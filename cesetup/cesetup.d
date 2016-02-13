@@ -95,7 +95,7 @@ static this()
         asSu = environment.get("SUDO_USER") != "";
         if (asSu)
         {
-            exePath = "/usr/bin";
+            exePath = "/usr/bin/";
             datPath = "/home/" ~ environment.get("SUDO_USER") ~ "/.config/Coedit/";
             shortCutPath = "/usr/share/applications/";
         }

@@ -31,10 +31,7 @@
 
 [lnk_bugtracker]: https://github.com/BBasile/Coedit/issues
 
-Welcome to Coedit Wiki, the documentation source for the small Windows & Linux IDE for the D programming language.
-A summary of the content is accessible in the right side-bar.
-
-*Note that this document is based on Coedit 2 development version and it does not represent anymore the latest official stable release*
+Welcome to the Coedit Wiki, the documentation source for the small Windows & Linux IDE for the D programming language.
 
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/coedit.win7.33.png) ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/coedit.linux.kde.33.png)
 
