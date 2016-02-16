@@ -539,14 +539,15 @@ begin
   fKeyChanged := false;
   if fDoc.Lines.Count = 0 then exit;
   //
-  md := '';
-  if fDoc.isDSource and (fDoc.CaretY < 50) then
+  md := pageControl.currentPage.Caption;
+  if (fDoc.isDSource and (fDoc.CaretY < 50)) or (md = fDoc.fileName.extractFileName) then
   begin
     lex(fDoc.Lines.Text, fTokList, @lexFindToken);
     md := getModuleName(fTokList);
     fTokList.Clear;
   end;
-  if md.isEmpty then md := fDoc.fileName.extractFileName;
+  if md.isEmpty or (md = '<new document>') then
+    md := fDoc.fileName.extractFileName;
   pageControl.currentPage.Caption := md;
 end;
 {$ENDREGION}
