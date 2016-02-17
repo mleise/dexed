@@ -1937,7 +1937,7 @@ begin
   	fRunProc.OnTerminate:= @asyncprocTerminate;
   end else
   begin
-    {$IFDEF LINUX}
+    {$IFNDEF WINDOWS}
     fRunProc.Options := fRunProc.Options + [poNewConsole];
     {$ENDIF}
   end;

@@ -626,7 +626,7 @@ begin
   begin
     str := binKindStr[fBinKind];
     if str.isNotEmpty then aList.Add(str);
-    {$IFDEF UNIX}
+    {$IFNDEF WINDOWS}
     if fBinKind = sharedlib then
       aList.Add('-fPIC');
     {$ENDIF}
@@ -659,7 +659,7 @@ begin
     if (str <> strbase) then
     begin
       aList.Add(str);
-      {$IFDEF UNIX}
+      {$IFNDEF WINDOWS}
       if fBinKind = sharedlib then
         aList.Add('-fPIC');
       {$ENDIF}
@@ -667,7 +667,7 @@ begin
     else
     begin
       aList.Add(strbase);
-      {$IFDEF UNIX}
+      {$IFNDEF WINDOWS}
       if baseopt.fBinKind = sharedlib then
         aList.Add('-fPIC');
       {$ENDIF}

@@ -150,7 +150,7 @@ begin
   subjProjNew(fProjectSubject, self);
   subjProjChanged(fProjectSubject, self);
   //
-  {$IFDEF LINUX}
+  {$IFNDEF WINDOWS}
   fBasePath := '/';
   {$ENDIF}
   //

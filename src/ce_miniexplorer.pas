@@ -661,7 +661,7 @@ var
   str: string;
 begin
   result := false;
-  {$IFDEF LINUX}
+  {$IFNDEF WINDOWS}
   if (aPath.length >= 2) and (aPath[2] <> '/') then
     aPath := '/' + aPath;
   {$ENDIF}

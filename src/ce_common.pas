@@ -9,8 +9,7 @@ uses
   Classes, SysUtils,
   {$IFDEF WINDOWS}
   Windows, JwaTlHelp32,
-  {$ENDIF}
-  {$IFDEF LINUX}
+  {$ELSE}
   ExtCtrls, FileUtil, LazFileUtils,
   {$ENDIF}
   {$IFNDEF CEBUILD}
@@ -64,7 +63,7 @@ type
    * An idle timer is started when executing and trigs the event if necessary.
    *)
   TCheckedAsyncProcess = class(TAsyncProcess)
-  {$IFDEF LINUX}
+  {$IFNDEF WINDOWS}
   private
     fTimer: TIdleTimer;
     procedure checkTerminated(sender: TObject);
@@ -377,7 +376,7 @@ begin
   exit(system.length(self));
 end;
 
-{$IFDEF LINUX}
+{$IFNDEF WINDOWS}
 constructor TCheckedAsyncProcess.Create(aOwner: TComponent);
 begin
   inherited;
@@ -521,13 +520,9 @@ begin
 end;
 begin
   result := aPath;
-  {$IFDEF MSWINDOWS}
+  {$IFDEF WINDOWS}
   result := patchProc(result, '/');
-  {$ENDIF}
-  {$IFDEF UNIX}
-  result := patchProc(result, '\');
-  {$ENDIF}
-  {$IFDEF DARWIN}
+  {$ELSE}
   result := patchProc(result, '\');
   {$ENDIF}
 end;
@@ -629,7 +624,7 @@ begin
   result := sysutils.GetEnvironmentVariable('HOME') + '/.config';
   {$ENDIF}
   {$IFDEF DARWIN}
-  result := sysutils.GetEnvironmentVariable('HOME') + '/Library';
+  result := sysutils.GetEnvironmentVariable('HOME') + '/Library/Application Support';
   {$ENDIF}
   if not DirectoryExists(result) then
     raise Exception.Create('Coedit failed to retrieve the user data folder');
@@ -806,7 +801,6 @@ begin
     Free;
   end;
   {$ENDIF}
-
 end;
 
 function exeInSysPath(anExeName: string): boolean;
@@ -1159,13 +1153,13 @@ procedure deleteDups(str: TStrings);
 var
   i: integer;
 begin
-  {$HINTS OFF}
+  {$PUSH}{$HINTS OFF}
   if str = nil then exit;
   for i:= str.Count-1 downto 0 do
     // if less than 0 -> not found -> unsigned -> greater than current index.
     if cardinal(str.IndexOf(str[i])) <  i then
       str.Delete(i);
-  {$HINTS ON}
+  {$POP}
 end;
 
 initialization

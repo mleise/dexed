@@ -826,8 +826,7 @@ begin
   if conf.isNotNil then
     setFrom(conf);
   pathPart := TrimRightSet(pathPart, ['/','\']);
-  {$IFDEF WINDOWS}
-  {$ELSE}
+  {$IFNDEF WINDOWS}
   if fBinKind in [staticlib, sharedlib] then
     namePart := 'lib' + namePart;
   {$ENDIF}

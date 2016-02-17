@@ -111,15 +111,31 @@ begin
     end;
     {$ENDIF}
     {$IFDEF DARWIN}
-    assert(false, 'to be implemented');
+    if '/Library/D/dmd/src/phobos'.dirExists then
+    begin
+      with TLibraryItem(fCol.Add) do begin
+        libAlias := 'phobos';
+        libFile := '';
+        libSourcePath := '/Library/D/dmd/src/phobos';
+      end;
+    end;
+    // add druntime (no lib - only for DCD)
+    if '/Library/D/dmd/src/druntime/import'.dirExists then
+    begin
+      with TLibraryItem(fCol.Add) do begin
+        libAlias := 'druntime';
+        libFile  := '';
+        libSourcePath := '/Library/D/dmd/src/druntime/import';
+      end;
+    end;
     {$ENDIF}
   end;
-  if fCol.Count = 0 then
+  if (fCol.Count = 0) and not (getCoeditDocPath + libFname).fileExists then
   begin
-    dlgOkError(
-      'Coedit failed to automatically add "druntime" and "phobos" to the library manager.'
-    + 'These two items have to be added manually following the procedure described in the wiki.'
-    );
+    dlgOkInfo(
+      'Coedit failed to add "druntime" and "phobos" to the library manager.'
+    + 'If they are not already specified in the DCD configuration then the '
+    + 'completion will not work properly');
   end;
   updateDCD;
 end;
