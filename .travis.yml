@@ -3,7 +3,7 @@ sudo: true
 install: ./etc/travis-lazarus/.travis.install.py
 
 env:
-  - LAZ_VER=1.6.0
+  - LAZ_VER=1.6
 
 os:
   - linux
