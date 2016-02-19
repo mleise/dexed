@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LazFileUtils, SynEditKeyCmds, SynHighlighterLFM, Forms, StdCtrls,
-  xAnchorDocking, xAnchorDockStorage, xAnchorDockOptionsDlg, Controls, Graphics, strutils,
+  AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls, Graphics, strutils,
   Dialogs, Menus, ActnList, ExtCtrls, process, XMLPropStorage, SynExportHTML,
   ce_common, ce_dmdwrap, ce_nativeproject, ce_dcd, ce_synmemo, ce_writableComponent,
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, ExtCtrls, ActnList, Menus,
-  xAnchorDocking, ce_interfaces;
+  AnchorDocking, ce_interfaces;
 
 type
 
