@@ -790,13 +790,13 @@ begin
   editor.CommandProcessor(ecDown, '', nil);
   editor.CommandProcessor(ecInsertLine, '', nil);
   editor.CommandProcessor(ecDown, '', nil);
-  editor.CommandProcessor(ecLineStart, '', nil);
+  while editor.CaretX <> 1 do editor.CommandProcessor(ecLeft, '' , nil);
   for j := 1 to i do editor.CommandProcessor(ecChar, beg[j], nil);
   editor.CommandProcessor(ecChar, '}', nil);
   editor.CommandProcessor(ecUp, '', nil);
-  editor.CommandProcessor(ecLineStart, '', nil);
   for j := 1 to i do editor.CommandProcessor(ecChar, beg[j], nil);
   editor.CommandProcessor(ecTab, '', nil);
+  while editor.CaretX > 1 + i + editor.TabWidth do editor.CommandProcessor(ecLeft, '' , nil);
   editor.EndUndoBlock;
 end;
 
