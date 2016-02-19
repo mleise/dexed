@@ -97,7 +97,7 @@ type
     property mouseOptions: TSynEditorMouseOptions read fMouseOptions write fMouseOptions;
     property options1: TSynEditorOptions read fOptions1 write fOptions1;
     property options2: TSynEditorOptions2 read fOptions2 write fOptions2;
-    property resetFontSize: boolean read fResetFontSize write fResetFontSize default false;
+    property resetFontSize: boolean read fResetFontSize write fResetFontSize default true;
     property rightEdge: Integer read fRightEdge write fRightEdge default 80;
     property rightEdgeColor: TColor read fRightEdgeColor write fRightEdgeColor default clSilver;
     property selection: TSynSelectedColor read fSelAttribs write setSelCol;
