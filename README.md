@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/BBasile/Coedit/raw/master/logo/coedit.png?raw=true" alt="CE"/>
+  <img src="https://github.com/BBasile/Coedit/raw/master/logo/coedit.png?raw=true" width="18%" height="18%" alt="CE"/>
 </p>
 
 Coedit is an IDE for the D programming language [D2](http://dlang.org).
@@ -26,8 +26,9 @@ Coedit is an IDE for the D programming language [D2](http://dlang.org).
 
 **Project information**
 ---
-- latest version: version 2 gold.
+- latest version: version 2 gold, Feb 12 2016.
 - licensed under the term of the MIT license.
+- [![](https://www.openhub.net/p/Coedit/widgets/project_thin_badge?format=gif&amp;ref=sample")](https://www.openhub.net/p/Coedit)
 
 **Download the latest build**
 ---
@@ -43,7 +44,6 @@ Download the zipped binaries or the zipped setup program for you platform:
 
 [**See the wiki**](https://github.com/BBasile/Coedit/wiki#detailed-setup-procedure) for more information about the setup. 
 
-
 **Build**
 ---
 
@@ -57,5 +57,5 @@ Windows version (Windows 7, x86):
 Linux version (OpenSuse 13.2, KDE, x86_64):
 ![Nux screen-cap](https://github.com/BBasile/CoeditWikiData/raw/master/coedit.linux.kde.png "Coedit GUI preview")
 
-Linux version (Mint 17.2, Cinnamon, x86):
+Linux version (Mint 17.1, Cinnamon, x86):
 ![Nux screen-cap](https://github.com/BBasile/CoeditWikiData/raw/master/coedit.linux.cinnamon.png "Coedit GUI preview")
