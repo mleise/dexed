@@ -569,6 +569,17 @@ begin
       lst.Add(patchPlateformPath(arr.Strings[i]));
   end;
 end;
+procedure tryAddRelOrAbsFile(const fname: string);
+begin
+  if not isDlangCompilable(fname.extractFileExt) then
+    exit;
+  if fname.fileExists and FilenameIsAbsolute(fname) then
+  begin
+    fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, fname)))
+  end
+  else if patchPlateformPath(expandFilenameEx(fBasePath, fname)).fileExists then
+    fSrcs.Add(fname);
+end;
 procedure tryAddFromFolder(const pth: string);
 var
   abs: string;
@@ -616,7 +627,7 @@ begin
     begin
       arr := TJSONArray(item);
       for i := 0 to arr.Count-1 do
-        fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, arr.Strings[i])));
+        tryAddRelOrAbsFile(arr.Strings[i]);
     end;
     conf := getCurrentCustomConfig;
     if conf.isNotNil then
@@ -644,7 +655,7 @@ begin
       begin
         arr := TJSONArray(item);
         for i := 0 to arr.Count-1 do
-          fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, arr.Strings[i])));
+          tryAddRelOrAbsFile(arr.Strings[i]);
       end;
     end;
     deleteDups(fSrcs);
