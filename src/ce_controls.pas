@@ -550,6 +550,7 @@ begin
   fCloseBtn.Visible:= pbMoveRight in fButtons;
   fAddBtn.Visible:= pbAdd in fButtons;
   fSplitBtn.Visible:= pbSplit in fButtons;
+  fSplitBtn.Enabled:= fPages.Count > 0;
   fHeader.EnableAlign;
   fCloseBtn.Enabled := fPageIndex <> -1;
   fMoveLeftBtn.Enabled := fPageIndex > 0;
