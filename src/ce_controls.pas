@@ -450,26 +450,52 @@ begin
 end;
 
 procedure TCEPageControl.movePageRight;
+var
+  i: integer;
 begin
   if fPageIndex = fPages.Count-1 then
     exit;
 
   fPages.Exchange(fPageIndex, fPageIndex + 1);
   fTabs.Tabs.Exchange(fPageIndex, fPageIndex + 1);
+
+  {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
+  for i := 0 to fPagesHistory.Count-1 do
+  begin
+    if PtrInt(fPagesHistory[i]) = fPageIndex then
+      fPagesHistory[i] := Pointer(PtrInt(fPageIndex+1))
+    else if PtrInt(fPagesHistory[i]) = fPageIndex+1 then
+      fPagesHistory[i] := Pointer(PtrInt(fPageIndex))
+  end;
+  {$POP}
+
   if fPageIndex = fSplittedPageIndex then
     fSplittedPageIndex += 1;
   setPageIndex(fPageIndex+1);
 end;
 
 procedure TCEPageControl.movePageLeft;
+var
+  i: integer;
 begin
   if fPageIndex <= 0 then
     exit;
 
   fPages.Exchange(fPageIndex, fPageIndex - 1);
   fTabs.Tabs.Exchange(fPageIndex, fPageIndex - 1);
+
+  {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
+  for i := 0 to fPagesHistory.Count-1 do
+  begin
+    if PtrInt(fPagesHistory[i]) = fPageIndex then
+      fPagesHistory[i] := Pointer(PtrInt(fPageIndex-1))
+    else if PtrInt(fPagesHistory[i]) = fPageIndex-1 then
+      fPagesHistory[i] := Pointer(PtrInt(fPageIndex))
+  end;
+  {$POP}
+
   if fPageIndex = fSplittedPageIndex then
-      fSplittedPageIndex -= 1;
+    fSplittedPageIndex -= 1;
   setPageIndex(fPageIndex-1);
 end;
 
