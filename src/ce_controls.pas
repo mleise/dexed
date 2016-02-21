@@ -26,6 +26,15 @@ type
     property index: integer read getIndex;
   end;
 
+  TCEPagesOption = (poPageHistory);
+  TCEPagesOptions = set of TCEPagesOption;
+
+const
+
+  defPagesOpt = [poPageHistory];
+
+type
+
   (**
    * Minimalist page-control dedicated to Coedit
    *
@@ -45,6 +54,7 @@ type
     fSplitBtn: TSpeedButton;
     fContent: TPanel;
     fPages: TFPList;
+    fPagesHistory: TFPList;
     fPageIndex: integer;
     fSplittedPageIndex: integer;
     fButtons: TCEPageControlButtons;
@@ -52,6 +62,7 @@ type
     fOnChanging: TTabChangingEvent;
     fSplitter: TSplitter;
     fOldSplitPos: integer;
+    fOptions: TCEPagesOptions;
     fOnDragDrop: TDragDropEvent;
     fOnDragOver: TDragOverEvent;
 
@@ -78,6 +89,7 @@ type
 
     procedure setOnDragOver(value: TDragOverEvent);
     procedure setOnDragDrop(value: TDragDropEvent);
+    procedure setPagesOptions(value: TCEPagesOptions);
 
   public
     constructor Create(aowner: TComponent); override;
@@ -104,6 +116,8 @@ type
 
     property onChanged: TNotifyEvent read fOnChanged write fOnChanged;
     property onChanging: TTabChangingEvent read fOnChanging write fOnChanging;
+
+    property options: TCEPagesOptions read fOptions write setPagesOptions default defPagesOpt;
 
     property OnDragOver read fOnDragOver write setOnDragOver;
     property OnDragDrop read fOnDragDrop write setOnDragDrop;
@@ -137,6 +151,8 @@ end;
 constructor TCEPageControl.Create(aowner: TComponent);
 begin
   inherited;
+
+  fOptions := defPagesOpt;
 
   fHeader := TWinControl.Create(self);
   fHeader.Parent:= self;
@@ -212,6 +228,7 @@ begin
   fSplitter.Width := 6;
 
   fPages := TFPList.Create;
+  fPagesHistory := TFPList.Create;
   fPageIndex := -1;
 
   fButtons:= CEPageControlDefaultButtons;
@@ -223,6 +240,7 @@ begin
   while fPages.Count > 0 do
     deletePage(fPages.Count-1);
   fPages.Free;
+  fPagesHistory.Free;
   inherited;
 end;
 
@@ -242,6 +260,14 @@ begin
   fOnDragDrop:=value;
   fContent.OnDragDrop:=value;
   fTabs.OnDragDrop:=value;
+end;
+
+procedure TCEPageControl.setPagesOptions(value: TCEPagesOptions);
+begin
+  if fOptions = value then
+    exit;
+  fOptions := value;
+  fPagesHistory.Clear;
 end;
 
 procedure TCEPageControl.changedNotify;
@@ -338,6 +364,12 @@ function TCEPageControl.addPage: TCEPage;
 var
   pge: TCEPage;
 begin
+
+  if poPageHistory in fOptions then
+    {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
+    fPagesHistory.Insert(0, Pointer(PtrUint(fPageIndex)));
+    {$POP}
+
   pge := TCEPage.Create(self);
   pge.Parent := fContent;
   pge.Align:= alClient;
@@ -365,6 +397,14 @@ begin
 
   fPages.Delete(index);
   fTabs.Tabs.Delete(index);
+
+  if (poPageHistory in fOptions) and (fPagesHistory.Count > 0) then
+  begin
+    {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
+    fPageIndex := Integer(fPagesHistory[0]);
+    fPagesHistory.Delete(0);
+    {$POP}
+  end;
 
   if fPages.Count = 0 then
     fPageIndex:=-1;
