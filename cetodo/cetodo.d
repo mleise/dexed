@@ -4,21 +4,35 @@ TODO source code analyzer for Coedit projects/files
 ## Format: 
 
 `` 
-// TODO [fields] : text
+[D comment prefix] TODO|FIXME [fields] : description
 ``
 
-- TODO/FIXME: used to detect that the comment is a "TODO" comment. The keyword is not
-case sensitive.
+- D comment prefix: todo comments are detected in all the D comments kind.
+In multi line comments, new lines must not be prefixed with '*' or '+'.
+For example the following multiline comment is not suitable for a TODO comment:
 
-- fields: an optional list of property with a format similar to the execution argument 
-of a program: `-<char x><property for char x>-<char y><property for char y>`.
-possible fields include:
-    - c: TODO category, e.g: _-cserialization_, _-cpersistence_, _ -cerrorhandling_.
-    - a: TODO assignee, e.g: _-aMisterFreeze_, _-aMadameMichou_, _-aJhonSmith_.
-    - p: TODO priority, eg: _-p8_, _-p0_.
+/++
+ + TODO:whatever.
+ +/
+
+but this one is:
+
+/++
+  TODO:whatever.
+ +/
+
+- TODO|FIXME: used to detect that the comment is a "TODO" comment.
+The keywords are not case sensitive.
+
+- fields: an optional list of properties with the format
+`-<char x><property for char x>
+the possible fields are:
+    - c: TODO category, e.g: _-cserialization_, -cerrorhandling_.
+    - a: TODO assignee, e.g: _-aMisterFreeze_, _-aFantomas_.
+    - p: TODO priority, as an integer literal, eg: _-p8_, _-p0_.
     - s: TODO status, e.g _-sPartiallyFixed_, _-sDone_.
   
-- text: the literal message, e.g:  "set this property as const() to set it read only".
+- description: what's to be done, e.g:  "set this property as const()".
 
 ## Examples:
 
@@ -40,12 +54,9 @@ and TTodoItem(the collection item).
 ********************************************************************************/
 module cetodo;
 
-// std
 import std.stdio, std.getopt, std.string, std.algorithm;
 import std.array, std.conv, std.traits, std.ascii;
 import std.file, std.path, std.range;
-
-// libdparse
 import dparse.lexer;
 
 /// Encapsulates the fields of a _TODO comment_.
@@ -76,14 +87,20 @@ private struct TodoItem
      * prior = the _TODO comment_ priority, as an integer litteral, optional.
      * status = the _TODO comment_ status, optional.
      */
-    @safe public this(string fname, string line, string text, string cat = "",  string ass = "", string prior = "", string status = "")
+    @safe public this(string fname, string line, string text, string cat = "",
+        string ass = "", string prior = "", string status = "")
     {   
         // fname must really be valid
         if (!fname.exists) throw new Exception("TodoItem exception, the file name is invalid");
         
         // priority must be convertible to int
-        if (prior.length) try auto i = to!long(prior);
+        if (prior.length) try to!long(prior);
         catch(Exception e) prior = "";
+
+        // Pascal strings are not multi-line
+        version(Windows) immutable glue = "'#13#10'";
+        else immutable glue = "'#10'";
+        text = text.splitLines.join(glue);
               
         fFields[TodoField.filename] = fname.idup;
         fFields[TodoField.line]     = line.idup;
@@ -109,7 +126,7 @@ private struct TodoItem
     }
 }
 
-private alias TodoItems = TodoItem * [];
+private alias TodoItems = TodoItem* [];
 
 /**
  * Application main procedure.
@@ -156,8 +173,6 @@ void main(string[] args)
 
     // the widget has the LFM script in the output
     write(lfmApp.data);
-    
-    // TODO: NEVER call writeln() in this program otherwise the widget cant interpret the output
 }
 
 /// Try to transforms a Token into a a TODO item
@@ -166,27 +181,28 @@ void main(string[] args)
     if (atok.type != (tok!"comment")) return;
     auto text = atok.text.strip;
     string identifier;
-  
-    
-    // detects single line comments, incl. ddoc
-    bool isSingleLineComment; 
-    while (!text.empty)
+
+
+    // always comment
+    text.popFrontN(2);
+    if (text.empty)
+        return;
+    // ddoc suffix
+    if (text.front.among('/', '*', '+'))
     {
-        auto front = text.front;
-        if (front == '/') identifier ~= front;
-        else
-        {
-            if (!isSingleLineComment)
-                isSingleLineComment = (identifier.length > 1);
-            if (!front.isWhite) break; 
-        }
         text.popFront;
-    }   
-    if (!isSingleLineComment) return;
-    identifier = ""; 
-    
-    
-    // looks for the TODO/FIXME token
+        if (text.empty)
+            return;
+    }
+    // leading whites
+    while (text.front.isWhite)
+    {
+        text.popFront;
+        if (text.empty)
+            return;
+    }
+
+    // "TODO|FIXME"
     bool isTodoComment;
     while (!text.empty)
     {
@@ -202,9 +218,9 @@ void main(string[] args)
     identifier = "";
     
     
-    // separates the description fields from the text body
+    // splits "fields" and "description"
     bool isWellFormed;
-    string comment, fields;
+    string fields;
     while (!text.empty)
     {
         auto front = text.front;     
@@ -221,11 +237,11 @@ void main(string[] args)
     identifier = ""; 
     
     
-    // parses the item description fields
+    // parses "fields"
     string a, c, p, s;
     while (!fields.empty)
     {
-        dchar front = fields.front;
+        const dchar front = fields.front;
         fields.popFront;
         if ((front == '-' || fields.empty) && identifier.length > 2)
         {
@@ -242,6 +258,9 @@ void main(string[] args)
         }
         identifier ~= front;  
     }
+
+    if (text.length > 1 && text[$-2..$].among("*/", "+/"))
+        text.length -=2;
 
 
     string line;
@@ -260,3 +279,11 @@ void main(string[] args)
 // TODO-cannnotations-p8: annotates the member of the module as @safe and if possible nothrow.
 // TODO-cfeature-sDone: save this property in the inifile.
 // TODO-aMe-cCat-p1-sjkjkj:todo body
+/**
+ TODO-cd:
+ - this
+ - that
+*/
+/++ TODO-cx:a mqkjfmksmldkf
++/
+
