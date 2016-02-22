@@ -59,16 +59,16 @@ import std.array, std.conv, std.traits, std.ascii;
 import std.file, std.path, std.range;
 import dparse.lexer;
 
-/// Encapsulates the fields of a _TODO comment_.
+/// Encapsulates the fields of a TODO comment_.
 private struct TodoItem 
 {
     /** 
      * Enumerates the possible fields of _a TODO comment_. 
      * They must match the published member of the widget-side class TTodoItem.
      */
-    private static enum TodoField {filename, line, text, category, assignee, priority, status}
+    private enum TodoField: ubyte {filename, line, text, category, assignee, priority, status}
     private __gshared static string[TodoField] fFieldNames;
-    private string[TodoField] fFields;
+    private string[TodoField.max+1] fFields;
     
     static this()
     {
@@ -79,20 +79,17 @@ private struct TodoItem
     /**
      * Constructs a TODO item with its fields.
      * Params:
-     * fname = the file where the _TODO comment_ is located. mandatory.
-     * line = the line where the _TODO comment_ is located. mandatory.
-     * text = the _TODO comment_ main text. mandatory.
-     * cat = the _TODO comment_ category, optional.
-     * ass = the _TODO comment_ assignee, optional.
-     * prior = the _TODO comment_ priority, as an integer litteral, optional.
-     * status = the _TODO comment_ status, optional.
+     * fname = the file where the _TODO comment is located. mandatory.
+     * line  = the line where the _TODO comment_is located. mandatory.
+     * text  = the _TODO comment main text. mandatory.
+     * cat   = the _TODO comment category, optional.
+     * ass   = the _TODO comment assignee, optional.
+     * prior = the _TODO comment priority, as an integer litteral, optional.
+     * status= the _TODO comment status, optional.
      */
-    @safe public this(string fname, string line, string text, string cat = "",
+    @safe this(string fname, string line, string text, string cat = "",
         string ass = "", string prior = "", string status = "")
-    {   
-        // fname must really be valid
-        if (!fname.exists) throw new Exception("TodoItem exception, the file name is invalid");
-        
+    {
         // priority must be convertible to int
         if (prior.length) try to!long(prior);
         catch(Exception e) prior = "";
@@ -102,13 +99,13 @@ private struct TodoItem
         else immutable glue = "'#10'";
         text = text.splitLines.join(glue);
               
-        fFields[TodoField.filename] = fname.idup;
-        fFields[TodoField.line]     = line.idup;
-        fFields[TodoField.text]     = text.idup;
-        fFields[TodoField.category] = cat.idup;
-        fFields[TodoField.assignee] = ass.idup;
-        fFields[TodoField.priority] = prior.idup;
-        fFields[TodoField.status]   = status.idup;
+        fFields[TodoField.filename] = fname;
+        fFields[TodoField.line]     = line;
+        fFields[TodoField.text]     = text;
+        fFields[TodoField.category] = cat;
+        fFields[TodoField.assignee] = ass;
+        fFields[TodoField.priority] = prior;
+        fFields[TodoField.status]   = status;
     }
     
     /**
@@ -116,7 +113,7 @@ private struct TodoItem
      * Params:
      * LfmString = the string containing the LFM script.
      */
-    public void serialize(ref Appender!string lfmApp)
+    void serialize(ref Appender!string lfmApp)
     {
         lfmApp.put("  \r    item\r");
         foreach(member; EnumMembers!TodoField)
@@ -179,9 +176,8 @@ void main(string[] args)
 @safe private void token2TodoItem(const(Token) atok, string fname, ref TodoItems todoItems)
 {
     if (atok.type != (tok!"comment")) return;
-    auto text = atok.text.strip;
+    string text = atok.text.strip;
     string identifier;
-
 
     // always comment
     text.popFrontN(2);
@@ -216,8 +212,7 @@ void main(string[] args)
     }
     if (!isTodoComment) return;
     identifier = "";
-    
-    
+
     // splits "fields" and "description"
     bool isWellFormed;
     string fields;
@@ -235,8 +230,7 @@ void main(string[] args)
     }
     if (!isWellFormed) return;
     identifier = ""; 
-    
-    
+
     // parses "fields"
     string a, c, p, s;
     while (!fields.empty)
@@ -269,9 +263,9 @@ void main(string[] args)
     todoItems ~= new TodoItem(fname, line, text, c, a, p, s);
 }
 
-// samples for testing the program as a runnable ('Compile and run file ...') with '<CFF>'
+// samples for testing the program as a runnable ('Compile file and run ...') with '<CFF>'
 
-// fixme-p8: èuèuuè``u`èuùè é ^ç 
+// fixme-p8: èuèuuè``u`èuùè é ^çßßðđææ«€¶ 
 // fixme-p8: fixme also handled
 // TODO-cINVALID_because_no_content:
 ////TODO:set this property as const() to set it read only.
