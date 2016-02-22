@@ -263,36 +263,6 @@ type
 
 implementation
 
-{$IFDEF LINUX}
-var
-  // flag that indicates that migration is to be done on first call to getCoeditData...
-  doneLinuxDataMigration: boolean = false;
-
-procedure MigrateOldData;
-var
-  oldLocation: string;
-  newLocation: string;
-  err: boolean;
-begin
-  err := false;
-  doneLinuxDataMigration := true;
-  oldLocation := sysutils.GetEnvironmentVariable('HOME') +'/Coedit';
-  if not oldLocation.dirExists then exit;
-  newLocation := getUserDataPath + 'Coedit';
-  try
-    try
-      CopyDirTree(oldLocation, newLocation,
-        [cffOverwriteFile,cffCreateDestDirectory,cffPreserveTime]);
-    except
-      err := true;
-    end;
-  finally
-    if not err then
-      FileUtil.DeleteDirectory(oldLocation, false);
-  end;
-end;
-{$ENDIF}
-
 procedure TCEPersistentShortcut.assign(aValue: TPersistent);
 var
   src: TCEPersistentShortcut;
@@ -634,10 +604,6 @@ end;
 
 function getCoeditDocPath: string;
 begin
-  {$IFDEF LINUX}
-  if not doneLinuxDataMigration then
-    MigrateOldData;
-  {$ENDIF}
   result := getUserDataPath + 'Coedit' + directorySeparator;
 end;
 
