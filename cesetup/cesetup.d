@@ -146,7 +146,7 @@ void main(string[] args)
         return;
     }
 
-    if (!uninstall) Formater.justify!'C'("Coedit 2 gold - setup");
+    if (!uninstall) Formater.justify!'C'(format("Coedit %s - setup", splitVer));
     else Formater.justify!'C'("Coedit uninstaller");
     
     Formater.separate;
@@ -366,5 +366,13 @@ void postUninstall()
     {
         tryRemove(shortCutPath ~ "coedit.desktop");
     }
+}
+
+/// splits the version identifier used in filenames
+string splitVer()
+{
+    import std.regex: matchAll, regex;
+    return matchAll(import("version.txt"), regex("\\d+|\\D+"))
+        .join.join(" ").stripRight;
 }
 
