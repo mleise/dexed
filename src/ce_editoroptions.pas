@@ -103,9 +103,6 @@ type
     property selection: TSynSelectedColor read fSelAttribs write setSelCol;
     property shortcuts: TCollection read fShortCuts write setShortcuts;
     property tabulationWidth: Integer read fTabWidth write fTabWidth default 4;
-    // TODO-cmaintenance: remove this from 2_update_1
-    property blockIdentation: Integer write fBlockIdent stored false; deprecated;
-    property hintDelay: Integer write setDDocDelay stored false; deprecated;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;

@@ -1173,8 +1173,6 @@ begin
     if fAppliOpts.reloadLastDocuments then
       LoadLastDocsAndProj;
 
-    // http://bugs.freepascal.org/view.php?id=29475
-    // TODO-cgonnawork: when Laz 1.6 is rlzd, remove etc/anchordocking and use Laz package
     DockMaster.ResetSplitters;
 
     if fFirstTimeCoedit then

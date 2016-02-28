@@ -147,10 +147,6 @@ type
     property ddoc:        TSynHighlighterAttributes read fDDocsAttrib write setDDocsAttrib;
     property inlineAsm:   TSynHighlighterAttributes read fAsblrAttrib write setAsblrAttrib;
     property special:     TSynHighlighterAttributes read fSpeckAttrib write setSpeckAttrib;
-    // TODO-cmaintenance: remove this from 2_update_1
-    property DDocsAttrib: TSynHighlighterAttributes write setDDocsAttrib; deprecated;
-    property AsblrAttrib: TSynHighlighterAttributes write setAsblrAttrib; deprecated;
-    property SpeckAttrib: TSynHighlighterAttributes write setSpeckAttrib; deprecated;
 	public
 		constructor create(aOwner: TComponent); override;
     destructor destroy; override;

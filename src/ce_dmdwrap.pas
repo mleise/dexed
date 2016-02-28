@@ -93,9 +93,6 @@ type
     property quiet: boolean read fQuiet write setQuiet default false;
     property showHiddenAlloc: boolean read fVgc write setVgc default false;
     property showColumnsNumber: boolean read fCol write setCol default false;
-    // TODO-cmaintenance: remove this from 2_update_1
-    property additionalWarnings: boolean write setWarnInfo stored false; deprecated;
-    property depreciationHandling: TDepHandling write setDepHandling stored false; deprecated;
   public
     constructor create;
     procedure assign(aValue: TPersistent); override;

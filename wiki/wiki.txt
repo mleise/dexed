@@ -43,7 +43,7 @@ There are four ways to get the program, from the simplest to the most complex:
 * build the program from the sources.
 * download and install the official package for a linux distribution.
 
-In all the cases, the _DMD_ D2 compiler must setup and its location added to your environment PATH variable:
+In all the cases, the _DMD_ D2 compiler must setup and its location has to match to one of the directory of the PATH environment variable.
 If it's not already installed, [download](http://dlang.org/download.html) and setup DMD2 for your platform. 
 The latest Coedit version requires at least DMD 2.066.
 
@@ -113,7 +113,7 @@ You're now ready to build Coedit. This can be done in the IDE or using the _lazb
 	* `cd` to the repository location, sub folder **lazproj**.
 	* type `lazbuild -B coedit.lpi` and <kbd>ENTER</kbd>. note that the path to _lazbuild_ may have to be specified.
 
-After what Coedit executable should be build. The executable is output to the _bin_ folder.
+After what Coedit should be build. The executable is output to the _bin_ folder.
 
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/builddone1.png)
 
@@ -151,7 +151,7 @@ In addition to the setup program, **.deb** and **.rpm** would be welcome. They c
 The documentation (the sources of this wiki) need to be reviewed, as it's currently written by a non native English speaker.
 The wiki can be edited locally by cloning [this git repository](https://github.com/BBasile/Coedit.wiki.git).
 It's also possible to propose pull requests in the main repository since the [wiki source is present](https://github.com/BBasile/Coedit/tree/master/wiki).
-As tool, one of the many markdown editor available on the web can be used, for example [StackEdit](https://stackedit.io/editor).
+As tool, one of the markdown editor available on the web can be used, for example [StackEdit](https://stackedit.io/editor).
 
 There is also a huge need to split the wiki in pages. 
 Because the page becomes huge and a long to load, the browsers can fail to scroll to a particular anchor.
@@ -204,12 +204,12 @@ For discussions, the official D forums [propose a section dedicated to the IDEs]
 
 # Runnable module
 
-Coedit has the ability to compile and execute the module that's currently edited even if it's not part of a project. Such a module is called a **runnable** module.
+Coedit is able to compile and execute the module that's currently edited even if it's not part of a project. Such a module is called a **runnable** module.
 A runnable module has not to be explicitly saved because Coedit will handle the task automatically, using an unique temporary file name.
 For example it's possible to call the action _Compile and run file_ directly after the action _New runnable module_.
 
 This feature is useful to test quickly an idea or to use a module as a script without messing with all the parameters that a project would require.
-However, the first script line can be used to pass extra options. They'll be parsed and automatically submited to the compiler.
+However, the first script line can be used to pass extra options. They'll be parsed and automatically submitted to the compiler (runnable modules are always compiled with DMD).
 
 For example this runnable:
 
@@ -218,16 +218,16 @@ For example this runnable:
 void main(){}
 ```
 
-will be optimized and will get _libcairo_ linked in. The first line must start with `#!runnable-flags:`, without any spaces.
+will be optimized and _libcairo_ will be linked in the binary. The first line must start with `#!runnable-flags:`, without any spaces.
 
 To be runnable, a module must verify the following requirements:
 - a **void main()** is present.
 - the modules to import must be known, either by the [library manager][lnk_widg_lib] or by the DMD configuration file.
-- _import expressions_ ( ```import(file);``` ) are allowed if _file_ stand in the same folder as the file being edited.
+- _import expressions_ ( ```import(file);``` ) are allowed if _file_ stands in the same folder as the file being edited.
 - the module should be a simple console program. When executed, the process output is redirected to the [message widget][lnk_widg_msg] and the input can be passed using the [process input widget][lnk_widg_procinp].
 
 The action _Compile file and run outside_ can be used to execute in an external console.
-This must be used if the runnable outputs thousands of lines, to display properly UTF8 or if the runnable has a GUI.
+This must be used if the runnable outputs thousands of lines, to display properly UTF8 characters or if it has a GUI.
 
 The version identifier **runnable_module** is automatically defined when a runnable is compiled.
 It can be used to adjust the source according to the execution context, for example:
@@ -245,16 +245,16 @@ else
 
 The executable produced is deleted after each run unless the file has been saved explicitly out of the initial temporary folder.
 
-Note that the action _Run file unittest_ is based on the same internal function excepted that the **-main** and **-unittest** switches are automatically added to the runnable switches list (menu **File**, action **Set runnable switches**).
+Note that the action _Run file unittest_ is based on the same internal function excepted that the **-main** and **-unittest** switches are automatically added to the switch list (menu **File**, action **Set runnable switches**).
 
 # Native projects
 
 Coedit features a native project format completely based on the _DMD_ options (they are also called CE projects).
-Actually almost each DMD switch is represented by a project option.
+Almost each DMD switch is represented by a project option.
 
-The project has common parameters:
-- the source files. Either modules, interfaces, static libraries or objects.
-- library aliases: a list of aliases to specify which [_libman_ entries][lnk_widg_lib] are used by the project.
+The project has common parameters,
+- The source files. Either modules, interfaces, static libraries or objects.
+- Library aliases: a list of aliases to specify which [_libman_ entries][lnk_widg_lib] are used by the project.
 
 but most of them are specific to each configuration.
 
@@ -268,14 +268,13 @@ The file names and directory paths can be relative.
 The base directory of a relative path is always the folder where is saved the project.
 They can often include a [symbolic string][lnk_sym] and a path can be itself relative to a symbol.
 The project format is cross-platform, path separators are internally converted.
-It means that a project file saved under _Windows_ can be opened and compiled under _Linux_ and vice-versa.
 
 Here are some more or less complex examples which illustrates the project format:
-- the tutorials written for the wiki.
 - the [metad][lnk_metad] meta repository.
 - the tools written for Coedit: [cesyms][lnk_cesyms] and [cetodo][lnk_cetodo].
+- [iz](https://github.com/BBasile/iz) and [dbeaengine](https://github.com/BBasile/dbeaengine)
 
-Even if designed upon _DMD_ options, it's also possible to compile a CE project using [LDC](https://github.com/ldc-developers/ldc).
+Even if it's based on the _DMD_ options, it's also possible to compile a CE project using [LDC](https://github.com/ldc-developers/ldc).
 To do so, the application option _Native project compiler_ must be set accordingly.
 
 # DUB projects.
@@ -284,8 +283,8 @@ Since the version 2, Coedit also handles [DUB](http://code.dlang.org/getting_sta
 
 DUB project description must be in [JSON format](http://code.dlang.org/package-format?lang=json), [SDL](http://code.dlang.org/package-format?lang=sdl) in not supported.
 
-DUB projects are handled exactly as CE projects are. The _project_ menu proposes the same features.
-However the configuration is done in another widget, see the [dedicated paragraph][lnk_widg_dub].
+DUB projects are handled exactly as CE projects are. The _project_ menu proposes the same features 
+however the configuration is done in another widget, see the [dedicated paragraph][lnk_widg_dub].
 
 # D Completion Daemon integration
 
@@ -298,15 +297,15 @@ However, _DCD_ may have to be build manually, for example if a new version is re
 Visit the product [homepage](https://github.com/Hackerpilot/DCD) for more information.
  
 Once DCD build or extracted from the release archive, copy the two programs (_dcd-client_ and _dcd-server_) to the folder where the Coedit executable stands.
-They can be put elsewhere, as long as the target directory is a known operating system PATH. Under a _Linux_ OS it's common to put them in the _user/bin_ folder.
+They can be put elsewhere, as long as the target directory is a known operating system PATH.
 
 ### Imports
 
 In _Coedit_, _DCD_ relies on the [library manager][lnk_widg_lib] entries and on the project parameters. 
-If the [_libman_][lnk_widg_lib] is empty then the the scope of DCD is limited to the current module or the to the current project sources and imports.
-To prevent that, it's absolutely necessary to add at least _phobos_ and _core_ to the [_libman_][lnk_widg_lib] (if not automatically done the first time CE is executed).
+If the [_libman_][lnk_widg_lib] is empty then the scope of DCD is limited to the current module or the to the current project sources and imports.
+To avoid that, it's absolutely necessary to add at least _phobos_ and _core_ to the [_libman_][lnk_widg_lib] (if not automatically done the first time CE is executed).
 
-_DCD_ also has a native configuration system. Refer to the official [_Readme_](https://github.com/Hackerpilot/DCD#configuration-files).
+_DCD_ also has its own configuration system. Refer to the official [_Readme_](https://github.com/Hackerpilot/DCD#configuration-files).
 
 ### Usage
  
@@ -525,6 +524,7 @@ Coedit handles the task automatically (see later in the project configuration wi
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_link.png): if the current project _binaryKind_ is set to _staticlib_ then the _libman_ will use its parameters to create an entry. This avoids to browse in the dialogs, for example if you wish to setup several [_metad_][lnk_metad] items. Note that sometimes the sources root folder has to be adjusted.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_open.png): if the selected item defines a _project_ then closes current project and opens the one matching to the entry.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/dub_small.png): allows to fetch the master version of a [DUB registry item](http://code.dlang.org/). When the button is clicked, an input field allows to type the library name, after what, if the name is valid, the library will be downloaded, compiled and a new entry automatically filled. This features is actually more useful for the CE projects and the runnable modules as the dependencies of a DUB projects are handled automatically. It allows to use every DUB library in a CE project, even if the package doesn't include a CE project file.
+Note well that this feature works even if the target project is described with the _SDL_ format.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_edit.png): edit the item alias.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/folder/folder_brick.png): select the library file. In some rare case, this field can be omitted (for example if the library file is set in the _sc.ini_).
 This can be skipped if the library is only a small orphan _d_ source that's not been compiled as a static library or if the entry is only used for the [DCD][lnk_dcd] completion.
@@ -534,13 +534,13 @@ This can be skipped if the library is only a small orphan _d_ source that's not 
 
 If they're not automatically detected, it's recommended to add the _runtime library_ and _phobos_.
 A collection of third party libraries are provided by the [_metad_][lnk_metad] repository. 
-All of them can be easily build in Coedit and setup in the _libman_.
+All of them can be easily build in Coedit and setup in the [_libman_](lnk_widg_lib).
 
 The library entries are saved in the user folder [(see options)][lnk_widg_opts] as _libraryManager.txt_.
 
 ## Symbol list widget
 
-This list enumerates the symbols declarared in a D module (imports, classes, variables, etc).
+This list enumerates the symbols declared in a D module (imports, classes, variables, etc).
 The widget is a GUI front end for the [_cesyms_][lnk_cesyms] tool.
 It can be used to quickly find and go to the declaration of a symbol but also as a basic linter since the syntactic errors are displayed (almost immediately if the option _refresh on change_ is checked).
 
@@ -569,7 +569,7 @@ If this choice has avoided a painful GUI designing work, it also perfectly repre
 
 The following paragraphs specify exactly which _DMD_ switch is generated for an option,
 however these values are not anymore exact when CE is tweaked to compile its project format with _LDC2_ since
-the _DMD_ switches are translated for _LDC2_ through the compatibilty tool _LDMD2_.
+the _DMD_ switches are translated for _LDC2_ through the compatibility tool _LDMD2_.
 
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/cog/cog_add.png): adds a new compiler configuration. An input-query dialog allows to directly set its name (see the above note about the configuration name).
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/cog/cog_delete.png): removes the current compiler configuration.
@@ -623,7 +623,7 @@ These options are defined per-configuration.
 
 - codeviewCformat: generate debug info using the _codeview_ format. (**-gc**)
 - codeviewDexts: adds D _codeview_ extensions. (**-g**)
-- debug: sets if debug informations are generated. (**-debug**)
+- debug: sets if debug information are generated. (**-debug**)
 - debugLevel: sets the debugging level. (**-debug=x**)
 - debugIdentifiers: list of debug identifiers. (for each item **-debug=item** is generated). One item per line.
 - generateMapFile: sets if a map file is generated. (**-map**)
