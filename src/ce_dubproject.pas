@@ -615,10 +615,10 @@ begin
       for i := 0 to arr.Count-1 do
       begin
         pth := TrimRightSet(arr.Strings[i], ['/','\']);
-        if pth.dirExists then
+        if pth.dirExists and FilenameIsAbsolute(pth) then
           tryAddFromFolder(pth)
         else
-          tryAddFromFolder(fBasePath + pth);
+          tryAddFromFolder(expandFilenameEx(fBasePath, pth));
       end;
     end;
     // custom files
@@ -643,10 +643,10 @@ begin
         for i := 0 to arr.Count-1 do
         begin
           pth := TrimRightSet(arr.Strings[i], ['/','\']);
-          if pth.dirExists then
+          if pth.dirExists and FilenameIsAbsolute(pth) then
             tryAddFromFolder(pth)
           else
-            tryAddFromFolder(fBasePath + pth);
+            tryAddFromFolder(expandFilenameEx(fBasePath, pth));
         end;
       end;
       // custom files in current config
