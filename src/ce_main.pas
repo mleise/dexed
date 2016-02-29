@@ -400,7 +400,7 @@ type
     property dubCompiler: TCECompiler read getDubCompiler write setDubCompiler;
     property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
 
-    // stored by DCD wrapper since it reloads before CEMainForm instantiation
+    // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
   end;
 

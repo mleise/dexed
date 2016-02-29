@@ -6,9 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Menus, ComCtrls, Buttons, LazFileUtils,
+  Menus, ComCtrls, Buttons, LazFileUtils, strutils,
   ce_widget, ce_interfaces, ce_nativeproject, ce_dmdwrap, ce_common, ce_dialogs,
-  ce_sharedres, process, ce_dubproject, ce_observer;
+  ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang;
 
 type
 
@@ -61,6 +61,9 @@ type
   public
     constructor Create(aOwner: TComponent); override;
   end;
+
+  // determine the root of a library, according to the module names
+  function sourceRoot(project: ICECommonProject): string;
 
 implementation
 
@@ -274,12 +277,7 @@ begin
         begin
           Caption := nme;
           SubItems.Add(prj.outputFilename);
-          if str.Count = 1 then
-            cdy := str[0].extractFileDir
-          else begin
-            cdy := commonFolder(str);
-            cdy := cdy.extractFileDir;
-          end;
+          cdy := sourceRoot(prj as ICECommonProject);
           SubItems.Add(cdy);
           SubItems.Add(prj.filename);
           Selected:=true;
@@ -348,7 +346,6 @@ var
   fname: string;
   root: string;
   lalias: string;
-  i: integer;
 begin
   if fProj = nil then exit;
   //
@@ -363,16 +360,7 @@ begin
   //
   str := TStringList.Create;
   try
-    for i := 0 to fProj.sourcesCount-1 do
-      str.Add(fProj.sourceAbsolute(i));
-    // single source libs usually have the structure "src/<fname>"
-    if str.Count = 1 then
-      root := str[0].extractFileDir
-    // multi source libs have the structure "src/LibName/<fname>"/...
-    else begin
-      root := commonFolder(str);
-      root := root.extractFileDir;
-    end;
+    root := sourceRoot(fProj);
     if root.isEmpty then
     begin
       dlgOkInfo('the static library can not be registered because its source files have no common folder');
@@ -564,6 +552,67 @@ begin
   end;
   LibMan.libraries.EndUpdate;
   LibMan.updateDCD;
+end;
+
+function sourceRoot(project: ICECommonProject): string;
+var
+  i, j: integer;
+  name: string;
+  fold: string;
+  modn: TStringList;
+  modf: TStringList;
+  toks: TLexTokenList;
+  base: string;
+begin
+  base := project.basePath;
+
+  // 1 source, same folder
+  if project.sourcesCount = 1 then
+  begin
+    name := project.sourceAbsolute(0);
+    if name.extractFilePath = base then
+      exit(base);
+  end;
+
+  modn := TStringList.Create;
+  modf := TStringList.Create;
+  toks := TLexTokenList.Create;
+  try
+    // get module name and store the parent.parent.parent... dir
+    for i := 0 to project.sourcesCount-1 do
+    begin
+      fold := project.sourceAbsolute(i);
+      modf.LoadFromFile(fold);
+      lex(modf.Text, toks);
+      name := getModuleName(toks);
+      for j := 0 to WordCount(name, ['.'])-1 do
+        fold := extractFileDir(fold);
+      modn.Add(fold);
+      toks.Clear;
+    end;
+    result := modn[0];
+    // no error possible if 1 module
+    if project.sourcesCount > 1 then
+    begin
+      for i := 1 to modn.Count-1 do
+      begin
+        // expect same folder
+        if modn[i] = modn[i-1] then
+          continue;
+        // if not use common directory.
+        modf.Clear;
+        for j := 0 to project.sourcesCount-1 do
+          modf.Add(project.sourceAbsolute(j));
+        result := commonFolder(modf);
+        result := result.extractFileDir;
+        break;
+      end;
+    end;
+  finally
+    modf.Free;
+    modn.Free;
+    toks.Free;
+  end;
 end;
 
 end.
