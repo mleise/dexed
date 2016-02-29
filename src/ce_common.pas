@@ -260,8 +260,15 @@ type
    *)
   procedure deleteDups(str: TStrings);
 
+var
+  // supplementatl directories to find background tools
+  additionalPath: string;
+
 
 implementation
+
+uses
+  ce_main;
 
 procedure TCEPersistentShortcut.assign(aValue: TPersistent);
 var
@@ -790,6 +797,8 @@ begin
   // maybe in current dir
   if anExeName.fileExists then
     env += PathSeparator + GetCurrentDir;
+  if additionalPath.isNotEmpty then
+    env += PathSeparator + additionalPath;
   {$IFNDEF CEBUILD}
   if Application <> nil then
     env += PathSeparator + ExtractFileDir(application.ExeName.ExtractFilePath);

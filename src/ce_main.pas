@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, LazFileUtils, SynEditKeyCmds, SynHighlighterLFM, Forms, StdCtrls,
   AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls, Graphics, strutils,
   Dialogs, Menus, ActnList, ExtCtrls, process, XMLPropStorage, SynExportHTML,
-  ce_common, ce_dmdwrap, ce_nativeproject, ce_dcd, ce_synmemo, ce_writableComponent,
+  ce_common, ce_dmdwrap, ce_nativeproject, ce_synmemo, ce_writableComponent,
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
@@ -384,11 +384,14 @@ type
     fMaxRecentProjs: integer;
     fMaxRecentDocs: integer;
     fDcdPort: word;
+    function getAdditionalPATH: string;
+    procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
     function getNativeProjecCompiler: TCECompiler;
     procedure setDubCompiler(value: TCECompiler);
     procedure setNativeProjecCompiler(value: TCECompiler);
   published
+    property additionalPATH: string read getAdditionalPATH write setAdditionalPath;
     property coverModuleTests: boolean read fCovModUt write fCovModUt;
     property floatingWidgetOnTop: boolean read fFloatingWidgetOnTop write fFloatingWidgetOnTop;
     property reloadLastDocuments: boolean read fReloadLastDocuments write fReloadLastDocuments;
@@ -424,7 +427,7 @@ implementation
 {$R *.lfm}
 
 uses
-  SynMacroRecorder, ce_symstring;
+  SynMacroRecorder, ce_symstring, ce_dcd;
 
 {$REGION TCEApplicationOptions ------------------------------------------------------}
 constructor TCEApplicationOptions.Create(AOwner: TComponent);
@@ -459,6 +462,31 @@ begin
     fNoGdcWarn := true;
   end;
   ce_nativeproject.setNativeProjectCompiler(value);
+end;
+
+function TCEApplicationOptionsBase.getAdditionalPATH: string;
+begin
+  exit(ce_common.additionalPath);
+end;
+
+procedure TCEApplicationOptionsBase.setAdditionalPath(const value: string);
+var
+  str: TStringList;
+  cat: string;
+  i: integer;
+begin
+  str := TStringList.Create;
+  try
+    str.Delimiter:= PathSeparator;
+    str.DelimitedText:= value;
+    for i := str.Count-1 downto 0 do
+      if not str[i].dirExists then
+        str.Delete(i);
+    cat := str.DelimitedText;
+    ce_common.additionalPath := cat;
+  finally
+    str.Free;
+  end;
 end;
 
 destructor TCEApplicationOptions.Destroy;
