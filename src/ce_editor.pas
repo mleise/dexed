@@ -540,15 +540,18 @@ begin
   if fDoc.Lines.Count = 0 then exit;
   //
   md := pageControl.currentPage.Caption;
-  if (fDoc.isDSource and (fDoc.CaretY < 50)) or (md = fDoc.fileName.extractFileName) then
+  if ((fDoc.CaretY < 50) or (md.isEmpty) or (md = '<new document>'))
+    or ((md = fDoc.fileName.extractFileName) and (fDoc.isDSource)) then
   begin
-    lex(fDoc.Lines.Text, fTokList, @lexFindToken);
-    md := getModuleName(fTokList);
-    fTokList.Clear;
+    if fDoc.isDSource then
+    begin
+      lex(fDoc.Lines.Text, fTokList, @lexFindToken);
+      md := getModuleName(fTokList);
+      fTokList.Clear;
+    end else
+      md := fDoc.fileName.extractFileName;
+    pageControl.currentPage.Caption := md;
   end;
-  if md.isEmpty or (md = '<new document>') then
-    md := fDoc.fileName.extractFileName;
-  pageControl.currentPage.Caption := md;
 end;
 {$ENDREGION}
 
