@@ -41,7 +41,7 @@ type
     property endOfline: DfmtEol read fEol write setEol default lf;
     property indentationStyle: DfmtIndentstyle read fTabStyle write setIndentStyle default space;
     property indentSize: integer read fIndentSize write fIndentSize default 4;
-    property tabWidth: integer read fTabWidth write fTabWidth default 8;
+    property tabWidth: integer read fTabWidth write fTabWidth default 4;
     property hardLineLen: integer read fHardLLen write fHardLLen default 120;
     property softLineLen: integer read fSoftLLen write fSoftLLen default 80;
     property braceStyle: DfmtBraceStyle read fBraceStyle write setBraceStyle default allman;
@@ -121,7 +121,7 @@ begin
   fEol          := lf;
   fTabStyle     := DfmtIndentstyle.space;
   fIndentSize   := 4;
-  fTabWidth     := 8;
+  fTabWidth     := 4;
   fHardLLen     := 120;
   fSoftLLen     := 80;
   fBraceStyle   := DfmtBraceStyle.allman;
