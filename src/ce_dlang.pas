@@ -351,6 +351,7 @@ procedure lex(const aText: string; aList: TLexTokenList; aCallBack: TLexFoundEve
 var
   reader: TReaderHead;
   identifier: string;
+  nestedCom: integer;
 
   function isOutOfBound: boolean;
   begin
@@ -446,11 +447,29 @@ begin
     begin
       if (reader.Next^ = '+') then
       begin
+        nestedCom := 1;
         if isOutOfBound then
           exit;
-        while (reader.head^ <> '+') or (reader.Next^ <> '/') do
-          if isOutOfBound then
-            exit;
+        repeat
+          while ((reader.head^ <> '+') or (reader.head^ <> '/')) or
+                ((reader.next^ <> '/') or (reader.head^ <> '+')) do
+          begin
+            if isOutOfBound then
+              exit;
+            if (reader.previous^ = '/') and (reader.next^ = '+') then
+            begin
+              nestedCom += 1;
+              break;
+            end;
+            if (reader.previous^ = '+') and (reader.next^ = '/') then
+            begin
+              nestedCom -= 1;
+              break;
+            end;
+            if isOutOfBound then
+              exit;
+          end;
+        until nestedCom = 0;
         reader.Next;
         addToken(ltkComment);
         if callBackDoStop then
