@@ -456,12 +456,12 @@ begin
           begin
             if isOutOfBound then
               exit;
-            if (reader.previous^ = '/') and (reader.next^ = '+') then
+            if ((reader.head-1)^ = '/') and (reader.head^ = '+') then
             begin
               nestedCom += 1;
               break;
             end;
-            if (reader.previous^ = '+') and (reader.next^ = '/') then
+            if ((reader.head-1)^ = '+') and (reader.head^ = '/') then
             begin
               nestedCom -= 1;
               break;

@@ -457,7 +457,6 @@ begin
   next;
 end;
 
-//TODO-cD2Syn: nested comments with multiple nesting on the same line.
 procedure TSynD2Syn.next;
 var
   reader: PChar = nil;
@@ -592,41 +591,78 @@ begin
   begin
     fTokKind := tkCommt;
     if readDelim(reader, fTokStop, '+') then
-      if readDelim(reader, fTokStop, '/') then exit
-        else fTokKind := tkDDocs;
-    if readUntil(reader, fTokStop, '+/') then exit;
+      if readDelim(reader, fTokStop, '/') then
+        exit
+      else
+        fTokKind := tkDDocs;
     inc(fCurrRange.nestedCommentsCount);
-    if fTokKind = tkDDocs then
-      fCurrRange.rangeKinds += [rkBlockDoc2]
-    else
-      fCurrRange.rangeKinds += [rkBlockCom2];
-    readLine(reader, fTokStop);
-    if (fTokKind = tkCommt) then
-      StartCodeFoldBlock(nil, fkComments2 in fFoldKinds)
-    else if (fTokKind = tkDDocs) then
-      StartCodeFoldBlock(nil, fkDDoc in fFoldKinds);
+    while (reader^ <> #10) and (fCurrRange.nestedCommentsCount > 0) do
+    begin
+      if readUntilAmong(reader, fTokStop, ['+', '/']) then
+      begin
+        if readDelim(reader, fTokStop, ['+', '/']) then
+        begin
+          if ((reader-1)^ = '/') and (reader^ = '+') then
+          begin
+            inc(fCurrRange.nestedCommentsCount);
+            readerNext;
+            continue;
+          end;
+          if ((reader-1)^ = '+') and (reader^ = '/') then
+          begin
+            dec(fCurrRange.nestedCommentsCount);
+            readerNext;
+            continue;
+          end;
+        end else readerNext;
+      end;
+    end;
+    if (fCurrRange.nestedCommentsCount > 0) then
+    begin
+      if fTokKind = tkDDocs then
+        fCurrRange.rangeKinds += [rkBlockDoc2]
+      else
+        fCurrRange.rangeKinds += [rkBlockCom2];
+      if (fTokKind = tkCommt) then
+        StartCodeFoldBlock(nil, fkComments2 in fFoldKinds)
+      else if (fTokKind = tkDDocs) then
+        StartCodeFoldBlock(nil, fkDDoc in fFoldKinds);
+    end;
     exit;
   end else readerReset;
   if (rkBlockCom2 in fCurrRange.rangeKinds) or (rkBlockDoc2 in fCurrRange.rangeKinds) then
   begin
     if (rkBlockDoc2 in fCurrRange.rangeKinds) then fTokKind := tkDDocs
       else fTokKind := tkCommt;
-    if readUntil(reader, fTokStop, '/+') then
-      inc(fCurrRange.nestedCommentsCount)
-    else readerReset;
-    if readUntil(reader, fTokStop, '+/') then
+    while (reader^ <> #10) and (fCurrRange.nestedCommentsCount > 0) do
     begin
-      dec(fCurrRange.nestedCommentsCount);
-      if fCurrRange.nestedCommentsCount <> 0 then
-        exit;
+      if readUntilAmong(reader, fTokStop, ['+', '/']) then
+      begin
+        if readDelim(reader, fTokStop, ['+', '/']) then
+        begin
+          if ((reader-1)^ = '/') and (reader^ = '+') then
+          begin
+            inc(fCurrRange.nestedCommentsCount);
+            readerNext;
+            continue;
+          end;
+          if ((reader-1)^ = '+') and (reader^ = '/') then
+          begin
+            dec(fCurrRange.nestedCommentsCount);
+            readerNext;
+            continue;
+          end;
+        end else readerNext;
+      end;
+    end;
+    if fCurrRange.nestedCommentsCount = 0 then
+    begin
       if (fTokKind = tkCommt) then
         EndCodeFoldBlock(fkComments2 in fFoldKinds)
       else if (fTokKind = tkDDocs) then
         EndCodeFoldBlock(fkDDoc in fFoldKinds);
       fCurrRange.rangeKinds -= [rkBlockDoc2, rkBlockCom2];
-      exit;
     end;
-    readLine(reader, fTokStop);
     exit;
   end;
 
@@ -819,6 +855,8 @@ begin
           if not isOperator1(reader^) then exit;
         end;
     end;
+    if isWhite(reader^) then
+      exit;
     fTokKind := tkIdent; // invalid op not colorized.
   end;
 
