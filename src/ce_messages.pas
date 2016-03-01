@@ -6,11 +6,14 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
-  lcltype, ce_widget, ActnList, Menus, clipbrd, AnchorDocking, TreeFilterEdit,
-  Buttons, math, process, ce_writableComponent, ce_common, ce_synmemo, GraphType,
-  ce_dlangutils, ce_interfaces, ce_observer, ce_symstring, ce_processes, ce_sharedres, EditBtn;
+  EditBtn, lcltype, ce_widget, ActnList, Menus, clipbrd, AnchorDocking, math,
+  TreeFilterEdit, Buttons, process, GraphType, fgl,
+  ce_writableComponent, ce_common, ce_synmemo, ce_dlangutils, ce_interfaces,
+  ce_observer, ce_symstring, ce_processes, ce_sharedres;
 
 type
+
+  TCEEditorMessagePos = class(specialize TFPGMap<string,integer>);
 
   (**
    * the struct linked to a log message. allow to be filtered.
@@ -78,6 +81,7 @@ type
     procedure TreeFilterEdit1AfterFilter(Sender: TObject);
     procedure TreeFilterEdit1ButtonClick(Sender: TObject);
   private
+    fEditorMessagePos: TCEEditorMessagePos;
     fDemanglerAvailable: boolean;
     fMsgColors: array[TCEAppMessageKind] of TColor;
     fActAutoSel: TAction;
@@ -312,6 +316,8 @@ begin
   btnClearCat.OnClick := @actClearCurCatExecute;
   AssignPng(btnClearCat, 'clean');
   //
+  fEditorMessagePos := TCEEditorMessagePos.Create;
+  //
   fname := getCoeditDocPath + optname;
   if fname.fileExists then
   begin
@@ -328,6 +334,7 @@ end;
 
 destructor TCEMessagesWidget.destroy;
 begin
+  fEditorMessagePos.Free;
   fToDemangle.Free;
   FreeAndNil(fToDemangleObjs);
   freeDemangler;
@@ -665,6 +672,15 @@ end;
 {$REGION ICEMultiDocObserver ---------------------------------------------------}
 procedure TCEMessagesWidget.docNew(aDoc: TCESynMemo);
 begin
+
+  if fDoc.isNotNil and fOptions.fAutoSelect and (fCtxt = amcEdit) then
+  begin
+    if list.Selected.isNotNil then
+      fEditorMessagePos[fDoc.fileName] := list.Selected.Index
+    else
+      fEditorMessagePos[fDoc.fileName] := -1;
+  end;
+
   fDoc := aDoc;
   filterMessages(fCtxt);
 end;
@@ -673,15 +689,41 @@ procedure TCEMessagesWidget.docClosing(aDoc: TCESynMemo);
 begin
   if aDoc <> fDoc then exit;
   clearbyData(fDoc);
+  fEditorMessagePos.Remove(fDoc.fileName);
   fDoc := nil;
   filterMessages(fCtxt);
 end;
 
 procedure TCEMessagesWidget.docFocused(aDoc: TCESynMemo);
+var
+  i: integer;
 begin
   if fDoc = aDoc then exit;
+
+  if fDoc.isNotNil and fOptions.fAutoSelect and (fCtxt = amcEdit) then
+  begin
+    if list.Selected.isNotNil then
+      fEditorMessagePos[fDoc.fileName] := list.Selected.Index
+    else
+      fEditorMessagePos[fDoc.fileName] := -1;
+  end;
+
   fDoc := aDoc;
   filterMessages(fCtxt);
+
+  if fOptions.fAutoSelect and (fCtxt = amcEdit) then
+  begin
+    i := fEditorMessagePos.IndexOf(fDoc.fileName);
+    if i <> -1 then
+    begin
+      i := fEditorMessagePos.Data[i];
+      if (i <> -1) and (i < list.Items.Count) then
+      begin
+        list.Selected := list.Items[i];
+        list.Selected.MakeVisible;
+      end;
+    end;
+  end;
 end;
 
 procedure TCEMessagesWidget.docChanged(aDoc: TCESynMemo);
@@ -753,6 +795,8 @@ var
 begin
   if aData.isNil then
     exit;
+  if (TObject(aData) = fDoc) and (fDoc.isNotNil) then
+    fEditorMessagePos[fDoc.fileName] := -1;
   list.BeginUpdate;
   for i := List.Items.Count-1 downto 0 do
   begin
