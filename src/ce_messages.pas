@@ -777,6 +777,7 @@ var
   msgdt: PMessageData;
 begin
   list.BeginUpdate;
+  TreeFilterEdit1.Filter := '';
   if aCtxt = amcAll then
     List.Items.Clear
   else for i := List.Items.Count-1 downto 0 do
