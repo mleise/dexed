@@ -58,6 +58,7 @@ type
     fCompletionMenuWidth: integer;
     fCompletionMenuLines: Byte;
     fAutoCLoseCurlyBrace: TBraceAutoCloseStyle;
+    fCtrlDisableAutoClose: boolean;
     //
     procedure setFont(value: TFont);
     procedure setSelCol(value: TSynSelectedColor);
@@ -83,6 +84,7 @@ type
     property completionMenuCaseCare: boolean read fCompletionMenuCaseCare write fCompletionMenuCaseCare;
     property completionMenuLines: byte read fCompletionMenuLines write setCompletionMenuLines;
     property completionMenuWidth: integer read fCompletionMenuWidth write fCompletionMenuWidth;
+    //property ctrlDisableAutoClose: boolean read fCtrlDisableAutoClose write fCtrlDisableAutoClose default true;
     property currentLine: TSynSelectedColor read fCurrLineAttribs write setCurrLineAttribs;
     property ddocDelay: Integer read fDDocDelay write setDDocDelay;
     property folding: TSynSelectedColor read fFoldedColor write setFoldedColor;
@@ -217,6 +219,7 @@ begin
   fCurrLineAttribs.Background := fBackground - $080808;
   fCurrLineAttribs.Foreground := clNone;
   //
+  fCtrlDisableAutoClose := true;
   options1 :=
     [eoAutoIndent, eoBracketHighlight, eoGroupUndo, eoTabsToSpaces, eoTrimTrailingSpaces,
     eoDragDropEditing, eoShowCtrlMouseLinks, eoEnhanceHomeKey, eoTabIndent];
@@ -263,6 +266,7 @@ begin
   begin
     srcopt := TCEEditorOptionsBase(src);
     //
+    fCtrlDisableAutoClose:=srcopt.fCtrlDisableAutoClose;
     fResetFontSize:=srcopt.fResetFontSize;
     fAutoCLoseCurlyBrace := srcopt.fAutoCLoseCurlyBrace;
     fCompletionMenuWidth:=srcopt.fCompletionMenuWidth;
@@ -608,6 +612,7 @@ begin
   if not fResetFontSize then
     anEditor.Font.Size := savedSize;
 
+  anEditor.ctrlDisableAutoClose           := fCtrlDisableAutoClose;
   anEditor.autoCloseCurlyBrace            := fAutoCLoseCurlyBrace;
   anEditor.completionMenu.TheForm.Width   := fCompletionMenuWidth;
   anEditor.completionMenu.LinesInWindow   := fCompletionMenuLines;
