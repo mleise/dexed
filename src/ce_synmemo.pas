@@ -140,8 +140,6 @@ type
     fOverrideColMode: boolean;
     fAutoCloseCurlyBrace: TBraceAutoCloseStyle;
     fLexToks: TLexTokenList;
-    fCtrlDisableAutoClose: boolean;
-    fShiftState: TShiftState;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseFileBytePos: Integer;
     procedure changeNotify(Sender: TObject);
@@ -225,7 +223,6 @@ type
     property ddocDelay: Integer read fDDocDelay write setDDocDelay;
     property autoDotDelay: Integer read fAutoDotDelay write setAutoDotDelay;
     property autoCloseCurlyBrace: TBraceAutoCloseStyle read fAutoCloseCurlyBrace write fAutoCloseCurlyBrace;
-    property ctrlDisableAutoClose: boolean read fCtrlDisableAutoClose write fCtrlDisableAutoClose;
   end;
 
   procedure SetDefaultCoeditKeystrokes(ed: TSynEdit);
@@ -1392,7 +1389,6 @@ end;
 procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
 begin
   inherited;
-  //fShiftState := Shift;
   highlightCurrentIdentifier;
   if fCompletion.IsActive then
       fCompletion.CurrentString:= GetWordAtRowCol(LogicalCaretXY);
@@ -1449,8 +1445,6 @@ begin
           showCallTips(fCallTipStrings.Text);
       end;
     '{':
-        //if (not fCtrlDisableAutoClose) or
-        //  (fCtrlDisableAutoClose and (not (ssCtrl in fShiftState))) then
         case fAutoCloseCurlyBrace of
           autoCloseAlways:
             curlyBraceCloseAndIndent(self);

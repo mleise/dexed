@@ -98,8 +98,9 @@ uses
 const
   OptFname = 'staticmacros.txt';
 
-  defMacros: array[0..14] of string = (
+  defMacros: array[0..15] of string = (
     '$a=auto',
+    '$b={}',
     '$c=class {}',
     '$e=enum {}',
     '$it=interface {}',
