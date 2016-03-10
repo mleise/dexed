@@ -335,9 +335,6 @@ begin
     search.Whole := ssoWholeWord in options;
     search.RegularExpressions:= ssoRegExpr in options;
     search.Pattern:=fToFind;
-
-    // search.IdentChars:= [];
-
     start := Point(1,1);
     stop := Point(high(integer), lines.Count);
     while search.FindNextOne(lines, start, stop, startf, stopf) do
@@ -348,7 +345,8 @@ begin
       start := stopf;
     end;
     msgs := getMessageDisplay;
-    msg := format('%d result(s) for the pattern <%s>', [length(res), fToFind]);
+    msg := format('%d result(s) for the pattern <%s> in %s',
+      [length(res), fToFind, filename]);
     msgs.message(msg, nil, amcMisc, amkInf);
     fmt := fileName + '(%d,%d): "%s"';
     for i := 0 to high(res) do
@@ -556,14 +554,16 @@ end;
 procedure TCESearchWidget.updateImperative;
 var
   canAll: boolean;
+  hasTxt: boolean;
 begin
-  canAll := (fDoc.isNotNil and not fAllInProj) or (fAllInProj and (fProj <> nil));
-  btnFind.Enabled := fDoc.isNotNil and fToFind.isNotEmpty;
-  btnFindAll.Enabled := canAll;
+  canAll := ((fDoc.isNotNil and not fAllInProj) or (fAllInProj and (fProj <> nil)));
+  hasTxt := fToFind.isNotEmpty and not fToFind.isBlank;
+  btnFind.Enabled := fDoc.isNotNil and hasTxt;
+  btnFindAll.Enabled := canAll and hasTxt;
   btnReplace.Enabled := fDoc.isNotNil and chkEnableRep.Checked and fToFind.isNotEmpty;
   btnReplaceAll.Enabled := btnReplace.Enabled;
   cbReplaceWth.Enabled := fDoc.isNotNil and chkEnableRep.Checked;
-  cbToFind.Enabled := canAll;
+  cbToFind.Enabled := canAll or fDoc.isNotNil;
 end;
 {$ENDREGION}
 

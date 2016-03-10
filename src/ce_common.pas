@@ -6,7 +6,7 @@ interface
 
 uses
 
-  Classes, SysUtils,
+  Classes, SysUtils, strutils,
   {$IFDEF WINDOWS}
   Windows, JwaTlHelp32,
   {$ELSE}
@@ -15,7 +15,7 @@ uses
   {$IFNDEF CEBUILD}
   forms,
   {$ENDIF}
-  process, asyncprocess;
+  process, asyncprocess, fgl;
 
 const
   exeExt = {$IFDEF WINDOWS} '.exe' {$ELSE} ''   {$ENDIF};
@@ -24,6 +24,8 @@ const
   dynExt = {$IFDEF WINDOWS} '.dll' {$ENDIF} {$IFDEF LINUX}'.so'{$ENDIF} {$IFDEF DARWIN}'.dylib'{$ENDIF};
 
 type
+
+  TIntByString = class(specialize TFPGMap<string, integer>);
 
   TCECompiler = (dmd, gdc, ldc);
 
@@ -48,6 +50,7 @@ type
   TStringHelper = type helper for string
     function isEmpty: boolean;
     function isNotEmpty: boolean;
+    function isBlank: boolean;
     function extractFileName: string;
     function extractFileExt: string;
     function extractFilePath: string;
@@ -260,6 +263,11 @@ type
    *)
   procedure deleteDups(str: TStrings);
 
+  (**
+   * Indicates wether str is only made of blank characters
+   *)
+  function isBlank(const str: string): boolean;
+
 var
   // supplementatl directories to find background tools
   additionalPath: string;
@@ -311,6 +319,11 @@ end;
 function TStringHelper.isNotEmpty: boolean;
 begin
   exit(self <> '');
+end;
+
+function TStringHelper.isBlank: boolean;
+begin
+  exit(ce_common.isBlank(self));
 end;
 
 function TStringHelper.extractFileName: string;
@@ -1135,6 +1148,16 @@ begin
     if cardinal(str.IndexOf(str[i])) <  i then
       str.Delete(i);
   {$POP}
+end;
+
+function isBlank(const str: string): boolean;
+var
+  c: char;
+begin
+  result := true;
+  for c in str do
+    if not (c in [#9, ' ']) then
+      exit(false);
 end;
 
 initialization
