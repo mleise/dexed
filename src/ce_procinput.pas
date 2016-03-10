@@ -6,18 +6,20 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Menus, StdCtrls, ce_widget, process, ce_common, ce_interfaces, ce_observer,
-  ce_mru;
+  Menus, StdCtrls, Buttons, ce_widget, process, ce_common, ce_interfaces,
+  ce_observer, ce_mru, ce_sharedres;
 
 type
 
   { TCEProcInputWidget }
 
   TCEProcInputWidget = class(TCEWidget, ICEProcInputHandler)
-    btnSend: TButton;
+    btnClose: TBitBtn;
+    btnSend: TBitBtn;
     Panel1: TPanel;
     txtInp: TEdit;
     txtExeName: TStaticText;
+    procedure btnCloseClick(Sender: TObject);
     procedure btnSendClick(Sender: TObject);
     procedure txtInpKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
@@ -58,6 +60,8 @@ begin
     fMru.LoadFromFile(fname);
   if fMru.Count = 0 then
     fMru.Insert(0, '(your input here)');
+  AssignPng(btnClose, 'pencil_delete');
+  AssignPng(btnSend, 'pencil_go');
 end;
 
 destructor TCEProcInputWidget.destroy;
@@ -113,6 +117,9 @@ procedure TCEProcInputWidget.sendInput;
 var
   inp: string;
 begin
+  if fProc.Input.isNil or (fProc.Input.Handle = INVALID_HANDLE_VALUE) then
+    exit;
+
   fMru.Insert(0,txtInp.Text);
   fMruPos := 0;
   if txtInp.Text <> '' then
@@ -127,6 +134,13 @@ procedure TCEProcInputWidget.btnSendClick(Sender: TObject);
 begin
   if fProc.isNotNil then
     sendInput;
+end;
+
+procedure TCEProcInputWidget.btnCloseClick(Sender: TObject);
+begin
+  if fProc.isNotNil and fProc.Input.isNotNil and
+    (fProc.Input.Handle <> INVALID_HANDLE_VALUE) then
+      fProc.CloseInput;
 end;
 
 procedure TCEProcInputWidget.txtInpKeyDown(Sender: TObject; var Key: Word;

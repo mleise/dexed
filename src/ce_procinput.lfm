@@ -2,25 +2,25 @@ inherited CEProcInputWidget: TCEProcInputWidget
   Left = 863
   Height = 63
   Top = 397
-  Width = 613
+  Width = 620
   Caption = 'Process input'
   ClientHeight = 63
-  ClientWidth = 613
+  ClientWidth = 620
   inherited Back: TPanel
     Height = 63
-    Width = 613
+    Width = 620
     ClientHeight = 63
-    ClientWidth = 613
+    ClientWidth = 620
     inherited Content: TPanel
       Height = 63
-      Width = 613
+      Width = 620
       ClientHeight = 63
-      ClientWidth = 613
+      ClientWidth = 620
       object txtExeName: TStaticText[0]
         Left = 4
         Height = 22
         Top = 4
-        Width = 605
+        Width = 612
         Align = alTop
         BorderSpacing.Around = 4
         BorderStyle = sbsSunken
@@ -32,35 +32,48 @@ inherited CEProcInputWidget: TCEProcInputWidget
         Left = 4
         Height = 30
         Top = 30
-        Width = 605
+        Width = 612
         Align = alTop
         BorderSpacing.Around = 4
         BevelOuter = bvNone
         ClientHeight = 30
-        ClientWidth = 605
+        ClientWidth = 612
         Enabled = False
         TabOrder = 1
-        object btnSend: TButton
-          Left = 530
-          Height = 30
-          Top = 0
-          Width = 75
-          Align = alRight
-          BorderSpacing.Left = 4
-          Caption = 'Send'
-          OnClick = btnSendClick
-          TabOrder = 0
-        end
         object txtInp: TEdit
           Left = 0
           Height = 26
           Top = 2
-          Width = 526
+          Width = 556
           Align = alClient
           BorderSpacing.Top = 2
           BorderSpacing.Bottom = 2
           OnKeyDown = txtInpKeyDown
+          TabOrder = 0
+        end
+        object btnClose: TBitBtn
+          Left = 584
+          Height = 30
+          Hint = 'close the process input stream'
+          Top = 0
+          Width = 28
+          Align = alRight
+          Layout = blGlyphBottom
+          OnClick = btnCloseClick
+          Spacing = 0
           TabOrder = 1
+        end
+        object btnSend: TBitBtn
+          Left = 556
+          Height = 30
+          Hint = 'send the text to hte process'
+          Top = 0
+          Width = 28
+          Align = alRight
+          Layout = blGlyphBottom
+          OnClick = btnSendClick
+          Spacing = 0
+          TabOrder = 2
         end
       end
     end
