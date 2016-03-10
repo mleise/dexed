@@ -44,7 +44,11 @@ void main(string[] args)
     ubyte[] source;
     if (args.length == 1)
     {
-        foreach(buff; stdin.byChunk(1024))
+        version(runnable_module)
+        {
+            source = cast(ubyte[]) read(__FILE__, size_t.max);
+        }
+        else foreach(buff; stdin.byChunk(1024))
             source ~= buff;
     }
     else if (args.length == 2)
@@ -287,21 +291,7 @@ class SymbolListBuilder : ASTVisitor
     /// returns a new symbol if the declarator is based on a Token named "name".
     final Symbol * addDeclaration(DT)(DT adt)
     {
-        static if
-        (
-            is(DT == const(EponymousTemplateDeclaration)) ||
-            is(DT == const(AnonymousEnumMember))    ||
-            is(DT == const(AliasInitializer))       ||
-            is(DT == const(ClassDeclaration))       ||
-            is(DT == const(Declarator))             ||
-            is(DT == const(EnumDeclaration))        ||
-            is(DT == const(FunctionDeclaration))    ||
-            is(DT == const(InterfaceDeclaration))   ||
-            is(DT == const(StructDeclaration))      ||
-            is(DT == const(TemplateDeclaration))    ||
-            is(DT == const(UnionDeclaration))
-            
-        )
+        static if (__traits(hasMember, DT, "name"))
         {
             count++;
             auto result = construct!Symbol;
@@ -311,8 +301,7 @@ class SymbolListBuilder : ASTVisitor
             parent.subs ~= result;
             return result;
         }
-        
-        version(none) assert(0, "addDeclaration no implemented for " ~ DT.stringof);
+        else static assert(0, "addDeclaration no implemented for " ~ DT.stringof);
     }
     
     /// visitor implementation if the declarator is based on a Token named "name".
@@ -347,12 +336,23 @@ class SymbolListBuilder : ASTVisitor
         // why is initializers an array ?
         if (decl.initializers.length > 0)
             namedVisitorImpl!(AliasInitializer, SymbolType._alias)(decl.initializers[0]);  
-    }   
-    
-    final override void visit(const AnonymousEnumDeclaration decl) 
+    }
+
+    final override void visit(const AnonymousEnumMember decl)
     {
-        if (decl.members.length) foreach(mem; decl.members)
-            namedVisitorImpl!(AnonymousEnumMember, SymbolType._enum)(mem);
+        namedVisitorImpl!(AnonymousEnumMember, SymbolType._enum)(decl);
+    }
+
+    final override void visit(const AnonymousEnumDeclaration decl)
+    {
+        decl.accept(this);
+    }
+
+    final override void visit(const AutoDeclaration decl)
+    {
+        otherVisitorImpl(SymbolType._enum, decl.identifiers[0].text,
+            decl.identifiers[0].line, decl.identifiers[0].column);
+        decl.accept(this);
     }
      
     final override void visit(const ClassDeclaration decl) 
@@ -434,7 +434,9 @@ class SymbolListBuilder : ASTVisitor
     final override void visit(const VariableDeclaration decl) 
     {
         foreach(elem; decl.declarators)
-            namedVisitorImpl!(Declarator, SymbolType._variable, false)(elem);  
+            namedVisitorImpl!(Declarator, SymbolType._variable, false)(elem);
+        if (decl.autoDeclaration)
+            visit(decl.autoDeclaration);
     }
     
     final override void visit(const StaticConstructor decl) 
