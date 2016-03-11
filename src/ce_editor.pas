@@ -61,6 +61,8 @@ type
     fTokList: TLexTokenList;
     fModStart: boolean;
     fLastCommand: TSynEditorCommand;
+    procedure updateStatusBar;
+    procedure updatePageCaption;
     procedure pageBtnAddCLick(Sender: TObject);
     procedure pageCloseBtnClick(Sender: TObject);
     procedure lexFindToken(const aToken: PLexToken; out doStop: boolean);
@@ -180,7 +182,6 @@ begin
   //
   fDoc := aDoc;
   focusedEditorChanged;
-  beginDelayedUpdate;
   updateImperative;
 end;
 
@@ -191,8 +192,8 @@ begin
   aDoc.Parent := nil;
   if aDoc = fDoc then
     fDoc := nil;
-  updateImperative;
   pageControl.deletePage(pageControl.pageIndex);
+  updateImperative;
 end;
 
 procedure TCEEditorWidget.docFocused(aDoc: TCESynMemo);
@@ -200,7 +201,6 @@ begin
   if aDoc = fDoc then exit;
   fDoc := aDoc;
   focusedEditorChanged;
-  beginDelayedUpdate;
   updateImperative;
 end;
 
@@ -209,7 +209,6 @@ begin
   if fDoc <> aDoc then exit;
   fKeyChanged := true;
   beginDelayedUpdate;
-  updateImperative;
 end;
 {$ENDREGION}
 
@@ -335,7 +334,8 @@ begin
   fDoc.PopupMenu := mnuEditor;
   fDoc.hideCallTips;
   fDoc.hideDDocs;
-  if (pageControl.currentPage.Caption = '') then
+  if (pageControl.currentPage.Caption = '') or
+    (pageControl.currentPage.Caption ='<new document>') then
   begin
     fKeyChanged := true;
     beginDelayedUpdate;
@@ -414,7 +414,6 @@ end;
 
 procedure TCEEditorWidget.memoMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  beginDelayedUpdate;
   updateImperative;
 end;
 
@@ -471,19 +470,19 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.updateImperative;
+procedure TCEEditorWidget.updateStatusBar;
 const
   modstr: array[boolean] of string = ('...', 'MODIFIED');
-var
-  md: string = '';
 begin
-  if fDoc = nil then begin
+  if fDoc = nil then
+  begin
     editorStatus.Panels[0].Text := '';
     editorStatus.Panels[1].Text := '';
     editorStatus.Panels[2].Text := '';
     editorStatus.Panels[3].Text := '';
     editorStatus.Panels[4].Text := '';
-  end else begin
+  end else
+  begin
     editorStatus.Panels[0].Text := format('%d : %d | %d', [fDoc.CaretY, fDoc.CaretX, fDoc.SelEnd - fDoc.SelStart]);
     editorStatus.Panels[1].Text := modstr[fDoc.modified];
     if macRecorder.State = msRecording then
@@ -499,19 +498,44 @@ begin
     end else
       editorStatus.Panels[3].Width:= 0;
     editorStatus.Panels[4].Text := fDoc.fileName;
-    if Visible and pageControl.currentPage.isNotNil and ((pageControl.currentPage.Caption = '') or
-      (pageControl.currentPage.Caption = '<new document>')) then
-    begin
-      if fDoc.isDSource and (fDoc.CaretY < 50) then
-      begin
-        lex(fDoc.Lines.Text, fTokList, @lexFindToken);
-        md := getModuleName(fTokList);
-        fTokList.Clear;
-      end;
-      if md.isEmpty then md := fDoc.fileName.extractFileName;
-      pageControl.currentPage.Caption := md;
-    end;
   end;
+end;
+
+procedure TCEEditorWidget.updatePageCaption;
+var
+  md: string = '';
+begin
+  if fDoc.isDSource then
+  begin
+    lex(fDoc.Lines.Text, fTokList, @lexFindToken);
+    md := getModuleName(fTokList);
+    fTokList.Clear;
+    if md.isEmpty then
+      md := fDoc.fileName.extractFileName;
+  end
+  else if fDoc.fileName.fileExists then
+    md := fDoc.fileName.extractFileName
+  else
+    md := '<new document>';
+  pageControl.currentPage.Caption := md;
+end;
+
+procedure TCEEditorWidget.updateImperative;
+begin
+  updateStatusBar;
+  if fDoc.isNotNil then
+    updatePageCaption;
+end;
+
+procedure TCEEditorWidget.updateDelayed;
+begin
+  if fDoc = nil then
+    exit;
+  updateStatusBar;
+  if not fKeyChanged then
+    exit;
+  if fDoc.isNotNil then
+    updatePageCaption;
 end;
 
 procedure TCEEditorWidget.lexFindToken(const aToken: PLexToken; out doStop: boolean);
@@ -525,32 +549,6 @@ begin
   begin
     doStop := true;
     fModStart := false;
-  end;
-end;
-
-procedure TCEEditorWidget.updateDelayed;
-var
-  md: string;
-begin
-  if fDoc = nil then exit;
-  updateImperative;
-  if not fKeyChanged then exit;
-  //
-  fKeyChanged := false;
-  if fDoc.Lines.Count = 0 then exit;
-  //
-  md := pageControl.currentPage.Caption;
-  if ((fDoc.CaretY < 50) or (md.isEmpty) or (md = '<new document>'))
-    or ((md = fDoc.fileName.extractFileName) and (fDoc.isDSource)) then
-  begin
-    if fDoc.isDSource then
-    begin
-      lex(fDoc.Lines.Text, fTokList, @lexFindToken);
-      md := getModuleName(fTokList);
-      fTokList.Clear;
-    end else
-      md := fDoc.fileName.extractFileName;
-    pageControl.currentPage.Caption := md;
   end;
 end;
 {$ENDREGION}
