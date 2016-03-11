@@ -61,7 +61,7 @@ type
     function find(const aValue: string): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
   end;
 
-  TTokenKind = (tkCommt, tkIdent, tkKeywd, tkStrng, tkBlank, tkSymbl, tkNumbr, tkDDocs, tkSpecK);
+  TTokenKind = (tkCommt, tkIdent, tkKeywd, tkStrng, tkBlank, tkSymbl, tkNumbr, tkDDocs, tkSpecK, tkError);
 
   TRangeKind = (rkString1, rkString2, rkTokString, rkBlockCom1, rkBlockCom2, rkBlockDoc1, rkBlockDoc2, rkAsm);
 
@@ -111,6 +111,7 @@ type
     fDDocsAttrib: TSynHighlighterAttributes;
     fAsblrAttrib: TSynHighlighterAttributes;
     fSpeckAttrib: TSynHighlighterAttributes;
+    fErrorAttrib: TSynHighlighterAttributes;
     fKeyWords: TD2Dictionary;
     fSpecKw: TD2Dictionary;
     fLineBuf: string;
@@ -130,6 +131,7 @@ type
     procedure setDDocsAttrib(value: TSynHighlighterAttributes);
     procedure setAsblrAttrib(value: TSynHighlighterAttributes);
     procedure setSpeckAttrib(value: TSynHighlighterAttributes);
+    procedure setErrorAttrib(value: TSynHighlighterAttributes);
     procedure doAttribChange(sender: TObject);
     procedure doChanged;
   protected
@@ -147,6 +149,7 @@ type
     property ddoc:        TSynHighlighterAttributes read fDDocsAttrib write setDDocsAttrib;
     property inlineAsm:   TSynHighlighterAttributes read fAsblrAttrib write setAsblrAttrib;
     property special:     TSynHighlighterAttributes read fSpeckAttrib write setSpeckAttrib;
+    property errors:      TSynHighlighterAttributes read fErrorAttrib write setErrorAttrib;
 	public
 		constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -303,6 +306,7 @@ begin
   fDDocsAttrib := TSynHighlighterAttributes.Create('DDoc','DDoc');
   fAsblrAttrib := TSynHighlighterAttributes.Create('Asm','Asm');
   fSpeckAttrib := TSynHighlighterAttributes.Create('SpecialKeywords','SpecialKeywords');
+  fErrorAttrib := TSynHighlighterAttributes.Create('Errors','Errors');
 
   fNumbrAttrib.Foreground := $000079F2;
   fSymblAttrib.Foreground := clMaroon;
@@ -320,6 +324,11 @@ begin
   fAsblrAttrib.Style := [fsBold];
   fSpeckAttrib.Style := [fsBold];
 
+  fErrorAttrib.Foreground:= fIdentAttrib.Foreground;
+  fErrorAttrib.FrameStyle:= slsWaved;
+  fErrorAttrib.FrameColor:= clRed;
+  fErrorAttrib.FrameEdges:= sfeBottom;
+
   AddAttribute(fWhiteAttrib);
   AddAttribute(fNumbrAttrib);
   AddAttribute(fSymblAttrib);
@@ -330,6 +339,7 @@ begin
   AddAttribute(fDDocsAttrib);
   AddAttribute(fAsblrAttrib);
   AddAttribute(fSpeckAttrib);
+  AddAttribute(fErrorAttrib);
 
   fAttribLut[TTokenKind.tkident] := fIdentAttrib;
   fAttribLut[TTokenKind.tkBlank] := fWhiteAttrib;
@@ -340,6 +350,7 @@ begin
   fAttribLut[TTokenKind.tksymbl] := fSymblAttrib;
   fAttribLut[TTokenKind.tkDDocs] := fDDocsAttrib;
   fAttribLut[TTokenKind.tkSpecK] := fSpeckAttrib;
+  fAttribLut[TTokenKind.tkError] := fErrorAttrib;
 
   SetAttributesOnChange(@doAttribChange);
   fTokStop := 1;
@@ -443,6 +454,11 @@ end;
 procedure TSynD2Syn.setSpeckAttrib(value: TSynHighlighterAttributes);
 begin
   fSpeckAttrib.Assign(value);
+end;
+
+procedure TSynD2Syn.setErrorAttrib(value: TSynHighlighterAttributes);
+begin
+  fErrorAttrib.Assign(value);
 end;
 
 procedure TSynD2Syn.setLine(const NewValue: String; LineNumber: Integer);
@@ -860,8 +876,8 @@ begin
     fTokKind := tkIdent; // invalid op not colorized.
   end;
 
-  // Keyword - identifiers
-  if not isWhite(reader^) then
+  //Keyword - identifiers
+  if isFirstIdentifier(reader^) then
   begin
     fTokKind := tkIdent;
     while(true) do
@@ -883,8 +899,8 @@ begin
 
   if fLineBuf[fTokStop] = #10 then exit;
 
-  // Should not happend
-  assert(false);
+  readUntilAmong(reader, fTokStop, [#9, #10, ' ']);
+  fTokKind := tkError;
 end;
 
 function TSynD2Syn.GetEol: Boolean;
