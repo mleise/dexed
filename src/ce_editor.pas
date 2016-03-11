@@ -198,6 +198,8 @@ end;
 
 procedure TCEEditorWidget.docFocused(aDoc: TCESynMemo);
 begin
+  if pageControl.currentPage.Caption = '<new document>' then
+    updatePageCaption;
   if aDoc = fDoc then exit;
   fDoc := aDoc;
   focusedEditorChanged;
@@ -206,7 +208,8 @@ end;
 
 procedure TCEEditorWidget.docChanged(aDoc: TCESynMemo);
 begin
-  if fDoc <> aDoc then exit;
+  if fDoc <> aDoc then
+    exit;
   fKeyChanged := true;
   beginDelayedUpdate;
 end;
