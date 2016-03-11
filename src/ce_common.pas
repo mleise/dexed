@@ -6,7 +6,7 @@ interface
 
 uses
 
-  Classes, SysUtils, strutils,
+  Classes, SysUtils,
   {$IFDEF WINDOWS}
   Windows, JwaTlHelp32,
   {$ELSE}

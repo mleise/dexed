@@ -117,7 +117,7 @@ procedure TCEProcInputWidget.sendInput;
 var
   inp: string;
 begin
-  if fProc.Input.isNil or (fProc.Input.Handle = INVALID_HANDLE_VALUE) then
+  if fProc.Input.isNil or (fProc.Input.Handle = 0) then
     exit;
 
   fMru.Insert(0,txtInp.Text);
@@ -139,7 +139,7 @@ end;
 procedure TCEProcInputWidget.btnCloseClick(Sender: TObject);
 begin
   if fProc.isNotNil and fProc.Input.isNotNil and
-    (fProc.Input.Handle <> INVALID_HANDLE_VALUE) then
+    (fProc.Input.Handle <> 0) then
       fProc.CloseInput;
 end;
 
