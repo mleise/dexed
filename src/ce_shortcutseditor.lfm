@@ -64,7 +64,7 @@ object CEShortcutEditor: TCEShortcutEditor
         Left = 0
         Height = 22
         Top = 2
-        Width = 258
+        Width = 247
         Align = alClient
         Alignment = taCenter
         BorderSpacing.Top = 2
@@ -73,11 +73,11 @@ object CEShortcutEditor: TCEShortcutEditor
         TabOrder = 0
       end
       object shortcutCatcher: TEdit
-        Left = 310
+        Left = 299
         Height = 22
         Hint = 'type a key combination while active'
         Top = 2
-        Width = 109
+        Width = 120
         Align = alRight
         BorderSpacing.Top = 1
         BorderSpacing.Bottom = 1
@@ -89,7 +89,7 @@ object CEShortcutEditor: TCEShortcutEditor
         TabOrder = 1
       end
       object btnActivate: TSpeedButton
-        Left = 285
+        Left = 274
         Height = 22
         Hint = 'enable shortcut capture'
         Top = 2
@@ -99,7 +99,7 @@ object CEShortcutEditor: TCEShortcutEditor
         OnClick = btnActivateClick
       end
       object btnClear: TSpeedButton
-        Left = 260
+        Left = 249
         Height = 22
         Hint = 'clear shortcut'
         Top = 2

@@ -263,6 +263,8 @@ begin
   if tree.Selected.Data.isNil then exit;
   //
   shortcutCatcher.Enabled := not shortcutCatcher.Enabled;
+  if shortcutCatcher.Enabled then
+    shortcutCatcher.SetFocus;
 end;
 
 procedure TCEShortcutEditor.btnClearClick(Sender: TObject);
@@ -277,6 +279,7 @@ begin
     fHasChanged := true;
   end;
   //
+  shortcutCatcher.Enabled := false;
   updateEditCtrls;
 end;
 
@@ -320,6 +323,7 @@ end;
 procedure TCEShortcutEditor.updateEditCtrls;
 begin
   schrtText.Caption := '';
+  shortcutCatcher.TextHint := '(Enter shortcut)';
   //
   if tree.Selected.isNil then exit;
   if tree.Selected.Level = 0 then exit;
@@ -327,6 +331,8 @@ begin
   //
   schrtText.Caption := TShortcutItem(tree.Selected.Data).combination;
   shortcutCatcher.Text := '';
+  if schrtText.Caption <> '' then
+    shortcutCatcher.TextHint := '(' + schrtText.Caption + ')';
 end;
 
 function TCEShortcutEditor.findCategory(const aName: string; aData: Pointer): TTreeNode;

@@ -22,6 +22,8 @@ inherited CESearchWidget: TCESearchWidget
         Top = 4
         Width = 391
         Align = alTop
+        AutoComplete = True
+        AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchCaseSensitive, cbactSearchAscending]
         AutoSize = False
         BorderSpacing.Around = 4
         ItemHeight = 0
@@ -251,6 +253,8 @@ inherited CESearchWidget: TCESearchWidget
           Width = 283
           Align = alClient
           Anchors = [akTop, akLeft, akBottom]
+          AutoComplete = True
+          AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchCaseSensitive, cbactSearchAscending]
           ItemHeight = 0
           MaxLength = 128
           OnChange = cbReplaceWthChange
