@@ -5,7 +5,7 @@ unit ce_staticmacro;
 interface
 
 uses
-  Classes, Sysutils, SynEdit, SynCompletion,
+  Classes, Sysutils, SynEdit, SynCompletion, RegExpr,
   ce_common, ce_interfaces, ce_writableComponent, ce_synmemo;
 
 type
@@ -48,6 +48,7 @@ type
    *)
   TCEStaticEditorMacro = class(TWritableLfmTextComponent, ICEMultiDocObserver, ICEEditableOptions, ICEEditableShortCut)
   private
+    fValidator: TRegExpr;
     fCompletor: TSynAutoComplete;
     fMacros: TStringList;
     fDoc: TCESynMemo;
@@ -201,8 +202,11 @@ var
 begin
   inherited;
   fAutomatic := true;
+  fValidator := TRegExpr.Create('^\$\w*[a-zA-Z]$');
+  fValidator.Compile;
   fCompletor := TSynAutoComplete.Create(self);
   fCompletor.ShortCut := 8224; // SHIFT + SPACE
+  fCompletor.EndOfTokenChr:= '';
   fMacros := TStringList.Create;
   fMacros.Delimiter := '=';
   //
@@ -236,6 +240,7 @@ begin
   EntitiesConnector.removeObserver(Self);
   //
   fMacros.Free;
+  fValidator.Free;
   inherited;
 end;
 
@@ -349,22 +354,10 @@ end;
 procedure TCEStaticEditorMacro.sanitize;
 var
   i: Integer;
-  text: string;
-  macro: string;
 begin
   for i := fMacros.Count-1 downto 0 do
-  begin
-    text := fMacros[i];
-    if text.length >= 4 then
-      if text[1] = '$' then
-        if Pos('=', text) > 2 then
-        begin
-          macro := fMacros.Names[i];
-          if (macro[macro.length] in ['a'..'z', 'A'..'Z', '0'..'9']) then
-            continue;
-        end;
-    fMacros.Delete(i);
-  end;
+    if not fValidator.Exec(fMacros.Names[i]) then
+      fMacros.Delete(i);
 end;
 
 procedure TCEStaticEditorMacro.addDefaults;
