@@ -25,7 +25,9 @@ type
     autoCloseNever,
     autoCloseAtEof,
     autoCloseAlways,
-    autoCloseLexically
+    autoCloseLexically,
+    autoCloseOnNewLine,
+    autoCloseLexicallyOnNewLine
   );
 
   TIdentifierMatchOptions = set of TIdentifierMatchOption;
@@ -1388,6 +1390,27 @@ end;
 {$REGION user input ------------------------------------------------------------}
 procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
 begin
+  if Key = VK_RETURN then
+  begin
+    if (fAutoCloseCurlyBrace in [autoCloseOnNewLine, autoCloseLexicallyOnNewLine])
+    and (CaretX > 1) and (LineText[CaretX-1] = '{') then
+    begin
+      if fAutoCloseCurlyBrace = autoCloseOnNewLine then
+      begin
+        Key := 0;
+        curlyBraceCloseAndIndent(self);
+      end
+      else begin
+        fLexToks.Clear;
+        lex(lines.Text, fLexToks);
+        if lexCanCloseBrace then
+        begin
+          Key := 0;
+          curlyBraceCloseAndIndent(self);
+        end;
+      end;
+    end;
+  end;
   inherited;
   highlightCurrentIdentifier;
   if fCompletion.IsActive then
@@ -1414,7 +1437,7 @@ end;
 procedure TCESynMemo.KeyUp(var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    VK_PRIOR, VK_NEXT, Vk_UP: fPositions.store;
+    VK_PRIOR, VK_NEXT, VK_UP: fPositions.store;
     VK_OEM_PERIOD, VK_DECIMAL: fCanAutoDot := true;
   end;
   inherited;
