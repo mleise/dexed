@@ -26,8 +26,9 @@ type
     autoCloseAtEof,
     autoCloseAlways,
     autoCloseLexically,
-    autoCloseOnNewLine,
-    autoCloseLexicallyOnNewLine
+    autoCloseOnNewLineEof,
+    autoCloseOnNewLineAlways,
+    autoCloseOnNewLineLexically
   );
 
   TIdentifierMatchOptions = set of TIdentifierMatchOption;
@@ -1392,15 +1393,22 @@ procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
 begin
   if Key = VK_RETURN then
   begin
-    if (fAutoCloseCurlyBrace in [autoCloseOnNewLine, autoCloseLexicallyOnNewLine])
+    if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically])
     and (CaretX > 1) and (LineText[CaretX-1] = '{') then
-    begin
-      if fAutoCloseCurlyBrace = autoCloseOnNewLine then
+    case fAutoCloseCurlyBrace of
+      autoCloseOnNewLineAlways:
       begin
         Key := 0;
         curlyBraceCloseAndIndent(self);
-      end
-      else begin
+      end;
+      autoCloseOnNewLineEof:
+        if (CaretY = Lines.Count) and (CaretX = LineText.length+1) then
+        begin
+          Key := 0;
+          curlyBraceCloseAndIndent(self);
+        end;
+      autoCloseOnNewLineLexically:
+      begin
         fLexToks.Clear;
         lex(lines.Text, fLexToks);
         if lexCanCloseBrace then
