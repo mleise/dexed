@@ -14,7 +14,10 @@ type
   DfmtEol = (cr, lf, crlf);
   DfmtIndentstyle = (tab, space);
   DfmtBraceStyle = (allman, otbs, stroustrup);
+  DfmtConstraint = (condNewLineIndent, condNewLine, alwaysNewLine, alwaysNewLineIndent);
 
+
+type
   // wraps dfmt options to build the command line with ease
   // and allows to save the options between session.
   TCEDmtWrapper = class(TWritableLfmTextComponent)
@@ -30,6 +33,7 @@ type
     fSplitOp: boolean;
     fCompactLbl: boolean;
     fSpaceSelImp: boolean;
+    fConstraints: DfmtConstraint;
     procedure setSoftLLen(value: integer);
     procedure setHardLLen(value: integer);
     procedure setTabWidth(value: integer);
@@ -37,6 +41,7 @@ type
     procedure setEol(value: DfmtEol);
     procedure setBraceStyle(value: DfmtBraceStyle);
     procedure setIndentStyle(value: DfmtIndentstyle);
+    procedure setConstraintsStyle(value: DfmtConstraint);
   published
     property endOfline: DfmtEol read fEol write setEol default lf;
     property indentationStyle: DfmtIndentstyle read fTabStyle write setIndentStyle default space;
@@ -49,6 +54,7 @@ type
     property spaceAfterImport: boolean read fSpaceSelImp write fSpaceSelImp default true;
     property splitOpAtPrevLine: boolean read fSplitOp write fSplitOp default true;
     property compactLabeledStatements: boolean read fCompactLbl write fCompactLbl default true;
+    property constraintsStyle: DfmtConstraint read fConstraints write setConstraintsStyle default condNewLineIndent;
   public
     constructor create(AOwner: TComponent); override;
     procedure getParameters(str: TStrings);
@@ -129,6 +135,7 @@ begin
   fSpaceSelImp  := true;
   fSplitOp      := true;
   fCompactLbl   := true;
+  fConstraints  := DfmtConstraint.condNewLineIndent;
 end;
 
 procedure TCEDfmtWidget.dfmtOptionEditorEditorFilter(Sender: TObject;
@@ -197,6 +204,14 @@ begin
     value := DfmtIndentstyle.space;
   fTabStyle:=value;
 end;
+
+procedure TCEDmtWrapper.setConstraintsStyle(value: DfmtConstraint);
+begin
+  if not (value in [DfmtConstraint.alwaysNewLine, DfmtConstraint.alwaysNewLineIndent,
+    DfmtConstraint.condNewLine, DfmtConstraint.condNewLineIndent]) then
+      value := DfmtConstraint.condNewLineIndent;
+  fConstraints:=value;
+end;
 {$ENDREGION}
 
 {$REGION ICEMultiDocObserver ---------------------------------------------------}
@@ -231,6 +246,8 @@ const
   falsetrue: array[boolean] of string = ('false', 'true');
   idtstyle: array[DfmtIndentstyle] of string = ('tab', 'space');
   brc: array[DfmtBraceStyle] of string = ('allman', 'otbs', 'stroustrup');
+  cts: array[DfmtConstraint] of string = ('conditional_newline_indent',
+    'conditional_newline', 'always_newline', 'always_newline_indent');
 begin
   str.Add('--end_of_line=' + eol[endOfline]);
   str.Add('--max_line_length=' + intToStr(hardLineLen));
@@ -243,6 +260,7 @@ begin
   str.Add('--space_after_cast=' + falsetrue[spaceAfterCast]);
   str.Add('--selective_import_space=' + falsetrue[spaceAfterImport]);
   str.Add('--compact_labeled_statements=' + falsetrue[compactLabeledStatements]);
+  str.Add('--template_constraint_style=' + cts[fConstraints]);
 end;
 
 procedure TCEDfmtWidget.doApply(sender: TObject);
