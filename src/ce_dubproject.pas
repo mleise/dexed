@@ -734,14 +734,21 @@ procedure TCEDubProject.updateImportPathsFromJson;
   var
     arr: TJSONArray;
     item: TJSONData;
+    pth: string;
     i: integer;
   begin
     item := obj.Find('importPaths');
     if assigned(item) then
     begin
       arr := TJSONArray(item);
-      for i:= 0 to arr.Count-1 do
-        fImportPaths.Add(arr.Strings[i]);
+      for i := 0 to arr.Count-1 do
+      begin
+        pth := TrimRightSet(arr.Strings[i], ['/','\']);
+        if pth.dirExists and FilenameIsAbsolute(pth) then
+          fImportPaths.Add(pth)
+        else
+          fImportPaths.Add(expandFilenameEx(fBasePath, pth));
+      end;
     end;
   end;
   // note: dependencies are added as import to allow DCD completion
