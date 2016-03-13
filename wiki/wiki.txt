@@ -873,12 +873,14 @@ The tool itself can be build with Coedit.
 
 ## Process input widget
 
-This simple utility allows to send the input to a process that's executed from Coedit and redirected to Coedit.
-It works for the runnable modules and the project output, when launched from Coedit.
-
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/processinput1.png)
 
-The input is passed with the <kbd>ENTER</kbd> key or the **Send** button.
+This simple utility allows to send some text to the input stream of a process that's executed from Coedit and redirected to Coedit messages.
+It works for the runnable modules and the project output, when launched from Coedit.
+
+- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_go.png): sends the text to the process, also works with <kbd>ENTER</kbd>.
+- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_delete.png): closes the process input stream.
+
 The input text can include a [symbolic string][lnk_sym].
 
 ## Mini explorer widget
