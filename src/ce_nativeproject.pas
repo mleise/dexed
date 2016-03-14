@@ -11,8 +11,9 @@ uses
   {$IFNDEF CEBUILD}
   ce_dialogs,
   {$ENDIF}
-  Classes, SysUtils, process, strUtils, ce_common, ce_writableComponent,
-  ce_dmdwrap, ce_observer, ce_interfaces, ce_processes, LazFileUtils;
+  Classes, SysUtils, process, strUtils, RegExpr,
+  ce_common, ce_writableComponent, ce_dmdwrap, ce_observer, ce_interfaces,
+  ce_processes, LazFileUtils;
 
 type
 
@@ -390,39 +391,43 @@ end;
 
 procedure TCENativeProject.getOpts(const aList: TStrings);
 var
-  rel, abs: string;
+  rel: string;
   i: Integer;
-  ex_files: TStringList;
-  ex_folds: TStringList;
+  exc: TStringList;
   libAliasesPtr: TStringList;
   str: string;
 begin
   if fConfIx = -1 then exit;
-  ex_files := TStringList.Create;
-  ex_folds := TStringList.Create;
+  exc := TStringList.Create;
   try
     // prepares the exclusions
     for i := 0 to currentConfiguration.pathsOptions.exclusions.Count-1 do
     begin
       str := symbolExpander.get(currentConfiguration.pathsOptions.exclusions[i]);
-      rel := expandFilenameEx(fBasePath, currentConfiguration.pathsOptions.exclusions[i]);
-      if str.fileExists then
-        ex_files.Add(str)
-      else if str.dirExists then
-        ex_folds.Add(str);
-      if rel.fileExists then
-        ex_files.Add(rel)
-      else if rel.dirExists then
-        ex_folds.Add(rel);
+      exc.Add(str)
     end;
     // sources
     for rel in fSrcs do if rel <> '' then
-    begin
-      abs := expandFilenameEx(fBasePath, rel);
-      if ex_files.IndexOf(abs) = -1 then
-        if ex_folds.IndexOf(abs.extractFilePath) = -1
-          then aList.Add(abs); // note: process.inc ln 249. double quotes are added if there's a space.
+      aList.Add(expandFilenameEx(fBasePath, rel)); // note: process.inc ln 249. double quotes are added if there's a space.
+    // exclusions
+    if exc.Count > 0 then with TRegExpr.Create do
+    try
+      for str in exc do
+      begin
+        try
+          Expression:= globToReg(str);
+          Compile;
+          for i := aList.Count-1 downto 0 do
+            if Exec(aList[i]) then
+              aList.Delete(i);
+        except
+          continue;
+        end;
+      end;
+    finally
+      free;
     end;
+
     // libraries: an asterisk in list selects all the entries
     libAliasesPtr := fLibAliases;
     if (fLibAliases.Count > 0) and (fLibAliases[0] = '*') then
@@ -444,8 +449,7 @@ begin
     else
       currentConfiguration.getOpts(aList);
   finally
-    ex_files.Free;
-    ex_folds.Free;
+    exc.Free;
   end;
 end;
 
