@@ -268,6 +268,13 @@ type
    *)
   function isBlank(const str: string): boolean;
 
+  (**
+   * Converts a global match expression to a regular expression.
+   * Limitation: Windows style, [] not handled.
+   * src: github.com/spring/svn-spring-archive/blob/master/branches/greenail/rts/System/Platform/filefunctions.h#L29
+   *)
+  function globToReg(const glob: string ): string;
+
 var
   // supplementatl directories to find background tools
   additionalPath: string;
@@ -1158,6 +1165,52 @@ begin
   for c in str do
     if not (c in [#9, ' ']) then
       exit(false);
+end;
+
+function globToReg(const glob: string ): string;
+  procedure quote(var r: string; c: char);
+  begin
+    if not (c in ['a'..'z', 'A'..'Z', '0'..'9', '_']) then
+      r += '\';
+    r += c;
+  end;
+var
+  i: integer = 0;
+  b: integer = 0;
+begin
+  result := '^';
+  while i < length(glob) do
+  begin
+    i += 1;
+    case glob[i] of
+      '*': result += '.*';
+      '?': result += '.';
+      '{':
+        begin
+          b += 1;
+          result += '(';
+        end;
+      '}':
+        begin
+          b -= 1;
+          result += ')';
+        end;
+      ',':
+        begin
+          if b > 0 then
+            result += '|'
+          else
+            quote(result, glob[i]);
+        end;
+      '\':
+        begin
+          i += 1;
+          quote(result, glob[i]);
+        end;
+      else
+        quote(result, glob[i]);
+    end;
+  end;
 end;
 
 initialization

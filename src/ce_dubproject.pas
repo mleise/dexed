@@ -5,7 +5,8 @@ unit ce_dubproject;
 interface
 
 uses
-  Classes, SysUtils, xfpjson, xjsonparser, xjsonscanner, process, strutils, LazFileUtils,
+  Classes, SysUtils, xfpjson, xjsonparser, xjsonscanner, process, strutils,
+  LazFileUtils, RegExpr,
   ce_common, ce_interfaces, ce_observer, ce_dialogs, ce_processes;
 
 type
@@ -595,6 +596,7 @@ begin
 end;
 var
   pth: string;
+  glb: TRegExpr;
 begin
   fSrcs.Clear;
   if not assigned(fJSON) then
@@ -662,14 +664,29 @@ begin
     // exclusions
     lst.Clear;
     getExclusion(fJSON);
-    conf := getCurrentCustomConfig;
+      conf := getCurrentCustomConfig;
     if conf.isNotNil then
       getExclusion(conf);
-    for i := fSrcs.Count-1 downto 0 do
-      for j := 0 to lst.Count-1 do
-        if SameFileName(fSrcs[i], lst[j]) then
-          fSrcs.Delete(i);
-    // TODO-cDUB: manage exclusions with http://dlang.org/phobos/std_path.html#.globMatch
+    if lst.Count > 0 then
+    begin
+      glb := TRegExpr.Create;
+      try
+        for j := 0 to lst.Count-1 do
+        begin
+          try
+            glb.Expression := globToReg(lst[j]);
+            glb.Compile;
+            for i := fSrcs.Count-1 downto 0 do
+              if glb.Exec(fSrcs[i]) then
+                fSrcs.Delete(i);
+          except
+            continue;
+          end;
+        end;
+      finally
+        glb.Free;
+      end;
+    end;
   finally
     lst.Free;
   end;
