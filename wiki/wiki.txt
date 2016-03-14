@@ -266,7 +266,7 @@ see the [project configuration][lnk_widg_prjconf] and the [project inspector][ln
 
 The file names and directory paths can be relative. 
 The base directory of a relative path is always the folder where is saved the project.
-They can often include a [symbolic string][lnk_sym] and a path can be itself relative to a symbol.
+They can often contain [symbolic strings][lnk_sym] and a path can be itself relative to a symbol.
 The project format is cross-platform, path separators are internally converted.
 
 Here are some more or less complex examples which illustrates the project format:
@@ -679,7 +679,7 @@ These options are defined per-configuration.
 
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/projconf.paths1.png)
 
-- exclusions: some paths or some file to exclude from the main sources. A file can be relative or include [a symbolic string][lnk_sym]. A path is only handled if it's the direct parent of a file.
+- exclusions: paths or files to exclude from the main sources. The items can contain [symbolic strings [lnk_sym]. The items can be global [match expressions](https://en.wikipedia.org/wiki/Glob_(programming)).
 - extraSources: either _*.lib_, _*.a_, _*.o_ and _*.obj_,  files or _*.d_, _*.di_ source files. If a path that ends with an asterisk is added (e.g: _folderA\folderB\*_) then every source files located in this folder and its sub-folders will be passed to the compiler.
 - forceExtension: when set, the output filename has always the right file extension. This option is useful when the _outputFilename_ contains periods but no extension (example: `-offoo.bar` under linux generates the executable `foo.bar` but under windows and if the option is set `foo.bar.exe`).
 - importModulePaths: a list of paths where _DMD_ has to look for the libraries sources. (**-I**)
@@ -696,12 +696,12 @@ These options are not compatible with the system of _base_ & _overridden_ config
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/projconf.preprocess1.png)
 
 - executable: the executable file name. If the system cannot solve its path using the environment variables then it must be included.
-It can also be substituted by a [symbolic string][lnk_sym].
+It can also be represented by a [symbolic string][lnk_sym].
 - options: a set of options. Activate **poUsesPipe** and **poStdErrToOutput** if you wish to redirect the process output to the messages widget.
 - parameters: a list of switches and arguments. As usual, one item per line, no double quotes.
 - showWindow: sets how the program window is displayed.
 - simpleCommands: additionally to the process, a list of shell commands can be specified, they are executed before the pre/post process. The commands have fixed options: always piped to the message widget, the working directory is always the project path.
-The commands can include [symbolic string][lnk_sym].
+The commands can contain [symbolic strings][lnk_sym].
 
 The pre-build process is always executed, even if the project has no source files.
 This can be used as a trick to compile from another tool.
@@ -830,16 +830,16 @@ A tool can be selected from the left side of the widget. If selected, a property
 
 - clearMessages: if the tool standard output is redirected to the [messages widget][lnk_widg_msg] then the previous messages are cleared before the execution. The output is redirected to the messages when **popUsePipes** is set and if the **nextToolAlias** is empty.
 - editorToInput: when set, the content of the current editor is streamed to the tool standard input.
-- executable: the tool file name. If the system cannot find its path in the environment variables then it must be included. The field can include a [symbolic string][lnk_sym].
+- executable: the tool file name. If the system cannot find its path in the environment variables then it must be included. The field can include [symbolic strings][lnk_sym].
 - nextToolAlias: defines the alias of another tool that will be launched after this one returns.
 - options: various options for the process to create. If you set **popUsePipes** and **poStdErrToOutput** to true, then the standard output will be redirected to the message widget, category Misc.
 - outputToNext: if **popUsePipes** is set in the options and if the next tool is defined then the next tool will see its input stream filled with the output stream.
-- parameters: allows to define the parameters, switches and options passed to the process. As usual, one item per line, no quotes. The items can include a [symbolic string][lnk_sym].
+- parameters: allows to define the parameters, switches and options passed to the process. As usual, one item per line, no quotes. The items can contains [symbolic strings][lnk_sym].
 - queryParameters: if set to true then a small input query dialog will be shown before executing the tool. It can be filled with more _--para --meters_.
 - shortcut: allow to define the keystroke used to launch the tool. The shortcut can also be edited in the [options editor][lnk_widg_opts].
 - showWindow: allow to define how the tool window is displayed. Set to *swoHIDE* if the tool std out is redirected.
 - toolAlias: the friendly name associated to the tool.
-- workingDirectory: the directory in which the tool starts. Not to mismatch with its path. The field can include a [symbolic string][lnk_sym].
+- workingDirectory: the directory in which the tool starts. Not to mismatch with its path. The field can contain [symbolic strings][lnk_sym].
 
 The configuration is saved between each session, in the same folder as the application [options][lnk_widg_opts].
 
@@ -881,7 +881,7 @@ It works for the runnable modules and the project output, when launched from Coe
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_go.png): sends the text to the process, also works with <kbd>ENTER</kbd>.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_delete.png): closes the process input stream.
 
-The input text can include a [symbolic string][lnk_sym].
+The input text can contain [symbolic strings][lnk_sym].
 
 ## Mini explorer widget
 

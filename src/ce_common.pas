@@ -270,8 +270,7 @@ type
 
   (**
    * Converts a global match expression to a regular expression.
-   * Limitation: Windows style, [] not handled.
-   * src: github.com/spring/svn-spring-archive/blob/master/branches/greenail/rts/System/Platform/filefunctions.h#L29
+   * Limitation: Windows style, negation of set not handled [!a-z] [!abc]
    *)
   function globToReg(const glob: string ): string;
 
@@ -1170,7 +1169,7 @@ end;
 function globToReg(const glob: string ): string;
   procedure quote(var r: string; c: char);
   begin
-    if not (c in ['a'..'z', 'A'..'Z', '0'..'9', '_']) then
+    if not (c in ['a'..'z', 'A'..'Z', '0'..'9', '_', '-']) then
       r += '\';
     r += c;
   end;
@@ -1185,6 +1184,7 @@ begin
     case glob[i] of
       '*': result += '.*';
       '?': result += '.';
+      '[', ']': result += glob[i];
       '{':
         begin
           b += 1;
@@ -1201,11 +1201,6 @@ begin
             result += '|'
           else
             quote(result, glob[i]);
-        end;
-      '\':
-        begin
-          i += 1;
-          quote(result, glob[i]);
         end;
       else
         quote(result, glob[i]);
