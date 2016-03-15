@@ -24,7 +24,7 @@ module cesyms;
 
 import std.stdio, std.path, std.file, std.array, std.string;
 import std.getopt, std.json, std.conv;
-import dparse.lexer, dparse.ast, dparse.parser;
+import dparse.lexer, dparse.ast, dparse.parser, dparse.rollback_allocator;
 import std.traits;
 
 enum ListFmt
@@ -63,10 +63,11 @@ void main(string[] args)
         return;
 
     // load and parse the file
+    RollbackAllocator alloc;
     auto config = LexerConfig(fname, StringBehavior.source, WhitespaceBehavior.skip);
     auto scache = StringCache(StringCache.defaultBucketCount);
     auto ast = parseModule(getTokensForParser(source, config, &scache), fname,
-            null, &(SymbolListBuilder.astError));
+        &alloc, &(SymbolListBuilder.astError));
 
     // visit each root member
     SymbolListBuilder slb = construct!SymbolListBuilder;
