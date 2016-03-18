@@ -147,13 +147,14 @@ type
     property inlining: boolean read fInline write setInline default false;
     property boundsCheck: TBoundCheckKind read fBoundsCheck write setBoundsCheck default safeOnly;
     property optimizations: boolean read fOptimz write setOptims default false;
-    property generateStackFrame: boolean read fGenStack write setGenStack default false;
     property addMain: boolean read fAddMain write setAddMain default false;
     property release: boolean read fRelease write setRelease default false;
     property unittest: boolean read fUnittest write setUnittest default false;
     property versionIdentifiers: TStringList read fVerIds write setVerIds;
     property generateAllTmpCode: boolean read fAllInst write setAllInst default false;
     property addStackStompCode: boolean read fStackStomp write setStackStomp default false;
+    //TODO-cmaintenace: remove deprecated props after next rlz
+    property generateStackFrame: boolean write setGenStack stored false; deprecated;
   public
     constructor create;
     destructor destroy; override;
@@ -166,27 +167,33 @@ type
    *)
   TDebugOpts = class(TOptsGroup)
   private
-    fDebug: boolean;
-    fDbgD: boolean;
+    fDebugConditions: boolean;
+    fGenInfos: boolean;
     fDbgC: boolean;
     fGenMap: boolean;
     fDbgIdents: TStringList;
     fDbgLevel: Integer;
     fForceDbgBool: boolean;
+    fGenFrame: boolean;
     procedure updateForceDbgBool;
-    procedure setDebug(const aValue: boolean);
-    procedure setDbgD(const aValue: boolean);
+    procedure setGenFrame(const aValue: boolean);
+    procedure setDebugConditions(const aValue: boolean);
+    procedure setGenInfos(const aValue: boolean);
     procedure setDbgC(const aValue: boolean);
     procedure setGenMap(const aValue: boolean);
     procedure setDbgLevel(const aValue: Integer);
     procedure setDbgIdents(aValue: TStringList);
   published
-    property debug: boolean read fDebug write setDebug default false;
+    property debugConditions: boolean read fDebugConditions write setDebugConditions default false;
     property debugIdentifiers: TStringList read fDbgIdents write setDbgIdents;
     property debugLevel: Integer read fDbgLevel write setDbgLevel default 0;
-    property codeviewDexts: boolean read fDbgD write setDbgD default false;
-    property codeviewCformat: boolean read fDbgC write setDbgC default false;
+    property generateInfos: boolean read fGenInfos write setGenInfos default false;
     property generateMapFile: boolean read fGenMap write setGenMap default false;
+    property generateStackFrame: boolean read fGenFrame write setGenFrame default false;
+    //TODO-cmaintenace: remove deprecated props after next rlz
+    property debug: boolean write setDebugConditions; deprecated;
+    property codeviewDexts: boolean write setGenInfos stored false; deprecated;
+    property codeviewCformat: boolean write setDbgC stored false; deprecated;
   public
     constructor create;
     destructor destroy; override;
@@ -632,7 +639,6 @@ begin
     if fUnittest then aList.Add('-unittest');
     if fInline then aList.Add('-inline');
     if fOptimz then aList.Add('-O');
-    if fGenStack then aList.Add('-gs');
     if fStackStomp then aList.Add('-gx');
     if fAllInst then aList.Add('-allinst');
     if fAddMain then aList.Add('-main');
@@ -675,7 +681,6 @@ begin
     if baseopt.fUnittest or fUnittest then aList.Add('-unittest');
     if baseopt.fInline or fInline then aList.Add('-inline');
     if baseopt.fOptimz or fOptimz then aList.Add('-O');
-    if baseopt.fGenStack or fGenStack then aList.Add('-gs');
     if baseopt.fStackStomp or fStackStomp then aList.Add('-gx');
     if baseopt.fAllInst or fAllInst then aList.Add('-allinst');
     if baseopt.fAddMain or fAddMain then aList.Add('-main');
@@ -827,18 +832,19 @@ var
 begin
   if base.isNil then
   begin
-    if fDebug then aList.Add('-debug');
+    if fDebugConditions then aList.Add('-debug');
     if fDbgLevel <> 0 then
       aList.Add('-debug=' + intToStr(fDbgLevel));
     for idt in fDbgIdents do
       aList.Add('-debug=' + idt);
-    if fDbgD then aList.Add('-g');
+    if fGenInfos then aList.Add('-g');
     if fDbgC then aList.Add('-gc');
     if fGenMap then aList.Add('-map');
+    if fGenFrame and (aList.IndexOf('-gs') = -1) then aList.Add('-gs');
   end else
   begin
     baseopt := TDebugOpts(base);
-    if baseopt.fDebug or fDebug then aList.Add('-debug');
+    if baseopt.fDebugConditions or fDebugConditions then aList.Add('-debug');
     if (baseopt.fDbgLevel <> 0) and (fDbgLevel = 0) then
       aList.Add('-debug=' + intToStr(baseopt.fDbgLevel))
     else if fDbgLevel <> 0 then
@@ -846,9 +852,10 @@ begin
     if fDbgIdents.Count = 0 then
       for idt in baseopt.fDbgIdents do aList.Add('-debug=' + idt)
     else for idt in fDbgIdents do aList.Add('-debug=' + idt);
-    if baseopt.fDbgD or fDbgD then aList.Add('-g');
+    if baseopt.fGenInfos or fGenInfos then aList.Add('-g');
     if baseopt.fDbgC or fDbgC then aList.Add('-gc');
     if baseopt.fGenMap or fGenMap then aList.Add('-map');
+    if (baseopt.fGenFrame or fGenFrame) and (aList.IndexOf('-gs') = -1) then aList.Add('-gs');
   end;
 end;
 
@@ -861,11 +868,12 @@ begin
     src := TDebugOpts(aValue);
     //
     fDbgIdents.Assign(src.fDbgIdents);
-    fDebug    := src.fDebug;
+    fDebugConditions    := src.fDebugConditions;
     fDbgLevel := src.fDbgLevel;
-    fDbgD     := src.fDbgD;
+    fGenInfos     := src.fGenInfos;
     fDbgC     := src.fDbgC;
     fGenMap   := src.fGenMap;
+    fGenFrame := src.fGenFrame;
   end
   else inherited;
 end;
@@ -873,25 +881,32 @@ end;
 procedure TDebugOpts.updateForceDbgBool;
 begin
   fForceDbgBool := (fDbgLevel > 0) or (fDbgIdents.Count > 0);
-  if fForceDbgBool then setDebug(true);
+  if fForceDbgBool then setDebugConditions(true);
 end;
 
-procedure TDebugOpts.setDebug(const aValue: boolean);
+procedure TDebugOpts.setDebugConditions(const aValue: boolean);
 begin
   if fForceDbgBool then
   begin
-    fDebug := true;
+    fDebugConditions := true;
     exit;
   end;
-  if fDebug = aValue then exit;
-  fDebug := aValue;
+  if fDebugConditions = aValue then exit;
+  fDebugConditions := aValue;
   doChanged;
 end;
 
-procedure TDebugOpts.setDbgD(const aValue: boolean);
+procedure TDebugOpts.setGenFrame(const aValue: boolean);
 begin
-  if fDbgD = aValue then exit;
-  fDbgD := aValue;
+  if fGenFrame = aValue then exit;
+  fGenFrame:=aValue;
+  doChanged;
+end;
+
+procedure TDebugOpts.setGenInfos(const aValue: boolean);
+begin
+  if fGenInfos = aValue then exit;
+  fGenInfos := aValue;
   doChanged;
 end;
 

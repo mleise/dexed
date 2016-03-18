@@ -354,8 +354,8 @@ begin
   with TCompilerConfiguration(fConfigs.Add) do
   begin
     Name := 'debug';
-    debugingOptions.debug := true;
-    debugingOptions.codeviewCformat := true;
+    debugingOptions.debugConditions := true;
+    debugingOptions.generateInfos := true;
     outputOptions.boundsCheck := onAlways;
   end;
   with TCompilerConfiguration(fConfigs.Add) do
