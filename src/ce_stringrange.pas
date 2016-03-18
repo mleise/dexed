@@ -97,6 +97,11 @@ end;
 
 function TStringRange.init(const str: string): PStringRange;
 begin
+  ptr := nil;
+  pos := 0;
+  len := 0;
+  if str = '' then
+    exit;
   ptr := @str[1];
   pos := 0;
   len := length(str);

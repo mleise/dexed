@@ -1002,6 +1002,8 @@ begin
   rng.init(aMessg);
   while true do
   begin
+    if rng.empty then
+      break;
     idt := rng.popUntil(alp)^.takeWhile(alp).yield;
     if idt = '' then
       exit;
@@ -1017,11 +1019,14 @@ var
   lne: string;
   col: string = '';
 begin
+  Result := Point(-1,-1);
+  if aMessage.isEmpty then
+    exit;
   rng.init(aMessage);
-  rng.popUntil(['('])^.popWhile(['(']);
+  rng.popUntil('(')^.popWhile('(');
   lne := rng.takeUntil([',', ':', ')']).yield;
   if rng.front in [',', ':'] then
-    col := rng.popWhile([',', ':'])^.takeUntil([')']).yield;
+    col := rng.popWhile([',', ':'])^.takeUntil(')').yield;
   result.y := strToIntDef(lne, -1);
   result.x := strToIntDef(col, -1);
 end;
