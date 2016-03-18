@@ -10,7 +10,7 @@ uses
 type
 
   {
-    The common process runner used in Coedit.
+    The stanndard process wrapper used in Coedit.
 
     This class solves several issues encountered when using TProcess and TAsyncProcess:
 
@@ -32,13 +32,14 @@ type
     fRealOnTerminate: TNotifyEvent;
     fRealOnReadData: TNotifyEvent;
     fOutputStack: TMemoryStream;
-    fTerminateChecker: TIdleTimer;
+    fTerminateChecker: TTimer;
     fDoneTerminated: boolean;
     procedure checkTerminated(sender: TObject);
     procedure setOnTerminate(value: TNotifyEvent);
     procedure setOnReadData(value: TNotifyEvent);
-    procedure internalDoOnReadData(sender: TObject);
-    procedure internalDoOnTerminate(sender: TObject);
+  protected
+    procedure internalDoOnReadData(sender: TObject); virtual;
+    procedure internalDoOnTerminate(sender: TObject); virtual;
   published
     property OnTerminate write setOnTerminate;
     property OnReadData write setOnReadData;
@@ -52,6 +53,26 @@ type
     procedure getFullLines(list: TStrings; consume: boolean = true);
     // access to a flexible copy of TProcess.Output
     property OutputStack: TMemoryStream read fOutputStack;
+  end;
+
+  {
+    OnReadData is only called if no additional buffers are passed
+    during a timeout.
+  }
+  TCEAutoBufferedProcess = class(TCEProcess)
+  private
+    fNewBufferChecker: TTimer;
+    fNewBufferTimeOut: Integer;
+    fPreviousSize: Integer;
+    procedure newBufferCheckerChecks(sender: TObject);
+    procedure setTimeout(value: integer);
+  protected
+    procedure internalDoOnReadData(sender: TObject); override;
+    procedure internalDoOnTerminate(sender: TObject); override;
+  public
+    constructor create(aOwner: TComponent); override;
+    procedure execute; override;
+    property timeOut: integer read fNewBufferTimeOut write setTimeout;
   end;
 
   procedure killProcess(var proc: TCEProcess);
@@ -72,11 +93,11 @@ constructor TCEProcess.create(aOwner: TComponent);
 begin
   inherited;
   FOutputStack := TMemoryStream.Create;
-  FTerminateChecker := TIdleTimer.Create(nil);
+  FTerminateChecker := TTimer.Create(nil);
   FTerminateChecker.Interval := 50;
   fTerminateChecker.OnTimer := @checkTerminated;
   fTerminateChecker.Enabled := false;
-  fTerminateChecker.AutoEnabled:= true;
+  //fTerminateChecker.AutoEnabled:= true;
   TAsyncProcess(self).OnTerminate := @internalDoOnTerminate;
   TAsyncProcess(self).OnReadData := @internalDoOnReadData;
 end;
@@ -185,6 +206,52 @@ begin
     exit;
   fTerminateChecker.Enabled := false;
   internalDoOnTerminate(self);
+end;
+
+constructor TCEAutoBufferedProcess.create(aOwner: TComponent);
+begin
+  inherited;
+  fNewBufferTimeOut := 1000;
+  fNewBufferChecker := TTimer.Create(self);
+  fNewBufferChecker.Enabled:= false;
+  fNewBufferChecker.Interval:= fNewBufferTimeOut;
+  fNewBufferChecker.OnTimer:= @newBufferCheckerChecks;
+end;
+
+procedure TCEAutoBufferedProcess.setTimeout(value: integer);
+begin
+  if fNewBufferTimeOut = value then
+    exit;
+  fNewBufferTimeOut := value;
+  fNewBufferChecker.Interval:= fNewBufferTimeOut;
+end;
+
+procedure TCEAutoBufferedProcess.execute;
+begin
+  fPreviousSize := fOutputStack.Size;
+  fNewBufferChecker.Enabled:=true;
+  inherited;
+end;
+
+procedure TCEAutoBufferedProcess.newBufferCheckerChecks(sender: TObject);
+begin
+  if fOutputStack.Size = fPreviousSize then
+  begin
+    if assigned(fRealOnReadData) then
+      fRealOnReadData(self);
+  end;
+  fPreviousSize := fOutputStack.Size;
+end;
+
+procedure TCEAutoBufferedProcess.internalDoOnReadData(sender: TObject);
+begin
+  fillOutputStack;
+end;
+
+procedure TCEAutoBufferedProcess.internalDoOnTerminate(sender: TObject);
+begin
+  fNewBufferChecker.Enabled:=false;
+  inherited;
 end;
 
 end.
