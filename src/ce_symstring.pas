@@ -5,7 +5,8 @@ unit ce_symstring;
 interface
 
 uses
-  ce_observer, ce_interfaces, ce_nativeproject, ce_synmemo, ce_common;
+  ce_observer, ce_interfaces, ce_nativeproject, ce_synmemo, ce_common,
+  ce_stringrange;
 
 type
 
@@ -224,56 +225,34 @@ end;
 
 function TCESymbolExpander.get(const symString: string): string;
 var
-  elems: TStringList;
-  elem: string;
-  begs, ends: boolean;
-  i: integer;
+  rng: TStringRange;
+  sym: string;
 begin
   Result := '';
   if symString.isEmpty then
     exit;
   //
   updateSymbols;
-  elems := TStringList.Create;
-  try
-    i := 0;
-    elem := '';
-    repeat
-      Inc(i);
-      if not (symString[i] in ['<', '>']) then
-        elem += symString[i]
-      else
-      begin
-        if symString[i] = '<' then
-          begs := True;
-        ends := symString[i] = '>';
-        elems.Add(elem);
-        elem := '';
-        if begs and ends then
-        begin
-          begs := False;
-          ends := False;
-          // elem.obj is a flag to differenciate symbols from elements
-          elems.Objects[elems.Count - 1] := Self;
-        end;
-      end;
-    until
-      i = symString.length;
-    elems.Add(elem);
-    elem := '';
-    for i := 0 to elems.Count - 1 do
+  rng := TStringRange.create(symString);
+  while true do
+  begin
+    if rng.empty then
+      break;
+    Result += rng.takeUntil('<').yield;
+    if not rng.empty and (rng.front = '<') then
     begin
-      if elems.Objects[i].isNil then
-        Result += elems[i]
-      else
-        case elems[i] of
-          '<', '>': continue;
+      rng.popFront;
+      sym := rng.takeUntil('>').yield;
+      if not rng.empty and (rng.front = '>') then
+      begin
+        rng.popFront;
+        case sym of
           'CAF', 'CoeditApplicationFile': Result += fSymbols[CAF];
           'CAP', 'CoeditApplicationPath': Result += fSymbols[CAP];
           //
-          'CFF', 'CurrentFileFile'    : Result += fSymbols[CFF];
-          'CFP', 'CurrentFilePath'    : Result += fSymbols[CFP];
-          'CI', 'CurrentIdentifier'   : Result += fSymbols[CI];
+          'CFF', 'CurrentFileFile'      : Result += fSymbols[CFF];
+          'CFP', 'CurrentFilePath'      : Result += fSymbols[CFP];
+          'CI', 'CurrentIdentifier'     : Result += fSymbols[CI];
           //
           'CPF', 'CurrentProjectFile'   : Result += fSymbols[CPF];
           'CPFS', 'CurrentProjectFiles' : Result += fSymbols[CPFS];
@@ -282,13 +261,13 @@ begin
           'CPP', 'CurrentProjectPath'   : Result += fSymbols[CPP];
           'CPR', 'CurrentProjectRoot'   : Result += fSymbols[CPR];
           'CPCD','CurrentProjectCommonDirectory': Result += fSymbols[CPCD];
+          else Result += '<' + sym + '>';
         end;
+      end
+      else Result += '<' + sym;
     end;
-  finally
-    elems.Free;
   end;
 end;
-
 {$ENDREGION}
 
 initialization
