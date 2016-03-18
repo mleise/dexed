@@ -9,7 +9,7 @@ uses
   EditBtn, lcltype, ce_widget, ActnList, Menus, clipbrd, AnchorDocking, math,
   TreeFilterEdit, Buttons, process, GraphType, fgl,
   ce_writableComponent, ce_common, ce_synmemo, ce_dlangutils, ce_interfaces,
-  ce_observer, ce_symstring, ce_processes, ce_sharedres;
+  ce_observer, ce_symstring, ce_processes, ce_sharedres, ce_stringrange;
 
 type
 
@@ -975,8 +975,8 @@ end;
 
 function guessMessageKind(const aMessg: string): TCEAppMessageKind;
 var
-  pos: Integer = 1;
-  idt: string = '';
+  idt: string;
+  rng: TStringRange;
 function checkIdent: TCEAppMessageKind;
 begin
   case idt of
@@ -995,71 +995,35 @@ begin
       exit(amkBub);
   end;
 end;
+const
+  alp = ['a'..'z', 'A'..'Z'];
 begin
   result := amkBub;
-  while(true) do
+  rng.init(aMessg);
+  while true do
   begin
-    if pos > aMessg.length then
+    idt := rng.popUntil(alp)^.takeWhile(alp).yield;
+    if idt = '' then
       exit;
-    if aMessg[pos] in [#0..#32, ',', ':', ';'] then
-    begin
-      Inc(pos);
-      result := checkIdent;
-      if result <> amkBub then
-        exit;
-      idt := '';
-      continue;
-    end;
-    if not (aMessg[pos] in ['a'..'z', 'A'..'Z']) then
-    begin
-      Inc(pos);
-      result := checkIdent;
-      if result <> amkBub then exit;
-      idt := '';
-      continue;
-    end;
-    idt += aMessg[pos];
-    Inc(pos);
+    result := checkIdent;
+    if result <> amkBub then
+      exit;
   end;
 end;
 
 function getLineFromMessage(const aMessage: string): TPoint;
 var
-  i, j: Integer;
-  ident: string = '';
+  rng: TStringRange;
+  lne: string;
+  col: string = '';
 begin
-  result.x := 0;
-  result.y := 0;
-  i := 1;
-  while (true) do
-  begin
-    if i > aMessage.length then exit;
-    if aMessage[i] = '(' then
-    begin
-      inc(i);
-      if i > aMessage.length then exit;
-      while( isNumber(aMessage[i]) or (aMessage[i] = ',') or (aMessage[i] = ':')) do
-      begin
-        ident += aMessage[i];
-        inc(i);
-        if i > aMessage.length then exit;
-      end;
-      if aMessage[i] = ')' then
-      begin
-        j := Pos(',', ident);
-        if j = 0 then j := Pos(':', ident);
-        if j = 0 then
-          result.y := strToIntDef(ident, -1)
-        else
-        begin
-          result.y := strToIntDef(ident[1..j-1], -1);
-          result.x := strToIntDef(ident[j+1..ident.length], -1);
-        end;
-        exit;
-      end;
-    end;
-    inc(i);
-  end;
+  rng.init(aMessage);
+  rng.popUntil(['('])^.popWhile(['(']);
+  lne := rng.takeUntil([',', ':', ')']).yield;
+  if rng.front in [',', ':'] then
+    col := rng.popWhile([',', ':'])^.takeUntil([')']).yield;
+  result.y := strToIntDef(lne, -1);
+  result.x := strToIntDef(col, -1);
 end;
 
 function openFileFromDmdMessage(const aMessage: string): boolean;
