@@ -13,7 +13,13 @@ type
   (**
    * Enumerates the symbol kinds, used to index an associative array.
    *)
-  TCESymbol = (CAF, CAP, CFF, CFP, CI, CPF, CPP, CPO, CPR, CPN, CPFS, CPCD);
+  TCESymbol = ( ENV_USER, ENV_HOME, ENV_TEMP, CAF, CAP,
+                CFF, CFP, CI, CPF, CPP, CPO, CPR, CPN, CPFS, CPCD);
+const
+
+  FirstVariableSymbol = CFF;
+
+type
 
   (**
    * TCESymbolExpander is designed to expand Coedit symbolic strings,
@@ -59,6 +65,18 @@ constructor TCESymbolExpander.Create;
 begin
   EntitiesConnector.addObserver(self);
   fNeedUpdate := true;
+  //
+  {$IFDEF UNIX}
+  fSymbols[ENV_USER] := sysutils.GetEnvironmentVariable('USER');
+  fSymbols[ENV_HOME] := sysutils.GetEnvironmentVariable('HOME');
+  fSymbols[ENV_TEMP] := sysutils.GetEnvironmentVariable('TMPDIR');
+  {$ELSE}
+  fSymbols[ENV_USER] := sysutils.GetEnvironmentVariable('USERNAME');
+  fSymbols[ENV_HOME] := sysutils.GetEnvironmentVariable('HOMEPATH');
+  fSymbols[ENV_TEMP] := sysutils.GetEnvironmentVariable('TEMP');
+  {$ENDIF}
+  fSymbols[CAF] := Application.ExeName;
+  fSymbols[CAP] := fSymbols[CAF].extractFilePath;
 end;
 
 destructor TCESymbolExpander.Destroy;
@@ -167,12 +185,8 @@ begin
   hasProjItf := fProjInterface <> nil;
   hasDoc := fDoc.isNotNil;
   //
-  for e := low(TCESymbol) to high(TCESymbol) do
+  for e := FirstVariableSymbol to high(TCESymbol) do
     fSymbols[e] := na;
-  //
-  // application
-  fSymbols[CAF] := Application.ExeName;
-  fSymbols[CAP] := fSymbols[CAF].extractFilePath;
   // document
   if hasDoc then
   begin
@@ -247,20 +261,25 @@ begin
       begin
         rng.popFront;
         case sym of
+          'ENV_HOME': Result += fSymbols[ENV_HOME];
+          'ENV_TEMP': Result += fSymbols[ENV_TEMP];
+          'ENV_USER': Result += fSymbols[ENV_USER];
+          //
           'CAF', 'CoeditApplicationFile': Result += fSymbols[CAF];
           'CAP', 'CoeditApplicationPath': Result += fSymbols[CAP];
           //
           'CFF', 'CurrentFileFile'      : Result += fSymbols[CFF];
           'CFP', 'CurrentFilePath'      : Result += fSymbols[CFP];
-          'CI', 'CurrentIdentifier'     : Result += fSymbols[CI];
+          'CI',  'CurrentIdentifier'    : Result += fSymbols[CI];
           //
           'CPF', 'CurrentProjectFile'   : Result += fSymbols[CPF];
-          'CPFS', 'CurrentProjectFiles' : Result += fSymbols[CPFS];
+          'CPFS','CurrentProjectFiles'  : Result += fSymbols[CPFS];
           'CPN', 'CurrentProjectName'   : Result += fSymbols[CPN];
           'CPO', 'CurrentProjectOutput' : Result += fSymbols[CPO];
           'CPP', 'CurrentProjectPath'   : Result += fSymbols[CPP];
           'CPR', 'CurrentProjectRoot'   : Result += fSymbols[CPR];
           'CPCD','CurrentProjectCommonDirectory': Result += fSymbols[CPCD];
+          //
           else Result += '<' + sym + '>';
         end;
       end
