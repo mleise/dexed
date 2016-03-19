@@ -27,6 +27,7 @@ function isAlNum(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isHex(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isSymbol(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isPtrOperator(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+function isPostOpSymbol(const c: char): boolean; {$IFNDEF DEBUG} inline; {$ENDIF}
 function isOperator1(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isOperator2(const s: string): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isOperator3(const s: string): boolean; {$IFNDEF DEBUG} inline; {$ENDIF}
@@ -99,6 +100,11 @@ end;
 function isPtrOperator(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 begin
   exit(c in ['&', '*']);
+end;
+
+function isPostOpSymbol (const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+begin
+  exit(c in ['+', '-', '*', '&']);
 end;
 
 function isOperator1(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}

@@ -815,11 +815,15 @@ begin
     exit;
   end else readerReset;
 
-  // numbers 1
+  // numbers
   if (isNumber(reader^)) then
   begin
-    while isAlNum(readerNext^) or (reader^ = '_') or (reader^ = '.') do (*!*);
-    fTokKind := tkNumbr;
+    while isHex(readerNext^) or (reader^ = '_') or (reader^ = '.')
+      or (reader^ in ['x', 'X', 'u', 'U', 'L', 'i']) do (*!*);
+    if isWhite(reader^) or isSymbol(reader^) or isOperator1(reader^) then
+      fTokKind := tkNumbr
+    else
+      fTokKind := tkError;
     exit;
   end;
 
@@ -828,6 +832,8 @@ begin
   begin
     fTokKind := tkSymbl;
     case reader^ of
+      ';': if (fTokStop>1) and ((reader-1)^ = '}') then
+        fTokKind := tkError;
       '{': StartCodeFoldBlock(nil, fkBrackets in fFoldKinds);
       '}':
       begin
@@ -846,7 +852,7 @@ begin
     exit;
   end;
 
-  // symbChars 2: operators
+  // operators
   if isOperator1(reader^) then
   begin
     fTokKind := tkSymbl;
@@ -859,7 +865,9 @@ begin
         end;
       3:begin
           if (not isOperator1(reader^)) and
-            isOperator3(fLineBuf[fTokStart..fTokStop-1])
+            (isOperator3(fLineBuf[fTokStart..fTokStop-1]) or
+              (isOperator2(fLineBuf[fTokStart..fTokStop-2]) and
+                isPostOpSymbol(fLineBuf[fTokStop-1])))
           then exit;
         end;
       2:begin
@@ -871,9 +879,9 @@ begin
           if not isOperator1(reader^) then exit;
         end;
     end;
-    if isWhite(reader^) then
-      exit;
-    fTokKind := tkIdent; // invalid op not colorized.
+    fTokKind := tkError;
+    //if isWhite(reader^) then
+    exit;
   end;
 
   //Keyword - identifiers
