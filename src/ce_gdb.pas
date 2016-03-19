@@ -5,21 +5,105 @@ unit ce_gdb;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, ListFilterEdit, Forms, Controls, Graphics,
-  Dialogs, ExtCtrls, Menus, Buttons, ComCtrls, StdCtrls, process, ce_common,
-  ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo, ce_sharedres;
+  Classes, SysUtils, FileUtil, ListFilterEdit, Forms, Controls, Graphics, RegExpr,
+  ComCtrls, PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, strutils,
+  Buttons, StdCtrls, process ,ce_common, ce_interfaces, ce_widget, ce_processes,
+  ce_observer, ce_synmemo, ce_sharedres;
 
 type
 
+  //TODO-cDebugging: write a parser for the DBG/MI output messages
+
   {$IFDEF CPU64}
-  TCpuRegs = (rax);
+  TCpuRegister = (rax, rbx, rcx, rdx, rsi, rdi, rbp, rsp, r8, r9, r10, r11, r12, r13,
+    r14, r15, rip);
   {$ENDIF}
 
   {$IFDEF CPU32}
-  TCpuRegs = (eax);
+  TCpuRegs = (eax, ebx, ecx, edx, esi, edi, ebp, esp, eip);
   {$ENDIF}
 
-  //TODO-cDebugging: write a parser for the DBG/MI output messages
+  TFLAG = (F_ID, F_VIP, F_VIF, F_AC, F_VM, F_RF, F_NT, F_IOPL, F_OF, F_DF, F_IF,
+    F_TF, F_SF, F_ZF, F_AF, F_PF, F_CF);
+  TEFLAG = set of TFLAG;
+
+  TSegmentRegister = (S_CS, S_SS, S_DS, S_ES, S_FS, S_GS);
+
+  // aliased to get hex display in object inspector.
+  TCpuRegValue = type PtrInt;
+
+  // Stores the stack and the registers content, to be displayable in
+  // an object inspector.
+  TInspectableState = class(TPersistent)
+  private
+    fWordSpliter: TRegExpr;
+    fFlags: TEFLAG;
+    fSegment: array[TSegmentRegister] of byte;
+    fLastCalls: array[0..9] of string;
+    fCallStack: TStringList;
+    fRegisters: array[TCpuRegister] of TCpuRegValue;
+  published
+    property EFLAGS: TEFLAG read fFlags;
+  {$IFDEF CPU64}
+    property RAX: TCpuRegValue read fRegisters[TCpuRegister.rax];
+    property RBX: TCpuRegValue read fRegisters[TCpuRegister.rbx];
+    property RCX: TCpuRegValue read fRegisters[TCpuRegister.rcx];
+    property RDX: TCpuRegValue read fRegisters[TCpuRegister.rdx];
+    property RSI: TCpuRegValue read fRegisters[TCpuRegister.rsi];
+    property RDI: TCpuRegValue read fRegisters[TCpuRegister.rdi];
+    property RBP: TCpuRegValue read fRegisters[TCpuRegister.rbp];
+    property RSP: TCpuRegValue read fRegisters[TCpuRegister.rsp];
+    property R8:  TCpuRegValue read fRegisters[TCpuRegister.r8];
+    property R9:  TCpuRegValue read fRegisters[TCpuRegister.r9];
+    property R10: TCpuRegValue read fRegisters[TCpuRegister.r10];
+    property R11: TCpuRegValue read fRegisters[TCpuRegister.r11];
+    property R12: TCpuRegValue read fRegisters[TCpuRegister.r12];
+    property R13: TCpuRegValue read fRegisters[TCpuRegister.r13];
+    property R14: TCpuRegValue read fRegisters[TCpuRegister.r14];
+    property R15: TCpuRegValue read fRegisters[TCpuRegister.r15];
+    property RIP: TCpuRegValue read fRegisters[TCpuRegister.rip];
+  {$ELSE}
+    property EAX: TCpuRegValue read fRegisters[TCpuRegs.eax];
+    property EBX: TCpuRegValue read fRegisters[TCpuRegs.ebx];
+    property ECX: TCpuRegValue read fRegisters[TCpuRegs.ecx];
+    property EDX: TCpuRegValue read fRegisters[TCpuRegs.edx];
+    property ESI: TCpuRegValue read fRegisters[TCpuRegs.esi];
+    property EDI: TCpuRegValue read fRegisters[TCpuRegs.edi];
+    property EBP: TCpuRegValue read fRegisters[TCpuRegs.ebp];
+    property ESP: TCpuRegValue read fRegisters[TCpuRegs.esp];
+    property EIP: TCpuRegValue read fRegisters[TCpuRegs.eip];
+  {$ENDIF}
+    property CallStack_M0: string read fLastCalls[0];
+    property CallStack_M1: string read fLastCalls[1];
+    property CallStack_M2: string read fLastCalls[2];
+    property CallStack_M3: string read fLastCalls[3];
+    property CallStack_M4: string read fLastCalls[4];
+    property CallStack_M5: string read fLastCalls[5];
+    property CallStack_M6: string read fLastCalls[6];
+    property CallStack_M7: string read fLastCalls[7];
+    property CallStack_M8: string read fLastCalls[8];
+    property CallStack_M9: string read fLastCalls[9];
+    property CallStack: TStringList read fCallStack;
+    //
+    property CS: byte read fSegment[TSegmentRegister.S_CS];
+    property DS: byte read fSegment[TSegmentRegister.S_DS];
+    property ES: byte read fSegment[TSegmentRegister.S_ES];
+    property FS: byte read fSegment[TSegmentRegister.S_FS];
+    property GS: byte read fSegment[TSegmentRegister.S_GS];
+    property SS: byte read fSegment[TSegmentRegister.S_SS];
+  public
+    constructor create;
+    destructor destroy; override;
+    // called on the result of "info stack"
+    procedure parseCallStack(stream: TStream);
+    // called on the result of "info register"
+    procedure parseRegisters(stream: TStream);
+  end;
+
+  TCpuRegValueEditor = class(TIntegerProperty)
+  public
+    function GetValue: ansistring; override;
+  end;
 
 
   TGDBMI_Frame = record
@@ -71,6 +155,8 @@ type
 
   { TCEGdbWidget }
   TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEMultiDocObserver)
+    btnReg: TBitBtn;
+    btnStack: TBitBtn;
     btnSendCom: TBitBtn;
     btnStop: TBitBtn;
     btnStart: TBitBtn;
@@ -80,9 +166,11 @@ type
     Panel1: TPanel;
     Panel2: TPanel;
     Panel3: TPanel;
-    TreeView1: TTreeView;
+    stateViewer: TTIPropertyGrid;
     procedure btnContClick(Sender: TObject);
+    procedure btnRegClick(Sender: TObject);
     procedure btnSendComClick(Sender: TObject);
+    procedure btnStackClick(Sender: TObject);
     procedure btnStartClick(Sender: TObject);
     procedure btnStopClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -92,8 +180,8 @@ type
     fFileLineBrks: TStringList;
     fDocHandler: ICEMultiDocHandler;
     fMsg: ICEMessagesDisplay;
-    fGdb: TCEProcess;
-    fRegs: array[TCpuRegs] of ptrUint;
+    fGdb: TCEAutoBufferedProcess;
+    fInspState: TInspectableState;
     //
     procedure startDebugging;
     procedure killGdb;
@@ -129,6 +217,131 @@ type
 implementation
 {$R *.lfm}
 
+{$REGION TInspectableState -----------------------------------------------------}
+function TCpuRegValueEditor.GetValue: ansistring;
+begin
+  {$IFDEF CPU64}
+  result := '0x' + IntToHex(GetInt64Value, 16);
+  {$ELSE}
+  result := '0x' + IntToHex(GetInt64Value, 8);
+  {$ENDIF}
+end;
+
+constructor TInspectableState.create;
+begin
+  fCallStack := TStringList.Create;
+  fWordSpliter := TRegExpr.Create('[A-Za-z0-9_#]+');
+  fWordSpliter.Compile;
+end;
+
+destructor TInspectableState.destroy;
+begin
+  fCallStack.free;
+  fWordSpliter.Free;
+  inherited;
+end;
+
+procedure TInspectableState.parseCallStack(stream: TStream);
+var
+  rdr: TStringList;
+  str: string;
+  i,j: integer;
+begin
+  fCallStack.Clear;
+  for i := low(fLastCalls) to high(fLastCalls) do
+    fLastCalls[i] := '';
+  rdr := TStringList.Create;
+  try
+    rdr.LoadFromStream(stream);
+    if (rdr.Count = 0) or (pos('(gdb)', rdr[0]) = -1) then
+      exit;
+    // fix first line
+    str := rdr[0];
+    rdr[0] := str[7 .. str.length];
+    for str in rdr do
+    begin
+      if fWordSpliter.Exec(str) and fWordSpliter.ExecNext then
+        fCallStack.Insert(0, str[fWordSpliter.MatchLen[0]+1 .. str.length]);
+    end;
+    if fCallStack.Count > 9 then j := 9 else j := fCallStack.Count-1;
+    for i := 0 to j do
+      fLastCalls[i] := fCallStack[i];
+  finally
+    rdr.free;
+  end;
+end;
+
+procedure TInspectableState.parseRegisters(stream: TStream);
+var
+  rdr: TStringList;
+  str: string;
+  reg: string;
+  val: string;
+begin
+  rdr := TStringList.Create;
+  try
+    rdr.LoadFromStream(stream);
+    if (rdr.Count = 0) or (pos('(gdb)', rdr[0]) = -1) then
+      exit;
+    // fix first line
+    str := rdr[0];
+    rdr[0] := str[7 .. str.length];
+    // each line = reg hex dec
+    for str in rdr do
+    begin
+      reg := '';
+      if fWordSpliter.Exec(str) then
+      begin
+        reg := fWordSpliter.Match[0];
+        if fWordSpliter.ExecNext and fWordSpliter.ExecNext then
+        begin
+          val := fWordSpliter.Match[0];
+          case reg of
+            'cs':  fSegment[TSegmentRegister.S_CS] := StrToInt(val);
+            'ds':  fSegment[TSegmentRegister.S_DS] := StrToInt(val);
+            'es':  fSegment[TSegmentRegister.S_ES] := StrToInt(val);
+            'fs':  fSegment[TSegmentRegister.S_FS] := StrToInt(val);
+            'gs':  fSegment[TSegmentRegister.S_GS] := StrToInt(val);
+            'ss':  fSegment[TSegmentRegister.S_SS] := StrToInt(val);
+            {$IFDEF CPU64}
+            'rax': fRegisters[TCpuRegister.rax] := StrToInt64(val);
+            'rbx': fRegisters[TCpuRegister.rbx] := StrToInt64(val);
+            'rcx': fRegisters[TCpuRegister.rcx] := StrToInt64(val);
+            'rdx': fRegisters[TCpuRegister.rdx] := StrToInt64(val);
+            'rdi': fRegisters[TCpuRegister.rdi] := StrToInt64(val);
+            'rsi': fRegisters[TCpuRegister.rsi] := StrToInt64(val);
+            'rbp': fRegisters[TCpuRegister.rbp] := StrToInt64(val);
+            'rsp': fRegisters[TCpuRegister.rsp] := StrToInt64(val);
+            'r8':  fRegisters[TCpuRegister.r8]  := StrToInt64(val);
+            'r9':  fRegisters[TCpuRegister.r9]  := StrToInt64(val);
+            'r10': fRegisters[TCpuRegister.r10] := StrToInt64(val);
+            'r11': fRegisters[TCpuRegister.r11] := StrToInt64(val);
+            'r12': fRegisters[TCpuRegister.r12] := StrToInt64(val);
+            'r13': fRegisters[TCpuRegister.r13] := StrToInt64(val);
+            'r14': fRegisters[TCpuRegister.r14] := StrToInt64(val);
+            'r15': fRegisters[TCpuRegister.r15] := StrToInt64(val);
+            'rip': fRegisters[TCpuRegister.rip] := StrToInt64(val);
+            {$ELSE}
+            'eax': fRegisters[TCpuRegister.eax] := StrToInt(val);
+            'ebx': fRegisters[TCpuRegister.ebx] := StrToInt(val);
+            'ecx': fRegisters[TCpuRegister.ecx] := StrToInt(val);
+            'edx': fRegisters[TCpuRegister.edx] := StrToInt(val);
+            'edi': fRegisters[TCpuRegister.edi] := StrToInt(val);
+            'esi': fRegisters[TCpuRegister.esi] := StrToInt(val);
+            'ebp': fRegisters[TCpuRegister.ebp] := StrToInt(val);
+            'esp': fRegisters[TCpuRegister.esp] := StrToInt(val);
+            'eip': fRegisters[TCpuRegister.eip] := StrToInt(val);
+            {$ENDIF}
+          end;
+        end;
+      end;
+    end;
+  finally
+    rdr.free;
+  end;
+end;
+{$ENDREGION}
+
 {$REGION Common/standard comp --------------------------------------------------}
 constructor TCEGdbWidget.create(aOwner: TComponent);
 begin
@@ -138,6 +351,8 @@ begin
   fMsg:= getMessageDisplay;
   fFileLineBrks:= TStringList.Create;
   fLog := TStringList.Create;
+  fInspState := TInspectableState.Create;
+  stateViewer.TIObject := fInspState;
   //
   AssignPng(btnSendCom, 'accept');
 end;
@@ -147,6 +362,7 @@ begin
   fFileLineBrks.Free;
   fLog.Free;
   killGdb;
+  fInspState.Free;
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
@@ -274,10 +490,11 @@ begin
   if not str.fileExists then exit;
   // gdb process
   killGdb;
-  fGdb := TCEProcess.create(nil);
+  fGdb := TCEAutoBufferedProcess.create(nil);
   fGdb.Executable:= 'gdb' + exeExt;
   fgdb.Options:= [poUsePipes, poStderrToOutPut];
   fgdb.Parameters.Add(str);
+  //fgdb.Parameters.Add('--interpreter=mi');
   fGdb.OnReadData:= @gdbOutput;
   fGdb.OnTerminate:= @gdbOutput;
   fgdb.execute;
@@ -329,7 +546,8 @@ end;
 procedure TCEGdbWidget.processInfoRegs(sender: TObject);
 begin
   try
-    //
+    fInspState.parseRegisters(fgdb.OutputStack);
+    fgdb.OutputStack.Clear;
   finally
     fGdb.OnReadData:=@gdbOutput;
   end;
@@ -338,7 +556,8 @@ end;
 procedure TCEGdbWidget.processInfoStack(sender: TObject);
 begin
   try
-    //
+    fInspState.parseCallStack(fgdb.OutputStack);
+    fgdb.OutputStack.Clear;
   finally
     fGdb.OnReadData:=@gdbOutput;
   end;
@@ -377,6 +596,11 @@ begin
   gdbCommand('continue');
 end;
 
+procedure TCEGdbWidget.btnRegClick(Sender: TObject);
+begin
+  infoRegs;
+end;
+
 procedure TCEGdbWidget.btnStopClick(Sender: TObject);
 begin
   gdbCommand('kill');
@@ -389,6 +613,11 @@ begin
   edit1.Text := '';
 end;
 
+procedure TCEGdbWidget.btnStackClick(Sender: TObject);
+begin
+  infoStack;
+end;
+
 procedure TCEGdbWidget.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key <> byte(#13) then exit;
@@ -396,6 +625,7 @@ begin
   edit1.Text := '';
 end;
 {$ENDREGION}
-
+initialization
+  RegisterPropertyEditor(TypeInfo(TCpuRegValue), nil, '', TCpuRegValueEditor);
 end.
 

@@ -3,6 +3,7 @@ inherited CEGdbWidget: TCEGdbWidget
   Height = 521
   Top = 213
   Width = 517
+  ActiveControl = Back
   Caption = 'GDB commander'
   ClientHeight = 521
   ClientWidth = 517
@@ -42,10 +43,10 @@ inherited CEGdbWidget: TCEGdbWidget
           TabOrder = 0
         end
         object lstfilter: TListFilterEdit
-          Left = 92
+          Left = 152
           Height = 26
           Top = 2
-          Width = 419
+          Width = 359
           ButtonWidth = 28
           NumGlyphs = 1
           Align = alClient
@@ -80,6 +81,32 @@ inherited CEGdbWidget: TCEGdbWidget
           Spacing = 0
           TabOrder = 3
         end
+        object btnReg: TBitBtn
+          Left = 92
+          Height = 26
+          Hint = 'view registers'
+          Top = 2
+          Width = 28
+          Align = alLeft
+          BorderSpacing.Around = 2
+          Layout = blGlyphBottom
+          OnClick = btnRegClick
+          Spacing = 0
+          TabOrder = 4
+        end
+        object btnStack: TBitBtn
+          Left = 122
+          Height = 26
+          Hint = 'view call stack'
+          Top = 2
+          Width = 28
+          Align = alLeft
+          BorderSpacing.Around = 2
+          Layout = blGlyphBottom
+          OnClick = btnStackClick
+          Spacing = 0
+          TabOrder = 5
+        end
       end
       object Panel2: TPanel[1]
         Left = 0
@@ -92,21 +119,6 @@ inherited CEGdbWidget: TCEGdbWidget
         ClientHeight = 487
         ClientWidth = 517
         TabOrder = 1
-        object TreeView1: TTreeView
-          Left = 4
-          Height = 447
-          Top = 4
-          Width = 509
-          Align = alClient
-          BorderSpacing.Around = 4
-          DefaultItemHeight = 16
-          ScrollBars = ssAutoBoth
-          TabOrder = 0
-          Items.Data = {
-            F9FFFFFF020001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000
-            00000003000000454158
-          }
-        end
         object Panel3: TPanel
           Left = 4
           Height = 28
@@ -117,7 +129,7 @@ inherited CEGdbWidget: TCEGdbWidget
           BevelOuter = bvNone
           ClientHeight = 28
           ClientWidth = 509
-          TabOrder = 1
+          TabOrder = 0
           object Edit1: TEdit
             Left = 0
             Height = 24
@@ -140,6 +152,21 @@ inherited CEGdbWidget: TCEGdbWidget
             OnClick = btnSendComClick
             TabOrder = 1
           end
+        end
+        object stateViewer: TTIPropertyGrid
+          Left = 0
+          Height = 451
+          Top = 0
+          Width = 517
+          Align = alClient
+          CheckboxForBoolean = True
+          DefaultValueFont.Color = clWindowText
+          Filter = [tkInteger, tkChar, tkEnumeration, tkFloat, tkSet, tkMethod, tkSString, tkLString, tkAString, tkWString, tkVariant, tkArray, tkRecord, tkInterface, tkClass, tkObject, tkWChar, tkBool, tkInt64, tkQWord, tkDynArray, tkInterfaceRaw, tkProcVar, tkUString, tkUChar, tkHelper, tkFile, tkClassRef, tkPointer]
+          Indent = 10
+          NameFont.Color = clWindowText
+          PreferredSplitterX = 200
+          SplitterX = 200
+          ValueFont.Color = clMaroon
         end
       end
     end
