@@ -227,8 +227,9 @@ var
   pge: string;
   cli: TFPHTTPClient;
 begin
+  cbb.Items.Clear;
   cli := TFPHTTPClient.Create(self);
-  pge := cli.Get('http://code.dlang.org/');
+  pge := cli.Get('https://code.dlang.org/');
   // note, also works with regex \"packages\/[a-zA-Z0-9_-]+\"
   with TStringRange.create(pge) do while not empty do
   begin
