@@ -6,14 +6,24 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Menus, ComCtrls, Buttons, LazFileUtils, strutils,
+  Menus, ComCtrls, Buttons, LazFileUtils, strutils, fphttpclient, StdCtrls,
   ce_widget, ce_interfaces, ce_nativeproject, ce_dmdwrap, ce_common, ce_dialogs,
-  ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang;
+  ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_stringrange;
 
 type
 
-  { TCELibManEditorWidget }
+  TDubPackageQueryForm = class(TForm)
+  private
+    cbb: TComboBox;
+    function getText: string;
+    procedure getList(sender: TObject);
+  public
+    class function showAndWait(out value: string): TModalResult; static;
+    constructor Create(TheOwner: TComponent); override;
+    property text: string read getText;
+  end;
 
+  { TCELibManEditorWidget }
   TCELibManEditorWidget = class(TCEWidget, ICEProjectObserver)
     btnOpenProj: TBitBtn;
     btnMoveDown: TBitBtn;
@@ -160,6 +170,96 @@ begin
   itm.Selected := True;
 end;
 
+constructor TDubPackageQueryForm.Create(TheOwner: TComponent);
+var
+  bok: TBitBtn;
+  bno: TBitBtn;
+  bww: TBitBtn;
+begin
+  inherited;
+
+  width  := 400;
+  height := 36;
+  BorderStyle:= bsToolWindow;
+  caption := 'Select or type the DUB package name';
+  Position:= poMainFormCenter;
+
+  cbb := TComboBox.Create(self);
+  cbb.Parent := self;
+  cbb.AutoComplete := true;
+  cbb.Align := alClient;
+  cbb.BorderSpacing.Around := 2;
+  cbb.Sorted:= true;
+
+  bww := TBitBtn.Create(self);
+  bww.Parent := self;
+  bww.Align := alRight;
+  bww.Width:= 28;
+  bww.BorderSpacing.Around := 2;
+  bww.ShowHint := true;
+  bww.Hint := 'get the package list';
+  bww.OnClick:= @getList;
+  AssignPng(bww, 'arrow_update');
+
+  bok := TBitBtn.Create(self);
+  bok.Parent := self;
+  bok.ModalResult:= mrOk;
+  bok.Align := alRight;
+  bok.Width := 28;
+  bok.BorderSpacing.Around := 2;
+  bok.Hint := 'try to fetch, compile and auto-register';
+  bok.ShowHint := true;
+  AssignPng(bok, 'accept');
+
+  bno := TBitBtn.Create(self);
+  bno.Parent := self;
+  bno.ModalResult:= mrCancel;
+  bno.Align := alRight;
+  bno.Width:= 28;
+  bno.BorderSpacing.Around := 2;
+  bno.Hint := 'cancel and do nothing';
+  bno.ShowHint := true;
+  AssignPng(bno, 'cancel');
+end;
+
+procedure TDubPackageQueryForm.getList(sender: TObject);
+var
+  pge: string;
+  cli: TFPHTTPClient;
+begin
+  cli := TFPHTTPClient.Create(self);
+  pge := cli.Get('http://code.dlang.org/');
+  // note, also works with regex \"packages\/[a-zA-Z0-9_-]+\"
+  with TStringRange.create(pge) do while not empty do
+  begin
+    if popUntil('"')^.startsWith('"packages/') then
+    begin
+      popUntil('/')^.popFront;
+      cbb.Items.Add(takeUntil('"').yield);
+      popUntil('"')^.popFront;
+    end
+    else popFront;
+  end;
+end;
+
+function TDubPackageQueryForm.getText: string;
+begin
+  result := cbb.Text;
+end;
+
+class function TDubPackageQueryForm.showAndWait(out value: string): TModalResult;
+var
+  frm: TDubPackageQueryForm;
+begin
+  frm := TDubPackageQueryForm.Create(nil);
+  result := frm.ShowModal;
+  if result = mrOk then
+    value := frm.text
+  else
+    value := '';
+  frm.Free;
+end;
+
 procedure TCELibManEditorWidget.btnDubFetchClick(Sender: TObject);
 var
   dub: TProcess;
@@ -174,8 +274,8 @@ var
   cdy: string;
   upd: boolean = false;
 begin
-  if not InputQuery('DUB library import', 'please enter the name of the package',
-    nme) then exit;
+  if TDubPackageQueryForm.showAndWait(nme) <> mrOk then
+    exit;
   if List.Items.FindCaption(0, nme, false, false, false).isNotNil then
   begin
     dlgOkInfo(format('a library item with the alias "%s" already exists, delete it before trying again.',
