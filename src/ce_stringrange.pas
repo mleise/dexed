@@ -38,45 +38,49 @@ type
     class function create(const pchr: PChar; length: integer): TStringRange; static;
 
     // initializes the range with a string.
-    function init(const str: string): PStringRange; inline;
+    function init(const str: string): PStringRange; {$IFNDEF DEBUG}inline;{$ENDIF}
     // initialized the range from a pointer.
-    function init(const pchr: PChar; length: integer): PStringRange; inline;
+    function init(const pchr: PChar; length: integer): PStringRange; {$IFNDEF DEBUG}inline;{$ENDIF}
 
     // advances.
-    procedure popFront; inline;
+    procedure popFront; {$IFNDEF DEBUG}inline;{$ENDIF}
     // returns the current element.
-    function front: char; inline;
+    function front: char; {$IFNDEF DEBUG}inline;{$ENDIF}
     // indicates wether the range is consumed.
-    function empty: boolean; inline;
+    function empty: boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 
     // yields the state of the range to a string.
-    function yield: string; inline;
+    function yield: string; {$IFNDEF DEBUG}inline;{$ENDIF}
     // returns a copy.
-    function save: TStringRange; inline;
+    function save: TStringRange; {$IFNDEF DEBUG}inline;{$ENDIF}
     // resets the range.
-    function reset: PStringRange; inline;
+    function reset: PStringRange; {$IFNDEF DEBUG}inline;{$ENDIF}
 
     // advances the range while the front is in value, returns a copy.
-    function takeWhile(value: TSysCharSet): TStringRange; overload; inline;
-    function takeWhile(value: Char): TStringRange; overload; inline;
+    function takeWhile(value: TSysCharSet): TStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
+    // advances the range while the front is equal to value, returns a copy.
+    function takeWhile(value: Char): TStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
     // advances the range until the front is in value, returns a copy.
-    function takeUntil(value: TSysCharSet): TStringRange; overload; inline;
-    function takeUntil(value: Char): TStringRange; overload; inline;
+    function takeUntil(value: TSysCharSet): TStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
+    // advances the range until the front is equal to value, returns a copy.
+    function takeUntil(value: Char): TStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
     // advances the range while the front is in value.
-    function popWhile(value: TSysCharSet): PStringRange; overload; inline;
-    function popWhile(value: Char): PStringRange; overload; inline;
+    function popWhile(value: TSysCharSet): PStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
+    // advances the range while the front is equal to value.
+    function popWhile(value: Char): PStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
     // advances the range until the front is in value.
-    function popUntil(value: TSysCharSet): PStringRange; overload; inline;
-    function popUntil(value: Char): PStringRange; overload; inline;
+    function popUntil(value: TSysCharSet): PStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
+    // advances the range until the front is equal to value.
+    function popUntil(value: Char): PStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
 
     // returns the next word.
-    function nextWord: string; inline;
+    function nextWord: string; {$IFNDEF DEBUG}inline;{$ENDIF}
     // returns the next line.
-    function nextLine: string; inline;
+    function nextLine: string; {$IFNDEF DEBUG}inline;{$ENDIF}
     // indicates wether the range starts with value.
-    function startsWith(const value: string): boolean; inline;
+    function startsWith(const value: string): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
     // indicates wether the range starts with value.
-    function startsWith(var value: TStringRange): boolean; inline;
+    function startsWith(var value: TStringRange): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
   end;
 
 implementation
@@ -266,8 +270,8 @@ end;
 function TStringRange.startsWith(const value: string): boolean;
 begin
   Result := false;
-  if len - pos <= length(value) then
-    Result := ptr[pos .. pos + length(value)] = value;
+  if len - pos >= length(value) then
+    Result := ptr[pos .. pos + length(value)-1] = value;
 end;
 
 function TStringRange.startsWith(var value: TStringRange): boolean;
