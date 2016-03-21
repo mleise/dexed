@@ -45,6 +45,7 @@ type
     fCanBeRun: boolean;
     fBaseConfig: TCompilerConfiguration;
     fCompiled: boolean;
+    fSymStringExpander: ICESymStringExpander;
     procedure updateOutFilename;
     procedure doChanged;
     procedure getBaseConfig;
@@ -127,7 +128,7 @@ type
 implementation
 
 uses
-  controls, dialogs, ce_symstring, ce_libman, ce_dcd;
+  controls, dialogs, ce_libman, ce_dcd;
 
 var
   NativeProjectCompilerFilename: string = 'dmd';
@@ -136,6 +137,7 @@ var
 constructor TCENativeProject.create(aOwner: TComponent);
 begin
   inherited create(aOwner);
+  fSymStringExpander := getSymStringExpander;
   //
   fRunnerOldCwd := GetCurrentDirUTF8;
   fProjectSubject := TCEProjectSubject.create;
@@ -403,7 +405,7 @@ begin
     // prepares the exclusions
     for i := 0 to currentConfiguration.pathsOptions.exclusions.Count-1 do
     begin
-      str := symbolExpander.get(currentConfiguration.pathsOptions.exclusions[i]);
+      str := fSymStringExpander.expand(currentConfiguration.pathsOptions.exclusions[i]);
       exc.Add(str)
     end;
     // sources
@@ -620,7 +622,7 @@ begin
   // field is specified
   if fOutputFilename.isNotEmpty then
   begin
-    fOutputFilename := symbolExpander.get(fOutputFilename);
+    fOutputFilename := fSymStringExpander.expand(fOutputFilename);
     fOutputFilename := expandFilenameEx(fBasePath, fOutputFilename);
     {$IFDEF WINDOWS}
     // field is specified without ext or with a dot in the name.
@@ -666,7 +668,7 @@ begin
   //
   for i := 0 to processInfo.simpleCommands.Count-1 do
   begin
-    pname := symbolExpander.get(processInfo.simpleCommands[i]);
+    pname := fSymStringExpander.expand(processInfo.simpleCommands[i]);
     proc := TProcess.Create(nil);
     lst := TStringList.Create;
     try
@@ -689,7 +691,7 @@ begin
       exit(false);
   end;
   //
-  pname := symbolExpander.get(processInfo.executable);
+  pname := fSymStringExpander.expand(processInfo.executable);
   if (not exeInSysPath(pname)) and pname.isNotEmpty then
     exit(false)
   else if pname.isEmpty then
@@ -701,11 +703,11 @@ begin
     proc.Executable := exeFullName(pname);
     j := proc.Parameters.Count-1;
     for i:= 0 to j do
-      proc.Parameters.AddText(symbolExpander.get(proc.Parameters[i]));
+      proc.Parameters.AddText(fSymStringExpander.expand(proc.Parameters[i]));
     for i:= 0 to j do
       proc.Parameters.Delete(0);
     if proc.CurrentDirectory.isNotEmpty then
-      proc.CurrentDirectory := symbolExpander.get(proc.CurrentDirectory);
+      proc.CurrentDirectory := fSymStringExpander.expand(proc.CurrentDirectory);
     // else cwd is set to project dir in compile()
     ensureNoPipeIfWait(proc);
     proc.Execute;
@@ -799,7 +801,7 @@ begin
     i := 1;
     repeat
       prm := ExtractDelimited(i, runArgs, [' ']);
-      prm := symbolExpander.get(prm);
+      prm := fSymStringExpander.expand(prm);
       if prm.isNotEmpty then
         fRunner.Parameters.AddText(prm);
       Inc(i);

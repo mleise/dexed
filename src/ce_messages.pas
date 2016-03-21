@@ -8,8 +8,8 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
   EditBtn, lcltype, ce_widget, ActnList, Menus, clipbrd, AnchorDocking, math,
   TreeFilterEdit, Buttons, process, GraphType, fgl,
-  ce_writableComponent, ce_common, ce_synmemo, ce_dlangutils, ce_interfaces,
-  ce_observer, ce_symstring, ce_processes, ce_sharedres, ce_stringrange;
+  ce_writableComponent, ce_common, ce_synmemo, ce_interfaces, ce_observer,
+  ce_processes, ce_sharedres, ce_stringrange;
 
 type
 
@@ -105,6 +105,7 @@ type
     fToDemangle: TStringList;
     fToDemangleObjs: TFPList;
     fFiltering: boolean;
+    fSymStringExpander: ICESymStringExpander;
     function itemShouldBeVisible(item: TTreeNode; aCtxt: TCEAppMessageCtxt): boolean;
     procedure demanglerOutput(sender: TObject);
     procedure filterMessages(aCtxt: TCEAppMessageCtxt);
@@ -150,6 +151,10 @@ type
     procedure optionedEvent(anEvent: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     //
+    function openFileFromDmdMessage(const aMessage: string): boolean;
+    function getLineFromMessage(const aMessage: string): TPoint;
+    function guessMessageKind(const aMessg: string): TCEAppMessageKind;
+    //
     function singleServiceName: string;
     procedure message(const aValue: string; aData: Pointer; aCtxt: TCEAppMessageCtxt; aKind: TCEAppMessageKind);
     procedure clearbyContext(aCtxt: TCEAppMessageCtxt);
@@ -175,10 +180,6 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
   end;
-
-  function guessMessageKind(const aMessg: string): TCEAppMessageKind;
-  function getLineFromMessage(const aMessage: string): TPoint;
-  function openFileFromDmdMessage(const aMessage: string): boolean;
 
 implementation
 {$R *.lfm}
@@ -260,6 +261,7 @@ var
 begin
   fMaxMessCnt := 500;
   fCtxt := amcAll;
+  fSymStringExpander:= getSymStringExpander;
   //
   fActAutoSel := TAction.Create(self);
   fActAutoSel.Caption := 'Auto select message category';
@@ -973,7 +975,7 @@ begin
   list.EndUpdate;
 end;
 
-function guessMessageKind(const aMessg: string): TCEAppMessageKind;
+function TCEMessagesWidget.guessMessageKind(const aMessg: string): TCEAppMessageKind;
 var
   idt: string;
   rng: TStringRange;
@@ -1013,7 +1015,7 @@ begin
   end;
 end;
 
-function getLineFromMessage(const aMessage: string): TPoint;
+function TCEMessagesWidget.getLineFromMessage(const aMessage: string): TPoint;
 var
   rng: TStringRange;
   lne: string;
@@ -1031,7 +1033,7 @@ begin
   result.x := strToIntDef(col, -1);
 end;
 
-function openFileFromDmdMessage(const aMessage: string): boolean;
+function TCEMessagesWidget.openFileFromDmdMessage(const aMessage: string): boolean;
 var
   i: integer = 0;
   ident: string = '';
@@ -1063,13 +1065,13 @@ begin
         exit(true);
       end;
       // if fname relative to native project path or project filed 'root'
-      absName := expandFilenameEx(symbolExpander.get('<CPP>') + DirectorySeparator, ident);
+      absName := expandFilenameEx(fSymStringExpander.expand('<CPP>') + DirectorySeparator, ident);
       if absName.fileExists then
       begin
         getMultiDocHandler.openDocument(absName);
         exit(true);
       end;
-      absName := expandFilenameEx(symbolExpander.get('<CPR>') + DirectorySeparator, ident);
+      absName := expandFilenameEx(fSymStringExpander.expand('<CPR>') + DirectorySeparator, ident);
       if absName.fileExists then
       begin
         getMultiDocHandler.openDocument(absName);

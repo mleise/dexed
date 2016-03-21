@@ -200,6 +200,7 @@ type
 
   private
 
+    fSymStringExpander: ICESymStringExpander;
     fCovModUt: boolean;
     fDoc: TCESynMemo;
     fFirstTimeCoedit: boolean;
@@ -427,7 +428,7 @@ implementation
 {$R *.lfm}
 
 uses
-  SynMacroRecorder, ce_symstring, ce_dcd;
+  SynMacroRecorder, ce_dcd;
 
 {$REGION TCEApplicationOptions ------------------------------------------------------}
 constructor TCEApplicationOptions.Create(AOwner: TComponent);
@@ -777,6 +778,7 @@ begin
   //
   updateMainMenuProviders;
   EntitiesConnector.forceUpdate;
+  fSymStringExpander:= getSymStringExpander;
   //
   getCMdParams;
   if fNativeProject.isNil then
@@ -1949,7 +1951,7 @@ begin
   if ( i > 18) then
   begin
     if firstlineFlags.upperCase[1..17] = '#!RUNNABLE-FLAGS:' then
-        firstlineFlags := symbolExpander.get(firstlineFlags[18..i])
+        firstlineFlags := fSymStringExpander.expand(firstlineFlags[18..i])
     else firstlineFlags:= '';
   end else firstlineFlags:= '';
 
@@ -2016,7 +2018,7 @@ begin
       if runArgs.isNotEmpty then
       begin
         lst.Clear;
-        CommandToList(symbolExpander.get(runArgs), lst);
+        CommandToList(fSymStringExpander.expand(runArgs), lst);
         fRunProc.Parameters.AddStrings(lst);
       end;
       fRunProc.Executable := fname + exeExt;

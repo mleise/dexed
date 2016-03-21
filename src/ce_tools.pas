@@ -30,6 +30,7 @@ type
     fOutputToNext: boolean;
     fShortcut: TShortcut;
     fMsgs: ICEMessagesDisplay;
+    fSymStringExpander: ICESymStringExpander;
     procedure setParameters(value: TStringList);
     procedure processOutput(sender: TObject);
     procedure setToolAlias(value: string);
@@ -107,7 +108,7 @@ var
 implementation
 
 uses
-  ce_symstring, dialogs;
+  dialogs;
 
 const
   toolsFname = 'tools.txt';
@@ -126,6 +127,8 @@ end;
 constructor TCEToolItem.create(ACollection: TCollection);
 begin
   inherited;
+  fSymStringExpander:= getSymStringExpander;
+  fMsgs       := getMessageDisplay;
   fToolItems  := TCEToolItems(ACollection);
   fToolAlias  := format('<tool %d>', [ID]);
   fParameters := TStringList.create;
@@ -203,16 +206,16 @@ begin
   fProcess.OnReadData:= @processOutput;
   fProcess.OnTerminate:= @processOutput;
   fProcess.Options := fOpts;
-  fProcess.Executable := exeFullName(symbolExpander.get(fExecutable));
+  fProcess.Executable := exeFullName(fSymStringExpander.expand(fExecutable));
   fProcess.ShowWindow := fShowWin;
-  fProcess.CurrentDirectory := symbolExpander.get(fWorkingDir);
+  fProcess.CurrentDirectory := fSymStringExpander.expand(fWorkingDir);
   for prm in fParameters do if not isStringDisabled(prm) then
-    fProcess.Parameters.AddText(symbolExpander.get(prm));
+    fProcess.Parameters.AddText(fSymStringExpander.expand(prm));
   if fQueryParams then
   begin
     prm := '';
     if InputQuery('Parameters', '', prm) then
-      if prm.isNotEmpty then fProcess.Parameters.AddText(symbolExpander.get(prm));
+      if prm.isNotEmpty then fProcess.Parameters.AddText(fSymStringExpander.expand(prm));
   end;
   ensureNoPipeIfWait(fProcess);
   //
@@ -241,7 +244,6 @@ var
 begin
   if ((not fOutputToNext) or fNextToolAlias.isEmpty) and (poUsePipes in options) then
   begin
-    getMessageDisplay(fMsgs);
     lst := TStringList.Create;
     try
       fProcess.getFullLines(lst);

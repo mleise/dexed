@@ -26,6 +26,7 @@ type
     fMruPos: Integer;
     fMru: TCEMRUList;
     fProc: TProcess;
+    fSymStringExpander: ICESymStringExpander;
     procedure sendInput;
     //
     function singleServiceName: string;
@@ -41,7 +42,7 @@ implementation
 {$R *.lfm}
 
 uses
-  ce_symstring, LCLType;
+  LCLType;
 
 const
   OptsFname = 'procinput.txt';
@@ -52,6 +53,7 @@ var
   fname: string;
 begin
   inherited;
+  fSymStringExpander:= getSymStringExpander;
   fMru := TCEMRUList.Create;
   fMru.maxCount := 25;
   EntitiesConnector.addSingleService(self);
@@ -123,7 +125,7 @@ begin
   fMru.Insert(0,txtInp.Text);
   fMruPos := 0;
   if txtInp.Text <> '' then
-    inp := symbolExpander.get(txtInp.Text) + lineEnding
+    inp := fSymStringExpander.expand(txtInp.Text) + lineEnding
   else
     inp := txtInp.Text + lineEnding;
   fProc.Input.Write(inp[1], inp.length);

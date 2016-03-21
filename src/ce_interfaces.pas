@@ -293,6 +293,16 @@ type
 
 
 
+  (**
+   * Single service related to the expansion of Coedit "symbolic strings".
+   *)
+  ICESymStringExpander = interface(ICESingleService)
+    // expand all the symbols <IDENT> in value in result.
+    function expand(const value: string): string;
+  end;
+
+
+
 {
   subject primitives:
 
@@ -323,9 +333,10 @@ type
   Service getters:
 }
   function getMessageDisplay(var obj: ICEMessagesDisplay): ICEMessagesDisplay;
-  function getMessageDisplay: ICEMessagesDisplay; overload;
-  function getprocInputHandler: ICEProcInputHandler; overload;
-  function getMultiDocHandler: ICEMultiDocHandler; overload;
+  function getMessageDisplay: ICEMessagesDisplay;
+  function getprocInputHandler: ICEProcInputHandler;
+  function getMultiDocHandler: ICEMultiDocHandler;
+  function getSymStringExpander: ICESymStringExpander;
 
 implementation
 
@@ -449,6 +460,11 @@ end;
 function getMultiDocHandler: ICEMultiDocHandler;
 begin
   exit(EntitiesConnector.getSingleService('ICEMultiDocHandler') as ICEMultiDocHandler);
+end;
+
+function getSymStringExpander: ICESymStringExpander;
+begin
+  exit(EntitiesConnector.getSingleService('ICESymStringExpander') as ICESymStringExpander);
 end;
 {$ENDREGION}
 

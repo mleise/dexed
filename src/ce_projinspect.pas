@@ -42,6 +42,7 @@ type
     fImpsNode, fInclNode: TTreeNode;
     fXtraNode: TTreeNode;
     fLastFileOrFolder: string;
+    fSymStringExpander: ICESymStringExpander;
     procedure actUpdate(sender: TObject);
     procedure TreeDblClick(sender: TObject);
     procedure actOpenFileExecute(sender: TObject);
@@ -65,12 +66,11 @@ type
 implementation
 {$R *.lfm}
 
-uses
-  ce_symstring;
-
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEProjectInspectWidget.create(aOwner: TComponent);
 begin
+  fSymStringExpander:= getSymStringExpander;
+  //
   fActOpenFile := TAction.Create(self);
   fActOpenFile.Caption := 'Open file in editor';
   fActOpenFile.OnExecute := @actOpenFileExecute;
@@ -447,7 +447,7 @@ begin
     if str.isEmpty then
       continue;
     fold := expandFilenameEx(fProject.basePath, str);
-    fold := symbolExpander.get(fold);
+    fold := fSymStringExpander.expand(fold);
     itm := Tree.Items.AddChild(fImpsNode, fold);
     itm.ImageIndex := 5;
     itm.SelectedIndex := 5;
@@ -459,7 +459,7 @@ begin
     if str.isEmpty then
       continue;
     fold := expandFilenameEx(fProject.basePath, str);
-    fold := symbolExpander.get(fold);
+    fold := fSymStringExpander.expand(fold);
     itm := Tree.Items.AddChild(fInclNode, fold);
     itm.ImageIndex := 5;
     itm.SelectedIndex := 5;
@@ -471,7 +471,7 @@ begin
     if str.isEmpty then
       continue;
     src := expandFilenameEx(fProject.basePath, str);
-    src := symbolExpander.get(src);
+    src := fSymStringExpander.expand(src);
     lst := TStringList.Create;
     try
       if listAsteriskPath(src, lst) then for src in lst do

@@ -25,7 +25,7 @@ type
    * TCESymbolExpander is designed to expand Coedit symbolic strings,
    * using the information collected from several observer interfaces.
    *)
-  TCESymbolExpander = class(ICEMultiDocObserver, ICEProjectObserver)
+  TCESymbolExpander = class(ICEMultiDocObserver, ICEProjectObserver, ICESymStringExpander)
   private
     fProj: TCENativeProject;
     fProjInterface: ICECommonProject;
@@ -45,25 +45,26 @@ type
     procedure docClosing(aDoc: TCESynMemo);
     procedure docFocused(aDoc: TCESynMemo);
     procedure docChanged(aDoc: TCESynMemo);
+    //
+    function singleServiceName: string;
+    function expand(const value: string): string;
   public
     constructor Create;
     destructor Destroy; override;
-    // expands the symbols contained in symString
-    function get(const symString: string): string;
   end;
-
-var
-  symbolExpander: TCESymbolExpander;
 
 implementation
 
 uses
   Forms, SysUtils, Classes;
+var
+  symbolExpander: TCESymbolExpander;
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCESymbolExpander.Create;
 begin
   EntitiesConnector.addObserver(self);
+  EntitiesConnector.addSingleService(self);
   fNeedUpdate := true;
   //
   {$IFDEF UNIX}
@@ -237,17 +238,22 @@ begin
   end;
 end;
 
-function TCESymbolExpander.get(const symString: string): string;
+function TCESymbolExpander.singleServiceName: string;
+begin
+  exit('ICESymStringExpander');
+end;
+
+function TCESymbolExpander.expand(const value: string): string;
 var
   rng: TStringRange;
   sym: string;
 begin
   Result := '';
-  if symString.isEmpty then
+  if value.isEmpty then
     exit;
   //
   updateSymbols;
-  rng := TStringRange.create(symString);
+  rng := TStringRange.create(value);
   while true do
   begin
     if rng.empty then

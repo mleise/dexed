@@ -5,8 +5,8 @@ unit ce_dmdwrap;
 interface
 
 uses
-  classes, sysutils, process, asyncprocess, ce_common,
-  ce_processes, ce_interfaces;
+  classes, sysutils, process, asyncprocess,
+  ce_common, ce_processes, ce_interfaces;
 
 (*
 
@@ -29,9 +29,11 @@ type
     fOnChange: TNotifyEvent;
     procedure doChanged;
   protected
+    fSymStringExpander: ICESymStringExpander;
     property onChange: TNotifyEvent read fOnChange write fOnChange;
   public
     procedure getOpts(aList: TStrings; base: TOptsGroup = nil); virtual; abstract;
+    constructor create; virtual;
   end;
 
   (*****************************************************************************
@@ -94,7 +96,7 @@ type
     property showHiddenAlloc: boolean read fVgc write setVgc default false;
     property showColumnsNumber: boolean read fCol write setCol default false;
   public
-    constructor create;
+    constructor create; override;
     procedure assign(aValue: TPersistent); override;
     procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
   end;
@@ -156,7 +158,7 @@ type
     //TODO-cmaintenace: remove deprecated props after next rlz
     property generateStackFrame: boolean write setGenStack stored false; deprecated;
   public
-    constructor create;
+    constructor create; override;
     destructor destroy; override;
     procedure assign(aValue: TPersistent); override;
     procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
@@ -195,7 +197,7 @@ type
     property codeviewDexts: boolean write setGenInfos stored false; deprecated;
     property codeviewCformat: boolean write setDbgC stored false; deprecated;
   public
-    constructor create;
+    constructor create; override;
     destructor destroy; override;
     procedure assign(aValue: TPersistent); override;
     procedure getOpts(aList: TStrings;base: TOptsGroup = nil); override;
@@ -230,7 +232,7 @@ type
     property importStringPaths: TStringList read fImpStr write setImpt;
     property forceExtension: boolean read fForceExt write setForceExt default false;
   public
-    constructor create;
+    constructor create; override;
     destructor destroy; override;
     procedure assign(aValue: TPersistent); override;
     procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
@@ -249,7 +251,7 @@ type
     property coverage: boolean read fCov write setCov default false;
     property customOptions: TStringList read fCustom write setCustom;
   public
-    constructor create;
+    constructor create; override;
     destructor destroy; override;
     procedure assign(aValue: TPersistent); override;
     procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
@@ -281,7 +283,7 @@ type
     property showWindow: TShowWindowOptions read fShowWin write setShowWin default swoNone;
     property simpleCommands: TStringList read fCommands write setCommands;
   public
-    constructor create;
+    constructor create; override;
     destructor destroy; override;
     procedure assign(source: TPersistent); override;
     procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
@@ -324,6 +326,7 @@ type
    *)
   TCompilerConfiguration = class(TCollectionItem)
   private
+    fSymStringExpander: ICESymStringExpander;
     fName: string;
     fOnChanged: TNotifyEvent;
     fDocOpts: TDocOpts;
@@ -376,8 +379,10 @@ type
 
 implementation
 
-uses
-  ce_symstring;
+constructor TOptsGroup.create;
+begin
+  fSymStringExpander := getSymStringExpander;
+end;
 
 procedure TOptsGroup.doChanged;
 begin
@@ -396,9 +401,9 @@ begin
     if fGenJson then
       aList.Add('-X');
     if fDocDir <> '' then
-      aList.Add('-Dd' + symbolExpander.get(fDocDir));
+      aList.Add('-Dd' + fSymStringExpander.expand(fDocDir));
     if fJsonFname <> '' then
-      aList.Add('-Xf' + symbolExpander.get(fJsonFname));
+      aList.Add('-Xf' + fSymStringExpander.expand(fJsonFname));
   end else
   begin
     baseopt := TDocOpts(base);
@@ -407,17 +412,17 @@ begin
     if baseopt.fGenJson or fGenJson then
       aList.Add('-X');
     if (baseopt.fDocDir <> '') and (fDocDir <> '') then
-      aList.Add('-Dd' + symbolExpander.get(fDocDir))
+      aList.Add('-Dd' + fSymStringExpander.expand(fDocDir))
     else if (fDocDir <> '') then
-      aList.Add('-Dd' + symbolExpander.get(fDocDir))
+      aList.Add('-Dd' + fSymStringExpander.expand(fDocDir))
     else if (baseopt.fDocDir <> '') then
-      aList.Add('-Dd' + symbolExpander.get(baseopt.fDocDir));
+      aList.Add('-Dd' + fSymStringExpander.expand(baseopt.fDocDir));
     if (baseopt.fJsonFname <> '') and (fJsonFname <> '') then
-      aList.Add('-Xf' + symbolExpander.get(fJsonFname))
+      aList.Add('-Xf' + fSymStringExpander.expand(fJsonFname))
     else if fJsonFname <> '' then
-      aList.Add('-Xf' + symbolExpander.get(fJsonFname))
+      aList.Add('-Xf' + fSymStringExpander.expand(fJsonFname))
     else if (baseopt.fJsonFname <> '') then
-      aList.Add('-Dd' + symbolExpander.get(baseopt.fJsonFname));
+      aList.Add('-Dd' + fSymStringExpander.expand(baseopt.fJsonFname));
   end;
 end;
 
@@ -489,6 +494,7 @@ end;
 {$REGION TMsgOpts --------------------------------------------------------------}
 constructor TMsgOpts.create;
 begin
+  inherited;
   fDepHandling := TDepHandling.warning;
   fWarnings := true;
 end;
@@ -607,6 +613,7 @@ end;
 {$REGION TOutputOpts -----------------------------------------------------------}
 constructor TOutputOpts.create;
 begin
+  inherited;
   fVerIds := TStringList.Create;
   fBoundsCheck := safeOnly;
 end;
@@ -816,6 +823,7 @@ end;
 {$REGION TDebugOpts ------------------------------------------------------------}
 constructor TDebugOpts.create;
 begin
+  inherited;
   fDbgIdents := TStringList.Create;
 end;
 
@@ -944,6 +952,7 @@ end;
 {$REGION TPathsOpts ------------------------------------------------------------}
 constructor TPathsOpts.create;
 begin
+  inherited;
   fExtraSrcs := TStringList.Create;
   fImpMod := TStringList.Create;
   fImpStr := TStringList.Create;
@@ -979,7 +988,7 @@ begin
       begin
         if isStringDisabled(str) then
           continue;
-        sym := symbolExpander.get(str);
+        sym := fSymStringExpander.expand(str);
         if not listAsteriskPath(sym, aList, exts) then
           aList.Add(sym);
       end;
@@ -987,13 +996,13 @@ begin
       exts.Free;
     end;
     for str in fImpMod do if not isStringDisabled(str) then
-      aList.Add('-I'+ symbolExpander.get(str));
+      aList.Add('-I'+ fSymStringExpander.expand(str));
     for str in fImpStr do if not isStringDisabled(str) then
-      aList.Add('-J'+ symbolExpander.get(str));
+      aList.Add('-J'+ fSymStringExpander.expand(str));
     if fFname <> '' then
-      aList.Add('-of' + symbolExpander.get(fFname));
+      aList.Add('-of' + fSymStringExpander.expand(fFname));
     if fObjDir <> '' then
-      aList.Add('-od' + symbolExpander.get(fObjDir));
+      aList.Add('-od' + fSymStringExpander.expand(fObjDir));
   end else
   begin
     baseopt := TPathsOpts(base);
@@ -1006,7 +1015,7 @@ begin
       begin
         if isStringDisabled(str) then
           continue;
-        sym := symbolExpander.get(str);
+        sym := fSymStringExpander.expand(str);
         if not listAsteriskPath(sym, aList, exts) then
           aList.Add(sym);
       end;
@@ -1017,22 +1026,22 @@ begin
     if fImpMod.Count = 0 then rightList := baseopt.fImpMod
     else rightList := fImpMod;
     for str in rightList do if not isStringDisabled(str) then
-      aList.Add('-I'+ symbolExpander.get(str));
+      aList.Add('-I'+ fSymStringExpander.expand(str));
     //
     if fImpStr.Count = 0 then rightList := baseopt.fImpStr
     else rightList := fImpStr;
     for str in rightList do if not isStringDisabled(str) then
-      aList.Add('-J'+ symbolExpander.get(str));
+      aList.Add('-J'+ fSymStringExpander.expand(str));
     //
     str := '';
     if fFname <> '' then str := fFname else
       if baseopt.fFname <> '' then str := baseopt.fFname;
-    if str.isNotEmpty then aList.Add('-of' + symbolExpander.get(str));
+    if str.isNotEmpty then aList.Add('-of' + fSymStringExpander.expand(str));
     //
     str := '';
     if fObjDir <> '' then str := fObjDir else
       if baseopt.fObjDir <> '' then str := baseopt.fObjDir;
-    if str.isNotEmpty then aList.Add('-od' + symbolExpander.get(str));
+    if str.isNotEmpty then aList.Add('-od' + fSymStringExpander.expand(str));
   end;
 end;
 
@@ -1118,6 +1127,7 @@ end;
 {$REGION TOtherOpts ------------------------------------------------------------}
 constructor TOtherOpts.create;
 begin
+  inherited;
   fCustom := TStringList.Create;
 end;
 
@@ -1163,7 +1173,7 @@ begin
         str2 := '-' + str1
       else
         str2 := str1;
-      aList.AddText(symbolExpander.get(str2));
+      aList.AddText(fSymStringExpander.expand(str2));
     end;
     if fCov then aList.Add('-cov');
   end else
@@ -1179,7 +1189,7 @@ begin
         str2 := '-' + str1
       else
         str2 := str1;
-      aList.AddText(symbolExpander.get(str2));
+      aList.AddText(fSymStringExpander.expand(str2));
     end;
     if baseopt.fCov or fCov then aList.Add('-cov');
   end;
@@ -1195,6 +1205,7 @@ end;
 {$REGION TCustomProcOptions ----------------------------------------------------}
 constructor TCustomProcOptions.create;
 begin
+  inherited;
   fParameters := TStringList.Create;
   fCommands := TStringList.Create;
 end;
@@ -1230,7 +1241,7 @@ procedure TCustomProcOptions.setProcess(var aProcess: TProcess);
 begin
   //TODO-cNativeProjects: adapt TCustomProcOptions.setProcess to base/override system
   aProcess.Parameters.Clear;
-  aProcess.Parameters.AddText(symbolExpander.get(Parameters.Text));
+  aProcess.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
   aProcess.Executable := fExecutable;
   aProcess.ShowWindow := fShowWin;
   aProcess.Options    := fOptions;
@@ -1241,7 +1252,7 @@ end;
 procedure TCustomProcOptions.setProcess(var aProcess: TAsyncProcess);
 begin
   aProcess.Parameters.Clear;
-  aProcess.Parameters.AddText(symbolExpander.get(Parameters.Text));
+  aProcess.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
   aProcess.Executable := fExecutable;
   aProcess.ShowWindow := fShowWin;
   aProcess.Options    := fOptions;
@@ -1252,7 +1263,7 @@ end;
 procedure TCustomProcOptions.setProcess(var aProcess: TCheckedAsyncProcess);
 begin
   aProcess.Parameters.Clear;
-  aProcess.Parameters.AddText(symbolExpander.get(Parameters.Text));
+  aProcess.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
   aProcess.Executable := fExecutable;
   aProcess.ShowWindow := fShowWin;
   aProcess.Options    := fOptions;
@@ -1263,7 +1274,7 @@ end;
 procedure TCustomProcOptions.setProcess(var aProcess: TCEProcess);
 begin
   aProcess.Parameters.Clear;
-  aProcess.Parameters.AddText(symbolExpander.get(Parameters.Text));
+  aProcess.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
   aProcess.Executable := fExecutable;
   aProcess.ShowWindow := fShowWin;
   aProcess.Options    := fOptions;
@@ -1316,6 +1327,8 @@ end;
 constructor TCompilerConfiguration.create(aCollection: TCollection);
 begin
   inherited create(aCollection);
+
+  fSymStringExpander:= getSymStringExpander;
 
   fDocOpts    := TDocOpts.create;
   fDebugOpts  := TDebugOpts.create;
@@ -1414,7 +1427,7 @@ begin
   end;
   if fe and nme.isNotEmpty then
   begin
-    nme := symbolExpander.get(nme);
+    nme := fSymStringExpander.expand(nme);
     ext := nme.extractFileExt;
     nme := '-of' + nme;
     i := aList.IndexOf(nme);
