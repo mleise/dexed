@@ -245,7 +245,7 @@ end;
 
 function TCESymbolExpander.expand(const value: string): string;
 var
-  rng: TStringRange;
+  rng: TStringRange = (ptr:nil; pos:0; len: 0);
   sym: string;
 begin
   Result := '';
@@ -253,7 +253,7 @@ begin
     exit;
   //
   updateSymbols;
-  rng := TStringRange.create(value);
+  rng.init(value);
   while true do
   begin
     if rng.empty then
