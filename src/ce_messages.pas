@@ -105,7 +105,6 @@ type
     fToDemangle: TStringList;
     fToDemangleObjs: TFPList;
     fFiltering: boolean;
-    fSymStringExpander: ICESymStringExpander;
     function itemShouldBeVisible(item: TTreeNode; aCtxt: TCEAppMessageCtxt): boolean;
     procedure demanglerOutput(sender: TObject);
     procedure filterMessages(aCtxt: TCEAppMessageCtxt);
@@ -261,7 +260,6 @@ var
 begin
   fMaxMessCnt := 500;
   fCtxt := amcAll;
-  fSymStringExpander:= getSymStringExpander;
   //
   fActAutoSel := TAction.Create(self);
   fActAutoSel.Caption := 'Auto select message category';
@@ -978,7 +976,7 @@ end;
 function TCEMessagesWidget.guessMessageKind(const aMessg: string): TCEAppMessageKind;
 var
   idt: string;
-  rng: TStringRange;
+  rng: TStringRange = (ptr:nil; pos:0; len: 0);
 function checkIdent: TCEAppMessageKind;
 begin
   case idt of
@@ -1017,7 +1015,7 @@ end;
 
 function TCEMessagesWidget.getLineFromMessage(const aMessage: string): TPoint;
 var
-  rng: TStringRange;
+  rng: TStringRange = (ptr:nil; pos:0; len: 0);
   lne: string;
   col: string = '';
 begin
@@ -1064,18 +1062,15 @@ begin
         getMultiDocHandler.openDocument(absName);
         exit(true);
       end;
-      // if fname relative to native project path or project filed 'root'
-      absName := expandFilenameEx(fSymStringExpander.expand('<CPP>') + DirectorySeparator, ident);
-      if absName.fileExists then
+      // if fname relative to project path
+      if fProj <> nil then
       begin
-        getMultiDocHandler.openDocument(absName);
-        exit(true);
-      end;
-      absName := expandFilenameEx(fSymStringExpander.expand('<CPR>') + DirectorySeparator, ident);
-      if absName.fileExists then
-      begin
-        getMultiDocHandler.openDocument(absName);
-        exit(true);
+        absName := expandFilenameEx(fProj.filename.extractFileDir + DirectorySeparator, ident);
+        if absName.fileExists then
+        begin
+          getMultiDocHandler.openDocument(absName);
+          exit(true);
+        end;
       end;
     end
     // <assertion failure messg>@<filename>
