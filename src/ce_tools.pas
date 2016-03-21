@@ -127,6 +127,7 @@ end;
 constructor TCEToolItem.create(ACollection: TCollection);
 begin
   inherited;
+  // TODO-cbugfix: tools are init before symstring, even when order of 'uses' is modified (lpr)
   fSymStringExpander:= getSymStringExpander;
   fMsgs       := getMessageDisplay;
   fToolItems  := TCEToolItems(ACollection);
@@ -200,6 +201,8 @@ begin
   //
   if fClearMessages then
     getMessageDisplay(fMsgs).clearByContext(amcMisc);
+  if fSymStringExpander = nil then
+    fSymStringExpander:= getSymStringExpander;
   //
   old := GetCurrentDirUTF8;
   fProcess := TCEProcess.Create(nil);
