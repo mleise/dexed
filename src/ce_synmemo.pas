@@ -794,19 +794,30 @@ begin
   editor.CommandProcessor(ecInsertLine, '', nil);
   editor.CommandProcessor(ecDown, '', nil);
   while editor.CaretX <> 1 do editor.CommandProcessor(ecLeft, '' , nil);
-  for j := 1 to i do editor.CommandProcessor(ecChar, beg[j], nil);
+  for j := 1 to i do
+  begin
+    if beg[j] = #9 then
+      editor.CommandProcessor(ecTab, '', nil)
+    else
+      editor.CommandProcessor(ecChar, beg[j], nil);
+  end;
   editor.CommandProcessor(ecChar, '}', nil);
   editor.CommandProcessor(ecUp, '', nil);
-  for j := 1 to i do editor.CommandProcessor(ecChar, beg[j], nil);
+  for j := 1 to i do
+  begin
+    if beg[j] = #9 then
+      editor.CommandProcessor(ecTab, '', nil)
+    else
+      editor.CommandProcessor(ecChar, beg[j], nil);
+  end;
   editor.CommandProcessor(ecTab, '', nil);
-  while editor.CaretX > 1 + i + editor.TabWidth do editor.CommandProcessor(ecLeft, '' , nil);
+  while editor.LogicalCaretXY.X > 1 + i + editor.TabWidth do editor.CommandProcessor(ecLeft, '' , nil);
   editor.EndUndoBlock;
 end;
 
 procedure commentSelection(editor: TSynEdit);
   procedure commentHere;
   begin
-    editor.ExecuteCommand(ecLineTextStart, '', nil);
     editor.ExecuteCommand(ecChar, '/', nil);
     editor.ExecuteCommand(ecChar, '/', nil);
   end;
@@ -817,7 +828,7 @@ procedure commentSelection(editor: TSynEdit);
     editor.ExecuteCommand(ecDeleteChar, '', nil);
   end;
 var
-  i: integer;
+  i, j, dx, lx, numUndo: integer;
   line: string;
   undo: boolean = false;
   pt, cp: TPoint;
@@ -828,6 +839,7 @@ begin
     line := TrimLeft(editor.LineText);
     undo := (line.length > 1) and (line[1..2] = '//');
     editor.BeginUndoBlock;
+    editor.ExecuteCommand(ecLineTextStart, '', nil);
     if not undo then
     begin
       commentHere;
@@ -841,25 +853,38 @@ begin
     editor.EndUndoBlock;
   end else
   begin
-    pt.X:= 0;
+    undo := false;
+    pt.X:= high(pt.X);
     cp := editor.CaretXY;
+    numUndo := 0;
     for i := editor.BlockBegin.Y-1 to editor.BlockEnd.Y-1 do
     begin
       line := TrimLeft(editor.Lines[i]);
+      dx := editor.Lines[i].length - line.length;
+      lx := 0;
+      for j := 1 to dx do
+        if editor.Lines[i][j] = #9 then
+          lx += editor.TabWidth
+        else
+          lx += 1;
+      if lx + 1 < pt.X then
+        pt.X:= lx + 1;
       if (line.length > 1) and (line[1..2] = '//') then
-        undo := true
-      else begin
-        undo := false;
-        break;
-      end;
+        numUndo += 1;
     end;
+    if numUndo = 0 then
+      undo := false
+    else if numUndo = editor.BlockEnd.Y + 1 - editor.BlockBegin.Y then
+      undo := true;
     editor.BeginUndoBlock;
     for i := editor.BlockBegin.Y to editor.BlockEnd.Y do
     begin
       pt.Y:= i;
       editor.ExecuteCommand(ecGotoXY, '', @pt);
       if not undo then
-        commentHere
+      begin
+        commentHere;
+      end
       else
         unCommentHere;
     end;
@@ -1397,7 +1422,7 @@ begin
   if Key = VK_RETURN then
   begin
     if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically])
-    and (CaretX > 1) and (LineText[CaretX-1] = '{') then
+    and (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
     case fAutoCloseCurlyBrace of
       autoCloseOnNewLineAlways:
       begin
