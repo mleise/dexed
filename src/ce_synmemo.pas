@@ -1171,11 +1171,14 @@ var
 begin
   for i := 0 to fLexToks.Count-1 do
   begin
-    tok := PLexToken(fLexToks[i]);
+    tok := fLexToks[i];
     c += byte((tok^.kind = TLexTokenKind.ltkSymbol) and (tok^.Data = '{'));
     c -= byte((tok^.kind = TLexTokenKind.ltkSymbol) and (tok^.Data = '}'));
   end;
-  exit(c > 0);
+  if (tok <> nil) and (tok^.kind = ltkIllegal) then
+    result := false
+  else
+    result := c > 0;
 end;
 
 procedure TCESynMemo.SetHighlighter(const Value: TSynCustomHighlighter);
