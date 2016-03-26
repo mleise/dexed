@@ -9,7 +9,8 @@ uses
   {$IFDEF WINDOWS}
   windows,
   {$ENDIF}
-  ce_common, ce_writableComponent, ce_interfaces, ce_observer, ce_synmemo;
+  ce_common, ce_writableComponent, ce_interfaces, ce_observer, ce_synmemo,
+  ce_stringrange;
 
 type
 
@@ -481,7 +482,22 @@ begin
   if fTempLines.Count = 0 then
     updateServerlistening;
   for str in fTempLines do
-    aComment += ReplaceStr(str, '\n', LineEnding);
+  begin
+    with TStringRange.create(str) do while not empty do
+    begin
+      aComment += takeUntil('\').yield;
+      if startsWith('\\') then
+      begin
+        aComment += '\';
+        popFront; popFront;
+      end
+      else if startsWith('\n') then
+      begin
+        aComment += LineEnding;
+        popFront; popFront;
+      end
+    end;
+  end;
   //
   aComment := ReplaceText(aComment, 'ditto' + LineEnding + LineEnding, '');
   aComment := ReplaceText(aComment, 'ditto', '');
