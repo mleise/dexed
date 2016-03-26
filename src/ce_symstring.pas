@@ -206,6 +206,7 @@ begin
     fSymbols[CPP] := fSymbols[CPF].extractFilePath;
     fSymbols[CPN] := stripFileExt(fSymbols[CPF].extractFileName);
     fSymbols[CPO] := fProjInterface.outputFilename;
+    fSymbols[CPR] := fSymbols[CPP];
     if fProjInterface.sourcesCount <> 0 then
     begin
       str := TStringList.Create;
@@ -236,6 +237,10 @@ begin
         fSymbols[CPR] := fSymbols[CPP];
     end;
   end;
+  //
+  for e := FirstVariableSymbol to high(TCESymbol) do
+    if fSymbols[e].isEmpty then
+      fSymbols[e] := na;
 end;
 
 function TCESymbolExpander.singleServiceName: string;
