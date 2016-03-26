@@ -15,11 +15,13 @@ type
 
   TCEProcInputWidget = class(TCEWidget, ICEProcInputHandler)
     btnClose: TBitBtn;
+    btnKill: TBitBtn;
     btnSend: TBitBtn;
     Panel1: TPanel;
     txtInp: TEdit;
     txtExeName: TStaticText;
     procedure btnCloseClick(Sender: TObject);
+    procedure btnKillClick(Sender: TObject);
     procedure btnSendClick(Sender: TObject);
     procedure txtInpKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
@@ -64,6 +66,7 @@ begin
     fMru.Insert(0, '(your input here)');
   AssignPng(btnClose, 'pencil_delete');
   AssignPng(btnSend, 'pencil_go');
+  AssignPng(btnKill, 'cancel');
 end;
 
 destructor TCEProcInputWidget.destroy;
@@ -143,6 +146,12 @@ begin
   if fProc.isNotNil and fProc.Input.isNotNil and
     (fProc.Input.Handle <> 0) then
       fProc.CloseInput;
+end;
+
+procedure TCEProcInputWidget.btnKillClick(Sender: TObject);
+begin
+  if fProc.isNotNil then
+    fProc.Terminate(0);
 end;
 
 procedure TCEProcInputWidget.txtInpKeyDown(Sender: TObject; var Key: Word;
