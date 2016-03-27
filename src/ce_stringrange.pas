@@ -87,6 +87,11 @@ implementation
 
 class function TStringRange.create(const str: string): TStringRange;
 begin
+  result.ptr := nil;
+  result.pos := 0;
+  result.len := 0;
+  if str = '' then
+    exit;
   result.ptr := @str[1];
   result.pos := 0;
   result.len := length(str);
