@@ -1040,7 +1040,7 @@ procedure setNativeProjectCompiler(value: TCECompiler);
 begin
   case value of
     dmd: NativeProjectCompilerFilename := exeFullName('dmd' + exeExt);
-    gdc: NativeProjectCompilerFilename := exeFullName('cegdcldc' + exeExt);
+    gdc: NativeProjectCompilerFilename := exeFullName('gdmd' + exeExt);
     ldc: NativeProjectCompilerFilename := exeFullName('ldmd2' + exeExt);
   end;
   if (not NativeProjectCompilerFilename.fileExists)
