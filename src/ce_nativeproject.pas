@@ -781,6 +781,8 @@ begin
   fCompilProc.OnReadData:= @compProcOutput;
   fCompilProc.OnTerminate:= @compProcTerminated;
   getOpts(fCompilProc.Parameters);
+  if NativeProjectCompiler = gdc then
+    fCompilProc.Parameters.Add('-gdc=gdc');
   fCompilProc.Execute;
 end;
 
