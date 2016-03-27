@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Menus, ComCtrls, Buttons, LazFileUtils, strutils, fphttpclient, StdCtrls,
   ce_widget, ce_interfaces, ce_nativeproject, ce_dmdwrap, ce_common, ce_dialogs,
-  ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_stringrange;
+  ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_stringrange,
+  ce_libman;
 
 type
 
@@ -39,7 +40,9 @@ type
     btnSelProj: TBitBtn;
     List: TListView;
     Panel1: TPanel;
+    btnEnabled: TSpeedButton;
     procedure btnAddLibClick(Sender: TObject);
+    procedure btnEnabledClick(Sender: TObject);
     procedure btnDubFetchClick(Sender: TObject);
     procedure btnEditAliasClick(Sender: TObject);
     procedure btnOpenProjClick(Sender: TObject);
@@ -63,9 +66,10 @@ type
     procedure projFocused(aProject: ICECommonProject);
     procedure projCompiling(aProject: ICECommonProject);
     procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    function  itemForRow(row: TListItem): TLibraryItem;
+    procedure RowToLibrary(row: TListItem);
     //
     procedure dataToGrid;
-    procedure gridToData;
   protected
     procedure DoShow; override;
   public
@@ -76,14 +80,12 @@ type
   function sourceRoot(project: ICECommonProject): string;
 
 implementation
-
 {$R *.lfm}
 
-uses
-  ce_libman;
 
 const
   notav: string = '< n/a >';
+  enableStr: array [boolean] of string = ('false','true');
 
 constructor TCELibManEditorWidget.Create(aOwner: TComponent);
 begin
@@ -100,6 +102,7 @@ begin
   AssignPng(btnDubFetch, 'dub_small');
   AssignPng(btnSelProj, 'script_bricks');
   AssignPng(btnOpenProj, 'book_open');
+  AssignPng(btnEnabled, 'book');
 end;
 
 procedure TCELibManEditorWidget.updateButtonsState;
@@ -108,6 +111,10 @@ begin
     fProj.Filename.fileExists;
   btnOpenProj.Enabled := List.Selected.isNotNil and
     List.Selected.SubItems[2].fileExists;
+  if List.Selected.isNotNil and itemForRow(List.Selected).enabled then
+    AssignPng(btnEnabled, 'book')
+  else
+    AssignPng(btnEnabled, 'book_grey');
 end;
 
 procedure TCELibManEditorWidget.projNew(aProject: ICECommonProject);
@@ -146,9 +153,15 @@ procedure TCELibManEditorWidget.projCompiled(aProject: ICECommonProject; success
 begin
 end;
 
+function TCELibManEditorWidget.itemForRow(row: TListItem): TLibraryItem;
+begin
+  result := TLibraryItem(row.Data);
+end;
+
 procedure TCELibManEditorWidget.ListEdited(Sender: TObject; Item: TListItem; var AValue: string);
 begin
-  gridToData;
+  if Item.isNotNil then
+    RowToLibrary(item);
 end;
 
 procedure TCELibManEditorWidget.ListSelectItem(Sender: TObject;
@@ -162,10 +175,12 @@ var
   itm: TListItem;
 begin
   itm := List.Items.Add;
+  itm.Data := LibMan.libraries.Add;
   itm.Caption := notav;
   itm.SubItems.Add(notav);
   itm.SubItems.Add(notav);
   itm.SubItems.Add(notav);
+  itm.SubItems.Add(enableStr[true]);
   SetFocus;
   itm.Selected := True;
 end;
@@ -272,8 +287,8 @@ var
   err: integer;
   idx: integer;
   prj: TCEDubProject;
-  cdy: string;
   upd: boolean = false;
+  row: TListItem;
 begin
   if TDubPackageQueryForm.showAndWait(nme) <> mrOk then
     exit;
@@ -374,15 +389,15 @@ begin
       try
         for idx := 0 to prj.sourcesCount-1 do
           str.Add(prj.sourceAbsolute(idx));
-        with List.Items.Add do
-        begin
-          Caption := nme;
-          SubItems.Add(prj.outputFilename);
-          cdy := sourceRoot(prj as ICECommonProject);
-          SubItems.Add(cdy);
-          SubItems.Add(prj.filename);
-          Selected:=true;
-        end;
+        row := List.Items.Add;
+        row.Data := LibMan.libraries.Add;
+        row.Caption := nme;
+        row.SubItems.Add(prj.outputFilename);
+        row.SubItems.Add(sourceRoot(prj as ICECommonProject));
+        row.SubItems.Add(prj.filename);
+        row.SubItems.Add(enableStr[true]);
+        row.Selected:=true;
+        RowToLibrary(row);
       finally
         str.Free;
       end;
@@ -392,7 +407,6 @@ begin
   finally
     prj.Free;
     EntitiesConnector.endUpdate;
-    gridToData;
   end;
 end;
 
@@ -405,7 +419,20 @@ begin
   al := List.Selected.Caption;
   if inputQuery('library alias', '', al) then
     List.Selected.Caption := al;
-  gridToData;
+  RowToLibrary(List.Selected);
+end;
+
+procedure TCELibManEditorWidget.btnEnabledClick(Sender: TObject);
+begin
+  if List.Selected.isNil then
+    exit;
+
+  if List.Selected.SubItems[3] = 'true' then
+    List.Selected.SubItems[3] := 'false'
+  else
+    List.Selected.SubItems[3] := 'true';
+  RowToLibrary(List.Selected);
+  updateButtonsState;
 end;
 
 procedure TCELibManEditorWidget.btnOpenProjClick(Sender: TObject);
@@ -447,6 +474,7 @@ var
   fname: string;
   root: string;
   lalias: string;
+  row: TListItem;
 begin
   if fProj = nil then exit;
   //
@@ -469,21 +497,21 @@ begin
     end;
     //
     fname := fProj.outputFilename;
-    with List.Items.Add do
-    begin
-      Caption := ExtractFileNameOnly(fname);
-      if fname.extractFileExt <> libExt then
-        SubItems.add(fname + libExt)
-      else
-        SubItems.add(fname);
-      SubItems.add(root);
-      SubItems.add(fProj.filename);
-      if not SubItems[0].fileExists then
-        dlgOkInfo('the library file does not exist, maybe the project not been already compiled ?');
-      Selected:= true;
-    end;
+    row := List.Items.Add;
+    row.Data := LibMan.libraries.Add;
+    row.Caption := ExtractFileNameOnly(fname);
+    if fname.extractFileExt <> libExt then
+      row.SubItems.add(fname + libExt)
+    else
+      row.SubItems.add(fname);
+    row.SubItems.add(root);
+    row.SubItems.add(fProj.filename);
+    row.SubItems.add(enableStr[true]);
+    if not row.SubItems[0].fileExists then
+      dlgOkInfo('the library file does not exist, maybe the project not been already compiled ?');
+    row.Selected:= true;
     SetFocus;
-    gridToData;
+    RowToLibrary(row);
   finally
     str.free;
   end;
@@ -493,28 +521,27 @@ procedure TCELibManEditorWidget.btnRemLibClick(Sender: TObject);
 begin
   if List.Selected.isNil then
     exit;
+  LibMan.libraries.Delete(List.Selected.Index);
   List.Items.Delete(List.Selected.Index);
-  gridToData;
 end;
 
 procedure TCELibManEditorWidget.btnSelProjClick(Sender: TObject);
 var
-  ini: string = '';
+  ini: string;
 begin
   if List.Selected.isNil then
     exit;
-  if List.Selected.SubItems.Count > 2 then
-    ini := List.Selected.SubItems[2]
-  else while List.Selected.SubItems.Count < 3 do
-    List.Selected.SubItems.Add(ini);
-  with TOpenDialog.Create(nil) do try
+  //
+  ini := List.Selected.SubItems[2];
+  with TOpenDialog.Create(nil) do
+  try
     FileName := ini;
     if Execute then
       List.Selected.SubItems[2] := FileName;
   finally
     free;
   end;
-  gridToData;
+  RowToLibrary(List.Selected);
 end;
 
 procedure TCELibManEditorWidget.btnSelFileClick(Sender: TObject);
@@ -523,28 +550,26 @@ var
 begin
   if List.Selected.isNil then
     exit;
-  if List.Selected.SubItems.Count > 0 then
-    ini := List.Selected.SubItems[0]
-  else
-    List.Selected.SubItems.Add(ini);
+  //
+  ini := List.Selected.SubItems[0];
   with TOpenDialog.Create(nil) do
-    try
-      filename := ini;
-      if Execute then
+  try
+    filename := ini;
+    if Execute then
+    begin
+      if not filename.fileExists then
+        List.Selected.SubItems[0] := filename.extractFilePath
+      else
       begin
-        if not filename.fileExists then
-          List.Selected.SubItems[0] := filename.extractFilePath
-        else
-        begin
-          List.Selected.SubItems[0] := filename;
-          if (List.Selected.Caption.isEmpty) or (List.Selected.Caption = notav) then
-            List.Selected.Caption := ChangeFileExt(filename.extractFileName, '');
-        end;
+        List.Selected.SubItems[0] := filename;
+        if (List.Selected.Caption.isEmpty) or (List.Selected.Caption = notav) then
+          List.Selected.Caption := ChangeFileExt(filename.extractFileName, '');
       end;
-    finally
-      Free;
     end;
-  gridToData;
+  finally
+    Free;
+  end;
+  RowToLibrary(List.Selected);
 end;
 
 procedure TCELibManEditorWidget.btnSelfoldOfFilesClick(Sender: TObject);
@@ -553,16 +578,11 @@ var
 begin
   if List.Selected.isNil then
     exit;
-  if List.Selected.SubItems.Count > 0 then
-    dir := List.Selected.SubItems[0]
-  else
-  begin
-    dir := '';
-    List.Selected.SubItems.Add(dir);
-  end;
+  //
+  dir := List.Selected.SubItems[0];
   if selectDirectory('folder of static libraries', dir, outdir, True, 0) then
     List.Selected.SubItems[0] := outdir;
-  gridToData;
+  RowToLibrary(List.Selected);
 end;
 
 procedure TCELibManEditorWidget.btnSelRootClick(Sender: TObject);
@@ -571,39 +591,39 @@ var
 begin
   if List.Selected.isNil then
     exit;
-  if List.Selected.SubItems.Count > 1 then
-    dir := List.Selected.SubItems[1]
-  else
-  begin
-    dir := '';
-    while List.Selected.SubItems.Count < 2 do
-      List.Selected.SubItems.Add(dir);
-  end;
+  //
+  dir := List.Selected.SubItems[1];
   if selectDirectory('sources root', dir, outdir, True, 0) then
     List.Selected.SubItems[1] := outdir;
-  gridToData;
+  RowToLibrary(List.Selected);
 end;
 
 procedure TCELibManEditorWidget.btnMoveUpClick(Sender: TObject);
+var
+  i: integer;
 begin
   if list.Selected.isNil then
     exit;
   if list.Selected.Index = 0 then
     exit;
   //
-  list.Items.Exchange(list.Selected.Index, list.Selected.Index - 1);
-  gridToData;
+  i := list.Selected.Index;
+  list.Items.Exchange(i, i - 1);
+  LibMan.libraries.Exchange(i, i - 1);
 end;
 
 procedure TCELibManEditorWidget.btnMoveDownClick(Sender: TObject);
+var
+  i: integer;
 begin
   if list.Selected.isNil then
     exit;
   if list.Selected.Index = list.Items.Count - 1 then
     exit;
   //
-  list.Items.Exchange(list.Selected.Index, list.Selected.Index + 1);
-  gridToData;
+  i := list.Selected.Index;
+  list.Items.Exchange(i, i + 1);
+  LibMan.libraries.Exchange(i, i + 1);
 end;
 
 procedure TCELibManEditorWidget.DoShow;
@@ -626,32 +646,30 @@ begin
   begin
     itm := TLibraryItem(LibMan.libraries.Items[i]);
     row := List.Items.Add;
+    row.Data:= itm;
     row.Caption := itm.libAlias;
     row.SubItems.Add(itm.libFile);
     row.SubItems.Add(itm.libSourcePath);
     row.SubItems.Add(itm.projectFile);
+    row.SubItems.Add(enableStr[itm.enabled]);
   end;
   List.EndUpdate;
 end;
 
-procedure TCELibManEditorWidget.gridToData;
+procedure TCELibManEditorWidget.RowToLibrary(row: TListItem);
 var
   itm: TLibraryItem;
-  row: TListItem;
 begin
-  if LibMan.isNil then
+  itm := itemForRow(row);
+  if itm.isNil then
     exit;
-  LibMan.libraries.BeginUpdate;
-  LibMan.libraries.Clear;
-  for row in List.Items do
-  begin
-    itm := TLibraryItem(LibMan.libraries.Add);
-    itm.libAlias := row.Caption;
-    itm.libFile := row.SubItems[0];
-    itm.libSourcePath := row.SubItems[1];
-    itm.projectFile:= row.SubItems[2];
-  end;
-  LibMan.libraries.EndUpdate;
+
+  itm.libAlias      := row.Caption;
+  itm.libFile       := row.SubItems[0];
+  itm.libSourcePath := row.SubItems[1];
+  itm.projectFile   := row.SubItems[2];
+  itm.enabled       := row.SubItems[3] = enableStr[true];
+
   LibMan.updateDCD;
 end;
 

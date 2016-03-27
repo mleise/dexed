@@ -157,6 +157,15 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
           Spacing = 0
           TabOrder = 11
         end
+        object btnEnabled: TSpeedButton
+          Left = 196
+          Height = 26
+          Hint = 'disable or enable this library, without removing it from the collection'
+          Top = 0
+          Width = 28
+          Align = alLeft
+          OnClick = btnEnabledClick
+        end
       end
       object List: TListView[1]
         Left = 4
@@ -184,7 +193,12 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
           item
             AutoSize = True
             Caption = 'project'
-            Width = 409
+            Width = 54
+          end        
+          item
+            AutoSize = True
+            Caption = 'enabled'
+            Width = 355
           end>
         GridLines = True
         HideSelection = False

@@ -20,11 +20,15 @@ type
     fSourcePath: string;
     fLibFile: string;
     fProjFile: string;
+    fEnabled: boolean;
   published
     property libAlias: string read fAlias write fAlias;
     property libSourcePath: string read fSourcePath write fSourcePath;
     property libFile: string read fLibFile write fLibFile;
     property projectFile: string read fProjFile write fProjFile;
+    property enabled: boolean read fEnabled write fEnabled default true;
+  public
+    constructor Create(ACollection: TCollection); override;
   end;
 
   (**
@@ -33,7 +37,7 @@ type
   TLibraryManager = class(TWritableLfmTextComponent)
   private
     fCol: TCollection;
-    procedure setCol(const aValue: TCollection);
+    procedure setCol(value: TCollection);
   published
     property libraries: TCollection read fCol write setCol;
   public
@@ -53,6 +57,12 @@ var
   LibMan: TLibraryManager;
 
 implementation
+
+constructor TLibraryItem.Create(ACollection: TCollection);
+begin
+  inherited create(ACollection);
+  fEnabled:=true;
+end;
 
 constructor TLibraryManager.create(aOwner: TComponent);
 var
@@ -148,9 +158,9 @@ begin
   inherited;
 end;
 
-procedure TLibraryManager.setCol(const aValue: TCollection);
+procedure TLibraryManager.setCol(value: TCollection);
 begin
-  fCol.assign(aValue);
+  fCol.assign(value);
 end;
 
 procedure TLibraryManager.updateDCD;
@@ -166,7 +176,8 @@ begin
     for i := 0 to fCol.Count-1 do
     begin
       itm := TLibraryItem(fCol.Items[i]);
-      str.Add(itm.libSourcePath);
+      if itm.enabled then
+        str.Add(itm.libSourcePath);
     end;
     DcdWrapper.addImportFolders(str);
   finally
@@ -188,8 +199,8 @@ begin
   for i := 0 to fCol.Count-1 do
   begin
     itm := TLibraryItem(fCol.Items[i]);
-    if someAliases.isNotNil then
-      if someAliases.IndexOf(itm.libAlias) = -1 then
+    if (not itm.enabled) or
+      (someAliases.isNotNil and (someAliases.IndexOf(itm.libAlias) = -1)) then
         continue;
     // single lib files
     if fileExists(itm.libFile) then
@@ -232,8 +243,8 @@ begin
   for i := 0 to fCol.Count-1 do
   begin
     itm := TLibraryItem(fCol.Items[i]);
-    if someAliases.isNotNil then
-      if someAliases.IndexOf(itm.libAlias) = -1 then
+    if (not itm.enabled) or
+      (someAliases.isNotNil and (someAliases.IndexOf(itm.libAlias) = -1)) then
         continue;
     //
     if aList.IndexOf(itm.libSourcePath) <> -1 then

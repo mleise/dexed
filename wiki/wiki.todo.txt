@@ -1,2 +1,7 @@
 - new symbolic strings, ENV_XXX, see issue #27
 - fetch DUB package, list of online package can be displayed.
+- libman, entries can be disabled without removal, example: useful when testing new dmd version with runnable, no need to recompile all libs of the registry.
+- support for gdmd
+- input process widget: kill process, in case of error, infinite loop, emergency kill
+- editor note about usefull commands: comment selection, invert version all/none
+- tuto are obsolete
