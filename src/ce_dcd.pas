@@ -497,6 +497,7 @@ begin
         popFront; popFront;
       end
     end;
+    aComment += LineEnding + LineEnding;
   end;
   //
   aComment := ReplaceText(aComment, 'ditto' + LineEnding + LineEnding, '');
