@@ -827,7 +827,7 @@ begin
     exit;
   end;
 
-  // symbols 1
+  // symbols
   if isSymbol(reader^) then
   begin
     fTokKind := tkSymbl;
@@ -856,31 +856,60 @@ begin
   if isOperator1(reader^) then
   begin
     fTokKind := tkSymbl;
-    while isOperator1(readerNext^) do (*!*);
-    case fTokStop - fTokStart of
-      4:begin
-          if (not isOperator1(reader^)) and
-            isOperator4(fLineBuf[fTokStart..fTokStop-1])
-          then exit;
-        end;
-      3:begin
-          if (not isOperator1(reader^)) and
-            (isOperator3(fLineBuf[fTokStart..fTokStop-1]) or
-              (isOperator2(fLineBuf[fTokStart..fTokStop-2]) and
-                isPostOpSymbol(fLineBuf[fTokStop-1])))
-          then exit;
-        end;
-      2:begin
-          if (not isOperator1(reader^)) and
-            isOperator2(fLineBuf[fTokStart..fTokStop-1])
-          then exit;
-        end;
-      1:begin
-          if not isOperator1(reader^) then exit;
-        end;
+    while isOperator1(readerNext^) do
+      if fTokStop - fTokStart = 4 then break;
+    if (fTokStop - fTokStart = 4) then
+    begin
+      if isOperator4(fLineBuf[fTokStart..fTokStart+3]) then
+        exit;
+      if isOperator3(fLineBuf[fTokStart..fTokStart+2]) then
+      begin
+        readerPrev;
+        exit;
+      end;
+      if isOperator2(fLineBuf[fTokStart..fTokStart+1]) then
+      begin
+        readerPrev;
+        readerPrev;
+        exit;
+      end;
+      if isOperator1(fLineBuf[fTokStart]) then
+      begin
+        readerPrev;
+        readerPrev;
+        readerPrev;
+        exit;
+      end;
     end;
+    if (fTokStop - fTokStart = 3) then
+    begin
+      if isOperator3(fLineBuf[fTokStart..fTokStart+2]) then
+        exit;
+      if isOperator2(fLineBuf[fTokStart..fTokStart+1]) then
+      begin
+        readerPrev;
+        exit;
+      end;
+      if isOperator1(fLineBuf[fTokStart]) then
+      begin
+        readerPrev;
+        readerPrev;
+        exit;
+      end;
+    end;
+    if (fTokStop - fTokStart = 2) then
+    begin
+      if isOperator2(fLineBuf[fTokStart..fTokStart+1]) then
+        exit;
+      if isOperator1(fLineBuf[fTokStart]) then
+      begin
+        readerPrev;
+        exit;
+      end;
+    end;
+    if (fTokStop - fTokStart = 1) and isOperator1(fLineBuf[fTokStart]) then
+      exit;
     fTokKind := tkError;
-    //if isWhite(reader^) then
     exit;
   end;
 

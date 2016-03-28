@@ -739,51 +739,97 @@ begin
         if isOutOfBound then
           exit;
         identifier += reader.head^;
+        if length(identifier) = 4 then
+          break;
       end;
-      case length(identifier) of
-        4:
+      if length(identifier) = 4 then
+      begin
+        if isOperator4(identifier) then
         begin
-          if (not isOperator1(reader.head^)) and
-            isOperator4(identifier) then
-          begin
-            addToken(ltkOperator);
-            if callBackDoStop then
-              exit;
-            continue;
-          end;
+          addToken(ltkOperator);
+          if callBackDoStop then
+            exit;
+          continue;
         end;
-        3:
+        if isOperator3(identifier[1..length(identifier)-1]) then
         begin
-          if (not isOperator1(reader.head^)) and
-            isOperator3(identifier) then
-          begin
-            addToken(ltkOperator);
-            if callBackDoStop then
-              exit;
-            continue;
-          end;
+          reader.previous;
+          addToken(ltkOperator);
+          if callBackDoStop then
+            exit;
+          continue;
         end;
-        2:
+        if isOperator2(identifier[1..length(identifier)-2]) then
         begin
-          if (not isOperator1(reader.head^)) and
-            isOperator2(identifier) then
-          begin
-            addToken(ltkOperator);
-            if callBackDoStop then
-              exit;
-            continue;
-          end;
+          reader.previous;
+          reader.previous;
+          addToken(ltkOperator);
+          if callBackDoStop then
+            exit;
+          continue;
         end;
-        1:
+        if isOperator1(identifier[1]) then
         begin
-          if not isOperator1(reader.head^) then
-          begin
-            addToken(ltkOperator);
-            if callBackDoStop then
-              exit;
-            continue;
-          end;
+          reader.previous;
+          reader.previous;
+          reader.previous;
+          addToken(ltkOperator);
+          if callBackDoStop then
+            exit;
+          continue;
         end;
+      end;
+      if length(identifier) = 3 then
+      begin
+        if isOperator3(identifier) then
+        begin
+          addToken(ltkOperator);
+          if callBackDoStop then
+            exit;
+          continue;
+        end;
+        if isOperator2(identifier[1..length(identifier)-1]) then
+        begin
+          reader.previous;
+          addToken(ltkOperator);
+          if callBackDoStop then
+            exit;
+          continue;
+        end;
+        if isOperator1(identifier[1]) then
+        begin
+          reader.previous;
+          reader.previous;
+          addToken(ltkOperator);
+          if callBackDoStop then
+            exit;
+          continue;
+        end;
+      end;
+      if length(identifier) = 2 then
+      begin
+        if isOperator2(identifier) then
+        begin
+          addToken(ltkOperator);
+          if callBackDoStop then
+            exit;
+          continue;
+        end;
+        if isOperator1(identifier[1]) then
+        begin
+          reader.previous;
+          addToken(ltkOperator);
+          if callBackDoStop then
+            exit;
+          continue;
+        end;
+      end;
+      if (length(identifier) = 1) and isOperator1(identifier[1]) then
+      begin
+        addToken(ltkOperator);
+        if callBackDoStop then
+          exit;
+        continue;
       end;
     end;
 
@@ -807,7 +853,9 @@ begin
     end;
 
     // error
+    {$IFDEF DEBUG}
     identifier += ' (unrecognized lexer input)';
+    {$ENDIF}
     addToken(ltkIllegal);
 
   end;
