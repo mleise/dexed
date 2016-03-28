@@ -1,4 +1,4 @@
-unit fpjsonrtti;
+unit xfpjsonrtti;
 
 {$mode objfpc}
 

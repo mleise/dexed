@@ -212,6 +212,7 @@ begin
     parser := TJSONParser.Create(loader, [joIgnoreTrailingComma, joUTF8]);
     //TODO-cfcl-json: remove etc/fcl-json the day they'll merge and rlz the version with 'Options'
     //TODO-cfcl-json: track possible changes and fixes at http://svn.freepascal.org/cgi-bin/viewvc.cgi/trunk/packages/fcl-json/
+    //latest in in etc = rev 33310.
     try
       try
         fJSON := parser.Parse as TJSONObject;
