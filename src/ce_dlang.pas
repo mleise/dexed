@@ -751,7 +751,7 @@ begin
             exit;
           continue;
         end;
-        if isOperator3(identifier[1..length(identifier)-1]) then
+        if isOperator3(identifier[1..3]) then
         begin
           reader.previous;
           addToken(ltkOperator);
@@ -759,7 +759,7 @@ begin
             exit;
           continue;
         end;
-        if isOperator2(identifier[1..length(identifier)-2]) then
+        if isOperator2(identifier[1..2]) then
         begin
           reader.previous;
           reader.previous;
@@ -788,7 +788,7 @@ begin
             exit;
           continue;
         end;
-        if isOperator2(identifier[1..length(identifier)-1]) then
+        if isOperator2(identifier[1..2]) then
         begin
           reader.previous;
           addToken(ltkOperator);

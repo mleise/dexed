@@ -815,6 +815,31 @@ begin
     exit;
   end else readerReset;
 
+  // bin & hex literals
+  if reader^ = '0' then if readerNext^ in ['b','B', 'x', 'X'] then
+  begin
+    fTokKind:= tkNumbr;
+    readerNext;
+    if (reader-1)^ in ['b','B'] then
+      readWhile(reader, fTokStop, ['0','1','_'])
+    else
+      readWhile(reader, fTokStop, hexaChars + ['.']);
+    if not tryReadDelim(reader, fTokStop, 'uL')
+    then if not tryReadDelim(reader, fTokStop, 'UL')
+    then if not tryReadDelim(reader, fTokStop, 'Lu')
+    then if not tryReadDelim(reader, fTokStop, 'LU')
+    then if reader^ in ['U','L','u', 'p', 'P', 'i'] then
+      readerNext;
+    if not isWhite(reader^) and not isOperator1(reader^) and
+      not isSymbol(reader^) then
+    begin
+      fTokKind:= tkError;
+      readUntilAmong(reader, fTokStop, [#0..#32] + symbChars);
+    end;
+    exit;
+  end
+  else readerPrev;
+
   // numbers
   if (isNumber(reader^)) then
   begin
