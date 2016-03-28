@@ -61,23 +61,17 @@ type
     function find(const aValue: string): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
   end;
 
-  TTokenKind = (tkCommt, tkIdent, tkKeywd, tkStrng, tkBlank, tkSymbl, tkNumbr, tkDDocs, tkSpecK, tkError);
+  TTokenKind = (tkCommt, tkIdent, tkKeywd, tkStrng, tkBlank, tkSymbl, tkNumbr,
+    tkDDocs, tkSpecK, tkError, tkAsmbl);
 
-  TRangeKind = (rkString1, rkString2, rkTokString, rkBlockCom1, rkBlockCom2, rkBlockDoc1, rkBlockDoc2, rkAsm);
-
-  // a terminal range kind, cannot be combined with another range kind.
-  TPrimaryRange = (prNone, prString1, prString2, prBlockCom1, prBlockCom2, prBlockDoc1, prBlockDoc2);
-
-  // can be combined to a primary range
-  TSecondaryRange = (srNone, srTokenString, srActiveVersion, srInactiveVersion, srAssembly);
-
-  // used by the secondary ranges to transform the standard token attributes.
-  TAttributeTransform = (taFontStyle, taFontColor, taBackColor);
+  TRangeKind = (rkString1, rkString2, rkTokString, rkBlockCom1, rkBlockCom2,
+    rkBlockDoc1, rkBlockDoc2, rkAsm);
 
   TRangeKinds = set of TRangeKind;
 
   // defines the ranges which can be folded
-  TFoldKinds = set of (fkBrackets, fkComments1, fkComments2, fkStrings, fkRegion, fkDDoc);
+  TFoldKinds = set of (fkBrackets, fkComments1, fkComments2, fkStrings, fkRegion,
+    fkDDoc);
 
   // internal class used to keep trace of the useful informations of the previous line
   TSynD2SynRange = class(TSynCustomHighlighterRange)
@@ -86,8 +80,6 @@ type
     nestedCommentsCount: Integer;
     tokenStringBracketsCount: Integer;
     rangeKinds: TRangeKinds;
-    primaryRange: TPrimaryRange;
-    secondaryRange: TSecondaryRange;
     // double quoted multi-line string prefixed with 'r':
     // => don't skip '"' following '\'
     rString: boolean;
@@ -265,9 +257,6 @@ begin
   tokenStringBracketsCount := 0;
   rangeKinds := [];
   rString := false;
-  //
-  primaryRange := prNone;
-  secondaryRange := srNone;
 end;
 
 procedure TSynD2SynRange.copyFrom(aSource: TSynD2SynRange);
@@ -277,9 +266,6 @@ begin
   tokenStringBracketsCount := aSource.tokenStringBracketsCount;
   rangeKinds := aSource.rangeKinds;
   rString := aSource.rString;
-  //
-  primaryRange := aSource.primaryRange;
-  secondaryRange := aSource.secondaryRange;
 end;
 
 constructor TSynD2Syn.create(aOwner: TComponent);
@@ -351,6 +337,7 @@ begin
   fAttribLut[TTokenKind.tkDDocs] := fDDocsAttrib;
   fAttribLut[TTokenKind.tkSpecK] := fSpeckAttrib;
   fAttribLut[TTokenKind.tkError] := fErrorAttrib;
+  fAttribLut[TTokenKind.tkAsmbl] := fAsblrAttrib;
 
   SetAttributesOnChange(@doAttribChange);
   fTokStop := 1;
@@ -882,7 +869,8 @@ begin
   begin
     fTokKind := tkSymbl;
     while isOperator1(readerNext^) do
-      if fTokStop - fTokStart = 4 then break;
+      if (fTokStop - fTokStart = 4) or (reader^= #10) then
+        break;
     if (fTokStop - fTokStart = 4) then
     begin
       if isOperator4(fLineBuf[fTokStart..fTokStart+3]) then
@@ -949,13 +937,15 @@ begin
       if isOperator1(reader^) then break;
     end;
     if fKeyWords.find(fLineBuf[FTokStart..fTokStop-1]) then
-      fTokKind := tkKeywd
-    else if fSpecKw.find(fLineBuf[FTokStart..fTokStop-1]) then
-      fTokKind := tkSpecK;
-    //check asm range
-    if fTokKind = tkKeywd then
-      if fLineBuf[FTokStart..fTokStop-1] = 'asm' then
+    begin
+      fTokKind := tkKeywd;
+      if (fLineBuf[FTokStart..fTokStop-1] = 'asm') then
         fCurrRange.rangeKinds += [rkAsm];
+    end
+    else if fSpecKw.find(fLineBuf[FTokStart..fTokStop-1]) then
+      fTokKind := tkSpecK
+    else if rkAsm in fCurrRange.rangeKinds then
+      fTokKind:=tkAsmbl;
     exit;
   end;
 
@@ -973,12 +963,6 @@ end;
 function TSynD2Syn.GetTokenAttribute: TSynHighlighterAttributes;
 begin
   result := fAttribLut[fTokKind];
-  if (rkAsm in fCurrRange.rangeKinds) then
-    if (fTokKind <> tkSymbl) then
-      if (fTokKind <> tkKeywd) then
-        if (fTokKind <> tkCommt) then
-          if (fTokKind <> tkDDocs) then
-            result := fAsblrAttrib;
 end;
 
 procedure TSynD2Syn.SetRange(Value: Pointer);
