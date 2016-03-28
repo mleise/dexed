@@ -63,15 +63,15 @@ type
     property R15: TCpuRegValue read fRegisters[TCpuRegister.r15];
     property RIP: TCpuRegValue read fRegisters[TCpuRegister.rip];
   {$ELSE}
-    property EAX: TCpuRegValue read fRegisters[TCpuRegs.eax];
-    property EBX: TCpuRegValue read fRegisters[TCpuRegs.ebx];
-    property ECX: TCpuRegValue read fRegisters[TCpuRegs.ecx];
-    property EDX: TCpuRegValue read fRegisters[TCpuRegs.edx];
-    property ESI: TCpuRegValue read fRegisters[TCpuRegs.esi];
-    property EDI: TCpuRegValue read fRegisters[TCpuRegs.edi];
-    property EBP: TCpuRegValue read fRegisters[TCpuRegs.ebp];
-    property ESP: TCpuRegValue read fRegisters[TCpuRegs.esp];
-    property EIP: TCpuRegValue read fRegisters[TCpuRegs.eip];
+    property EAX: TCpuRegValue read fRegisters[TCpuRegister.eax];
+    property EBX: TCpuRegValue read fRegisters[TCpuRegister.ebx];
+    property ECX: TCpuRegValue read fRegisters[TCpuRegister.ecx];
+    property EDX: TCpuRegValue read fRegisters[TCpuRegister.edx];
+    property ESI: TCpuRegValue read fRegisters[TCpuRegister.esi];
+    property EDI: TCpuRegValue read fRegisters[TCpuRegister.edi];
+    property EBP: TCpuRegValue read fRegisters[TCpuRegister.ebp];
+    property ESP: TCpuRegValue read fRegisters[TCpuRegister.esp];
+    property EIP: TCpuRegValue read fRegisters[TCpuRegister.eip];
   {$ENDIF}
     property CallStack_M0: string read fLastCalls[0];
     property CallStack_M1: string read fLastCalls[1];
