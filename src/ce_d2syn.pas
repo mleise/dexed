@@ -465,7 +465,8 @@ var
   reader: PChar = nil;
 
 label
-  _postString1;
+  _postString1,
+  _notDotFloat;
 
 procedure readerReset;
 begin
@@ -669,7 +670,7 @@ begin
     exit;
   end;
 
-  // string 1
+  // double quoted strings | raw double quoted strings
   if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkTokString])
     then if readDelim(reader, fTokStop, stringPrefixes) then
   begin
@@ -739,7 +740,7 @@ begin
     exit;
   end;
 
-  // string 2
+  // backticks strings
   if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkTokString]) then
     if readDelim(reader, fTokStop, '`') then
   begin
@@ -768,7 +769,7 @@ begin
     exit;
   end;
 
-  //token string
+  // token string
   if readDelim(reader, fTokStop, 'q{') then
   begin
     fTokKind := tkSymbl;
@@ -811,11 +812,17 @@ begin
       readWhile(reader, fTokStop, ['0','1','_'])
     else
       readWhile(reader, fTokStop, hexaChars + ['.']);
-    if not tryReadDelim(reader, fTokStop, 'uL')
+    // exponent, sign tokenized later as op then value as number
+    if reader^ in ['P','p'] then
+    begin
+      readerNext;
+      exit;
+    end;
+         if not tryReadDelim(reader, fTokStop, 'uL')
     then if not tryReadDelim(reader, fTokStop, 'UL')
     then if not tryReadDelim(reader, fTokStop, 'Lu')
     then if not tryReadDelim(reader, fTokStop, 'LU')
-    then if reader^ in ['U','L','u', 'p', 'P', 'i'] then
+    then if reader^ in ['U', 'L', 'u', 'i'] then
       readerNext;
     if not isWhite(reader^) and not isOperator1(reader^) and
       not isSymbol(reader^) then
@@ -827,17 +834,72 @@ begin
   end
   else readerPrev;
 
-  // numbers
-  if (isNumber(reader^)) then
+  // int and float literals
+  if (reader^ = '.') or (isNumber(reader^)) then
   begin
-    while isHex(readerNext^) or (reader^ = '_') or (reader^ = '.')
-      or (reader^ in ['x', 'X', 'u', 'U', 'L', 'i']) do (*!*);
-    if isWhite(reader^) or isSymbol(reader^) or isOperator1(reader^) then
-      fTokKind := tkNumbr
-    else
-      fTokKind := tkError;
+    if (reader^= '.') then
+    begin
+      readerNext;
+      if not isNumber(reader^) then
+      begin
+        readerPrev;
+        goto _notDotFloat;
+      end else
+        readerPrev;
+    end;
+    fTokKind:= tkNumbr;
+    if reader^ <> '.' then
+      while isNumber(readerNext^) or (reader^ = '_') do (*!*);
+    if reader^ = '.' then
+      while isNumber(readerNext^) or (reader^ = '_') do (*!*);
+    if reader^= '.' then
+    begin
+      readerNext;
+      // .init .min .max etc.
+      if not isNumber(reader^) then
+      begin
+        readerPrev;
+        exit;
+      end;
+      readerPrev;
+    end;
+    // exponent, sign tokenized later as op then value as number
+    if reader^ in ['E','e'] then
+    begin
+      readerNext;
+      exit;
+    end;
+    // try valid suffixes
+         if not tryReadDelim(reader, fTokStop, 'uL')
+    then if not tryReadDelim(reader, fTokStop, 'UL')
+    then if not tryReadDelim(reader, fTokStop, 'Lu')
+    then if not tryReadDelim(reader, fTokStop, 'LU')
+    then if not tryReadDelim(reader, fTokStop, 'fi')
+    then if not tryReadDelim(reader, fTokStop, 'Fi')
+    then if not tryReadDelim(reader, fTokStop, 'Li')
+    then if reader^ in ['U','L','u', 'i', 'f','F'] then
+      readerNext;
+    if not isWhite(reader^) and not isOperator1(reader^) and
+      (not isSymbol(reader^) or (reader^ = '.')) then
+    begin
+      fTokKind:= tkError;
+      readUntilAmong(reader, fTokStop, [#0..#32] + symbChars - ['.']);
+    end;
     exit;
   end;
+  _notDotFloat:
+
+  // generic number literals
+  //if (isNumber(reader^)) then
+  //begin
+  //  while isHex(readerNext^) or (reader^ = '_') or (reader^ = '.')
+  //    or (reader^ in ['x', 'X', 'u', 'U', 'L', 'i']) do (*!*);
+  //  if isWhite(reader^) or isSymbol(reader^) or isOperator1(reader^) then
+  //    fTokKind := tkNumbr
+  //  else
+  //    fTokKind := tkError;
+  //  exit;
+  //end;
 
   // symbols
   if isSymbol(reader^) then
@@ -926,7 +988,7 @@ begin
     exit;
   end;
 
-  //Keyword - identifiers
+  // Keywords & identifiers
   if isFirstIdentifier(reader^) then
   begin
     fTokKind := tkIdent;
