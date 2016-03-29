@@ -835,6 +835,13 @@ begin
   begin
     if (reader^= '.') then
     begin
+      readerPrev;
+      if reader^= '.' then
+      begin
+        readerNext;
+        goto _notDotFloat;
+      end else
+        readerNext;
       readerNext;
       if not isNumber(reader^) then
       begin
