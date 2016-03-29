@@ -292,7 +292,6 @@ type
       without the overload aProcess does not get the Parameters if aProcess is TAsynProcess...}
     procedure setProcess(var aProcess: TProcess);
     procedure setProcess(var aProcess: TAsyncProcess);
-    procedure setProcess(var aProcess: TCheckedAsyncProcess);
     procedure setProcess(var aProcess: TCEProcess);
   end;
 
@@ -1250,17 +1249,6 @@ begin
 end;
 
 procedure TCustomProcOptions.setProcess(var aProcess: TAsyncProcess);
-begin
-  aProcess.Parameters.Clear;
-  aProcess.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
-  aProcess.Executable := fExecutable;
-  aProcess.ShowWindow := fShowWin;
-  aProcess.Options    := fOptions;
-  aProcess.CurrentDirectory := fWorkDir;
-  aProcess.StartupOptions := aProcess.StartupOptions + [suoUseShowWindow];
-end;
-
-procedure TCustomProcOptions.setProcess(var aProcess: TCheckedAsyncProcess);
 begin
   aProcess.Parameters.Clear;
   aProcess.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));

@@ -62,21 +62,6 @@ type
   end;
 
   (**
-   * Workaround for a TAsyncProcess Linux issue: OnTerminate event not called.
-   * An idle timer is started when executing and trigs the event if necessary.
-   *)
-  TCheckedAsyncProcess = class(TAsyncProcess)
-  {$IFNDEF WINDOWS}
-  private
-    fTimer: TIdleTimer;
-    procedure checkTerminated(sender: TObject);
-  public
-    constructor Create(aOwner: TComponent); override;
-    procedure Execute; override;
-  {$ENDIF}
-  end;
-
-  (**
    *  TProcess with assign() 'overriden'.
    *)
   TProcessEx = class helper for TProcess
@@ -210,7 +195,6 @@ type
    * Terminates and frees aProcess.
    *)
   procedure killProcess(var aProcess: TAsyncProcess);
-  procedure killProcess(var aProcess: TCheckedAsyncProcess);
 
   (**
    * Ensures that the i/o process pipes are not redirected if it waits on exit.
@@ -371,33 +355,6 @@ function TStringHelper.length: integer;
 begin
   exit(system.length(self));
 end;
-
-{$IFNDEF WINDOWS}
-constructor TCheckedAsyncProcess.Create(aOwner: TComponent);
-begin
-  inherited;
-  fTimer := TIdleTimer.Create(self);
-  fTimer.Enabled := false;
-  fTimer.Interval := 50;
-  fTimer.AutoEnabled := false;
-end;
-
-procedure TCheckedAsyncProcess.Execute;
-begin
-  if OnTerminate <> nil then
-    fTimer.Enabled :=true;
-  fTimer.OnTimer := @checkTerminated;
-  inherited;
-end;
-
-procedure TCheckedAsyncProcess.checkTerminated(sender: TObject);
-begin
-  if Running then exit;
-  if OnTerminate = nil then exit;
-  fTimer.Enabled:=false;
-  OnTerminate(Self);
-end;
-{$ENDIF}
 
 procedure TProcessEx.Assign(aValue: TPersistent);
 var
@@ -896,16 +853,6 @@ begin
 end;
 
 procedure killProcess(var aProcess: TAsyncProcess);
-begin
-  if aProcess = nil then
-    exit;
-  if aProcess.Running then
-    aProcess.Terminate(0);
-  aProcess.Free;
-  aProcess := nil;
-end;
-
-procedure killProcess(var aProcess: TCheckedAsyncProcess);
 begin
   if aProcess = nil then
     exit;
