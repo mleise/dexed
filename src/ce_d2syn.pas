@@ -148,7 +148,7 @@ type
     procedure Assign(Source: TPersistent); override;
     procedure GetTokenEx(out TokenStart: PChar; out TokenLength: integer); override;
     function GetDefaultAttribute(Index: integer): TSynHighlighterAttributes; override;
-    procedure setLine(const NewValue: String; LineNumber: Integer); override;
+    procedure setLine(const NewValue: string; LineNumber: Integer); override;
     procedure next; override;
     function  GetTokenAttribute: TSynHighlighterAttributes; override;
     function GetToken: string; override;
@@ -170,7 +170,7 @@ begin
     addEntry(value);
 end;
 
-{$IFDEF DEBUG}{$R-}{$ENDIF}
+{$IFDEF DEBUG}{$PUSH}{$R-}{$ENDIF}
 function TD2Dictionary.toHash(const aValue: string): Byte;
 var
   i: Integer;
@@ -179,7 +179,7 @@ begin
 	for i := 1 to length(aValue) do
 	  result += (Byte(aValue[i]) shl (4 and (1-i))) xor 25;
 end;
-{$IFDEF DEBUG}{$R+}{$ENDIF}
+{$IFDEF DEBUG}{$POP}{$ENDIF}
 
 procedure TD2Dictionary.addEntry(const aValue: string);
 var
@@ -283,16 +283,16 @@ begin
   WordBreakChars := WordBreakChars - ['@'];
 
   fWhiteAttrib := TSynHighlighterAttributes.Create('White','White');
-	fNumbrAttrib := TSynHighlighterAttributes.Create('Number','Number');
-	fSymblAttrib := TSynHighlighterAttributes.Create('Symbol','Symbol');
-	fIdentAttrib := TSynHighlighterAttributes.Create('Identifier','Identifier');
-	fCommtAttrib := TSynHighlighterAttributes.Create('Comment','Comment');
-	fStrngAttrib := TSynHighlighterAttributes.Create('String','String');
-  fKeywdAttrib := TSynHighlighterAttributes.Create('Keyword','Keyword');
-  fDDocsAttrib := TSynHighlighterAttributes.Create('DDoc','DDoc');
-  fAsblrAttrib := TSynHighlighterAttributes.Create('Asm','Asm');
-  fSpeckAttrib := TSynHighlighterAttributes.Create('SpecialKeywords','SpecialKeywords');
-  fErrorAttrib := TSynHighlighterAttributes.Create('Errors','Errors');
+  fNumbrAttrib := TSynHighlighterAttributes.Create('Numbr','Numbr');
+  fSymblAttrib := TSynHighlighterAttributes.Create('Symbl','Symbl');
+  fIdentAttrib := TSynHighlighterAttributes.Create('Ident','Ident');
+  fCommtAttrib := TSynHighlighterAttributes.Create('Commt','Commt');
+  fStrngAttrib := TSynHighlighterAttributes.Create('Strng','Strng');
+  fKeywdAttrib := TSynHighlighterAttributes.Create('Keywd','Keywd');
+  fDDocsAttrib := TSynHighlighterAttributes.Create('DDocs','DDocs');
+  fAsblrAttrib := TSynHighlighterAttributes.Create('Asblr','Asblr');
+  fSpeckAttrib := TSynHighlighterAttributes.Create('Speck','Speck');
+  fErrorAttrib := TSynHighlighterAttributes.Create('Error','Error');
 
   fNumbrAttrib.Foreground := $000079F2;
   fSymblAttrib.Foreground := clMaroon;
@@ -379,12 +379,10 @@ begin
   EndUpdate;
 end;
 
-{$HINTS OFF}
 procedure TSynD2Syn.doAttribChange(sender: TObject);
 begin
   doChanged;
 end;
-{$HINTS ON}
 
 procedure TSynD2Syn.setFoldKinds(value: TFoldKinds);
 begin
@@ -448,7 +446,7 @@ begin
   fErrorAttrib.Assign(value);
 end;
 
-procedure TSynD2Syn.setLine(const NewValue: String; LineNumber: Integer);
+procedure TSynD2Syn.setLine(const NewValue: string; LineNumber: Integer);
 begin
   inherited;
   // note: the end of line is marked with a #10
@@ -463,10 +461,8 @@ end;
 procedure TSynD2Syn.next;
 var
   reader: PChar = nil;
-
 label
-  _postString1,
-  _notDotFloat;
+  _notRawStrng, _notDotFloat;
 
 procedure readerReset;
 begin
@@ -681,7 +677,7 @@ begin
       begin
         fCurrRange.rString := false;
         readerPrev;
-        goto _postString1;
+        goto _notRawStrng;
       end;
     end;
     readerNext;
@@ -709,7 +705,7 @@ begin
     fCurrRange.rangeKinds += [rkString1];
     StartCodeFoldBlock(nil, fkStrings in fFoldKinds);
     exit;
-  end else _postString1: readerReset;
+  end else _notRawStrng: readerReset;
   if rkString1 in fCurrRange.rangeKinds then
   begin
     fTokKind := tkStrng;
@@ -1069,30 +1065,12 @@ end;
 
 function TSynD2Syn.GetDefaultAttribute(Index: integer): TSynHighlighterAttributes;
 begin
-  case Index of
-    SYN_ATTR_COMMENT: Result    := fCommtAttrib;
-    SYN_ATTR_IDENTIFIER: Result := fIdentAttrib;
-    SYN_ATTR_KEYWORD: Result    := fKeywdAttrib;
-    SYN_ATTR_STRING: Result     := fStrngAttrib;
-    SYN_ATTR_WHITESPACE: Result := fWhiteAttrib;
-    SYN_ATTR_SYMBOL: Result     := fSymblAttrib;
-    else Result := fIdentAttrib;
-  end;
+  result := nil;
 end;
 
 function TSynD2Syn.GetTokenKind: integer;
-var
-  a: TSynHighlighterAttributes;
 begin
-  Result := SYN_ATTR_IDENTIFIER;
-  a := GetTokenAttribute;
-  if a = fIdentAttrib then Result := SYN_ATTR_IDENTIFIER  else
-  if a = fWhiteAttrib then Result := SYN_ATTR_WHITESPACE  else
-  if a = fCommtAttrib then Result := SYN_ATTR_COMMENT     else
-  if a = fKeywdAttrib then Result := SYN_ATTR_KEYWORD     else
-  if a = fStrngAttrib then Result := SYN_ATTR_STRING      else
-  if a = fSymblAttrib then Result := SYN_ATTR_SYMBOL      else
-  if a = fNumbrAttrib then Result := Ord(TTokenKind.tkNumbr);
+  Result := Integer(fTokKind);
 end;
 
 initialization
