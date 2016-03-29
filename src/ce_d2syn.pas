@@ -851,7 +851,14 @@ begin
     if reader^ <> '.' then
       while isNumber(readerNext^) or (reader^ = '_') do (*!*);
     if reader^ = '.' then
-      while isNumber(readerNext^) or (reader^ = '_') do (*!*);
+    begin
+      if isNumber(readerNext^) then
+      begin
+        while isNumber(reader^) or (reader^ = '_') do
+          readerNext;
+      end else
+        readerPrev;
+    end;
     if reader^= '.' then
     begin
       readerNext;
@@ -888,18 +895,6 @@ begin
     exit;
   end;
   _notDotFloat:
-
-  // generic number literals
-  //if (isNumber(reader^)) then
-  //begin
-  //  while isHex(readerNext^) or (reader^ = '_') or (reader^ = '.')
-  //    or (reader^ in ['x', 'X', 'u', 'U', 'L', 'i']) do (*!*);
-  //  if isWhite(reader^) or isSymbol(reader^) or isOperator1(reader^) then
-  //    fTokKind := tkNumbr
-  //  else
-  //    fTokKind := tkError;
-  //  exit;
-  //end;
 
   // symbols
   if isSymbol(reader^) then
