@@ -904,8 +904,6 @@ begin
   begin
     fTokKind := tkSymbl;
     case reader^ of
-      ';': if (fTokStop>1) and ((reader-1)^ = '}') then
-        fTokKind := tkError;
       '{': StartCodeFoldBlock(nil, fkBrackets in fFoldKinds);
       '}':
       begin
