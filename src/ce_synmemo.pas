@@ -1221,7 +1221,7 @@ begin
   fIdentifier := GetWordAtRowCol(LogicalCaretXY);
   if (fIdentifier.length > 2) and (not SelAvail) then
     SetHighlightSearch(fIdentifier, fMatchIdentOpts)
-  else if SelAvail then
+  else if SelAvail and (BlockBegin.Y = BlockEnd.Y) then
   begin
     str := SelText;
     for i := 1 to str.length do
