@@ -93,8 +93,15 @@ type
 
 const
   LexTokenKindString: array[TLexTokenKind] of string =
-    ('Illegal', 'Character', 'Comment', 'Identifier', 'Keyword',
-    'Number', 'Operator', 'String', 'Symbol');
+    ('Illegal  ',
+    'Character ',
+    'Comment   ',
+    'Identifier',
+    'Keyword   ',
+    'Number    ',
+    'Operator  ',
+    'String    ',
+    'Symbol    ');
 
 type
 
@@ -120,6 +127,7 @@ type
   public
     procedure Clear;
     procedure addToken(aValue: PLexToken);
+    procedure saveToFile(fname: string);
     property token[index: integer]: PLexToken read getToken; default;
   end;
 
@@ -328,6 +336,25 @@ begin
   add(Pointer(aValue));
 end;
 
+procedure TLexTokenList.saveToFile(fname: string);
+var
+  tok: PLexToken;
+  i: integer;
+begin
+  with TStringList.Create do
+  try
+    for i:= 0 to self.count-1 do
+    begin
+      tok := getToken(i);
+      add(format('line %.5d - col %.3d: (%s): %s', [tok^.position.Y, tok^.position.X,
+        LexTokenKindString[tok^.kind], tok^.Data]));
+    end;
+  finally
+    SaveToFile(fname);
+    free;
+  end;
+end;
+
 function TLexTokenEnumerator.GetCurrent: PLexToken;
 begin
   exit(fList.token[fIndex]);
@@ -484,6 +511,7 @@ begin
     end;
 
     // string 1, note: same escape error as in SynD2Syn
+    rstring := false;
     if (reader.head^ in ['r', 'x']) then
     begin
       rstring := reader.head^ = 'r';
@@ -500,6 +528,7 @@ begin
         if isStringPostfix(reader.Next^) then
           reader.Next;
         addToken(ltkString);
+        rstring := false;
         if callBackDoStop then
           exit;
         continue;
@@ -518,20 +547,30 @@ begin
           reader.Next;
           if isOutOfBound then
             exit;
-        end
-        else if (reader.head^ = '"') then
+          continue;
+        end;
+        if (reader.head^ = '"') then
+        begin
+          reader.Next;
+          if isOutOfBound then
+            exit;
           break;
-        identifier += reader.head^;
-        reader.Next;
-        if isOutOfBound then
-          exit;
+        end
+        else
+        begin
+          identifier += reader.head^;
+          reader.Next;
+          if isOutOfBound then
+            exit;
+        end;
       end;
-      if isStringPostfix(reader.Next^) then
+      if isStringPostfix(reader.head^) then
       begin
         identifier += reader.head^;
         reader.Next;
       end;
       addToken(ltkString);
+      rstring := false;
       if callBackDoStop then
         exit;
       continue;
@@ -585,20 +624,21 @@ begin
       begin
         if reader.head^ = '\' then
         begin
+          identifier += reader.head^;
           reader.Next;
+          identifier += reader.head^;
           if isOutOfBound then
-            exit;
-          if reader.head^ = #10 then
             exit;
           reader.Next;
           if isOutOfBound then
             exit;
         end;
-        if reader.head^ = #39 then
-          break;
-        reader.Next;
         if isOutOfBound then
           exit;
+        if reader.head^ = #39 then
+          break;
+        identifier += reader.head^;
+        reader.Next;
       end;
       reader.Next;
       if isOutOfBound then

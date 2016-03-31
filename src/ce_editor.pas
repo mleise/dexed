@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, lcltype, Graphics, SynEditKeyCmds,
-  ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder,
+  ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder, dialogs,
   SynPluginSyncroEdit, SynEdit, SynHighlighterMulti, ce_dialogs,
   ce_widget, ce_interfaces, ce_synmemo, ce_dlang, ce_common, ce_dcd, ce_observer,
   ce_sharedres, ce_controls;
@@ -18,6 +18,8 @@ type
   TCEEditorWidget = class(TCEWidget, ICEMultiDocObserver, ICEMultiDocHandler, ICEProjectObserver)
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    MenuItem3: TMenuItem;
+    MenuItem5: TMenuItem;
     mnEdInvAllNone: TMenuItem;
     mneEdComm: TMenuItem;
     mnuedPrev: TMenuItem;
@@ -35,6 +37,7 @@ type
     macRecorder: TSynMacroRecorder;
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
+    procedure MenuItem5Click(Sender: TObject);
     procedure mnEdInvAllNoneClick(Sender: TObject);
     procedure mneEdCommClick(Sender: TObject);
     procedure mnuedPrevClick(Sender: TObject);
@@ -593,6 +596,24 @@ procedure TCEEditorWidget.mnEdInvAllNoneClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecSwapVersionAllNone, '', nil);
+end;
+
+procedure TCEEditorWidget.MenuItem5Click(Sender: TObject);
+begin
+  if fDoc.isNil then
+    exit;
+  with TSaveDialog.Create(nil) do
+  try
+    if execute then
+    begin
+      fTokList.Clear;
+      lex(fDoc.Text, fTokList, nil);
+      fTokList.saveToFile(FileName);
+      fTokList.Clear;
+    end;
+  finally
+    free;
+  end;
 end;
 
 procedure TCEEditorWidget.mnuedCutClick(Sender: TObject);

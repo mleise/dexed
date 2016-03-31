@@ -120,5 +120,12 @@ inherited CEEditorWidget: TCEEditorWidget
       Caption = 'Show ddoc'
       OnClick = mnuedDdocClick
     end
+    object MenuItem3: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem5: TMenuItem
+      Caption = 'Save lexical tokens to file...'
+      OnClick = MenuItem5Click
+    end
   end
 end
