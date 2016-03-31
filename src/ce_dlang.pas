@@ -72,6 +72,8 @@ type
     fAbsoluteIndex: Integer;
     fReaderHead: PChar;
     fPreviousLineColum: Integer;
+    fBegColumnIndex: Integer;
+    fBegLineIndex: Integer;
     function getColAndLine: TPoint;
   public
     constructor Create(const aText: PChar; const aColAndLine: TPoint);
@@ -79,11 +81,14 @@ type
     //
     function Next: PChar;
     function previous: PChar;
+    procedure saveBeginning;
     //
     property AbsoluteIndex: Integer read fAbsoluteIndex;
     property LineIndex: Integer read fLineIndex;
     property ColumnIndex: Integer read fColumnIndex;
     property LineAnColumn: TPoint read getColAndLine;
+    property SavedLine: Integer read fBegLineIndex;
+    property SavedColumn: Integer read fBegColumnIndex;
     //
     property head: PChar read fReaderHead;
   end;
@@ -252,6 +257,13 @@ begin
   end;
   exit(fReaderHead);
 end;
+
+procedure TReaderHead.saveBeginning;
+begin
+  fBegColumnIndex:= fColumnIndex;
+  fBegLineIndex:= fLineIndex;
+end;
+
 {$ENDREGION}
 
 {$REGION TD2Dictionary ---------------------------------------------------------}
@@ -387,8 +399,8 @@ var
   begin
     ptk := new(PLexToken);
     ptk^.kind := aTk;
-    ptk^.position := reader.LineAnColumn;
-    ptk^.position.X -= length(identifier);
+    ptk^.position.X := reader.SavedColumn;
+    ptk^.position.Y := reader.SavedLine;
     ptk^.Data := identifier;
     aList.Add(ptk);
   end;
@@ -433,17 +445,18 @@ begin
     begin
       if (reader.Next^ = '/') then
       begin
+        reader.saveBeginning;
         if isOutOfBound then
           exit;
         while (reader.head^ <> #10) do
         begin
-          reader.Next;
           identifier += reader.head^;
+          reader.Next;
           if isOutOfBound then
             exit;
         end;
-        reader.Next;
         addToken(ltkComment);
+        reader.Next;
         if callBackDoStop then
           exit;
         continue;
@@ -457,13 +470,17 @@ begin
     begin
       if (reader.Next^ = '*') then
       begin
+        reader.saveBeginning;
         if isOutOfBound then
           exit;
         while (reader.head^ <> '*') or (reader.Next^ <> '/') do
+        begin
+          identifier += reader.head^;
           if isOutOfBound then
             exit;
-        reader.Next;
+        end;
         addToken(ltkComment);
+        reader.Next;
         if callBackDoStop then
           exit;
         continue;
@@ -477,6 +494,7 @@ begin
     begin
       if (reader.Next^ = '+') then
       begin
+        reader.saveBeginning;
         nestedCom := 1;
         if isOutOfBound then
           exit;
@@ -500,8 +518,8 @@ begin
               exit;
           end;
         until nestedCom = 0;
-        reader.Next;
         addToken(ltkComment);
+        reader.Next;
         if callBackDoStop then
           exit;
         continue;
@@ -520,6 +538,7 @@ begin
     end;
     if (reader.head^ = '"') then
     begin
+      reader.saveBeginning;
       reader.Next;
       if isOutOfBound then
         exit;
@@ -580,6 +599,7 @@ begin
     if (reader.head^ = '`') then
     begin
       reader.Next;
+      reader.saveBeginning;
       if isOutOfBound then
         exit;
       while (reader.head^ <> '`') do
@@ -602,6 +622,7 @@ begin
     // token string
     if (reader.head^ = 'q') and (reader.Next^ = '{') then
     begin
+      reader.saveBeginning;
       reader.Next;
       if isOutOfBound then
         exit;
@@ -618,6 +639,7 @@ begin
     if (reader.head^ = #39) then
     begin
       reader.Next;
+      reader.saveBeginning;
       if isOutOfBound then
         exit;
       while true do
@@ -652,6 +674,7 @@ begin
     // check negative float '-0.'
     if (reader.head^ = '-') then
     begin
+      reader.saveBeginning;
       identifier += reader.head^;
       if reader.Next^ = '0' then
       begin
@@ -678,6 +701,7 @@ begin
     // binary/hex numbr/float
     if (reader.head^ = '0') then
     begin
+      reader.saveBeginning;
       identifier += reader.head^;
       if (reader.Next^ in ['b', 'B']) then
       begin
@@ -733,6 +757,7 @@ begin
     // check negative float/int '-xxx'
     if (reader.head^ = '-') then
     begin
+      reader.saveBeginning;
       identifier += reader.head^;
       if not isNumber(reader.Next^) then
       begin
@@ -744,6 +769,7 @@ begin
     // numbers
     if isNumber(reader.head^) then
     begin
+      reader.saveBeginning;
       identifier += reader.head^;
       while isNumber(reader.Next^) or (reader.head^ = '_') do
       begin
@@ -760,6 +786,7 @@ begin
     // symbChars
     if isSymbol(reader.head^) then
     begin
+      reader.saveBeginning;
       identifier += reader.head^;
       reader.Next;
       addToken(ltkSymbol);
@@ -773,6 +800,7 @@ begin
     // operators
     if isOperator1(reader.head^) then
     begin
+      reader.saveBeginning;
       identifier += reader.head^;
       while isOperator1(reader.Next^) do
       begin
@@ -876,6 +904,7 @@ begin
     // identifier accum
     if isFirstIdentifier(reader.head^) then
     begin
+      reader.saveBeginning;
       while isIdentifier(reader.head^) do
       begin
         identifier += reader.head^;
