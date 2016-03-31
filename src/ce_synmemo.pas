@@ -1197,7 +1197,7 @@ begin
   for i := 0 to fLexToks.Count-1 do
   begin
     tok := fLexToks[i];
-    c += byte((tok^.kind = TLexTokenKind.ltkSymbol) and (tok^.Data = '{'));
+    c += byte((tok^.kind = TLexTokenKind.ltkSymbol) and (((tok^.Data = '{')) or (tok^.Data = 'q{')));
     c -= byte((tok^.kind = TLexTokenKind.ltkSymbol) and (tok^.Data = '}'));
   end;
   if (tok <> nil) and (tok^.kind = ltkIllegal) then
