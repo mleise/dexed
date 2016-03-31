@@ -2022,6 +2022,8 @@ begin
       sysutils.DeleteFile(fname + objExt);
     end
     else begin
+      fMsgs.message(format('error: the process (%s) has returned the signal %d',
+        [dmdproc.Executable, dmdproc.ExitStatus]), fDoc, amcEdit, amkErr);
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' has not been compiled',
         fDoc, amcEdit, amkErr);
     end;
