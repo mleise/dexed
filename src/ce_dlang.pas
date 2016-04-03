@@ -98,7 +98,7 @@ type
 
 const
   LexTokenKindString: array[TLexTokenKind] of string =
-    ('Illegal  ',
+   ('Illegal   ',
     'Character ',
     'Comment   ',
     'Identifier',
@@ -675,6 +675,59 @@ begin
       continue;
     end;
 
+    // binary literals
+    if (reader.head^ = '0') then
+    begin
+      reader.saveBeginning;
+      identifier += reader.head^;
+      if reader.Next^ in ['b', 'B'] then
+      begin
+        identifier += reader.head^;
+        while reader.Next^ in ['0','1','_'] do
+          identifier += reader.head^;
+        if  (reader.head[0..1] = 'LU') or
+            (reader.head[0..1] = 'Lu') or
+            (reader.head[0..1] = 'UL') or
+            (reader.head[0..1] = 'uL') then
+        begin
+          identifier += reader.head[0..1];
+          reader.Next;
+          reader.Next;
+        end else
+        if reader.head^ in ['L','u','U'] then
+        begin
+          identifier += reader.head^;
+          reader.Next;
+        end;
+        if isWhite(reader.head^) or isOperator1(reader.head^) or
+          isSymbol(reader.head^) then
+        begin
+          addToken(ltkNumber);
+          if callBackDoStop then
+            exit;
+          continue;
+        end
+        else
+        begin
+          while true do
+          begin
+            if isWhite(reader.head^) or isOperator1(reader.head^) or
+              isSymbol(reader.head^) or isOutOfBound then
+            begin
+              addToken(ltkIllegal);
+              break;
+              if callBackDoStop then
+                exit;
+            end;
+            identifier += reader.head^;
+            reader.Next;
+          end;
+          continue;
+        end;
+      end else
+        reader.previous;
+    end;
+
     // check negative float '-0.'
     if (reader.head^ = '-') then
     begin
@@ -702,27 +755,11 @@ begin
     // + exponent
     // float .xxxx
 
-    // binary/hex numbr/float
+    // hex numbr/float
     if (reader.head^ = '0') then
     begin
       reader.saveBeginning;
       identifier += reader.head^;
-      if (reader.Next^ in ['b', 'B']) then
-      begin
-        identifier += reader.head^;
-        while isBit(reader.Next^) or (reader.head^ = '_') do
-        begin
-          if isOutOfBound then
-            exit;
-          identifier += reader.head^;
-        end;
-        addToken(ltkNumber);
-        if callBackDoStop then
-          exit;
-        continue;
-      end
-      else
-        reader.previous;
       if (reader.Next^ in ['x', 'X']) then
       begin
         identifier += reader.head^;
