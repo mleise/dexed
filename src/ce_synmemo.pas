@@ -1294,7 +1294,11 @@ begin
   FileAge(fFilename, fFileDate);
   fModified := false;
   if fFilename <> fTempFileName then
+  begin
+    if fTempFileName.fileExists then
+      sysutils.DeleteFile(fTempFileName);
     subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
+  end;
 end;
 
 procedure TCESynMemo.save;
