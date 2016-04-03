@@ -54,7 +54,6 @@ function tryReadDelim(var aReader: PChar; var aPosition: Integer; const aDelim: 
 
 implementation
 
-{$BOOLEVAL ON}
 function isWhite(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 begin
   exit(c in [#0..#32]);
@@ -158,7 +157,6 @@ function isFirstIdentifier(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDI
 begin
   exit(isIdentifier(c) and (not isNumber(c)));
 end;
-{$BOOLEVAL OFF}
 
 function readLine(var aReader: PChar; var aPosition: Integer): boolean;
 begin

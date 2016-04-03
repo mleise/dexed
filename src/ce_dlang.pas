@@ -385,7 +385,7 @@ begin
   Result.fIndex := -1;
 end;
 
-{$BOOLEVAL ON}
+
 procedure lex(const aText: string; aList: TLexTokenList; aCallBack: TLexFoundEvent = nil);
 var
   reader: TReaderHead;
@@ -473,9 +473,11 @@ begin
         reader.saveBeginning;
         if isOutOfBound then
           exit;
-        while (reader.head^ <> '*') or (reader.Next^ <> '/') do
+        reader.Next;
+        while (reader.head^ <> '/') or ((reader.head - 1)^ <> '*') do
         begin
           identifier += reader.head^;
+          reader.Next;
           if isOutOfBound then
             exit;
         end;
@@ -499,7 +501,7 @@ begin
         if isOutOfBound then
           exit;
         repeat
-          while ((reader.head^ <> '+') or (reader.head^ <> '/')) or
+          while ((reader.head^ <> '+') or (reader.head^ <> '/')) and
                 ((reader.next^ <> '/') or (reader.head^ <> '+')) do
           begin
             if isOutOfBound then
@@ -620,22 +622,24 @@ begin
     end;
 
     // token string
-    if (reader.head^ = 'q') and (reader.Next^ = '{') then
+    if (reader.head^ = 'q') then
     begin
-      reader.saveBeginning;
-      reader.Next;
-      if isOutOfBound then
-        exit;
-      identifier := 'q{';
-      addToken(ltkSymbol);
-      if callBackDoStop then
-        exit;
-      continue;
-    end
-    else
-      reader.previous;
+      if (reader.Next^ = '{') then
+      begin
+        reader.saveBeginning;
+        reader.Next;
+        if isOutOfBound then
+          exit;
+        identifier := 'q{';
+        addToken(ltkSymbol);
+        if callBackDoStop then
+          exit;
+        continue;
+      end else
+        reader.previous;
+    end;
 
-    //chars, note: same escape error as in SynD2Syn
+    //chars
     if (reader.head^ = #39) then
     begin
       reader.Next;
@@ -783,7 +787,7 @@ begin
       continue;
     end;
 
-    // symbChars
+    // symbols
     if isSymbol(reader.head^) then
     begin
       reader.saveBeginning;
@@ -922,6 +926,12 @@ begin
     end;
 
     // error
+    while not isWhite(reader.head^) do
+    begin
+      if isOutOfBound then
+        break;
+      reader.Next;
+    end;
     {$IFDEF DEBUG}
     identifier += ' (unrecognized lexer input)';
     {$ENDIF}
@@ -929,8 +939,6 @@ begin
 
   end;
 end;
-
-{$BOOLEVAL OFF}
 {$ENDREGION}
 
 {$REGION Syntactic errors}
