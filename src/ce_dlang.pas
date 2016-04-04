@@ -110,8 +110,8 @@ const
 
 type
 
-  (*****************************************************************************
-   * Lexer token
+  (**
+   * Lexer token.
    *)
   PLexToken = ^TLexToken;
 
@@ -123,8 +123,8 @@ type
 
   TLexFoundEvent = procedure(const aToken: PLexToken; out doStop: boolean) of Object;
 
-  (*****************************************************************************
-   * List of lexer tokens
+  (**
+   * List of lexer tokens.
    *)
   TLexTokenList = class(TFPList)
   private
@@ -144,8 +144,8 @@ type
     property Current: PLexToken read GetCurrent;
   end;
 
-  (*****************************************************************************
-   * Error record
+  (**
+   * Lexer error.
    *)
   PLexError = ^TLexError;
 
@@ -154,15 +154,15 @@ type
     msg: string;
   end;
 
-  (*****************************************************************************
-   * Error list
+  (**
+   * Error list.
    *)
   TLexErrorList = class(TFPList)
   private
     function getError(index: integer): TLexError;
   public
     procedure Clear;
-    procedure addError(aValue: PLexError);
+    procedure addError(value: PLexError);
     property error[index: integer]: TLexError read getError;
   end;
 
@@ -174,23 +174,18 @@ type
     property Current: TLexError read GetCurrent;
   end;
 
-operator enumerator(aTokenList: TLexTokenList): TLexTokenEnumerator;
-operator enumerator(anErrorList: TLexErrorList): TLexErrorEnumerator;
+operator enumerator(list: TLexTokenList): TLexTokenEnumerator;
+operator enumerator(list: TLexErrorList): TLexErrorEnumerator;
 
 (**
- * Lexes aText and fills aList with the TLexToken found.
+ * Lexes text and fills list with the TLexToken found.
  *)
-procedure lex(const aText: string; aList: TLexTokenList; aCallBack: TLexFoundEvent = nil);
-
-(**
- * Detects various syntactic errors in a TLexTokenList
- *)
-procedure checkSyntacticErrors(const aTokenList: TLexTokenList; const anErrorList: TLexErrorList);
+procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = nil);
 
 (**
  * Outputs the module name from a tokenized D source.
  *)
-function getModuleName(const aTokenList: TLexTokenList): string;
+function getModuleName(const list: TLexTokenList): string;
 
 (**
  * Compares two TPoints.
@@ -378,20 +373,22 @@ begin
   exit(fIndex < fList.Count);
 end;
 
-operator enumerator(aTokenList: TLexTokenList): TLexTokenEnumerator;
+operator enumerator(list: TLexTokenList): TLexTokenEnumerator;
 begin
   Result := TLexTokenEnumerator.Create;
-  Result.fList := aTokenList;
+  Result.fList := list;
   Result.fIndex := -1;
 end;
 
 
-procedure lex(const aText: string; aList: TLexTokenList; aCallBack: TLexFoundEvent = nil);
+procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = nil);
 var
   reader: TReaderHead;
   identifier: string;
   nestedCom: integer;
   rstring: boolean;
+  decSet: boolean;
+  expSet: boolean;
 
   procedure addToken(aTk: TLexTokenKind);
   var
@@ -402,12 +399,12 @@ var
     ptk^.position.X := reader.SavedColumn;
     ptk^.position.Y := reader.SavedLine;
     ptk^.Data := identifier;
-    aList.Add(ptk);
+    list.Add(ptk);
   end;
 
   function isOutOfBound: boolean;
   begin
-    result := reader.AbsoluteIndex >= length(aText);
+    result := reader.AbsoluteIndex >= length(text);
     if result and (identifier <> '') then
       addToken(ltkIllegal);
   end;
@@ -415,15 +412,15 @@ var
   function callBackDoStop: boolean;
   begin
     Result := False;
-    if aCallBack <> nil then
-      aCallBack(PLexToken(aList.Items[aList.Count - 1]), Result);
+    if clbck <> nil then
+      clbck(list[list.Count-1], Result);
   end;
 
 begin
 
-  if aText = '' then exit;
+  if text = '' then exit;
 
-  reader.Create(@aText[1], Point(0, 0));
+  reader.Create(@text[1], Point(0, 0));
   while (True) do
   begin
 
@@ -465,7 +462,7 @@ begin
         reader.previous;
     end;
 
-    // block comments 1
+    // block comments
     if (reader.head^ = '/') then
     begin
       if (reader.Next^ = '*') then
@@ -491,7 +488,7 @@ begin
         reader.previous;
     end;
 
-    // block comments 2
+    // nested block comments
     if (reader.head^ = '/') then
     begin
       if (reader.Next^ = '+') then
@@ -530,7 +527,7 @@ begin
         reader.previous;
     end;
 
-    // string 1, note: same escape error as in SynD2Syn
+    // double quoted or raw strings
     rstring := false;
     if (reader.head^ in ['r', 'x']) then
     begin
@@ -597,7 +594,7 @@ begin
       continue;
     end;
 
-    // string 2
+    // back quoted strings
     if (reader.head^ = '`') then
     begin
       reader.Next;
@@ -639,7 +636,7 @@ begin
         reader.previous;
     end;
 
-    //chars
+    // char literals
     if (reader.head^ = #39) then
     begin
       reader.Next;
@@ -675,14 +672,13 @@ begin
       continue;
     end;
 
-    // binary literals
+    // binary and hex literals
     if (reader.head^ = '0') then
     begin
       reader.saveBeginning;
-      identifier += reader.head^;
       if reader.Next^ in ['b', 'B'] then
       begin
-        identifier += reader.head^;
+        identifier := '0' + reader.head^;
         while reader.Next^ in ['0','1','_'] do
           identifier += reader.head^;
         if  (reader.head[0..1] = 'LU') or
@@ -724,93 +720,92 @@ begin
           end;
           continue;
         end;
-      end else
-        reader.previous;
-    end;
-
-    // check negative float '-0.'
-    if (reader.head^ = '-') then
-    begin
-      reader.saveBeginning;
-      identifier += reader.head^;
-      if reader.Next^ = '0' then
+      end
+      else if reader.head^ in ['x', 'X'] then
       begin
-        if reader.Next^ = '.' then
-          reader.previous // back to 0, get into "binary/hex numbr/float"
+        identifier := '0' + reader.head^;
+        reader.Next;
+        expSet := reader.head^ in ['p','P'];
+        decSet := reader.head^ = '.';
+        if not (expSet or decSet) then
+          reader.previous;
+        while reader.Next^ in ['0'..'9', 'a'..'f', 'A'..'F', '_'] do
+          identifier += reader.head^;
+        decSet := reader.head^ = '.';
+        expSet := reader.head^ in ['p','P'];
+        if (not expSet and decSet) then
+          while reader.Next^ in ['0'..'9', 'a'..'f', 'A'..'F', '_'] do
+            identifier += reader.head^
+        else if (expSet) then
+          while reader.Next^ in ['0'..'9', '_'] do
+            identifier += reader.head^;
+        if not expSet then expSet:= reader.head^ in ['p','P'];
+        if (expSet) then
+          while reader.Next^ in ['0'..'9', '_'] do
+            identifier += reader.head^;
+        if  (reader.head[0..1] = 'LU') or
+            (reader.head[0..1] = 'Lu') or
+            (reader.head[0..1] = 'UL') or
+            (reader.head[0..1] = 'Li') or
+            (reader.head[0..1] = 'fi') or
+            (reader.head[0..1] = 'uL') then
+        begin
+          identifier += reader.head[0..1];
+          reader.Next;
+          reader.Next;
+        end else
+        if reader.head^ in ['L','u','U', 'i', 'f'] then
+        begin
+          identifier += reader.head^;
+          reader.Next;
+        end;
+        if isWhite(reader.head^) or isOperator1(reader.head^) or
+          isSymbol(reader.head^) then
+        begin
+          addToken(ltkNumber);
+          if callBackDoStop then
+            exit;
+          continue;
+        end
         else
         begin
-          reader.previous;
-          reader.previous; // back to -
-          identifier := '';
+          while true do
+          begin
+            if isWhite(reader.head^) or isOperator1(reader.head^) or
+              isSymbol(reader.head^) or isOutOfBound then
+            begin
+              addToken(ltkIllegal);
+              break;
+              if callBackDoStop then
+                exit;
+            end;
+            identifier += reader.head^;
+            reader.Next;
+          end;
+          continue;
         end;
-      end
-      else
-      begin
-        reader.previous; // back to -
-        identifier := '';
-      end;
-    end;
-
-    // + suffixes
-    // + exponent
-    // float .xxxx
-
-    // hex numbr/float
-    if (reader.head^ = '0') then
-    begin
-      reader.saveBeginning;
-      identifier += reader.head^;
-      if (reader.Next^ in ['x', 'X']) then
-      begin
-        identifier += reader.head^;
-        while isHex(reader.Next^) or (reader.head^ = '_') do
-        begin
-          if isOutOfBound then
-            exit;
-          identifier += reader.head^;
-        end;
-        addToken(ltkNumber);
-        if callBackDoStop then
-          exit;
-        continue;
       end
       else
         reader.previous;
-      if (reader.Next^ = '.') then
-      begin
-        identifier += reader.head^;
-        while isNumber(reader.Next^) do
-        begin
-          if isOutOfBound then
-            exit;
-          identifier += reader.head^;
-        end;
-        addToken(ltkNumber);
-        if callBackDoStop then
-          exit;
-        continue;
-      end
+    end;
+
+    // check float literal starting with dec separator
+    decSet := false;
+    expSet := false;
+    if (reader.head^= '.') then
+    begin
+      if isNumber(reader.Next^) then
+        decSet := true
       else
         reader.previous;
-      identifier := '';
     end;
 
-    // check negative float/int '-xxx'
-    if (reader.head^ = '-') then
-    begin
-      reader.saveBeginning;
-      identifier += reader.head^;
-      if not isNumber(reader.Next^) then
-      begin
-        reader.previous; // back to '-'
-        identifier := '';
-      end;
-    end;
-
-    // numbers
+    // decimal number literals
     if isNumber(reader.head^) then
     begin
       reader.saveBeginning;
+      if decSet then
+        identifier:= '.';
       identifier += reader.head^;
       while isNumber(reader.Next^) or (reader.head^ = '_') do
       begin
@@ -818,10 +813,78 @@ begin
           exit;
         identifier += reader.head^;
       end;
-      addToken(ltkNumber);
-      if callBackDoStop then
-        exit;
-      continue;
+      if decSet and (reader.head^ = '.') then
+      begin
+        addToken(ltkNumber);
+        if callBackDoStop then
+          exit;
+        continue;
+      end;
+      if (reader.head^ = '.') then
+      begin
+        decSet := true;
+        identifier += reader.head^;
+      end;
+      expSet := reader.head^ in ['e','E'];
+      if expSet then identifier += reader.head^;
+      if decSet then while isNumber(reader.Next^) or (reader.head^ = '_') do
+      begin
+        if isOutOfBound then
+          exit;
+        identifier += reader.head^;
+      end;
+      if not expSet then
+      begin
+        expSet := reader.head^ in ['e','E'];
+        if expSet then identifier += reader.head^;
+      end;
+      if expSet then while isNumber(reader.Next^) or (reader.head^ = '_') do
+      begin
+        if isOutOfBound then
+          exit;
+        identifier += reader.head^;
+      end;
+      if  (reader.head[0..1] = 'LU') or
+          (reader.head[0..1] = 'Lu') or
+          (reader.head[0..1] = 'UL') or
+          (reader.head[0..1] = 'Li') or
+          (reader.head[0..1] = 'fi') or
+          (reader.head[0..1] = 'uL') then
+      begin
+        identifier += reader.head[0..1];
+        reader.Next;
+        reader.Next;
+      end else
+      if reader.head^ in ['L','u','U', 'i', 'f'] then
+      begin
+        identifier += reader.head^;
+        reader.Next;
+      end;
+      if isWhite(reader.head^) or isOperator1(reader.head^) or
+        isSymbol(reader.head^) then
+      begin
+        addToken(ltkNumber);
+        if callBackDoStop then
+          exit;
+        continue;
+      end
+      else
+      begin
+        while true do
+        begin
+          if isWhite(reader.head^) or isOperator1(reader.head^) or
+            isSymbol(reader.head^) or isOutOfBound then
+          begin
+            addToken(ltkIllegal);
+            break;
+            if callBackDoStop then
+              exit;
+          end;
+          identifier += reader.head^;
+          reader.Next;
+        end;
+        continue;
+      end;
     end;
 
     // symbols
@@ -942,7 +1005,7 @@ begin
       end;
     end;
 
-    // identifier accum
+    // identifiers and keywords
     if isFirstIdentifier(reader.head^) then
     begin
       reader.saveBeginning;
@@ -962,8 +1025,9 @@ begin
       continue;
     end;
 
-    // error
-    while not isWhite(reader.head^) do
+    // illegal
+    while not isWhite(reader.head^) or not isSymbol(reader.head^) or
+      not isOperator1(reader.head^) do
     begin
       if isOutOfBound then
         break;
@@ -993,9 +1057,9 @@ begin
   end;
 end;
 
-procedure TLexErrorList.addError(aValue: PLexError);
+procedure TLexErrorList.addError(value: PLexError);
 begin
-  add(Pointer(aValue));
+  add(Pointer(value));
 end;
 
 function TLexErrorEnumerator.GetCurrent: TLexError;
@@ -1009,146 +1073,21 @@ begin
   exit(fIndex < fList.Count);
 end;
 
-operator enumerator(anErrorList: TLexErrorList): TLexErrorEnumerator;
+operator enumerator(list: TLexErrorList): TLexErrorEnumerator;
 begin
   Result := TLexErrorEnumerator.Create;
-  Result.fList := anErrorList;
+  Result.fList := list;
   Result.fIndex := -1;
 end;
 
-procedure checkSyntacticErrors(const aTokenList: TLexTokenList; const anErrorList: TLexErrorList);
-const
-  errPrefix = 'syntactic error: ';
-var
-  tk: PLexToken = nil;
-  old1:PLexToken = nil;
-  old2: PLexToken = nil;
-  lastSignifiant: PLexToken = nil;
-  err: PLexError;
-  tkIndex: NativeInt;
-  pareCnt, curlCnt, squaCnt: NativeInt;
-  pareLeft, curlLeft, squaLeft: boolean;
-
-  procedure addError(const aMsg: string);
-  begin
-    err := new(PLexError);
-    err^.msg := errPrefix + aMsg;
-    err^.position := aTokenList.token[tkIndex]^.position;
-    anErrorList.addError(err);
-  end;
-
-label
-  _preSeq;
-begin
-
-  tkIndex := -1;
-  pareCnt := 0;
-  curlCnt := 0;
-  squaCnt := 0;
-  pareLeft := False;
-  curlLeft := False;
-  squaLeft := False;
-  FillByte(old1, sizeOf(TLexToken), 0);
-  FillByte(old2, sizeOf(TLexToken), 0);
-  FillByte(lastSignifiant, sizeOf(TLexToken), 0);
-
-  for tk in aTokenList do
-  begin
-    Inc(tkIndex);
-
-    // brackets count
-    if tk^.kind = ltkSymbol then
-    begin
-      case tk^.Data of
-        '(': Inc(pareCnt);
-        '{': Inc(curlCnt);
-        '[': Inc(squaCnt);
-        ')': Dec(pareCnt);
-        '}': Dec(curlCnt);
-        ']': Dec(squaCnt);
-      end;
-
-      // only for the first occurence
-      if not pareLeft then
-        if pareCnt = -1 then
-        begin
-          addError('a left parenthesis is missing');
-          pareLeft := True;
-        end;
-      if not curlLeft then
-        if curlCnt = -1 then
-        begin
-          addError('a left curly bracket is missing');
-          curlLeft := True;
-        end;
-      if not squaLeft then
-        if squaCnt = -1 then
-        begin
-          addError('a left square bracket is missing');
-          squaLeft := True;
-        end;
-
-      // at the end
-      if (tkIndex = aTokenList.Count - 1) then
-      begin
-        if pareCnt > 0 then
-          addError('a right parenthesis is missing');
-        if curlCnt > 0 then
-          addError('a right curly bracket is missing');
-        if squaCnt > 0 then
-          addError('a right square bracket is missing');
-      end;
-
-      goto _preSeq;
-    end;
-
-    // lexer invalid token
-    if tk^.kind = ltkIllegal then
-    begin
-      addError(tk^.Data);
-      goto _preSeq;
-    end;
-
-    _preSeq:
-
-      // invalid sequences
-      if tkIndex > 0 then
-      begin
-        // empty statements:
-        if (tk^.kind = ltkSymbol) and (tk^.Data = ';') then
-          if (lastSignifiant^.kind = ltkSymbol) and (lastSignifiant^.Data = ';') then
-            addError('invalid syntax for empty statement');
-        if tk^.kind <> ltkComment then
-          lastSignifiant := tk;
-
-        // suspicious double keywords
-        if (old1^.kind = ltkKeyword) and (tk^.kind = ltkKeyword) then
-          if old1^.Data = tk^.Data then
-            addError('keyword is duplicated');
-
-        // suspicious double numbers
-        if (old1^.kind = ltkNumber) and (tk^.kind = ltkNumber) then
-          addError('symbol or operator expected after number');
-      end;
-    if tkIndex > 1 then
-    begin
-    end;
-
-    old1 := tk;
-    old2 := old1;
-  end;
-
-
-end;
-
-function getModuleName(const aTokenList: TLexTokenList): string;
+function getModuleName(const list: TLexTokenList): string;
 var
   ltk: PLexToken;
   mtok: boolean;
 begin
   Result := '';
   mtok := False;
-  for ltk in aTokenList do
+  for ltk in list do
   begin
     if mtok then
     begin
