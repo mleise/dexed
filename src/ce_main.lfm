@@ -1471,7 +1471,6 @@ object CEMainForm: TCEMainForm
   LCLVersion = '1.6.0.4'
   object mainMenu: TMainMenu
     Images = imgList
-    top = 1
     object MenuItem1: TMenuItem
       Caption = 'File'
       object MenuItem5: TMenuItem
@@ -1913,6 +1912,9 @@ object CEMainForm: TCEMainForm
       object MenuItem36: TMenuItem
         Caption = '-'
       end
+      object MenuItem72: TMenuItem
+        Action = actFileCompile
+      end
       object MenuItem37: TMenuItem
         Action = actFileCompAndRun
         Bitmap.Data = {
@@ -2029,6 +2031,9 @@ object CEMainForm: TCEMainForm
           1F00BB871E00B9841A00B67E0FEAC4973BFFC79D49FFC39538FFB37904FFB47A
           07FFB47A07FFB47A08FFB57C0AFFB67F0FFFB88114FFBA851B23
         }
+      end
+      object MenuItem73: TMenuItem
+        Action = actFileRun
       end
       object MenuItem63: TMenuItem
         Action = actFileUnittest
@@ -3277,6 +3282,9 @@ object CEMainForm: TCEMainForm
     end
     object MenuItem8: TMenuItem
       Caption = 'Run'
+      object MenuItem74: TMenuItem
+        Action = actFileCompile
+      end
       object MenuItem9: TMenuItem
         Action = actFileCompAndRun
         Bitmap.Data = {
@@ -3393,6 +3401,9 @@ object CEMainForm: TCEMainForm
           1F00BB871E00B9841A00B67E0FEAC4973BFFC79D49FFC39538FFB37904FFB47A
           07FFB47A07FFB47A08FFB57C0AFFB67F0FFFB88114FFBA851B23
         }
+      end
+      object MenuItem75: TMenuItem
+        Action = actFileRun
       end
       object MenuItem64: TMenuItem
         Action = actFileUnittest
@@ -3722,6 +3733,7 @@ object CEMainForm: TCEMainForm
     Images = imgList
     OnUpdate = ActionsUpdate
     left = 32
+    top = 1
     object actEdCopy: TAction
       Category = 'Edit'
       Caption = 'Copy'
@@ -3821,14 +3833,6 @@ object CEMainForm: TCEMainForm
       ImageIndex = 7
       OnExecute = actFileAddToProjExecute
       OnUpdate = updateDocumentBasedAction
-    end
-    object actFileCompAndRun: TAction
-      Category = 'File'
-      Caption = 'Compile file and run'
-      ImageIndex = 22
-      OnExecute = actFileCompAndRunExecute
-      OnUpdate = updateDocumentBasedAction
-      ShortCut = 116
     end
     object actProjSave: TAction
       Category = 'Project'
@@ -3961,6 +3965,33 @@ object CEMainForm: TCEMainForm
       ImageIndex = 30
       OnExecute = actLayoutSaveExecute
     end
+    object actProjNewDubJson: TAction
+      Category = 'Project'
+      Caption = 'DUB json'
+      ImageIndex = 8
+      OnExecute = actProjNewDubJsonExecute
+    end
+    object actProjNewNative: TAction
+      Category = 'Project'
+      Caption = 'Native format'
+      ImageIndex = 8
+      OnExecute = actProjNewNativeExecute
+    end
+    object actFileCompile: TAction
+      Category = 'File'
+      Caption = 'Compile file'
+      ImageIndex = 22
+      OnExecute = actFileCompileExecute
+      OnUpdate = updateDocumentBasedAction
+    end
+    object actFileCompAndRun: TAction
+      Category = 'File'
+      Caption = 'Compile file and run'
+      ImageIndex = 22
+      OnExecute = actFileCompAndRunExecute
+      OnUpdate = updateDocumentBasedAction
+      ShortCut = 116
+    end
     object actFileCompileAndRunOut: TAction
       Category = 'File'
       Caption = 'Compile file and run outside'
@@ -3976,6 +4007,20 @@ object CEMainForm: TCEMainForm
       OnExecute = actFileCompAndRunWithArgsExecute
       OnUpdate = updateDocumentBasedAction
       ShortCut = 24695
+    end
+    object actFileRun: TAction
+      Category = 'File'
+      Caption = 'Run compiled file'
+      ImageIndex = 22
+      OnExecute = actFileRunExecute
+      OnUpdate = updateDocumentBasedAction
+    end
+    object actFileUnittest: TAction
+      Category = 'File'
+      Caption = 'Run file unittests'
+      ImageIndex = 22
+      OnExecute = actFileUnittestExecute
+      OnUpdate = updateDocumentBasedAction
     end
     object actFileSaveAll: TAction
       Category = 'File'
@@ -4006,30 +4051,11 @@ object CEMainForm: TCEMainForm
       OnExecute = actFileHtmlExportExecute
       OnUpdate = updateDocumentBasedAction
     end
-    object actFileUnittest: TAction
-      Category = 'File'
-      Caption = 'Run file unittests'
-      ImageIndex = 22
-      OnExecute = actFileUnittestExecute
-      OnUpdate = updateDocumentBasedAction
-    end
     object actSetRunnableSw: TAction
       Category = 'File'
       Caption = 'Set runnable switches'
       ImageIndex = 34
       OnExecute = actSetRunnableSwExecute
-    end
-    object actProjNewDubJson: TAction
-      Category = 'Project'
-      Caption = 'DUB json'
-      ImageIndex = 8
-      OnExecute = actProjNewDubJsonExecute
-    end
-    object actProjNewNative: TAction
-      Category = 'Project'
-      Caption = 'Native format'
-      ImageIndex = 8
-      OnExecute = actProjNewNativeExecute
     end
     object actFileSaveCopyAs: TAction
       Category = 'File'

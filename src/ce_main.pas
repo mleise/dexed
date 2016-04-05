@@ -37,6 +37,8 @@ type
     actFileUnittest: TAction;
     actFileCompileAndRunOut: TAction;
     actFileSaveCopyAs: TAction;
+    actFileCompile: TAction;
+    actFileRun: TAction;
     actProjNewDubJson: TAction;
     actProjNewNative: TAction;
     actSetRunnableSw: TAction;
@@ -132,6 +134,10 @@ type
     MenuItem69: TMenuItem;
     MenuItem70: TMenuItem;
     MenuItem71: TMenuItem;
+    MenuItem72: TMenuItem;
+    MenuItem73: TMenuItem;
+    MenuItem74: TMenuItem;
+    MenuItem75: TMenuItem;
     mnuLayout: TMenuItem;
     mnuItemMruFile: TMenuItem;
     mnuItemMruProj: TMenuItem;
@@ -142,6 +148,8 @@ type
     MenuItem7: TMenuItem;
     MenuItem8: TMenuItem;
     MenuItem9: TMenuItem;
+    procedure actFileCompileExecute(Sender: TObject);
+    procedure actFileRunExecute(Sender: TObject);
     procedure actFileSaveCopyAsExecute(Sender: TObject);
     procedure actProjNewDubJsonExecute(Sender: TObject);
     procedure actProjNewNativeExecute(Sender: TObject);
@@ -290,7 +298,8 @@ type
     procedure asyncprocOutput(sender: TObject);
     procedure asyncprocTerminate(sender: TObject);
     procedure unittestDone(Sender: TObject);
-    procedure compileAndRunFile(unittest: boolean = false; redirect: boolean = true;
+    procedure compileRunnable(unittest: boolean = false);
+    procedure executeRunnable(unittest: boolean = false; redirect: boolean = true;
       const runArgs: string = '');
 
     // file sub routines
@@ -1924,8 +1933,7 @@ begin
   form.Free;
 end;
 
-procedure TCEMainForm.compileAndRunFile(unittest: boolean = false; redirect: boolean = true;
-	const runArgs: string = '');
+procedure TCEMainForm.compileRunnable(unittest: boolean = false);
 var
   i: integer;
   dmdproc: TCEProcess;
@@ -1948,28 +1956,16 @@ begin
   end else firstlineFlags:= '';
 
 
-  fRunProc := TCEProcess.Create(nil);
-  if redirect then
-  begin
-  	fRunProc.Options := [poStderrToOutPut, poUsePipes];
-  	fRunProc.ShowWindow := swoHIDE;
-  	fRunProc.OnReadData := @asyncprocOutput;
-  	fRunProc.OnTerminate:= @asyncprocTerminate;
-  end else
-  begin
-    {$IFNDEF WINDOWS}
-    fRunProc.Options := fRunProc.Options + [poNewConsole];
-    {$ENDIF}
-  end;
-
   lst := TStringList.Create;
   dmdproc := TCEProcess.Create(nil);
   try
 
     fMsgs.message('compiling ' + shortenPath(fDoc.fileName, 25), fDoc, amcEdit, amkInf);
 
-    if fDoc.fileName.fileExists then fDoc.save
-    else fDoc.saveTempFile;
+    if fDoc.fileName.fileExists then
+      fDoc.save
+    else
+      fDoc.saveTempFile;
     fname := stripFileExt(fDoc.fileName);
 
     if fRunnableSw.isEmpty then
@@ -2001,25 +1997,11 @@ begin
     dmdproc.Execute;
     while dmdproc.Running do
       application.ProcessMessages;
-
+    sysutils.DeleteFile(fname + objExt);
     if (dmdProc.ExitStatus = 0) then
     begin
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' successfully compiled',
         fDoc, amcEdit, amkInf);
-      fRunProc.CurrentDirectory := fRunProc.Executable.extractFileDir;
-      if runArgs.isNotEmpty then
-      begin
-        lst.Clear;
-        CommandToList(fSymStringExpander.expand(runArgs), lst);
-        fRunProc.Parameters.AddStrings(lst);
-      end;
-      fRunProc.Executable := fname + exeExt;
-      if unittest and fCovModUt then
-        fRunProc.OnTerminate:=@unittestDone;
-      if redirect then
-      	getprocInputHandler.addProcess(fRunProc);
-      fRunProc.Execute;
-      sysutils.DeleteFile(fname + objExt);
     end
     else begin
       fMsgs.message(format('error: the process (%s) has returned the signal %d',
@@ -2030,6 +2012,49 @@ begin
 
   finally
     dmdproc.Free;
+    lst.Free;
+  end;
+end;
+
+procedure TCEMainForm.executeRunnable(unittest: boolean = false; redirect: boolean = true;
+	const runArgs: string = '');
+var
+  lst: TStringList;
+  fname: string;
+begin
+  if fDoc.isNil then exit;
+  fname := stripFileExt(fDoc.fileName) + exeExt;
+  if not fname.fileExists then exit;
+
+  fRunProc := TCEProcess.Create(nil);
+  if redirect then
+  begin
+  	fRunProc.Options := [poStderrToOutPut, poUsePipes];
+  	fRunProc.ShowWindow := swoHIDE;
+  	fRunProc.OnReadData := @asyncprocOutput;
+  	fRunProc.OnTerminate:= @asyncprocTerminate;
+  end
+  else
+  begin
+    {$IFNDEF WINDOWS}
+    fRunProc.Options := fRunProc.Options + [poNewConsole];
+    {$ENDIF}
+  end;
+  lst := TStringList.Create;
+  try
+    fRunProc.CurrentDirectory := fRunProc.Executable.extractFileDir;
+    if runArgs.isNotEmpty then
+    begin
+      CommandToList(fSymStringExpander.expand(runArgs), lst);
+      fRunProc.Parameters.AddStrings(lst);
+    end;
+    fRunProc.Executable := fname + exeExt;
+    if unittest and fCovModUt then
+      fRunProc.OnTerminate:=@unittestDone;
+    if redirect then
+      getprocInputHandler.addProcess(fRunProc);
+    fRunProc.Execute;
+  finally
     lst.Free;
   end;
 end;
@@ -2075,28 +2100,72 @@ end;
 
 procedure TCEMainForm.actFileUnittestExecute(Sender: TObject);
 begin
-  if fDoc.isNotNil then
-    compileAndRunFile(true);
+  if fDoc.isNil then
+    exit;
+  compileRunnable(true);
+  executeRunnable(true);
 end;
 
 procedure TCEMainForm.actFileCompAndRunExecute(Sender: TObject);
 begin
-  if fDoc.isNotNil then
-    compileAndRunFile(false);
+  if fDoc.isNil then
+    exit;
+  compileRunnable(false);
+  executeRunnable(false, true);
 end;
 
 procedure TCEMainForm.actFileCompileAndRunOutExecute(Sender: TObject);
 begin
-  if fDoc.isNotNil then
-    compileAndRunFile(false, false);
+  if fDoc.isNil then
+    exit;
+  compileRunnable(false);
+  executeRunnable(false, false);
 end;
 
 procedure TCEMainForm.actFileCompAndRunWithArgsExecute(Sender: TObject);
 var
   runargs: string = '';
 begin
-  if fDoc.isNotNil and InputQuery('Execution arguments', '', runargs) then
-    compileAndRunFile(false, true, runargs);
+  if fDoc.isNil then
+    exit;
+  if not InputQuery('Execution arguments', '', runargs) then
+    exit;
+  compileRunnable(false);
+  executeRunnable(false, true, runargs);
+end;
+
+procedure TCEMainForm.actFileCompileExecute(Sender: TObject);
+begin
+  compileRunnable(false);
+end;
+
+procedure TCEMainForm.actFileRunExecute(Sender: TObject);
+var
+  fname: string;
+  older: boolean = false;
+  exist: boolean = false;
+const
+  messg: string = 'Either the runnable does not exist or it is older than its source.' +
+    LineEnding +  ' Do you wish to recompile it ?';
+begin
+  if fDoc.isNil then
+    exit;
+  FreeRunnableProc;
+  fname := stripFileExt(fDoc.fileName) + exeExt;
+  if fname.fileExists then
+  begin
+    exist := true;
+    older := FileAge(fname) < FileAge(fDoc.fileName);
+  end;
+  if (not exist) or (older) then
+  begin
+    if dlgOkCancel(messg) = mrOK then
+      compileRunnable
+    else if not exist then
+      exit;
+  end;
+  if fname.fileExists then
+    executeRunnable(false, true);
 end;
 
 procedure TCEMainForm.actFileOpenContFoldExecute(Sender: TObject);
