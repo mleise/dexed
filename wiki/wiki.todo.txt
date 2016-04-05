@@ -5,3 +5,4 @@
 - input process widget: kill process, in case of error, infinite loop, emergency kill
 - editor note about usefull commands: comment selection, invert version all/none
 - tuto are obsolete
+- appli option, describe runnable destination

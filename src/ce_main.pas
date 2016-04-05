@@ -208,6 +208,7 @@ type
 
   private
 
+    fRunnableDestination: string;
     fSymStringExpander: ICESymStringExpander;
     fCovModUt: boolean;
     fDoc: TCESynMemo;
@@ -295,6 +296,7 @@ type
     procedure widgetShowFromAction(sender: TObject);
 
     // run & exec sub routines
+    function runnableExename: string;
     procedure asyncprocOutput(sender: TObject);
     procedure asyncprocTerminate(sender: TObject);
     procedure unittestDone(Sender: TObject);
@@ -393,12 +395,14 @@ type
     fMaxRecentProjs: integer;
     fMaxRecentDocs: integer;
     fDcdPort: word;
+    fRunnableDest: TCEPathname;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
     function getNativeProjecCompiler: TCECompiler;
     procedure setDubCompiler(value: TCECompiler);
     procedure setNativeProjecCompiler(value: TCECompiler);
+    procedure setRunnableDestination(const value: TCEPathname);
   published
     property additionalPATH: string read getAdditionalPATH write setAdditionalPath;
     property coverModuleTests: boolean read fCovModUt write fCovModUt;
@@ -408,6 +412,7 @@ type
     property maxRecentDocuments: integer read fMaxRecentDocs write fMaxRecentDocs;
     property dubCompiler: TCECompiler read getDubCompiler write setDubCompiler;
     property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
+    property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination;
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
@@ -466,6 +471,14 @@ begin
   ce_nativeproject.setNativeProjectCompiler(value);
 end;
 
+procedure TCEApplicationOptionsBase.setRunnableDestination(const value: TCEPathname);
+begin
+  fRunnableDest := value;
+  if (length(fRunnableDest) > 0)
+    and (fRunnableDest[length(fRunnableDest)] <> DirectorySeparator) then
+      fRunnableDest += DirectorySeparator;
+end;
+
 function TCEApplicationOptionsBase.getAdditionalPATH: string;
 begin
   exit(ce_common.additionalPath);
@@ -505,6 +518,7 @@ begin
     fMaxRecentDocs:= CEMainForm.fFileMru.maxCount;
     fDcdPort := DcdWrapper.port;
     fCovModUt:= CEMainForm.fCovModUt;
+    fRunnableDest := CEMainForm.fRunnableDestination;
   end else if src = fBackup then
   begin
     fCovModUt:=fBackup.fCovModUt;
@@ -513,6 +527,7 @@ begin
     fMaxRecentProjs:= fBackup.fMaxRecentProjs;
     fReloadLastDocuments:=fBackup.fReloadLastDocuments;
     fFloatingWidgetOnTop := fBackup.fFloatingWidgetOnTop;
+    CEMainForm.fRunnableDestination := fBackup.fRunnableDest;
   end
   else inherited;
 end;
@@ -525,6 +540,7 @@ begin
     CEMainForm.fProjMru.maxCount := fMaxRecentProjs;
     CEMainForm.fFileMru.maxCount := fMaxRecentDocs;
     CEMainForm.updateFloatingWidgetOnTop(fFloatingWidgetOnTop);
+    CEMainForm.fRunnableDestination := fRunnableDest;
     DcdWrapper.port:=fDcdPort;
   end else if dst = fBackup then
   begin
@@ -534,6 +550,7 @@ begin
     fBackup.fFloatingWidgetOnTop:=fFloatingWidgetOnTop;
     fBackup.fDcdPort:=fDcdPort;
     fBackup.fCovModUt:=fCovModUt;
+    fBackup.fRunnableDest:= fRunnableDest;
   end
   else inherited;
 end;
@@ -1850,6 +1867,30 @@ end;
 {$ENDREGION}
 
 {$REGION run -------------------------------------------------------------------}
+function TCEMainForm.runnableExename: string;
+begin
+  result := '';
+  if fDoc.isNil then
+    exit;
+
+  result := stripFileExt(fDoc.fileName) + exeExt;
+  if fDoc.isTemporary then
+    exit;
+  if fRunnableDestination.isNotEmpty then
+  begin
+    if FilenameIsAbsolute(fRunnableDestination) then
+    begin
+      if fRunnableDestination.dirExists then
+        result := fRunnableDestination + stripFileExt(fDoc.fileName.extractFileName)
+          + exeExt;
+    end else
+    begin
+      result := fDoc.fileName.extractFilePath + fRunnableDestination
+        + stripFileExt(fDoc.fileName.extractFileName) + exeExt;
+    end;
+  end;
+end;
+
 procedure TCEMainForm.asyncprocOutput(sender: TObject);
 var
   proc: TCEProcess;
@@ -1922,6 +1963,9 @@ begin
       continue;
     if cur = '-main' then
       continue;
+    // would break some internal stuff
+    if (cur.length > 2) and (cur[1..3] = '-of') then
+      continue;
     RemoveTrailingChars(cur, [#0..#30]);
     fRunnableSw += (cur + #13);
   end;
@@ -1966,7 +2010,7 @@ begin
       fDoc.save
     else
       fDoc.saveTempFile;
-    fname := stripFileExt(fDoc.fileName);
+    fname := stripFileExt(runnableExename);
 
     if fRunnableSw.isEmpty then
       fRunnableSw := '-vcolumns'#13'-w'#13'-wi';
@@ -1978,6 +2022,7 @@ begin
     dmdproc.Options := [poUsePipes, poStderrToOutPut];
     dmdproc.Executable := 'dmd';
     dmdproc.Parameters.Add(fDoc.fileName);
+    dmdproc.Parameters.Add('-of' + fname + exeExt);
     dmdproc.Parameters.Add('-J' + fDoc.fileName.extractFilePath);
     dmdproc.Parameters.AddText(fRunnableSw);
     CommandToList(firstlineFlags, lst);
@@ -1990,7 +2035,6 @@ begin
         dmdproc.Parameters.Add('-cov');
     end
     else dmdproc.Parameters.Add('-version=runnable_module');
-    dmdproc.Parameters.Add('-of' + fname + exeExt);
     LibMan.getLibFiles(nil, dmdproc.Parameters);
     LibMan.getLibSources(nil, dmdproc.Parameters);
     deleteDups(dmdproc.Parameters);
@@ -2023,7 +2067,7 @@ var
   fname: string;
 begin
   if fDoc.isNil then exit;
-  fname := stripFileExt(fDoc.fileName) + exeExt;
+  fname := runnableExename;
   if not fname.fileExists then exit;
 
   fRunProc := TCEProcess.Create(nil);
@@ -2048,7 +2092,7 @@ begin
       CommandToList(fSymStringExpander.expand(runArgs), lst);
       fRunProc.Parameters.AddStrings(lst);
     end;
-    fRunProc.Executable := fname + exeExt;
+    fRunProc.Executable := fname;
     if unittest and fCovModUt then
       fRunProc.OnTerminate:=@unittestDone;
     if redirect then
@@ -2069,7 +2113,7 @@ begin
   asyncprocTerminate(sender);
   if fCovModUt then
   begin
-    fname   := stripFileExt(TProcess(sender).Executable);
+    fname   := stripFileExt(fDoc.fileName);
     fullcov := true;
     covname := ReplaceStr(fname + '.lst', DirectorySeparator, '-');
     {$IFDEF WINDOWS}
@@ -2088,6 +2132,7 @@ begin
             fullcov := false;
           end;
         sysutils.DeleteFile(covname);
+        sysutils.DeleteFile('__main.lst');
         if fullcov then fMsgs.message(shortenPath(fDoc.fileName, 25)
           + ' is 100% covered by the unittests', fDoc, amcEdit, amkInf);
       finally
@@ -2103,7 +2148,7 @@ begin
   if fDoc.isNil then
     exit;
   compileRunnable(true);
-  executeRunnable(true);
+  executeRunnable(true, true);
 end;
 
 procedure TCEMainForm.actFileCompAndRunExecute(Sender: TObject);
@@ -2151,7 +2196,7 @@ begin
   if fDoc.isNil then
     exit;
   FreeRunnableProc;
-  fname := stripFileExt(fDoc.fileName) + exeExt;
+  fname := runnableExename;
   if fname.fileExists then
   begin
     exist := true;
@@ -2190,7 +2235,7 @@ end;
 
 procedure TCEMainForm.actProjCompAndRunWithArgsExecute(Sender: TObject);
 begin
- fRunProjAfterCompArg := true;
+  fRunProjAfterCompArg := true;
 end;
 
 procedure TCEMainForm.actProjRunExecute(Sender: TObject);
