@@ -6,3 +6,4 @@
 - editor note about usefull commands: comment selection, invert version all/none
 - tuto are obsolete
 - appli option, describe runnable destination
+- emnu reference, action Compile file, action Run compiled file

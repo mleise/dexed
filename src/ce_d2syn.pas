@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Graphics,
   SynEditHighlighter, SynEditHighlighterFoldBase, SynEditTypes,
-  ce_dlangutils;
+  ce_dlangutils,ce_dlangmaps;
 
 const
 
@@ -35,12 +35,6 @@ const
     'ubyte', 'ucent', 'uint', 'ulong', 'union', 'unittest', 'ushort',
     'version', 'void', 'volatile',
     'wchar', 'while', 'with', 'wstring'
-  );
-
-  D2SpecKw: array[0..10] of string =
-  (
-    '__FILE__', '__MODULE__', '__LINE__', '__FUNCTION__', '__PRETTY_FUNCTION__',
-    '__DATE__', '__EOF__', '__TIME__', '__TIMESTAMP__', '__VENDOR__', '__VERSION__'
   );
 
 type
@@ -105,7 +99,6 @@ type
     fSpeckAttrib: TSynHighlighterAttributes;
     fErrorAttrib: TSynHighlighterAttributes;
     fKeyWords: TD2Dictionary;
-    fSpecKw: TD2Dictionary;
     fLineBuf: string;
     fTokStart, fTokStop: Integer;
     fTokKind: TTokenKind;
@@ -276,7 +269,6 @@ begin
   DefaultFilter:= 'D source|*.d|D interface|*.di';
 
   fKeyWords.create(D2Kw);
-  fSpecKw.create(D2SpecKw);
 
   fFoldKinds := [fkBrackets,fkRegion];
 
@@ -1000,7 +992,7 @@ begin
       if (fLineBuf[FTokStart..fTokStop-1] = 'asm') then
         fCurrRange.rangeKinds += [rkAsm];
     end
-    else if fSpecKw.find(fLineBuf[FTokStart..fTokStop-1]) then
+    else if specialKeywordsMap.match(fLineBuf[FTokStart..fTokStop-1]) then
       fTokKind := tkSpecK
     else if rkAsm in fCurrRange.rangeKinds then
       fTokKind:=tkAsmbl;
