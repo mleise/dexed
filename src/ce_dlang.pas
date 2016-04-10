@@ -5,61 +5,10 @@ unit ce_dlang;
 interface
 
 uses
-  Classes, SysUtils, ce_dlangutils;
+  Classes, SysUtils, ce_dlangutils, ce_dlangmaps;
 
-const
-
-  D2Kw: array[0..109] of string =
-    ('abstract', 'alias', 'align', 'asm', 'assert', 'auto',
-    'body', 'bool', 'break', 'byte',
-    'case', 'cast', 'catch', 'cdouble', 'cent', 'cfloat', 'char', 'class',
-    'const', 'continue', 'creal',
-    'dchar', 'debug', 'default', 'delegate', 'delete', 'deprecated', 'do', 'double',
-    'else', 'enum', 'export', 'extern',
-    'false', 'final', 'finally', 'float', 'for', 'foreach',
-    'foreach_reverse', 'function',
-    'goto',
-    'idouble', 'if', 'ifloat', 'immutable', 'import', 'in', 'inout', 'int',
-    'interface', 'invariant', 'ireal', 'is',
-    'lazy', 'long',
-    'macro', 'mixin', 'module',
-    'new', 'nothrow', 'null',
-    'out', 'override',
-    'package', 'pragma', 'private', 'protected', 'ptrdiff_t', 'public', 'pure',
-    'real', 'ref', 'return',
-    'size_t', 'scope', 'shared', 'short', 'static', 'string', 'struct',
-    'super', 'switch', 'synchronized',
-    'template', 'this', 'throw', 'true', 'try', 'typedef', 'typeid', 'typeof',
-    'ubyte', 'ucent', 'uint', 'ulong', 'union', 'unittest', 'ushort',
-    'version', 'void', 'volatile',
-    'wchar', 'while', 'with',
-    '__FILE__', '__MODULE__', '__LINE__', '__FUNCTION__', '__PRETTY_FUNCTION__'
-    );
 
 type
-
-  (**
-   * sector for an array of Keyword with a common hash.
-   *)
-  TD2DictionaryEntry = record
-    filled: Boolean;
-    values: array of string;
-  end;
-
-  (**
-   * Dictionary for the D2 keywords.
-   *)
-  TD2Dictionary = object
-  private
-    fLongest, fShortest: NativeInt;
-    fEntries: array[Byte] of TD2DictionaryEntry;
-    function toHash(const aValue: string): Byte; {$IFNDEF DEBUG}inline;{$ENDIF}
-    procedure addEntry(const aValue: string);
-  public
-    constructor Create;
-    destructor Destroy; // do not remove even if empty (compat with char-map version)
-    function find(const aValue: string): boolean;
-  end;
 
   (**
    * Represents the pointer in a source file.
@@ -194,9 +143,6 @@ operator = (lhs: TPoint; rhs: TPoint): boolean;
 
 implementation
 
-var
-  D2Dictionary: TD2Dictionary;
-
 {$REGION TReaderHead -----------------------------------------------------------}
 operator = (lhs: TPoint; rhs: TPoint): boolean;
 begin
@@ -257,68 +203,6 @@ procedure TReaderHead.saveBeginning;
 begin
   fBegColumnIndex:= fColumnIndex;
   fBegLineIndex:= fLineIndex;
-end;
-
-{$ENDREGION}
-
-{$REGION TD2Dictionary ---------------------------------------------------------}
-constructor TD2Dictionary.Create;
-var
-  Value: string;
-begin
-  for Value in D2Kw do
-    addEntry(Value);
-end;
-
-destructor TD2Dictionary.Destroy;
-begin
-end;
-
-{$IFDEF DEBUG}{$R-}{$ENDIF}
-function TD2Dictionary.toHash(const aValue: string): Byte;
-var
-  i: Integer;
-begin
-  Result := 0;
-  for i := 1 to length(aValue) do
-    Result +=
-      (Byte(aValue[i]) shl (4 and (1 - i))) xor 25;
-end;
-
-{$IFDEF DEBUG}{$R+}{$ENDIF}
-
-procedure TD2Dictionary.addEntry(const aValue: string);
-var
-  hash: Byte;
-begin
-  if find(aValue) then
-    exit;
-  hash := toHash(aValue);
-  fEntries[hash].filled := True;
-  setLength(fEntries[hash].values, length(fEntries[hash].values) + 1);
-  fEntries[hash].values[high(fEntries[hash].values)] := aValue;
-  if fLongest <= length(aValue) then
-    fLongest := length(aValue);
-  if fShortest >= length(aValue) then
-    fShortest := length(aValue);
-end;
-
-function TD2Dictionary.find(const aValue: string): boolean;
-var
-  hash: Byte;
-  i: NativeInt;
-begin
-  Result := False;
-  if length(aValue) > fLongest then
-    exit;
-  if length(aValue) < fShortest then
-    exit;
-  hash := toHash(aValue);
-  if (not fEntries[hash].filled) then
-    exit(False);
-  for i := 0 to high(fEntries[hash].values) do
-    if fEntries[hash].values[i] = aValue then
-      exit(True);
 end;
 
 {$ENDREGION}
@@ -1016,7 +900,9 @@ begin
         if isOutOfBound then
           exit;
       end;
-      if D2Dictionary.find(identifier) then
+      if keywordsMap.match(identifier) then
+        addToken(ltkKeyword)
+      else if specialKeywordsMap.match(identifier) then
         addToken(ltkKeyword)
       else
         addToken(ltkIdentifier);
@@ -1109,10 +995,5 @@ begin
 end;
 
 {$ENDREGION}
-
-initialization
-  D2Dictionary.Create;
-
-finalization
-  D2Dictionary.Destroy;
 end.
+
