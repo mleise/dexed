@@ -9,51 +9,7 @@ uses
   SynEditHighlighter, SynEditHighlighterFoldBase, SynEditTypes,
   ce_dlangutils,ce_dlangmaps;
 
-const
-
-  D2Kw: array[0..107] of string =
-  ( 'abstract', 'alias', 'align', 'asm', 'assert', 'auto',
-    'body', 'bool', 'break', 'byte',
-    'case', 'cast', 'catch', 'cdouble', 'cent', 'cfloat', 'char', 'class',
-    'const', 'continue', 'creal',
-    'dchar', 'debug', 'default', 'delegate', 'delete', 'deprecated', 'do', 'double', 'dstring',
-    'else', 'enum', 'export', 'extern',
-    'false', 'final', 'finally', 'float', 'for', 'foreach',
-    'foreach_reverse', 'function',
-    'goto', '__gshared',
-    'idouble', 'if', 'ifloat', 'immutable', 'import', 'in', 'inout', 'int',
-    'interface', 'invariant', 'ireal', 'is',
-    'lazy', 'long',
-    'macro', 'mixin', 'module',
-    'new', 'nothrow', 'null',
-    'out', 'override',
-    'package', 'pragma', 'private', 'protected', 'ptrdiff_t', 'public', 'pure',
-    'real', 'ref', 'return',
-    'size_t', 'scope', 'shared', 'short', 'static', 'string', 'struct',
-    'super', 'switch', 'synchronized',
-    'template', 'this', 'throw', 'true', 'try', 'typedef', 'typeid', 'typeof',
-    'ubyte', 'ucent', 'uint', 'ulong', 'union', 'unittest', 'ushort',
-    'version', 'void', 'volatile',
-    'wchar', 'while', 'with', 'wstring'
-  );
-
 type
-
-  TD2DictionaryEntry = record
-    filled: Boolean;
-    values: array of string;
-  end;
-
-  TD2Dictionary = object
-  private
-    fLongest, fShortest: NativeInt;
-    fEntries: array[Byte] of TD2DictionaryEntry;
-    function toHash(const aValue: string): Byte;  {$IFNDEF DEBUG}inline;{$ENDIF}
-    procedure addEntry(const aValue: string);
-  public
-    constructor create(from: array of string);
-    function find(const aValue: string): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
-  end;
 
   TTokenKind = (tkCommt, tkIdent, tkKeywd, tkStrng, tkBlank, tkSymbl, tkNumbr,
     tkDDocs, tkSpecK, tkError, tkAsmbl);
@@ -98,7 +54,6 @@ type
     fAsblrAttrib: TSynHighlighterAttributes;
     fSpeckAttrib: TSynHighlighterAttributes;
     fErrorAttrib: TSynHighlighterAttributes;
-    fKeyWords: TD2Dictionary;
     fLineBuf: string;
     fTokStart, fTokStop: Integer;
     fTokKind: TTokenKind;
@@ -154,54 +109,6 @@ type
 	end;
 
 implementation
-
-constructor TD2Dictionary.create(from: array of string);
-var
-  value: string;
-begin
-  for value in from do
-    addEntry(value);
-end;
-
-{$IFDEF DEBUG}{$PUSH}{$R-}{$ENDIF}
-function TD2Dictionary.toHash(const aValue: string): Byte;
-var
-  i: Integer;
-begin
-  result := 0;
-	for i := 1 to length(aValue) do
-	  result += (Byte(aValue[i]) shl (4 and (1-i))) xor 25;
-end;
-{$IFDEF DEBUG}{$POP}{$ENDIF}
-
-procedure TD2Dictionary.addEntry(const aValue: string);
-var
-  hash: Byte;
-begin
-  if find(aValue) then exit;
-  hash := toHash(aValue);
-  fEntries[hash].filled := true;
-  setLength(fEntries[hash].values, length(fEntries[hash].values) + 1);
-  fEntries[hash].values[high(fEntries[hash].values)] := aValue;
-  if fLongest <= length(aValue) then
-    fLongest := length(aValue);
-  if fShortest >= length(aValue) then
-    fShortest := length(aValue);
-end;
-
-function TD2Dictionary.find(const aValue: string): boolean;
-var
-  hash: Byte;
-  i: NativeInt;
-begin
-  result := false;
-  if length(aValue) > fLongest then exit;
-  if length(aValue) < fShortest then exit;
-  hash := toHash(aValue);
-  if (not fEntries[hash].filled) then exit(false);
-  for i:= 0 to high(fEntries[hash].values) do
-    if fEntries[hash].values[i] = aValue then exit(true);
-end;
 
 procedure TSynD2SynRange.Assign(Src: TSynCustomHighlighterRange);
 var
@@ -267,8 +174,6 @@ begin
   SetSubComponent(true);
 
   DefaultFilter:= 'D source|*.d|D interface|*.di';
-
-  fKeyWords.create(D2Kw);
 
   fFoldKinds := [fkBrackets,fkRegion];
 
@@ -986,7 +891,7 @@ begin
       if isSymbol(reader^) then break;
       if isOperator1(reader^) then break;
     end;
-    if fKeyWords.find(fLineBuf[FTokStart..fTokStop-1]) then
+    if keywordsMap.match(fLineBuf[FTokStart..fTokStop-1]) then
     begin
       fTokKind := tkKeywd;
       if (fLineBuf[FTokStart..fTokStop-1] = 'asm') then

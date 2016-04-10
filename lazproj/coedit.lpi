@@ -401,11 +401,6 @@
       <OtherUnitFiles Value="..\src;..\etc\fcl-json\src"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <Parsing>
-      <SyntaxOptions>
-        <StaticKeyword Value="True"/>
-      </SyntaxOptions>
-    </Parsing>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
       <Optimizations>
