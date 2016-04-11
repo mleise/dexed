@@ -1980,9 +1980,10 @@ end;
 procedure TCEMainForm.compileRunnable(unittest: boolean = false);
 var
   i: integer;
+  fname: string;
   dmdproc: TCEProcess;
-  lst: TStringList;
-  fname, firstlineFlags: string;
+  lst: TStringList = nil;
+  firstLineFlags: string = '';
 begin
 
   fMsgs.clearByData(fDoc);
@@ -1992,20 +1993,19 @@ begin
 
   firstlineFlags := fDoc.Lines[0];
   i := firstlineFlags.length;
-  if ( i > 18) then
+  if (i > 18) and (firstlineFlags.upperCase[1..17] = '#!RUNNABLE-FLAGS:') then
   begin
-    if firstlineFlags.upperCase[1..17] = '#!RUNNABLE-FLAGS:' then
-        firstlineFlags := fSymStringExpander.expand(firstlineFlags[18..i])
-    else firstlineFlags:= '';
-  end else firstlineFlags:= '';
+    firstlineFlags := fSymStringExpander.expand(firstlineFlags[18..i]);
+    lst := TStringList.Create;
+    CommandToList(firstlineFlags, lst);
+    for i:= lst.Count-1 downto 0 do
+      if (lst[i].length > 2) and (lst[i][1..3] = '-of') then
+        lst.Delete(i);
+  end;
 
-
-  lst := TStringList.Create;
   dmdproc := TCEProcess.Create(nil);
   try
-
     fMsgs.message('compiling ' + shortenPath(fDoc.fileName, 25), fDoc, amcEdit, amkInf);
-
     if fDoc.fileName.fileExists then
       fDoc.save
     else
@@ -2025,8 +2025,8 @@ begin
     dmdproc.Parameters.Add('-of' + fname + exeExt);
     dmdproc.Parameters.Add('-J' + fDoc.fileName.extractFilePath);
     dmdproc.Parameters.AddText(fRunnableSw);
-    CommandToList(firstlineFlags, lst);
-    dmdproc.Parameters.AddStrings(lst);
+    if lst.isNotNil and (lst.Count <> 0) then
+      dmdproc.Parameters.AddStrings(lst);
     if unittest then
     begin
       dmdproc.Parameters.Add('-main');
@@ -2056,7 +2056,8 @@ begin
 
   finally
     dmdproc.Free;
-    lst.Free;
+    if lst.isNotNil then
+      lst.Free;
   end;
 end;
 
