@@ -2128,7 +2128,7 @@ begin
         for i := 0 to lst.Count-1 do
           if lst[i][1..7] = '0000000' then
           begin
-            fMsgs.message(format('%s(%d): %s',[fDoc.fileName, i+1,
+            fMsgs.message(format('%s(%d): %s', [fDoc.fileName, i+1,
               'not covered by the unittests']), fDoc, amcEdit, amkWarn);
             fullcov := false;
           end;

@@ -143,6 +143,7 @@ type
     fOverrideColMode: boolean;
     fAutoCloseCurlyBrace: TBraceAutoCloseStyle;
     fLexToks: TLexTokenList;
+    fDisableFileDateCheck: boolean;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseFileBytePos: Integer;
     procedure changeNotify(Sender: TObject);
@@ -219,6 +220,7 @@ type
     property isTemporary: boolean read getIfTemp;
     property TextView;
     //
+    property disableFileDateCheck: boolean read fDisableFileDateCheck write fDisableFileDateCheck;
     property MouseStart: Integer read getMouseFileBytePos;
     property D2Highlighter: TSynD2Syn read fD2Highlighter;
     property TxtHighlighter: TSynTxtSyn read fTxtHighlighter;
@@ -1376,12 +1378,13 @@ var
   str: TStringList;
 begin
   if fFilename = fTempFileName then exit;
+  if fDisableFileDateCheck then exit;
   if not FileAge(fFilename, newDate) then exit;
   if fFileDate = newDate then exit;
   if fFileDate <> 0.0 then
   begin
     // note: this could cause a bug during the DST switch.
-    // e.g: save at 2h59, at 3h00 clock is reset to 2h00, set the focus on the doc: new version message.
+    // e.g: save at 2h59, 3h00 reset to 2h00, set the focus on the doc: new version message.
     if dlgOkCancel(format('"%s" has been modified by another program, load the new version ?',
       [shortenPath(fFilename, 25)])) = mrOk then
     begin
