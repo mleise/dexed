@@ -211,6 +211,7 @@ type
     fRunnableDestination: string;
     fSymStringExpander: ICESymStringExpander;
     fCovModUt: boolean;
+    fAlwaysUseDest: boolean;
     fDoc: TCESynMemo;
     fFirstTimeCoedit: boolean;
     fActionHandler: TCEActionProviderSubject;
@@ -396,6 +397,7 @@ type
     fMaxRecentDocs: integer;
     fDcdPort: word;
     fRunnableDest: TCEPathname;
+    fAlwaysUseDest: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
@@ -413,6 +415,7 @@ type
     property dubCompiler: TCECompiler read getDubCompiler write setDubCompiler;
     property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
     property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination;
+    property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest;
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
@@ -519,6 +522,7 @@ begin
     fDcdPort := DcdWrapper.port;
     fCovModUt:= CEMainForm.fCovModUt;
     fRunnableDest := CEMainForm.fRunnableDestination;
+    fAlwaysUseDest := CEMainForm.fAlwaysUseDest;
   end else if src = fBackup then
   begin
     fCovModUt:=fBackup.fCovModUt;
@@ -528,6 +532,7 @@ begin
     fReloadLastDocuments:=fBackup.fReloadLastDocuments;
     fFloatingWidgetOnTop := fBackup.fFloatingWidgetOnTop;
     CEMainForm.fRunnableDestination := fBackup.fRunnableDest;
+    CEmainForm.fAlwaysUseDest := fBackup.fAlwaysUseDest;
   end
   else inherited;
 end;
@@ -541,6 +546,7 @@ begin
     CEMainForm.fFileMru.maxCount := fMaxRecentDocs;
     CEMainForm.updateFloatingWidgetOnTop(fFloatingWidgetOnTop);
     CEMainForm.fRunnableDestination := fRunnableDest;
+    CEMainForm.fAlwaysUseDest := fAlwaysUseDest;
     DcdWrapper.port:=fDcdPort;
   end else if dst = fBackup then
   begin
@@ -551,6 +557,7 @@ begin
     fBackup.fDcdPort:=fDcdPort;
     fBackup.fCovModUt:=fCovModUt;
     fBackup.fRunnableDest:= fRunnableDest;
+    fBackup.fAlwaysUseDest := fAlwaysUseDest;
   end
   else inherited;
 end;
@@ -1878,6 +1885,9 @@ begin
     exit;
   if fRunnableDestination.isNotEmpty then
   begin
+    if not fAlwaysUseDest and assigned(fProjectInterface)
+      and not fProjectInterface.isSource(fDoc.fileName) then
+        exit;
     if FilenameIsAbsolute(fRunnableDestination) then
     begin
       if fRunnableDestination.dirExists then
