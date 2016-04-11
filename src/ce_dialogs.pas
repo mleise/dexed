@@ -11,22 +11,27 @@ uses
 (**
  * Ok/Cancel modal dialog
  *)
-function dlgOkCancel(const aMsg: string): TModalResult;
+function dlgOkCancel(const message: string): TModalResult;
+
+(**
+ * Yes/No modal dialog
+ *)
+function dlgYesNo(const message: string): TModalResult;
 
 (**
  * Info message
  *)
-function dlgOkInfo(const aMsg: string): TModalResult;
+function dlgOkInfo(const message: string): TModalResult;
 
 (**
  * Error message
  *)
-function dlgOkError(const aMsg: string): TModalResult;
+function dlgOkError(const message: string): TModalResult;
 
 (**
  * close aFilename Ok/Cancel.
  *)
-function dlgFileChangeClose(const aFilename: string): TModalResult;
+function dlgFileChangeClose(const fname: string): TModalResult;
 
 const
   DdiagFilter = 'D source|*.d|D interface|*.di|All files|*.*';
@@ -34,32 +39,39 @@ const
 implementation
 
 
-function dlgOkCancel(const aMsg: string): TModalResult;
+function dlgOkCancel(const message: string): TModalResult;
 const
   Btns = [mbOK,mbCancel];
 begin
-  exit( MessageDlg('Coedit', aMsg, mtConfirmation, Btns, ''));
+  exit( MessageDlg('Coedit', message, mtConfirmation, Btns, ''));
 end;
 
-function dlgOkInfo(const aMsg: string): TModalResult;
+function dlgYesNo(const message: string): TModalResult;
+const
+  Btns = [mbYes,mbNo];
+begin
+  exit( MessageDlg('Coedit', message, mtConfirmation, Btns, ''));
+end;
+
+function dlgOkInfo(const message: string): TModalResult;
 const
   Btns = [mbOK];
 begin
-  exit( MessageDlg('Coedit', aMsg, mtInformation, Btns, ''));
+  exit( MessageDlg('Coedit', message, mtInformation, Btns, ''));
 end;
 
-function dlgOkError(const aMsg: string): TModalResult;
+function dlgOkError(const message: string): TModalResult;
 const
   Btns = [mbOK];
 begin
-  exit( MessageDlg('Coedit', aMsg, mtError, Btns, ''));
+  exit( MessageDlg('Coedit', message, mtError, Btns, ''));
 end;
 
-function dlgFileChangeClose(const aFilename: string): TModalResult;
+function dlgFileChangeClose(const fname: string): TModalResult;
 const
   fmt = '"%s" latest modifications are not saved.'#13#10#13#10'Close it without saving ?';
 begin
-  exit(dlgOkCancel(format(fmt, [aFilename])));
+  exit(dlgOkCancel(format(fmt, [fname])));
 end;
 
 end.

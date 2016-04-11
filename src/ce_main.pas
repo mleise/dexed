@@ -1471,7 +1471,7 @@ begin
   if fRunProjAfterCompile and assigned(fProjectInterface) then
   begin
     if not success then
-      runprev := dlgOkCancel('last build failed, continue and run ?') = mrOK;
+      runprev := dlgYesNo('last build failed, continue and run ?') = mrYes;
     if runprev then
     begin
       if fRunProjAfterCompArg and
@@ -2192,7 +2192,7 @@ var
   exist: boolean = false;
 const
   messg: string = 'Either the runnable does not exist or it is older than its source.' +
-    LineEnding +  ' Do you wish to recompile it ?';
+    LineEnding +  'Do you wish to recompile it ?';
 begin
   if fDoc.isNil then
     exit;
@@ -2205,7 +2205,7 @@ begin
   end;
   if (not exist) or (older) then
   begin
-    if dlgOkCancel(messg) = mrOK then
+    if dlgYesNo(messg) = mrYes then
       compileRunnable
     else if not exist then
       exit;
@@ -2247,7 +2247,7 @@ begin
     exit;
   end;
   if (not fProjectInterface.targetUpToDate) then if
-    dlgOkCancel('The project output is not up-to-date, rebuild ?') = mrOK then
+    dlgYesNo('The project output is not up-to-date, rebuild ?') = mrYes then
       fProjectInterface.compile;
   if fProjectInterface.outputFilename.fileExists
       or (fProjectInterface.getFormat = pfDub) then

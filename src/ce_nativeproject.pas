@@ -497,9 +497,9 @@ var
       if sourceAbsolute(i).fileExists then
         allMissing := false;
     if not allMissing then exit;
-    if dlgOkCancel( 'The project source(s) are all missing. ' + LineEnding +
+    if dlgYesNo( 'The project source(s) are all missing. ' + LineEnding +
       'This can be encountered if the project file has been moved from its original location.' + LineEnding + LineEnding +
-      'Do you wish to select the new root folder ?') <> mrOk then exit;
+      'Do you wish to select the new root folder ?') <> mrYes then exit;
     // TODO-cimprovement: use commonFolder() when it'll be compat. with the rel. paths.
     // hint for the common dir
     dirHint := fSrcs[i];
@@ -529,10 +529,10 @@ var
     begin
       oldsrc := sourceAbsolute(i);
       if oldsrc.fileExists then continue;
-      if dlgOkCancel(format('a particular project source file ("%s") is missing. '
+      if dlgYesNo(format('a particular project source file ("%s") is missing. '
         + LineEnding + 'This happends if a source file has been moved, renamed ' +
         'or deleted.' + LineEnding + LineEnding +
-        'Do you wish to select its new location?', [fSrcs[i]])) <> mrOk then exit;
+        'Do you wish to select its new location?', [fSrcs[i]])) <> mrYes then exit;
       //
       opendlg := TOpenDialog.Create(nil);
       try
@@ -541,14 +541,14 @@ var
         if opendlg.execute then
         begin
           if oldsrc.extractFileName <> opendlg.filename.extractFileName then
-            if dlgOkCancel('the filenames are different, replace the old file ?') <> mrOk then
+            if dlgYesNo('the filenames are different, replace the old file ?') <> mrYes then
               continue;
             fSrcs[i] := ExtractRelativepath(fBasePath, opendlg.Filename);
             hasPatched := true;
         end else
         begin
-          if dlgOkCancel('You have choosen not to update the file, ' +
-          'do you wish to remove it from the project ?') <> mrOk then
+          if dlgYesNo('You have choosen not to update the file, ' +
+          'do you wish to remove it from the project ?') <> mrYes then
               continue;
           fSrcs.Delete(i);
           hasPatched := true;

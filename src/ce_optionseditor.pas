@@ -147,7 +147,7 @@ begin
   begin
     if fCatChanged then
     begin
-      result := dlgOkCancel(msg_mod) = mrOk;
+      result := dlgYesNo(msg_mod) = mrYes;
       fCatChanged := not result;
       if result then btnCancelClick(nil);
     end;
@@ -159,7 +159,7 @@ begin
     if dt^.observer = nil then exit;
     if dt^.observer.optionedOptionsModified() then
     begin
-      result := dlgOkCancel(msg_mod) = mrOk;
+      result := dlgYesNo(msg_mod) = mrYes;
       if result then btnCancelClick(nil);
     end;
   end;

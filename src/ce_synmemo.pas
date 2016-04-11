@@ -1385,8 +1385,8 @@ begin
   begin
     // note: this could cause a bug during the DST switch.
     // e.g: save at 2h59, 3h00 reset to 2h00, set the focus on the doc: new version message.
-    if dlgOkCancel(format('"%s" has been modified by another program, load the new version ?',
-      [shortenPath(fFilename, 25)])) = mrOk then
+    if dlgYesNo(format('"%s" has been modified by another program, load the new version ?',
+      [shortenPath(fFilename, 25)])) = mrYes then
     begin
       str := TStringList.Create;
       try
