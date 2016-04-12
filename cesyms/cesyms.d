@@ -37,7 +37,7 @@ void main(string[] args)
 {
     // format
     bool asJson;
-    getopt(args, std.getopt.config.passThrough, 'j', &asJson);
+    getopt(args, std.getopt.config.passThrough, "j", &asJson);
 
     // get either the module from stdin or from first arg
     string fname;
