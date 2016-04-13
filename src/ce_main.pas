@@ -944,7 +944,6 @@ begin
     itm.Action := act;
     itm.Tag := ptrInt(widg);
     mnuItemWin.Add(itm);
-    widg.Visible:=false;
   end;
 end;
 
