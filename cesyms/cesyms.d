@@ -428,8 +428,17 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
 
     final override void visit(const StaticDestructor decl)
     {
-
         otherVisitorImpl(decl, SymbolType._function, "static ~this", decl.line, decl.column);
+    }
+
+    final override void visit(const SharedStaticConstructor decl)
+    {
+        otherVisitorImpl(decl, SymbolType._function, "shared static this", decl.line, decl.column);
+    }
+
+    final override void visit(const SharedStaticDestructor decl)
+    {
+        otherVisitorImpl(decl, SymbolType._function, "shared static ~this", decl.line, decl.column);
     }
 }
 //----
