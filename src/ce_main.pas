@@ -138,6 +138,8 @@ type
     MenuItem73: TMenuItem;
     MenuItem74: TMenuItem;
     MenuItem75: TMenuItem;
+    MenuItem76: TMenuItem;
+    MenuItem77: TMenuItem;
     mnuLayout: TMenuItem;
     mnuItemMruFile: TMenuItem;
     mnuItemMruProj: TMenuItem;
@@ -155,6 +157,7 @@ type
     procedure actProjNewNativeExecute(Sender: TObject);
     procedure actSetRunnableSwExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure MenuItem77Click(Sender: TObject);
     procedure updateDocumentBasedAction(sender: TObject);
     procedure updateProjectBasedAction(sender: TObject);
     procedure updateDocEditBasedAction(sender: TObject);
@@ -941,6 +944,7 @@ begin
     itm.Action := act;
     itm.Tag := ptrInt(widg);
     mnuItemWin.Add(itm);
+    widg.Visible:=false;
   end;
 end;
 
@@ -1242,6 +1246,11 @@ begin
   // saving doesnt work when csDestroying in comp.state (i.e in destroy)
   if CloseAction = caFree then
     SaveDocking;
+end;
+
+procedure TCEMainForm.MenuItem77Click(Sender: TObject);
+begin
+  fOptEdWidg.showWidget;
 end;
 
 destructor TCEMainForm.destroy;

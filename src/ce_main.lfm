@@ -2671,6 +2671,14 @@ object CEMainForm: TCEMainForm
           77FF73716FFF6D6B69FF696665FF63605FFF6461600064616000
         }
       end
+      object MenuItem76: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem77: TMenuItem
+        Caption = 'Options...'
+        ImageIndex = 23
+        OnClick = MenuItem77Click
+      end
     end
     object MenuItem14: TMenuItem
       Caption = 'Project'
