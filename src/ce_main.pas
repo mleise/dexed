@@ -1728,8 +1728,8 @@ end;
 procedure TCEMainForm.actFileAddToProjExecute(Sender: TObject);
 begin
   if fDoc.isNil then exit;
-  if fDoc.isProjectFile then exit;
   if fProjectInterface = nil then exit;
+  if fProjectInterface.filename = fDoc.fileName then exit;
   //
   if fProjectInterface.getFormat = pfNative then
   begin

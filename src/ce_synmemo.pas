@@ -112,7 +112,6 @@ type
     fCacheLoaded: boolean;
     fIsDSource: boolean;
     fIsTxtFile: boolean;
-    fIsConfig: boolean;
     fFocusForInput: boolean;
     fIdentifier: string;
     fTempFileName: string;
@@ -216,7 +215,6 @@ type
     property completionMenu: TSynCompletion read fCompletion;
     property syncroEdit: TSynPluginSyncroEdit read fSyncEdit;
     property isDSource: boolean read fIsDSource;
-    property isProjectFile: boolean read fIsConfig; // warning: never set !
     property isTemporary: boolean read getIfTemp;
     property TextView;
     //
@@ -1435,7 +1433,7 @@ procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
 begin
   if Key = VK_RETURN then
   begin
-    if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically])then
+    if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically]) then
     case fAutoCloseCurlyBrace of
       autoCloseOnNewLineAlways: if (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
       begin
