@@ -789,6 +789,13 @@ begin
       break;
     i += 1;
   end;
+  if (beg[i] <> '{') and (i > 1) then
+  begin
+    if (eoTabsToSpaces in editor.Options) then
+      i -= editor.TabWidth
+    else
+      i -= 1;
+  end;
   i -= 1;
   editor.BeginUndoBlock;
   editor.CommandProcessor(ecInsertLine, '', nil);
@@ -1007,7 +1014,7 @@ begin
   end;
   CaretXY := cp;
 end;
-{$ENDREGIOn}
+{$ENDREGION}
 
 {$REGION DDoc & CallTip --------------------------------------------------------}
 procedure TCESynMemo.InitHintWins;
@@ -1428,15 +1435,14 @@ procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
 begin
   if Key = VK_RETURN then
   begin
-    if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically])
-    and (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
+    if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically])then
     case fAutoCloseCurlyBrace of
-      autoCloseOnNewLineAlways:
+      autoCloseOnNewLineAlways: if (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
       begin
         Key := 0;
         curlyBraceCloseAndIndent(self);
       end;
-      autoCloseOnNewLineEof:
+      autoCloseOnNewLineEof: if (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
         if (CaretY = Lines.Count) and (CaretX = LineText.length+1) then
         begin
           Key := 0;
