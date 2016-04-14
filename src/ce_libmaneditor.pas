@@ -294,15 +294,16 @@ var
   idx: integer;
   prj: TCEDubProject;
   upd: boolean = false;
-  row: TListItem;
+  ovw: boolean = false;
+  row: TListItem = nil;
 begin
   if TDubPackageQueryForm.showAndWait(nme) <> mrOk then
     exit;
   if List.Items.FindCaption(0, nme, false, false, false).isNotNil then
   begin
-    dlgOkInfo(format('a library item with the alias "%s" already exists, delete it before trying again.',
-      [nme]));
-    exit;
+    if dlgYesNo(format('a library item with the alias "%s" already exists, do you wish to update it ?',
+      [nme])) <> mrYes then exit
+    else ovw := true;
   end;
   {$IFDEF WINDOWS}
   pth := GetEnvironmentVariable('APPDATA') + '\dub\packages\' + nme + '-master';
@@ -362,6 +363,7 @@ begin
     dub.Options:= [poUsePipes, poStderrToOutPut];
     dub.Parameters.Add('build');
     dub.Parameters.Add('--build=release');
+    dub.Parameters.Add('--force');
     dub.CurrentDirectory:= pth;
     dub.Execute;
     while dub.Running do sleep(10);
@@ -397,7 +399,10 @@ begin
       try
         for idx := 0 to prj.sourcesCount-1 do
           str.Add(prj.sourceAbsolute(idx));
-        row := List.Items.Add;
+        if ovw then
+          row := List.FindCaption(0, nme, true, true, true);
+        if row.isNil then
+          row := List.Items.Add;
         row.Data := LibMan.libraries.Add;
         row.Caption := nme;
         row.SubItems.Add(prj.outputFilename);
