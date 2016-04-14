@@ -50,81 +50,118 @@ type
 
   (**
    * Perfect static hash-map that detects the 'straight' D2 keywords plus a few
-   * exception for the library types related to immutable strings.
+   * exception for the library types related to the strings and registry-wide integers.
    *)
   keywordsMap = record
   private
-    const fWords: array [0..255] of string =
+    const fWords: array [0..511] of string =
     (
-      '', '', 'scope', '', 'creal', '', '', '', '', '', '', '', '', '', 'delegate',
-      '', 'dstring', '', 'override', '', '', '', 'is', 'while', 'asm', '', '',
-      '', 'struct', '', 'cast', '', '', '', 'long', '', '', 'wstring', '', '',
-      'super', 'else', 'real', '', '', '', '', 'mixin', '', '', '', '', '', 'align',
-      '', 'dchar', '', '__vector', '', 'bool', '', '', '', '', '', 'unittest',
-      'ireal', '', '', '', 'nothrow', 'pragma', '', 'null', '', 'do', '', 'cfloat',
-      'cent', '', '', 'true', '', '', 'macro', 'enum', '', '', '', 'immutable', '',
-      '', 'private', 'interface', '', 'foreach_reverse', '', '', 'delete', '', '',
-      'abstract', 'template', '', '', 'idouble', 'volatile', '', '', 'alias', 'version',
-      'char', 'catch', '', '__traits', 'break', '', 'byte', '', '', 'short', '',
-      'typeid', 'assert', '', 'goto', '', '', 'protected', '', 'this', '', '', '',
-      'default', '', '', '', 'deprecated', '', 'uint', '', '', 'false', '', '', '',
-      'ushort', '', '', 'class', '', '', '', 'ref', '', 'if', 'typeof', 'try', '',
-      '', 'return', 'void', '', 'throw', '', '', 'pure', 'static', '', 'export', '',
-      '', 'typedef', 'ucent', 'finally', '', 'union', 'lazy', '', '', 'with', 'case',
-      'body', '__parameters', '', 'float', '', '', 'invariant', '', '', 'string', 'new',
-      'ulong', '', '', '', 'function', 'inout', '', '', '', 'switch', '', 'int', '',
-      'wchar', 'module', '', '', '', '', '', '', 'import', 'for', '', '', '', '', '',
-      '', 'public', '__gshared', 'shared', 'const', '', 'final', 'foreach', '',
-      'ifloat', 'out', 'synchronized', '', 'continue', '', '', 'extern', 'package',
-      '', 'in', '', '', '', 'debug', '', '', 'double', '', '', 'cdouble', '', 'ubyte',
-      'auto', ''
+      'double', '', '', '', '', 'volatile', 'synchronized', '', 'wchar', '', '',
+      '', '', '', 'goto', '', 'assert', '', '', 'void', '', '', '', 'override',
+      'pure', '', '', '', '', '', '', 'delegate', '', '', 'super', '', 'case',
+      '', '', '', 'pragma', '', '', '', 'string', '', 'debug', '', '', '', '',
+      '', 'module', '', '', '', '', '', '', '', '', '', '', 'immutable', '',
+      'template', 'dstring', '', '__parameters', '', '', '', '', '__vector', '',
+      '', '', '', '', '', 'invariant', '', 'unittest', '', '', 'protected', '',
+      '', 'break', 'alias', '', '', '', '', '', '', '', '', '', 'wstring', '',
+      '', 'private', 'final', '', 'false', '', 'catch', 'float', '', '', '', '',
+      '', '', '', '', '', '', '', '', '', '', 'align', '', '', '', '', '', '',
+      'ptrdiff_t', '', '', '', '', '', '', 'delete', '', '', '', '', '', '', '',
+      'do', '', 'mixin', '', 'ireal', '', '', '', '', 'static', 'extern', '', '',
+      'null', '', '', 'creal', '', '', 'typeid', '', 'idouble', '', '', '', 'try',
+      '', '', '', 'finally', '', 'is', '', 'cdouble', '', 'in', '', '', '', '',
+      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+      'scope', '', '', 'package', '', '', '', '', '', 'interface', '', '', 'macro',
+      '', '', '', '', '', '', '', '', '', 'default', '', '', '', '', '', 'out',
+      '', '', '', '', 'size_t', '', '', '', '', 'new', 'int', '', '', '', '', '',
+      '', '', '', 'this', '', '', '', '', '', '', '', 'public', '', '', '',
+      'continue', '', '', '', 'body', '', '', '', '', '', '', 'ifloat', '', '',
+      '', '', 'version', '', '', 'deprecated', '', '', '', 'cfloat', '', 'uint',
+      'function', '', '', '', '', 'short', '', 'with', 'typeof', '', '', '', '',
+      '', '', '', '', '', '', '', 'import', '', '', '', '', '', '', '', '',
+      '__traits', '', '', '', '', '', 'export', '', '', '', '', '', '', '', '',
+      '', '', '', '', '', '', 'throw', 'ushort', '', '', '', '', '', '', '', '',
+      '', 'asm', '', '', '', '', '', 'byte', '', '', '', '', '', 'abstract',
+      'union', 'if', '', 'true', '', 'typedef', '', '', '', '', '', '', '', '',
+      '', '', '', '', '', '', '', 'enum', '', '', 'const', '', '', '', '', '', '',
+      '', 'bool', '', '', '', '', '', '', 'ubyte', 'else', 'long', '', '', 'for',
+      '', '', '', 'inout', '', '', '', '', '', '', '', 'auto', '', '', '', '', '',
+      '', 'cent', '', '', '', '', '', '', '', '', 'class', '', '', 'cast', '', '',
+      '', '', '', 'struct', '', 'foreach', '', '', '', 'ulong', '', '', '__gshared',
+      '', 'while', 'ref', '', '', '', '', '', '', '', '', 'char', 'return', '',
+      'foreach_reverse', 'lazy', '', '', 'ucent', '', '', '', 'nothrow', '', '',
+      '', '', '', '', '', 'switch', '', '', 'dchar', '', '', '', 'shared', '', '',
+      '', 'real', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
     );
-    const fHasEntry: array [0..255] of boolean =
+    const fHasEntry: array [0..511] of boolean =
     (
-      false, false, true, false, true, false, false, false, false, false, false,
-      false, false, false, true, false, true, false, true, false, false, false,
-      true, true, true, false, false, false, true, false, true, false, false,
-      false, true, false, false, true, false, false, true, true, true, false,
-      false, false, false, true, false, false, false, false, false, true, false,
-      true, false, true, false, true, false, false, false, false, false, true,
-      true, false, false, false, true, true, false, true, false, true, false,
-      true, true, false, false, true, false, false, true, true, false, false,
-      false, true, false, false, true, true, false, true, false, false, true,
-      false, false, true, true, false, false, true, true, false, false, true,
-      true, true, true, false, true, true, false, true, false, false, true, false,
-      true, true, false, true, false, false, true, false, true, false, false, false,
-      true, false, false, false, true, false, true, false, false, true, false, false,
-      false, true, false, false, true, false, false, false, true, false, true, true,
-      true, false, false, true, true, false, true, false, false, true, true, false,
-      true, false, false, true, true, true, false, true, true, false, false, true,
-      true, true, true, false, true, false, false, true, false, false, true, true,
-      true, false, false, false, true, true, false, false, false, true, false, true,
-      false, true, true, false, false, false, false, false, false, true, true, false,
-      false, false, false, false, false, true, true, true, true, false, true, true,
-      false, true, true, true, false, true, false, false, true, true, false, true,
-      false, false, false, true, false, false, true, false, false, true, false, true,
-      true, false
+      true, false, false, false, false, true, true, false, true, false, false,
+      false, false, false, true, false, true, false, false, true, false, false,
+      false, true, true, false, false, false, false, false, false, true, false,
+      false, true, false, true, false, false, false, true, false, false, false,
+      true, false, true, false, false, false, false, false, true, false, false,
+      false, false, false, false, false, false, false, false, true, false, true,
+      true, false, true, false, false, false, false, true, false, false, false,
+      false, false, false, true, false, true, false, false, true, false, false,
+      true, true, false, false, false, false, false, false, false, false, false,
+      true, false, false, true, true, false, true, false, true, true, false, false,
+      false, false, false, false, false, false, false, false, false, false, false,
+      false, true, false, false, false, false, false, false, true, false, false,
+      false, false, false, false, true, false, false, false, false, false, false,
+      false, true, false, true, false, true, false, false, false, false, true,
+      true, false, false, true, false, false, true, false, false, true, false,
+      true, false, false, false, true, false, false, false, true, false, true,
+      false, true, false, true, false, false, false, false, false, false, false,
+      false, false, false, false, false, false, false, false, false, false, false,
+      false, false, false, false, true, false, false, true, false, false, false,
+      false, false, true, false, false, true, false, false, false, false, false,
+      false, false, false, false, true, false, false, false, false, false, true,
+      false, false, false, false, true, false, false, false, false, true, true,
+      false, false, false, false, false, false, false, false, true, false, false,
+      false, false, false, false, false, true, false, false, false, true, false,
+      false, false, true, false, false, false, false, false, false, true, false,
+      false, false, false, true, false, false, true, false, false, false, true,
+      false, true, true, false, false, false, false, true, false, true, true, false,
+      false, false, false, false, false, false, false, false, false, false, true,
+      false, false, false, false, false, false, false, false, true, false, false,
+      false, false, false, true, false, false, false, false, false, false, false,
+      false, false, false, false, false, false, false, true, true, false, false,
+      false, false, false, false, false, false, false, true, false, false, false,
+      false, false, true, false, false, false, false, false, true, true, true,
+      false, true, false, true, false, false, false, false, false, false, false,
+      false, false, false, false, false, false, false, false, true, false, false,
+      true, false, false, false, false, false, false, false, true, false, false,
+      false, false, false, false, true, true, true, false, false, true, false,
+      false, false, true, false, false, false, false, false, false, false, true,
+      false, false, false, false, false, false, true, false, false, false, false,
+      false, false, false, false, true, false, false, true, false, false, false,
+      false, false, true, false, true, false, false, false, true, false, false,
+      true, false, true, true, false, false, false, false, false, false, false,
+      false, true, true, false, true, true, false, false, true, false, false,
+      false, true, false, false, false, false, false, false, false, true, false,
+      false, true, false, false, false, true, false, false, false, true, false,
+      false, false, false, false, false, false, false, false, false, false, false,
+      false, false, false, false
     );
     const fCoeffs: array[0..255] of Byte =
     (
-      52, 97, 140, 119, 15, 140, 19, 72, 97, 210, 250, 188, 57, 103, 183, 37, 46,
-      56, 13, 166, 218, 23, 103, 109, 208, 28, 53, 198, 197, 249, 112, 136, 245,
-      167, 160, 217, 160, 35, 91, 70, 207, 80, 9, 131, 0, 102, 137, 201, 201, 236,
-      161, 10, 120, 104, 42, 66, 179, 30, 76, 137, 43, 160, 178, 192, 113, 214,
-      208, 213, 9, 226, 182, 248, 107, 4, 227, 0, 44, 168, 54, 135, 93, 54, 179,
-      49, 127, 36, 114, 213, 191, 59, 205, 253, 99, 47, 4, 33, 105, 152, 134, 204,
-      63, 7, 38, 110, 46, 227, 60, 136, 193, 218, 165, 122, 168, 156, 239, 143,
-      255, 233, 189, 244, 39, 50, 219, 95, 8, 219, 231, 44, 104, 114, 59, 90, 240,
-      28, 50, 39, 90, 144, 70, 15, 57, 53, 198, 219, 126, 49, 14, 100, 75, 215,
-      90, 208, 147, 57, 240, 103, 141, 183, 65, 51, 14, 246, 49, 5, 102, 33, 156,
-      122, 135, 160, 212, 193, 195, 133, 86, 74, 182, 187, 115, 239, 64, 161, 16,
-      112, 28, 82, 18, 112, 139, 9, 250, 117, 16, 34, 40, 223, 113, 158, 26, 230,
-      2, 218, 158, 134, 136, 14, 156, 53, 193, 237, 238, 162, 75, 230, 241, 211,
-      140, 154, 137, 22, 193, 112, 118, 231, 220, 130, 151, 229, 78, 62, 21, 253,
-      30, 161, 223, 3, 220, 125, 140, 243, 86, 180, 166, 127, 40, 156, 212, 44,
-      104, 140, 251, 36, 211, 254, 77, 25
+      93, 12, 147, 37, 246, 76, 204, 47, 77, 0, 217, 84, 225, 244, 62, 63, 81, 2,
+      46, 137, 104, 245, 184, 87, 229, 148, 69, 207, 24, 10, 239, 172, 27, 34, 60,
+      251, 113, 66, 175, 29, 10, 1, 158, 38, 157, 120, 224, 173, 11, 199, 49, 173,
+      88, 229, 213, 191, 217, 177, 90, 19, 83, 212, 97, 12, 136, 154, 243, 105,
+      97, 29, 94, 226, 71, 60, 28, 245, 38, 212, 156, 116, 254, 70, 207, 211, 93,
+      67, 32, 42, 149, 101, 98, 4, 83, 160, 228, 128, 231, 188, 100, 178, 22, 172,
+      198, 218, 13, 166, 45, 54, 49, 152, 14, 123, 232, 223, 86, 10, 62, 46, 220,
+      55, 161, 22, 210, 86, 14, 79, 8, 28, 66, 67, 84, 116, 159, 144, 37, 46, 199,
+      218, 233, 188, 207, 168, 89, 64, 245, 3, 6, 199, 144, 165, 216, 145, 141, 70,
+      69, 20, 149, 252, 119, 75, 153, 97, 14, 196, 74, 48, 91, 145, 70, 90, 59, 69,
+      92, 252, 233, 161, 169, 155, 9, 28, 234, 103, 172, 225, 164, 49, 161, 95, 81,
+      201, 217, 217, 58, 119, 169, 230, 11, 8, 137, 65, 165, 159, 4, 243, 225, 236,
+      178, 209, 133, 35, 68, 222, 237, 114, 64, 158, 72, 66, 151, 208, 169, 232, 83,
+      229, 157, 233, 123, 135, 65, 187, 161, 100, 217, 63, 124, 36, 108, 198, 2,
+      103, 156, 241, 140, 163, 128, 196, 45, 166, 41, 61, 19, 139, 25, 115, 72, 175
     );
-    class function hash(const w: string): Byte; static; {$IFNDEF DEBUG}inline;{$ENDIF}
+    class function hash(const w: string): Word; static; {$IFNDEF DEBUG}inline;{$ENDIF}
   public
     class function match(const w: string): boolean; static; {$IFNDEF DEBUG}inline;{$ENDIF}
   end;
@@ -157,20 +194,20 @@ begin
 end;
 
 {$IFDEF DEBUG}{$PUSH}{$R-}{$ENDIF}
-class function keywordsMap.hash(const w: string): Byte;
+class function keywordsMap.hash(const w: string): Word;
 var
   i: integer;
 begin
   Result := 0;
-  for i := 2 to length(w) do
-    Result += fCoeffs[(Byte(w[i]) + (Byte(i-1) xor Byte(w[i-1]))) and $FF];
-  Result := Result and $FF;
+  for i := 1 to length(w) do
+    Result += fCoeffs[Byte(w[i])];
+  Result := Result and $1FF;
 end;
 {$IFDEF DEBUG}{$POP}{$ENDIF}
 
 class function keywordsMap.match(const w: string): boolean;
 var
-  h: Byte;
+  h: Word;
 begin
   result := false;
   if (length(w) < 2) or (length(w) > 15) then
