@@ -321,6 +321,7 @@ begin
   try
     dub.Executable:= 'dub';
     dub.Options:= [poUsePipes, poStderrToOutPut];
+    dub.ShowWindow:= swoHIDE;
     if not upd then
     begin
       dub.Parameters.Add('fetch');
@@ -357,6 +358,7 @@ begin
   dub := TProcess.Create(nil);
   try
     dub.Executable:= 'dub';
+    dub.ShowWindow:= swoHIDE;
     dub.Options:= [poUsePipes, poStderrToOutPut];
     dub.Parameters.Add('build');
     dub.Parameters.Add('--build=release');
