@@ -72,7 +72,7 @@ void main(string[] args)
     {
         SymbolListBuilder!(ListFmt.Pas) slb = construct!(SymbolListBuilder!(ListFmt.Pas));
         auto ast = parseModule(getTokensForParser(source, config, &scache), fname,
-            &alloc, &(slb.astError));
+            &alloc, &slb.astError);
         foreach (Declaration decl; ast.declarations)
             slb.visit(decl);
         write(slb.serialize);
@@ -82,7 +82,7 @@ void main(string[] args)
     {
         SymbolListBuilder!(ListFmt.Json) slb = construct!(SymbolListBuilder!(ListFmt.Json));
         auto ast = parseModule(getTokensForParser(source, config, &scache), fname,
-            &alloc, &(slb.astError));
+            &alloc, &slb.astError);
         foreach (Declaration decl; ast.declarations)
             slb.visit(decl);
         write(slb.serialize);
@@ -125,7 +125,7 @@ void* getMem(size_t size) nothrow
 }
 
 CT construct(CT, A...)(A a)
-    if (is(CT == class) && !isAbstractClass!CT)
+if (is(CT == class) && !isAbstractClass!CT)
 {
     auto size = typeid(CT).init.length;
     auto memory = getMem(size);
@@ -139,7 +139,7 @@ CT construct(CT, A...)(A a)
 }
 
 void destruct(T)(ref T instance)
-    if (is(T == class) || (isPointer!T && is(PointerTarget!T == struct)))
+if (is(T == class))
 {
     if (!instance)
         return;
@@ -345,12 +345,12 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
 
     final override void visit(const Constructor decl)
     {
-        otherVisitorImpl(decl, SymbolType._function, "this", decl.line, decl.column);
+        otherVisitorImpl(decl, SymbolType._function, "ctor", decl.line, decl.column);
     }
 
     final override void visit(const Destructor decl)
     {
-        otherVisitorImpl(decl, SymbolType._function, "~this", decl.line, decl.column);
+        otherVisitorImpl(decl, SymbolType._function, "dtor", decl.line, decl.column);
     }
 
     final override void visit(const EnumDeclaration decl)
@@ -423,22 +423,22 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
 
     final override void visit(const StaticConstructor decl)
     {
-        otherVisitorImpl(decl, SymbolType._function, "static this", decl.line, decl.column);
+        otherVisitorImpl(decl, SymbolType._function, "static ctor", decl.line, decl.column);
     }
 
     final override void visit(const StaticDestructor decl)
     {
-        otherVisitorImpl(decl, SymbolType._function, "static ~this", decl.line, decl.column);
+        otherVisitorImpl(decl, SymbolType._function, "static dtor", decl.line, decl.column);
     }
 
     final override void visit(const SharedStaticConstructor decl)
     {
-        otherVisitorImpl(decl, SymbolType._function, "shared static this", decl.line, decl.column);
+        otherVisitorImpl(decl, SymbolType._function, "shared static ctor", decl.line, decl.column);
     }
 
     final override void visit(const SharedStaticDestructor decl)
     {
-        otherVisitorImpl(decl, SymbolType._function, "shared static ~this", decl.line, decl.column);
+        otherVisitorImpl(decl, SymbolType._function, "shared static dtor", decl.line, decl.column);
     }
 }
 //----
