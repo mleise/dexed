@@ -194,7 +194,7 @@ begin
   inherited;
 
   width  := 400;
-  height := 36;
+  height := 34;
   BorderStyle:= bsToolWindow;
   caption := 'Select or type the DUB package name';
   Position:= poMainFormCenter;
@@ -203,17 +203,19 @@ begin
   cbb.Parent := self;
   cbb.AutoComplete := true;
   cbb.Align := alClient;
-  cbb.BorderSpacing.Around := 2;
+  cbb.BorderSpacing.Around := 6;
   cbb.Sorted:= true;
 
   bww := TBitBtn.Create(self);
   bww.Parent := self;
   bww.Align := alRight;
   bww.Width:= 28;
-  bww.BorderSpacing.Around := 2;
+  bww.BorderSpacing.Around := 4;
   bww.ShowHint := true;
   bww.Hint := 'get the package list';
   bww.OnClick:= @getList;
+  bww.Layout:= blGlyphTop;
+  bww.Spacing:= 2;
   AssignPng(bww, 'arrow_update');
 
   bok := TBitBtn.Create(self);
@@ -221,9 +223,11 @@ begin
   bok.ModalResult:= mrOk;
   bok.Align := alRight;
   bok.Width := 28;
-  bok.BorderSpacing.Around := 2;
+  bok.BorderSpacing.Around := 4;
   bok.Hint := 'try to fetch, compile and auto-register';
   bok.ShowHint := true;
+  bok.Layout:= blGlyphTop;
+  bok.Spacing:= 2;
   AssignPng(bok, 'accept');
 
   bno := TBitBtn.Create(self);
@@ -231,9 +235,11 @@ begin
   bno.ModalResult:= mrCancel;
   bno.Align := alRight;
   bno.Width:= 28;
-  bno.BorderSpacing.Around := 2;
+  bno.BorderSpacing.Around := 4;
   bno.Hint := 'cancel and do nothing';
   bno.ShowHint := true;
+  bno.Layout:= blGlyphTop;
+  bno.Spacing:= 2;
   AssignPng(bno, 'cancel');
 end;
 
