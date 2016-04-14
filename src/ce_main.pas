@@ -1366,7 +1366,6 @@ var
   itm: TMenuItem;
   fname: string;
   clickTrg: TNotifyEvent;
-  i: NativeInt;
 begin
   srcLst := TCEMruFileList(Sender);
   if srcLst.isNil then exit;
@@ -1383,12 +1382,11 @@ begin
 
     trgMnu.Clear;
 
-    for i:= 0 to srcLst.Count-1 do
+    for fname in srcLst do
     begin
-      fname := srcLst[i];
       itm := TMenuItem.Create(trgMnu);
       itm.Hint := fname;
-      itm.Caption := shortenPath(fname, 50);
+      itm.Caption := fname.extractFileName + ' - (' + fname + ')';
       itm.OnClick := clickTrg;
       trgMnu.Add(itm);
     end;
