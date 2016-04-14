@@ -304,7 +304,7 @@ type
     procedure asyncprocOutput(sender: TObject);
     procedure asyncprocTerminate(sender: TObject);
     procedure unittestDone(Sender: TObject);
-    procedure compileRunnable(unittest: boolean = false);
+    function  compileRunnable(unittest: boolean = false): boolean;
     procedure executeRunnable(unittest: boolean = false; redirect: boolean = true;
       const runArgs: string = '');
 
@@ -1993,7 +1993,7 @@ begin
   form.Free;
 end;
 
-procedure TCEMainForm.compileRunnable(unittest: boolean = false);
+function TCEMainForm.compileRunnable(unittest: boolean = false): boolean;
 var
   i: integer;
   fname: string;
@@ -2002,6 +2002,7 @@ var
   firstLineFlags: string = '';
 begin
 
+  result := false;
   fMsgs.clearByData(fDoc);
   FreeRunnableProc;
   if fDoc.isNil then exit;
@@ -2060,6 +2061,7 @@ begin
     sysutils.DeleteFile(fname + objExt);
     if (dmdProc.ExitStatus = 0) then
     begin
+      result := true;
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' successfully compiled',
         fDoc, amcEdit, amkInf);
     end
@@ -2164,24 +2166,24 @@ procedure TCEMainForm.actFileUnittestExecute(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
-  compileRunnable(true);
-  executeRunnable(true, true);
+  if compileRunnable(true) then
+    executeRunnable(true, true);
 end;
 
 procedure TCEMainForm.actFileCompAndRunExecute(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
-  compileRunnable(false);
-  executeRunnable(false, true);
+  if compileRunnable(false) then
+    executeRunnable(false, true);
 end;
 
 procedure TCEMainForm.actFileCompileAndRunOutExecute(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
-  compileRunnable(false);
-  executeRunnable(false, false);
+  if compileRunnable(false) then
+    executeRunnable(false, false);
 end;
 
 procedure TCEMainForm.actFileCompAndRunWithArgsExecute(Sender: TObject);
@@ -2192,8 +2194,8 @@ begin
     exit;
   if not InputQuery('Execution arguments', '', runargs) then
     exit;
-  compileRunnable(false);
-  executeRunnable(false, true, runargs);
+  if compileRunnable(false) then
+    executeRunnable(false, true, runargs);
 end;
 
 procedure TCEMainForm.actFileCompileExecute(Sender: TObject);
