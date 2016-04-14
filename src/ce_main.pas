@@ -283,7 +283,6 @@ type
 
     //Init - Fina
     procedure getCMdParams;
-    procedure checkCompilo;
     procedure InitMRUs;
     procedure InitWidgets;
     procedure InitDocking;
@@ -802,8 +801,6 @@ begin
   OnDragDrop:= @ddHandler.DragDrop;
   OnDragOver:= @ddHandler.DragOver;
   //
-  checkCompilo;
-  //
   updateMainMenuProviders;
   EntitiesConnector.forceUpdate;
   fSymStringExpander:= getSymStringExpander;
@@ -813,17 +810,6 @@ begin
     newNativeProj;
   //
   fInitialized := true;
-end;
-
-procedure TCEMainForm.checkCompilo;
-const
-  msg = 'Coedit requires DMD to be setup on this system' + LineEnding +
-    'If DMD is setup please add it to the system PATH variable before using Coedit';
-begin
-  if exeInSysPath('dmd') then
-    exit;
-  dlgOkError(msg);
-  close;
 end;
 
 procedure TCEMainForm.getCMdParams;
