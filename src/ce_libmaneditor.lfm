@@ -178,27 +178,27 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
           item
             AutoSize = True
             Caption = 'Alias'
-            Width = 39
+            Width = 37
           end        
           item
             AutoSize = True
-            Caption = 'Library file'
-            Width = 76
+            Caption = 'Library file or folder of sources'
+            Width = 67
           end        
           item
             AutoSize = True
             Caption = 'Sources root'
-            Width = 88
+            Width = 78
           end        
           item
             AutoSize = True
             Caption = 'project'
-            Width = 54
+            Width = 49
           end        
           item
             AutoSize = True
             Caption = 'enabled'
-            Width = 355
+            Width = 54
           end>
         GridLines = True
         HideSelection = False

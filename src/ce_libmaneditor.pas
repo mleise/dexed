@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Menus, ComCtrls, Buttons, LazFileUtils, strutils, fphttpclient, StdCtrls,
+  Menus, ComCtrls, Buttons, LazFileUtils, strutils, fphttpclient, StdCtrls, xfpjson,
   ce_widget, ce_interfaces, ce_nativeproject, ce_dmdwrap, ce_common, ce_dialogs,
   ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_stringrange,
   ce_libman;
@@ -111,8 +111,9 @@ begin
     fProj.Filename.fileExists;
   btnOpenProj.Enabled := List.Selected.isNotNil and
     List.Selected.SubItems[2].fileExists;
-  if List.Selected.isNotNil and itemForRow(List.Selected).enabled then
-    AssignPng(btnEnabled, 'book')
+  if List.Selected.isNotNil and itemForRow(List.Selected).isNotNil and
+    itemForRow(List.Selected).enabled then
+      AssignPng(btnEnabled, 'book')
   else
     AssignPng(btnEnabled, 'book_grey');
 end;
@@ -291,7 +292,6 @@ var
   str: TStringList;
   itf: ICEMessagesDisplay;
   err: integer;
-  idx: integer;
   prj: TCEDubProject;
   upd: boolean = false;
   ovw: boolean = false;
@@ -381,7 +381,41 @@ begin
   end;
   if err <> 0 then
   begin
-    itf.message('error, failed to compile the package to register', nil, amcMisc, amkErr);
+    // allow "sourceLibrary"
+    EntitiesConnector.beginUpdate;
+    prj := TCEDubProject.create(nil);
+    try
+      if FileExists(pth + DirectorySeparator + 'dub.json') then
+        prj.loadFromFile(pth + DirectorySeparator + 'dub.json')
+      else if FileExists(pth + DirectorySeparator + 'package.json') then
+        prj.loadFromFile(pth + DirectorySeparator + 'package.json');
+      if prj.json.isNotNil and TJSONObject(prj.json).Find('targetType').isNotNil
+        and (TJSONObject(prj.json).Find('targetType').AsString = 'sourceLibrary')
+      then
+      begin
+        if ovw then
+           row := List.FindCaption(0, nme, true, true, true);
+        if row.isNil then
+           row := List.Items.Add;
+        if row.Data.isNil then
+          row.Data := LibMan.libraries.Add;
+        row.Caption:= nme;
+        row.SubItems.Clear;
+        nme := sourceRoot(prj as ICECommonProject);
+        row.SubItems.Add(nme);
+        row.SubItems.Add(nme);
+        row.SubItems.Add(prj.filename);
+        row.SubItems.Add(enableStr[true]);
+        row.Selected:=true;
+        RowToLibrary(row);
+        itf.message('The package to register is a source library.' +
+          'It is not pre-compiled but its sources are registered', nil, amcMisc, amkInf);
+      end else
+        itf.message('error, failed to compile the package to register', nil, amcMisc, amkErr);
+    finally
+      prj.Free;
+      EntitiesConnector.endUpdate;
+    end;
     exit;
   end;
 
@@ -395,25 +429,20 @@ begin
       prj.loadFromFile(pth + DirectorySeparator + 'package.json');
     if prj.filename.isNotEmpty and (prj.binaryKind = staticlib) then
     begin
-      str := TStringList.Create;
-      try
-        for idx := 0 to prj.sourcesCount-1 do
-          str.Add(prj.sourceAbsolute(idx));
-        if ovw then
-          row := List.FindCaption(0, nme, true, true, true);
-        if row.isNil then
-          row := List.Items.Add;
+      if ovw then
+        row := List.FindCaption(0, nme, true, true, true);
+      if row.isNil then
+        row := List.Items.Add;
+      if row.Data.isNil then
         row.Data := LibMan.libraries.Add;
-        row.Caption := nme;
-        row.SubItems.Add(prj.outputFilename);
-        row.SubItems.Add(sourceRoot(prj as ICECommonProject));
-        row.SubItems.Add(prj.filename);
-        row.SubItems.Add(enableStr[true]);
-        row.Selected:=true;
-        RowToLibrary(row);
-      finally
-        str.Free;
-      end;
+      row.Caption := nme;
+      row.SubItems.Clear;
+      row.SubItems.Add(prj.outputFilename);
+      row.SubItems.Add(sourceRoot(prj as ICECommonProject));
+      row.SubItems.Add(prj.filename);
+      row.SubItems.Add(enableStr[true]);
+      row.Selected:=true;
+      RowToLibrary(row);
     end else
       itf.message('warning, the package json description can not be found or the target is not a static library',
         nil, amcMisc, amkWarn);
