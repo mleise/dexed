@@ -178,12 +178,12 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
           item
             AutoSize = True
             Caption = 'Alias'
-            Width = 37
+            Width = 629
           end        
           item
             AutoSize = True
             Caption = 'Library file or folder of sources'
-            Width = 67
+            Width = 172
           end        
           item
             AutoSize = True

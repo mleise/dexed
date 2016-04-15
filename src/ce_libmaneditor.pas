@@ -250,8 +250,16 @@ var
   cli: TFPHTTPClient;
 begin
   cbb.Items.Clear;
-  cli := TFPHTTPClient.Create(self);
-  pge := cli.Get('https://code.dlang.org/');
+  cli := TFPHTTPClient.Create(nil);
+  try
+    try
+      pge := cli.Get('https://code.dlang.org/');
+    except
+      pge := '';
+    end;
+  finally
+    cli.Free;
+  end;
   // note, also works with regex \"packages\/[a-zA-Z0-9_-]+\"
   with TStringRange.create(pge) do while not empty do
   begin
