@@ -57,7 +57,7 @@ type
     property constraintsStyle: DfmtConstraint read fConstraints write setConstraintsStyle default condNewLineIndent;
   public
     constructor create(AOwner: TComponent); override;
-    procedure getParameters(str: TStrings);
+    procedure getParameters(str: TStrings; majv, minv: Byte);
   end;
 
   { TCEDfmtWidget }
@@ -240,7 +240,7 @@ end;
 {$ENDREGION}
 
 {$REGION Dfmt things -----------------------------------------------------------}
-procedure TCEDmtWrapper.getParameters(str: TStrings);
+procedure TCEDmtWrapper.getParameters(str: TStrings; majv, minv: Byte);
 const
   eol: array[DfmtEol] of string = ('cr', 'lf', 'crlf');
   falsetrue: array[boolean] of string = ('false', 'true');
@@ -260,14 +260,18 @@ begin
   str.Add('--space_after_cast=' + falsetrue[spaceAfterCast]);
   str.Add('--selective_import_space=' + falsetrue[spaceAfterImport]);
   str.Add('--compact_labeled_statements=' + falsetrue[compactLabeledStatements]);
-  str.Add('--template_constraint_style=' + cts[fConstraints]);
+  if (majv = 0) and (minv > 4) then
+    str.Add('--template_constraint_style=' + cts[fConstraints]);
 end;
 
 procedure TCEDfmtWidget.doApply(sender: TObject);
 var
   inp: string;
+  i: integer;
   prc: TProcess;
   str: TStringList;
+  majv: byte = 0;
+  minv: byte = 4;
 begin
   if fDoc.isNil then
     exit;
@@ -277,9 +281,21 @@ begin
   fBackup.Assign(fDoc.Lines);
   prc := TProcess.create(nil);
   try
-    fDmtWrapper.getParameters(prc.Parameters);
-    prc.Options:= prc.Options + [poUsePipes, poStderrToOutPut];
     prc.Executable:= exeFullName('dfmt' + exeExt);
+    prc.Options:= prc.Options + [poUsePipes, poStderrToOutPut];
+
+    setLength(inp, 20);
+    prc.Parameters.Add('--version');
+    prc.Execute;
+    i := prc.Output.Read(inp[1], 20);
+    if (i > 4) and (inp[2] = '.') then
+    begin
+      majv := Byte(inp[1]) - Byte('0');
+      minv := Byte(inp[3]) - Byte('0');
+    end;
+
+    prc.Parameters.Clear;
+    fDmtWrapper.getParameters(prc.Parameters, majv, minv);
     prc.Execute;
     inp := fDoc.Lines.Text;
     prc.Input.Write(inp[1], inp.length);
