@@ -12,7 +12,7 @@ uses
 type
 
   TTokenKind = (tkCommt, tkIdent, tkKeywd, tkStrng, tkBlank, tkSymbl, tkNumbr,
-    tkDDocs, tkSpecK, tkError, tkAsmbl);
+    tkDDocs, tkSpecK, tkError, tkAsmbl, tkAttri);
 
   TRangeKind = (rkString1, rkString2, rkTokString, rkBlockCom1, rkBlockCom2,
     rkBlockDoc1, rkBlockDoc2, rkAsm);
@@ -54,6 +54,7 @@ type
     fAsblrAttrib: TSynHighlighterAttributes;
     fSpeckAttrib: TSynHighlighterAttributes;
     fErrorAttrib: TSynHighlighterAttributes;
+    fAttriAttrib: TSynHighlighterAttributes;
     fLineBuf: string;
     fTokStart, fTokStop: Integer;
     fTokKind: TTokenKind;
@@ -72,6 +73,7 @@ type
     procedure setAsblrAttrib(value: TSynHighlighterAttributes);
     procedure setSpeckAttrib(value: TSynHighlighterAttributes);
     procedure setErrorAttrib(value: TSynHighlighterAttributes);
+    procedure setAttriAttrib(value: TSynHighlighterAttributes);
     procedure doAttribChange(sender: TObject);
     procedure doChanged;
   protected
@@ -90,6 +92,7 @@ type
     property inlineAsm:   TSynHighlighterAttributes read fAsblrAttrib write setAsblrAttrib;
     property special:     TSynHighlighterAttributes read fSpeckAttrib write setSpeckAttrib;
     property errors:      TSynHighlighterAttributes read fErrorAttrib write setErrorAttrib;
+    property attributes:  TSynHighlighterAttributes read fAttriAttrib write setAttriAttrib;
 	public
 		constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -190,6 +193,7 @@ begin
   fAsblrAttrib := TSynHighlighterAttributes.Create('Asblr','Asblr');
   fSpeckAttrib := TSynHighlighterAttributes.Create('Speck','Speck');
   fErrorAttrib := TSynHighlighterAttributes.Create('Error','Error');
+  fAttriAttrib := TSynHighlighterAttributes.Create('Attri','Attri');
 
   fNumbrAttrib.Foreground := $000079F2;
   fSymblAttrib.Foreground := clMaroon;
@@ -199,6 +203,7 @@ begin
   fKeywdAttrib.Foreground := clNavy;
   fAsblrAttrib.Foreground := clGray;
   fSpeckAttrib.Foreground := clNavy;
+  fAttriAttrib.Foreground := clNavy;
 
   fDDocsAttrib.Foreground := clTeal;
 
@@ -206,6 +211,7 @@ begin
   fKeywdAttrib.Style := [fsBold];
   fAsblrAttrib.Style := [fsBold];
   fSpeckAttrib.Style := [fsBold];
+  fAttriAttrib.Style := [fsBold];
 
   fErrorAttrib.Foreground:= fIdentAttrib.Foreground;
   fErrorAttrib.FrameStyle:= slsWaved;
@@ -223,6 +229,7 @@ begin
   AddAttribute(fAsblrAttrib);
   AddAttribute(fSpeckAttrib);
   AddAttribute(fErrorAttrib);
+  AddAttribute(fAttriAttrib);
 
   fAttribLut[TTokenKind.tkident] := fIdentAttrib;
   fAttribLut[TTokenKind.tkBlank] := fWhiteAttrib;
@@ -235,6 +242,7 @@ begin
   fAttribLut[TTokenKind.tkSpecK] := fSpeckAttrib;
   fAttribLut[TTokenKind.tkError] := fErrorAttrib;
   fAttribLut[TTokenKind.tkAsmbl] := fAsblrAttrib;
+  fAttribLut[TTokenKind.tkAttri] := fAttriAttrib;
 
   SetAttributesOnChange(@doAttribChange);
   fTokStop := 1;
@@ -341,6 +349,11 @@ end;
 procedure TSynD2Syn.setErrorAttrib(value: TSynHighlighterAttributes);
 begin
   fErrorAttrib.Assign(value);
+end;
+
+procedure TSynD2Syn.setAttriAttrib(value: TSynHighlighterAttributes);
+begin
+  fAttriAttrib.Assign(value);
 end;
 
 procedure TSynD2Syn.setLine(const NewValue: string; LineNumber: Integer);
@@ -879,6 +892,23 @@ begin
       exit;
     fTokKind := tkError;
     exit;
+  end;
+
+  // attributes
+  if reader^ = '@' then
+  begin
+    if isAlpha(readerNext^) then
+    begin
+      fTokKind:=tkAttri;
+      while isAlNum(reader^) or (reader^ = '_') do
+      begin
+        if reader^= #10 then
+          exit;
+        readerNext;
+      end;
+      exit;
+    end else
+      readerPrev;
   end;
 
   // Keywords & identifiers
