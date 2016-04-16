@@ -12,7 +12,7 @@ uses
 type
 
   TTokenKind = (tkCommt, tkIdent, tkKeywd, tkStrng, tkBlank, tkSymbl, tkNumbr,
-    tkDDocs, tkSpecK, tkError, tkAsmbl, tkAttri);
+    tkDDocs, tkSpecK, tkError, tkAsmbl, tkAttri, tkLost);
 
   TRangeKind = (rkString1, rkString2, rkTokString, rkBlockCom1, rkBlockCom2,
     rkBlockDoc1, rkBlockDoc2, rkAsm);
@@ -55,6 +55,7 @@ type
     fSpeckAttrib: TSynHighlighterAttributes;
     fErrorAttrib: TSynHighlighterAttributes;
     fAttriAttrib: TSynHighlighterAttributes;
+    fLost_Attrib: TSynHighlighterAttributes;
     fLineBuf: string;
     fTokStart, fTokStop: Integer;
     fTokKind: TTokenKind;
@@ -194,6 +195,7 @@ begin
   fSpeckAttrib := TSynHighlighterAttributes.Create('Speck','Speck');
   fErrorAttrib := TSynHighlighterAttributes.Create('Error','Error');
   fAttriAttrib := TSynHighlighterAttributes.Create('Attri','Attri');
+  fLost_Attrib := TSynHighlighterAttributes.Create('Lost','Lost');
 
   fNumbrAttrib.Foreground := $000079F2;
   fSymblAttrib.Foreground := clMaroon;
@@ -204,14 +206,17 @@ begin
   fAsblrAttrib.Foreground := clGray;
   fSpeckAttrib.Foreground := clNavy;
   fAttriAttrib.Foreground := clNavy;
-
+  fLost_Attrib.Foreground := clLime;
   fDDocsAttrib.Foreground := clTeal;
+
+  fLost_Attrib.Background := clBlack;
 
   fCommtAttrib.Style := [fsItalic];
   fKeywdAttrib.Style := [fsBold];
   fAsblrAttrib.Style := [fsBold];
   fSpeckAttrib.Style := [fsBold];
   fAttriAttrib.Style := [fsBold];
+  fLost_Attrib.Style := [fsBold];
 
   fErrorAttrib.Foreground:= fIdentAttrib.Foreground;
   fErrorAttrib.FrameStyle:= slsWaved;
@@ -243,6 +248,7 @@ begin
   fAttribLut[TTokenKind.tkError] := fErrorAttrib;
   fAttribLut[TTokenKind.tkAsmbl] := fAsblrAttrib;
   fAttribLut[TTokenKind.tkAttri] := fAttriAttrib;
+  fAttribLut[TTokenKind.tkLost]  := fLost_Attrib;
 
   SetAttributesOnChange(@doAttribChange);
   fTokStop := 1;
@@ -805,6 +811,8 @@ begin
       fTokKind:= tkError;
       readUntilAmong(reader, fTokStop, [#0..#32] + symbChars - ['.']);
     end;
+    if (fTokStop - fTokStart = 10) and (fLineBuf[fTokStart..fTokStop-1] = '4815162342') then
+      fTokKind:=tkLost;
     exit;
   end;
   _notDotFloat:
