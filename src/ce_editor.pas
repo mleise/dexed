@@ -201,10 +201,11 @@ end;
 
 procedure TCEEditorWidget.docFocused(aDoc: TCESynMemo);
 begin
-  if pageControl.currentPage.Caption = '<new document>' then
-    updatePageCaption;
   if aDoc = fDoc then exit;
   fDoc := aDoc;
+  if fDoc.isNotNil and pageControl.currentPage.isNotNil and
+    (pageControl.currentPage.Caption = '<new document>') then
+      updatePageCaption;
   focusedEditorChanged;
   updateImperative;
 end;
@@ -510,20 +511,21 @@ end;
 
 procedure TCEEditorWidget.updatePageCaption;
 var
-  md: string = '';
+  md: string = '<new document>';
 begin
-  if fDoc.isDSource then
+  if fDoc.isNotNil then
   begin
-    lex(fDoc.Lines.Text, fTokList, @lexFindToken);
-    md := getModuleName(fTokList);
-    fTokList.Clear;
-    if md.isEmpty then
-      md := fDoc.fileName.extractFileName;
-  end
-  else if fDoc.fileName.fileExists then
-    md := fDoc.fileName.extractFileName
-  else
-    md := '<new document>';
+    if fDoc.isDSource then
+    begin
+      lex(fDoc.Lines.Text, fTokList, @lexFindToken);
+      md := getModuleName(fTokList);
+      fTokList.Clear;
+      if md.isEmpty then
+        md := fDoc.fileName.extractFileName;
+    end
+    else if fDoc.fileName.fileExists then
+      md := fDoc.fileName.extractFileName
+  end;
   pageControl.currentPage.Caption := md;
 end;
 
