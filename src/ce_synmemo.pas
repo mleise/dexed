@@ -1029,12 +1029,13 @@ end;
 procedure TCESynMemo.showCallTips(findOpenParen: boolean = true);
 var
   str: string;
-  i: integer;
+  i, x: integer;
 begin
   if not fCallTipWin.Visible then
     fCallTipStrings.Clear;
   str := LineText[1..CaretX];
-  i := CaretX;
+  x := CaretX;
+  i := x;
   if findOpenParen then while true do
   begin
     if i = 1 then
@@ -1069,6 +1070,8 @@ begin
     {$ENDIF}
     showCallTips(str);
   end;
+  if findOpenParen then
+    CaretX:=x;
 end;
 
 procedure TCESynMemo.showCallTips(const tips: string);
@@ -1438,8 +1441,6 @@ end;
 
 {$REGION user input ------------------------------------------------------------}
 procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
-var
-  i: integer;
 begin
   case Key of
     VK_BACK: if fCallTipWin.Visible and (CaretX > 1)
@@ -1511,7 +1512,6 @@ end;
 procedure TCESynMemo.UTF8KeyPress(var Key: TUTF8Char);
 var
   c: TUTF8Char;
-  i: integer;
 begin
   c := Key;
   inherited;
