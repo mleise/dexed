@@ -1041,10 +1041,13 @@ begin
       break;
     if str[i-1] = '(' then
     begin
-      CaretX := i;
+      LogicalCaretXY := Point(i, CaretY);
       break;
     end;
-    i -= 1;
+    if str[i] = #9 then
+      i -= TabWidth
+    else
+      i -= 1;
   end;
   DcdWrapper.getCallTip(str);
   if str.isNotEmpty then

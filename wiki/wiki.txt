@@ -177,11 +177,14 @@ For discussions, the official D forums [propose a section dedicated to the IDEs]
 - **"Save file as..."**: save the current editor using a dialog.
 - **"Export html..."**: export the current editor to a html file with html-based highlighting.
 - **"Add file to project"**: adds the file matching to the current editor to the project. If the current editor has been created using **"New empty file"** or **"New runnable module"** then the operation fails.
+- **"Compile file"**: compile the current file. See [runnable modules][lnk_runa].
 - **"Compile file and run"**: compiles the current file and execute. See [runnable modules][lnk_runa].
 - **"Compile file and run outside"**: compiles the current file and execute without redirection. See [runnable modules][lnk_runa].
 - **"Compile file and run..."**: compiles the current file and execute with a set of options defined in a simple input-query dialog. The arguments must be separated with spaces and can include double quotes.
+- **"Run compiled file"**: tries the execute the binary produced by a previous call to _Compile file_.
 - **"Run file unittests"**: compiles and runs the current file with the options **-main -unittest**. If the application option _coverModuleTests_ is set then CE will also pass **-cov** to DMD and report in the messages the lines of code that are not covered by the unit tests. This action is not usable if the current module already contains a `main()` function.
 - **"Set runnable switches"**: allows to modify the switches passed to DMD when compiling a runnable module. One switch by line, invalid or duplicated switches are removed, such as _-main_ and _-unittest_ since they are set with _Run file unittests_.
+- **"Verify with Dscanner"**: verifies the current file with [Dscanner](https://github.com/Hackerpilot/Dscanner). Results are displayed in the [message widget][lnk_widg_msg].
 - **"View in mini explorer"**: expands the [mini-explorer][lnk_widg_miniexpl] tree on the folder that contains the current file.
 
 ## Project
@@ -207,9 +210,11 @@ For discussions, the official D forums [propose a section dedicated to the IDEs]
 Coedit is able to compile and execute the module that's currently edited even if it's not part of a project. Such a module is called a **runnable** module.
 A runnable module has not to be explicitly saved because Coedit will handle the task automatically, using an unique temporary file name.
 For example it's possible to call the action _Compile and run file_ directly after the action _New runnable module_.
+By default the binary is produced in the folder where is located the D source. This can be changed in the [general options](lnk_widg_opts),
+_runnableDestination_ allows to specify a path. If it's relative then the binary will be output in a sub folder named as this string. It it's an absolute path then the binary will be produced in this directory. When _runnableDestinationAlways_ is not checked, _runnableDestination_ is only handled if the D source part of the current project.
 
-This feature is useful to test quickly an idea or to use a module as a script without messing with all the parameters that a project would require.
-However, the first script line can be used to pass extra options. They'll be parsed and automatically submitted to the compiler (runnable modules are always compiled with DMD).
+A runnable is useful to test quickly an idea or to use a module as a script without messing with all the parameters that a project would require.
+However, the first script line can be used to pass additional options. They'll be parsed and automatically submitted to the compiler (runnable modules are always compiled with DMD).
 
 For example this runnable:
 
@@ -249,12 +254,12 @@ Note that the action _Run file unittest_ is based on the same internal function 
 
 # Native projects
 
-Coedit features a native project format completely based on the _DMD_ options (they are also called CE projects).
+Coedit features a native project format completely based on the _DMD_ options.
 Almost each DMD switch is represented by a project option.
 
 The project has common parameters,
 - The source files. Either modules, interfaces, static libraries or objects.
-- Library aliases: a list of aliases to specify which [_libman_ entries][lnk_widg_lib] are used by the project.
+- Library aliases: a list of aliases to specify the [_libman_ entries][lnk_widg_lib] used by the project.
 
 but most of them are specific to each configuration.
 
@@ -274,7 +279,8 @@ Here are some more or less complex examples which illustrates the project format
 - the tools written for Coedit: [cesyms][lnk_cesyms] and [cetodo][lnk_cetodo].
 - [iz](https://github.com/BBasile/iz) and [dbeaengine](https://github.com/BBasile/dbeaengine)
 
-Even if it's based on the _DMD_ options, it's also possible to compile a CE project using [LDC](https://github.com/ldc-developers/ldc).
+Even if it's based on the _DMD_ options, it's also possible to compile a CE project using [LDC](https://github.com/ldc-developers/ldc) or
+[GDMD](https://github.com/D-Programming-GDC/GDMD/tree/dport).
 To do so, the application option _Native project compiler_ must be set accordingly.
 
 # DUB projects.
@@ -346,6 +352,12 @@ Application:
 - **`<CAF>`**: also _`<CoeditApplicationFile>`_. Expanded to Coedit filename.
 - **`<CAP>`**: also _`<CoeditApplicationPath>`_. Expanded to Coedit path.
 
+Environment:
+
+- **`<ENV_HOME>`**: Expanded to the user home directory. This is the equivalent of `HOME` (on a Posix system) or `USERHOME` (on a Windows system).
+- **`<ENV_TEMP>`**: Expanded to the user temporary directory.
+- **`<ENV_USER>`**: Expanded to the user name.
+
 Current file:
 - **`<CFF>`**: also _`<CurrentFileFile>`_. Expanded to the current file filename.
 - **`<CFP>`**: also _`<CurrentFilePath>`_. Expanded to the current file path.
@@ -387,6 +399,7 @@ Docking can be customized in the [option editor][lnk_widg_opts]:
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/optdock.png)
 
 Note that the docking relies on a component that's in beta state and problems might be encountered:
+- many small windows appear when CE is launched: the widgets are actually all independent forms that are created before being docked, under a Windows system they are visible for a second.
 - space between the menu and the workspace: the splitter can be moved when pressing the <kbd>CTRL</kbd> key.
 - strange looking layout after reloading (missing splitter between two widgets, or nothing between two splitters): close CE, delete the configuration file named _docking.xml_ from the [data folder][lnk_widg_opts], after what Coedit will start with the default layout.
 - other problem: [file an issue][lnk_bugtracker].
@@ -402,7 +415,7 @@ The _source editor widget_ is a standard code editor, specialized for highlighti
 #### Overview
 
 - folding: curly brackets blocks, multi-line strings, block comments, nested block comments, DDoc comments blocks.
-- colorization of the following categories: keywords, special keywords, numbers, symbols, comments, assembler instructions and identifiers, DDoc comments.
+- colorization of the following categories: attributes, keywords, special keywords, numbers, symbols, comments, assembler, DDoc comments.
 - current identifier markup, selection markup.
 - standard keyboard navigation shortcuts <kbd>CTRL</kbd> + [<kbd>SHIFT</kbd> +] <kbd>LEFT</kbd> | <kbd>RIGHT</kbd>, <kbd>CTRL</kbd> + <kbd>HOME</kbd>, <kbd>CTRL</kbd> + <kbd>END</kbd> etc.
 - macro recording and playback using  <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>R</kbd> (start or stop recording) or <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>P</kbd> (play).
@@ -452,8 +465,6 @@ Custom macros can be edited in the [options editor][lnk_widg_opts]:
 
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/optmacros.png)
 
-Note that since version 2, the predefined macros are not hardcoded anymore and they can be completely deleted.
-
 #### Editor options
 
 Editor options are displayed in the [option editor][lnk_widg_opts].
@@ -482,6 +493,21 @@ The document to pin can be replaced on the fly, still using the same button, and
 
 It's useful to display a module that contains the declarations of a library binding since it's not anymore necessary to change the editor page to verify the members of an enum or the parameters of a function.
 Note that the action _jump to declaration_ (see [DCD][lnk_dcd]) is adapted so that the page index is not modified if the declaration definition is in the document that's pined to the right.
+
+#### Helpers
+
+The editor proposes two useful actions to (un)comment blocks of code. 
+The action _invert version all none_ changes the `version(none)` statements to `version(all)` statements and vice versa. When no selection is available this is applied to the whole document.
+The action _comment selection_ adds or removes the `\\` located at the beginning of each line in the current selection.
+
+Another important helper is the brace auto-closing. By default it's not activated. Several modes are proposed:
+- _autoCloseNever_: deactivate the feature. 
+- _autoCloseAtEof_: closes a brace after a `{` located at the end of file.
+- _autoCloseAlways_: closes a brace after a `{`.
+- _autoCloseLexically_: closes a brace after a `{` if the count of braces pairs is odd.
+- _autoCloseOnNewLineEof_: closes a brace after a `{` located at the end of file but only after <kbd>ENTER</kbd>.
+- _autoCloseOnNewLineAlways_: closes a brace after a `{` but only after <kbd>ENTER</kbd>.
+- _autoCloseOnNewLineLexically_: closes a brace on <kbd>ENTER</kbd> and if the count of braces pairs is odd.
 
 ## Find & replace widget
 
@@ -523,8 +549,8 @@ Coedit handles the task automatically (see later in the project configuration wi
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_up.png) **/** ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_down.png): change selected entry position.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_link.png): if the current project _binaryKind_ is set to _staticlib_ then the _libman_ will use its parameters to create an entry. This avoids to browse in the dialogs, for example if you wish to setup several [_metad_][lnk_metad] items. Note that sometimes the sources root folder has to be adjusted.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_open.png): if the selected item defines a _project_ then closes current project and opens the one matching to the entry.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/dub_small.png): allows to fetch the master version of a [DUB registry item](http://code.dlang.org/). When the button is clicked, an input field allows to type the library name, after what, if the name is valid, the library will be downloaded, compiled and a new entry automatically filled. This features is actually more useful for the CE projects and the runnable modules as the dependencies of a DUB projects are handled automatically. It allows to use every DUB library in a CE project, even if the package doesn't include a CE project file.
-Note well that this feature works even if the target project is described with the _SDL_ format.
+- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/dub_small.png): allows to fetch the master version of a [DUB registry item](http://code.dlang.org/). When the button is clicked, a dialog is displayed. It allows to type the name of the library to download or to select a library in a list obtained from the official repository. After validation and if the name is valid, the library will be downloaded, compiled and a new entry automatically filled. This features is actually more useful for the CE projects and the runnable modules since the dependencies of a DUB projects are handled automatically. It allows to use any DUB library in a CE project, even if the package doesn't include a CE project file. Note well that this feature works even if the target project is described with the _SDL_ format.
+- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book.png): enable or disable the selected entry. This is mainly useful to test new DMD versions since the libraries often have to be recompiled from a version to another.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_edit.png): edit the item alias.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/folder/folder_brick.png): select the library file. In some rare case, this field can be omitted (for example if the library file is set in the _sc.ini_).
 This can be skipped if the library is only a small orphan _d_ source that's not been compiled as a static library or if the entry is only used for the [DCD][lnk_dcd] completion.
@@ -880,6 +906,7 @@ It works for the runnable modules and the project output, when launched from Coe
 
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_go.png): sends the text to the process, also works with <kbd>ENTER</kbd>.
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_delete.png): closes the process input stream.
+- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/cancel.png): forces the process termination.
 
 The input text can contain [symbolic strings][lnk_sym].
 
