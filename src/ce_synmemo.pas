@@ -771,54 +771,49 @@ end;
 
 procedure curlyBraceCloseAndIndent(editor: TSynEdit);
 var
-  beg: string;
-  i: integer = 1;
-  j: integer;
-const
-  blk = [' ', #9];
+  i: integer;
+  beg: string = '';
+  numTabs: integer = 0;
+  numSpac: integer = 0;
 begin
-  beg := editor.LineText;
-  if beg.isEmpty then exit;
-  beg := beg[1..editor.CaretX];
-  if beg.isEmpty then exit;
+
+  i := editor.CaretY - 1;
   while true do
   begin
-    if (i > beg.length) or not (beg[i] in blk) then
+    if i < 0 then
       break;
-    i += 1;
-  end;
-  if (beg[i] <> '{') and (i > 1) then
-  begin
-    if (eoTabsToSpaces in editor.Options) then
-      i -= editor.TabWidth
+    beg := editor.Lines[i];
+    if beg.isBlank then
+      i -= 1
     else
-      i -= 1;
+      break;
   end;
-  i -= 1;
+
+  for i:= 1 to beg.length do
+  begin
+    case beg[i] of
+      #9: numTabs += 1;
+      ' ': numSpac += 1;
+      else break;
+    end;
+  end;
+  numTabs += numSpac div editor.TabWidth;
+
   editor.BeginUndoBlock;
+
   editor.CommandProcessor(ecInsertLine, '', nil);
   editor.CommandProcessor(ecDown, '', nil);
+
   editor.CommandProcessor(ecInsertLine, '', nil);
   editor.CommandProcessor(ecDown, '', nil);
   while editor.CaretX <> 1 do editor.CommandProcessor(ecLeft, '' , nil);
-  for j := 1 to i do
-  begin
-    if beg[j] = #9 then
-      editor.CommandProcessor(ecTab, '', nil)
-    else
-      editor.CommandProcessor(ecChar, beg[j], nil);
-  end;
+  for i:= 0 to numTabs-1 do editor.CommandProcessor(ecTab, '', nil);
   editor.CommandProcessor(ecChar, '}', nil);
+
   editor.CommandProcessor(ecUp, '', nil);
-  for j := 1 to i do
-  begin
-    if beg[j] = #9 then
-      editor.CommandProcessor(ecTab, '', nil)
-    else
-      editor.CommandProcessor(ecChar, beg[j], nil);
-  end;
-  editor.CommandProcessor(ecTab, '', nil);
-  while editor.LogicalCaretXY.X > 1 + i + editor.TabWidth do editor.CommandProcessor(ecLeft, '' , nil);
+  while editor.CaretX <> 1 do editor.CommandProcessor(ecLeft, '' , nil);
+  for i:= 0 to numTabs do editor.CommandProcessor(ecTab, '', nil);
+
   editor.EndUndoBlock;
 end;
 
@@ -1446,7 +1441,7 @@ begin
           Key := 0;
           curlyBraceCloseAndIndent(self);
         end;
-      autoCloseOnNewLineLexically:
+      autoCloseOnNewLineLexically: if LogicalCaretXY.X - 1 >= lineText.length then
       begin
         fLexToks.Clear;
         lex(lines.Text, fLexToks);
