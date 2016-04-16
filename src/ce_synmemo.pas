@@ -946,12 +946,12 @@ procedure TCESynMemo.invertVersionAllNone;
 var
   i: integer;
   c: char;
-  tok, tok1, tok2, tok3: PLexToken;
+  tok, tok1, tok2: PLexToken;
   pt, cp, st, nd: TPoint;
   sel: boolean;
 begin
   fLexToks.Clear;
-  lex(lines.Text, fLexToks);
+  lex(lines.Text, fLexToks, nil, [lxoNoComments]);
   cp := CaretXY;
   if SelAvail then
   begin
@@ -975,18 +975,11 @@ begin
       or (tok^.kind <> ltkIdentifier) or (i < 2) then
         continue;
     //
-    if i = 2 then
-      tok1 := nil
-    else
-      tok1 := PLexToken(fLexToks[i-3]);
-    tok2 := PLexToken(fLexToks[i-2]);
-    tok3 := PLexToken(fLexToks[i-1]);
+    tok1 := PLexToken(fLexToks[i-2]);
+    tok2 := PLexToken(fLexToks[i-1]);
     //
-    if  ((tok2^.kind = ltkKeyword) and (tok2^.data = 'version')
-      and (tok3^.kind = ltkSymbol) and (tok3^.data = '('))
-    or ((tok1 <> nil) and (tok1^.kind = ltkKeyword) and (tok1^.data = 'version')
-      and (tok3^.kind = ltkComment) and
-        (tok2^.kind = ltkSymbol) and (tok2^.data = '(')) then
+    if  ((tok1^.kind = ltkKeyword) and (tok1^.data = 'version')
+      and (tok2^.kind = ltkSymbol) and (tok2^.data = '(')) then
     begin
       pt := tok^.position;
       pt.X += 1;

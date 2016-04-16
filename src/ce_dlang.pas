@@ -70,6 +70,9 @@ type
     Data: string;
   end;
 
+  TLexOption = (lxoNoComments);
+  TLexOptions = set of TLexOption;
+
   TLexFoundEvent = procedure(const aToken: PLexToken; out doStop: boolean) of Object;
 
   (**
@@ -129,7 +132,7 @@ operator enumerator(list: TLexErrorList): TLexErrorEnumerator;
 (**
  * Lexes text and fills list with the TLexToken found.
  *)
-procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = nil);
+procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = nil; Options: TLexOptions = []);
 
 (**
  * Outputs the module name from a tokenized D source.
@@ -265,7 +268,7 @@ begin
 end;
 
 
-procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = nil);
+procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = nil; Options: TLexOptions = []);
 var
   reader: TReaderHead;
   identifier: string;
@@ -273,11 +276,14 @@ var
   rstring: boolean;
   decSet: boolean;
   expSet: boolean;
+  noComment: boolean;
 
   procedure addToken(aTk: TLexTokenKind);
   var
     ptk: PLexToken;
   begin
+    if (aTk = ltkComment) and (noComment) then
+      exit;
     ptk := new(PLexToken);
     ptk^.kind := aTk;
     ptk^.position.X := reader.SavedColumn;
@@ -303,6 +309,8 @@ var
 begin
 
   if text = '' then exit;
+
+  noComment := lxoNoComments in Options;
 
   reader.Create(@text[1], Point(0, 0));
   while (True) do
@@ -331,7 +339,8 @@ begin
           exit;
         while (reader.head^ <> #10) do
         begin
-          identifier += reader.head^;
+          if not noComment then
+            identifier += reader.head^;
           reader.Next;
           if isOutOfBound then
             exit;
@@ -357,7 +366,8 @@ begin
         reader.Next;
         while (reader.head^ <> '/') or ((reader.head - 1)^ <> '*') do
         begin
-          identifier += reader.head^;
+          if not noComment then
+            identifier += reader.head^;
           reader.Next;
           if isOutOfBound then
             exit;
@@ -387,6 +397,8 @@ begin
           begin
             if isOutOfBound then
               exit;
+            if not noComment then
+              identifier += reader.head^;
             if ((reader.head-1)^ = '/') and (reader.head^ = '+') then
             begin
               nestedCom += 1;
