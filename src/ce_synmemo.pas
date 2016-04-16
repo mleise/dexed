@@ -869,7 +869,7 @@ begin
           lx += editor.TabWidth
         else
           lx += 1;
-      if lx + 1 < pt.X then
+      if (lx + 1 < pt.X) and not line.isEmpty then
         pt.X:= lx + 1;
       if (line.length > 1) and (line[1..2] = '//') then
         numUndo += 1;
@@ -883,6 +883,8 @@ begin
     begin
       pt.Y:= i;
       editor.ExecuteCommand(ecGotoXY, '', @pt);
+      while editor.CaretX < pt.X do
+        editor.ExecuteCommand(ecChar, ' ', nil);
       if not undo then
       begin
         commentHere;
