@@ -234,17 +234,17 @@ type
   function CustomCommandToSstring(Int: Longint; var Ident: string): Boolean;
 
 const
-  ecCompletionMenu    = ecUserFirst + 1;
-  ecJumpToDeclaration = ecUserFirst + 2;
-  ecPreviousLocation  = ecUserFirst + 3;
-  ecNextLocation      = ecUserFirst + 4;
-  ecRecordMacro       = ecUserFirst + 5;
-  ecPlayMacro         = ecUserFirst + 6;
-  ecShowDdoc          = ecUserFirst + 7;
-  ecShowCallTips      = ecUserFirst + 8;
-  ecCurlyBraceClose   = ecUserFirst + 9;
-  ecCommentSelection  = ecUserFirst + 10;
-  ecSwapVersionAllNone = ecUserFirst + 11;
+  ecCompletionMenu      = ecUserFirst + 1;
+  ecJumpToDeclaration   = ecUserFirst + 2;
+  ecPreviousLocation    = ecUserFirst + 3;
+  ecNextLocation        = ecUserFirst + 4;
+  ecRecordMacro         = ecUserFirst + 5;
+  ecPlayMacro           = ecUserFirst + 6;
+  ecShowDdoc            = ecUserFirst + 7;
+  ecShowCallTips        = ecUserFirst + 8;
+  ecCurlyBraceClose     = ecUserFirst + 9;
+  ecCommentSelection    = ecUserFirst + 10;
+  ecSwapVersionAllNone  = ecUserFirst + 11;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
