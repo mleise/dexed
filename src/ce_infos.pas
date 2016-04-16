@@ -176,6 +176,10 @@ begin
   fIsModal := true;
   fIsDockable := false;
   //
+  toolItem := TToolInfo.Construct(self, tikOptional, 'dscanner',
+    'optional, the D source code analyzer');
+  toolItem.Parent := boxTools;
+  toolItem.ReAlign;
   toolItem := TToolInfo.Construct(self, tikOptional, 'dfmt',
     'optional, the D source code formater, needed by the Dfmt commander widget');
   toolItem.Parent := boxTools;

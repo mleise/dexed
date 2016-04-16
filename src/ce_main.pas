@@ -39,6 +39,7 @@ type
     actFileSaveCopyAs: TAction;
     actFileCompile: TAction;
     actFileRun: TAction;
+    actFileDscanner: TAction;
     actProjNewDubJson: TAction;
     actProjNewNative: TAction;
     actSetRunnableSw: TAction;
@@ -140,6 +141,7 @@ type
     MenuItem75: TMenuItem;
     MenuItem76: TMenuItem;
     MenuItem77: TMenuItem;
+    MenuItem78: TMenuItem;
     mnuLayout: TMenuItem;
     mnuItemMruFile: TMenuItem;
     mnuItemMruProj: TMenuItem;
@@ -151,6 +153,7 @@ type
     MenuItem8: TMenuItem;
     MenuItem9: TMenuItem;
     procedure actFileCompileExecute(Sender: TObject);
+    procedure actFileDscannerExecute(Sender: TObject);
     procedure actFileRunExecute(Sender: TObject);
     procedure actFileSaveCopyAsExecute(Sender: TObject);
     procedure actProjNewDubJsonExecute(Sender: TObject);
@@ -2187,6 +2190,38 @@ end;
 procedure TCEMainForm.actFileCompileExecute(Sender: TObject);
 begin
   compileRunnable(false);
+end;
+
+procedure TCEMainForm.actFileDscannerExecute(Sender: TObject);
+var
+  lst: TStringList;
+  prc: TProcess;
+  pth: string;
+  msg: string;
+begin
+  if fDoc.isNil then
+    exit;
+  if fDoc.isTemporary and fDoc.modified then
+    fDoc.saveTempFile;
+  pth := exeFullName('dscanner' + exeExt);
+  if not pth.fileExists then
+    exit;
+  prc := TProcess.Create(nil);
+  lst := TStringList.Create;
+  try
+    prc.Executable:=pth;
+    prc.Options:= [poUsePipes];
+    prc.ShowWindow:= swoHIDE;
+    prc.Parameters.Add(fDoc.fileName);
+    prc.Parameters.Add('-S');
+    prc.Execute;
+    processOutputToStrings(prc, lst);
+    for msg in lst do
+      fMsgs.message(msg, fDoc, amcEdit, amkAuto);
+  finally
+    prc.Free;
+    lst.Free;
+  end;
 end;
 
 procedure TCEMainForm.actFileRunExecute(Sender: TObject);

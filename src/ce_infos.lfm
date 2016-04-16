@@ -1,21 +1,21 @@
 inherited CEInfoWidget: TCEInfoWidget
   Left = 713
-  Height = 457
+  Height = 502
   Top = 245
   Width = 411
   BorderIcons = [biSystemMenu, biMinimize, biMaximize]
   Caption = 'About'
-  ClientHeight = 457
+  ClientHeight = 502
   ClientWidth = 411
   inherited Back: TPanel
-    Height = 457
+    Height = 502
     Width = 411
-    ClientHeight = 457
+    ClientHeight = 502
     ClientWidth = 411
     inherited Content: TPanel
-      Height = 457
+      Height = 502
       Width = 411
-      ClientHeight = 457
+      ClientHeight = 502
       ClientWidth = 411
       object GroupBox1: TGroupBox[0]
         Left = 4
@@ -46,18 +46,18 @@ inherited CEInfoWidget: TCEInfoWidget
       end
       object GroupBox2: TGroupBox[1]
         Left = 4
-        Height = 340
+        Height = 385
         Top = 113
         Width = 403
         Align = alClient
         BorderSpacing.Around = 4
         Caption = 'tools status'
-        ClientHeight = 310
+        ClientHeight = 355
         ClientWidth = 399
         TabOrder = 1
         object boxTools: TScrollBox
           Left = 4
-          Height = 302
+          Height = 347
           Top = 4
           Width = 391
           HorzScrollBar.Page = 1
