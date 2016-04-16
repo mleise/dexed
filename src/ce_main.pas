@@ -12,7 +12,7 @@ uses
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
-  ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor, ce_gdb, ce_dfmt, ce_lcldragdrop;
+  ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor, (*ce_gdb,*) ce_dfmt, ce_lcldragdrop;
 
 type
 
@@ -241,7 +241,7 @@ type
     fSymlWidg: TCESymbolListWidget;
     fInfoWidg: TCEInfoWidget;
     fDubProjWidg: TCEDubProjectEditorWidget;
-    fGdbWidg: TCEGdbWidget;
+    //fGdbWidg: TCEGdbWidget;
     fDfmtWidg:  TCEDfmtWidget;
 
     fRunProjAfterCompArg: boolean;
@@ -894,7 +894,7 @@ begin
   fSymlWidg := TCESymbolListWidget.create(self);
   fInfoWidg := TCEInfoWidget.create(self);
   fDubProjWidg:= TCEDubProjectEditorWidget.create(self);
-  fGdbWidg  := TCEGdbWidget.create(self);
+  //fGdbWidg  := TCEGdbWidget.create(self);
   fDfmtWidg := TCEDfmtWidget.create(self);
 
   getMessageDisplay(fMsgs);
@@ -913,7 +913,7 @@ begin
   fWidgList.addWidget(@fSymlWidg);
   fWidgList.addWidget(@fInfoWidg);
   fWidgList.addWidget(@fDubProjWidg);
-  fWidgList.addWidget(@fGdbWidg);
+  //fWidgList.addWidget(@fGdbWidg);
   fWidgList.addWidget(@fDfmtWidg);
   fWidgList.sort(@CompareWidgCaption);
 

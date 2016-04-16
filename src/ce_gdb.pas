@@ -105,7 +105,6 @@ type
     function GetValue: ansistring; override;
   end;
 
-
   TGDBMI_Frame = record
     level: integer;
     func: string;
@@ -115,6 +114,21 @@ type
     from: string;
   end;
 
+  {
+    breakpoint:
+
+    (gdb)
+    =breakpoint-modified,bkpt={number="2",type="breakpoint",disp="keep",enabled="y",addr="0x000000000049dc7a",func="D main",file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="39",thread-groups=["i1"],times="1",original-location="/home/basile/Dev/dproj/Resource.d/src/resource.d:39"}
+    ~"\nBreakpoint "
+    ~"2, D main (args=...) at /home/basile/Dev/dproj/Resource.d/src/resource.d:39\n"
+    ~"39\t    getopt(args, config.passThrough, \"h|help\", &wantHelp);\n"
+    *stopped,reason="breakpoint-hit",disp="keep",bkptno="2",frame={addr="0x000000000049dc7a",func="D main",args=[{name="args",value="..."}],file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="39"},thread-id="1",stopped-threads="all",core="3"
+    (gdb)
+
+    . line starting with = is to parse as TGDBMI_Breakpoint, thorically its [opt token]=, no token for breakpoint reached since it's not a result
+    . lines starting with "~" can be ignored, they represent the output stream displayed in the CLI
+
+  }
   TGDBMI_Breakpoint = record
     number: integer;
     tpe: string;        // named "type"
@@ -243,162 +257,22 @@ end;
 
 procedure TInspectableState.parseCallStack(stream: TStream);
 var
-  rdr: TStringList;
+  rng: TStringRange = (ptr: nil; pos: 0; len: 0);
   str: string;
   i,j: integer;
 begin
-  fCallStack.Clear;
-  for i := low(fLastCalls) to high(fLastCalls) do
-    fLastCalls[i] := '';
-  rdr := TStringList.Create;
-  try
-    rdr.LoadFromStream(stream);
-    if (rdr.Count = 0) or (pos('(gdb)', rdr[0]) = -1) then
-      exit;
-    // fix first line
-    str := rdr[0];
-    rdr[0] := str[7 .. str.length];
-    for str in rdr do
-    begin
-      if fWordSpliter.Exec(str) and fWordSpliter.ExecNext then
-        fCallStack.Insert(0, str[fWordSpliter.MatchLen[0]+1 .. str.length]);
-    end;
-    if fCallStack.Count > 9 then j := 9 else j := fCallStack.Count-1;
-    for i := 0 to j do
-      fLastCalls[i] := fCallStack[i];
-  finally
-    rdr.free;
-  end;
+
+
 end;
 
 procedure TInspectableState.parseRegisters(stream: TStream);
 var
-  rdr: TStringList;
-  str: string;
   reg: string;
   val: string;
   rng: TStringRange = (ptr: nil; pos: 0; len: 0);
 begin
 
-  setLength(str, stream.Size);
-  stream.Read(str[1], str.length);
-  rng.init(str);
 
-  if rng.empty then
-    exit;
-  if not rng.startsWith('&"info registers\n"') then
-    exit;
-  rng.popUntil(#10)^.popFront;
-
-  while not rng.empty do
-  begin
-    if rng.front <> '~' then
-      exit;
-    rng.popFront;
-    if rng.front <> '"' then
-      exit;
-    rng.popFront;
-
-    reg := rng.takeUntil([' ', #9]).yield;
-
-    if (reg = 'rip') or (reg = 'eip') then
-    begin
-      rng.popUntil(#10)^.popFront;
-      rng.popUntil(#10)^.popFront;
-      continue;
-    end;
-
-    rng.popUntil(#10)^.popFront;
-    if rng.front <> '~' then
-      exit;
-    rng.popFront;
-    if rng.front <> '"' then
-      exit;
-    rng.popFront;
-    if rng.front <> '\' then
-      exit;
-    rng.popFront;
-
-    if rng.front <> 't' then
-      exit;
-    rng.popFront;
-
-
-    if reg = 'eflags' then
-    begin
-      fFlags := [];
-      if rng.front <> '[' then
-        exit;
-      rng.popFront;
-      while rng.front <> ']' do
-      begin
-        val := rng.popWhile([' ', #9])^.takeUntil([' ', #9, ']']).yield;
-        case val of
-          'CS': include(fFlags, TFLAG.CS);
-          'PF': include(fFlags, TFLAG.PF);
-          'AF': include(fFlags, TFLAG.AF);
-          'ZF': include(fFlags, TFLAG.ZF);
-          'SF': include(fFlags, TFLAG.SF);
-          'TF': include(fFlags, TFLAG.TF);
-          'IF': include(fFlags, TFLAG.IF_);
-          'DF': include(fFlags, TFLAG.DF);
-          'OF': include(fFlags, TFLAG.OF_);
-          //'NT': include(fFlags, TFLAG.NT);
-          //'RF': include(fFlags, TFLAG.RF);
-          //'VM': include(fFlags, TFLAG.VM);
-          //'AC': include(fFlags, TFLAG.AC);
-          //'VIF':include(fFlags, TFLAG.VIF);
-          //'VIP':include(fFlags, TFLAG.VIP);
-          //'ID': include(fFlags, TFLAG.ID);
-        end;
-      end;
-      rng.popUntil(#10)^.popFront;
-      rng.popUntil(#10)^.popFront;
-      continue;
-    end;
-
-    val := rng.takeWhile(['0','1','2','3','4','5','6','7','8','9']).yield;
-    rng.popUntil(#10)^.popFront;
-    rng.popUntil(#10)^.popFront;
-    case reg of
-      'cs':  fSegment[TSegmentRegister.S_CS] := StrToInt(val);
-      'ds':  fSegment[TSegmentRegister.S_DS] := StrToInt(val);
-      'es':  fSegment[TSegmentRegister.S_ES] := StrToInt(val);
-      'fs':  fSegment[TSegmentRegister.S_FS] := StrToInt(val);
-      'gs':  fSegment[TSegmentRegister.S_GS] := StrToInt(val);
-      'ss':  fSegment[TSegmentRegister.S_SS] := StrToInt(val);
-      {$IFDEF CPU64}
-      'rax': fRegisters[TCpuRegister.rax] := StrToInt64(val);
-      'rbx': fRegisters[TCpuRegister.rbx] := StrToInt64(val);
-      'rcx': fRegisters[TCpuRegister.rcx] := StrToInt64(val);
-      'rdx': fRegisters[TCpuRegister.rdx] := StrToInt64(val);
-      'rdi': fRegisters[TCpuRegister.rdi] := StrToInt64(val);
-      'rsi': fRegisters[TCpuRegister.rsi] := StrToInt64(val);
-      'rbp': fRegisters[TCpuRegister.rbp] := StrToInt64(val);
-      'rsp': fRegisters[TCpuRegister.rsp] := StrToInt64(val);
-      'r8':  fRegisters[TCpuRegister.r8]  := StrToInt64(val);
-      'r9':  fRegisters[TCpuRegister.r9]  := StrToInt64(val);
-      'r10': fRegisters[TCpuRegister.r10] := StrToInt64(val);
-      'r11': fRegisters[TCpuRegister.r11] := StrToInt64(val);
-      'r12': fRegisters[TCpuRegister.r12] := StrToInt64(val);
-      'r13': fRegisters[TCpuRegister.r13] := StrToInt64(val);
-      'r14': fRegisters[TCpuRegister.r14] := StrToInt64(val);
-      'r15': fRegisters[TCpuRegister.r15] := StrToInt64(val);
-      'rip': fRegisters[TCpuRegister.rip] := StrToInt64(val);
-      {$ELSE}
-      'eax': fRegisters[TCpuRegister.eax] := StrToInt(val);
-      'ebx': fRegisters[TCpuRegister.ebx] := StrToInt(val);
-      'ecx': fRegisters[TCpuRegister.ecx] := StrToInt(val);
-      'edx': fRegisters[TCpuRegister.edx] := StrToInt(val);
-      'edi': fRegisters[TCpuRegister.edi] := StrToInt(val);
-      'esi': fRegisters[TCpuRegister.esi] := StrToInt(val);
-      'ebp': fRegisters[TCpuRegister.ebp] := StrToInt(val);
-      'esp': fRegisters[TCpuRegister.esp] := StrToInt(val);
-      'eip': fRegisters[TCpuRegister.eip] := StrToInt(val);
-      {$ENDIF}
-    end;
-
-  end;
 end;
 {$ENDREGION}
 
@@ -638,12 +512,14 @@ end;
 
 procedure TCEGdbWidget.infoRegs;
 begin
-  gdbCommand('info registers', @processInfoRegs);
+  // GDBMI output format, "info registers" is for CLI output
+  gdbCommand('-data-list-register-values d', @processInfoRegs);
 end;
 
 procedure TCEGdbWidget.infoStack;
 begin
-  gdbCommand('info stack', @processInfoStack);
+  // GDBMI output format, "info frame" is for CLI output
+  gdbCommand('-stack-info-frame', @processInfoStack);
 end;
 
 procedure TCEGdbWidget.btnStartClick(Sender: TObject);
