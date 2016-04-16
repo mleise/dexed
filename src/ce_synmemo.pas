@@ -151,7 +151,6 @@ type
     procedure loadCache;
     class procedure cleanCache; static;
     procedure setDefaultFontSize(aValue: Integer);
-    procedure getCallTips;
     procedure DDocTimerEvent(sender: TObject);
     procedure AutoDotTimerEvent(sender: TObject);
     procedure InitHintWins;
@@ -197,8 +196,9 @@ type
     procedure saveTempFile;
     //
     procedure invertVersionAllNone;
-    procedure showCallTips;
+    procedure showCallTips(findOpenParen: boolean = true);
     procedure hideCallTips;
+    procedure decCallTipsLvl;
     procedure showDDocs;
     procedure hideDDocs;
     //
@@ -924,7 +924,7 @@ begin
     begin
       hideCallTips;
       hideDDocs;
-      showCallTips;
+      showCallTips(true);
     end;
     ecCurlyBraceClose:
       curlyBraceCloseAndIndent(self);
@@ -1026,7 +1026,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.showCallTips;
+procedure TCESynMemo.showCallTips(findOpenParen: boolean = true);
 var
   str: string;
   i: integer;
@@ -1035,7 +1035,7 @@ begin
     fCallTipStrings.Clear;
   str := LineText[1..CaretX];
   i := CaretX;
-  while true do
+  if findOpenParen then while true do
   begin
     if i = 1 then
       break;
@@ -1090,6 +1090,21 @@ begin
   fCallTipWin.Hide;
 end;
 
+procedure TCESynMemo.decCallTipsLvl;
+var
+  i: integer;
+begin
+  {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
+  i := integer(pointer(fCallTipStrings.Objects[0]));
+  {$POP}
+  for i in [0..i-1] do
+    fCallTipStrings.Delete(0);
+  if fCallTipStrings.Count = 0 then
+    hideCallTips
+  else
+    showCallTips(fCallTipStrings.Text);
+end;
+
 procedure TCESynMemo.showDDocs;
 var
   str: string;
@@ -1110,11 +1125,6 @@ procedure TCESynMemo.hideDDocs;
 begin
   fCanShowHint := false;
   fDDocWin.Hide;
-end;
-
-procedure TCESynMemo.getCallTips();
-begin
-  showCallTips;
 end;
 
 procedure TCESynMemo.setDDocDelay(aValue: Integer);
@@ -1428,30 +1438,37 @@ end;
 
 {$REGION user input ------------------------------------------------------------}
 procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
+var
+  i: integer;
 begin
-  if Key = VK_RETURN then
-  begin
-    if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically]) then
-    case fAutoCloseCurlyBrace of
-      autoCloseOnNewLineAlways: if (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
-      begin
-        Key := 0;
-        curlyBraceCloseAndIndent(self);
-      end;
-      autoCloseOnNewLineEof: if (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
-        if (CaretY = Lines.Count) and (CaretX = LineText.length+1) then
+  case Key of
+    VK_BACK: if fCallTipWin.Visible and (CaretX > 1)
+      and (LineText[LogicalCaretXY.X-1] = '(') then
+        decCallTipsLvl;
+    VK_RETURN:
+    begin
+      if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically]) then
+      case fAutoCloseCurlyBrace of
+        autoCloseOnNewLineAlways: if (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
         begin
           Key := 0;
           curlyBraceCloseAndIndent(self);
         end;
-      autoCloseOnNewLineLexically: if LogicalCaretXY.X - 1 >= lineText.length then
-      begin
-        fLexToks.Clear;
-        lex(lines.Text, fLexToks);
-        if lexCanCloseBrace then
+        autoCloseOnNewLineEof: if (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
+          if (CaretY = Lines.Count) and (CaretX = LineText.length+1) then
+          begin
+            Key := 0;
+            curlyBraceCloseAndIndent(self);
+          end;
+        autoCloseOnNewLineLexically: if LogicalCaretXY.X - 1 >= lineText.length then
         begin
-          Key := 0;
-          curlyBraceCloseAndIndent(self);
+          fLexToks.Clear;
+          lex(lines.Text, fLexToks);
+          if lexCanCloseBrace then
+          begin
+            Key := 0;
+            curlyBraceCloseAndIndent(self);
+          end;
         end;
       end;
     end;
@@ -1499,19 +1516,8 @@ begin
   c := Key;
   inherited;
   case c of
-    '(': getCallTips;
-    ')': if fCallTipWin.Visible then
-      begin
-        {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
-        i := integer(pointer(fCallTipStrings.Objects[0]));
-        {$POP}
-        for i in [0..i-1] do
-          fCallTipStrings.Delete(0);
-        if fCallTipStrings.Count = 0 then
-          hideCallTips
-        else
-          showCallTips(fCallTipStrings.Text);
-      end;
+    '(': showCallTips(false);
+    ')': if fCallTipWin.Visible then decCallTipsLvl;
     '{':
         case fAutoCloseCurlyBrace of
           autoCloseAlways:
