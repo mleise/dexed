@@ -783,7 +783,7 @@ begin
     if i < 0 then
       break;
     beg := editor.Lines[i];
-    if beg.isBlank then
+    if (Pos('{', beg) = 0) then
       i -= 1
     else
       break;
