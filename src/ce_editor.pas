@@ -201,11 +201,11 @@ end;
 
 procedure TCEEditorWidget.docFocused(aDoc: TCESynMemo);
 begin
-  if aDoc = fDoc then exit;
-  fDoc := aDoc;
   if fDoc.isNotNil and pageControl.currentPage.isNotNil and
     (pageControl.currentPage.Caption = '<new document>') then
       updatePageCaption;
+  if aDoc = fDoc then exit;
+  fDoc := aDoc;
   focusedEditorChanged;
   updateImperative;
 end;
