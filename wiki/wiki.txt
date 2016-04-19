@@ -86,7 +86,7 @@ or `chmod a+x` the file in a console.
 
 ## Build the sources
 
-Download ans setup the tools:
+Download and setup the tools:
 
 * [Download](http://lazarus.freepascal.org/index.php?page=downloads) and setup the latest Lazarus version (1.6) and  FPC + FPC sources (3.0.0) for your platform.
 	* Windows: the three packages are bundled in an installer. Even on Windows 64 bit, the 32 version must be setup.
