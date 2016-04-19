@@ -1989,6 +1989,7 @@ var
   dmdproc: TCEProcess;
   lst: TStringList = nil;
   firstLineFlags: string = '';
+  asObj: boolean = false;
 begin
 
   result := false;
@@ -2005,8 +2006,25 @@ begin
     lst := TStringList.Create;
     CommandToList(firstlineFlags, lst);
     for i:= lst.Count-1 downto 0 do
+    begin
       if (lst[i].length > 2) and (lst[i][1..3] = '-of') then
+      begin
         lst.Delete(i);
+        fMsgs.message('the option "-of" is not be handled in the runnable modules',
+          fDoc, amcEdit, amkWarn);
+      end
+      else if lst[i] = '-c' then
+      begin
+        if not unittest then
+          asObj:=true
+        else
+        begin
+          lst.Delete(i);
+          fMsgs.message('the option "-c" is not be handled when a module is tested',
+            fDoc, amcEdit, amkWarn);
+        end;
+      end;
+    end;
   end;
 
   dmdproc := TCEProcess.Create(nil);
@@ -2028,7 +2046,10 @@ begin
     dmdproc.Options := [poUsePipes, poStderrToOutPut];
     dmdproc.Executable := 'dmd';
     dmdproc.Parameters.Add(fDoc.fileName);
-    dmdproc.Parameters.Add('-of' + fname + exeExt);
+    if not asObj then
+      dmdproc.Parameters.Add('-of' + fname + exeExt)
+    else
+      dmdproc.Parameters.Add('-of' + fname + objExt);
     dmdproc.Parameters.Add('-J' + fDoc.fileName.extractFilePath);
     dmdproc.Parameters.AddText(fRunnableSw);
     if lst.isNotNil and (lst.Count <> 0) then
@@ -2047,7 +2068,8 @@ begin
     dmdproc.Execute;
     while dmdproc.Running do
       application.ProcessMessages;
-    sysutils.DeleteFile(fname + objExt);
+    if not asObj then
+      sysutils.DeleteFile(fname + objExt);
     if (dmdProc.ExitStatus = 0) then
     begin
       result := true;
