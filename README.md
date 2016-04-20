@@ -26,7 +26,7 @@ Coedit is an IDE for the D programming language [D2](http://dlang.org).
 
 **Project information**
 ---
-- latest release: version 2, update 4, Wad Apr 20 2016.
+- latest release: version 2, update 4, Wed Apr 20 2016.
 - licensed under the term of the MIT license.
 
 **Download the latest build**
