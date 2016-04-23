@@ -26,7 +26,7 @@ type
     property index: integer read getIndex;
   end;
 
-  TCEPagesOption = (poPageHistory);
+  TCEPagesOption = (poPageHistory, poBottomHeader);
   TCEPagesOptions = set of TCEPagesOption;
 
 const
@@ -90,6 +90,7 @@ type
     procedure setOnDragOver(value: TDragOverEvent);
     procedure setOnDragDrop(value: TDragDropEvent);
     procedure setPagesOptions(value: TCEPagesOptions);
+    procedure setHeaderPosition(bottom: boolean);
 
   public
     constructor Create(aowner: TComponent); override;
@@ -151,8 +152,6 @@ end;
 constructor TCEPageControl.Create(aowner: TComponent);
 begin
   inherited;
-
-  fOptions := defPagesOpt;
 
   fHeader := TWinControl.Create(self);
   fHeader.Parent:= self;
@@ -231,6 +230,8 @@ begin
   fPagesHistory := TFPList.Create;
   fPageIndex := -1;
 
+  setPagesOptions(defPagesOpt);
+
   fButtons:= CEPageControlDefaultButtons;
   updateButtonsState;
 end;
@@ -268,6 +269,20 @@ begin
     exit;
   fOptions := value;
   fPagesHistory.Clear;
+  setHeaderPosition(poBottomHeader in fOptions);
+end;
+
+procedure TCEPageControl.setHeaderPosition(bottom: boolean);
+begin
+  if bottom then
+  begin
+    fTabs.TabPosition:= tpBottom;
+    fHeader.Align:= alBottom;
+  end else
+  begin
+    fTabs.TabPosition:= tpTop;
+    fHeader.Align:= alTop;
+  end;
 end;
 
 procedure TCEPageControl.changedNotify;
