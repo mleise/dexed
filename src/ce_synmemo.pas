@@ -648,6 +648,8 @@ begin
     AddKey(ecLeft, VK_LEFT, [], 0, []);
     AddKey(ecSelLeft, VK_LEFT, [ssShift], 0, []);
     AddKey(ecWordLeft, VK_LEFT, [ssCtrl], 0, []);
+    AddKey(ecWordEndLeft, VK_LEFT, [ssCtrl,ssAlt], 0, []);
+    AddKey(ecWordEndRight, VK_RIGHT, [ssCtrl,ssAlt], 0, []);
     AddKey(ecSelWordLeft, VK_LEFT, [ssShift,ssCtrl], 0, []);
     AddKey(ecRight, VK_RIGHT, [], 0, []);
     AddKey(ecSelRight, VK_RIGHT, [ssShift], 0, []);
