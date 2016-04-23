@@ -67,7 +67,8 @@ type
     procedure beforeLoad; override;
     procedure afterSave; override;
     procedure afterLoad; override;
-    procedure setFilename(const aValue: string); override;
+    procedure customSaveToFile(const aFilename: string); override;
+    procedure customLoadFromFile(const aFilename: string); override;
     procedure readerPropNoFound(Reader: TReader; Instance: TPersistent;
       var PropName: string; IsPath: Boolean; var Handled, Skip: Boolean); override;
   published
@@ -226,18 +227,20 @@ begin
   endUpdate;
 end;
 
-procedure TCENativeProject.setFilename(const aValue: string);
+procedure TCENativeProject.customLoadFromFile(const aFilename: string);
+begin
+  fbasePath := aFilename.extractFilePath;
+  inherited customLoadFromFile(aFilename);
+end;
+
+procedure TCENativeProject.customSaveToFile(const aFilename: string);
 var
   oldAbs, newRel, oldBase: string;
   i: NativeInt;
 begin
-  if fFilename = aValue then exit;
-  //
   beginUpdate;
-
-  fFilename := aValue;
   oldBase := fBasePath;
-  fBasePath := fFilename.extractFilePath;
+  fBasePath := aFilename.extractFilePath;
   //
   for i:= 0 to fSrcs.Count-1 do
   begin
@@ -245,8 +248,8 @@ begin
     newRel := ExtractRelativepath(fBasePath, oldAbs);
     fSrcs[i] := newRel;
   end;
-  //
   endUpdate;
+  inherited customSaveToFile(aFilename);
 end;
 
 procedure TCENativeProject.setLibAliases(const value: TStringList);
