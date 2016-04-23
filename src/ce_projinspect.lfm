@@ -36,6 +36,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         ScrollBars = ssAutoBoth
         ShowRoot = False
         TabOrder = 0
+        OnClick = TreeClick
         OnKeyDown = TreeKeyDown
         OnSelectionChanged = TreeSelectionChanged
         Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowLines, tvoToolTips, tvoThemedDraw]

@@ -27,6 +27,7 @@ type
     procedure btnRemFileClick(Sender: TObject);
     procedure btnRemFoldClick(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
+    procedure TreeClick(Sender: TObject);
     procedure TreeKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TreeSelectionChanged(Sender: TObject);
   protected
@@ -213,6 +214,25 @@ begin
     TreeDblClick(nil);
 end;
 
+procedure TCEProjectInspectWidget.TreeClick(Sender: TObject);
+begin
+  if Tree.Selected.isNotNil then
+  begin
+    Tree.MultiSelect := Tree.Selected.Parent = fFileNode;
+    if not (Tree.Selected.Parent = fFileNode) then
+    begin
+      Tree.MultiSelect := false;
+      Tree.ClearSelection(true);
+      Tree.Selected.MultiSelected:=false;
+    end;
+  end
+  else
+  begin
+    Tree.MultiSelect := false;
+    Tree.ClearSelection(true);
+  end;
+end;
+
 procedure TCEProjectInspectWidget.TreeSelectionChanged(Sender: TObject);
 begin
   actUpdate(sender);
@@ -227,19 +247,22 @@ end;
 procedure TCEProjectInspectWidget.TreeDblClick(sender: TObject);
 var
   fname: string;
-  i: NativeInt;
+  i, j: integer;
 begin
   if fProject.isNil or Tree.Selected.isNil then
     exit;
   //
   if (Tree.Selected.Parent = fFileNode) or (Tree.Selected.Parent = fXtraNode) then
   begin
-    fname := Tree.Selected.Text;
-    i := fProject.Sources.IndexOf(fname);
-    if i > -1 then
-      fname := fProject.sourceAbsolute(i);
-    if isEditable(fname.extractFileExt) and fname.fileExists then
-      getMultiDocHandler.openDocument(fname);
+    for j:= 0 to Tree.SelectionCount-1 do
+    begin
+      fname := Tree.Selections[j].Text;
+      i := fProject.Sources.IndexOf(fname);
+      if i > -1 then
+        fname := fProject.sourceAbsolute(i);
+      if isEditable(fname.extractFileExt) and fname.fileExists then
+        getMultiDocHandler.openDocument(fname);
+    end;
   end
   else if Tree.Selected.Parent = fConfNode then
   begin
@@ -342,21 +365,22 @@ end;
 procedure TCEProjectInspectWidget.btnRemFileClick(Sender: TObject);
 var
   fname: string;
-  i: NativeInt;
+  i, j: integer;
 begin
   if fProject.isNil or Tree.Selected.isNil then
     exit;
   //
   if Tree.Selected.Parent = fFileNode then
   begin
-    fname := Tree.Selected.Text;
-    i := fProject.Sources.IndexOf(fname);
-    if i > -1 then
+    fProject.beginUpdate;
+    for j:= 0 to Tree.SelectionCount-1 do
     begin
-      fProject.beginUpdate;
-      fProject.Sources.Delete(i);
-      fProject.endUpdate;
+      fname := Tree.Selections[j].Text;
+      i := fProject.Sources.IndexOf(fname);
+      if i <> -1 then
+        fProject.Sources.Delete(i);
     end;
+    fProject.endUpdate;
   end;
 end;
 
