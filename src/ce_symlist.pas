@@ -686,6 +686,21 @@ function getCatNode(node: TTreeNode; stype: TSymbolType ): TTreeNode;
     result := node.FindNode(aCat);
     if result.isNil then
       result := node.TreeNodes.AddChild(node, aCat);
+    case stype of
+      _alias    : begin result.ImageIndex:=0; result.SelectedIndex:=0; end;
+      _class    : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
+      _enum     : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
+      _function : begin result.ImageIndex:=3; result.SelectedIndex:=3; end;
+      _import   : begin result.ImageIndex:=4; result.SelectedIndex:=4; end;
+      _interface: begin result.ImageIndex:=5; result.SelectedIndex:=5; end;
+      _mixin    : begin result.ImageIndex:=6; result.SelectedIndex:=6; end;
+      _struct   : begin result.ImageIndex:=7; result.SelectedIndex:=7; end;
+      _template : begin result.ImageIndex:=8; result.SelectedIndex:=8; end;
+      _union    : begin result.ImageIndex:=0; result.SelectedIndex:=0; end;
+      _variable : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
+      _warning  : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
+      _error    : begin result.ImageIndex:=3; result.SelectedIndex:=3; end;
+    end;
   end;
   //
 begin
@@ -731,7 +746,10 @@ begin
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   node := tree.Items.AddChildObject(cat, sym.name, Pointer(sym.fline));
   {$POP}
-  if not fShowChildCategories then node := nil;
+  node.SelectedIndex:= cat.SelectedIndex;
+  node.ImageIndex:= cat.ImageIndex;
+  if not fShowChildCategories then
+    node := nil;
   cat.Visible:=true;
   for i := 0 to sym.subs.Count-1 do
     symbolToTreeNode(node, sym.subs[i]);
