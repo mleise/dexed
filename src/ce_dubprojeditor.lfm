@@ -1,7 +1,7 @@
 inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
-  Left = 1471
+  Left = 771
   Height = 424
-  Top = 10
+  Top = 245
   Width = 411
   Caption = 'Dub project editor'
   ClientHeight = 424
@@ -28,7 +28,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         TabOrder = 0
         object TabSheet1: TTabSheet
           Caption = 'Inspector'
-          ClientHeight = 388
+          ClientHeight = 380
           ClientWidth = 395
           object pnlToolBar1: TPanel
             Left = 4
@@ -44,10 +44,10 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
             ClientWidth = 387
             TabOrder = 0
             object fltInspect: TTreeFilterEdit
-              Left = 2
+              Left = 30
               Height = 22
               Top = 2
-              Width = 383
+              Width = 355
               ButtonWidth = 23
               NumGlyphs = 1
               Align = alClient
@@ -56,15 +56,27 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
               TabOrder = 0
               FilteredTreeview = treeInspect
             end
+            object btnRefresh: TBitBtn
+              Left = 0
+              Height = 26
+              Hint = 'refresh the files and configurations'
+              Top = 0
+              Width = 28
+              Align = alLeft
+              Layout = blGlyphBottom
+              OnClick = btnRefreshClick
+              Spacing = 0
+              TabOrder = 1
+            end
           end
           object treeInspect: TTreeView
             Left = 4
-            Height = 352
+            Height = 344
             Top = 32
             Width = 387
             Align = alClient
             BorderSpacing.Around = 4
-            DefaultItemHeight = 18
+            DefaultItemHeight = 16
             DragMode = dmAutomatic
             HideSelection = False
             Images = imgList

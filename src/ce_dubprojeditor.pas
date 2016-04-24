@@ -29,6 +29,7 @@ type
     btnAcceptProp: TSpeedButton;
     btnAddProp: TSpeedButton;
     btnDelProp: TSpeedButton;
+    btnRefresh: TBitBtn;
     edProp: TEdit;
     fltEdit: TTreeFilterEdit;
     imgList: TImageList;
@@ -45,6 +46,7 @@ type
     procedure btnAcceptPropClick(Sender: TObject);
     procedure btnAddPropClick(Sender: TObject);
     procedure btnDelPropClick(Sender: TObject);
+    procedure btnRefreshClick(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure propTreeSelectionChanged(Sender: TObject);
     procedure treeInspectDblClick(Sender: TObject);
@@ -147,6 +149,7 @@ begin
   AssignPng(btnAddProp, 'textfield_add');
   AssignPng(btnDelProp, 'textfield_delete');
   AssignPng(btnAcceptProp, 'accept');
+  AssignPng(btnRefresh, 'arrow_update');
 end;
 
 procedure TCEDubProjectEditorWidget.SetVisible(Value: boolean);
@@ -315,11 +318,18 @@ begin
   updateValueEditor;
 end;
 
+procedure TCEDubProjectEditorWidget.btnRefreshClick(Sender: TObject);
+begin
+  if fProj.isNil or not fProj.filename.fileExists then
+      exit;
+  fProj.loadFromFile(fProj.filename);
+end;
+
 procedure TCEDubProjectEditorWidget.MenuItem1Click(Sender: TObject);
 begin
-  if fProj.isNil then exit;
-  fProj.beginModification;
-  fProj.endModification;
+  if fProj.isNil or not fProj.filename.fileExists then
+    exit;
+  fProj.loadFromFile(fProj.filename);
 end;
 
 procedure TCEDubProjectEditorWidget.setJsonValueFromEditor;
