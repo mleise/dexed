@@ -34,11 +34,13 @@ enum ListFmt
     Json
 }
 
+__gshared bool deep;
+
 void main(string[] args)
 {
     // format
     bool asJson;
-    getopt(args, std.getopt.config.passThrough, "j", &asJson);
+    getopt(args, config.passThrough, "j", &asJson, "d", &deep);
 
     // get either the module from stdin or from first arg
     string fname;
@@ -73,8 +75,7 @@ void main(string[] args)
         SymbolListBuilder!(ListFmt.Pas) slb = construct!(SymbolListBuilder!(ListFmt.Pas));
         auto ast = parseModule(getTokensForParser(source, config, &scache), fname,
             &alloc, &slb.astError);
-        foreach (Declaration decl; ast.declarations)
-            slb.visit(decl);
+        slb.visit(ast);
         write(slb.serialize);
         slb.destruct;
     }
@@ -83,8 +84,7 @@ void main(string[] args)
         SymbolListBuilder!(ListFmt.Json) slb = construct!(SymbolListBuilder!(ListFmt.Json));
         auto ast = parseModule(getTokensForParser(source, config, &scache), fname,
             &alloc, &slb.astError);
-        foreach (Declaration decl; ast.declarations)
-            slb.visit(decl);
+        slb.visit(ast);
         write(slb.serialize);
         slb.destruct;
     }
@@ -249,7 +249,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             pasStream.put(format("col = %d\r", dt.name.column));
             pasStream.put(format("name = '%s'\r", dt.name.text));
             pasStream.put(format("symType = %s\r", st));
-            static if (dig)
+            static if (dig) if (deep)
             {
                 pasStream.put("subs = <");
                 dt.accept(this);
@@ -264,7 +264,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             item["col"]  = JSONValue(dt.name.column);
             item["name"] = JSONValue(dt.name.text);
             item["type"] = JSONValue(to!string(st));
-            static if (dig)
+            static if (dig) if (deep)
             {
                 JSONValue subs = parseJSON("[]");
                 JSONValue* old = jarray;

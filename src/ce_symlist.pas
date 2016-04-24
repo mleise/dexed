@@ -84,6 +84,7 @@ type
     fAutoExpandErrors: boolean;
     fSmartExpander: boolean;
     fSortSymbols: boolean;
+    fDeep: boolean;
   published
     property autoRefresh: boolean read fAutoRefresh write fAutoRefresh;
     property refreshOnChange: boolean read fRefreshOnChange write fRefreshOnChange;
@@ -94,6 +95,7 @@ type
     property autoExpandErrors: boolean read fAutoExpandErrors write fAutoExpandErrors;
     property sortSymbols: boolean read fSortSymbols write fSortSymbols;
     property smartExpander: boolean read fSmartExpander write fSmartExpander;
+    property deep: boolean read fDeep write fDeep default true;
   public
     constructor Create(AOwner: TComponent); override;
     procedure Assign(Source: TPersistent); override;
@@ -131,6 +133,7 @@ type
     fAutoRefresh: boolean;
     fRefreshOnChange: boolean;
     fRefreshOnFocus: boolean;
+    fDeep: boolean;
     fShowChildCategories: boolean;
     fSmartFilter: boolean;
     fAutoExpandErrors: boolean;
@@ -256,6 +259,7 @@ end;
 constructor  TCESymbolListOptions.Create(AOwner: TComponent);
 begin
   inherited;
+  fDeep := true;
   fRefreshOnFocus := true;
   fShowChildCategories := true;
   fAutoExpandErrors := true;
@@ -273,6 +277,7 @@ begin
   begin
     widg := TCESymbolListWidget(Source);
     //
+    fDeep                 := widg.fDeep;
     fAutoRefreshDelay     := widg.updaterByDelayDuration;
     fRefreshOnFocus       := widg.fRefreshOnFocus;
     fRefreshOnChange      := widg.fRefreshOnChange;
@@ -303,6 +308,7 @@ begin
     widg.fAutoExpandErrors      := fAutoExpandErrors;
     widg.fSortSymbols           := fSortSymbols;
     widg.fSmartExpander         := fSmartExpander;
+    widg.fDeep                  := fDeep;
     //
     widg.fActAutoRefresh.Checked    := fAutoRefresh;
     widg.fActRefreshOnChange.Checked:= fRefreshOnChange;
@@ -676,6 +682,7 @@ begin
   fToolProc.Executable := fToolExeName;
   fToolProc.OnTerminate := @toolTerminated;
   fToolProc.CurrentDirectory := Application.ExeName.extractFileDir;
+  if fDeep then fToolProc.Parameters.Add('-d');
   fToolProc.Execute;
   str := fDoc.Text;
   fToolProc.Input.Write(str[1], str.length);
