@@ -23,7 +23,7 @@ Usage
 module cesyms;
 
 import std.stdio, std.path, std.file, std.array, std.string;
-import std.getopt, std.json, std.conv;
+import std.getopt, std.json, std.conv, std.format;
 import dparse.lexer, dparse.ast, dparse.parser, dparse.rollback_allocator;
 import std.traits;
 
@@ -161,6 +161,7 @@ enum SymbolType
     _struct,
     _template,
     _union,
+    _unittest,
     _variable,
     _warning
 }
@@ -178,6 +179,8 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
         static JSONValue json;
         static JSONValue* jarray;
     }
+
+    static uint utc;
 
     alias visit = ASTVisitor.visit;
 
@@ -410,6 +413,12 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
     final override void visit(const UnionDeclaration decl)
     {
         namedVisitorImpl!(UnionDeclaration, SymbolType._union)(decl);
+    }
+
+    final override void visit(const Unittest decl)
+    {
+        otherVisitorImpl(decl, SymbolType._unittest, format("test%.4d",utc++),
+            decl.line, decl.column);
     }
 
     final override void visit(const VariableDeclaration decl)

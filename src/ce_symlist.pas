@@ -24,6 +24,7 @@ type
       _struct,
       _template,
       _union,
+      _unittest,
       _variable,
       _warning
   );
@@ -137,7 +138,7 @@ type
     fSmartExpander: boolean;
     ndAlias, ndClass, ndEnum, ndFunc, ndUni: TTreeNode;
     ndImp, ndIntf, ndMix, ndStruct, ndTmp: TTreeNode;
-    ndVar, ndWarn, ndErr: TTreeNode;
+    ndVar, ndWarn, ndErr, ndUt: TTreeNode;
     procedure TreeDblClick(Sender: TObject);
     procedure actRefreshExecute(Sender: TObject);
     procedure actAutoRefreshExecute(Sender: TObject);
@@ -368,9 +369,10 @@ begin
   ndStruct  := Tree.Items[7];
   ndTmp     := Tree.Items[8];
   ndUni     := Tree.Items[9];
-  ndVar     := Tree.Items[10];
-  ndWarn    := Tree.Items[11];
-  ndErr     := Tree.Items[12];
+  ndUt      := Tree.Items[10];
+  ndVar     := Tree.Items[11];
+  ndWarn    := Tree.Items[12];
+  ndErr     := Tree.Items[13];
   //
   png := TPortableNetworkGraphic.Create;
   try
@@ -565,6 +567,7 @@ begin
     ndStruct.Visible:= ndStruct.Count > 0;
     ndTmp.Visible   := ndTmp.Count > 0;
     ndUni.Visible   := ndUni.Count > 0;
+    ndUt.Visible    := ndUt.Count > 0;
     ndVar.Visible   := ndVar.Count > 0;
     ndWarn.Visible  := ndWarn.Count > 0;
     ndErr.Visible   := ndErr.Count > 0;
@@ -580,6 +583,7 @@ begin
     ndStruct.Visible:= true;
     ndTmp.Visible   := true;
     ndUni.Visible   := true;
+    ndUt.Visible    := true;
     ndVar.Visible   := true;
     ndWarn.Visible  := true;
     ndErr.Visible   := true;
@@ -598,6 +602,7 @@ begin
   ndStruct.DeleteChildren;
   ndTmp.DeleteChildren;
   ndUni.DeleteChildren;
+  ndUt.DeleteChildren;
   ndVar.DeleteChildren;
   ndWarn.DeleteChildren;
   ndErr.DeleteChildren;
@@ -697,9 +702,10 @@ function getCatNode(node: TTreeNode; stype: TSymbolType ): TTreeNode;
       _struct   : begin result.ImageIndex:=7; result.SelectedIndex:=7; end;
       _template : begin result.ImageIndex:=8; result.SelectedIndex:=8; end;
       _union    : begin result.ImageIndex:=0; result.SelectedIndex:=0; end;
-      _variable : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
-      _warning  : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
-      _error    : begin result.ImageIndex:=3; result.SelectedIndex:=3; end;
+      _unittest : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
+      _variable : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
+      _warning  : begin result.ImageIndex:=9; result.SelectedIndex:=9; end;
+      _error    : begin result.ImageIndex:=10; result.SelectedIndex:=10; end;
     end;
   end;
   //
@@ -716,6 +722,7 @@ begin
     _struct   : exit(ndStruct);
     _template : exit(ndTmp);
     _union    : exit(ndUni);
+    _unittest : exit(ndUt);
     _variable : exit(ndVar);
     _warning  : exit(ndWarn);
     _error    : exit(ndErr);
@@ -730,6 +737,7 @@ begin
     _struct:    exit(newCat('Struct'));
     _template:  exit(newCat('Template'));
     _union:     exit(newCat('Union'));
+    _unittest:  exit(newCat('Unittest'));
     _variable:  exit(newCat('Variable'));
     _warning:   exit(ndWarn);
     _error:     exit(ndErr);
