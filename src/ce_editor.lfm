@@ -97,16 +97,20 @@ inherited CEEditorWidget: TCEEditorWidget
     object MenuItem7: TMenuItem
       Caption = '-'
     end
-    object mneEdComm: TMenuItem
+    object mnuedComm: TMenuItem
       Caption = 'Comment'
-      OnClick = mneEdCommClick
+      OnClick = mnuedCommClick
     end
-    object mnEdInvAllNone: TMenuItem
+    object mnuedInvAllNone: TMenuItem
       Caption = 'Invert version all none'
-      OnClick = mnEdInvAllNoneClick
+      OnClick = mnuedInvAllNoneClick
     end
     object MenuItem1: TMenuItem
       Caption = '-'
+    end
+    object mnuedRename: TMenuItem
+      Caption = 'Rename identifier'
+      OnClick = mnuedRenameClick
     end
     object mnuedJum2Decl: TMenuItem
       Caption = 'Jump to declaration'

@@ -14,6 +14,7 @@ uses
 
 type
 
+  TIntOpenArray = array of integer;
 
   (**
    * Wrap the dcd-server and dcd-client processes.
@@ -64,6 +65,7 @@ type
     procedure getCallTip(out tips: string);
     procedure getDdocFromCursor(out aComment: string);
     procedure getDeclFromCursor(out aFilename: string; out aPosition: Integer);
+    procedure getLocalSymbolUsageFromCursor(var locs: TIntOpenArray);
     //
     property available: boolean read fAvailable;
   end;
@@ -539,6 +541,40 @@ begin
     loc := ReplaceStr(loc, LineEnding, '');
     aPosition := strToIntDef(loc, -1);
   end;
+end;
+
+procedure TCEDcdWrapper.getLocalSymbolUsageFromCursor(var locs: TIntOpenArray);
+var
+   i: Integer;
+   str: string;
+begin
+  if not fAvailable then exit;
+  if not fServerListening then exit;
+  if fDoc = nil then exit;
+  //
+  terminateClient;
+  //
+  fClient.Parameters.Clear;
+  fClient.Parameters.Add('-u');
+  fClient.Parameters.Add('-c');
+  fClient.Parameters.Add(intToStr(fDoc.SelStart - 1));
+  fClient.Execute;
+  writeSourceToInput;
+  //
+  setLength(locs, 0);
+  fTempLines.LoadFromStream(fClient.Output);
+  if fTempLines.Count < 2 then
+    exit;
+  str := fTempLines[0];
+  // symbol is not in current module, too complex for now
+  if str.length < 6 then
+    exit;
+  if str[1..5] <> 'stdin' then
+    exit;
+  //
+  setLength(locs, fTempLines.count-1);
+  for i:= 1 to fTempLines.count-1 do
+    locs[i-1] := StrToIntDef(fTempLines[i], -1);
 end;
 {$ENDREGION}
 

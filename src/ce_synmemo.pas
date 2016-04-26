@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, controls,lcltype, Forms, graphics, ExtCtrls, crc,
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
-  SynEditMarks, SynEditTypes, SynHighlighterJScript,
+  SynEditMarks, SynEditTypes, SynHighlighterJScript, dialogs,
   ce_common, ce_observer, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang;
 
@@ -195,6 +195,7 @@ type
     procedure save;
     procedure saveTempFile;
     //
+    procedure renameIdentifier;
     procedure invertVersionAllNone;
     procedure showCallTips(findOpenParen: boolean = true);
     procedure hideCallTips;
@@ -245,6 +246,7 @@ const
   ecCurlyBraceClose     = ecUserFirst + 9;
   ecCommentSelection    = ecUserFirst + 10;
   ecSwapVersionAllNone  = ecUserFirst + 11;
+  ecRenameIdentifier    = ecUserFirst + 12;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -732,6 +734,7 @@ begin
     AddKey(ecCurlyBraceClose, 0, [], 0, []);
     AddKey(ecCommentSelection, ord('/'), [ssCtrl], 0, []);
     AddKey(ecSwapVersionAllNone, 0, [], 0, []);
+    AddKey(ecRenameIdentifier, VK_F2, [ssCtrl], 0, []);
   end;
 end;
 
@@ -749,6 +752,7 @@ begin
     'ecCurlyBraceClose':    begin Int := ecCurlyBraceClose; exit(true); end;
     'ecCommentSelection':   begin Int := ecCommentSelection; exit(true); end;
     'ecSwapVersionAllNone': begin Int := ecSwapVersionAllNone; exit(true); end;
+    'ecRenameIdentifier':   begin Int := ecRenameIdentifier; exit(true); end;
     else exit(false);
   end;
 end;
@@ -767,6 +771,7 @@ begin
     ecCurlyBraceClose:    begin Ident := 'ecCurlyBraceClose'; exit(true); end;
     ecCommentSelection:   begin Ident := 'ecCommentSelection'; exit(true); end;
     ecSwapVersionAllNone: begin Ident := 'ecSwapVersionAllNone'; exit(true); end;
+    ecRenameIdentifier:   begin Ident := 'ecRenameIdentifier'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -936,6 +941,8 @@ begin
       commentSelection(self);
     ecSwapVersionAllNone:
       invertVersionAllNone;
+    ecRenameIdentifier:
+      renameIdentifier;
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1003,6 +1010,43 @@ begin
     end;
   end;
   CaretXY := cp;
+end;
+
+procedure TCESynMemo.renameIdentifier;
+var
+  locs: TIntOpenArray = nil;
+  old, idt: string;
+  i, j, loc: integer;
+  c: char;
+begin
+  if not DcdWrapper.available then
+    exit;
+  old := GetWordAtRowCol(LogicalCaretXY);
+  DcdWrapper.getLocalSymbolUsageFromCursor(locs);
+  if length(locs) = 0 then
+  begin
+    dlgOkInfo('Unknown, ambiguous or non-local symbol for "'+ old +'"');
+    exit;
+  end;
+  //
+  idt := 'new identifier for "' + old + '"';
+  idt := InputBox('Local identifier renaming', idt, '');
+  if idt.isEmpty or idt.isBlank then
+    exit;
+  //
+  for i:= high(locs) downto 0 do
+  begin
+    loc := locs[i];
+    if loc = -1 then
+      continue;
+    BeginUndoBlock;
+    SelStart := loc + 1;
+    for j in [0..old.length-1] do
+      ExecuteCommand(ecDeleteChar, '', nil);
+    for c in idt do
+      ExecuteCommand(ecChar, c, nil);
+    EndUndoBlock;
+  end;
 end;
 {$ENDREGION}
 

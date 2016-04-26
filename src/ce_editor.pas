@@ -20,8 +20,9 @@ type
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem5: TMenuItem;
-    mnEdInvAllNone: TMenuItem;
-    mneEdComm: TMenuItem;
+    mnuedRename: TMenuItem;
+    mnuedInvAllNone: TMenuItem;
+    mnuedComm: TMenuItem;
     mnuedPrev: TMenuItem;
     mnuedNext: TMenuItem;
     mnuedCallTip: TMenuItem;
@@ -38,8 +39,9 @@ type
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
     procedure MenuItem5Click(Sender: TObject);
-    procedure mnEdInvAllNoneClick(Sender: TObject);
-    procedure mneEdCommClick(Sender: TObject);
+    procedure mnuedRenameClick(Sender: TObject);
+    procedure mnuedInvAllNoneClick(Sender: TObject);
+    procedure mnuedCommClick(Sender: TObject);
     procedure mnuedPrevClick(Sender: TObject);
     procedure mnuedNextClick(Sender: TObject);
     procedure mnuedCallTipClick(Sender: TObject);
@@ -141,6 +143,7 @@ begin
   AssignPng(mnuedCopy.Bitmap, 'copy');
   AssignPng(mnuedNext.Bitmap, 'go_next');
   AssignPng(mnuedPrev.Bitmap, 'go_previous');
+  AssignPng(mnuedRename.Bitmap, 'pencil');
   //
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
@@ -577,7 +580,7 @@ begin
   fDoc.showCallTips;
 end;
 
-procedure TCEEditorWidget.mneEdCommClick(Sender: TObject);
+procedure TCEEditorWidget.mnuedCommClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecCommentSelection, '', nil);
@@ -595,7 +598,7 @@ begin
     fDoc.CommandProcessor(ecNextLocation, '', nil);
 end;
 
-procedure TCEEditorWidget.mnEdInvAllNoneClick(Sender: TObject);
+procedure TCEEditorWidget.mnuedInvAllNoneClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecSwapVersionAllNone, '', nil);
@@ -617,6 +620,12 @@ begin
   finally
     free;
   end;
+end;
+
+procedure TCEEditorWidget.mnuedRenameClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.CommandProcessor(ecRenameIdentifier, '', nil);
 end;
 
 procedure TCEEditorWidget.mnuedCutClick(Sender: TObject);
