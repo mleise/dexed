@@ -567,8 +567,6 @@ begin
     exit;
   str := fTempLines[0];
   // symbol is not in current module, too complex for now
-  if str.length < 6 then
-    exit;
   if str[1..5] <> 'stdin' then
     exit;
   //
