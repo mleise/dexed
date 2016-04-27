@@ -1482,6 +1482,8 @@ end;
 
 {$REGION user input ------------------------------------------------------------}
 procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
+var
+  line: string;
 begin
   case Key of
     VK_BACK: if fCallTipWin.Visible and (CaretX > 1)
@@ -1489,20 +1491,22 @@ begin
         decCallTipsLvl;
     VK_RETURN:
     begin
+      line := LineText;
       if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically]) then
       case fAutoCloseCurlyBrace of
-        autoCloseOnNewLineAlways: if (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
+        autoCloseOnNewLineAlways: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
         begin
           Key := 0;
           curlyBraceCloseAndIndent(self);
         end;
-        autoCloseOnNewLineEof: if (CaretX > 1) and (LineText[LogicalCaretXY.X - 1] = '{') then
-          if (CaretY = Lines.Count) and (CaretX = LineText.length+1) then
+        autoCloseOnNewLineEof: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
+          if (CaretY = Lines.Count) and (CaretX = line.length+1) then
           begin
             Key := 0;
             curlyBraceCloseAndIndent(self);
           end;
-        autoCloseOnNewLineLexically: if LogicalCaretXY.X - 1 >= lineText.length then
+        autoCloseOnNewLineLexically: if (LogicalCaretXY.X - 1 >= line.length)
+            or isBlank(line[LogicalCaretXY.X .. line.length]) then
         begin
           fLexToks.Clear;
           lex(lines.Text, fLexToks);
