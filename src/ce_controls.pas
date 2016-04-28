@@ -26,8 +26,8 @@ type
     property index: integer read getIndex;
   end;
 
-  TCEPagesOption = (poPageHistory, poBottomHeader);
-  TCEPagesOptions = set of TCEPagesOption;
+  TCEPageControlOption = (poPageHistory, poBottomHeader);
+  TCEPageControlOptions = set of TCEPageControlOption;
 
 const
 
@@ -62,7 +62,7 @@ type
     fOnChanging: TTabChangingEvent;
     fSplitter: TSplitter;
     fOldSplitPos: integer;
-    fOptions: TCEPagesOptions;
+    fOptions: TCEPageControlOptions;
     fOnDragDrop: TDragDropEvent;
     fOnDragOver: TDragOverEvent;
 
@@ -89,7 +89,7 @@ type
 
     procedure setOnDragOver(value: TDragOverEvent);
     procedure setOnDragDrop(value: TDragDropEvent);
-    procedure setPagesOptions(value: TCEPagesOptions);
+    procedure setPagesOptions(value: TCEPageControlOptions);
     procedure setHeaderPosition(bottom: boolean);
 
   public
@@ -118,7 +118,7 @@ type
     property onChanged: TNotifyEvent read fOnChanged write fOnChanged;
     property onChanging: TTabChangingEvent read fOnChanging write fOnChanging;
 
-    property options: TCEPagesOptions read fOptions write setPagesOptions default defPagesOpt;
+    property options: TCEPageControlOptions read fOptions write setPagesOptions default defPagesOpt;
 
     property OnDragOver read fOnDragOver write setOnDragOver;
     property OnDragDrop read fOnDragDrop write setOnDragDrop;
@@ -263,7 +263,7 @@ begin
   fTabs.OnDragDrop:=value;
 end;
 
-procedure TCEPageControl.setPagesOptions(value: TCEPagesOptions);
+procedure TCEPageControl.setPagesOptions(value: TCEPageControlOptions);
 begin
   if fOptions = value then
     exit;
@@ -560,12 +560,12 @@ end;
 procedure TCEPageControl.updateButtonsState;
 begin
   fHeader.DisableAlign;
-  fCloseBtn.Visible:= pbClose in fButtons;
-  fMoveLeftBtn.Visible:= pbMoveLeft in fButtons;
-  fCloseBtn.Visible:= pbMoveRight in fButtons;
-  fAddBtn.Visible:= pbAdd in fButtons;
-  fSplitBtn.Visible:= pbSplit in fButtons;
-  fSplitBtn.Enabled:= fPages.Count > 0;
+  fMoveLeftBtn.Visible := pbMoveLeft in fButtons;
+  fMoveRightBtn.Visible := pbMoveRight in fButtons;
+  fAddBtn.Visible := pbAdd in fButtons;
+  fCloseBtn.Visible := pbClose in fButtons;
+  fSplitBtn.Visible := pbSplit in fButtons;
+  fSplitBtn.Enabled := fPages.Count > 0;
   fHeader.EnableAlign;
   fCloseBtn.Enabled := fPageIndex <> -1;
   fMoveLeftBtn.Enabled := fPageIndex > 0;

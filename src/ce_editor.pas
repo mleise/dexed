@@ -9,11 +9,31 @@ uses
   ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder, dialogs,
   SynPluginSyncroEdit, SynEdit, SynHighlighterMulti, ce_dialogs,
   ce_widget, ce_interfaces, ce_synmemo, ce_dlang, ce_common, ce_dcd, ce_observer,
-  ce_sharedres, ce_controls;
+  ce_sharedres, ce_controls, ce_writableComponent;
 
 type
 
-  { TCEEditorWidget }
+  TCEEditorWidget = class;
+
+  TCEPagesOptions = class(TWritableLfmTextComponent, ICEEditableOptions)
+  private
+    fEditorWidget: TCEEditorWidget;
+    fPageButtons: TCEPageControlButtons;
+    fPageOptions: TCEPageControlOptions;
+    function optionedWantCategory(): string;
+    function optionedWantEditorKind: TOptionEditorKind;
+    function optionedWantContainer: TPersistent;
+    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    function optionedOptionsModified: boolean;
+  published
+    property pageButtons: TCEPageControlButtons read fPageButtons write fPageButtons;
+    property pageOptions: TCEPageControlOptions read fPageOptions write fPageOptions;
+  public
+    procedure Assign(Source: TPersistent); override;
+    procedure AssignTo(Target: TPersistent); override;
+    constructor construct(editorWidg: TCEEditorWidget);
+    destructor Destroy; override;
+  end;
 
   TCEEditorWidget = class(TCEWidget, ICEMultiDocObserver, ICEMultiDocHandler, ICEProjectObserver)
     MenuItem1: TMenuItem;
@@ -59,6 +79,7 @@ type
     procedure updateDelayed; override;
     procedure updateImperative; override;
   private
+    fOptions: TCEPagesOptions;
     pageControl: TCEPageControl;
     fKeyChanged: boolean;
     fDoc: TCESynMemo;
@@ -111,6 +132,82 @@ implementation
 
 uses
   ce_lcldragdrop;
+const
+  optname = 'editorpages.txt';
+
+{$REGION TCEPagesOptions -------------------------------------------------------}
+constructor TCEPagesOptions.construct(editorWidg: TCEEditorWidget);
+var
+  fname: string;
+begin
+  fEditorWidget := editorWidg;
+  inherited create(editorWidg);
+  EntitiesConnector.addObserver(self);
+  //
+  fname := getCoeditDocPath + optname;
+  if fname.fileExists then
+  begin
+    loadFromFile(fname);
+    assignTo(fEditorWidget);
+  end
+  else Assign(fEditorWidget);
+end;
+
+destructor TCEPagesOptions.Destroy;
+begin
+  saveToFile(getCoeditDocPath + optname);
+  EntitiesConnector.removeObserver(self);
+  inherited;
+end;
+
+procedure TCEPagesOptions.Assign(Source: TPersistent);
+begin
+  if Source = fEditorWidget then
+  begin
+    fPageButtons := fEditorWidget.pageControl.buttons;
+    fPageOptions := fEditorWidget.pageControl.options;
+  end
+  else inherited;
+end;
+
+procedure TCEPagesOptions.AssignTo(Target: TPersistent);
+begin
+  if Target = fEditorWidget then
+  begin
+    fEditorWidget.pageControl.buttons := fPageButtons;
+    fEditorWidget.pageControl.options := fPageOptions;
+  end
+  else inherited;
+end;
+
+function TCEPagesOptions.optionedWantCategory(): string;
+begin
+  exit('Editor pages')
+end;
+
+function TCEPagesOptions.optionedWantEditorKind: TOptionEditorKind;
+begin
+  exit(oekGeneric);
+end;
+
+function TCEPagesOptions.optionedWantContainer: TPersistent;
+begin
+  exit(self);
+end;
+
+procedure TCEPagesOptions.optionedEvent(anEvent: TOptionEditorEvent);
+begin
+  case anEvent of
+    oeeAccept: assignTo(fEditorWidget);
+    oeeCancel: Assign(fEditorWidget);
+  end;
+end;
+
+function TCEPagesOptions.optionedOptionsModified: boolean;
+begin
+  exit(false);
+end;
+{$ENDREGION}
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEEditorWidget.create(aOwner: TComponent);
@@ -147,6 +244,8 @@ begin
   //
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
+  //
+  fOptions:= TCEPagesOptions.construct(self);
 end;
 
 destructor TCEEditorWidget.destroy;
@@ -159,6 +258,7 @@ begin
       if (PageControl.Pages[i].Controls[0] is TCESynMemo) then
         PageControl.Pages[i].Controls[0].Free;
   fTokList.Free;
+  fOptions.Free;
   inherited;
 end;
 
