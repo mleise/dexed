@@ -2232,9 +2232,7 @@ begin
   lst := TStringList.Create;
   try
     prc.Executable:=pth;
-    {$IFDEF WINDOWS}
     prc.Options := [poUsePipes, poStderrToOutPut {$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
-    {$ENDIF}
     prc.ShowWindow:= swoHIDE;
     prc.Parameters.Add(fDoc.fileName);
     prc.Parameters.Add('-S');
