@@ -16,6 +16,7 @@ Coedit is an IDE for the D programming language [D2](http://dlang.org).
 - single click to compile and execute an unsaved module (aka a _runnable module_).
 - single click to compile and _unittest_ a module.
 - advanced editor with D2 syntax highlighter, folds, regions, identifier markup, macros, sync-edit, etc.
+- edition helpers: comment blocks, local identifier renaming, brace auto-closing.
 - list of the symbols in the module being edited.
 - static libraries manager that supports auto-registration from local DUB projects, from online DUB packages or from Coedit custom project format.
 - _todo comments_ parser and dedicated widget.
@@ -26,20 +27,20 @@ Coedit is an IDE for the D programming language [D2](http://dlang.org).
 
 **Project information**
 ---
-- latest release: version 2, update 4, Wed Apr 20 2016.
+- latest release: version 2, update 5, Fri Apr 29 2016.
 - licensed under the term of the MIT license.
 
 **Download the latest build**
 ---
 Download the zipped binaries or the zipped setup program for you platform:
 
-- :package: [setup program for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/2_update_4/coedit.2update4.linux32.setup.zip)
-- :package: [binaries for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/2_update_4/coedit.2update4.linux32.zip)
-- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_4/coedit.2update4.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_4/coedit.2update4.linux64.zip)
-- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_4/coedit.2update4.win32.setup.zip)
-- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_4/coedit.2update4.win32.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_4/coedit-2-update4.x86_64.rpm)
+- :package: [setup program for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/2_update_5/coedit.2update5.linux32.setup.zip)
+- :package: [binaries for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/2_update_5/coedit.2update5.linux32.zip)
+- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_5/coedit.2update5.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_5/coedit.2update5.linux64.zip)
+- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_5/coedit.2update5.win32.setup.zip)
+- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_5/coedit.2update5.win32.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/2_update_5/coedit-2-update5.x86_64.rpm)
 
 [**See the wiki**](https://github.com/BBasile/Coedit/wiki#detailed-setup-procedure) for more information about the setup. 
 
