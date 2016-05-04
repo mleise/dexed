@@ -1015,12 +1015,15 @@ end;
 procedure TCESynMemo.renameIdentifier;
 var
   locs: TIntOpenArray = nil;
-  old, idt: string;
+  old, idt, line: string;
   i, j, loc: integer;
   c: char;
 begin
   if not DcdWrapper.available then
     exit;
+  line := lineText;
+  if (CaretX = 1) or not (line[LogicalCaretXY.X] in IdentChars) or
+    not (line[LogicalCaretXY.X-1] in IdentChars)  then exit;
   old := GetWordAtRowCol(LogicalCaretXY);
   DcdWrapper.getLocalSymbolUsageFromCursor(locs);
   if length(locs) = 0 then
