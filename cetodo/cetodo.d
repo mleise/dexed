@@ -172,11 +172,42 @@ void main(string[] args)
     write(lfmApp.data);
 }
 
+// comments may include some "'", which in Pascal are string delim
+string patchPasStringLitteral(string str) @safe
+{
+    Appender!string app;
+    app.reserve(str.length);
+    bool skip;
+    foreach (immutable i; 0..str.length)
+    {
+        char c = str[i];
+        if (c > 0x7F)
+        {
+            app ~= str[i];
+            skip = true;
+        }
+        else if (c == '\'')
+        {
+            if (skip)
+                app ~= str[i];
+            else
+                app ~= "'#39'";
+            skip = false;
+        }
+        else
+        {
+            app ~= str[i];
+            skip = false;
+        }
+    }
+    return app.data;
+}
+
 /// Try to transforms a Token into a a TODO item
 @safe private void token2TodoItem(const(Token) atok, string fname, ref TodoItems todoItems)
 {
     if (atok.type != (tok!"comment")) return;
-    string text = atok.text.strip;
+    string text = atok.text.strip.patchPasStringLitteral;
     string identifier;
 
     // always comment
@@ -268,7 +299,7 @@ void main(string[] args)
 // fixme-p8: èuèuuè``u`èuùè é ^çßßðđææ«€¶ 
 // fixme-p8: fixme also handled
 // TODO-cINVALID_because_no_content:
-////TODO:set this property as const() to set it read only.
+/// TODO:set this property as const() to set it read only.
 // TODO-cfeature-sDone:save this property in the inifile.
 // TODO-cannnotations-p8: annotates the member of the module as @safe and if possible nothrow.
 // TODO-cfeature-sDone: save this property in the inifile.
@@ -280,4 +311,5 @@ void main(string[] args)
 */
 /++ TODO-cx:a mqkjfmksmldkf
 +/
+// TODO: it's fixed or it's not (issue #40) [çéèà]
 
