@@ -956,7 +956,7 @@ var
   i: integer;
   c: char;
   tok, tok1, tok2: PLexToken;
-  pt, cp, st, nd: TPoint;
+  cp, st, nd: TPoint;
   sel: boolean;
 begin
   fLexToks.Clear;
@@ -990,10 +990,9 @@ begin
     if  ((tok1^.kind = ltkKeyword) and (tok1^.data = 'version')
       and (tok2^.kind = ltkSymbol) and (tok2^.data = '(')) then
     begin
-      pt := tok^.position;
-      pt.X += 1;
       BeginUndoBlock;
-      ExecuteCommand(ecGotoXY, '', @pt);
+      LogicalCaretXY := tok^.position;
+      CaretX:=CaretX+1;
       case tok^.Data of
         'all':
         begin
