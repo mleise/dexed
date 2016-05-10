@@ -33,6 +33,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Images = imgList
         MultiSelect = True
         ParentFont = False
+        ParentShowHint = False
         ReadOnly = True
         ShowLines = False
         ShowRoot = False
