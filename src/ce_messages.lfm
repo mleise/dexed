@@ -35,12 +35,14 @@ inherited CEMessagesWidget: TCEMessagesWidget
         ParentFont = False
         ParentShowHint = False
         ReadOnly = True
+        ShowHint = True
         ShowLines = False
         ShowRoot = False
         TabOrder = 0
+        ToolTips = False
         OnCustomDrawItem = ListCustomDrawItem
         OnKeyDown = ListKeyDown
-        Options = [tvoAllowMultiselect, tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoToolTips, tvoThemedDraw]
+        Options = [tvoAllowMultiselect, tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoThemedDraw]
       end
       object selCtxt: TToolBar[1]
         Left = 2
