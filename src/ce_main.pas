@@ -217,6 +217,7 @@ type
     fRunnableDestination: string;
     fSymStringExpander: ICESymStringExpander;
     fCovModUt: boolean;
+    fDscanUnittests: boolean;
     fAlwaysUseDest: boolean;
     fDoc: TCESynMemo;
     fFirstTimeCoedit: boolean;
@@ -403,6 +404,7 @@ type
     fDcdPort: word;
     fRunnableDest: TCEPathname;
     fAlwaysUseDest: boolean;
+    fDscanUnittests: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
@@ -421,6 +423,7 @@ type
     property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
     property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination;
     property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest;
+    property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
@@ -457,6 +460,7 @@ begin
   inherited;
   fBackup := TCEApplicationOptionsBase.Create(self);
   EntitiesConnector.addObserver(self);
+  fDscanUnittests := true;
 end;
 
 function TCEApplicationOptionsBase.getDubCompiler: TCECompiler;
@@ -528,6 +532,7 @@ begin
     fCovModUt:= CEMainForm.fCovModUt;
     fRunnableDest := CEMainForm.fRunnableDestination;
     fAlwaysUseDest := CEMainForm.fAlwaysUseDest;
+    fDscanUnittests := CEMainForm.fDscanUnittests;
   end else if src = fBackup then
   begin
     fCovModUt:=fBackup.fCovModUt;
@@ -538,6 +543,7 @@ begin
     fFloatingWidgetOnTop := fBackup.fFloatingWidgetOnTop;
     CEMainForm.fRunnableDestination := fBackup.fRunnableDest;
     CEmainForm.fAlwaysUseDest := fBackup.fAlwaysUseDest;
+    CEMainForm.fDscanUnittests := fDscanUnittests;
   end
   else inherited;
 end;
@@ -552,6 +558,7 @@ begin
     CEMainForm.updateFloatingWidgetOnTop(fFloatingWidgetOnTop);
     CEMainForm.fRunnableDestination := fRunnableDest;
     CEMainForm.fAlwaysUseDest := fAlwaysUseDest;
+    CEMainForm.fDscanUnittests := fDscanUnittests;
     DcdWrapper.port:=fDcdPort;
   end else if dst = fBackup then
   begin
@@ -563,6 +570,7 @@ begin
     fBackup.fCovModUt:=fCovModUt;
     fBackup.fRunnableDest:= fRunnableDest;
     fBackup.fAlwaysUseDest := fAlwaysUseDest;
+    fBackup.fDscanUnittests:= fDscanUnittests;
   end
   else inherited;
 end;
@@ -2236,6 +2244,8 @@ begin
     prc.ShowWindow:= swoHIDE;
     prc.Parameters.Add(fDoc.fileName);
     prc.Parameters.Add('-S');
+    if not fDscanUnittests then
+      prc.Parameters.Add('--skipTests');
     prc.Execute;
     processOutputToStrings(prc, lst);
     for msg in lst do
