@@ -692,6 +692,7 @@ begin
     end;
     if dig(node) then break;
   end;
+  fLastListOrTree := Tree;
   showWidget;
 end;
 {$ENDREGION}
