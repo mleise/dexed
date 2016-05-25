@@ -1032,7 +1032,7 @@ begin
   end;
   //
   idt := 'new identifier for "' + old + '"';
-  idt := InputBox('Local identifier renaming', idt, '');
+  idt := InputBox('Local identifier renaming', idt, old);
   if idt.isEmpty or idt.isBlank then
     exit;
   //
