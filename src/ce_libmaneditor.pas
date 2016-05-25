@@ -99,7 +99,7 @@ begin
   AssignPng(btnSelfoldOfFiles, 'bricks');
   AssignPng(btnSelRoot, 'folder_add');
   AssignPng(btnReg, 'book_link');
-  AssignPng(btnDubFetch, 'dub_small');
+  AssignPng(btnDubFetch, 'dub');
   AssignPng(btnSelProj, 'script_bricks');
   AssignPng(btnOpenProj, 'book_open');
   AssignPng(btnEnabled, 'book');
