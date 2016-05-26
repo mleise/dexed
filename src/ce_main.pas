@@ -40,6 +40,7 @@ type
     actFileCompile: TAction;
     actFileRun: TAction;
     actFileDscanner: TAction;
+    actFileRunOut: TAction;
     actProjNewDubJson: TAction;
     actProjNewNative: TAction;
     actSetRunnableSw: TAction;
@@ -142,6 +143,8 @@ type
     MenuItem76: TMenuItem;
     MenuItem77: TMenuItem;
     MenuItem78: TMenuItem;
+    MenuItem79: TMenuItem;
+    MenuItem80: TMenuItem;
     mnuLayout: TMenuItem;
     mnuItemMruFile: TMenuItem;
     mnuItemMruProj: TMenuItem;
@@ -155,6 +158,7 @@ type
     procedure actFileCompileExecute(Sender: TObject);
     procedure actFileDscannerExecute(Sender: TObject);
     procedure actFileRunExecute(Sender: TObject);
+    procedure actFileRunOutExecute(Sender: TObject);
     procedure actFileSaveCopyAsExecute(Sender: TObject);
     procedure actProjNewDubJsonExecute(Sender: TObject);
     procedure actProjNewNativeExecute(Sender: TObject);
@@ -310,6 +314,7 @@ type
     function  compileRunnable(unittest: boolean = false): boolean;
     procedure executeRunnable(unittest: boolean = false; redirect: boolean = true;
       const runArgs: string = '');
+    procedure runFile(outside: boolean);
 
     // file sub routines
     procedure newFile;
@@ -2256,7 +2261,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actFileRunExecute(Sender: TObject);
+procedure TCEMainForm.runFile(outside: boolean);
 var
   fname: string;
   older: boolean = false;
@@ -2282,7 +2287,17 @@ begin
       exit;
   end;
   if fname.fileExists then
-    executeRunnable(false, true);
+    executeRunnable(false, not outside);
+end;
+
+procedure TCEMainForm.actFileRunExecute(Sender: TObject);
+begin
+  runFile(false);
+end;
+
+procedure TCEMainForm.actFileRunOutExecute(Sender: TObject);
+begin
+  runFile(true);
 end;
 
 procedure TCEMainForm.actFileOpenContFoldExecute(Sender: TObject);

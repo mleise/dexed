@@ -2107,6 +2107,9 @@ object CEMainForm: TCEMainForm
           07FFB47A07FFB47A08FFB57C0AFFB67F0FFFB88114FFBA851B23
         }
       end
+      object MenuItem79: TMenuItem
+        Action = actFileRunOut
+      end
       object MenuItem63: TMenuItem
         Action = actFileUnittest
         Bitmap.Data = {
@@ -3632,6 +3635,9 @@ object CEMainForm: TCEMainForm
           07FFB47A07FFB47A08FFB57C0AFFB67F0FFFB88114FFBA851B23
         }
       end
+      object MenuItem80: TMenuItem
+        Action = actFileRunOut
+      end
       object MenuItem64: TMenuItem
         Action = actFileUnittest
         Bitmap.Data = {
@@ -4240,6 +4246,13 @@ object CEMainForm: TCEMainForm
       Caption = 'Run compiled file'
       ImageIndex = 22
       OnExecute = actFileRunExecute
+      OnUpdate = updateDocumentBasedAction
+    end
+    object actFileRunOut: TAction
+      Category = 'File'
+      Caption = 'Run compiled file outside'
+      ImageIndex = 22
+      OnExecute = actFileRunOutExecute
       OnUpdate = updateDocumentBasedAction
     end
     object actFileUnittest: TAction
