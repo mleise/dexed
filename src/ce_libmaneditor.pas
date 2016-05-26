@@ -297,6 +297,7 @@ var
   nme: string = '';
   msg: string;
   pth: string;
+  dfn: string;
   str: TStringList;
   itf: ICEMessagesDisplay;
   err: integer;
@@ -363,6 +364,26 @@ begin
     exit;
   end;
 
+  // get the description
+  if FileExists(pth + DirectorySeparator + 'dub.json') then
+    dfn := pth + DirectorySeparator + 'dub.json'
+  else if FileExists(pth + DirectorySeparator + 'package.json') then
+    dfn := pth + DirectorySeparator + 'package.json'
+  else if FileExists(pth + DirectorySeparator + nme + DirectorySeparator + 'dub.json') then
+    dfn := pth + DirectorySeparator + nme + DirectorySeparator + 'dub.json'
+  else if FileExists(pth + DirectorySeparator + nme + DirectorySeparator + 'package.json') then
+    dfn := pth + DirectorySeparator + nme + DirectorySeparator + 'package.json'
+  else
+    dfn := '';
+
+  if not dfn.fileExists or dfn.isEmpty then
+  begin
+    itf.message('error, the DUB description is not found or it has not the JSON format',
+      nil, amcMisc, amkErr);
+    exit;
+  end;
+  pth := dfn.extractFileDir;
+
   // build
   dub := TProcess.Create(nil);
   try
@@ -393,10 +414,7 @@ begin
     EntitiesConnector.beginUpdate;
     prj := TCEDubProject.create(nil);
     try
-      if FileExists(pth + DirectorySeparator + 'dub.json') then
-        prj.loadFromFile(pth + DirectorySeparator + 'dub.json')
-      else if FileExists(pth + DirectorySeparator + 'package.json') then
-        prj.loadFromFile(pth + DirectorySeparator + 'package.json');
+      prj.loadFromFile(dfn);
       if prj.json.isNotNil and TJSONObject(prj.json).Find('targetType').isNotNil
         and (TJSONObject(prj.json).Find('targetType').AsString = 'sourceLibrary')
       then
@@ -431,10 +449,7 @@ begin
   EntitiesConnector.beginUpdate;
   prj := TCEDubProject.create(nil);
   try
-    if FileExists(pth + DirectorySeparator + 'dub.json') then
-      prj.loadFromFile(pth + DirectorySeparator + 'dub.json')
-    else if FileExists(pth + DirectorySeparator + 'package.json') then
-      prj.loadFromFile(pth + DirectorySeparator + 'package.json');
+    prj.loadFromFile(dfn);
     if prj.filename.isNotEmpty and (prj.binaryKind = staticlib) then
     begin
       if ovw then
