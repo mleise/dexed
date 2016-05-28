@@ -5,9 +5,10 @@ unit ce_main;
 interface
 
 uses
-  Classes, SysUtils, LazFileUtils, SynEditKeyCmds, SynHighlighterLFM, Forms, StdCtrls,
-  AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls, Graphics, strutils,
-  Dialogs, Menus, ActnList, ExtCtrls, process, XMLPropStorage, SynExportHTML,
+  Classes, SysUtils, LazFileUtils, SynEditKeyCmds, SynHighlighterLFM, Forms,
+  StdCtrls, AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls,
+  Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
+  XMLPropStorage, SynExportHTML,
   ce_common, ce_dmdwrap, ce_nativeproject, ce_synmemo, ce_writableComponent,
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
@@ -17,6 +18,11 @@ uses
 type
 
   TCEApplicationOptions = class;
+
+  TAnchorDockSplitterEx = class(TAnchorDockSplitter)
+  public
+    property OnMouseWheel;
+  end;
 
   { TCEMainForm }
   TCEMainForm = class(TForm, ICEMultiDocObserver, ICEEditableShortCut, ICEProjectObserver)
@@ -338,6 +344,8 @@ type
     procedure mruClearClick(Sender: TObject);
 
     // layout
+    procedure setSplitterWheelEvent;
+    procedure DockSplitterMw(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure LockTopWindow(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
     procedure layoutMnuItemClick(sender: TObject);
     procedure layoutLoadFromFile(const aFilename: string);
@@ -956,6 +964,46 @@ begin
   accept := GetKeyShiftState = [ssCtrl];
 end;
 
+procedure TCEMainForm.DockSplitterMw(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+var
+  offs: integer;
+  splt: TAnchorDockSplitter;
+begin
+  offs := -480 div WheelDelta;
+  splt := TAnchorDockSplitter(sender);
+  splt.MoveSplitter(offs);
+  if splt.ResizeAnchor in [akLeft, akRight] then
+    Mouse.CursorPos:= Point(Mouse.CursorPos.X + offs, Mouse.CursorPos.Y)
+  else
+    Mouse.CursorPos:= Point(Mouse.CursorPos.X, Mouse.CursorPos.Y + offs);
+  Handled := true;
+end;
+
+//TODO-cdocking: set splitter MW event when a new widget is docked
+procedure TCEMainForm.setSplitterWheelEvent;
+var
+  i: integer;
+  widg: TCEWidget;
+  site: TControl;
+  anchl: TAnchorKind;
+begin
+  for i := 0 to fWidgList.Count-1 do
+  begin
+    widg := fWidgList.widget[i];
+    if not widg.isDockable then continue;
+    for anchl in [low(anchl) .. high(anchl)] do
+      if GetDockSplitterOrParent(DockMaster.GetSite(widg), anchl, site) then
+      begin
+        if site is TAnchorDockHostSite then
+        begin
+          if TAnchorDockHostSite(site).BoundSplitter.isNotNil then
+            TAnchorDockSplitterEx(TAnchorDockHostSite(site).BoundSplitter).OnMouseWheel:=@DockSplitterMw;
+        end else if site is TAnchorDockSplitter then
+          TAnchorDockSplitterEx(TAnchorDockSplitter(site)).OnMouseWheel:=@DockSplitterMw;
+      end;
+  end;
+end;
+
 procedure TCEMainForm.InitDocking;
 var
   i: Integer;
@@ -1240,6 +1288,7 @@ begin
 
     fFirstShown := true;
   end;
+  setSplitterWheelEvent;
 end;
 
 procedure TCEMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
