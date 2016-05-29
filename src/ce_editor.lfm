@@ -98,8 +98,12 @@ inherited CEEditorWidget: TCEEditorWidget
       Caption = '-'
     end
     object mnuedComm: TMenuItem
-      Caption = 'Comment'
+      Caption = 'Comment selected lines'
       OnClick = mnuedCommClick
+    end
+    object MenuItem6: TMenuItem
+      Caption = 'Comment identifier'
+      OnClick = MenuItem6Click
     end
     object mnuedInvAllNone: TMenuItem
       Caption = 'Invert version all none'

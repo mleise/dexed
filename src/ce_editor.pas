@@ -35,11 +35,14 @@ type
     destructor Destroy; override;
   end;
 
+  { TCEEditorWidget }
+
   TCEEditorWidget = class(TCEWidget, ICEMultiDocObserver, ICEMultiDocHandler, ICEProjectObserver)
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem5: TMenuItem;
+    MenuItem6: TMenuItem;
     mnuedRename: TMenuItem;
     mnuedInvAllNone: TMenuItem;
     mnuedComm: TMenuItem;
@@ -59,6 +62,7 @@ type
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
     procedure MenuItem5Click(Sender: TObject);
+    procedure MenuItem6Click(Sender: TObject);
     procedure mnuedRenameClick(Sender: TObject);
     procedure mnuedInvAllNoneClick(Sender: TObject);
     procedure mnuedCommClick(Sender: TObject);
@@ -720,6 +724,12 @@ begin
   finally
     free;
   end;
+end;
+
+procedure TCEEditorWidget.MenuItem6Click(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.CommandProcessor(ecCommentIdentifier, '', nil);
 end;
 
 procedure TCEEditorWidget.mnuedRenameClick(Sender: TObject);
