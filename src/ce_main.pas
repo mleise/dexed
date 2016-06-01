@@ -224,6 +224,7 @@ type
 
   private
 
+    fRunnableCompiler: TCECompiler;
     fRunnableDestination: string;
     fSymStringExpander: ICESymStringExpander;
     fCovModUt: boolean;
@@ -421,8 +422,10 @@ type
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
-    function getNativeProjecCompiler: TCECompiler;
     procedure setDubCompiler(value: TCECompiler);
+    function getRunnableCompiler: TCECompiler;
+    procedure setRunnableCompiler(value: TCECompiler);
+    function getNativeProjecCompiler: TCECompiler;
     procedure setNativeProjecCompiler(value: TCECompiler);
     procedure setRunnableDestination(const value: TCEPathname);
   published
@@ -434,6 +437,7 @@ type
     property maxRecentDocuments: integer read fMaxRecentDocs write fMaxRecentDocs;
     property dubCompiler: TCECompiler read getDubCompiler write setDubCompiler;
     property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
+    property runnableCompiler: TCECompiler read getRunnableCompiler write setRunnableCompiler;
     property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination;
     property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest;
     property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
@@ -494,6 +498,22 @@ end;
 procedure TCEApplicationOptionsBase.setNativeProjecCompiler(value: TCECompiler);
 begin
   ce_nativeproject.setNativeProjectCompiler(value);
+end;
+
+function TCEApplicationOptionsBase.getRunnableCompiler: TCECompiler;
+begin
+  exit(CEMainForm.fRunnableCompiler);
+end;
+
+procedure TCEApplicationOptionsBase.setRunnableCompiler(value: TCECompiler);
+begin
+  case value of
+    ldc: if not exeInSysPath('ldmd2' + exeExt) then
+      value := dmd;
+    gdc: if not exeInSysPath('gdmd' + exeExt) then
+      value := dmd;
+  end;
+  CEMainForm.fRunnableCompiler:=value;
 end;
 
 procedure TCEApplicationOptionsBase.setRunnableDestination(const value: TCEPathname);
@@ -2106,7 +2126,11 @@ begin
   	dmdproc.OnReadData := @asyncprocOutput;
   	dmdproc.OnTerminate:= @asyncprocTerminate;
     dmdproc.Options := [poUsePipes, poStderrToOutPut];
-    dmdproc.Executable := 'dmd';
+    case fRunnableCompiler of
+      dmd: dmdProc.Executable:='dmd' + exeExt;
+      ldc: dmdProc.Executable:='ldmd2' + exeExt;
+      gdc: dmdProc.Executable:='gdmd' + exeExt;
+    end;
     dmdproc.Parameters.Add(fDoc.fileName);
     if not asObj then
       dmdproc.Parameters.Add('-of' + fname + exeExt)
