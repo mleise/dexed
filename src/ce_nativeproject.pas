@@ -976,7 +976,7 @@ var
 begin
   str := TStringList.Create;
   try
-    str.Add('dmd' + exeExt);
+    str.Add(NativeProjectCompilerFilename.extractFileName);
     getOpts(str);
     result := str.Text;
   finally
