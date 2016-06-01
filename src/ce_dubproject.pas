@@ -95,12 +95,11 @@ type
   function getDubCompiler: TCECompiler;
   procedure setDubCompiler(value: TCECompiler);
 
-implementation
-
 var
-
   DubCompiler: TCECompiler = dmd;
   DubCompilerFilename: string = 'dmd';
+
+implementation
 
 const
 

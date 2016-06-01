@@ -393,6 +393,7 @@ begin
     dub.Parameters.Add('build');
     dub.Parameters.Add('--build=release');
     dub.Parameters.Add('--force');
+    dub.Parameters.Add('--compiler=' + DubCompilerFilename);
     dub.CurrentDirectory:= pth;
     dub.Execute;
     while dub.Running do sleep(10);
