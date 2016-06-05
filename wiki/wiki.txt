@@ -55,6 +55,7 @@ The latest Coedit version requires at least DMD 2.066.
 	* note that the option `--nodcd` can be typed to skip the installation of the completion daemon.
 	* Linux, all users, in a console `cd` to the file location and type `sudo .\coedit.<version>.<platform>.setup`.
 	* Linux, only you, in a console `cd` to the file location and type: `.\coedit.<version>.<platform>.setup`.
+	* Windows, optional, it may be necessary to deactivate your anti-virus software. Norton AV has been reported for detecting a potential threat in his heuristic module and Avast AV not to allow the setup at all.
 	* Windows: double click, and confirm in the UAC dialog box.
 * To uninstall, run the same program but with the `-u` option.
 	* Linux: if coedit has been setup with `sudo` you must also uninstall with elevated privileges: `sudo .\coedit.<version>.<platform>.setup -u`.
@@ -64,7 +65,7 @@ The latest Coedit version requires at least DMD 2.066.
 Note for the future versions:
 * Updating doesn't require to uninstall.
 * it's possible to uninstall from a newer setup program.
-* always use the same privileges to uninstall or update as previously.
+* always use the same privileges to uninstall or update as used previously.
 
 ## Binaries
  
@@ -91,15 +92,9 @@ Download and setup the tools:
 * [Download](http://lazarus.freepascal.org/index.php?page=downloads) and setup the latest Lazarus version (1.6) and  FPC + FPC sources (3.0.0) for your platform.
 	* Windows: the three packages are bundled in an installer. Even on Windows 64 bit, the 32 version must be setup.
 	* Linux: the three packages must be downloaded and setup individually. It's recommended to download the packages from _SourceForge_ and not from the official repository of the distribution because they don't always propose the latest version.
-
-* [Clone](https://github.com/BBasile/Coedit.git) Coedit git repository. There are two ways to do it (console or a git GUI).
-If you've never used Git at all, you can try [Source-Tree](http://www.sourcetreeapp.com/), a freeware Git/Mercurial GUI that is distributed with a Git copy.
-
-When using a console:
-
 * `cd <user dir where to clone>`
 * `git clone https://github.com/BBasile/Coedit.git`
-* `git submodule update --init --recursive`
+* `git submodule update --init --recursive`, to clone _libdparse_, which is used by the background tools.
 
 You're now ready to build Coedit. This can be done in the IDE or using the _lazbuild_ utility.
 
@@ -301,6 +296,8 @@ The **D Completion Daemon** (DCD) is used for the completion, the function call 
 _DCD_ is a third part software, it's bundled in the archives distributed for each new [release](https://github.com/BBasile/Coedit/releases).
 However, _DCD_ may have to be build manually, for example if a new version is released while _Coedit_ development is paused for a while.
 Visit the product [homepage](https://github.com/Hackerpilot/DCD) for more information.
+Note that since version 2 update 5, Coedit uses an experimental features that's not merged in the official repository.
+If you wish to test it you must build [this clone](https://github.com/BBasile/DCD/tree/reboot-localusage), after checking out the right feature branch.
  
 Once DCD build or extracted from the release archive, copy the two programs (_dcd-client_ and _dcd-server_) to the folder where the Coedit executable stands.
 They can be put elsewhere, as long as the target directory is a known operating system PATH.
@@ -322,6 +319,7 @@ _DCD_ also has its own configuration system. Refer to the official [_Readme_](ht
 - <kbd>(</kbd>: Gets the function call tips. When functions calls are nested, call tips are stacked and separated by a group of hyphen.
 - <kbd>)</kbd>: If the call tips are displayed then decreases by one the stack of call tips.
 - <kbd>ESC</kbd>: Closes the call tips window, whatever is the level of the stack.
+- <kbd>CTRL</kbd> + <kbd>F2</kbd>: Renames the identifier for the symbol located at the cursor position. This works only if the symbol is declared in this module.
  
 Documentation comments associated to a symbol are displayed when the cursor motion stops over a symbol.
 
@@ -531,7 +529,9 @@ _Find all_ results are displayed in the [messages widget][lnk_widg_msg], with a 
 
 The scope of _Find all_ can be set, either to the current editor or to the whole project, by clicking the icon at the right.
 
-Note that to find the declaration of a symbol, <kbd>Ctrl</kbd> + <kbd>MB Left</kbd> or the [symbol list][lnk_widg_symlist] are faster.
+Notes:
+- To find the declaration of a symbol, <kbd>Ctrl</kbd> + <kbd>MB Left</kbd> or the [symbol list][lnk_widg_symlist] are faster.
+- To rename a variable or a type, local identifier renaming (<kbd>Ctrl</kbd> + <kbd>F2</kbd>) can be more accurate than _Replace all_ since this uses the semantic.
 
 ## Library manager widget
 

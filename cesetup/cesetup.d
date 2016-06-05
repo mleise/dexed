@@ -344,7 +344,7 @@ void postInstall()
         f.writeln("[Desktop Entry]");
         f.writeln("Name=coedit");
         f.writeln("Path=" ~ exePath);
-        f.writeln("Exec=coedit %f");
+        f.writeln("Exec=" ~ exePath ~ "coedit %f");
         f.writeln("Icon=" ~ datPath ~ "coedit.png");
         f.writeln("Type=Application");
         f.writeln("Categories=Application;IDE;Development;");
