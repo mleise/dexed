@@ -27,6 +27,7 @@ type
  *)
   TCENativeProject = class(TWritableLfmTextComponent, ICECommonProject)
   private
+    fInGroup: boolean;
     fCompilProc: TCEProcess;
     fOnChange: TNotifyEvent;
     fModified: boolean;
@@ -88,6 +89,8 @@ type
     function addConfiguration: TCompilerConfiguration;
     procedure getOpts(const aList: TStrings);
     //
+    procedure inGroup(value: boolean);
+    function inGroup: boolean;
     function getFormat: TCEProjectFormat;
     function getProject: TObject;
     function filename: string;
@@ -174,6 +177,16 @@ begin
   fConfigs.free;
   killProcess(fRunner);
   inherited;
+end;
+
+function TCENativeProject.inGroup: boolean;
+begin
+  exit(fInGroup);
+end;
+
+procedure TCENativeProject.inGroup(value: boolean);
+begin
+  fInGroup:=value;
 end;
 
 function TCENativeProject.getFormat: TCEProjectFormat;

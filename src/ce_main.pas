@@ -13,7 +13,8 @@ uses
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
-  ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor, (*ce_gdb,*) ce_dfmt, ce_lcldragdrop;
+  ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor, (*ce_gdb,*) ce_dfmt,
+  ce_lcldragdrop, ce_projgroup;
 
 type
 
@@ -47,6 +48,11 @@ type
     actFileRun: TAction;
     actFileDscanner: TAction;
     actFileRunOut: TAction;
+    actProjAddToGroup: TAction;
+    actProjNewGroup: TAction;
+    actProjOpenGroup: TAction;
+    actProjSaveGroup: TAction;
+    actProjSaveGroupAs: TAction;
     actProjNewDubJson: TAction;
     actProjNewNative: TAction;
     actSetRunnableSw: TAction;
@@ -151,6 +157,12 @@ type
     MenuItem78: TMenuItem;
     MenuItem79: TMenuItem;
     MenuItem80: TMenuItem;
+    MenuItem81: TMenuItem;
+    MenuItem82: TMenuItem;
+    MenuItem83: TMenuItem;
+    MenuItem84: TMenuItem;
+    MenuItem85: TMenuItem;
+    MenuItem86: TMenuItem;
     mnuLayout: TMenuItem;
     mnuItemMruFile: TMenuItem;
     mnuItemMruProj: TMenuItem;
@@ -166,8 +178,14 @@ type
     procedure actFileRunExecute(Sender: TObject);
     procedure actFileRunOutExecute(Sender: TObject);
     procedure actFileSaveCopyAsExecute(Sender: TObject);
+    procedure actNewGroupExecute(Sender: TObject);
+    procedure actProjAddToGroupExecute(Sender: TObject);
     procedure actProjNewDubJsonExecute(Sender: TObject);
+    procedure actProjNewGroupExecute(Sender: TObject);
     procedure actProjNewNativeExecute(Sender: TObject);
+    procedure actProjOpenGroupExecute(Sender: TObject);
+    procedure actProjSaveGroupAsExecute(Sender: TObject);
+    procedure actProjSaveGroupExecute(Sender: TObject);
     procedure actSetRunnableSwExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure MenuItem77Click(Sender: TObject);
@@ -227,6 +245,7 @@ type
     fRunnableCompiler: TCECompiler;
     fRunnableDestination: string;
     fSymStringExpander: ICESymStringExpander;
+    fProjectGroup: ICEProjectGroup;
     fCovModUt: boolean;
     fDscanUnittests: boolean;
     fAlwaysUseDest: boolean;
@@ -256,6 +275,7 @@ type
     fSymlWidg: TCESymbolListWidget;
     fInfoWidg: TCEInfoWidget;
     fDubProjWidg: TCEDubProjectEditorWidget;
+    fPrjGrpWidg: TCEProjectGroupWidget;
     //fGdbWidg: TCEGdbWidget;
     fDfmtWidg:  TCEDfmtWidget;
 
@@ -386,12 +406,14 @@ type
     procedure setTargets(projs: TCEMRUFileList; files: TCEMRUFileList);
   end;
 
+  //TODO-cprojectgroup: handle auto reloading of the previous group
+
   TCELastDocsAndProjs = class(TWritableLfmTextComponent)
   private
     fDocuments: TStringList;
     fProject: string;
     fDocIndex: integer;
-    //fProjectGRoup: string;
+    fProjectGroup: string;
     procedure setDocuments(aValue: TStringList);
   protected
     procedure beforeSave; override;
@@ -400,7 +422,7 @@ type
     property documentIndex: integer read fDocIndex write fDocIndex;
     property documents: TStringList read fDocuments write setDocuments;
     property project: string read fProject write fProject;
-    // property projectGroup: string read fProjectGroup write fProjectGroup;
+    property projectGroup: string read fProjectGroup write fProjectGroup;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -662,6 +684,10 @@ begin
     itf := TCEMainForm(aSource).fProjectInterface;
     if itf = nil then exit;
     fProject := itf.filename;
+    fProjectGroup := getProjectGroup.groupFilename;
+    // reload from group
+    if itf.inGroup and fProjectGroup.fileExists then
+      fProject := '';
   end else
     inherited;
 end;
@@ -679,8 +705,8 @@ begin
     if dst.fProjFromCommandLine then
       exit;
     itf := dst.fProjectInterface;
-    if (itf <> nil) and (itf.filename = fProject) then
-      exit;
+    if (itf <> nil) and (itf.filename = fProject) and
+      (itf.filename.fileExists) then exit;
     if fProject.isNotEmpty and fProject.fileExists then
     begin
       dst.openProj(fProject);
@@ -692,6 +718,10 @@ begin
           mem.Highlighter := LfmSyn
         else
           mem.Highlighter := JsSyn;
+    end;
+    if fProjectGroup.isNotEmpty and fProjectGroup.fileExists then
+    begin
+      getProjectGroup.openGroup(fProjectGroup);
     end;
   end else
     inherited;
@@ -848,6 +878,7 @@ begin
   updateMainMenuProviders;
   EntitiesConnector.forceUpdate;
   fSymStringExpander:= getSymStringExpander;
+  fProjectGroup := getProjectGroup;
   //
   getCMdParams;
   if fNativeProject.isNil then
@@ -923,23 +954,25 @@ var
   act: TAction;
   itm: TMenuItem;
 begin
-  fWidgList := TCEWidgetList.Create;
-  fMesgWidg := TCEMessagesWidget.create(self);
-  fEditWidg := TCEEditorWidget.create(self);
-  fProjWidg := TCEProjectInspectWidget.create(self);
-  fPrjCfWidg:= TCEProjectConfigurationWidget.create(self);
-  fFindWidg := TCESearchWidget.create(self);
-  fExplWidg := TCEMiniExplorerWidget.create(self);
-  fLibMWidg := TCELibManEditorWidget.create(self);
-  fTlsEdWidg:= TCEToolsEditorWidget.create(self);
-  fPrInpWidg:= TCEProcInputWidget.create(self);
-  fTodolWidg:= TCETodoListWidget.create(self);
-  fOptEdWidg:= TCEOptionEditorWidget.create(self);
-  fSymlWidg := TCESymbolListWidget.create(self);
-  fInfoWidg := TCEInfoWidget.create(self);
+  fWidgList   := TCEWidgetList.Create;
+  fMesgWidg   := TCEMessagesWidget.create(self);
+  fEditWidg   := TCEEditorWidget.create(self);
+  fProjWidg   := TCEProjectInspectWidget.create(self);
+  fPrjCfWidg  := TCEProjectConfigurationWidget.create(self);
+  fFindWidg   := TCESearchWidget.create(self);
+  fExplWidg   := TCEMiniExplorerWidget.create(self);
+  fLibMWidg   := TCELibManEditorWidget.create(self);
+  fTlsEdWidg  := TCEToolsEditorWidget.create(self);
+  fPrInpWidg  := TCEProcInputWidget.create(self);
+  fTodolWidg  := TCETodoListWidget.create(self);
+  fOptEdWidg  := TCEOptionEditorWidget.create(self);
+  fSymlWidg   := TCESymbolListWidget.create(self);
+  fInfoWidg   := TCEInfoWidget.create(self);
   fDubProjWidg:= TCEDubProjectEditorWidget.create(self);
-  //fGdbWidg  := TCEGdbWidget.create(self);
-  fDfmtWidg := TCEDfmtWidget.create(self);
+  fDfmtWidg   := TCEDfmtWidget.create(self);
+  fPrjGrpWidg := TCEProjectGroupWidget.create(self);
+
+  //fGdbWidg    := TCEGdbWidget.create(self);
 
   getMessageDisplay(fMsgs);
 
@@ -957,8 +990,11 @@ begin
   fWidgList.addWidget(@fSymlWidg);
   fWidgList.addWidget(@fInfoWidg);
   fWidgList.addWidget(@fDubProjWidg);
-  //fWidgList.addWidget(@fGdbWidg);
   fWidgList.addWidget(@fDfmtWidg);
+  fWidgList.addWidget(@fPrjGrpWidg);
+
+  //fWidgList.addWidget(@fGdbWidg);
+
   fWidgList.sort(@CompareWidgCaption);
 
   for widg in fWidgList do
@@ -2599,7 +2635,8 @@ procedure TCEMainForm.closeProj;
 begin
   if fProjectInterface = nil then exit;
   //
-  fProjectInterface.getProject.Free;
+  if not fProjectInterface.inGroup then
+    fProjectInterface.getProject.Free;
   fProjectInterface := nil;
   fNativeProject := nil;
   fDubProject := nil;
@@ -2608,16 +2645,18 @@ end;
 
 procedure TCEMainForm.actProjNewDubJsonExecute(Sender: TObject);
 begin
-  if (fProjectInterface <> nil) and fProjectInterface.modified and
-    (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fProjectInterface <> nil) and not fProjectInterface.inGroup
+    and fProjectInterface.modified and
+      (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
   closeProj;
   newDubProj;
 end;
 
 procedure TCEMainForm.actProjNewNativeExecute(Sender: TObject);
 begin
-  if (fProjectInterface <> nil) and fProjectInterface.modified and
-    (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fProjectInterface <> nil) and not fProjectInterface.inGroup
+    and fProjectInterface.modified and
+      (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
   closeProj;
   newNativeProj;
 end;
@@ -2665,17 +2704,21 @@ end;
 
 procedure TCEMainForm.mruProjItemClick(Sender: TObject);
 begin
-  if (fProjectInterface <> nil) and fProjectInterface.modified and
-    (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fProjectInterface <> nil) and not fProjectInterface.inGroup and
+      fProjectInterface.modified and
+        (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
   openProj(TMenuItem(Sender).Hint);
 end;
 
 procedure TCEMainForm.actProjCloseExecute(Sender: TObject);
 begin
-  if (fProjectInterface <> nil) and fProjectInterface.modified and
-    (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fProjectInterface <> nil) and not fProjectInterface.inGroup and
+        fProjectInterface.modified and
+          (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
   closeProj;
 end;
+
+//TODO-cprojectgroup: handle filename change when grouped
 
 procedure TCEMainForm.actProjSaveAsExecute(Sender: TObject);
 begin
@@ -2738,6 +2781,71 @@ procedure TCEMainForm.actProjOptViewExecute(Sender: TObject);
 begin
   if fProjectInterface = nil then exit;
   dlgOkInfo(fProjectInterface.getCommandLine);
+end;
+
+procedure TCEMainForm.actProjOpenGroupExecute(Sender: TObject);
+begin
+  if fProjectGroup.groupModified then
+  begin
+    if dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel then
+      exit;
+  end;
+  fProjectGroup.closeGroup;
+  with TOpenDialog.Create(nil) do
+  try
+    if execute then
+      fProjectGroup.openGroup(filename);
+  finally
+    free;
+  end;
+end;
+
+procedure TCEMainForm.actProjSaveGroupAsExecute(Sender: TObject);
+begin
+  with TSaveDialog.Create(nil) do
+  try
+    if execute then
+      fProjectGroup.saveGroup(filename);
+  finally
+    free;
+  end;
+end;
+
+procedure TCEMainForm.actProjSaveGroupExecute(Sender: TObject);
+begin
+  if not fProjectGroup.groupFilename.fileExists then
+    actProjSaveGroupAs.Execute
+  else
+    fProjectGroup.saveGroup(fProjectGroup.groupFilename);
+end;
+
+procedure TCEMainForm.actNewGroupExecute(Sender: TObject);
+begin
+  if fProjectGroup.groupModified then
+  begin
+    if dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel then
+      exit;
+  end;
+  fProjectGroup.closeGroup;
+end;
+
+procedure TCEMainForm.actProjAddToGroupExecute(Sender: TObject);
+begin
+  if fProjectInterface = nil then
+    exit;
+  if fProjectInterface.inGroup then
+    exit;
+  fProjectGroup.addProject(fProjectInterface);
+end;
+
+procedure TCEMainForm.actProjNewGroupExecute(Sender: TObject);
+begin
+  if fProjectGroup.groupModified then
+  begin
+    if dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel then
+      exit;
+  end;
+  fProjectGroup.closeGroup;
 end;
 {$ENDREGION}
 

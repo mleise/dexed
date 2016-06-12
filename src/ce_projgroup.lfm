@@ -1,0 +1,121 @@
+inherited CEProjectGroupWidget: TCEProjectGroupWidget
+  Left = 866
+  Height = 240
+  Top = 277
+  Width = 561
+  Caption = 'Project group'
+  ClientHeight = 240
+  ClientWidth = 561
+  inherited Back: TPanel
+    Height = 240
+    Width = 561
+    ClientHeight = 240
+    ClientWidth = 561
+    inherited Content: TPanel
+      Height = 240
+      Width = 561
+      ClientHeight = 240
+      ClientWidth = 561
+      object Panel1: TPanel[0]
+        Left = 4
+        Height = 26
+        Top = 4
+        Width = 553
+        Align = alTop
+        BorderSpacing.Around = 4
+        BevelOuter = bvNone
+        ClientHeight = 26
+        ClientWidth = 553
+        TabOrder = 0
+        object BtnAddProj: TBitBtn
+          Left = 0
+          Height = 26
+          Hint = 'add a project to the group'
+          Top = 0
+          Width = 28
+          Align = alLeft
+          Layout = blGlyphBottom
+          OnClick = BtnAddProjClick
+          Spacing = 0
+          TabOrder = 0
+        end
+        object btnRemProj: TBitBtn
+          Left = 28
+          Height = 26
+          Hint = 'remove selected project from the group'
+          Top = 0
+          Width = 28
+          Align = alLeft
+          Layout = blGlyphBottom
+          OnClick = btnRemProjClick
+          Spacing = 0
+          TabOrder = 1
+        end
+        object btnMoveDown: TBitBtn
+          Left = 56
+          Height = 26
+          Hint = 'move selected project down'
+          Top = 0
+          Width = 28
+          Align = alLeft
+          Layout = blGlyphBottom
+          OnClick = btnMoveDownClick
+          Spacing = 0
+          TabOrder = 2
+        end
+        object btnMoveUp: TBitBtn
+          Left = 84
+          Height = 26
+          Hint = 'move selected project up'
+          Top = 0
+          Width = 28
+          Align = alLeft
+          Layout = blGlyphBottom
+          OnClick = btnMoveUpClick
+          Spacing = 0
+          TabOrder = 3
+        end
+      end
+      object lstProj: TListView[1]
+        Left = 4
+        Height = 202
+        Top = 34
+        Width = 553
+        Align = alClient
+        AutoSort = False
+        AutoWidthLastColumn = True
+        BorderSpacing.Around = 4
+        Columns = <        
+          item
+            AutoSize = True
+            Caption = 'Name'
+            Width = 47
+          end        
+          item
+            AutoSize = True
+            Caption = 'Type'
+            Width = 39
+          end        
+          item
+            AutoSize = True
+            Caption = 'Configuration'
+            Width = 94
+          end        
+          item
+            Caption = 'Location'
+            Width = 369
+          end>
+        GridLines = True
+        ReadOnly = True
+        ScrollBars = ssAutoBoth
+        TabOrder = 1
+        ViewStyle = vsReport
+        OnDblClick = lstProjDblClick
+      end
+    end
+  end
+  inherited contextMenu: TPopupMenu
+    left = 272
+    top = 56
+  end
+end

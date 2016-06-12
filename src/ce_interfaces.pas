@@ -27,6 +27,10 @@ type
 
     // general properties ------------------------------------------------------
 
+      // indicates if the project is owned by a group.
+      function inGroup: boolean;
+      // flag the project as grouped
+      procedure inGroup(value: boolean);
       // indicates the project format
       function getFormat: TCEProjectFormat;
       // returns an untyped object that can be casted using getFormat()
@@ -279,7 +283,7 @@ type
     function documentCount: Integer;
     // returns the nth document
     function getDocument(index: Integer): TCESynMemo;
-    // returns true if the document matching aFielanme is already opened.
+    // returns true if the document matching aFilename is already opened.
     function findDocument(aFilename: string): TCESynMemo;
     // open or set the focus on the document matching aFilename
     procedure openDocument(aFilename: string);
@@ -289,6 +293,25 @@ type
     function closeDocument(doc: TCESynMemo): boolean;
     // conveniance property
     property document[index: integer]: TCESynMemo read getDocument;
+  end;
+
+
+  (**
+   * Single service related to the project groups
+   *)
+  ICEProjectGroup = interface(ICESingleService)
+    // add a project to the gtoup;
+    procedure addProject(aProject: ICECommonProject);
+    // open a group of project.
+    procedure openGroup(aFilename: string);
+    // save the group to a file.
+    procedure saveGroup(aFilename: string);
+    // close a group a initialize a new one
+    procedure closeGroup;
+    // indicates wether one of the project is modified or if the group is changed
+    function groupModified: boolean;
+    // indicates the group filename
+    function groupFilename: string;
   end;
 
 
@@ -337,6 +360,7 @@ type
   function getprocInputHandler: ICEProcInputHandler;
   function getMultiDocHandler: ICEMultiDocHandler;
   function getSymStringExpander: ICESymStringExpander;
+  function getProjectGroup: ICEProjectGroup;
 
 implementation
 
@@ -466,6 +490,12 @@ function getSymStringExpander: ICESymStringExpander;
 begin
   exit(EntitiesConnector.getSingleService('ICESymStringExpander') as ICESymStringExpander);
 end;
+
+function getProjectGroup: ICEProjectGroup;
+begin
+  exit(EntitiesConnector.getSingleService('ICEProjectGroup') as ICEProjectGroup);
+end;
+
 {$ENDREGION}
 
 end.

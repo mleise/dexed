@@ -13,6 +13,7 @@ type
 
   TCEDubProject = class(TComponent, ICECommonProject)
   private
+    fInGroup: boolean;
     fDubProc: TCEProcess;
     fPreCompilePath: string;
     fPackageName: string;
@@ -59,6 +60,8 @@ type
     procedure loadFromFile(const aFilename: string);
     procedure saveToFile(const aFilename: string);
     //
+    function inGroup: boolean;
+    procedure inGroup(value: boolean);
     function getFormat: TCEProjectFormat;
     function getProject: TObject;
     function modified: boolean;
@@ -142,6 +145,17 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION ICECommonProject: project props ---------------------------------------}
+function TCEDubProject.inGroup: boolean;
+begin
+  exit(fInGroup);
+end;
+
+procedure TCEDubProject.inGroup(value: boolean);
+begin
+  fInGroup:=value;
+end;
+
+
 function TCEDubProject.getFormat: TCEProjectFormat;
 begin
   exit(pfDub);

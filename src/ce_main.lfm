@@ -3032,6 +3032,9 @@ object CEMainForm: TCEMainForm
           ADFFB0B0AEEA000000000000000000000000FFFFFF00FFFFFF00
         }
       end
+      object MenuItem86: TMenuItem
+        Action = actProjAddToGroup
+      end
       object MenuItem29: TMenuItem
         Caption = '-'
       end
@@ -3472,6 +3475,21 @@ object CEMainForm: TCEMainForm
           0000000000000000000000000000BA8545FFB9843FFFB9843FFFBA8545FF0000
           0000000000000000000000000000000000000000000000000000
         }
+      end
+      object MenuItem81: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem82: TMenuItem
+        Action = actProjNewGroup
+      end
+      object MenuItem83: TMenuItem
+        Action = actProjOpenGroup
+      end
+      object MenuItem84: TMenuItem
+        Action = actProjSaveGroup
+      end
+      object MenuItem85: TMenuItem
+        Action = actProjSaveGroupAs
       end
     end
     object MenuItem8: TMenuItem
@@ -4382,6 +4400,37 @@ object CEMainForm: TCEMainForm
       ImageIndex = 35
       OnExecute = actFileDscannerExecute
       OnUpdate = updateDocumentBasedAction
+    end
+    object actProjOpenGroup: TAction
+      Category = 'Project'
+      Caption = 'Open project group...'
+      ImageIndex = 9
+      OnExecute = actProjOpenGroupExecute
+    end
+    object actProjSaveGroup: TAction
+      Category = 'Project'
+      Caption = 'Save project group'
+      ImageIndex = 3
+      OnExecute = actProjSaveGroupExecute
+    end
+    object actProjSaveGroupAs: TAction
+      Category = 'Project'
+      Caption = 'Save project group as...'
+      ImageIndex = 2
+      OnExecute = actProjSaveGroupAsExecute
+    end
+    object actProjNewGroup: TAction
+      Category = 'Project'
+      Caption = 'New project group'
+      ImageIndex = 8
+      OnExecute = actProjNewGroupExecute
+    end
+    object actProjAddToGroup: TAction
+      Category = 'Project'
+      Caption = 'Add current project to group'
+      ImageIndex = 7
+      OnExecute = actProjAddToGroupExecute
+      OnUpdate = updateProjectBasedAction
     end
   end
   object imgList: TImageList

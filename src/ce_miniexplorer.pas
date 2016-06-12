@@ -472,8 +472,9 @@ begin
   begin
     if assigned(fProj) then
     begin
-      if fProj.modified and (dlgFileChangeClose(fProj.filename) = mrCancel) then
-        exit;
+      if not fProj.inGroup and fProj.modified and
+        (dlgFileChangeClose(fProj.filename) = mrCancel) then
+          exit;
       fProj.getProject.Free;
     end;
     TCENativeProject.create(nil);
@@ -483,8 +484,9 @@ begin
   begin
     if assigned(fProj) then
     begin
-      if fProj.modified and (dlgFileChangeClose(fProj.filename) = mrCancel) then
-        exit;
+      if not fProj.inGroup and fProj.modified and
+        (dlgFileChangeClose(fProj.filename) = mrCancel) then
+          exit;
       fProj.getProject.Free;
     end;
     TCEDubProject.create(nil);
