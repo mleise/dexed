@@ -155,8 +155,6 @@ type
     property versionIdentifiers: TStringList read fVerIds write setVerIds;
     property generateAllTmpCode: boolean read fAllInst write setAllInst default false;
     property addStackStompCode: boolean read fStackStomp write setStackStomp default false;
-    //TODO-cmaintenace: remove deprecated props
-    property generateStackFrame: boolean write setGenStack stored false; deprecated;
   public
     constructor create; override;
     destructor destroy; override;
@@ -192,10 +190,6 @@ type
     property generateInfos: boolean read fGenInfos write setGenInfos default false;
     property generateMapFile: boolean read fGenMap write setGenMap default false;
     property generateStackFrame: boolean read fGenFrame write setGenFrame default false;
-    //TODO-cmaintenace: remove deprecated props
-    property debug: boolean write setDebugConditions; deprecated;
-    property codeviewDexts: boolean write setGenInfos stored false; deprecated;
-    property codeviewCformat: boolean write setDbgC stored false; deprecated;
   public
     constructor create; override;
     destructor destroy; override;

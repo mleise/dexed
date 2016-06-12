@@ -222,6 +222,8 @@ begin
   doChanged;
 end;
 
+//TODO-cprojectgroup: flag 'modified' not set when item deleted or pos exchanged from GUI
+
 procedure TProjectGroup.openGroup(aFilename: string);
 begin
   loadFromFile(aFilename);
@@ -377,6 +379,7 @@ procedure TCEProjectGroupWidget.btnRemProjClick(Sender: TObject);
 begin
   if lstProj.ItemIndex = -1 then exit;
   projectGroup.items.Delete(lstProj.Selected.Index);
+  updateList;
 end;
 
 procedure TCEProjectGroupWidget.lstProjDblClick(Sender: TObject);

@@ -406,8 +406,6 @@ type
     procedure setTargets(projs: TCEMRUFileList; files: TCEMRUFileList);
   end;
 
-  //TODO-cprojectgroup: handle auto reloading of the previous group
-
   TCELastDocsAndProjs = class(TWritableLfmTextComponent)
   private
     fDocuments: TStringList;
