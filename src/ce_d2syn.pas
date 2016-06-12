@@ -257,6 +257,7 @@ end;
 
 destructor TSynD2Syn.destroy;
 begin
+  fLost_Attrib.Free;
   fCurrRange.Free;
   inherited;
 end;
