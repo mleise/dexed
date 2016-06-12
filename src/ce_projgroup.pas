@@ -85,8 +85,7 @@ type
     procedure btnRemProjClick(Sender: TObject);
     procedure lstProjDblClick(Sender: TObject);
   private
-    fUngrouped: ICECommonProject;
-    fFromGroup: boolean;
+    fPrevProj: ICECommonProject;
     fProjSubj: TCEProjectSubject;
     //
     procedure projNew(aProject: ICECommonProject);
@@ -121,6 +120,7 @@ end;
 
 destructor TProjectGroup.destroy;
 begin
+  fItems.Clear;
   fItems.Free;
   inherited;
 end;
@@ -279,6 +279,7 @@ destructor TProjectGroupItem.destroy;
 begin
   if fProj <> nil then
     fProj.getProject.free;
+  fProj := nil;
   inherited;
 end;
 {$ENDREGION}
@@ -297,8 +298,8 @@ end;
 
 destructor TCEProjectGroupWidget.destroy;
 begin
-  inherited;
   fProjSubj.free;
+  inherited;
 end;
 
 procedure TCEProjectGroupWidget.DoShow;
@@ -311,8 +312,7 @@ end;
 {$REGION Widget ICEProjectObserver ---------------------------------------------}
 procedure TCEProjectGroupWidget.projNew(aProject: ICECommonProject);
 begin
-  if not fFromGroup then
-    fUngrouped := aProject;
+  fPrevProj := aProject;
 end;
 
 procedure TCEProjectGroupWidget.projChanged(aProject: ICECommonProject);
@@ -322,14 +322,12 @@ end;
 
 procedure TCEProjectGroupWidget.projClosing(aProject: ICECommonProject);
 begin
-  if not fFromGroup then
-    fUngrouped := nil;
+  fPrevProj := nil;
 end;
 
 procedure TCEProjectGroupWidget.projFocused(aProject: ICECommonProject);
 begin
-  if not fFromGroup then
-    fUngrouped := aProject;
+  fPrevProj := aProject;
 end;
 
 procedure TCEProjectGroupWidget.projCompiling(aProject: ICECommonProject);
@@ -385,12 +383,12 @@ procedure TCEProjectGroupWidget.lstProjDblClick(Sender: TObject);
 begin
   if lstProj.ItemIndex = -1 then
     exit;
-  fFromGroup := true;
   TProjectGroupItem(lstProj.Selected.Data).lazyLoad;
+  if fPrevProj <> nil then
+    subjProjClosing(fProjSubj, fPrevProj);
   subjProjFocused(fProjSubj, TProjectGroupItem(lstProj.Selected.Data).project);
   if projectGroup.index <> lstProj.ItemIndex then
     projectGroup.index := lstProj.ItemIndex;
-  fFromGroup := false;
 end;
 
 procedure TCEProjectGroupWidget.handleChanged(sender: TObject);

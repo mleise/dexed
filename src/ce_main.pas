@@ -881,8 +881,6 @@ begin
   fProjectGroup := getProjectGroup;
   //
   getCMdParams;
-  if fNativeProject.isNil then
-    newNativeProj;
   //
   fInitialized := true;
 end;
@@ -1336,6 +1334,8 @@ begin
     // see: http://forum.lazarus.freepascal.org/index.php/topic,30616.0.htm
     if fAppliOpts.reloadLastDocuments then
       LoadLastDocsAndProj;
+    if fProjectInterface = nil then
+      newNativeProj;
 
     DockMaster.ResetSplitters;
 
@@ -1398,8 +1398,11 @@ begin
     (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
   for i := fMultidoc.documentCount-1 downto 0 do
     if not fMultidoc.closeDocument(i) then exit;
+  if fProjectGroup.groupModified then if
+    (dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel) then exit;
   canClose := true;
   closeProj;
+  fProjectGroup.closeGroup;
 end;
 
 procedure TCEMainForm.updateDocumentBasedAction(sender: TObject);
@@ -2636,10 +2639,12 @@ begin
   if fProjectInterface = nil then exit;
   //
   if not fProjectInterface.inGroup then
+  begin
     fProjectInterface.getProject.Free;
-  fProjectInterface := nil;
-  fNativeProject := nil;
-  fDubProject := nil;
+    fProjectInterface := nil;
+    fNativeProject := nil;
+    fDubProject := nil;
+  end;
   showProjTitle;
 end;
 
