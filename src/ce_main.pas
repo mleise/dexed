@@ -48,6 +48,8 @@ type
     actFileRun: TAction;
     actFileDscanner: TAction;
     actFileRunOut: TAction;
+    actProjGroupCompile: TAction;
+    actProjSelUngrouped: TAction;
     actProjAddToGroup: TAction;
     actProjNewGroup: TAction;
     actProjOpenGroup: TAction;
@@ -163,6 +165,10 @@ type
     MenuItem84: TMenuItem;
     MenuItem85: TMenuItem;
     MenuItem86: TMenuItem;
+    MenuItem87: TMenuItem;
+    MenuItem88: TMenuItem;
+    MenuItem89: TMenuItem;
+    MenuItem90: TMenuItem;
     mnuLayout: TMenuItem;
     mnuItemMruFile: TMenuItem;
     mnuItemMruProj: TMenuItem;
@@ -180,12 +186,14 @@ type
     procedure actFileSaveCopyAsExecute(Sender: TObject);
     procedure actNewGroupExecute(Sender: TObject);
     procedure actProjAddToGroupExecute(Sender: TObject);
+    procedure actProjGroupCompileExecute(Sender: TObject);
     procedure actProjNewDubJsonExecute(Sender: TObject);
     procedure actProjNewGroupExecute(Sender: TObject);
     procedure actProjNewNativeExecute(Sender: TObject);
     procedure actProjOpenGroupExecute(Sender: TObject);
     procedure actProjSaveGroupAsExecute(Sender: TObject);
     procedure actProjSaveGroupExecute(Sender: TObject);
+    procedure actProjSelUngroupedExecute(Sender: TObject);
     procedure actSetRunnableSwExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure MenuItem77Click(Sender: TObject);
@@ -255,7 +263,8 @@ type
     fMultidoc: ICEMultiDocHandler;
     fScCollectCount: Integer;
     fUpdateCount: NativeInt;
-    fProjectInterface: ICECommonProject;
+    fProject: ICECommonProject;
+    fFreeProj: ICECommonProject;
     fDubProject: TCEDubProject;
     fNativeProject: TCENativeProject;
     fProjMru: TCEMRUProjectList;
@@ -281,6 +290,8 @@ type
 
     fRunProjAfterCompArg: boolean;
     fRunProjAfterCompile: boolean;
+    fIsCompilingGroup: boolean;
+    fGroupCompilationCnt: integer;
     fFirstShown: boolean;
     fProjFromCommandLine: boolean;
     fInitialized: boolean;
@@ -679,13 +690,10 @@ var
 begin
   if aSource is TCEMainForm then
   begin
-    itf := TCEMainForm(aSource).fProjectInterface;
-    if itf = nil then exit;
-    fProject := itf.filename;
+    itf := TCEMainForm(aSource).fFreeProj;
+    if itf <> nil then
+      fProject := itf.filename;
     fProjectGroup := getProjectGroup.groupFilename;
-    // reload from group
-    if itf.inGroup and fProjectGroup.fileExists then
-      fProject := '';
   end else
     inherited;
 end;
@@ -702,7 +710,7 @@ begin
     dst := TCEMainForm(aDestination);
     if dst.fProjFromCommandLine then
       exit;
-    itf := dst.fProjectInterface;
+    itf := dst.fProject;
     if (itf <> nil) and (itf.filename = fProject) and
       (itf.filename.fileExists) then exit;
     if fProject.isNotEmpty and fProject.fileExists then
@@ -710,9 +718,9 @@ begin
       dst.openProj(fProject);
       hdl := getMultiDocHandler;
       if assigned(hdl) then
-      mem := hdl.findDocument(dst.fProjectInterface.filename);
+      mem := hdl.findDocument(dst.fProject.filename);
       if mem.isNotNil then
-        if dst.fProjectInterface.getFormat = pfNative then
+        if dst.fProject.getFormat = pfNative then
           mem.Highlighter := LfmSyn
         else
           mem.Highlighter := JsSyn;
@@ -1332,7 +1340,7 @@ begin
     // see: http://forum.lazarus.freepascal.org/index.php/topic,30616.0.htm
     if fAppliOpts.reloadLastDocuments then
       LoadLastDocsAndProj;
-    if fProjectInterface = nil then
+    if fProject = nil then
       newNativeProj;
 
     DockMaster.ResetSplitters;
@@ -1392,14 +1400,19 @@ var
 begin
   canClose := false;
   SaveLastDocsAndProj;
-  if (fProjectInterface <> nil) and fProjectInterface.modified and
-    (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fFreeProj <> nil) then
+  begin
+    if fFreeProj.modified and
+      (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
+        exit;
+    fFreeProj.getProject.Free;
+    fFreeProj := nil;
+  end;
   for i := fMultidoc.documentCount-1 downto 0 do
     if not fMultidoc.closeDocument(i) then exit;
   if fProjectGroup.groupModified then if
     (dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel) then exit;
   canClose := true;
-  closeProj;
   fProjectGroup.closeGroup;
 end;
 
@@ -1410,7 +1423,7 @@ end;
 
 procedure TCEMainForm.updateProjectBasedAction(sender: TObject);
 begin
-  TAction(sender).Enabled := fProjectInterface <> nil;
+  TAction(sender).Enabled := fProject <> nil;
 end;
 
 procedure TCEMainForm.updateDocEditBasedAction(sender: TObject);
@@ -1548,11 +1561,13 @@ end;
 {$REGION ICEProjectObserver ----------------------------------------------------}
 procedure TCEMainForm.projNew(aProject: ICECommonProject);
 begin
- fProjectInterface := aProject;
- case fProjectInterface.getFormat of
-   pfNative: fNativeProject := TCENativeProject(fProjectInterface.getProject);
-   pfDub: fDubProject := TCEDubProject(fProjectInterface.getProject);
- end;
+  fProject := aProject;
+  case fProject.getFormat of
+    pfNative: fNativeProject := TCENativeProject(fProject.getProject);
+    pfDub: fDubProject := TCEDubProject(fProject.getProject);
+  end;
+  if not fProject.inGroup then
+    fFreeProj := aProject;
 end;
 
 procedure TCEMainForm.projChanged(aProject: ICECommonProject);
@@ -1562,9 +1577,11 @@ end;
 
 procedure TCEMainForm.projClosing(aProject: ICECommonProject);
 begin
-  if fProjectInterface <> aProject then
+  if aProject = fFreeProj then
+    fFreeProj := nil;
+  if fProject <> aProject then
     exit;
-  fProjectInterface := nil;
+  fProject := nil;
   fDubProject := nil;
   fNativeProject := nil;
   showProjTitle;
@@ -1572,12 +1589,17 @@ end;
 
 procedure TCEMainForm.projFocused(aProject: ICECommonProject);
 begin
- fProjectInterface := aProject;
- case fProjectInterface.getFormat of
-   pfNative: fNativeProject := TCENativeProject(fProjectInterface.getProject);
-   pfDub: fDubProject := TCEDubProject(fProjectInterface.getProject);
- end;
- showProjTitle;
+  fProject := aProject;
+  case fProject.getFormat of
+    pfNative: fNativeProject := TCENativeProject(fProject.getProject);
+    pfDub: fDubProject := TCEDubProject(fProject.getProject);
+  end;
+  if not fProject.inGroup then
+    fFreeProj := aProject
+  else if (fProject = fFreeProj) and (fProject.inGroup) then
+    fFreeProj := nil;
+
+  showProjTitle;
 end;
 
 procedure TCEMainForm.projCompiling(aProject: ICECommonProject);
@@ -1588,21 +1610,38 @@ procedure TCEMainForm.projCompiled(aProject: ICECommonProject; success: boolean)
 var
   runArgs: string = '';
   runprev: boolean = true;
+  i: integer;
 begin
-  if fRunProjAfterCompile and assigned(fProjectInterface) then
+  if not fIsCompilingGroup then
   begin
-    if not success then
-      runprev := dlgYesNo('last build failed, continue and run ?') = mrYes;
-    if runprev then
+    if fRunProjAfterCompile and assigned(fProject) then
     begin
-      if fRunProjAfterCompArg and
-        not InputQuery('Execution arguments', '', runargs) then
-          runargs := '';
-      fProjectInterface.run(runargs);
+      if not success then
+        runprev := dlgYesNo('last build failed, continue and run ?') = mrYes;
+      if runprev then
+      begin
+        if fRunProjAfterCompArg and
+          not InputQuery('Execution arguments', '', runargs) then
+            runargs := '';
+        fProject.run(runargs);
+      end;
+    end;
+    fRunProjAfterCompile := false;
+    fRunProjAfterCompArg := false;
+  end
+  else begin
+    fGroupCompilationCnt += 1;
+    if (fGroupCompilationCnt = fProjectGroup.projectCount) then
+    begin
+      for i:= 0 to fProjectGroup.projectCount-1 do
+        if not fProjectGroup.getProject(i).compiled then
+        begin
+          fMsgs.message('error, the project group is not fully compiled', nil, amcAll, amkErr);
+          exit;
+        end;
+      fMsgs.message('the project group is successfully compiled', nil, amcAll, amkInf);
     end;
   end;
-  fRunProjAfterCompile := false;
-  fRunProjAfterCompArg := false;
 end;
 {$ENDREGION}
 
@@ -1767,11 +1806,11 @@ end;
 
 procedure TCEMainForm.actProjOpenContFoldExecute(Sender: TObject);
 begin
-  if fProjectInterface = nil then exit;
-  if not fProjectInterface.filename.fileExists then exit;
+  if fProject = nil then exit;
+  if not fProject.filename.fileExists then exit;
   //
   DockMaster.GetAnchorSite(fExplWidg).Show;
-  fExplWidg.expandPath(fProjectInterface.filename.extractFilePath);
+  fExplWidg.expandPath(fProject.filename.extractFilePath);
 end;
 
 procedure TCEMainForm.actFileNewExecute(Sender: TObject);
@@ -1833,10 +1872,10 @@ end;
 procedure TCEMainForm.actFileAddToProjExecute(Sender: TObject);
 begin
   if fDoc.isNil then exit;
-  if fProjectInterface = nil then exit;
-  if fProjectInterface.filename = fDoc.fileName then exit;
+  if fProject = nil then exit;
+  if fProject.filename = fDoc.fileName then exit;
   //
-  if fProjectInterface.getFormat = pfNative then
+  if fProject.getFormat = pfNative then
   begin
     if fDoc.fileName.fileExists and not fDoc.isTemporary then
       fNativeProject.addSource(fDoc.fileName)
@@ -1999,8 +2038,8 @@ begin
     exit;
   if fRunnableDestination.isNotEmpty then
   begin
-    if not fAlwaysUseDest and assigned(fProjectInterface)
-      and not fProjectInterface.isSource(fDoc.fileName) then
+    if not fAlwaysUseDest and assigned(fProject)
+      and not fProject.isSource(fDoc.fileName) then
         exit;
     if FilenameIsAbsolute(fRunnableDestination) then
     begin
@@ -2421,13 +2460,13 @@ end;
 
 procedure TCEMainForm.actProjCompileExecute(Sender: TObject);
 begin
-  fProjectInterface.compile;
+  fProject.compile;
 end;
 
 procedure TCEMainForm.actProjCompileAndRunExecute(Sender: TObject);
 begin
   fRunProjAfterCompile := true;
-  fProjectInterface.compile;
+  fProject.compile;
 end;
 
 procedure TCEMainForm.actProjCompAndRunWithArgsExecute(Sender: TObject);
@@ -2437,17 +2476,17 @@ end;
 
 procedure TCEMainForm.actProjRunExecute(Sender: TObject);
 begin
-  if fProjectInterface.binaryKind <> executable then
+  if fProject.binaryKind <> executable then
   begin
     dlgOkInfo('Non executable projects cant be run');
     exit;
   end;
-  if (not fProjectInterface.targetUpToDate) then if
+  if (not fProject.targetUpToDate) then if
     dlgYesNo('The project output is not up-to-date, rebuild ?') = mrYes then
-      fProjectInterface.compile;
-  if fProjectInterface.outputFilename.fileExists
-      or (fProjectInterface.getFormat = pfDub) then
-        fProjectInterface.run;
+      fProject.compile;
+  if fProject.outputFilename.fileExists
+      or (fProject.getFormat = pfDub) then
+        fProject.run;
 end;
 
 procedure TCEMainForm.actProjRunWithArgsExecute(Sender: TObject);
@@ -2455,7 +2494,7 @@ var
   runargs: string = '';
 begin
   if InputQuery('Execution arguments', '', runargs) then
-    fProjectInterface.run(runargs);
+    fProject.run(runargs);
 end;
 {$ENDREGION}
 
@@ -2617,49 +2656,50 @@ end;
 {$REGION project ---------------------------------------------------------------}
 procedure TCEMainForm.showProjTitle;
 begin
-  if (fProjectInterface <> nil) and fProjectInterface.filename.fileExists then
-    caption := format('Coedit - %s', [shortenPath(fProjectInterface.filename, 30)])
+  if (fProject <> nil) and fProject.filename.fileExists then
+    caption := format('Coedit - %s', [shortenPath(fProject.filename, 30)])
   else
     caption := 'Coedit';
 end;
 
 procedure TCEMainForm.saveProjSource(const aEditor: TCESynMemo);
 begin
-  if fProjectInterface = nil then exit;
-  if fProjectInterface.filename <> aEditor.fileName then exit;
+  if fProject = nil then exit;
+  if fProject.filename <> aEditor.fileName then exit;
   //
-  aEditor.saveToFile(fProjectInterface.filename);
-  openProj(fProjectInterface.filename);
+  aEditor.saveToFile(fProject.filename);
+  openProj(fProject.filename);
 end;
 
 procedure TCEMainForm.closeProj;
 begin
-  if fProjectInterface = nil then exit;
+  if fProject = nil then exit;
   //
-  if not fProjectInterface.inGroup then
+  if fProject = fFreeProj then
   begin
-    fProjectInterface.getProject.Free;
-    fProjectInterface := nil;
-    fNativeProject := nil;
-    fDubProject := nil;
+    fProject.getProject.Free;
+    fFreeProj := nil;
   end;
+  fProject := nil;
+  fNativeProject := nil;
+  fDubProject := nil;
   showProjTitle;
 end;
 
 procedure TCEMainForm.actProjNewDubJsonExecute(Sender: TObject);
 begin
-  if (fProjectInterface <> nil) and not fProjectInterface.inGroup
-    and fProjectInterface.modified and
-      (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fProject <> nil) and not fProject.inGroup
+    and fProject.modified and
+      (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
   closeProj;
   newDubProj;
 end;
 
 procedure TCEMainForm.actProjNewNativeExecute(Sender: TObject);
 begin
-  if (fProjectInterface <> nil) and not fProjectInterface.inGroup
-    and fProjectInterface.modified and
-      (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fProject <> nil) and not fProject.inGroup
+    and fProject.modified and
+      (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
   closeProj;
   newNativeProj;
 end;
@@ -2668,7 +2708,7 @@ procedure TCEMainForm.newNativeProj;
 begin
   fNativeProject := TCENativeProject.Create(nil);
   fNativeProject.Name := 'CurrentProject';
-  fProjectInterface := fNativeProject as ICECommonProject;
+  fProject := fNativeProject as ICECommonProject;
   showProjTitle;
 end;
 
@@ -2678,18 +2718,18 @@ begin
   fDubProject.json.Add('name', '');
   fDubProject.beginModification;
   fDubProject.endModification;
-  fProjectInterface := fDubProject as ICECommonProject;
+  fProject := fDubProject as ICECommonProject;
   showProjTitle;
 end;
 
 procedure TCEMainForm.saveProj;
 begin
-  fProjectInterface.saveToFile(fProjectInterface.filename);
+  fProject.saveToFile(fProject.filename);
 end;
 
 procedure TCEMainForm.saveProjAs(const aFilename: string);
 begin
-  fProjectInterface.saveToFile(aFilename);
+  fProject.saveToFile(aFilename);
   showProjTitle;
 end;
 
@@ -2701,27 +2741,25 @@ begin
   else
     newNativeProj;
   //
-  fProjectInterface.loadFromFile(aFilename);
+  fProject.loadFromFile(aFilename);
   showProjTitle;
 end;
 
 procedure TCEMainForm.mruProjItemClick(Sender: TObject);
 begin
-  if (fProjectInterface <> nil) and not fProjectInterface.inGroup and
-      fProjectInterface.modified and
-        (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fProject <> nil) and not fProject.inGroup and
+      fProject.modified and
+        (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
   openProj(TMenuItem(Sender).Hint);
 end;
 
 procedure TCEMainForm.actProjCloseExecute(Sender: TObject);
 begin
-  if (fProjectInterface <> nil) and not fProjectInterface.inGroup and
-        fProjectInterface.modified and
-          (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fProject <> nil) and not fProject.inGroup and
+        fProject.modified and
+          (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
   closeProj;
 end;
-
-//TODO-cprojectgroup: handle filename change when grouped
 
 procedure TCEMainForm.actProjSaveAsExecute(Sender: TObject);
 begin
@@ -2735,15 +2773,15 @@ end;
 
 procedure TCEMainForm.actProjSaveExecute(Sender: TObject);
 begin
-  if fProjectInterface = nil then exit;
-  if fProjectInterface.filename.isNotEmpty then saveProj
+  if fProject = nil then exit;
+  if fProject.filename.isNotEmpty then saveProj
   else actProjSaveAs.Execute;
 end;
 
 procedure TCEMainForm.actProjOpenExecute(Sender: TObject);
 begin
-  if (fProjectInterface <> nil) and fProjectInterface.modified and
-    (dlgFileChangeClose(fProjectInterface.filename) = mrCancel) then exit;
+  if (fProject <> nil) and fProject.modified and
+    (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
   with TOpenDialog.Create(nil) do
   try
     if execute then openProj(filename);
@@ -2756,7 +2794,7 @@ procedure TCEMainForm.actProjOptsExecute(Sender: TObject);
 var
   win: TControl = nil;
 begin
-  if assigned(fProjectInterface) then case fProjectInterface.getFormat of
+  if assigned(fProject) then case fProject.getFormat of
     pfDub: win := DockMaster.GetAnchorSite(fDubProjWidg);
     pfNative: win := DockMaster.GetAnchorSite(fPrjCfWidg);
   end
@@ -2770,11 +2808,11 @@ end;
 
 procedure TCEMainForm.actProjSourceExecute(Sender: TObject);
 begin
-  if fProjectInterface = nil then exit;
-  if not fProjectInterface.filename.fileExists then exit;
+  if fProject = nil then exit;
+  if not fProject.filename.fileExists then exit;
   //
-  openFile(fProjectInterface.filename);
-  if fProjectInterface.getFormat = pfNative then
+  openFile(fProject.filename);
+  if fProject.getFormat = pfNative then
     fDoc.Highlighter := LfmSyn
   else
     fDoc.Highlighter := JsSyn;
@@ -2782,12 +2820,19 @@ end;
 
 procedure TCEMainForm.actProjOptViewExecute(Sender: TObject);
 begin
-  if fProjectInterface = nil then exit;
-  dlgOkInfo(fProjectInterface.getCommandLine);
+  if fProject = nil then exit;
+  dlgOkInfo(fProject.getCommandLine);
 end;
 
 procedure TCEMainForm.actProjOpenGroupExecute(Sender: TObject);
 begin
+  if (fProject <> nil) and not fProject.inGroup and
+    fProject.modified then
+  begin
+    if dlgFileChangeClose(fProject.filename) = mrCancel then
+      exit;
+    fProject.getProject.Free;
+  end;
   if fProjectGroup.groupModified then
   begin
     if dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel then
@@ -2822,6 +2867,12 @@ begin
     fProjectGroup.saveGroup(fProjectGroup.groupFilename);
 end;
 
+procedure TCEMainForm.actProjSelUngroupedExecute(Sender: TObject);
+begin
+  if fFreeProj <> nil then
+    fFreeProj.activate;
+end;
+
 procedure TCEMainForm.actNewGroupExecute(Sender: TObject);
 begin
   if fProjectGroup.groupModified then
@@ -2834,11 +2885,28 @@ end;
 
 procedure TCEMainForm.actProjAddToGroupExecute(Sender: TObject);
 begin
-  if fProjectInterface = nil then
+  if fFreeProj = nil then
     exit;
-  if fProjectInterface.inGroup then
+  if fFreeProj.inGroup then
     exit;
-  fProjectGroup.addProject(fProjectInterface);
+  fProjectGroup.addProject(fFreeProj);
+  fFreeProj := nil;
+end;
+
+procedure TCEMainForm.actProjGroupCompileExecute(Sender: TObject);
+var
+  i: integer;
+begin
+  if fProjectGroup.projectCount = 0 then
+    exit;
+  fGroupCompilationCnt := 0;
+  fIsCompilingGroup := true;
+  fMsgs.message('start compiling a project group...', nil, amcAll, amkInf);
+  for i:= 0 to fProjectGroup.projectCount-1 do
+  begin
+    fProjectGroup.getProject(i).activate;
+    fProject.compile;
+  end;
 end;
 
 procedure TCEMainForm.actProjNewGroupExecute(Sender: TObject);

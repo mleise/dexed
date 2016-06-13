@@ -5,7 +5,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, ExtCtrls, Menus,
-  Buttons, dialogs, ComCtrls,
+  Buttons, dialogs, ComCtrls, StdCtrls,
   ce_widget, ce_common, ce_interfaces, ce_writableComponent, ce_observer,
   ce_nativeproject, ce_dubproject, ce_anyprojloader, ce_sharedres;
 
@@ -29,37 +29,40 @@ type
   (**
    * Collection that handles several project at once.
    *)
-  TProjectGroup = class(TWritableLfmTextComponent, ICEProjectGroup)
+  TProjectGroup = class(TWritableLfmTextComponent, ICEProjectGroup, IFPObserver)
   private
-    fIndex: integer;
+    fProjectIndex: integer;
     fItems: TCollection;
     fModified: boolean;
     fOnChanged: TNotifyEvent;
     procedure setItems(value: TCollection);
-    procedure setIndex(value: integer);
+    procedure setProjectIndex(value: integer);
     function getItem(index: integer): TProjectGroupItem;
     procedure doChanged;
     //
-    procedure addProject(aProject: ICECommonProject);
-    procedure openGroup(aFilename: string);
-    procedure saveGroup(aFilename: string);
-    procedure closeGroup;
-    function groupModified: boolean;
-    function groupFilename: string;
-    function singleServiceName: string;
+    procedure FPOObservedChanged(ASender : TObject; Operation :
+      TFPObservedOperation; Data : Pointer);
   protected
     procedure afterLoad; override;
     procedure afterSave; override;
   published
     property items: TCollection read fItems write setItems;
-    property index: integer read fIndex write setIndex;
+    property projectIndex: integer read fProjectIndex write setProjectIndex;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     //
-    function projectCount: Integer;
+    function singleServiceName: string;
+    procedure addProject(aProject: ICECommonProject);
+    procedure openGroup(const fname: string);
+    procedure saveGroup(const fname: string);
+    procedure closeGroup;
+    function groupModified: boolean;
+    function groupFilename: string;
+    function projectCount: integer;
     function getProject(ix: Integer): ICECommonProject;
-    function findProject(aFilename: string): ICECommonProject;
+    function findProject(const fname: string): ICECommonProject;
+    procedure selectProject(ix: Integer);
     //
     function addItem(const fname: string): TProjectGroupItem;
     property item[ix: integer]: TProjectGroupItem read getItem; default;
@@ -74,11 +77,17 @@ type
 
   TCEProjectGroupWidget = class(TCEWidget, ICEProjectObserver)
     BtnAddProj: TBitBtn;
+    btnAddUnfocused: TBitBtn;
     btnMoveDown: TBitBtn;
     btnMoveUp: TBitBtn;
+    btnFreeFocus: TBitBtn;
     btnRemProj: TBitBtn;
     lstProj: TListView;
     Panel1: TPanel;
+    Panel2: TPanel;
+    StaticText1: TStaticText;
+    procedure btnAddUnfocusedClick(Sender: TObject);
+    procedure btnFreeFocusClick(Sender: TObject);
     procedure BtnAddProjClick(Sender: TObject);
     procedure btnMoveDownClick(Sender: TObject);
     procedure btnMoveUpClick(Sender: TObject);
@@ -86,6 +95,7 @@ type
     procedure lstProjDblClick(Sender: TObject);
   private
     fPrevProj: ICECommonProject;
+    fFreeProj: ICECommonProject;
     fProjSubj: TCEProjectSubject;
     //
     procedure projNew(aProject: ICECommonProject);
@@ -115,6 +125,7 @@ constructor TProjectGroup.create(aOwner: TComponent);
 begin
   inherited;
   fItems := TCollection.Create(TProjectGroupItem);
+  fItems.FPOAttachObserver(self);
   EntitiesConnector.addSingleService(self);
 end;
 
@@ -135,21 +146,28 @@ begin
   exit(TProjectGroupItem(fItems.Items[index]));
 end;
 
-procedure tProjectGroup.doChanged;
+procedure TProjectGroup.FPOObservedChanged(ASender: TObject;
+  Operation: TFPObservedOperation; Data : Pointer);
+begin
+  if operation = ooChange then
+    fModified := true;
+end;
+
+procedure TProjectGroup.doChanged;
 begin
   if assigned(fOnChanged) then
     fOnChanged(self);
 end;
 
-procedure TProjectGroup.setIndex(value: integer);
+procedure TProjectGroup.setProjectIndex(value: integer);
 begin
   if value < 0 then
     value := 0
   else if value > fItems.Count-1 then
     value := fItems.Count-1;
-  if fIndex <> value then
+  if fProjectIndex <> value then
   begin
-    fIndex := value;
+    fProjectIndex := value;
     fModified := true;
   end;
 end;
@@ -168,28 +186,28 @@ begin
   result.fFilename := fname;
 end;
 
-function TProjectGroup.projectCount: Integer;
-begin
-  exit(fItems.Count);
-end;
-
 function TProjectGroup.getProject(ix: Integer): ICECommonProject;
 begin
   item[ix].lazyLoad;
   exit(item[ix].fProj);
 end;
 
-function TProjectGroup.findProject(aFilename: string): ICECommonProject;
+function TProjectGroup.findProject(const fname: string): ICECommonProject;
 var
   i: integer;
 begin
   result := nil;
   for i := 0 to projectCount-1 do
-    if SameFileName(item[i].fFilename, aFilename) then
+    if SameFileName(item[i].fFilename, fname) then
     begin
       item[i].lazyLoad;
       exit(item[i].fProj);
     end;
+end;
+
+procedure TProjectGroup.selectProject(ix: Integer);
+begin
+  setProjectIndex(ix);
 end;
 
 procedure TProjectGroup.afterLoad;
@@ -218,21 +236,19 @@ begin
   TProjectGroupItem(it).fFilename := aProject.filename;
   TProjectGroupItem(it).fProj := aProject;
   aProject.inGroup(true);
-  fIndex := it.Index;
+  fProjectIndex := it.Index;
   doChanged;
 end;
 
-//TODO-cprojectgroup: flag 'modified' not set when item deleted or pos exchanged from GUI
-
-procedure TProjectGroup.openGroup(aFilename: string);
+procedure TProjectGroup.openGroup(const fname: string);
 begin
-  loadFromFile(aFilename);
+  loadFromFile(fname);
   doChanged;
 end;
 
-procedure TProjectGroup.saveGroup(aFilename: string);
+procedure TProjectGroup.saveGroup(const fname: string);
 begin
-  saveToFile(aFilename);
+  saveToFile(fname);
 end;
 
 procedure TProjectGroup.closeGroup;
@@ -240,7 +256,7 @@ begin
   fItems.Clear;
   fFilename:= '';
   fModified:=false;
-  fIndex := -1;
+  fProjectIndex := -1;
   doChanged;
 end;
 
@@ -261,6 +277,11 @@ end;
 function TProjectGroup.groupFilename: string;
 begin
   exit(Filename);
+end;
+
+function TProjectGroup.projectCount: integer;
+begin
+  exit(fItems.Count);
 end;
 
 function TProjectGroup.singleServiceName: string;
@@ -294,6 +315,8 @@ begin
   AssignPng(btnMoveDown, 'arrow_down');
   AssignPng(BtnAddProj, 'document_add');
   AssignPng(btnRemProj, 'document_delete');
+  AssignPng(btnFreeFocus, 'pencil');
+  AssignPng(btnAddUnfocused, 'document_add');
   projectGroup.onChanged:= @handleChanged;
   fProjSubj:= TCEProjectSubject.Create;
 end;
@@ -315,6 +338,8 @@ end;
 procedure TCEProjectGroupWidget.projNew(aProject: ICECommonProject);
 begin
   fPrevProj := aProject;
+  if not aProject.inGroup then
+    fFreeProj := aProject;
 end;
 
 procedure TCEProjectGroupWidget.projChanged(aProject: ICECommonProject);
@@ -325,11 +350,26 @@ end;
 procedure TCEProjectGroupWidget.projClosing(aProject: ICECommonProject);
 begin
   fPrevProj := nil;
+  if aProject = fFreeProj then
+  begin
+    fFreeProj := nil;
+    updateList;
+  end;
 end;
 
 procedure TCEProjectGroupWidget.projFocused(aProject: ICECommonProject);
 begin
   fPrevProj := aProject;
+  if not aProject.inGroup then
+  begin
+    fFreeProj := aProject;
+    updateList;
+  end
+  else if (aProject = fFreeProj) and (aProject.inGroup) then
+  begin
+    fFreeProj := nil;
+    updateList;
+  end;
 end;
 
 procedure TCEProjectGroupWidget.projCompiling(aProject: ICECommonProject);
@@ -355,6 +395,21 @@ begin
   finally
     free;
   end;
+end;
+
+procedure TCEProjectGroupWidget.btnFreeFocusClick(Sender: TObject);
+begin
+  if fFreeProj <> nil then
+    subjProjFocused(fProjSubj, fFreeProj);
+end;
+
+procedure TCEProjectGroupWidget.btnAddUnfocusedClick(Sender: TObject);
+begin
+  if fFreeProj = nil then
+    exit;
+  projectGroup.addProject(fFreeProj);
+  fFreeProj := nil;
+  updateList;
 end;
 
 procedure TCEProjectGroupWidget.btnMoveDownClick(Sender: TObject);
@@ -387,19 +442,17 @@ begin
   if lstProj.ItemIndex = -1 then
     exit;
   TProjectGroupItem(lstProj.Selected.Data).lazyLoad;
-  if fPrevProj <> nil then
-    subjProjClosing(fProjSubj, fPrevProj);
   subjProjFocused(fProjSubj, TProjectGroupItem(lstProj.Selected.Data).project);
-  if projectGroup.index <> lstProj.ItemIndex then
-    projectGroup.index := lstProj.ItemIndex;
+  if projectGroup.projectIndex <> lstProj.ItemIndex then
+    projectGroup.projectIndex := lstProj.ItemIndex;
 end;
 
 procedure TCEProjectGroupWidget.handleChanged(sender: TObject);
 begin
   updateList;
-  if (projectGroup.index <> -1) and (projectGroup.index <> lstProj.ItemIndex) then
+  if (projectGroup.projectIndex <> -1) and (projectGroup.projectIndex <> lstProj.ItemIndex) then
   begin
-    lstProj.ItemIndex := projectGroup.index;
+    lstProj.ItemIndex := projectGroup.projectIndex;
     lstProjDblClick(nil);
   end;
 end;
@@ -419,12 +472,18 @@ begin
       p := projectGroup.item[i];
       p.lazyLoad;
       Data:= p;
-      Caption := p.fFilename.extractFileName;
+      case p.project.getFormat of
+        pfNative: Caption := p.fFilename.extractFileName;
+        pfDub: Caption := TCEDubProject(p.project.getProject).json.Strings['name'];
+      end;
       SubItems.Add(typeStr[p.fProj.getFormat]);
       SubItems.Add(p.fProj.configurationName(p.fProj.getActiveConfigurationIndex));
-      SubItems.Add(p.fFilename.extractFilePath);
     end;
   end;
+  if fFreeProj <> nil then
+    StaticText1.Caption:= 'Free standing: ' + shortenPath(fFreeProj.filename, 30)
+  else
+    StaticText1.Caption:= 'No free standing project';
 end;
 {$ENDREGION}
 

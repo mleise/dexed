@@ -31,6 +31,8 @@ type
       function inGroup: boolean;
       // flag the project as grouped
       procedure inGroup(value: boolean);
+      // in a context of a group, activates the project
+      procedure activate;
       // indicates the project format
       function getFormat: TCEProjectFormat;
       // returns an untyped object that can be casted using getFormat()
@@ -303,15 +305,23 @@ type
     // add a project to the gtoup;
     procedure addProject(aProject: ICECommonProject);
     // open a group of project.
-    procedure openGroup(aFilename: string);
+    procedure openGroup(const fname: string);
     // save the group to a file.
-    procedure saveGroup(aFilename: string);
+    procedure saveGroup(const fname: string);
     // close a group a initialize a new one
     procedure closeGroup;
     // indicates wether one of the project is modified or if the group is changed
     function groupModified: boolean;
     // indicates the group filename
     function groupFilename: string;
+    // indicates the count of project in the group
+    function projectCount: integer;
+    // returns the nth project
+    function getProject(index: Integer): ICECommonProject;
+    // tries to find the project named fname.
+    function findProject(const fname: string): ICECommonProject;
+    // selects the nth project
+    procedure selectProject(index: Integer);
   end;
 
 

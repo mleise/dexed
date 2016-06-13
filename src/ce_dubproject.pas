@@ -60,6 +60,7 @@ type
     procedure loadFromFile(const aFilename: string);
     procedure saveToFile(const aFilename: string);
     //
+    procedure activate;
     function inGroup: boolean;
     procedure inGroup(value: boolean);
     function getFormat: TCEProjectFormat;
@@ -145,6 +146,11 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION ICECommonProject: project props ---------------------------------------}
+procedure TCEDubProject.activate;
+begin
+  subjProjFocused(fProjectSubject, self as ICECommonProject);
+end;
+
 function TCEDubProject.inGroup: boolean;
 begin
   exit(fInGroup);
@@ -252,6 +258,8 @@ var
   saver: TMemoryStream;
   str: string;
 begin
+  if aFilename <> fFilename then
+    inGroup(false);
   saver := TMemoryStream.Create;
   try
     fFilename := aFilename;

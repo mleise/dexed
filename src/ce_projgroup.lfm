@@ -1,20 +1,20 @@
 inherited CEProjectGroupWidget: TCEProjectGroupWidget
   Left = 866
-  Height = 240
+  Height = 268
   Top = 277
   Width = 561
   Caption = 'Project group'
-  ClientHeight = 240
+  ClientHeight = 268
   ClientWidth = 561
   inherited Back: TPanel
-    Height = 240
+    Height = 268
     Width = 561
-    ClientHeight = 240
+    ClientHeight = 268
     ClientWidth = 561
     inherited Content: TPanel
-      Height = 240
+      Height = 268
       Width = 561
-      ClientHeight = 240
+      ClientHeight = 268
       ClientWidth = 561
       object Panel1: TPanel[0]
         Left = 4
@@ -78,12 +78,11 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
       object lstProj: TListView[1]
         Left = 4
-        Height = 202
+        Height = 200
         Top = 34
         Width = 553
         Align = alClient
         AutoSort = False
-        AutoWidthLastColumn = True
         BorderSpacing.Around = 4
         Columns = <        
           item
@@ -99,11 +98,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
           item
             AutoSize = True
             Caption = 'Configuration'
-            Width = 94
-          end        
-          item
-            Caption = 'Location'
-            Width = 369
+            Width = 463
           end>
         GridLines = True
         ReadOnly = True
@@ -111,6 +106,52 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         TabOrder = 1
         ViewStyle = vsReport
         OnDblClick = lstProjDblClick
+      end
+      object Panel2: TPanel[2]
+        Left = 4
+        Height = 26
+        Top = 238
+        Width = 553
+        Align = alBottom
+        BorderSpacing.Around = 4
+        BevelOuter = bvNone
+        ClientHeight = 26
+        ClientWidth = 553
+        TabOrder = 2
+        object btnFreeFocus: TBitBtn
+          Left = 497
+          Height = 26
+          Hint = 'Put the focus on the ungrouped project'
+          Top = 0
+          Width = 28
+          Align = alRight
+          Layout = blGlyphBottom
+          OnClick = btnFreeFocusClick
+          Spacing = 0
+          TabOrder = 0
+        end
+        object StaticText1: TStaticText
+          Left = 2
+          Height = 22
+          Top = 2
+          Width = 493
+          Align = alClient
+          BorderSpacing.Around = 2
+          BorderStyle = sbsSunken
+          TabOrder = 1
+        end
+        object btnAddUnfocused: TBitBtn
+          Left = 525
+          Height = 26
+          Hint = 'Put the ungrouped project in the group'
+          Top = 0
+          Width = 28
+          Align = alRight
+          Layout = blGlyphBottom
+          OnClick = btnAddUnfocusedClick
+          Spacing = 0
+          TabOrder = 2
+        end
       end
     end
   end

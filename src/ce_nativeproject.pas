@@ -89,6 +89,7 @@ type
     function addConfiguration: TCompilerConfiguration;
     procedure getOpts(const aList: TStrings);
     //
+    procedure activate;
     procedure inGroup(value: boolean);
     function inGroup: boolean;
     function getFormat: TCEProjectFormat;
@@ -189,6 +190,11 @@ begin
   fInGroup:=value;
 end;
 
+procedure TCENativeProject.activate;
+begin
+  subjProjFocused(fProjectSubject, self as ICECommonProject);
+end;
+
 function TCENativeProject.getFormat: TCEProjectFormat;
 begin
   exit(pfNative);
@@ -252,6 +258,8 @@ var
   i: NativeInt;
 begin
   beginUpdate;
+  if aFilename <> fFilename then
+    inGroup(false);
   oldBase := fBasePath;
   fBasePath := aFilename.extractFilePath;
   //
