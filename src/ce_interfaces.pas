@@ -133,6 +133,11 @@ type
 
   (**
    * An implementer is informed about the current project(s).
+   * Usually observer should keep track of two ICECOmmonProject:
+   * - the free project: the project that's not in a group and that has to
+   *  be freed manualy in order to be replaced.
+   * - the current project which can be either the free project or one of the
+   *  project in the group
    *)
   ICEProjectObserver = interface(ISubjectType)
   ['ICEProjectObserver']

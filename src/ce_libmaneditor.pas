@@ -59,6 +59,7 @@ type
       );
   private
     fProj: ICECommonProject;
+    fFreeProj: ICECommonProject;
     procedure updateButtonsState;
     procedure projNew(aProject: ICECommonProject);
     procedure projChanged(aProject: ICECommonProject);
@@ -121,6 +122,8 @@ end;
 procedure TCELibManEditorWidget.projNew(aProject: ICECommonProject);
 begin
   fProj := aProject;
+  if not aProject.inGroup then
+    fFreeProj := aProject;
 end;
 
 procedure TCELibManEditorWidget.projChanged(aProject: ICECommonProject);
@@ -134,15 +137,17 @@ end;
 
 procedure TCELibManEditorWidget.projClosing(aProject: ICECommonProject);
 begin
-  if  fProj <> aProject then
-    exit;
   fProj := nil;
+  if aProject = fFreeProj then
+    fFreeProj := nil;
   updateButtonsState;
 end;
 
 procedure TCELibManEditorWidget.projFocused(aProject: ICECommonProject);
 begin
   fProj := aProject;
+  if not aProject.inGroup then
+    fFreeProj := aProject;
   updateButtonsState;
 end;
 
@@ -511,24 +516,22 @@ begin
   //
   if isValidNativeProject(fname) then
   begin
-    if assigned(fProj) then
+    if assigned(fFreeProj) then
     begin
-      if fProj.modified and not fProj.inGroup and
-        (dlgFileChangeClose(fProj.filename) = mrCancel) then
-          exit;
-      fProj.getProject.Free;
+      if fFreeProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
+        exit;
+      fFreeProj.getProject.Free;
     end;
     TCENativeProject.create(nil);
     fProj.loadFromFile(fname);
   end
   else if isValidDubProject(fname) then
   begin
-    if assigned(fProj) then
+    if assigned(fFreeProj) then
     begin
-      if fProj.modified and not fProj.inGroup and
-        (dlgFileChangeClose(fProj.filename) = mrCancel) then
-          exit;
-      fProj.getProject.Free;
+      if fFreeProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
+        exit;
+      fFreeProj.getProject.Free;
     end;
     TCEDubProject.create(nil);
     fProj.loadFromFile(fname);

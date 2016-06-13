@@ -85,6 +85,7 @@ type
     procedure TreeEnter(Sender: TObject);
   private
     fProj: ICECommonProject;
+    fFreeProj: ICECommonProject;
     fFavorites: TStringList;
     fLastFold: string;
     fLastListOrTree: TControl;
@@ -307,6 +308,8 @@ end;
 procedure TCEMiniExplorerWidget.projNew(aProject: ICECommonProject);
 begin
   fProj := aProject;
+  if not aProject.inGroup then
+    fFreeProj := aProject;
 end;
 
 procedure TCEMiniExplorerWidget.projChanged(aProject: ICECommonProject);
@@ -315,13 +318,16 @@ end;
 
 procedure TCEMiniExplorerWidget.projClosing(aProject: ICECommonProject);
 begin
-  if fProj = aProject then
-    fProj := nil;
+  fProj := nil;
+  if aProject = fFreeProj then
+    fFreeProj := nil;
 end;
 
 procedure TCEMiniExplorerWidget.projFocused(aProject: ICECommonProject);
 begin
   fProj := aProject;
+  if not aProject.inGroup then
+      fFreeProj := aProject;
   if visible and aProject.fileName.fileExists and fContextExpand then
     expandPath(aProject.fileName.extractFilePath);
 end;
@@ -470,24 +476,22 @@ begin
   {$ENDIF}
   if isValidNativeProject(fname) then
   begin
-    if assigned(fProj) then
+    if assigned(fFreeProj) then
     begin
-      if not fProj.inGroup and fProj.modified and
-        (dlgFileChangeClose(fProj.filename) = mrCancel) then
-          exit;
-      fProj.getProject.Free;
+      if fFreeProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
+        exit;
+      fFreeProj.getProject.Free;
     end;
     TCENativeProject.create(nil);
     proj := true;
   end
   else if isValidDubProject(fname) then
   begin
-    if assigned(fProj) then
+    if assigned(fFreeProj) then
     begin
-      if not fProj.inGroup and fProj.modified and
-        (dlgFileChangeClose(fProj.filename) = mrCancel) then
-          exit;
-      fProj.getProject.Free;
+      if fFreeProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
+        exit;
+      fFreeProj.getProject.Free;
     end;
     TCEDubProject.create(nil);
     proj := true;

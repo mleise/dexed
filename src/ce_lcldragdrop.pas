@@ -14,6 +14,7 @@ type
   TDDHandler = class(TObject, ICEProjectObserver)
   private
     fProj: ICECommonProject;
+    fFreeProj: ICECommonProject;
     procedure projNew(aProject: ICECommonProject);
     procedure projChanged(aProject: ICECommonProject);
     procedure projClosing(aProject: ICECommonProject);
@@ -52,6 +53,8 @@ end;
 procedure TDDHandler.projNew(aProject: ICECommonProject);
 begin
   fProj := aProject;
+  if not fProj.inGroup then
+    fFreeProj := fProj;
 end;
 
 procedure TDDHandler.projChanged(aProject: ICECommonProject);
@@ -60,13 +63,16 @@ end;
 
 procedure TDDHandler.projClosing(aProject: ICECommonProject);
 begin
-  if (fProj <> nil) and (fProj = aProject) then
-    fProj := nil;
+  fProj := nil;
+  if aProject = fFreeProj then
+    fFreeProj := nil;
 end;
 
 procedure TDDHandler.projFocused(aProject: ICECommonProject);
 begin
   fProj := aProject;
+  if not fProj.inGroup then
+    fFreeProj := fProj;
 end;
 
 procedure TDDHandler.projCompiling(aProject: ICECommonProject);
@@ -128,24 +134,22 @@ begin
 
   if isValidNativeProject(fname) then
   begin
-    if assigned(fProj) then
+    if assigned(fFreeProj) then
     begin
-      if fProj.modified and not fProj.inGroup and
-        (dlgFileChangeClose(fProj.filename) = mrCancel) then
-          exit;
-      fProj.getProject.Free;
+      if fFreeProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
+        exit;
+      fFreeProj.getProject.Free;
     end;
     TCENativeProject.create(nil);
     proj := true;
   end
   else if isValidDubProject(fname) then
   begin
-    if assigned(fProj) then
+    if assigned(fFreeProj) and not fFreeProj.inGroup then
     begin
-      if fProj.modified and not fProj.inGroup and
-        (dlgFileChangeClose(fProj.filename) = mrCancel) then
-          exit;
-      fProj.getProject.Free;
+      if fProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
+        exit;
+      fFreeProj.getProject.Free;
     end;
     TCEDubProject.create(nil);
     proj := true;
