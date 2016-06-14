@@ -145,6 +145,7 @@ type
     fDisableFileDateCheck: boolean;
     fDetectIndentMode: boolean;
     fPhobosDocRoot: string;
+    fAlwaysAdvancedFeatures: boolean;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseFileBytePos: Integer;
@@ -225,6 +226,7 @@ type
     property isTemporary: boolean read getIfTemp;
     property TextView;
     //
+    property alwaysAdvancedFeatures: boolean read fAlwaysAdvancedFeatures write fAlwaysAdvancedFeatures;
     property phobosDocRoot: string read fPhobosDocRoot write fPhobosDocRoot;
     property detectIndentMode: boolean read fDetectIndentMode write fDetectIndentMode;
     property disableFileDateCheck: boolean read fDisableFileDateCheck write fDisableFileDateCheck;
@@ -799,7 +801,8 @@ var
   numTabs: integer = 0;
   numSpac: integer = 0;
 begin
-
+  if not fIsDSource and not alwaysAdvancedFeatures then
+      exit;
   i := CaretY - 1;
   while true do
   begin
@@ -980,6 +983,8 @@ begin
     ecCompletionMenu:
     begin
       fCanAutoDot:=false;
+      if not fIsDSource and not alwaysAdvancedFeatures then
+        exit;
       fCompletion.Execute(GetWordAtRowCol(LogicalCaretXY),
         ClientToScreen(point(CaretXPix, CaretYPix + LineHeight)));
     end;
@@ -991,12 +996,16 @@ begin
     begin
       hideCallTips;
       hideDDocs;
+      if not fIsDSource and not alwaysAdvancedFeatures then
+        exit;
       showDDocs;
     end;
     ecShowCallTips:
     begin
       hideCallTips;
       hideDDocs;
+      if not fIsDSource and not alwaysAdvancedFeatures then
+        exit;
       showCallTips(true);
     end;
     ecCurlyBraceClose:
@@ -1226,6 +1235,8 @@ var
   str: string;
   i, x: integer;
 begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   if not fCallTipWin.Visible then
     fCallTipStrings.Clear;
   str := LineText[1..CaretX];
@@ -1273,6 +1284,8 @@ procedure TCESynMemo.showCallTips(const tips: string);
 var
   pnt: TPoint;
 begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   if tips.isEmpty then exit;
   //
   pnt := ClientToScreen(point(CaretXPix, CaretYPix));
@@ -1308,6 +1321,8 @@ var
   str: string;
 begin
   fCanShowHint := false;
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   DcdWrapper.getDdocFromCursor(str);
   //
   if str.isNotEmpty then
@@ -1344,6 +1359,8 @@ end;
 {$REGION Completion ------------------------------------------------------------}
 procedure TCESynMemo.completionExecute(sender: TObject);
 begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   fCompletion.TheForm.Font.Size := Font.Size;
   getCompletionList;
 end;
@@ -1471,7 +1488,8 @@ var
   ext: string;
 begin
   ext := aFilename.extractFileExt;
-  if not hasDlangSyntax(ext) then
+  fIsDsource := hasDlangSyntax(ext);
+  if not fIsDsource then
     Highlighter := TxtSyn;
   Lines.LoadFromFile(aFilename);
   fFilename := aFilename;
@@ -1510,7 +1528,8 @@ begin
   Lines.SaveToFile(aFilename);
   fFilename := aFilename;
   ext := aFilename.extractFileExt;
-  if hasDlangSyntax(ext) then
+  fIsDsource := hasDlangSyntax(ext);
+  if fIsDsource then
     Highlighter := fD2Highlighter;
   FileAge(fFilename, fFileDate);
   fModified := false;

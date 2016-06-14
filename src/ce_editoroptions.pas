@@ -60,6 +60,7 @@ type
     fCompletionMenuLines: Byte;
     fAutoCLoseCurlyBrace: TBraceAutoCloseStyle;
     fPhobosDocRoot: TCEPathname;
+    fAlwaysAdvancedFeatures: boolean;
     //
     procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
@@ -77,6 +78,7 @@ type
     procedure setCompletionMenuLines(value: byte);
     procedure setLineNumEvery(value: integer);
   published
+    property alwaysAdvancedFeatures: boolean read fAlwaysAdvancedFeatures write fAlwaysAdvancedFeatures;
     property autoCloseCurlyBrace: TBraceAutoCloseStyle read fAutoCLoseCurlyBrace write fAutoCLoseCurlyBrace default TBraceAutoCloseStyle.autoCloseNever;
     property autoDotDelay: integer read fAutoDotDelay write SetautoDotDelay;
     property background: TColor read fBackground write fBackground default clWhite;
@@ -269,6 +271,7 @@ begin
   begin
     srcopt := TCEEditorOptionsBase(src);
     //
+    fAlwaysAdvancedFeatures:=srcopt.fAlwaysAdvancedFeatures;
     fResetFontSize:=srcopt.fResetFontSize;
     fAutoCLoseCurlyBrace := srcopt.fAutoCLoseCurlyBrace;
     fCompletionMenuWidth:=srcopt.fCompletionMenuWidth;
@@ -651,6 +654,7 @@ begin
   anEditor.IdentifierMatchOptions:= identifierMatchOptions;
   anEditor.detectIndentMode := detectIndentMode;
   anEditor.phobosDocRoot:=fPhobosDocRoot;
+  anEditor.alwaysAdvancedFeatures:=fAlwaysAdvancedFeatures;
   for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
     kst := anEditor.Keystrokes.Items[i];

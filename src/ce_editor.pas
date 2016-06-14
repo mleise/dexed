@@ -678,9 +678,12 @@ end;
 
 procedure TCEEditorWidget.mnuedCallTipClick(Sender: TObject);
 begin
-  if fDoc.isNil then exit;
+  if fDoc.isNil then
+    exit;
   mnuEditor.Close;
   fDoc.hideDDocs;
+  if not fDoc.IsDSource and not fDoc.alwaysAdvancedFeatures then
+      exit;
   fDoc.showCallTips;
 end;
 
@@ -704,13 +707,18 @@ end;
 
 procedure TCEEditorWidget.mnuedInvAllNoneClick(Sender: TObject);
 begin
-  if fDoc.isNotNil then
-    fDoc.CommandProcessor(ecSwapVersionAllNone, '', nil);
+  if fDoc.isNil then
+    exit;
+  if not fDoc.IsDSource and not fDoc.alwaysAdvancedFeatures then
+    exit;
+  fDoc.CommandProcessor(ecSwapVersionAllNone, '', nil);
 end;
 
 procedure TCEEditorWidget.MenuItem5Click(Sender: TObject);
 begin
   if fDoc.isNil then
+    exit;
+  if not fDoc.IsDSource and not fDoc.alwaysAdvancedFeatures then
     exit;
   with TSaveDialog.Create(nil) do
   try
@@ -749,6 +757,8 @@ begin
   if fDoc.isNil then exit;
   mnuEditor.Close;
   fDoc.hideCallTips;
+  if not fDoc.IsDSource and not fDoc.alwaysAdvancedFeatures then
+    exit;
   fDoc.showDDocs;
 end;
 
@@ -780,7 +790,7 @@ procedure TCEEditorWidget.mnuEditorPopup(Sender: TObject);
 begin
   if fDoc.isNil then exit;
   //
-  mnuedCut.Enabled:=fDOc.SelAvail;
+  mnuedCut.Enabled:=fDoc.SelAvail;
   mnuedPaste.Enabled:=fDoc.CanPaste;
   mnuedCopy.Enabled:=fDoc.SelAvail;
   mnuedUndo.Enabled:=fDoc.CanUndo;
