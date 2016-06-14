@@ -192,6 +192,7 @@ type
     constructor Create(aOwner: TComponent); override;
     destructor destroy; override;
     procedure setFocus; override;
+    procedure enterEdit;
     //
     procedure checkFileDate;
     procedure loadFromFile(const aFilename: string);
@@ -600,11 +601,19 @@ begin
     Font.Size := fDefaultFontSize;
 end;
 
+procedure TCESynMemo.enterEdit;
+var
+  key: word = 0;
+begin
+  //MouseDown(mbLeft, [], CaretXPix, CaretYPix);
+  //MouseUp(mbLeft, [], CaretXPix, CaretYPix);
+  //TODO-cbugfix: editor has not the input focus after Ctrl+Tab (after pagecontrol.nextPage via shortcut)
+end;
+
 procedure TCESynMemo.setFocus;
 begin
   inherited;
   checkFileDate;
-  //
   highlightCurrentIdentifier;
   subjDocFocused(TCEMultiDocSubject(fMultiDocSubject), self);
 end;

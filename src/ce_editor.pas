@@ -9,25 +9,39 @@ uses
   ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder, dialogs,
   SynPluginSyncroEdit, SynEdit, SynHighlighterMulti, ce_dialogs,
   ce_widget, ce_interfaces, ce_synmemo, ce_dlang, ce_common, ce_dcd, ce_observer,
-  ce_sharedres, ce_controls, ce_writableComponent;
+  ce_sharedres, ce_controls, ce_writableComponent, LMessages;
 
 type
 
   TCEEditorWidget = class;
 
-  TCEPagesOptions = class(TWritableLfmTextComponent, ICEEditableOptions)
+  TCEPagesOptions = class(TWritableLfmTextComponent, ICEEditableOptions, ICEEditableShortCut)
   private
     fEditorWidget: TCEEditorWidget;
     fPageButtons: TCEPageControlButtons;
     fPageOptions: TCEPageControlOptions;
+    fMoveLeft: TShortCut;
+    fMoveRight: TShortCut;
+    fNextPage: TShortCut;
+    fPrevPage: TShortCut;
+    fShCount: integer;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
     procedure optionedEvent(anEvent: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
+    //
+    function scedWantFirst: boolean;
+    function scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
+    procedure scedSendItem(const category, identifier: string; aShortcut: TShortcut);
+    procedure scedSendDone;
   published
     property pageButtons: TCEPageControlButtons read fPageButtons write fPageButtons;
     property pageOptions: TCEPageControlOptions read fPageOptions write fPageOptions;
+    property nextPage: TShortCut read fNextPage write fNextPage;
+    property previousPage: TShortCut read fPrevPage write fPrevPage;
+    property moveLeft: TShortCut read fMoveLeft write fMoveLeft;
+    property moveRight: TShortCut read fMoveRight write fMoveRight;
   public
     procedure Assign(Source: TPersistent); override;
     procedure AssignTo(Target: TPersistent); override;
@@ -77,8 +91,6 @@ type
     procedure mnuedUndoClick(Sender: TObject);
     procedure mnuedRedoClick(Sender: TObject);
     procedure mnuedJum2DeclClick(Sender: TObject);
-    procedure PageControlChanged(Sender: TObject);
-    procedure PageControlChanging(Sender: TObject; var AllowChange: Boolean);
   protected
     procedure updateDelayed; override;
     procedure updateImperative; override;
@@ -91,6 +103,8 @@ type
     fTokList: TLexTokenList;
     fModStart: boolean;
     fLastCommand: TSynEditorCommand;
+    procedure PageControlChanged(Sender: TObject);
+    procedure PageControlChanging(Sender: TObject; var AllowChange: Boolean);
     procedure updateStatusBar;
     procedure updatePageCaption;
     procedure pageBtnAddCLick(Sender: TObject);
@@ -211,6 +225,42 @@ function TCEPagesOptions.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
+
+function TCEPagesOptions.scedWantFirst: boolean;
+begin
+  fShCount := 0;
+  exit(true);
+end;
+
+function TCEPagesOptions.scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
+begin
+  category := 'Editor pages';
+  case fShCount of
+    0: begin identifier := 'Select next page'; aShortcut:= fNextPage; end;
+    1: begin identifier := 'Select previous page'; aShortcut:= fPrevPage; end;
+    2: begin identifier := 'Move page left'; aShortcut:= fMoveLeft; end;
+    3: begin identifier := 'Move page right'; aShortcut:= fMoveRight; end;
+  end;
+  fShCount += 1;
+  result := fShCount <> 4;
+end;
+
+procedure TCEPagesOptions.scedSendItem(const category, identifier: string; aShortcut: TShortcut);
+begin
+  if fShCount = 4 then
+    fShCount := 0;
+  case fShCount of
+    0: fNextPage := aShortcut;
+    1: fPrevPage := aShortcut;
+    2: fMoveLeft := aShortcut;
+    3: fMoveRight:= aShortcut;
+  end;
+end;
+
+procedure TCEPagesOptions.scedSendDone;
+begin
+  fShCount := 0;
+end;
 {$ENDREGION}
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
@@ -270,6 +320,7 @@ function TCEEditorWidget.closeQuery: boolean;
 begin
   result := inherited and Parent.isNil;
 end;
+
 {$ENDREGION}
 
 {$REGION ICEMultiDocObserver ---------------------------------------------------}
@@ -315,6 +366,7 @@ begin
   fDoc := aDoc;
   focusedEditorChanged;
   updateImperative;
+  fDoc.enterEdit;
 end;
 
 procedure TCEEditorWidget.docChanged(aDoc: TCESynMemo);
@@ -472,17 +524,28 @@ begin
 end;
 
 procedure TCEEditorWidget.memoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+  sh: TShortCut;
 begin
   case Key of
-    VK_CLEAR,VK_RETURN,VK_BACK : fKeyChanged := true;
+    VK_CLEAR,VK_RETURN,VK_BACK :
+      fKeyChanged := true;
     VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT:
-    begin
-      if Shift <> [ssCtrl, ssAlt, ssShift] then
-        updateImperative
-      else begin
-        if Key = VK_LEFT then pageControl.pageIndex := pageControl.pageIndex -1
-        else if Key = VK_RIGHT then pageControl.pageIndex := pageControl.pageIndex +1;
-      end;
+      if Shift = [] then
+        updateImperative;
+    else begin
+      sh := KeyToShortCut(Key, shift);
+      if sh = fOptions.fNextPage then
+      begin
+        pageControl.pageIndex:= (pageControl.pageIndex + 1) mod pageControl.pageCount;
+      end
+      else if sh = fOptions.fPrevPage then
+        pageControl.pageIndex:= (pageControl.pageIndex - 1) mod pageControl.pageCount
+      else if sh = fOptions.fMoveLeft then
+        pageControl.movePageLeft
+      else if sh = fOptions.fMoveRight then
+        pageControl.movePageRight
+      else sh := 0;
     end;
   end;
   if fKeyChanged then
