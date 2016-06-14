@@ -1,4 +1,4 @@
-unit ce_anyprojloader;
+unit ce_projutils;
 {$I ce_defines.inc}
 
 interface
@@ -6,6 +6,9 @@ interface
 uses
   Classes, SysUtils,
   ce_nativeproject, ce_dubproject, ce_interfaces, ce_common, ce_observer;
+
+type
+  TCEProjectFileFormat = (pffNone, pffCe, pffDub);
 
 (**
  * Loads either a DUB or a CE project. If the filename is invalid or if it
@@ -15,7 +18,37 @@ uses
  *)
 function loadProject(const filename: string; discret: boolean): ICECommonProject;
 
+(**
+ * Indicates wether a file is a project, either CE or DUB.
+ *)
+function isProject(const filename: string): boolean;
+
+(**
+ * Indicates wether a file is a project, either CE or DUB.
+ *)
+function projectFormat(const filename: string): TCEProjectFileFormat;
+
 implementation
+
+function isProject(const filename: string): boolean;
+begin
+  if filename.extractFileExt = '.json' then
+    result := isValidDubProject(filename)
+  else
+    result := isValidNativeProject(filename);
+end;
+
+function projectFormat(const filename: string): TCEProjectFileFormat;
+begin
+  result := pffNone;
+  if filename.extractFileExt = '.json' then
+  begin
+    if isValidDubProject(filename) then
+      result := pffDub;
+  end
+  else
+    if isValidNativeProject(filename) then result := pffCe;
+end;
 
 function loadProject(const filename: string; discret: boolean): ICECommonProject;
 var

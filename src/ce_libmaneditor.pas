@@ -9,7 +9,7 @@ uses
   Menus, ComCtrls, Buttons, LazFileUtils, strutils, fphttpclient, StdCtrls, xfpjson,
   ce_widget, ce_interfaces, ce_nativeproject, ce_dmdwrap, ce_common, ce_dialogs,
   ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_stringrange,
-  ce_libman;
+  ce_libman, ce_projutils;
 
 type
 
@@ -509,12 +509,14 @@ end;
 procedure TCELibManEditorWidget.btnOpenProjClick(Sender: TObject);
 var
   fname: string;
+  fmt: TCEProjectFileFormat;
 begin
   if List.Selected.isNil then exit;
   fname := List.Selected.SubItems[2];
   if not fname.fileExists then exit;
   //
-  if isValidNativeProject(fname) then
+  fmt := projectFormat(fname);
+  if fmt in [pffCe, pffDub] then
   begin
     if assigned(fFreeProj) then
     begin
@@ -522,18 +524,10 @@ begin
         exit;
       fFreeProj.getProject.Free;
     end;
-    TCENativeProject.create(nil);
-    fProj.loadFromFile(fname);
-  end
-  else if isValidDubProject(fname) then
-  begin
-    if assigned(fFreeProj) then
-    begin
-      if fFreeProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
-        exit;
-      fFreeProj.getProject.Free;
-    end;
-    TCEDubProject.create(nil);
+    if fmt = pffCe then
+      TCENativeProject.create(nil)
+    else
+      TCEDubProject.create(nil);
     fProj.loadFromFile(fname);
   end
   else dlgOkInfo('the project file for this library seems to be invalid');

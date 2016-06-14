@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Controls, ComCtrls,
   ce_common, ce_nativeproject, ce_dubproject, ce_interfaces,
-  ce_dialogs;
+  ce_dialogs, ce_projutils;
 
 type
 
@@ -126,13 +126,14 @@ end;
 procedure TDDHandler.DragDrop(Sender, Source: TObject; X, Y: Integer);
 var
   fname: string;
-  proj: boolean = false;
+  fmt: TCEProjectFileFormat;
 begin
   if Source.isNil then exit;
   fname := getFilename(Source);
   if not fname.fileExists then exit;
 
-  if isValidNativeProject(fname) then
+  fmt := projectFormat(fname);
+  if fmt in [pffCe, pffDub] then
   begin
     if assigned(fFreeProj) then
     begin
@@ -140,24 +141,13 @@ begin
         exit;
       fFreeProj.getProject.Free;
     end;
-    TCENativeProject.create(nil);
-    proj := true;
+    if fmt = pffCe then
+      TCENativeProject.create(nil)
+    else
+      TCEDubProject.create(nil);
+    fProj.loadFromFile(fname);
   end
-  else if isValidDubProject(fname) then
-  begin
-    if assigned(fFreeProj) and not fFreeProj.inGroup then
-    begin
-      if fProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
-        exit;
-      fFreeProj.getProject.Free;
-    end;
-    TCEDubProject.create(nil);
-    proj := true;
-  end;
-  if assigned(fProj) and proj then
-    fProj.loadFromFile(fname)
-  else
-    getMultiDocHandler.openDocument(fname);
+  else getMultiDocHandler.openDocument(fname);
 end;
 
 initialization

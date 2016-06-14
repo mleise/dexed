@@ -13,6 +13,7 @@ type
 
   TCEDubProject = class(TComponent, ICECommonProject)
   private
+    fProjectName: string;
     fInGroup: boolean;
     fDubProc: TCEProcess;
     fPreCompilePath: string;
@@ -88,6 +89,7 @@ type
     function targetUpToDate: boolean;
     //
     property json: TJSONObject read fJSON;
+    property packageName: string read fPackageName;
   end;
 
   // these 9 built types always exist

@@ -397,7 +397,7 @@
         <ResourceBaseClass Value="Form"/>
       </Unit48>
       <Unit49>
-        <Filename Value="..\src\ce_anyprojloader.pas"/>
+        <Filename Value="..\src\ce_projutils.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit49>
     </Units>

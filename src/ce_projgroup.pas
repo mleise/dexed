@@ -7,7 +7,7 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, ExtCtrls, Menus,
   Buttons, dialogs, ComCtrls, StdCtrls,
   ce_widget, ce_common, ce_interfaces, ce_writableComponent, ce_observer,
-  ce_nativeproject, ce_dubproject, ce_anyprojloader, ce_sharedres;
+  ce_nativeproject, ce_dubproject, ce_projutils, ce_sharedres;
 
 type
 
@@ -474,14 +474,19 @@ begin
       Data:= p;
       case p.project.getFormat of
         pfNative: Caption := p.fFilename.extractFileName;
-        pfDub: Caption := TCEDubProject(p.project.getProject).json.Strings['name'];
+        pfDub: Caption := TCEDubProject(p.project.getProject).packageName;
       end;
       SubItems.Add(typeStr[p.fProj.getFormat]);
       SubItems.Add(p.fProj.configurationName(p.fProj.getActiveConfigurationIndex));
     end;
   end;
   if fFreeProj <> nil then
-    StaticText1.Caption:= 'Free standing: ' + shortenPath(fFreeProj.filename, 30)
+  begin
+    case fFreeProj.getFormat of
+      pfNative: StaticText1.Caption:= 'Free standing: ' + fFreeProj.filename.extractFileName;
+      pfDub: StaticText1.Caption:= 'Free standing: ' + TCEDubProject(fFreeProj.getProject).packageName;
+    end;
+  end
   else
     StaticText1.Caption:= 'No free standing project';
 end;

@@ -2904,6 +2904,7 @@ begin
   fMsgs.message('start compiling a project group...', nil, amcAll, amkInf);
   for i:= 0 to fProjectGroup.projectCount-1 do
   begin
+    //TODO-cprojectgroup: verify that compilation is not paralell since the projects use an async proc.
     fProjectGroup.getProject(i).activate;
     fProject.compile;
   end;

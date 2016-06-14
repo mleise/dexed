@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, FileUtil, ListFilterEdit, Forms, Controls, Graphics,
   ExtCtrls, Menus, ComCtrls, Buttons, lcltype, strutils, ce_widget, ce_sharedres,
   ce_common, ce_interfaces, ce_observer, ce_writableComponent, ce_dubproject,
-  ce_nativeproject, EditBtn, ce_dialogs, ce_synmemo;
+  ce_nativeproject, EditBtn, ce_dialogs, ce_synmemo, ce_projutils;
 
 type
 
@@ -465,7 +465,7 @@ end;
 procedure TCEMiniExplorerWidget.btnEditClick(Sender: TObject);
 var
   fname: string;
-  proj: boolean = false;
+  fmt: TCEProjectFileFormat;
 begin
   if lstFiles.Selected.isNil then exit;
   if lstFiles.Selected.Data.isNil then exit;
@@ -474,7 +474,8 @@ begin
   {$IFNDEF WINDOWS}
   fname := fname[2..fname.length];
   {$ENDIF}
-  if isValidNativeProject(fname) then
+  fmt := projectFormat(fname);
+  if fmt in [pffCe, pffDub] then
   begin
     if assigned(fFreeProj) then
     begin
@@ -482,24 +483,13 @@ begin
         exit;
       fFreeProj.getProject.Free;
     end;
-    TCENativeProject.create(nil);
-    proj := true;
+    if fmt = pffCe then
+      TCENativeProject.create(nil)
+    else
+      TCEDubProject.create(nil);
+    fProj.loadFromFile(fname);
   end
-  else if isValidDubProject(fname) then
-  begin
-    if assigned(fFreeProj) then
-    begin
-      if fFreeProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
-        exit;
-      fFreeProj.getProject.Free;
-    end;
-    TCEDubProject.create(nil);
-    proj := true;
-  end;
-  if assigned(fProj) and proj then
-    fProj.loadFromFile(fname)
-  else
-    getMultiDocHandler.openDocument(fname);
+  else getMultiDocHandler.openDocument(fname);
 end;
 
 procedure TCEMiniExplorerWidget.lstFilesDblClick(Sender: TObject);
