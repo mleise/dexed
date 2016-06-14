@@ -13,7 +13,6 @@ type
 
   TCEDubProject = class(TComponent, ICECommonProject)
   private
-    fProjectName: string;
     fInGroup: boolean;
     fDubProc: TCEProcess;
     fPreCompilePath: string;

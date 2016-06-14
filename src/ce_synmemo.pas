@@ -145,6 +145,7 @@ type
     fDisableFileDateCheck: boolean;
     fDetectIndentMode: boolean;
     fPhobosDocRoot: string;
+    procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseFileBytePos: Integer;
     procedure changeNotify(Sender: TObject);
@@ -197,11 +198,13 @@ type
     procedure save;
     procedure saveTempFile;
     //
+    procedure curlyBraceCloseAndIndent;
+    procedure commentSelection;
+    procedure commentIdentifier;
     procedure renameIdentifier;
     procedure invertVersionAllNone;
     procedure showCallTips(findOpenParen: boolean = true);
     procedure hideCallTips;
-    procedure decCallTipsLvl;
     procedure showDDocs;
     procedure hideDDocs;
     procedure ShowPhobosDoc;
@@ -789,7 +792,7 @@ begin
   end;
 end;
 
-procedure curlyBraceCloseAndIndent(editor: TSynEdit);
+procedure TCESynMemo.curlyBraceCloseAndIndent;
 var
   i: integer;
   beg: string = '';
@@ -797,12 +800,12 @@ var
   numSpac: integer = 0;
 begin
 
-  i := editor.CaretY - 1;
+  i := CaretY - 1;
   while true do
   begin
     if i < 0 then
       break;
-    beg := editor.Lines[i];
+    beg := Lines[i];
     if (Pos('{', beg) = 0) then
       i -= 1
     else
@@ -817,76 +820,76 @@ begin
       else break;
     end;
   end;
-  numTabs += numSpac div editor.TabWidth;
+  numTabs += numSpac div TabWidth;
 
-  editor.BeginUndoBlock;
+  BeginUndoBlock;
 
-  editor.CommandProcessor(ecInsertLine, '', nil);
-  editor.CommandProcessor(ecDown, '', nil);
+  CommandProcessor(ecInsertLine, '', nil);
+  CommandProcessor(ecDown, '', nil);
 
-  editor.CommandProcessor(ecInsertLine, '', nil);
-  editor.CommandProcessor(ecDown, '', nil);
-  while editor.CaretX <> 1 do editor.CommandProcessor(ecLeft, '' , nil);
-  for i:= 0 to numTabs-1 do editor.CommandProcessor(ecTab, '', nil);
-  editor.CommandProcessor(ecChar, '}', nil);
+  CommandProcessor(ecInsertLine, '', nil);
+  CommandProcessor(ecDown, '', nil);
+  while CaretX <> 1 do CommandProcessor(ecLeft, '' , nil);
+  for i:= 0 to numTabs-1 do CommandProcessor(ecTab, '', nil);
+  CommandProcessor(ecChar, '}', nil);
 
-  editor.CommandProcessor(ecUp, '', nil);
-  while editor.CaretX <> 1 do editor.CommandProcessor(ecLeft, '' , nil);
-  for i:= 0 to numTabs do editor.CommandProcessor(ecTab, '', nil);
+  CommandProcessor(ecUp, '', nil);
+  while CaretX <> 1 do CommandProcessor(ecLeft, '' , nil);
+  for i:= 0 to numTabs do CommandProcessor(ecTab, '', nil);
 
-  editor.EndUndoBlock;
+  EndUndoBlock;
 end;
 
-procedure commentSelection(editor: TSynEdit);
+procedure TCESynMemo.commentSelection;
   procedure commentHere;
   begin
-    editor.ExecuteCommand(ecChar, '/', nil);
-    editor.ExecuteCommand(ecChar, '/', nil);
+    ExecuteCommand(ecChar, '/', nil);
+    ExecuteCommand(ecChar, '/', nil);
   end;
   procedure unCommentHere;
   begin
-    editor.ExecuteCommand(ecLineTextStart, '', nil);
-    editor.ExecuteCommand(ecDeleteChar, '', nil);
-    editor.ExecuteCommand(ecDeleteChar, '', nil);
+    ExecuteCommand(ecLineTextStart, '', nil);
+    ExecuteCommand(ecDeleteChar, '', nil);
+    ExecuteCommand(ecDeleteChar, '', nil);
   end;
 var
   i, j, dx, lx, numUndo: integer;
   line: string;
-  undo: boolean = false;
+  mustUndo: boolean = false;
   pt, cp: TPoint;
 begin
-  if not editor.SelAvail then
+  if not SelAvail then
   begin
-    i := editor.CaretX;
-    line := TrimLeft(editor.LineText);
-    undo := (line.length > 1) and (line[1..2] = '//');
-    editor.BeginUndoBlock;
-    editor.ExecuteCommand(ecLineTextStart, '', nil);
-    if not undo then
+    i := CaretX;
+    line := TrimLeft(LineText);
+    mustUndo := (line.length > 1) and (line[1..2] = '//');
+    BeginUndoBlock;
+    ExecuteCommand(ecLineTextStart, '', nil);
+    if not mustUndo then
     begin
       commentHere;
-      editor.CaretX:= i+2;
+      CaretX:= i+2;
     end
     else
     begin
       unCommentHere;
-      editor.CaretX:= i-2;
+      CaretX:= i-2;
     end;
-    editor.EndUndoBlock;
+    EndUndoBlock;
   end else
   begin
-    undo := false;
+    mustUndo := false;
     pt.X:= high(pt.X);
-    cp := editor.CaretXY;
+    cp := CaretXY;
     numUndo := 0;
-    for i := editor.BlockBegin.Y-1 to editor.BlockEnd.Y-1 do
+    for i := BlockBegin.Y-1 to BlockEnd.Y-1 do
     begin
-      line := TrimLeft(editor.Lines[i]);
-      dx := editor.Lines[i].length - line.length;
+      line := TrimLeft(Lines[i]);
+      dx := Lines[i].length - line.length;
       lx := 0;
       for j := 1 to dx do
-        if editor.Lines[i][j] = #9 then
-          lx += editor.TabWidth
+        if Lines[i][j] = #9 then
+          lx += TabWidth
         else
           lx += 1;
       if (lx + 1 < pt.X) and not line.isEmpty then
@@ -895,40 +898,40 @@ begin
         numUndo += 1;
     end;
     if numUndo = 0 then
-      undo := false
-    else if numUndo = editor.BlockEnd.Y + 1 - editor.BlockBegin.Y then
-      undo := true;
-    editor.BeginUndoBlock;
-    for i := editor.BlockBegin.Y to editor.BlockEnd.Y do
+      mustUndo := false
+    else if numUndo = BlockEnd.Y + 1 - BlockBegin.Y then
+      mustUndo := true;
+    BeginUndoBlock;
+    for i := BlockBegin.Y to BlockEnd.Y do
     begin
       pt.Y:= i;
-      editor.ExecuteCommand(ecGotoXY, '', @pt);
-      while editor.CaretX < pt.X do
-        editor.ExecuteCommand(ecChar, ' ', nil);
-      if not undo then
+      ExecuteCommand(ecGotoXY, '', @pt);
+      while CaretX < pt.X do
+        ExecuteCommand(ecChar, ' ', nil);
+      if not mustUndo then
       begin
         commentHere;
       end
       else
         unCommentHere;
     end;
-    if not undo then
+    if not mustUndo then
       cp.X += 2
     else
       cp.X -= 2;
-    editor.CaretXY := cp;
-    editor.EndUndoBlock;
+    CaretXY := cp;
+    EndUndoBlock;
   end;
 end;
 
-procedure commentIdentifier(editor: TSynEdit);
+procedure TCESynMemo.commentIdentifier;
 var
   str: string;
   comment: boolean = true;
   tkType, st: Integer;
   attrib: TSynHighlighterAttributes;
 begin
-  if not editor.GetHighlighterAttriAtRowColEx(editor.CaretXY, str, tkType, st, attrib) then
+  if not GetHighlighterAttriAtRowColEx(CaretXY, str, tkType, st, attrib) then
     exit;
   if str.isEmpty then
     exit;
@@ -939,33 +942,33 @@ begin
 
   if comment then
   begin
-    editor.BeginUndoBlock;
-    editor.ExecuteCommand(ecWordLeft, '', nil);
-    editor.ExecuteCommand(ecChar, '/', nil);
-    editor.ExecuteCommand(ecChar, '*', nil);
-    editor.ExecuteCommand(ecWordEndRight, '', nil);
-    editor.ExecuteCommand(ecChar, '*', nil);
-    editor.ExecuteCommand(ecChar, '/', nil);
-    editor.EndUndoBlock;
+    BeginUndoBlock;
+    ExecuteCommand(ecWordLeft, '', nil);
+    ExecuteCommand(ecChar, '/', nil);
+    ExecuteCommand(ecChar, '*', nil);
+    ExecuteCommand(ecWordEndRight, '', nil);
+    ExecuteCommand(ecChar, '*', nil);
+    ExecuteCommand(ecChar, '/', nil);
+    EndUndoBlock;
   end else
   //TODO-ceditor: handle spaces between ident and comment beg end.
   begin
-    editor.BeginUndoBlock;
+    BeginUndoBlock;
     if str[1..2] = '/*' then
     begin
-      editor.ExecuteCommand(ecWordLeft, '', nil);
-      editor.ExecuteCommand(ecLeft, '', nil);
-      editor.ExecuteCommand(ecLeft, '', nil);
-      editor.ExecuteCommand(ecDeleteChar, '', nil);
-      editor.ExecuteCommand(ecDeleteChar, '', nil);
+      ExecuteCommand(ecWordLeft, '', nil);
+      ExecuteCommand(ecLeft, '', nil);
+      ExecuteCommand(ecLeft, '', nil);
+      ExecuteCommand(ecDeleteChar, '', nil);
+      ExecuteCommand(ecDeleteChar, '', nil);
     end;
     if str[str.length-1..str.length] = '*/' then
     begin
-      editor.ExecuteCommand(ecWordEndRight, '', nil);
-      editor.ExecuteCommand(ecDeleteChar, '', nil);
-      editor.ExecuteCommand(ecDeleteChar, '', nil);
+      ExecuteCommand(ecWordEndRight, '', nil);
+      ExecuteCommand(ecDeleteChar, '', nil);
+      ExecuteCommand(ecDeleteChar, '', nil);
     end;
-    editor.EndUndoBlock;
+    EndUndoBlock;
   end;
 end;
 
@@ -997,15 +1000,15 @@ begin
       showCallTips(true);
     end;
     ecCurlyBraceClose:
-      curlyBraceCloseAndIndent(self);
+      curlyBraceCloseAndIndent;
     ecCommentSelection:
-      commentSelection(self);
+      commentSelection;
     ecSwapVersionAllNone:
       invertVersionAllNone;
     ecRenameIdentifier:
       renameIdentifier;
     ecCommentIdentifier:
-      commentIdentifier(self);
+      commentIdentifier;
     ecShowPhobosDoc:
       ShowPhobosDoc;
   end;
@@ -1656,13 +1659,13 @@ begin
         autoCloseOnNewLineAlways: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
         begin
           Key := 0;
-          curlyBraceCloseAndIndent(self);
+          curlyBraceCloseAndIndent;
         end;
         autoCloseOnNewLineEof: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
           if (CaretY = Lines.Count) and (CaretX = line.length+1) then
           begin
             Key := 0;
-            curlyBraceCloseAndIndent(self);
+            curlyBraceCloseAndIndent;
           end;
         autoCloseOnNewLineLexically: if (LogicalCaretXY.X - 1 >= line.length)
             or isBlank(line[LogicalCaretXY.X .. line.length]) then
@@ -1672,7 +1675,7 @@ begin
           if lexCanCloseBrace then
           begin
             Key := 0;
-            curlyBraceCloseAndIndent(self);
+            curlyBraceCloseAndIndent;
           end;
         end;
       end;
@@ -1725,16 +1728,16 @@ begin
     '{':
         case fAutoCloseCurlyBrace of
           autoCloseAlways:
-            curlyBraceCloseAndIndent(self);
+            curlyBraceCloseAndIndent;
           autoCloseAtEof:
             if (CaretY = Lines.Count) and (CaretX = LineText.length+1) then
-              curlyBraceCloseAndIndent(self);
+              curlyBraceCloseAndIndent;
           autoCloseLexically:
           begin
             fLexToks.Clear;
             lex(lines.Text, fLexToks);
             if lexCanCloseBrace then
-              curlyBraceCloseAndIndent(self);
+              curlyBraceCloseAndIndent;
           end;
         end;
   end;
