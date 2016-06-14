@@ -59,7 +59,9 @@ type
     fCompletionMenuWidth: integer;
     fCompletionMenuLines: Byte;
     fAutoCLoseCurlyBrace: TBraceAutoCloseStyle;
+    fPhobosDocRoot: TCEPathname;
     //
+    procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
     procedure setSelCol(value: TSynSelectedColor);
     procedure setFoldedColor(value: TSynSelectedColor);
@@ -99,6 +101,7 @@ type
     property mouseOptions: TSynEditorMouseOptions read fMouseOptions write fMouseOptions;
     property options1: TSynEditorOptions read fOptions1 write fOptions1;
     property options2: TSynEditorOptions2 read fOptions2 write fOptions2;
+    property phobosDocRoot: TCEPathname read fPhobosDocRoot write setPhobosDocRoot;
     property resetFontSize: boolean read fResetFontSize write fResetFontSize default true;
     property rightEdge: Integer read fRightEdge write fRightEdge default 80;
     property rightEdgeColor: TColor read fRightEdgeColor write fRightEdgeColor default clSilver;
@@ -163,6 +166,7 @@ var
 begin
   inherited;
   //
+  fPhobosDocRoot := 'https://dlang.org/phobos/';
   fFont := TFont.Create;
   {$IFDEF WINDOWS}
   fFont.Name := 'Courier New';
@@ -284,6 +288,7 @@ begin
     lineNumberEvery := srcopt.lineNumberEvery;
     identifierMatchOptions:=srcopt.identifierMatchOptions;
     detectIndentMode:=srcopt.detectIndentMode;
+    fPhobosDocRoot:=srcopt.fPhobosDocRoot;
 
     tabulationWidth := srcopt.tabulationWidth;
     blockIndentation := srcopt.blockIndentation;
@@ -336,6 +341,15 @@ end;
 procedure TCEEditorOptionsBase.setFont(value: TFont);
 begin
   fFont.Assign(value);
+end;
+
+procedure TCEEditorOptionsBase.setPhobosDocRoot(value: TCEPathname);
+begin
+  if not DirectoryExists(value)  or (value <> 'https://dlang.org/phobos/') then
+    value := 'https://dlang.org/phobos/';
+  if (value[length(value)] <> DirectorySeparator) and DirectoryExists(value) then
+    value += DirectorySeparator;
+  fPhobosDocRoot:=value;
 end;
 
 procedure TCEEditorOptionsBase.setSelCol(value: TSynSelectedColor);
@@ -465,7 +479,6 @@ end;
 
 procedure TCEEditorOptions.docFocused(aDoc: TCESynMemo);
 begin
-  Assign();
 end;
 
 procedure TCEEditorOptions.docChanged(aDoc: TCESynMemo);
@@ -637,6 +650,7 @@ begin
   anEditor.RightEdgeColor := rightEdgeColor;
   anEditor.IdentifierMatchOptions:= identifierMatchOptions;
   anEditor.detectIndentMode := detectIndentMode;
+  anEditor.phobosDocRoot:=fPhobosDocRoot;
   for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
     kst := anEditor.Keystrokes.Items[i];

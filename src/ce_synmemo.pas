@@ -10,7 +10,7 @@ uses
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, dialogs,
   ce_common, ce_observer, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
-  ce_sharedres, ce_dlang;
+  ce_sharedres, ce_dlang, ce_stringrange;
 
 type
 
@@ -144,6 +144,7 @@ type
     fLexToks: TLexTokenList;
     fDisableFileDateCheck: boolean;
     fDetectIndentMode: boolean;
+    fPhobosDocRoot: string;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseFileBytePos: Integer;
     procedure changeNotify(Sender: TObject);
@@ -203,6 +204,7 @@ type
     procedure decCallTipsLvl;
     procedure showDDocs;
     procedure hideDDocs;
+    procedure ShowPhobosDoc;
     //
     function breakPointsCount: integer;
     function breakPointLine(index: integer): integer;
@@ -220,6 +222,7 @@ type
     property isTemporary: boolean read getIfTemp;
     property TextView;
     //
+    property phobosDocRoot: string read fPhobosDocRoot write fPhobosDocRoot;
     property detectIndentMode: boolean read fDetectIndentMode write fDetectIndentMode;
     property disableFileDateCheck: boolean read fDisableFileDateCheck write fDisableFileDateCheck;
     property MouseStart: Integer read getMouseFileBytePos;
@@ -250,6 +253,7 @@ const
   ecSwapVersionAllNone  = ecUserFirst + 11;
   ecRenameIdentifier    = ecUserFirst + 12;
   ecCommentIdentifier   = ecUserFirst + 13;
+  ecShowPhobosDoc       = ecUserFirst + 14;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -737,8 +741,9 @@ begin
     AddKey(ecCurlyBraceClose, 0, [], 0, []);
     AddKey(ecCommentSelection, ord('/'), [ssCtrl], 0, []);
     AddKey(ecSwapVersionAllNone, 0, [], 0, []);
-    AddKey(ecRenameIdentifier, VK_F2, [ssCtrl], 0, []);
+    AddKey(ecRenameIdentifier, VK_F2, [], 0, []);
     AddKey(ecCommentIdentifier, 0, [], 0, []);
+    AddKey(ecShowPhobosDoc, VK_F1, [], 0, []);
   end;
 end;
 
@@ -758,6 +763,7 @@ begin
     'ecSwapVersionAllNone': begin Int := ecSwapVersionAllNone; exit(true); end;
     'ecRenameIdentifier':   begin Int := ecRenameIdentifier; exit(true); end;
     'ecCommentIdentifier':  begin Int := ecCommentIdentifier; exit(true); end;
+    'ecShowPhobosDoc':      begin Int := ecShowPhobosDoc; exit(true); end;
     else exit(false);
   end;
 end;
@@ -778,6 +784,7 @@ begin
     ecSwapVersionAllNone: begin Ident := 'ecSwapVersionAllNone'; exit(true); end;
     ecRenameIdentifier:   begin Ident := 'ecRenameIdentifier'; exit(true); end;
     ecCommentIdentifier:  begin Ident := 'ecCommentIdentifier'; exit(true); end;
+    ecShowPhobosDoc:      begin Ident := 'ecShowPhobosDoc'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -999,6 +1006,8 @@ begin
       renameIdentifier;
     ecCommentIdentifier:
       commentIdentifier(self);
+    ecShowPhobosDoc:
+      ShowPhobosDoc;
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1106,6 +1115,90 @@ begin
     EndUndoBlock;
   end;
 end;
+
+procedure TCESynMemo.ShowPhobosDoc;
+var
+  str: string;
+  pth: string;
+  idt: string;
+  pos: integer;
+  len: integer;
+  sum: integer;
+  edt: TSynEdit;
+  rng: TStringRange = (ptr:nil; pos:0; len: 0);
+  i: integer;
+  linelen: integer;
+begin
+  DcdWrapper.getDeclFromCursor(str, pos);
+  if not str.fileExists then
+  begin
+    dlgOkInfo('html documentation cannot be found for "' + Identifier + '"');
+    exit;
+  end;
+  // verify that the decl is in phobos
+  pth := str;
+  while true do
+  begin
+    if pth.extractFilePath = pth then
+    begin
+      dlgOkInfo('html documentation cannot be found for "' + Identifier + '"');
+      exit;
+    end;
+    pth := pth.extractFilePath;
+    setLength(pth,pth.length-1);
+    if (pth.extractFilename = 'phobos') or (pth.extractFilename = 'core')
+      or (pth.extractFilename = 'etc') then
+        break;
+  end;
+  // get the declaration name
+  if pos <> -1 then
+  begin
+    edt := TSynEdit.Create(nil);
+    edt.Lines.LoadFromFile(str);
+    sum := 0;
+    len := getLineEndingLength(str);
+    for i := 0 to edt.Lines.Count-1 do
+    begin
+      linelen := edt.Lines[i].length;
+      if sum + linelen + len > pos then
+      begin
+        edt.CaretY := i + 1;
+        edt.CaretX := pos - sum + len;
+        edt.SelectWord;
+        idt := '#.' + edt.SelText;
+        break;
+      end;
+      sum += linelen;
+      sum += len;
+    end;
+    edt.Free;
+  end;
+  // guess the htm file + anchor
+  rng.init(str);
+  while true do
+  begin
+    if rng.empty then
+      exit;
+    rng.popUntil(DirectorySeparator);
+    if not rng.empty then
+      rng.popFront;
+    if rng.startsWith('std' + DirectorySeparator) or rng.startsWith('core' + DirectorySeparator)
+      or rng.startsWith('etc' + DirectorySeparator) then
+        break;
+  end;
+  pth := fPhobosDocRoot;
+  while not rng.empty do
+  begin
+    pth += rng.takeUntil([DirectorySeparator, '.']).yield;
+    if rng.startsWith('.d') then
+      break;
+    pth += '_';
+    rng.popFront;
+  end;
+  pth += idt;
+  shellOpen(pth);
+end;
+
 {$ENDREGION}
 
 {$REGION DDoc & CallTip --------------------------------------------------------}
@@ -1389,7 +1482,7 @@ begin
     loadCache;
     fCacheLoaded := true;
   end;
-  //
+  // TODO-cbugfix: follow http://bugs.freepascal.org/view.php?id=30272
   if detectIndentMode then
   begin
     case indentationMode(lines) of
