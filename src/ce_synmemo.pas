@@ -143,6 +143,7 @@ type
     fAutoCloseCurlyBrace: TBraceAutoCloseStyle;
     fLexToks: TLexTokenList;
     fDisableFileDateCheck: boolean;
+    fDetectIndentMode: boolean;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseFileBytePos: Integer;
     procedure changeNotify(Sender: TObject);
@@ -219,6 +220,7 @@ type
     property isTemporary: boolean read getIfTemp;
     property TextView;
     //
+    property detectIndentMode: boolean read fDetectIndentMode write fDetectIndentMode;
     property disableFileDateCheck: boolean read fDisableFileDateCheck write fDisableFileDateCheck;
     property MouseStart: Integer read getMouseFileBytePos;
     property D2Highlighter: TSynD2Syn read fD2Highlighter;
@@ -1386,6 +1388,14 @@ begin
     setFocus;
     loadCache;
     fCacheLoaded := true;
+  end;
+  //
+  if detectIndentMode then
+  begin
+    case indentationMode(lines) of
+      imTabs: Options:= Options - [eoTabsToSpaces];
+      imSpaces: Options:= Options + [eoTabsToSpaces];
+    end;
   end;
   subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
 end;

@@ -31,6 +31,7 @@ type
     //
     fShortCuts: TCollection;
     //
+    fDetectIndentationMode: boolean;
     fCurrLineAttribs: TSynSelectedColor;
     fSelAttribs: TSynSelectedColor;
     fFoldedColor: TSynSelectedColor;
@@ -85,6 +86,7 @@ type
     property completionMenuWidth: integer read fCompletionMenuWidth write fCompletionMenuWidth;
     property currentLine: TSynSelectedColor read fCurrLineAttribs write setCurrLineAttribs;
     property ddocDelay: Integer read fDDocDelay write setDDocDelay;
+    property detectIndentMode: boolean read fDetectIndentationMode write fDetectIndentationMode;
     property folding: TSynSelectedColor read fFoldedColor write setFoldedColor;
     property font: TFont read fFont write setFont;
     property highlighterDlang: TPersistent read fD2Syn write setD2Syn;
@@ -281,6 +283,7 @@ begin
     background := srcopt.background;
     lineNumberEvery := srcopt.lineNumberEvery;
     identifierMatchOptions:=srcopt.identifierMatchOptions;
+    detectIndentMode:=srcopt.detectIndentMode;
 
     tabulationWidth := srcopt.tabulationWidth;
     blockIndentation := srcopt.blockIndentation;
@@ -462,6 +465,7 @@ end;
 
 procedure TCEEditorOptions.docFocused(aDoc: TCESynMemo);
 begin
+  Assign();
 end;
 
 procedure TCEEditorOptions.docChanged(aDoc: TCESynMemo);
@@ -632,6 +636,7 @@ begin
   anEditor.RightEdge := rightEdge;
   anEditor.RightEdgeColor := rightEdgeColor;
   anEditor.IdentifierMatchOptions:= identifierMatchOptions;
+  anEditor.detectIndentMode := detectIndentMode;
   for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
     kst := anEditor.Keystrokes.Items[i];
