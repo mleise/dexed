@@ -2663,12 +2663,16 @@ begin
 end;
 
 procedure TCEMainForm.saveProjSource(const aEditor: TCESynMemo);
+var
+  fname: string;
 begin
   if fProject = nil then exit;
   if fProject.filename <> aEditor.fileName then exit;
   //
-  aEditor.saveToFile(fProject.filename);
-  openProj(fProject.filename);
+  fname := fProject.filename;
+  fProject.getProject.Free;
+  aEditor.saveToFile(fname);
+  openProj(fname);
 end;
 
 procedure TCEMainForm.closeProj;
@@ -2755,9 +2759,8 @@ end;
 
 procedure TCEMainForm.actProjCloseExecute(Sender: TObject);
 begin
-  if (fProject <> nil) and not fProject.inGroup and
-        fProject.modified and
-          (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
+  if (fProject <> nil) and not fProject.inGroup and fProject.modified and
+    (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
   closeProj;
 end;
 
@@ -2812,6 +2815,7 @@ begin
   if not fProject.filename.fileExists then exit;
   //
   openFile(fProject.filename);
+  fDoc.isProjectDescription := true;
   if fProject.getFormat = pfNative then
     fDoc.Highlighter := LfmSyn
   else

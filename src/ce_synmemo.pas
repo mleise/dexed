@@ -146,6 +146,7 @@ type
     fDetectIndentMode: boolean;
     fPhobosDocRoot: string;
     fAlwaysAdvancedFeatures: boolean;
+    fIsProjectDescription: boolean;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseFileBytePos: Integer;
@@ -226,6 +227,7 @@ type
     property isTemporary: boolean read getIfTemp;
     property TextView;
     //
+    property isProjectDescription: boolean read fIsProjectDescription write fIsProjectDescription;
     property alwaysAdvancedFeatures: boolean read fAlwaysAdvancedFeatures write fAlwaysAdvancedFeatures;
     property phobosDocRoot: string read fPhobosDocRoot write fPhobosDocRoot;
     property detectIndentMode: boolean read fDetectIndentMode write fDetectIndentMode;
@@ -1529,7 +1531,9 @@ begin
   ext := aFilename.extractFileExt;
   fIsDsource := hasDlangSyntax(ext);
   if fIsDsource then
-    Highlighter := fD2Highlighter;
+    Highlighter := fD2Highlighter
+  else if not isProjectDescription then
+    Highlighter := TxtHighlighter;
   FileAge(fFilename, fFileDate);
   fModified := false;
   if fFilename <> fTempFileName then
