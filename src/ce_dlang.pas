@@ -23,6 +23,7 @@ type
     fPreviousLineColum: Integer;
     fBegColumnIndex: Integer;
     fBegLineIndex: Integer;
+    fBegOffset: Integer;
     function getColAndLine: TPoint;
   public
     constructor Create(const aText: PChar; const aColAndLine: TPoint);
@@ -38,6 +39,7 @@ type
     property LineAnColumn: TPoint read getColAndLine;
     property SavedLine: Integer read fBegLineIndex;
     property SavedColumn: Integer read fBegColumnIndex;
+    property SavedOffset: Integer read fBegOffset;
     //
     property head: PChar read fReaderHead;
   end;
@@ -65,6 +67,7 @@ type
   PLexToken = ^TLexToken;
 
   TLexToken = record
+    offset: integer;
     position: TPoint;
     kind: TLexTokenKind;
     Data: string;
@@ -206,6 +209,7 @@ procedure TReaderHead.saveBeginning;
 begin
   fBegColumnIndex:= fColumnIndex;
   fBegLineIndex:= fLineIndex;
+  fBegOffset:= fAbsoluteIndex;
 end;
 
 {$ENDREGION}
@@ -240,8 +244,9 @@ begin
     for i:= 0 to self.count-1 do
     begin
       tok := getToken(i);
-      add(format('line %.5d - col %.3d: (%s): %s', [tok^.position.Y, tok^.position.X,
-        LexTokenKindString[tok^.kind], tok^.Data]));
+      add(format('line %.5d - col %.3d (%.8d): (%s): %s',
+        [tok^.position.Y, tok^.position.X, tok^.offset,
+          LexTokenKindString[tok^.kind], tok^.Data]));
     end;
   finally
     SaveToFile(fname);
@@ -288,6 +293,7 @@ var
     ptk^.kind := aTk;
     ptk^.position.X := reader.SavedColumn;
     ptk^.position.Y := reader.SavedLine;
+    ptk^.offset := reader.savedOffset;
     ptk^.Data := identifier;
     list.Add(ptk);
   end;

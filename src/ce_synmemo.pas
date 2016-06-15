@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, controls,lcltype, Forms, graphics, ExtCtrls, crc,
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
-  SynEditMarks, SynEditTypes, SynHighlighterJScript, dialogs,
+  SynEditMarks, SynEditTypes, SynHighlighterJScript, dialogs, Clipbrd,
   ce_common, ce_observer, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange;
 
@@ -210,6 +210,7 @@ type
     procedure showDDocs;
     procedure hideDDocs;
     procedure ShowPhobosDoc;
+    procedure copy;
     //
     function breakPointsCount: integer;
     function breakPointLine(index: integer): integer;
@@ -795,6 +796,59 @@ begin
   end;
 end;
 
+procedure TCESynMemo.DoOnProcessCommand(var Command: TSynEditorCommand;
+  var AChar: TUTF8Char; Data: pointer);
+begin
+  inherited;
+  case Command of
+    ecCompletionMenu:
+    begin
+      fCanAutoDot:=false;
+      if not fIsDSource and not alwaysAdvancedFeatures then
+        exit;
+      fCompletion.Execute(GetWordAtRowCol(LogicalCaretXY),
+        ClientToScreen(point(CaretXPix, CaretYPix + LineHeight)));
+    end;
+    ecPreviousLocation:
+      fPositions.back;
+    ecNextLocation:
+      fPositions.next;
+    ecShowDdoc:
+    begin
+      hideCallTips;
+      hideDDocs;
+      if not fIsDSource and not alwaysAdvancedFeatures then
+        exit;
+      showDDocs;
+    end;
+    ecShowCallTips:
+    begin
+      hideCallTips;
+      hideDDocs;
+      if not fIsDSource and not alwaysAdvancedFeatures then
+        exit;
+      showCallTips(true);
+    end;
+    ecCurlyBraceClose:
+      curlyBraceCloseAndIndent;
+    ecCommentSelection:
+      commentSelection;
+    ecSwapVersionAllNone:
+      invertVersionAllNone;
+    ecRenameIdentifier:
+      renameIdentifier;
+    ecCommentIdentifier:
+      commentIdentifier;
+    ecShowPhobosDoc:
+      ShowPhobosDoc;
+  end;
+  if fOverrideColMode and not SelAvail then
+  begin
+    fOverrideColMode := false;
+    Options := Options - [eoScrollPastEol];
+  end;
+end;
+
 procedure TCESynMemo.curlyBraceCloseAndIndent;
 var
   i: integer;
@@ -973,59 +1027,6 @@ begin
       ExecuteCommand(ecDeleteChar, '', nil);
     end;
     EndUndoBlock;
-  end;
-end;
-
-procedure TCESynMemo.DoOnProcessCommand(var Command: TSynEditorCommand;
-  var AChar: TUTF8Char; Data: pointer);
-begin
-  inherited;
-  case Command of
-    ecCompletionMenu:
-    begin
-      fCanAutoDot:=false;
-      if not fIsDSource and not alwaysAdvancedFeatures then
-        exit;
-      fCompletion.Execute(GetWordAtRowCol(LogicalCaretXY),
-        ClientToScreen(point(CaretXPix, CaretYPix + LineHeight)));
-    end;
-    ecPreviousLocation:
-      fPositions.back;
-    ecNextLocation:
-      fPositions.next;
-    ecShowDdoc:
-    begin
-      hideCallTips;
-      hideDDocs;
-      if not fIsDSource and not alwaysAdvancedFeatures then
-        exit;
-      showDDocs;
-    end;
-    ecShowCallTips:
-    begin
-      hideCallTips;
-      hideDDocs;
-      if not fIsDSource and not alwaysAdvancedFeatures then
-        exit;
-      showCallTips(true);
-    end;
-    ecCurlyBraceClose:
-      curlyBraceCloseAndIndent;
-    ecCommentSelection:
-      commentSelection;
-    ecSwapVersionAllNone:
-      invertVersionAllNone;
-    ecRenameIdentifier:
-      renameIdentifier;
-    ecCommentIdentifier:
-      commentIdentifier;
-    ecShowPhobosDoc:
-      ShowPhobosDoc;
-  end;
-  if fOverrideColMode and not SelAvail then
-  begin
-    fOverrideColMode := false;
-    Options := Options - [eoScrollPastEol];
   end;
 end;
 
@@ -1210,6 +1211,14 @@ begin
   end;
   pth += idt;
   shellOpen(pth);
+end;
+
+procedure TCESynMemo.copy;
+begin
+  {$IFDEF WINDOWS}
+  {$ELSE}
+  // workaround https://github.com/BBasile/Coedit/issues/39
+  {$ENDIF}
 end;
 
 {$ENDREGION}
@@ -1422,14 +1431,28 @@ end;
 function TCESynMemo.lexCanCloseBrace: boolean;
 var
   i: integer;
+  p: integer;
   c: integer = 0;
   tok: PLexToken;
+  ton: PLexToken;
+  bet: boolean;
 begin
+  p := SelStart;
   for i := 0 to fLexToks.Count-1 do
   begin
     tok := fLexToks[i];
+    if (i <> fLexToks.Count-1) then
+    begin
+      ton := fLexToks[i+1];
+      bet := (tok^.offset + 1 <= p) and (ton^.offset + 1 > p);
+    end else
+      bet := false;
+    if bet and (tok^.kind = ltkComment) then
+      exit(false);
     c += byte((tok^.kind = TLexTokenKind.ltkSymbol) and (((tok^.Data = '{')) or (tok^.Data = 'q{')));
     c -= byte((tok^.kind = TLexTokenKind.ltkSymbol) and (tok^.Data = '}'));
+    if bet and (c = 0) then
+      exit(false);
   end;
   if (tok <> nil) and (tok^.kind = ltkIllegal) then
     result := false
