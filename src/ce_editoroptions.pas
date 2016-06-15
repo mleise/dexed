@@ -142,22 +142,22 @@ type
     procedure scedSendItem(const category, identifier: string; aShortcut: TShortcut);
     procedure scedSendDone;
     //
-    procedure applyChangesFromSelf;
     procedure applyChangeToEditor(anEditor: TCESynMemo);
   protected
     procedure afterLoad; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure applyChangesFromSelf;
   end;
+
+var
+  EditorOptions: TCEEditorOptions;
 
 implementation
 
 const
   edoptFname = 'editor.txt';
-
-var
-  EditorOptions: TCEEditorOptions;
 
 {$REGION Standard Comp/Obj -----------------------------------------------------}
 constructor TCEEditorOptionsBase.Create(AOwner: TComponent);
