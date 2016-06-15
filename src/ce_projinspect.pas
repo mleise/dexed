@@ -183,7 +183,10 @@ begin
   enabled := false;
   fLastFileOrFolder := '';
   if aProject.getFormat <> pfNative then
+  begin
+    updateImperative;
     exit;
+  end;
   enabled := true;
   //
   fProject := TCENativeProject(aProject.getProject);

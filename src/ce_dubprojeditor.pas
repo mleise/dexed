@@ -204,7 +204,11 @@ begin
   fProj := nil;
   enabled := false;
   if aProject.getFormat <> pfDub then
+  begin
+    updateEditor;
+    updateInspector;
     exit;
+  end;
   fProj := TCEDubProject(aProject.getProject);
   enabled := true;
   if not Visible then
