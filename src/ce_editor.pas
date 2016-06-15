@@ -9,7 +9,7 @@ uses
   ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder, dialogs,
   SynPluginSyncroEdit, SynEdit, SynHighlighterMulti, ce_dialogs,
   ce_widget, ce_interfaces, ce_synmemo, ce_dlang, ce_common, ce_dcd, ce_observer,
-  ce_sharedres, ce_controls, ce_writableComponent, LMessages;
+  ce_sharedres, ce_controls, ce_writableComponent;
 
 type
 
@@ -366,7 +366,6 @@ begin
   fDoc := aDoc;
   focusedEditorChanged;
   updateImperative;
-  fDoc.enterEdit;
 end;
 
 procedure TCEEditorWidget.docChanged(aDoc: TCESynMemo);
@@ -534,18 +533,24 @@ begin
       if Shift = [] then
         updateImperative;
     else begin
+      // note: keys conflict can lead to a lose of focus, i.e shortcut
+      // to select next page cant be repeated.
       sh := KeyToShortCut(Key, shift);
       if sh = fOptions.fNextPage then
       begin
         pageControl.pageIndex:= (pageControl.pageIndex + 1) mod pageControl.pageCount;
       end
       else if sh = fOptions.fPrevPage then
-        pageControl.pageIndex:= (pageControl.pageIndex - 1) mod pageControl.pageCount
+      begin
+        if pageControl.pageIndex - 1 < 0 then
+          pageControl.pageIndex:= pageControl.pageCount - 1
+        else
+          pageControl.pageIndex:= pageControl.pageIndex - 1;
+      end
       else if sh = fOptions.fMoveLeft then
         pageControl.movePageLeft
       else if sh = fOptions.fMoveRight then
-        pageControl.movePageRight
-      else sh := 0;
+        pageControl.movePageRight;
     end;
   end;
   if fKeyChanged then
