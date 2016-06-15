@@ -561,7 +561,7 @@ end;
 
 procedure TCESymbolListWidget.updateVisibleCat;
 begin
-  if fDoc.isNotNil then
+  if fDoc.isNotNil and fDoc.isDSource then
   begin
     ndAlias.Visible := ndAlias.Count > 0;
     ndClass.Visible := ndClass.Count > 0;
@@ -672,8 +672,12 @@ var
 begin
   if not fHasToolExe then exit;
   if fDoc.isNil then exit;
-  if fDoc.Lines.Count = 0 then exit;
-  if not fDoc.isDSource then exit;
+  if (fDoc.Lines.Count = 0) or not fDoc.isDSource then
+  begin
+    clearTree;
+    updateVisibleCat;
+    exit;
+  end;
   //
   killProcess(fToolProc);
   fToolProc := TCEProcess.Create(nil);
