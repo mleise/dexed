@@ -44,7 +44,7 @@ inherited CEProcInputWidget: TCEProcInputWidget
           Left = 0
           Height = 26
           Top = 2
-          Width = 528
+          Width = 520
           Align = alClient
           BorderSpacing.Top = 2
           BorderSpacing.Bottom = 2
@@ -52,36 +52,39 @@ inherited CEProcInputWidget: TCEProcInputWidget
           TabOrder = 0
         end
         object btnClose: TBitBtn
-          Left = 556
-          Height = 30
+          Left = 552
+          Height = 26
           Hint = 'close the process input stream'
-          Top = 0
+          Top = 2
           Width = 28
           Align = alRight
+          BorderSpacing.Around = 2
           Layout = blGlyphBottom
           OnClick = btnCloseClick
           Spacing = 0
           TabOrder = 1
         end
         object btnSend: TBitBtn
-          Left = 528
-          Height = 30
+          Left = 522
+          Height = 26
           Hint = 'send the text to hte process'
-          Top = 0
+          Top = 2
           Width = 28
           Align = alRight
+          BorderSpacing.Around = 2
           Layout = blGlyphBottom
           OnClick = btnSendClick
           Spacing = 0
           TabOrder = 2
         end
         object btnKill: TBitBtn
-          Left = 584
-          Height = 30
+          Left = 582
+          Height = 26
           Hint = 'kill the process'
-          Top = 0
+          Top = 2
           Width = 28
           Align = alRight
+          BorderSpacing.Around = 2
           Layout = blGlyphBottom
           OnClick = btnKillClick
           Spacing = 0
