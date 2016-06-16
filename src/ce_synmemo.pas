@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, controls,lcltype, Forms, graphics, ExtCtrls, crc,
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
-  SynEditMarks, SynEditTypes, SynHighlighterJScript, dialogs, Clipbrd,
+  SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
   ce_common, ce_observer, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange;
 
@@ -174,6 +174,7 @@ type
     function  findBreakPoint(line: integer): boolean;
     procedure showCallTips(const tips: string);
     function lexCanCloseBrace: boolean;
+    procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
   protected
     procedure DoEnter; override;
     procedure DoExit; override;
@@ -490,6 +491,7 @@ constructor TCESynMemo.Create(aOwner: TComponent);
 begin
   inherited;
   //
+  OnStatusChange:= @handleStatusChanged;
   fDefaultFontSize := 10;
   Font.Size:=10;
   SetDefaultCoeditKeystrokes(Self); // not called in inherited if owner = nil !
@@ -1428,6 +1430,24 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION Coedit memo things ----------------------------------------------------}
+procedure TCESynMemo.handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
+begin
+  if scOptions in Changes then
+  begin
+    //TODO-cLazarus: track changes in http://bugs.freepascal.org/view.php?id=30272
+    // and remove this workaround if they fix it.
+    if Beautifier.isNotNil and (Beautifier is TSynBeautifier) then
+    begin
+      if not (eoTabsToSpaces in Options) and not (eoSpacesToTabs in Options) then
+        TSynBEautifier(Beautifier).IndentType := sbitConvertToTabOnly
+      else if eoSpacesToTabs in options then
+        TSynBEautifier(Beautifier).IndentType := sbitConvertToTabOnly
+      else
+        TSynBEautifier(Beautifier).IndentType := sbitSpace;
+    end
+  end;
+end;
+
 function TCESynMemo.lexCanCloseBrace: boolean;
 var
   i: integer;
