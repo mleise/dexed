@@ -1238,7 +1238,7 @@ begin
   aProcess.Executable := fExecutable;
   aProcess.ShowWindow := fShowWin;
   aProcess.Options    := fOptions;
-  aProcess.CurrentDirectory := fWorkDir;
+  aProcess.CurrentDirectory := fSymStringExpander.expand(fWorkDir);
   aProcess.StartupOptions := aProcess.StartupOptions + [suoUseShowWindow];
 end;
 
@@ -1249,7 +1249,7 @@ begin
   aProcess.Executable := fExecutable;
   aProcess.ShowWindow := fShowWin;
   aProcess.Options    := fOptions;
-  aProcess.CurrentDirectory := fWorkDir;
+  aProcess.CurrentDirectory := fSymStringExpander.expand(fWorkDir);
   aProcess.StartupOptions := aProcess.StartupOptions + [suoUseShowWindow];
 end;
 
@@ -1260,7 +1260,7 @@ begin
   aProcess.Executable := fExecutable;
   aProcess.ShowWindow := fShowWin;
   aProcess.Options    := fOptions;
-  aProcess.CurrentDirectory := fWorkDir;
+  aProcess.CurrentDirectory := fSymStringExpander.expand(fWorkDir);
   aProcess.StartupOptions := aProcess.StartupOptions + [suoUseShowWindow];
 end;
 
