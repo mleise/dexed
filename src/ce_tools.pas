@@ -199,8 +199,10 @@ var
 begin
   ce_processes.killProcess(fProcess);
   //
+  if fMsgs = nil then
+    fMsgs := getMessageDisplay;
   if fClearMessages then
-    getMessageDisplay(fMsgs).clearByContext(amcMisc);
+    fMsgs.clearByContext(amcMisc);
   if fSymStringExpander = nil then
     fSymStringExpander:= getSymStringExpander;
   //
