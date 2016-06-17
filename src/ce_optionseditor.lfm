@@ -33,7 +33,7 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
           Left = 0
           Height = 451
           Top = 0
-          Width = 140
+          Width = 150
           Align = alLeft
           AutoExpand = True
           DefaultItemHeight = 16
@@ -48,20 +48,20 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
           Options = [tvoAutoExpand, tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
         end
         object pnlEd: TPanel
-          Left = 146
+          Left = 156
           Height = 451
           Top = 0
-          Width = 405
+          Width = 395
           Align = alClient
           BevelOuter = bvNone
           ClientHeight = 451
-          ClientWidth = 405
+          ClientWidth = 395
           TabOrder = 1
           object inspector: TTIPropertyGrid
             Left = 0
             Height = 451
             Top = 0
-            Width = 405
+            Width = 395
             Align = alClient
             CheckboxForBoolean = False
             DefaultValueFont.Color = clWindowText
@@ -76,7 +76,7 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
           end
         end
         object Splitter1: TSplitter
-          Left = 140
+          Left = 150
           Height = 451
           Top = 0
           Width = 6
