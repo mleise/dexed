@@ -279,52 +279,104 @@ begin
       getHl.special.define(clNavy,[fsBold]);
       getHl.errors.define(clBlack,[],clNone,clRed,slsWaved,sfeBottom,[]);
       getHl.attributes.define(clNavy,[fsBold]);
+      //
+      folding.Background := clNone;
+      folding.Foreground := clDkGray;
+      folding.FrameColor := clDkGray;
+      //
+      mouseLink.Style := [fsUnderline, fsBold];
+      mouseLink.StyleMask := [];
+      mouseLink.Foreground := clNone;
+      mouseLink.Background := clNone;
+      //
+      bracketMatch.Foreground := clRed;
+      bracketMatch.Background := clNone;
+      //
+      identifierMatch.Foreground:= clNone;
+      identifierMatch.Background:= clSilver;
+      identifierMatch.BackAlpha:=70;
+      //
+      selection.Background:= $CCCCCC;
+      selection.Foreground:= clNone;
+      //
+      currentLine.Background:= $DEDEDE;
+      currentLine.Foreground:= clNone;
     end;
     with fPresets.addPreset do
     begin
       fName :='dark';
-      fBackground := $00404040;
-      getHl.whites.define(clNone);
-      getHl.numbers.define($F27900,[fsBold]);
-      getHl.symbols.define(clMaroon);
-      getHl.identifiers.define($E1EFF0);
-      getHl.comments.define($C7C7C7,[fsItalic]);
-      getHl.strings.define($84D2EC);
-      getHl.keywords.define($93C797,[fsBold]);
-      getHl.ddoc.define(clTeal);
-      getHl.inlineAsm.define($EC84CB,[fsBold]);
-      getHl.special.define($93C797,[fsBold]);
-      getHl.errors.define($E1EFF0,[],clNone,clRed,slsWaved,sfeBottom,[]);
-      getHl.attributes.define($93C797,[fsBold]);
-    end;
-    with fPresets.addPreset do
-    begin
-      fBackground := clWhite;
-      fName :='Mars bright';
-    end;
-    with fPresets.addPreset do
-    begin
-      fBackground :=clWhite;
-      fName :='Mars dark';
+      getHl.whites.FrameEdges := sfeNone;
+      getHl.numbers.Foreground := 16761218;
+      getHl.numbers.FrameEdges := sfeNone;
+      getHl.numbers.Style := [];
+      getHl.symbols.Foreground := clYellow;
+      getHl.symbols.FrameEdges := sfeNone;
+      getHl.identifiers.Foreground := 14807024;
+      getHl.identifiers.FrameEdges := sfeNone;
+      getHl.comments.Foreground := 13092807;
+      getHl.comments.FrameEdges := sfeNone;
+      getHl.strings.Foreground := 5157104;
+      getHl.strings.FrameEdges := sfeNone;
+      getHl.keywords.Foreground := 9684887;
+      getHl.keywords.FrameEdges := sfeNone;
+      getHl.ddoc.Foreground := 14671730;
+      getHl.ddoc.FrameEdges := sfeNone;
+      getHl.inlineAsm.Foreground := 15500491;
+      getHl.inlineAsm.FrameEdges := sfeNone;
+      getHl.special.Foreground := 9684887;
+      getHl.special.FrameEdges := sfeNone;
+      getHl.errors.Foreground := 14807024;
+      getHl.attributes.Foreground := 9684887;
+      getHl.attributes.FrameEdges := sfeNone;
+      background := 4210752;
+      bracketMatch.Background := clNone;
+      bracketMatch.Foreground := clFuchsia;
+      currentLine.Background := 6184542;
+      currentLine.Foreground := clNone;
+      folding.Background := 7303023;
+      folding.Foreground := clYellow;
+      identifierMatch.Background := 7697781;
+      identifierMatch.Foreground := clNone;
+      selection.Background := 10132122;
+      selection.Foreground := clNone;
     end;
     with fPresets.addPreset do
     begin
       fName :='Mustard';
-      fBackground := $78C8D3;
-      getHl.whites.define(clNone);
-      getHl.numbers.define($000079F2,[fsBold]);
-      getHl.symbols.define(clMaroon);
-      getHl.identifiers.define($1E2331);
-      getHl.comments.define($4F7184,[fsItalic]);
-      getHl.strings.define($6D82BA);
-      getHl.keywords.define($313A5A,[fsBold]);
-      getHl.ddoc.define($5F8194);
-      getHl.inlineAsm.define($98B7B4,[fsBold]);
-      getHl.special.define($313A5A,[fsBold]);
-      getHl.errors.define($1E2331,[],clNone,clRed,slsWaved,sfeBottom,[]);
-      getHl.attributes.define($313A5A,[fsBold]);
+      getHl.whites.FrameEdges := sfeNone;
+      getHl.numbers.FrameEdges := sfeNone;
+      getHl.symbols.Foreground := 3487083;
+      getHl.symbols.FrameEdges := sfeNone;
+      getHl.identifiers.Foreground := 1975089;
+      getHl.identifiers.FrameEdges := sfeNone;
+      getHl.comments.Foreground := 5206404;
+      getHl.comments.FrameEdges := sfeNone;
+      getHl.strings.Foreground := 6056852;
+      getHl.strings.FrameEdges := sfeNone;
+      getHl.keywords.Foreground := 3226202;
+      getHl.keywords.FrameEdges := sfeNone;
+      getHl.ddoc.Foreground := 6259092;
+      getHl.ddoc.FrameEdges := sfeNone;
+      getHl.inlineAsm.Foreground := 3379344;
+      getHl.inlineAsm.FrameEdges := sfeNone;
+      getHl.special.Foreground := 3226202;
+      getHl.special.FrameEdges := sfeNone;
+      getHl.errors.Foreground := 1975089;
+      getHl.attributes.Foreground := 3226202;
+      getHl.attributes.FrameEdges := sfeNone;
+      background := 9818842;
+      currentLine.Background := 9030871;
+      currentLine.Foreground := clNone;
+      folding.Background := clNone;
+      folding.Foreground := clYellow;
+      folding.FrameColor := clYellow;
+      identifierMatch.Background := 10278890;
+      identifierMatch.Foreground := clNone;
+      selection.Background := 8448232;
+      selection.Foreground := clNone;
     end;
   end;
+  // TODO-cd2synpresets: add more presets
   //
   fEditor := TSynEdit.Create(self);
   fEditor.Parent:= self;

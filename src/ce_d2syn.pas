@@ -94,6 +94,7 @@ type
     property special:     TSynHighlighterAttributes read fSpeckAttrib write setSpeckAttrib;
     property errors:      TSynHighlighterAttributes read fErrorAttrib write setErrorAttrib;
     property attributes:  TSynHighlighterAttributes read fAttriAttrib write setAttriAttrib;
+    property DefaultFilter stored false;
 	public
 		constructor create(aOwner: TComponent); override;
     destructor destroy; override;
