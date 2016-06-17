@@ -14,7 +14,7 @@ uses
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor, (*ce_gdb,*) ce_dfmt,
-  ce_lcldragdrop, ce_projgroup;
+  ce_lcldragdrop, ce_projgroup, ce_projutils;
 
 type
 
@@ -450,6 +450,7 @@ type
     fRunnableDest: TCEPathname;
     fAlwaysUseDest: boolean;
     fDscanUnittests: boolean;
+    fAutoSaveProjectFiles: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
@@ -472,6 +473,7 @@ type
     property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination;
     property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest;
     property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
+    property autoSaveProjectFiles: boolean read fAutoSaveProjectFiles write fAutoSaveProjectFiles default false;
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
@@ -2460,12 +2462,16 @@ end;
 
 procedure TCEMainForm.actProjCompileExecute(Sender: TObject);
 begin
+  if fAppliOpts.autoSaveProjectFiles then
+    saveModifiedProjectFiles(fProject);
   fProject.compile;
 end;
 
 procedure TCEMainForm.actProjCompileAndRunExecute(Sender: TObject);
 begin
   fRunProjAfterCompile := true;
+  if fAppliOpts.autoSaveProjectFiles then
+    saveModifiedProjectFiles(fProject);
   fProject.compile;
 end;
 
@@ -2483,7 +2489,11 @@ begin
   end;
   if (not fProject.targetUpToDate) then if
     dlgYesNo('The project output is not up-to-date, rebuild ?') = mrYes then
+    begin
+      if fAppliOpts.autoSaveProjectFiles then
+        saveModifiedProjectFiles(fProject);
       fProject.compile;
+    end;
   if fProject.outputFilename.fileExists
       or (fProject.getFormat = pfDub) then
         fProject.run;

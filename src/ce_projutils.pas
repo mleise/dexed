@@ -5,7 +5,7 @@ interface
 
 uses
   Classes, SysUtils,
-  ce_nativeproject, ce_dubproject, ce_interfaces, ce_common, ce_observer;
+  ce_nativeproject, ce_dubproject, ce_interfaces, ce_common, ce_observer, ce_synmemo;
 
 type
   TCEProjectFileFormat = (pffNone, pffCe, pffDub);
@@ -27,6 +27,11 @@ function isProject(const filename: string): boolean;
  * Indicates wether a file is a project, either CE or DUB.
  *)
 function projectFormat(const filename: string): TCEProjectFileFormat;
+
+(**
+ * Saves all the project files that are being edited and if they're modified.
+ *)
+procedure saveModifiedProjectFiles(project: ICECommonProject);
 
 implementation
 
@@ -85,6 +90,21 @@ begin
   end;
   if discret then
     EntitiesConnector.endUpdate;
+end;
+
+procedure saveModifiedProjectFiles(project: ICECommonProject);
+var
+  mdh: ICEMultiDocHandler;
+  doc: TCESynMemo;
+  i: integer;
+begin
+  mdh := getMultiDocHandler;
+  for i:= 0 to project.sourcesCount-1 do
+  begin
+    doc := mdh.findDocument(project.sourceAbsolute(i));
+    if doc.isNotNil and doc.modified then
+      doc.save;
+  end;
 end;
 
 end.
