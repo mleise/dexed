@@ -2477,7 +2477,11 @@ end;
 
 procedure TCEMainForm.actProjCompAndRunWithArgsExecute(Sender: TObject);
 begin
+  fRunProjAfterCompile := true;
   fRunProjAfterCompArg := true;
+  if fAppliOpts.autoSaveProjectFiles then
+    saveModifiedProjectFiles(fProject);
+  fProject.compile;
 end;
 
 procedure TCEMainForm.actProjRunExecute(Sender: TObject);
