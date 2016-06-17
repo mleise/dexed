@@ -45,15 +45,15 @@ type
     procedure setD2syn(value: TPersistent);
     function getHl: TSynD2Syn;
   published
-    property name: string read fName write fName;
-    property highlighter: TPersistent read fd2syn write setD2Syn;
-    property background: TColor read fBackground write fBackground default clWhite;
-    property bracketMatch: TSynSelectedColor read fBracketMatchAttribs write setBracketMatchColor;
-    property currentLine: TSynSelectedColor read fCurrLineAttribs write setCurrLineAttribs;
-    property folding: TSynSelectedColor read fFoldedColor write setFoldedColor;
-    property identifierMatch: TSynSelectedColor read fIdentifierMarkup write setIdentifierMarkup;
-    property mouseLink: TSynSelectedColor read fMouseLinkAttribs write setMouseLinkColor;
-    property selection: TSynSelectedColor read fSelAttribs write setSelCol;
+    property name: string read fName write fName stored true;
+    property highlighter: TPersistent read fd2syn write setD2Syn stored true;
+    property background: TColor read fBackground write fBackground stored true;
+    property bracketMatch: TSynSelectedColor read fBracketMatchAttribs write setBracketMatchColor stored true;
+    property currentLine: TSynSelectedColor read fCurrLineAttribs write setCurrLineAttribs stored true;
+    property folding: TSynSelectedColor read fFoldedColor write setFoldedColor stored true;
+    property identifierMatch: TSynSelectedColor read fIdentifierMarkup write setIdentifierMarkup stored true;
+    property mouseLink: TSynSelectedColor read fMouseLinkAttribs write setMouseLinkColor stored true;
+    property selection: TSynSelectedColor read fSelAttribs write setSelCol stored true;
   public
     constructor Create(ACollection: TCollection); override;
     destructor destroy; override;
@@ -259,9 +259,9 @@ begin
   fBackup:= TCED2SynPreset.Create(nil);
   fPresets:= TCED2SynPresets.Create(self);
   fname := getCoeditDocPath + optfname;
-  //if fname.fileExists then
-    //fPresets.loadFromFile(fname)
-  //else
+  if fname.fileExists then
+    fPresets.loadFromFile(fname)
+  else
   begin
     with fPresets.addPreset do
     begin
