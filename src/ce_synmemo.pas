@@ -1374,6 +1374,8 @@ begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
   fCompletion.TheForm.Font.Size := Font.Size;
+  fCompletion.TheForm.BackgroundColor:= self.Color;
+  fCompletion.TheForm.TextColor:= fD2Highlighter.identifiers.Foreground;
   getCompletionList;
 end;
 

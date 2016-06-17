@@ -391,7 +391,7 @@ begin
   fEditor.Options:= fEditor.Options - [eoScrollPastEof, eoScrollPastEol];
   fEditor.SetHighlightSearch('writeln',[]);
   fEditor.lines.Add('module preview;');
-  fEditor.lines.Add('import std.stdio');
+  fEditor.lines.Add('import std.stdio;');
   fEditor.lines.Add('/// ddoc comment');
   fEditor.lines.Add('@safe void main(string[] args)');
   fEditor.lines.Add('{');
