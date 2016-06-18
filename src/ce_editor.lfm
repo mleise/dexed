@@ -136,7 +136,7 @@ inherited CEEditorWidget: TCEEditorWidget
       OnClick = MenuItem5Click
     end
     object MenuItem8: TMenuItem
-      Caption = 'Save import to file...'
+      Caption = 'Save imports to file...'
       OnClick = MenuItem8Click
     end
   end

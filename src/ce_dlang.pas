@@ -1039,7 +1039,7 @@ begin
       itm := ''
     else if (tok^.Data = ';') or (tok^.Data = ':') or (tok^.Data = ',') then
     begin
-      if length(itm) <> 0 then
+      if (length(itm) <> 0) and (imports.IndexOf(itm) = -1) then
         imports.Add(itm);
       itm := '';
       if (tok^.Data = ';') or (tok^.Data = ':') then
