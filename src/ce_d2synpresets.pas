@@ -7,7 +7,7 @@ uses
   Classes, SysUtils, SynEditMiscClasses, Graphics, Controls, StdCtrls, ExtCtrls,
   SynEditHighlighter, SynEditTypes, SynEdit, RTTIGrids, Buttons,
   ce_interfaces, ce_common, ce_writableComponent, ce_d2syn, ce_observer,
-  ce_editoroptions, ce_sharedres;
+  ce_editoroptions, ce_sharedres, ce_txtsyn;
 
 type
 
@@ -185,6 +185,9 @@ begin
   EditorOptions.identifierMatch.Assign(identifierMatch);
   EditorOptions.mouseLink.Assign(mouseLink);
   EditorOptions.selection.Assign(selection);
+  TSynTxtSyn(EditorOptions.highlighterGeneric).whites.Assign(getHl.whites);
+  TSynTxtSyn(EditorOptions.highlighterGeneric).text.Assign(getHl.identifiers);
+  TSynTxtSyn(EditorOptions.highlighterGeneric).symbols.Assign(getHl.symbols);
   EditorOptions.applyChangesFromSelf;
 end;
 

@@ -268,7 +268,7 @@ var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
   TxtSyn: TSynTxtSyn;   // used as model to set the options when no editor exists.
   LfmSyn: TSynLfmSyn;   // used to highlight the native projects.
-  JsSyn: TSynJScriptSyn; // used to highlight the DUB JSON projects.
+  JsSyn: TSynJScriptSyn;// used to highlight the DUB JSON projects.
 
 
 implementation
