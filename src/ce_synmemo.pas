@@ -1436,8 +1436,6 @@ procedure TCESynMemo.handleStatusChanged(Sender: TObject; Changes: TSynStatusCha
 begin
   if scOptions in Changes then
   begin
-    //TODO-cLazarus: track changes in http://bugs.freepascal.org/view.php?id=30272
-    // and remove this workaround if they fix it.
     if Beautifier.isNotNil and (Beautifier is TSynBeautifier) then
     begin
       if not (eoTabsToSpaces in Options) and not (eoSpacesToTabs in Options) then
@@ -1549,7 +1547,6 @@ begin
     loadCache;
     fCacheLoaded := true;
   end;
-  // TODO-cbugfix: follow http://bugs.freepascal.org/view.php?id=30272
   if detectIndentMode then
   begin
     case indentationMode(lines) of

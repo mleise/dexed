@@ -143,6 +143,11 @@ procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = n
 function getModuleName(const list: TLexTokenList): string;
 
 (**
+ * Fills a list with all the modules imported in a tokenized D source.
+ *)
+procedure getImports(const list: TLexTokenList; imports: TStrings);
+
+(**
  * Compares two TPoints.
  *)
 operator = (lhs: TPoint; rhs: TPoint): boolean;
@@ -946,7 +951,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION Syntactic errors}
+{$REGION Utils}
 function TLexErrorList.getError(index: integer): TLexError;
 begin
   Result := PLexError(Items[index])^;
@@ -1012,6 +1017,37 @@ begin
   end;
 end;
 
+procedure getImports(const list: TLexTokenList; imports: TStrings);
+var
+  i: integer;
+  imp: boolean;
+  tok: PLexToken;
+  itm: string = '';
+begin
+  for i:= 0 to list.Count-1 do
+  begin
+    tok := list[i];
+    if (tok^.kind = ltkKeyword) and (tok^.Data = 'import') then
+    begin
+      imp := true;
+      continue;
+    end;
+    if not imp then
+      continue;
+    //
+    if (tok^.Data = '=') then
+      itm := ''
+    else if (tok^.Data = ';') or (tok^.Data = ':') or (tok^.Data = ',') then
+    begin
+      if length(itm) <> 0 then
+        imports.Add(itm);
+      itm := '';
+      if (tok^.Data = ';') or (tok^.Data = ':') then
+        imp := false;
+    end else
+      itm += tok^.Data;
+  end;
+end;
 {$ENDREGION}
 end.
 

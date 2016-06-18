@@ -57,6 +57,7 @@ type
     MenuItem3: TMenuItem;
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
+    MenuItem8: TMenuItem;
     mnuedRename: TMenuItem;
     mnuedInvAllNone: TMenuItem;
     mnuedComm: TMenuItem;
@@ -77,6 +78,7 @@ type
     mnuEditor: TPopupMenu;
     procedure MenuItem5Click(Sender: TObject);
     procedure MenuItem6Click(Sender: TObject);
+    procedure MenuItem8Click(Sender: TObject);
     procedure mnuedRenameClick(Sender: TObject);
     procedure mnuedInvAllNoneClick(Sender: TObject);
     procedure mnuedCommClick(Sender: TObject);
@@ -796,6 +798,31 @@ begin
       lex(fDoc.Text, fTokList, nil);
       fTokList.saveToFile(FileName);
       fTokList.Clear;
+    end;
+  finally
+    free;
+  end;
+end;
+
+procedure TCEEditorWidget.MenuItem8Click(Sender: TObject);
+var
+  str: TStringList;
+begin
+  if fDoc.isNil then
+    exit;
+  if not fDoc.IsDSource and not fDoc.alwaysAdvancedFeatures then
+    exit;
+  with TSaveDialog.Create(nil) do
+  try
+    if execute then
+    begin
+      str := TStringList.Create;
+      fTokList.Clear;
+      lex(fDoc.Text, fTokList, nil, [lxoNoComments]);
+      getImports(fTOkList, str);
+      str.SaveToFile(filename);
+      fTokList.Clear;
+      str.Free;
     end;
   finally
     free;

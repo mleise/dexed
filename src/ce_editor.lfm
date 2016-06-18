@@ -135,5 +135,9 @@ inherited CEEditorWidget: TCEEditorWidget
       Caption = 'Save lexical tokens to file...'
       OnClick = MenuItem5Click
     end
+    object MenuItem8: TMenuItem
+      Caption = 'Save import to file...'
+      OnClick = MenuItem8Click
+    end
   end
 end
