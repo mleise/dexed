@@ -33,7 +33,6 @@ type
   protected
     fIsDockable: boolean;
     fIsModal: boolean;
-    fID: string;
     // a descendant overrides to implement a periodic update.
     procedure updateLoop; virtual;
     // a descendant overrides to implement an imperative update.
