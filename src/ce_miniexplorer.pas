@@ -246,10 +246,10 @@ begin
   //
   fEditableOptions:= TCEMiniExplorerEditableOptions.create(self);
   //
-  AssignPng(btnAddFav, 'folder_add');
-  AssignPng(btnRemFav, 'folder_delete');
-  AssignPng(btnShellOpen, 'flash');
-  AssignPng(btnEdit, 'pencil');
+  AssignPng(btnAddFav, 'FOLDER_ADD');
+  AssignPng(btnRemFav, 'FOLDER_DELETE');
+  AssignPng(btnShellOpen, 'FLASH');
+  AssignPng(btnEdit, 'PENCIL');
   //
   fFavorites := TStringList.Create;
   fFavorites.onChange := @favStringsChange;

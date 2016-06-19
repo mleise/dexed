@@ -314,7 +314,7 @@ begin
   fBtns[amcProj]:= btnSelProj;
   //
   btnClearCat.OnClick := @actClearCurCatExecute;
-  AssignPng(btnClearCat, 'clean');
+  AssignPng(btnClearCat, 'CLEAN');
   //
   fEditorMessagePos := TCEEditorMessagePos.Create;
   //

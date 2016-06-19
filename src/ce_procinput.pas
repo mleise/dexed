@@ -64,9 +64,9 @@ begin
     fMru.LoadFromFile(fname);
   if fMru.Count = 0 then
     fMru.Insert(0, '(your input here)');
-  AssignPng(btnClose, 'pencil_delete');
-  AssignPng(btnSend, 'pencil_go');
-  AssignPng(btnKill, 'cancel');
+  AssignPng(btnClose, 'PENCIL_DELETE');
+  AssignPng(btnSend, 'PENCIL_GO');
+  AssignPng(btnKill, 'CANCEL');
 end;
 
 destructor TCEProcInputWidget.destroy;

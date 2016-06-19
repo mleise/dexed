@@ -525,7 +525,7 @@ begin
   fSyncEdit := TSynPluginSyncroEdit.Create(self);
   fSyncEdit.Editor := self;
   fSyncEdit.CaseSensitive := true;
-  AssignPng(fSyncEdit.GutterGlyph, 'link_edit');
+  AssignPng(fSyncEdit.GutterGlyph, 'LINK_EDIT');
   //
   fCompletion := TSyncompletion.create(nil);
   fCompletion.ShowSizeDrag := true;
@@ -557,8 +557,8 @@ begin
   TextBuffer.AddNotifyHandler(senrUndoRedoAdded, @changeNotify);
   //
   fImages := TImageList.Create(self);
-  fImages.AddLazarusResource('bullet_red');
-  fImages.AddLazarusResource('bullet_green');
+  fImages.AddResourceName(HINSTANCE, 'BULLET_RED');
+  fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN');
   fBreakPoints := TFPList.Create;
   //
   fPositions := TCESynMemoPositions.create(self);

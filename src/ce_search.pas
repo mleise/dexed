@@ -229,7 +229,7 @@ begin
   btnReplace.Action := fActReplaceNext;
   btnReplaceAll.Action := fActReplaceAll;
   btnFindAll.Action := fActFindAll;
-  AssignPng(btnAllScope, 'document');
+  AssignPng(btnAllScope, 'DOCUMENT');
   updateImperative;
   //
   EntitiesConnector.addObserver(self);
@@ -540,12 +540,12 @@ begin
   fAllInProj := not fAllInProj;
   if fAllInProj then
   begin
-    AssignPng(btnAllScope, 'document_all');
+    AssignPng(btnAllScope, 'DOCUMENT_ALL');
     btnAllScope.Hint := 'all project sources';
   end
   else
   begin
-    AssignPng(btnAllScope, 'document');
+    AssignPng(btnAllScope, 'DOCUMENT');
     btnAllScope.Hint := 'selected source';
   end;
   updateImperative;

@@ -13,6 +13,91 @@
         <DpiAware Value="True"/>
       </XPManifest>
       <Icon Value="0"/>
+      <Resources Count="83">
+        <Resource_0 FileName="../icons/window/layout_add.png" Type="RCDATA" ResourceName="LAYOUT_ADD"/>
+        <Resource_1 FileName="../icons/window/layout.png" Type="RCDATA" ResourceName="LAYOUT"/>
+        <Resource_2 FileName="../icons/window/application_go.png" Type="RCDATA" ResourceName="APPLICATION_GO"/>
+        <Resource_3 FileName="../icons/window/application_flash.png" Type="RCDATA" ResourceName="APPLICATION_FLASH"/>
+        <Resource_4 FileName="../icons/window/application_edit.png" Type="RCDATA" ResourceName="APPLICATION_EDIT"/>
+        <Resource_5 FileName="../icons/window/application_double.png" Type="RCDATA" ResourceName="APPLICATION_DOUBLE"/>
+        <Resource_6 FileName="../icons/window/application_delete.png" Type="RCDATA" ResourceName="APPLICATION_DELETE"/>
+        <Resource_7 FileName="../icons/window/application_add.png" Type="RCDATA" ResourceName="APPLICATION_ADD"/>
+        <Resource_8 FileName="../icons/window/application.png" Type="RCDATA" ResourceName="APPLICATION"/>
+        <Resource_9 FileName="../icons/other/tree_list.png" Type="RCDATA" ResourceName="TREE_LIST"/>
+        <Resource_10 FileName="../icons/other/textfield_delete.png" Type="RCDATA" ResourceName="TEXTFIELD_DELETE"/>
+        <Resource_11 FileName="../icons/other/textfield_add.png" Type="RCDATA" ResourceName="TEXTFIELD_ADD"/>
+        <Resource_12 FileName="../icons/other/splitter.png" Type="RCDATA" ResourceName="SPLITTER"/>
+        <Resource_13 FileName="../icons/other/script_bricks.png" Type="RCDATA" ResourceName="SCRIPT_BRICKS"/>
+        <Resource_14 FileName="../icons/other/pencil_go.png" Type="RCDATA" ResourceName="PENCIL_GO"/>
+        <Resource_15 FileName="../icons/other/pencil_delete.png" Type="RCDATA" ResourceName="PENCIL_DELETE"/>
+        <Resource_16 FileName="../icons/other/pencil.png" Type="RCDATA" ResourceName="PENCIL"/>
+        <Resource_17 FileName="../icons/other/paste.png" Type="RCDATA" ResourceName="PASTE"/>
+        <Resource_18 FileName="../icons/other/package_delete.png" Type="RCDATA" ResourceName="PACKAGE_DELETE"/>
+        <Resource_19 FileName="../icons/other/package_add.png" Type="RCDATA" ResourceName="PACKAGE_ADD"/>
+        <Resource_20 FileName="../icons/other/keyboard_pencil.png" Type="RCDATA" ResourceName="KEYBOARD_PENCIL"/>
+        <Resource_21 FileName="../icons/other/information.png" Type="RCDATA" ResourceName="INFORMATION"/>
+        <Resource_22 FileName="../icons/other/flash.png" Type="RCDATA" ResourceName="FLASH"/>
+        <Resource_23 FileName="../icons/other/dub_small.png" Type="RCDATA" ResourceName="DUB_SMALL"/>
+        <Resource_24 FileName="../icons/other/dub.png" Type="RCDATA" ResourceName="DUB"/>
+        <Resource_25 FileName="../icons/other/cut.png" Type="RCDATA" ResourceName="CUT"/>
+        <Resource_26 FileName="../icons/other/copy.png" Type="RCDATA" ResourceName="COPY"/>
+        <Resource_27 FileName="../icons/other/clean.png" Type="RCDATA" ResourceName="CLEAN"/>
+        <Resource_28 FileName="../icons/other/cancel.png" Type="RCDATA" ResourceName="CANCEL"/>
+        <Resource_29 FileName="../icons/other/bricks.png" Type="RCDATA" ResourceName="BRICKS"/>
+        <Resource_30 FileName="../icons/other/accept.png" Type="RCDATA" ResourceName="ACCEPT"/>
+        <Resource_31 FileName="../icons/link/link_edit.png" Type="RCDATA" ResourceName="LINK_EDIT"/>
+        <Resource_32 FileName="../icons/link/link_break.png" Type="RCDATA" ResourceName="LINK_BREAK"/>
+        <Resource_33 FileName="../icons/link/link.png" Type="RCDATA" ResourceName="LINK"/>
+        <Resource_34 FileName="../icons/folder/folder_star.png" Type="RCDATA" ResourceName="FOLDER_STAR"/>
+        <Resource_35 FileName="../icons/folder/folder_go.png" Type="RCDATA" ResourceName="FOLDER_GO"/>
+        <Resource_36 FileName="../icons/folder/folder_delete.png" Type="RCDATA" ResourceName="FOLDER_DELETE"/>
+        <Resource_37 FileName="../icons/folder/folder_brick.png" Type="RCDATA" ResourceName="FOLDER_BRICK"/>
+        <Resource_38 FileName="../icons/folder/folder_add.png" Type="RCDATA" ResourceName="FOLDER_ADD"/>
+        <Resource_39 FileName="../icons/folder/folder.png" Type="RCDATA" ResourceName="FOLDER"/>
+        <Resource_40 FileName="../icons/file/script_gear.png" Type="RCDATA" ResourceName="SCRIPT_GEAR"/>
+        <Resource_41 FileName="../icons/file/document_plus.png" Type="RCDATA" ResourceName="DOCUMENT_PLUS"/>
+        <Resource_42 FileName="../icons/file/document_next.png" Type="RCDATA" ResourceName="DOCUMENT_NEXT"/>
+        <Resource_43 FileName="../icons/file/document_delete.png" Type="RCDATA" ResourceName="DOCUMENT_DELETE"/>
+        <Resource_44 FileName="../icons/file/document_back.png" Type="RCDATA" ResourceName="DOCUMENT_BACK"/>
+        <Resource_45 FileName="../icons/file/document_all.png" Type="RCDATA" ResourceName="DOCUMENT_ALL"/>
+        <Resource_46 FileName="../icons/file/document_add.png" Type="RCDATA" ResourceName="DOCUMENT_ADD"/>
+        <Resource_47 FileName="../icons/file/document.png" Type="RCDATA" ResourceName="DOCUMENT"/>
+        <Resource_48 FileName="../icons/disk/disk_pen.png" Type="RCDATA" ResourceName="DISK_PEN"/>
+        <Resource_49 FileName="../icons/disk/disk_multiple.png" Type="RCDATA" ResourceName="DISK_MULTIPLE"/>
+        <Resource_50 FileName="../icons/disk/disk.png" Type="RCDATA" ResourceName="DISK"/>
+        <Resource_51 FileName="../icons/cog/wrench_orange.png" Type="RCDATA" ResourceName="WRENCH_ORANGE"/>
+        <Resource_52 FileName="../icons/cog/wrench.png" Type="RCDATA" ResourceName="WRENCH"/>
+        <Resource_53 FileName="../icons/cog/cog_go.png" Type="RCDATA" ResourceName="COG_GO"/>
+        <Resource_54 FileName="../icons/cog/cog_edit.png" Type="RCDATA" ResourceName="COG_EDIT"/>
+        <Resource_55 FileName="../icons/cog/cog_delete.png" Type="RCDATA" ResourceName="COG_DELETE"/>
+        <Resource_56 FileName="../icons/cog/cog_add.png" Type="RCDATA" ResourceName="COG_ADD"/>
+        <Resource_57 FileName="../icons/cog/cog.png" Type="RCDATA" ResourceName="COG"/>
+        <Resource_58 FileName="../icons/bullet/bullet_yellow.png" Type="RCDATA" ResourceName="BULLET_YELLOW"/>
+        <Resource_59 FileName="../icons/bullet/bullet_star.png" Type="RCDATA" ResourceName="BULLET_STAR"/>
+        <Resource_60 FileName="../icons/bullet/bullet_red.png" Type="RCDATA" ResourceName="BULLET_RED"/>
+        <Resource_61 FileName="../icons/bullet/bullet_purple.png" Type="RCDATA" ResourceName="BULLET_PURPLE"/>
+        <Resource_62 FileName="../icons/bullet/bullet_pink.png" Type="RCDATA" ResourceName="BULLET_PINK"/>
+        <Resource_63 FileName="../icons/bullet/bullet_orange.png" Type="RCDATA" ResourceName="BULLET_ORANGE"/>
+        <Resource_64 FileName="../icons/bullet/bullet_green.png" Type="RCDATA" ResourceName="BULLET_GREEN"/>
+        <Resource_65 FileName="../icons/bullet/bullet_blue.png" Type="RCDATA" ResourceName="BULLET_BLUE"/>
+        <Resource_66 FileName="../icons/bullet/bullet_black.png" Type="RCDATA" ResourceName="BULLET_BLACK"/>
+        <Resource_67 FileName="../icons/book/book_open.png" Type="RCDATA" ResourceName="BOOK_OPEN"/>
+        <Resource_68 FileName="../icons/book/book_link.png" Type="RCDATA" ResourceName="BOOK_LINK"/>
+        <Resource_69 FileName="../icons/book/book_grey.png" Type="RCDATA" ResourceName="BOOK_GREY"/>
+        <Resource_70 FileName="../icons/book/book_edit.png" Type="RCDATA" ResourceName="BOOK_EDIT"/>
+        <Resource_71 FileName="../icons/book/book_delete.png" Type="RCDATA" ResourceName="BOOK_DELETE"/>
+        <Resource_72 FileName="../icons/book/book_add.png" Type="RCDATA" ResourceName="BOOK_ADD"/>
+        <Resource_73 FileName="../icons/book/book.png" Type="RCDATA" ResourceName="BOOK"/>
+        <Resource_74 FileName="../icons/arrow/go_previous.png" Type="RCDATA" ResourceName="GO_PREVIOUS"/>
+        <Resource_75 FileName="../icons/arrow/go_next.png" Type="RCDATA" ResourceName="GO_NEXT"/>
+        <Resource_76 FileName="../icons/arrow/arrow_update.png" Type="RCDATA" ResourceName="ARROW_UPDATE"/>
+        <Resource_77 FileName="../icons/arrow/arrow_up.png" Type="RCDATA" ResourceName="ARROW_UP"/>
+        <Resource_78 FileName="../icons/arrow/arrow_undo.png" Type="RCDATA" ResourceName="ARROW_UNDO"/>
+        <Resource_79 FileName="../icons/arrow/arrow_shoe.png" Type="RCDATA" ResourceName="ARROW_SHOE"/>
+        <Resource_80 FileName="../icons/arrow/arrow_redo.png" Type="RCDATA" ResourceName="ARROW_REDO"/>
+        <Resource_81 FileName="../icons/arrow/arrow_pen.png" Type="RCDATA" ResourceName="ARROW_PEN"/>
+        <Resource_82 FileName="../icons/arrow/arrow_down.png" Type="RCDATA" ResourceName="ARROW_DOWN"/>
+      </Resources>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -54,7 +139,6 @@
           <Linking>
             <Debugging>
               <UseHeaptrc Value="True"/>
-              <TrashVariables Value="True"/>
             </Debugging>
           </Linking>
           <Other>

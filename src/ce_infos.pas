@@ -122,12 +122,12 @@ begin
       if pth.isEmpty then
       begin
         fStatus.Caption:= ' the tool cannot be found';
-        AssignPng(fIco, 'bullet_red');
+        AssignPng(fIco, 'BULLET_RED');
       end
       else
       begin
         fStatus.Caption:= ' the tool is available';
-        AssignPng(fIco, 'bullet_green');
+        AssignPng(fIco, 'BULLET_GREEN');
       end;
     end;
     tikOptional:
@@ -136,12 +136,12 @@ begin
       if pth.isEmpty then
       begin
         fStatus.Caption:= ' the tool cannot be found';
-        AssignPng(fIco, 'bullet_yellow');
+        AssignPng(fIco, 'BULLET_YELLOW');
       end
       else
       begin
         fStatus.Caption:= ' the tool is available';
-        AssignPng(fIco, 'bullet_green');
+        AssignPng(fIco, 'BULLET_GREEN');
       end;
     end;
     tikRunning:
@@ -150,17 +150,17 @@ begin
       if pth.isEmpty then
       begin
         fStatus.Caption:= ' the tool cannot be found';
-        AssignPng(fIco, 'bullet_red');
+        AssignPng(fIco, 'BULLET_RED');
       end
       else if AppIsRunning(fToolName + exeExt) then
       begin
         fStatus.Caption:= ' the tool is available and running';
-        AssignPng(fIco, 'bullet_green');
+        AssignPng(fIco, 'BULLET_GREEN');
       end
       else
       begin
         fStatus.Caption:= ' the tool is available but is not running';
-        AssignPng(fIco, 'bullet_yellow');
+        AssignPng(fIco, 'BULLET_YELLOW');
       end;
     end;
   end;

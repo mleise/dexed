@@ -119,7 +119,7 @@ begin
   fBtnValidate.Width:= 26;
   fBtnValidate.OnClick:=@doValidate;
   fBtnValidate.Hint:='accept and add a property';
-  AssignPng(fBtnValidate, 'accept');
+  AssignPng(fBtnValidate, 'ACCEPT');
 end;
 
 procedure TCEDubProjectPropAddPanel.doValidate(sender: TObject);
@@ -146,10 +146,10 @@ begin
   fNodeSources := treeInspect.Items[0];
   fNodeConfig := treeInspect.Items[1];
   //
-  AssignPng(btnAddProp, 'textfield_add');
-  AssignPng(btnDelProp, 'textfield_delete');
-  AssignPng(btnAcceptProp, 'accept');
-  AssignPng(btnRefresh, 'arrow_update');
+  AssignPng(btnAddProp, 'TEXTFIELD_ADD');
+  AssignPng(btnDelProp, 'TEXTFIELD_DELETE');
+  AssignPng(btnAcceptProp, 'ACCEPT');
+  AssignPng(btnRefresh, 'ARROW_UPDATE');
 end;
 
 procedure TCEDubProjectEditorWidget.SetVisible(Value: boolean);

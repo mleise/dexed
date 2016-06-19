@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, TreeFilterEdit, Forms, Controls, Graphics, ExtCtrls, Menus,
   ComCtrls, ce_widget, jsonparser, process, actnlist, Buttons, Clipbrd, LCLProc,
-  ce_common, ce_observer, ce_synmemo, ce_interfaces, ce_writableComponent, ce_processes;
+  ce_common, ce_observer, ce_synmemo, ce_interfaces, ce_writableComponent,
+  ce_processes, ce_sharedres;
 
 type
 
@@ -321,7 +322,6 @@ end;
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCESymbolListWidget.create(aOwner: TComponent);
 var
-  png: TPortableNetworkGraphic;
   fname: string;
 begin
   fAutoRefresh := false;
@@ -380,13 +380,7 @@ begin
   ndWarn    := Tree.Items[12];
   ndErr     := Tree.Items[13];
   //
-  png := TPortableNetworkGraphic.Create;
-  try
-    png.LoadFromLazarusResource('arrow_update');
-    btnRefresh.Glyph.Assign(png);
-  finally
-    png.Free;
-  end;
+  AssignPng(btnRefresh, 'ARROW_UPDATE');
   //
   Tree.OnDblClick := @TreeDblClick;
   Tree.PopupMenu := contextMenu;

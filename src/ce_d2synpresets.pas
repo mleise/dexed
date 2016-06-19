@@ -428,7 +428,7 @@ begin
   btn.BorderSpacing.Around:=2;
   btn.OnClick:=@btnAddClick;
   btn.Hint:='add preset';
-  AssignPng(btn, 'document_add');
+  AssignPng(btn, 'DOCUMENT_ADD');
   //
   btn := TBitBtn.Create(self);
   btn.Parent := pnl;
@@ -437,7 +437,7 @@ begin
   btn.BorderSpacing.Around:=2;
   btn.OnClick:=@btnDelClick;
   btn.Hint:='delete preset';
-  AssignPng(btn, 'document_delete');
+  AssignPng(btn, 'DOCUMENT_DELETE');
   //
   fPropEd := TTIPropertyGrid.Create(self);
   fPropEd.Parent := self;

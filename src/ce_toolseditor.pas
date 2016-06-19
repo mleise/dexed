@@ -48,12 +48,12 @@ constructor TCEToolsEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
   //
-  AssignPng(btnMoveUp, 'arrow_up');
-  AssignPng(btnMoveDown, 'arrow_down');
-  AssignPng(BtnAddTool, 'application_add');
-  AssignPng(btnRemTool, 'application_delete');
-  AssignPng(btnRun, 'application_flash');
-  AssignPng(btnClone, 'application_double');
+  AssignPng(btnMoveUp, 'ARROW_UP');
+  AssignPng(btnMoveDown, 'ARROW_DOWN');
+  AssignPng(BtnAddTool, 'APPLICATION_ADD');
+  AssignPng(btnRemTool, 'APPLICATION_DELETE');
+  AssignPng(btnRun, 'APPLICATION_FLASH');
+  AssignPng(btnClone, 'APPLICATION_DOUBLE');
   //
   propsEd.CheckboxForBoolean := true;
   rebuildToolList;

@@ -107,8 +107,8 @@ begin
   //
   btnCancel.OnClick := @doCancel;
   btnApply.OnClick  := @doApply;
-  AssignPng(btnCancel, 'cancel');
-  AssignPng(btnApply, 'accept');
+  AssignPng(btnCancel, 'CANCEL');
+  AssignPng(btnApply, 'ACCEPT');
   //
   dfmtOptionEditor.TIObject := fDmtWrapper;
 end;

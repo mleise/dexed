@@ -91,19 +91,19 @@ const
 constructor TCELibManEditorWidget.Create(aOwner: TComponent);
 begin
   inherited;
-  AssignPng(btnMoveDown, 'arrow_down');
-  AssignPng(btnMoveUp, 'arrow_up');
-  AssignPng(btnAddLib, 'book_add');
-  AssignPng(btnRemLib, 'book_delete');
-  AssignPng(btnEditAlias, 'book_edit');
-  AssignPng(btnSelFile, 'folder_brick');
-  AssignPng(btnSelfoldOfFiles, 'bricks');
-  AssignPng(btnSelRoot, 'folder_add');
-  AssignPng(btnReg, 'book_link');
-  AssignPng(btnDubFetch, 'dub');
-  AssignPng(btnSelProj, 'script_bricks');
-  AssignPng(btnOpenProj, 'book_open');
-  AssignPng(btnEnabled, 'book');
+  AssignPng(btnMoveDown, 'ARROW_DOWN');
+  AssignPng(btnMoveUp, 'ARROW_UP');
+  AssignPng(btnAddLib, 'BOOK_ADD');
+  AssignPng(btnRemLib, 'BOOK_DELETE');
+  AssignPng(btnEditAlias, 'BOOK_EDIT');
+  AssignPng(btnSelFile, 'FOLDER_BRICK');
+  AssignPng(btnSelfoldOfFiles, 'BRICKS');
+  AssignPng(btnSelRoot, 'FOLDER_ADD');
+  AssignPng(btnReg, 'BOOK_LINK');
+  AssignPng(btnDubFetch, 'DUB');
+  AssignPng(btnSelProj, 'SCRIPT_BRICKS');
+  AssignPng(btnOpenProj, 'BOOK_OPEN');
+  AssignPng(btnEnabled, 'BOOK');
 end;
 
 procedure TCELibManEditorWidget.updateButtonsState;
@@ -114,9 +114,9 @@ begin
     List.Selected.SubItems[2].fileExists;
   if List.Selected.isNotNil and itemForRow(List.Selected).isNotNil and
     itemForRow(List.Selected).enabled then
-      AssignPng(btnEnabled, 'book')
+      AssignPng(btnEnabled, 'BOOK')
   else
-    AssignPng(btnEnabled, 'book_grey');
+    AssignPng(btnEnabled, 'BOOK_GREY');
 end;
 
 procedure TCELibManEditorWidget.projNew(aProject: ICECommonProject);
@@ -222,7 +222,7 @@ begin
   bww.OnClick:= @getList;
   bww.Layout:= blGlyphTop;
   bww.Spacing:= 2;
-  AssignPng(bww, 'arrow_update');
+  AssignPng(bww, 'ARROW_UPDATE');
 
   bok := TBitBtn.Create(self);
   bok.Parent := self;
@@ -234,7 +234,7 @@ begin
   bok.ShowHint := true;
   bok.Layout:= blGlyphTop;
   bok.Spacing:= 2;
-  AssignPng(bok, 'accept');
+  AssignPng(bok, 'ACCEPT');
 
   bno := TBitBtn.Create(self);
   bno.Parent := self;
@@ -246,7 +246,7 @@ begin
   bno.ShowHint := true;
   bno.Layout:= blGlyphTop;
   bno.Spacing:= 2;
-  AssignPng(bno, 'cancel');
+  AssignPng(bno, 'CANCEL');
 end;
 
 procedure TDubPackageQueryForm.getList(sender: TObject);

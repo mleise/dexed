@@ -67,10 +67,10 @@ constructor TCEProjectConfigurationWidget.create(aOwner: TComponent);
 begin
   inherited;
   //
-  AssignPng(btnAddConf, 'cog_add');
-  AssignPng(btnDelConf, 'cog_delete');
-  AssignPng(btnCloneConf, 'cog_go');
-  AssignPng(btnSyncEdit, 'link_break');
+  AssignPng(btnAddConf, 'COG_ADD');
+  AssignPng(btnDelConf, 'COG_DELETE');
+  AssignPng(btnCloneConf, 'COG_GO');
+  AssignPng(btnSyncEdit, 'LINK_BREAK');
   //
   fSynchroItem := TStringList.Create;
   fSynchroValue := TStringList.Create;
@@ -177,8 +177,8 @@ begin
   if fSyncroMode = aValue then exit;
   //
   fSyncroMode := aValue;
-  if fSyncroMode then  AssignPng(btnSyncEdit, 'link')
-  else AssignPng(btnSyncEdit, 'link_break');
+  if fSyncroMode then  AssignPng(btnSyncEdit, 'LINK')
+  else AssignPng(btnSyncEdit, 'LINK_BREAK');
 end;
 
 function TCEProjectConfigurationWidget.syncroSetPropAsString(const ASection, Item, Default: string): string;

@@ -221,8 +221,8 @@ begin
   lstfilter.OnChange := @filterItems;
   btnGo.OnClick := @handleListClick;
   //
-  AssignPng(btnRefresh, 'arrow_update');
-  AssignPng(btnGo, 'arrow_pen');
+  AssignPng(btnRefresh, 'ARROW_UPDATE');
+  AssignPng(btnGo, 'ARROW_PEN');
   //
   fname := getCoeditDocPath + OptFname;
   if fname.fileExists then

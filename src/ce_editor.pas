@@ -279,24 +279,24 @@ begin
   pageControl.addButton.OnClick:=@pageBtnAddCLick;
   pageControl.OnDragDrop:= @ddHandler.DragDrop;
   pageControl.OnDragOver:= @ddHandler.DragOver;
-  AssignPng(pageControl.moveLeftButton, 'go_previous');
-  AssignPng(pageControl.moveRightButton, 'go_next');
-  AssignPng(pageControl.addButton, 'document_add');
-  AssignPng(pageControl.closeButton, 'document_delete');
-  AssignPng(pageControl.splitButton, 'splitter');
+  AssignPng(pageControl.moveLeftButton, 'GO_PREVIOUS');
+  AssignPng(pageControl.moveRightButton, 'GO_NEXT');
+  AssignPng(pageControl.addButton, 'DOCUMENT_ADD');
+  AssignPng(pageControl.closeButton, 'DOCUMENT_DELETE');
+  AssignPng(pageControl.splitButton, 'SPLITTER');
 
   fTokList := TLexTokenList.Create;
   //
-  AssignPng(mnuedCopy.Bitmap, 'copy');
-  AssignPng(mnuedCut.Bitmap, 'cut');
-  AssignPng(mnuedPaste.Bitmap, 'paste');
-  AssignPng(mnuedUndo.Bitmap, 'arrow_undo');
-  AssignPng(mnuedRedo.Bitmap, 'arrow_redo');
-  AssignPng(mnuedJum2Decl.Bitmap, 'arrow_shoe');
-  AssignPng(mnuedCopy.Bitmap, 'copy');
-  AssignPng(mnuedNext.Bitmap, 'go_next');
-  AssignPng(mnuedPrev.Bitmap, 'go_previous');
-  AssignPng(mnuedRename.Bitmap, 'pencil');
+  AssignPng(mnuedCopy.Bitmap, 'COPY');
+  AssignPng(mnuedCut.Bitmap, 'CUT');
+  AssignPng(mnuedPaste.Bitmap, 'PASTE');
+  AssignPng(mnuedUndo.Bitmap, 'ARROW_UNDO');
+  AssignPng(mnuedRedo.Bitmap, 'ARROW_REDO');
+  AssignPng(mnuedJum2Decl.Bitmap, 'ARROW_SHOE');
+  AssignPng(mnuedCopy.Bitmap, 'COPY');
+  AssignPng(mnuedNext.Bitmap, 'GO_NEXT');
+  AssignPng(mnuedPrev.Bitmap, 'GO_PREVIOUS');
+  AssignPng(mnuedRename.Bitmap, 'PENCIL');
   //
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);

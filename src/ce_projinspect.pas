@@ -86,10 +86,10 @@ begin
   //
   inherited;
   //
-  AssignPng(btnAddFile, 'document_add');
-  AssignPng(btnRemFile, 'document_delete');
-  AssignPng(btnAddFold, 'folder_add');
-  AssignPng(btnRemFold, 'folder_delete');
+  AssignPng(btnAddFile, 'DOCUMENT_ADD');
+  AssignPng(btnRemFile, 'DOCUMENT_DELETE');
+  AssignPng(btnAddFold, 'FOLDER_ADD');
+  AssignPng(btnRemFold, 'FOLDER_DELETE');
   //
   Tree.OnDblClick := @TreeDblClick;
   fFileNode := Tree.Items[0];

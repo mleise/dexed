@@ -311,12 +311,12 @@ end;
 constructor TCEProjectGroupWidget.create(aOwner: TCOmponent);
 begin
   inherited;
-  AssignPng(btnMoveUp, 'arrow_up');
-  AssignPng(btnMoveDown, 'arrow_down');
-  AssignPng(BtnAddProj, 'document_add');
-  AssignPng(btnRemProj, 'document_delete');
-  AssignPng(btnFreeFocus, 'pencil');
-  AssignPng(btnAddUnfocused, 'document_add');
+  AssignPng(btnMoveUp, 'ARROW_UP');
+  AssignPng(btnMoveDown, 'ARROW_DOWN');
+  AssignPng(BtnAddProj, 'DOCUMENT_ADD');
+  AssignPng(btnRemProj, 'DOCUMENT_DELETE');
+  AssignPng(btnFreeFocus, 'PENCIL');
+  AssignPng(btnAddUnfocused, 'DOCUMENT_ADD');
   projectGroup.onChanged:= @handleChanged;
   fProjSubj:= TCEProjectSubject.Create;
 end;

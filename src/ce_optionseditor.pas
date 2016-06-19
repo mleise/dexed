@@ -71,8 +71,8 @@ begin
   inspector.CheckboxForBoolean := true;
   inspector.PropertyEditorHook.AddHandlerModified(@inspectorModified);
   //
-  AssignPng(btnCancel, 'cancel');
-  AssignPng(btnAccept, 'accept');
+  AssignPng(btnCancel, 'CANCEL');
+  AssignPng(btnAccept, 'ACCEPT');
 end;
 
 destructor TCEOptionEditorWidget.destroy;

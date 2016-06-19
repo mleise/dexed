@@ -288,7 +288,7 @@ begin
   fInspState := TInspectableState.Create;
   stateViewer.TIObject := fInspState;
   //
-  AssignPng(btnSendCom, 'accept');
+  AssignPng(btnSendCom, 'ACCEPT');
 end;
 
 destructor TCEGdbWidget.destroy;

@@ -177,7 +177,7 @@ begin
   fObservers := TCEEditableShortCutSubject.create;
   fShortcuts := TShortCutCollection.create(self);
   fBackup := TShortCutCollection.create(self);
-  AssignPng(btnClear, 'clean');
+  AssignPng(btnClear, 'CLEAN');
   EntitiesConnector.addObserver(self);
 end;
 
@@ -192,7 +192,7 @@ begin
   inherited;
   if not visible then exit;
   //
-  AssignPng(btnActivate, 'keyboard_pencil');
+  AssignPng(btnActivate, 'KEYBOARD_PENCIL');
 end;
 {$ENDREGION}
 
