@@ -193,6 +193,7 @@ end;
 
 procedure TCEToolItem.execute(previous: TCEToolItem);
 var
+  arg: string;
   prm: string;
   inp: string;
   old: string;
@@ -220,7 +221,14 @@ begin
   begin
     prm := '';
     if InputQuery('Parameters', '', prm) then
-      if prm.isNotEmpty then fProcess.Parameters.AddText(fSymStringExpander.expand(prm));
+    begin
+      prm := fSymStringExpander.expand(prm);
+      arg := StringReplace(fParameters.Text, '<$1>', prm, [rfReplaceAll]);
+      if prm.isNotEmpty and (arg = fParameters.Text) then
+        fProcess.Parameters.AddText(prm)
+      else
+        fProcess.Parameters.Text := arg;
+    end;
   end;
   ensureNoPipeIfWait(fProcess);
   //
