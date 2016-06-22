@@ -298,6 +298,7 @@ begin
       identifierMatch.Foreground:= clNone;
       identifierMatch.Background:= clSilver;
       identifierMatch.BackAlpha:=70;
+      identifierMatch.BackPriority:= 10;
       //
       selection.Background:= $CCCCCC;
       selection.Foreground:= clNone;
@@ -339,6 +340,7 @@ begin
       folding.Background := 7303023;
       folding.Foreground := clYellow;
       identifierMatch.Background := 7697781;
+      identifierMatch.BackPriority:= 10;
       identifierMatch.Foreground := clNone;
       selection.Background := 10132122;
       selection.Foreground := clNone;
@@ -374,8 +376,37 @@ begin
       folding.Foreground := clYellow;
       folding.FrameColor := clYellow;
       identifierMatch.Background := 10278890;
+      identifierMatch.BackPriority:= 10;
       identifierMatch.Foreground := clNone;
       selection.Background := 8448232;
+      selection.Foreground := clNone;
+    end;
+    with fPresets.addPreset do
+    begin
+      name := 'Mars bright';
+      getHl.numbers.Foreground := 7763655;
+      getHl.comments.Foreground := clMedGray;
+      getHl.strings.Foreground := 3750276;
+      getHl.keywords.Foreground := 2631874;
+      getHl.ddoc.Foreground := 7105644;
+      getHl.special.Foreground := 2631874;
+      getHl.attributes.Foreground := 2631874;
+      background := 16448250;
+      bracketMatch.Background := 9276865;
+      bracketMatch.Foreground := clNone;
+      currentLine.Background := 13421772;
+      currentLine.Foreground := clNone;
+      folding.Background := clNone;
+      folding.Foreground := clNone;
+      folding.FrameColor := clBlack;
+      identifierMatch.Background := 14145500;
+      identifierMatch.Foreground := clNone;
+      identifierMatch.BackPriority := 10;
+      mouseLink.Background := clNone;
+      mouseLink.Foreground := clNone;
+      mouseLink.FrameColor := clRed;
+      mouseLink.FrameEdges := sfeBottom;
+      selection.Background := 12837345;
       selection.Foreground := clNone;
     end;
   end;
@@ -410,12 +441,12 @@ begin
   pnl.BevelOuter:= bvNone;
   pnl.BevelInner:= bvNone;
   pnl.Align:=alTop;
-  pnl.BorderSpacing.Around:= 4;
+  pnl.BorderSpacing.Around:= 2;
   pnl.Height:=30;
   //
   fList := TComboBox.Create(self);
   fList.Align:= alClient;
-  fList.BorderSpacing.Around:= 4;
+  fList.BorderSpacing.Around:= 2;
   fList.Parent := pnl;
   fList.ReadOnly:=true;
   fList.OnSelect:= @lstBoxSelChange;
@@ -557,6 +588,7 @@ begin
   fEditor.FoldedCodeColor := p.folding;
   fEditor.MouseLinkColor := p.mouseLink;
   fEditor.BracketMatchColor := p.bracketMatch;
+  fList.Items[fList.ItemIndex] := fPresets[fList.ItemIndex].name;
 end;
 {$ENDREGION}
 
