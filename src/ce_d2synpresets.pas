@@ -59,6 +59,7 @@ type
     destructor destroy; override;
     procedure assignToOptions;
     procedure assignFromOptions;
+    procedure Assign(Source: TPersistent); override;
   end;
 
   TCED2SynPresets = class(TWritableLfmTextComponent)
@@ -94,6 +95,7 @@ type
     procedure lstBoxSelChange(Sender: TObject);
     procedure btnAddClick(sender: TObject);
     procedure btnDelClick(sender: TObject);
+    procedure btnCloneClick(sender: TObject);
     procedure propEdModified(sender: TObject);
     procedure updateList;
     procedure updateEditor;
@@ -201,6 +203,25 @@ begin
   identifierMatch.Assign(EditorOptions.identifierMatch);
   mouseLink.Assign(EditorOptions.mouseLink);
   selection.Assign(EditorOptions.selection);
+end;
+
+procedure TCED2SynPreset.Assign(Source: TPersistent);
+var
+  src: TCED2SynPreset;
+begin
+  if Source is TCED2SynPreset then
+  begin
+    src := TCED2SynPreset(Source);
+    background:=src.background;
+    highlighter.Assign(src.highlighter);
+    bracketMatch.Assign(src.bracketMatch);
+    currentLine.Assign(src.currentLine);
+    folding.Assign(src.folding);
+    identifierMatch.Assign(src.identifierMatch);
+    mouseLink.Assign(src.mouseLink);
+    selection.Assign(src.selection);
+  end else
+    inherited;
 end;
 {$ENDREGION}
 
@@ -409,6 +430,39 @@ begin
       selection.Background := 12837345;
       selection.Foreground := clNone;
     end;
+    with fPresets.addPreset do
+    begin
+      name := 'Mars dark';
+      getHl.Enabled := False;
+      getHl.numbers.Foreground := 7763655;
+      getHl.symbols.Foreground := 5460961;
+      getHl.identifiers.Foreground := clCream;
+      getHl.comments.Foreground := 5095359;
+      getHl.strings.Foreground := 10790107;
+      getHl.keywords.Foreground := 4539883;
+      getHl.ddoc.Foreground := 10540501;
+      getHl.inlineAsm.Foreground := 12303291;
+      getHl.special.Foreground := 2631874;
+      getHl.errors.Foreground := clCream;
+      getHl.attributes.Foreground := 2631874;
+      background := 5263440;
+      bracketMatch.Background := 9276865;
+      bracketMatch.Foreground := clNone;
+      currentLine.Background := 4013373;
+      currentLine.Foreground := clNone;
+      folding.Background := clNone;
+      folding.Foreground := clNone;
+      folding.FrameColor := clBlack;
+      identifierMatch.Background := 6381928;
+      identifierMatch.Foreground := clNone;
+      identifierMatch.BackPriority := 10;
+      mouseLink.Background := clNone;
+      mouseLink.Foreground := clNone;
+      mouseLink.FrameColor := clRed;
+      mouseLink.FrameEdges := sfeBottom;
+      selection.Background := 12837345;
+      selection.Foreground := clNone;
+    end;
   end;
   // TODO-cd2synpresets: add more presets
   //
@@ -454,21 +508,27 @@ begin
   //
   btn := TBitBtn.Create(self);
   btn.Parent := pnl;
-  btn.Width:= 26;
+  btn.Width:= 28;
   btn.Align:= alRight;
-  btn.BorderSpacing.Around:=2;
   btn.OnClick:=@btnAddClick;
   btn.Hint:='add preset';
   AssignPng(btn, 'DOCUMENT_ADD');
   //
   btn := TBitBtn.Create(self);
   btn.Parent := pnl;
-  btn.Width:= 26;
+  btn.Width:= 28;
   btn.Align:= alRight;
-  btn.BorderSpacing.Around:=2;
   btn.OnClick:=@btnDelClick;
   btn.Hint:='delete preset';
   AssignPng(btn, 'DOCUMENT_DELETE');
+  //
+  btn := TBitBtn.Create(self);
+  btn.Parent := pnl;
+  btn.Width:= 28;
+  btn.Align:= alRight;
+  btn.OnClick:=@btnCloneClick;
+  btn.Hint:='clone preset';
+  AssignPng(btn, 'DOCUMENT_PLUS');
   //
   fPropEd := TTIPropertyGrid.Create(self);
   fPropEd.Parent := self;
@@ -553,6 +613,18 @@ begin
   fPresets.fCollection.Delete(fList.ItemIndex);
   updateList;
   lstBoxSelChange(nil);
+end;
+
+procedure TCED2SynPresetsLoaderForm.btnCloneClick(sender: TObject);
+var
+  old: TCED2SynPreset;
+begin
+  if fList.ItemIndex = -1 then
+    exit;
+  old := fPresets[fList.ItemIndex];
+  btnAddClick(nil);
+  fPresets[fList.ItemIndex].Assign(old);
+  updateEditor;
 end;
 
 procedure TCED2SynPresetsLoaderForm.propEdModified(sender: TObject);
