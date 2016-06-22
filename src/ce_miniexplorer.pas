@@ -60,7 +60,7 @@ type
 
   { TCEMiniExplorerWidget }
 
-  TCEMiniExplorerWidget = class(TCEWidget, ICEProjectObserver, ICEMultiDocObserver)
+  TCEMiniExplorerWidget = class(TCEWidget, ICEProjectObserver, ICEMultiDocObserver, ICEExplorer)
     btnAddFav: TBitBtn;
     btnEdit: TBitBtn;
     btnShellOpen: TBitBtn;
@@ -120,8 +120,12 @@ type
     procedure docFocused(aDoc: TCESynMemo);
     procedure docChanged(aDoc: TCESynMemo);
     procedure docClosing(aDoc: TCESynMemo);
+    //
+    function singleServiceName: string;
+    procedure browse(const location: string);
+    function currentLocation: string;
   public
-    constructor create(aIwner: TComponent); override;
+    constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     //
     procedure expandPath(aPath: string);
@@ -238,7 +242,7 @@ end;
 {$ENDREGION}
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEMiniExplorerWidget.create(aIwner: TComponent);
+constructor TCEMiniExplorerWidget.create(aOwner: TComponent);
 var
   fname: string;
 begin
@@ -279,6 +283,7 @@ begin
   end;
   //
   EntitiesConnector.addObserver(self);
+  EntitiesConnector.addSingleService(self);
 end;
 
 destructor TCEMiniExplorerWidget.destroy;
@@ -690,6 +695,26 @@ begin
   end;
   fLastListOrTree := Tree;
   showWidget;
+end;
+{$ENDREGION}
+
+{$REGION ICEEXplorer -----------------------------------------------------------}
+function TCEMiniExplorerWidget.singleServiceName: string;
+begin
+  exit('ICEExplorer');
+end;
+
+procedure TCEMiniExplorerWidget.browse(const location: string);
+begin
+  expandPath(location);
+end;
+
+function TCEMiniExplorerWidget.currentLocation: string;
+begin
+  if Tree.Selected.isNil then
+    result := ''
+  else
+    result := PString(tree.Selected.Data)^;
 end;
 {$ENDREGION}
 

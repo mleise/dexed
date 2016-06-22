@@ -342,6 +342,15 @@ type
   end;
 
 
+  (**
+   * Single service related to build-in file explorer.
+   *)
+  ICEExplorer = interface(ICESingleService)
+    procedure browse(const location: string);
+    function currentLocation: string;
+  end;
+
+
 
 {
   subject primitives:
@@ -378,6 +387,7 @@ type
   function getMultiDocHandler: ICEMultiDocHandler;
   function getSymStringExpander: ICESymStringExpander;
   function getProjectGroup: ICEProjectGroup;
+  function getExplorer: ICEExplorer;
 
 implementation
 
@@ -511,6 +521,11 @@ end;
 function getProjectGroup: ICEProjectGroup;
 begin
   exit(EntitiesConnector.getSingleService('ICEProjectGroup') as ICEProjectGroup);
+end;
+
+function getExplorer: ICEExplorer;
+begin
+  exit(EntitiesConnector.getSingleService('ICEExplorer') as ICEExplorer);
 end;
 
 {$ENDREGION}

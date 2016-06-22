@@ -1820,7 +1820,7 @@ begin
   if not fProject.filename.fileExists then exit;
   //
   DockMaster.GetAnchorSite(fExplWidg).Show;
-  fExplWidg.expandPath(fProject.filename.extractFilePath);
+  getExplorer.browse(fProject.filename.extractFilePath);
 end;
 
 procedure TCEMainForm.actFileNewExecute(Sender: TObject);
@@ -2465,7 +2465,7 @@ begin
   if not fDoc.fileName.fileExists then exit;
   //
   DockMaster.GetAnchorSite(fExplWidg).Show;
-  fExplWidg.expandPath(fDoc.fileName.extractFilePath);
+  getExplorer.browse(fDoc.fileName.extractFilePath);
 end;
 
 procedure TCEMainForm.actProjCompileExecute(Sender: TObject);
