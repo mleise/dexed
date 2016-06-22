@@ -53,12 +53,12 @@ The latest Coedit version requires at least DMD 2.066.
 * Choose the zipped setup for your platform (at the bottom of a release log, the buttons labeled `coedit.<version>.<platform>.setup.zip`).
 * The content must be extracted and executed:
 	* note that the option `--nodcd` can be typed to skip the installation of the completion daemon.
-	* Linux, all users, in a console `cd` to the file location and type `sudo .\coedit.<version>.<platform>.setup`.
-	* Linux, only you, in a console `cd` to the file location and type: `.\coedit.<version>.<platform>.setup`.
+	* Linux, all users, in a console `cd` to the file location and type `sudo ./coedit.<version>.<platform>.setup`.
+	* Linux, only you, in a console `cd` to the file location and type: `./coedit.<version>.<platform>.setup`.
 	* Windows, optional, it may be necessary to deactivate your anti-virus software. Norton AV has been reported for detecting a potential threat in his heuristic module and Avast AV not to allow the setup at all.
 	* Windows: double click, and confirm in the UAC dialog box.
 * To uninstall, run the same program but with the `-u` option.
-	* Linux: if coedit has been setup with `sudo` you must also uninstall with elevated privileges: `sudo .\coedit.<version>.<platform>.setup -u`.
+	* Linux: if coedit has been setup with `sudo` you must also uninstall with elevated privileges: `sudo ./coedit.<version>.<platform>.setup -u`.
 	* Windows: start a console as administrator and execute: `coedit.<version>.win32.setup -u`.
 	* Troubleshooting: run the setup program with the `-l` (or `--list`) option to get the status of the files and use the report to uninstall manually the files or open a ticket [here][lnk_bugtracker].
 	

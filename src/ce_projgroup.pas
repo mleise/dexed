@@ -36,7 +36,6 @@ type
     fModified: boolean;
     fOnChanged: TNotifyEvent;
     procedure setItems(value: TCollection);
-    procedure setProjectIndex(value: integer);
     function getItem(index: integer): TProjectGroupItem;
     procedure doChanged;
     //
@@ -45,9 +44,6 @@ type
   protected
     procedure afterLoad; override;
     procedure afterSave; override;
-  published
-    property items: TCollection read fItems write setItems;
-    property projectIndex: integer read fProjectIndex write setProjectIndex;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -60,13 +56,17 @@ type
     function groupModified: boolean;
     function groupFilename: string;
     function projectCount: integer;
+    function getProjectIndex: integer;
     function getProject(ix: Integer): ICECommonProject;
     function findProject(const fname: string): ICECommonProject;
-    procedure selectProject(ix: Integer);
+    procedure setProjectIndex(value: Integer);
     //
     function addItem(const fname: string): TProjectGroupItem;
     property item[ix: integer]: TProjectGroupItem read getItem; default;
     property onChanged: TNotifyEvent read fOnChanged write fOnChanged;
+  published
+    property items: TCollection read fItems write setItems;
+    property index: integer read fProjectIndex write setProjectIndex;
   end;
 
   (**
@@ -205,11 +205,6 @@ begin
     end;
 end;
 
-procedure TProjectGroup.selectProject(ix: Integer);
-begin
-  setProjectIndex(ix);
-end;
-
 procedure TProjectGroup.afterLoad;
 begin
   inherited;
@@ -282,6 +277,11 @@ end;
 function TProjectGroup.projectCount: integer;
 begin
   exit(fItems.Count);
+end;
+
+function TProjectGroup.getProjectIndex: integer;
+begin
+  exit(fProjectIndex);
 end;
 
 function TProjectGroup.singleServiceName: string;
@@ -443,16 +443,16 @@ begin
     exit;
   TProjectGroupItem(lstProj.Selected.Data).lazyLoad;
   subjProjFocused(fProjSubj, TProjectGroupItem(lstProj.Selected.Data).project);
-  if projectGroup.projectIndex <> lstProj.ItemIndex then
-    projectGroup.projectIndex := lstProj.ItemIndex;
+  if projectGroup.getProjectIndex <> lstProj.ItemIndex then
+    projectGroup.setProjectIndex(lstProj.ItemIndex);
 end;
 
 procedure TCEProjectGroupWidget.handleChanged(sender: TObject);
 begin
   updateList;
-  if (projectGroup.projectIndex <> -1) and (projectGroup.projectIndex <> lstProj.ItemIndex) then
+  if (projectGroup.getProjectIndex <> -1) and (projectGroup.getProjectIndex <> lstProj.ItemIndex) then
   begin
-    lstProj.ItemIndex := projectGroup.projectIndex;
+    lstProj.ItemIndex := projectGroup.getProjectIndex;
     lstProjDblClick(nil);
   end;
 end;

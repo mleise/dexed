@@ -423,6 +423,7 @@ type
     fProject: string;
     fDocIndex: integer;
     fProjectGroup: string;
+    fProjectIndex: integer;
     procedure setDocuments(aValue: TStringList);
   protected
     procedure beforeSave; override;
@@ -432,6 +433,7 @@ type
     property documents: TStringList read fDocuments write setDocuments;
     property project: string read fProject write fProject;
     property projectGroup: string read fProjectGroup write fProjectGroup;
+    property projectIndex: integer read fProjectIndex write fProjectIndex;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -690,12 +692,16 @@ procedure TCELastDocsAndProjs.Assign(aSource: TPersistent);
 var
   itf: ICECommonProject = nil;
 begin
-  if aSource is TCEMainForm then
+  if aSource = CEMainForm then
   begin
-    itf := TCEMainForm(aSource).fFreeProj;
+    itf := CEMainForm.fFreeProj;
     if itf <> nil then
       fProject := itf.filename;
     fProjectGroup := getProjectGroup.groupFilename;
+    if itf = CEMainForm.fProject then
+      fProjectIndex:=-1
+    else
+      fProjectIndex := getProjectGroup.getProjectIndex;
   end else
     inherited;
 end;
@@ -731,6 +737,8 @@ begin
     begin
       getProjectGroup.openGroup(fProjectGroup);
     end;
+    if (fProjectIndex = -1) and (dst.fFreeProj <> nil) then
+      dst.fFreeProj.activate;
   end else
     inherited;
 end;

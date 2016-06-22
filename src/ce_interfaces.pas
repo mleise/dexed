@@ -321,12 +321,14 @@ type
     function groupFilename: string;
     // indicates the count of project in the group
     function projectCount: integer;
+    // indicates the index of the project
+    function getProjectIndex: integer;
     // returns the nth project
     function getProject(index: Integer): ICECommonProject;
     // tries to find the project named fname.
     function findProject(const fname: string): ICECommonProject;
     // selects the nth project
-    procedure selectProject(index: Integer);
+    procedure setProjectIndex(index: Integer);
   end;
 
 
