@@ -48,6 +48,8 @@ type
     actFileRun: TAction;
     actFileDscanner: TAction;
     actFileRunOut: TAction;
+    actFileRunDub: TAction;
+    actFileRunDubOut: TAction;
     actProjGroupCompile: TAction;
     actProjSelUngrouped: TAction;
     actProjAddToGroup: TAction;
@@ -169,6 +171,12 @@ type
     MenuItem88: TMenuItem;
     MenuItem89: TMenuItem;
     MenuItem90: TMenuItem;
+    MenuItem91: TMenuItem;
+    MenuItem92: TMenuItem;
+    MenuItem93: TMenuItem;
+    MenuItem94: TMenuItem;
+    MenuItem95: TMenuItem;
+    MenuItem96: TMenuItem;
     mnuLayout: TMenuItem;
     mnuItemMruFile: TMenuItem;
     mnuItemMruProj: TMenuItem;
@@ -181,6 +189,8 @@ type
     MenuItem9: TMenuItem;
     procedure actFileCompileExecute(Sender: TObject);
     procedure actFileDscannerExecute(Sender: TObject);
+    procedure actFileRunDubExecute(Sender: TObject);
+    procedure actFileRunDubOutExecute(Sender: TObject);
     procedure actFileRunExecute(Sender: TObject);
     procedure actFileRunOutExecute(Sender: TObject);
     procedure actFileSaveCopyAsExecute(Sender: TObject);
@@ -353,6 +363,7 @@ type
     procedure executeRunnable(unittest: boolean = false; redirect: boolean = true;
       const runArgs: string = '');
     procedure runFile(outside: boolean);
+    procedure dubFile(outside: boolean);
 
     // file sub routines
     procedure newFile;
@@ -2418,6 +2429,46 @@ begin
     prc.Free;
     lst.Free;
   end;
+end;
+
+procedure TCEMainForm.actFileRunDubExecute(Sender: TObject);
+begin
+  dubFile(false);
+end;
+
+procedure TCEMainForm.actFileRunDubOutExecute(Sender: TObject);
+begin
+  dubFile(true);
+end;
+
+procedure TCEMainForm.dubFile(outside: boolean);
+begin
+  if fDoc = nil then
+    exit;
+  FreeRunnableProc;
+  fRunProc := TCEProcess.Create(nil);
+  if fDoc.fileName.fileExists then
+    fDoc.save
+  else
+    fDoc.saveTempFile;
+  fRunProc.Executable:= exeFullName('dub' + exeExt);
+  fRunProc.Parameters.Add(fDoc.fileName);
+  fRunProc.Execute;
+  if not outside then
+  begin
+	  fRunProc.Options := [poStderrToOutPut, poUsePipes];
+	  fRunProc.ShowWindow := swoHIDE;
+	  fRunProc.OnReadData := @asyncprocOutput;
+	  fRunProc.OnTerminate:= @asyncprocTerminate;
+    getprocInputHandler.addProcess(fRunProc);
+  end
+  else
+  begin
+    {$IFNDEF WINDOWS}
+    fRunProc.Options := fRunProc.Options + [poNewConsole];
+    {$ENDIF}
+  end;
+  fRunProc.execute;
 end;
 
 procedure TCEMainForm.runFile(outside: boolean);
