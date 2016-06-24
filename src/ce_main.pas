@@ -2468,6 +2468,10 @@ begin
     fRunProc.Options := fRunProc.Options + [poNewConsole];
     {$ENDIF}
   end;
+  case fAppliOpts.runnableCompiler of
+    gdc: fRunProc.Parameters.add('--compiler=gdc');
+    ldc: fRunProc.Parameters.add('--compiler=ldc2');
+  end;
   fRunProc.execute;
 end;
 
