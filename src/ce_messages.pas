@@ -923,6 +923,8 @@ var
 begin
   if List.Selected.isNil then
     exit;
+  if ssCtrl in GetKeyShiftState then
+    exit;
   msg := List.Selected.Text;
   if not openFileFromDmdMessage(msg) then
     exit;
