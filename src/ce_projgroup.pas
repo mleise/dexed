@@ -11,6 +11,8 @@ uses
 
 type
 
+  TProjectGroup = class;
+
   (**
    * Represents a project in a project group
    *)
@@ -18,12 +20,14 @@ type
   private
     fFilename: string;
     fProj: ICECommonProject;
+    fGroup: TProjectGroup;
   published
     property filename: string read fFilename write fFilename;
   public
     property project: ICECommonProject read fProj;
     procedure lazyLoad;
     destructor destroy; override;
+    function absoluteFilename: string;
   end;
 
   (**
@@ -35,6 +39,7 @@ type
     fItems: TCollection;
     fModified: boolean;
     fOnChanged: TNotifyEvent;
+    fBasePath: string;
     procedure setItems(value: TCollection);
     function getItem(index: integer): TProjectGroupItem;
     procedure doChanged;
@@ -179,11 +184,15 @@ begin
   fModified := true;
   for it in fItems do
   begin
-    if SameFileName(TProjectGroupItem(it).fFilename, fname) then
+    if SameFileName(TProjectGroupItem(it).absoluteFilename, fname) then
       exit(TProjectGroupItem(it));
   end;
   result := TProjectGroupItem(fItems.Add);
-  result.fFilename := fname;
+  result.fGroup := self;
+  if fBasePath = '' then
+    result.fFilename := fname
+  else
+    result.fFilename := ExtractRelativepath(fBasePath, fname);
 end;
 
 function TProjectGroup.getProject(ix: Integer): ICECommonProject;
@@ -198,7 +207,7 @@ var
 begin
   result := nil;
   for i := 0 to projectCount-1 do
-    if SameFileName(item[i].fFilename, fname) then
+    if SameFileName(item[i].absoluteFilename, fname) then
     begin
       item[i].lazyLoad;
       exit(item[i].fProj);
@@ -223,32 +232,56 @@ var
 begin
   fModified := true;
   for it in fItems do
-  begin
-    if SameFileName(TProjectGroupItem(it).fFilename, aProject.filename) then
+    if SameFileName(TProjectGroupItem(it).absoluteFilename, aProject.filename) then
       exit;
-  end;
   it := fItems.Add;
-  TProjectGroupItem(it).fFilename := aProject.filename;
+  if fBasePath = '' then
+    TProjectGroupItem(it).fFilename := aProject.filename
+  else
+    TProjectGroupItem(it).fFilename := ExtractRelativepath(fBasePath, aProject.filename);
   TProjectGroupItem(it).fProj := aProject;
+  TProjectGroupItem(it).fGroup := self;
   aProject.inGroup(true);
   fProjectIndex := it.Index;
   doChanged;
 end;
 
 procedure TProjectGroup.openGroup(const fname: string);
+var
+  i: integer;
 begin
+  fBasePath := fname.extractFilePath;
   loadFromFile(fname);
+  for i:= 0 to fItems.Count-1 do
+    getItem(i).fGroup := self;
   doChanged;
 end;
 
 procedure TProjectGroup.saveGroup(const fname: string);
+var
+  i: integer;
+  c: boolean = false;
+  n: string;
 begin
+  n := fname.extractFilePath;
+  if (fBasePath <> '') and (n <> fBasePath) then
+  begin
+    c := true;
+    for i:= 0 to projectCount-1 do
+      getItem(i).fFilename := getItem(i).absoluteFilename;
+  end
+  else if fBasePath = '' then
+    c := true;
+  if c then for i:= 0 to projectCount-1 do
+    getItem(i).fFilename := ExtractRelativepath(n, getItem(i).fFilename);
+  fBasePath := n;
   saveToFile(fname);
 end;
 
 procedure TProjectGroup.closeGroup;
 begin
   fItems.Clear;
+  fBasePath:='';
   fFilename:= '';
   fModified:=false;
   fProjectIndex := -1;
@@ -293,7 +326,7 @@ procedure TProjectGroupItem.lazyLoad;
 begin
   if fProj = nil then
   begin
-    fProj := loadProject(fFilename, true);
+    fProj := loadProject(absoluteFilename, true);
     fProj.inGroup(true);
   end;
 end;
@@ -304,6 +337,14 @@ begin
     fProj.getProject.free;
   fProj := nil;
   inherited;
+end;
+
+function TProjectGroupItem.absoluteFilename: string;
+begin
+  if fGroup.fBasePath = '' then
+    result := fFilename
+  else
+    result := expandFilenameEx(fGroup.fBasePath, fFilename);
 end;
 {$ENDREGION}
 
@@ -473,6 +514,7 @@ begin
     with lstProj.Items.Add do
     begin
       p := projectGroup.item[i];
+      p.fGroup := projectGroup;
       p.lazyLoad;
       Data:= p;
       case p.project.getFormat of

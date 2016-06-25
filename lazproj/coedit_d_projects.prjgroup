@@ -1,0 +1,13 @@
+object _1: TProjectGroup
+  items = <  
+    item
+      filename = '..\cesyms\cesyms_libman.coedit'
+    end  
+    item
+      filename = '..\cetodo\cetodo_libman.coedit'
+    end  
+    item
+      filename = '..\cesetup\cesetup.coedit'
+    end>
+  index = 0
+end

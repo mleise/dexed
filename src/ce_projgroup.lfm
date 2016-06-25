@@ -28,17 +28,17 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
           item
             AutoSize = True
             Caption = 'Name'
-            Width = 47
+            Width = 316
           end        
           item
             AutoSize = True
             Caption = 'Type'
-            Width = 39
+            Width = 38
           end        
           item
             AutoSize = True
             Caption = 'Configuration'
-            Width = 230
+            Width = 86
           end>
         GridLines = True
         ReadOnly = True
