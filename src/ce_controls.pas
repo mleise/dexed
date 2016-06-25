@@ -5,7 +5,7 @@ unit ce_controls;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, buttons;
+  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, buttons, Graphics;
 
 type
   TCEPageControlButton = (pbClose, pbMoveLeft, pbMoveRight, pbAdd, pbSplit);
@@ -166,6 +166,9 @@ begin
   fTabs.Options:=[];
   fTabs.OnChange:=@tabsChanged;
   fTabs.OnChanging:=@tabsChanging;
+  {$IFDEF WINDOWS}
+  fTabs.BorderSpacing.Top:= 8;
+  {$ENDIF}
 
   fMoveLeftBtn:= TSpeedButton.Create(self);
   fMoveLeftBtn.Parent := fHeader;

@@ -1,7 +1,7 @@
 inherited CEProjectGroupWidget: TCEProjectGroupWidget
-  Left = 866
+  Left = 862
   Height = 195
-  Top = 277
+  Top = 273
   Width = 328
   Caption = 'Project group'
   ClientHeight = 195
@@ -33,12 +33,12 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
           item
             AutoSize = True
             Caption = 'Type'
-            Width = 38
+            Width = 36
           end        
           item
             AutoSize = True
             Caption = 'Configuration'
-            Width = 86
+            Width = 77
           end>
         GridLines = True
         ReadOnly = True
