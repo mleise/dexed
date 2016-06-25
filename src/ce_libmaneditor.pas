@@ -21,8 +21,8 @@ type
     procedure getList(sender: TObject);
   public
     class function showAndWait(out value: string): TModalResult; static;
-    class procedure classCtor;
-    class procedure classDtor;
+    class constructor classCtor;
+    class destructor classDtor;
     constructor Create(TheOwner: TComponent); override;
     property text: string read getText;
   end;
@@ -180,12 +180,12 @@ begin
   itm.Selected := True;
 end;
 
-class procedure TDubPackageQueryForm.classCtor;
+class constructor TDubPackageQueryForm.classCtor;
 begin
   fList := TStringList.Create;
 end;
 
-class procedure TDubPackageQueryForm.classDtor;
+class destructor TDubPackageQueryForm.classDtor;
 begin
   fList.Free;
 end;
@@ -797,8 +797,4 @@ begin
   end;
 end;
 
-initialization
-  TDubPackageQueryForm.classCtor;
-finalization
-  TDubPackageQueryForm.classDtor;
 end.
