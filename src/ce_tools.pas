@@ -13,6 +13,8 @@ type
 
   TCEToolItems = class;
 
+  TPipeInputKind = (pikNone, pikEditor, pikSelection, pikLine);
+
   TCEToolItem = class(TCollectionItem)
   private
     fToolItems: TCEToolItems;
@@ -31,6 +33,7 @@ type
     fShortcut: TShortcut;
     fMsgs: ICEMessagesDisplay;
     fSymStringExpander: ICESymStringExpander;
+    fPipeInputKind: TPipeInputKind;
     procedure setParameters(value: TStringList);
     procedure processOutput(sender: TObject);
     procedure setToolAlias(value: string);
@@ -46,13 +49,15 @@ type
     property showWindows: TShowWindowOptions read fShowWin write fShowWin;
     property queryParameters: boolean read fQueryParams write fQueryParams;
     property clearMessages: boolean read fClearMessages write fClearMessages;
-    property editorToInput: boolean read fEditorToInput write fEditorToInput;
     property shortcut: TShortcut read fShortcut write fShortcut;
     property nextToolAlias: string read fNextToolAlias write fNextToolAlias;
     property outputToNext: boolean read fOutputToNext write fOutputToNext;
+    property pipeInputKind: TPipeInputKind read fPipeInputKind write fPipeInputKind;
     //
     property chainBefore: TStringList write setChainBefore stored false; deprecated;
     property chainAfter: TStringList write setChainAfter stored false; deprecated;
+    // TODO-cmaintenance: remove this property from version 3 update 1
+    property editorToInput: boolean read fEditorToInput write fEditorToInput stored false;
   public
     constructor create(ACollection: TCollection); override;
     destructor destroy; override;
@@ -169,6 +174,7 @@ begin
     workingDirectory  := tool.workingDirectory;
     editorToInput     := tool.editorToInput;
     showWindows       := tool.showWindows;
+    pipeInputKind     := tool.pipeInputKind;
     parameters.Assign(tool.parameters);
   end
   else inherited;
@@ -431,10 +437,15 @@ begin
   if aTool.isNil then exit;
   //
   aTool.execute(nil);
-  if aTool.editorToInput and fDoc.isNotNil and (poUsePipes in aTool.options)
-    and aTool.fProcess.Input.isNotNil then
+  if aTool.editorToInput then aTool.pipeInputKind:= pikEditor;
+  if (aTool.pipeInputKind <> pikNone) and fDoc.isNotNil
+    and (poUsePipes in aTool.options) and aTool.fProcess.Input.isNotNil then
   begin
-    txt := fDoc.Text;
+    case aTool.pipeInputKind of
+      pikEditor:    txt := fDoc.Text;
+      pikLine:      txt := fDoc.LineText;
+      pikSelection: txt := fDoc.SelText;
+    end;
     aTool.fProcess.Input.Write(txt[1], txt.length);
     aTool.fProcess.CloseInput;
   end;
