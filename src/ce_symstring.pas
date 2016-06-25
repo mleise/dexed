@@ -14,7 +14,7 @@ type
    * Enumerates the symbol kinds, used to index an associative array.
    *)
   TCESymbol = ( ENV_USER, ENV_HOME, ENV_TEMP, CAF, CAP,
-                CFF, CFP, CI, CPF, CPP, CPO, CPOP, CPR, CPN, CPFS, CPCD);
+                CFF, CFP, CI, CL, CPF, CPP, CPO, CPOP, CPR, CPN, CPFS, CPCD, CS);
 const
 
   FirstVariableSymbol = CFF;
@@ -197,6 +197,8 @@ begin
     fSymbols[CFP] := fDoc.fileName.extractFilePath;
     if fDoc.Identifier.isNotEmpty then
       fSymbols[CI] := fDoc.Identifier;
+    fSymbols[CL] := fDoc.LineText;
+    fSymbols[CS] := fDoc.SelText;
   end;
   // project interface
   if hasProjItf then
@@ -283,6 +285,8 @@ begin
           'CFF', 'CurrentFileFile'      : Result += fSymbols[CFF];
           'CFP', 'CurrentFilePath'      : Result += fSymbols[CFP];
           'CI',  'CurrentIdentifier'    : Result += fSymbols[CI];
+          'CL',  'CUrrentLine'          : Result += fSymbols[CL];
+          'CS',  'CurrentSelection'     : Result += fSymbols[CS];
           //
           'CPF', 'CurrentProjectFile'   : Result += fSymbols[CPF];
           'CPFS','CurrentProjectFiles'  : Result += fSymbols[CPFS];
