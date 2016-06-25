@@ -69,6 +69,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
       Width = 433
       object btnRun: TCEToolButton[0]
         Left = 157
+        Hint = 'execute selected tool'
         Top = 0
         Caption = 'btnRun'
         OnClick = btnRunClick
@@ -86,6 +87,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
       end
       object btnClone: TCEToolButton[2]
         Left = 113
+        Hint = 'clone selected tool'
         Top = 0
         Caption = 'btnClone'
         OnClick = btnCloneClick
@@ -94,6 +96,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
       end
       object btnMoveUp: TCEToolButton[3]
         Left = 85
+        Hint = 'move selected tool up'
         Top = 0
         Caption = 'btnMoveUp'
         OnClick = btnMoveUpClick
@@ -102,6 +105,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
       end
       object btnMoveDown: TCEToolButton[4]
         Left = 57
+        Hint = 'move selected tool down'
         Top = 0
         Caption = 'btnMoveDown'
         OnClick = btnMoveDownClick
@@ -110,6 +114,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
       end
       object btnRemTool: TCEToolButton[5]
         Left = 29
+        Hint = 'remove selected tool'
         Top = 0
         Caption = 'btnRemTool'
         OnClick = btnRemToolClick
@@ -118,6 +123,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
       end
       object btnAddTool: TCEToolButton[6]
         Left = 1
+        Hint = 'add a new empty tool'
         Top = 0
         Caption = 'btnAddTool'
         OnClick = BtnAddToolClick

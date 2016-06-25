@@ -124,8 +124,6 @@ implementation
 uses
   ce_observer;
 
-//TODO-cNewToolbar: button hints have not been copied
-
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEWidget.create(aOwner: TComponent);
 var

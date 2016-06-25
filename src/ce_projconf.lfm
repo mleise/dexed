@@ -1,5 +1,5 @@
 inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
-  Left = 1488
+  Left = 1467
   Height = 273
   Top = 349
   Width = 445
@@ -91,22 +91,25 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
       Width = 437
       object btnSyncEdit: TCEToolButton[0]
         Left = 85
+        Hint = 'activate or deactivate the synchronized edition'
         Top = 0
         Caption = 'btnSyncEdit'
         OnClick = btnSyncEditClick
         resourceName = 'LINK_BREAK'
         scaledSeparator = False
       end
-      object btnCLoneConf: TCEToolButton[1]
+      object btnCloneConf: TCEToolButton[1]
         Left = 57
+        Hint = 'clone the selected configuration'
         Top = 0
-        Caption = 'btnCLoneConf'
+        Caption = 'btnCloneConf'
         OnClick = btnCloneCurrClick
         resourceName = 'COG_GO'
         scaledSeparator = False
       end
       object btnDelConf: TCEToolButton[2]
         Left = 29
+        Hint = 'delete selected configuration'
         Top = 0
         Caption = 'btnDelConf'
         OnClick = btnDelConfClick
@@ -115,6 +118,7 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
       end
       object btnAddConf: TCEToolButton[3]
         Left = 1
+        Hint = 'add a new configuration'
         Top = 0
         Caption = 'btnAddConf'
         OnClick = btnAddConfClick

@@ -64,6 +64,7 @@ inherited CETodoListWidget: TCETodoListWidget
       Width = 576
       object btnGo: TCEToolButton[0]
         Left = 29
+        Hint = 'go the TODO item definition'
         Top = 0
         Caption = 'btnGo'
         resourceName = 'ARROW_PEN'
@@ -71,6 +72,7 @@ inherited CETodoListWidget: TCETodoListWidget
       end
       object btnRefresh: TCEToolButton[1]
         Left = 1
+        Hint = 'refresh the TODO items'
         Top = 0
         Caption = 'btnRefresh'
         resourceName = 'ARROW_UPDATE'
@@ -79,6 +81,7 @@ inherited CETodoListWidget: TCETodoListWidget
       object lstfilter: TListFilterEdit[2]
         Left = 61
         Height = 26
+        Hint = 'filter the TODO items that contain the text typed here'
         Top = 2
         Width = 513
         ButtonWidth = 28

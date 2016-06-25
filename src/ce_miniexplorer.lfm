@@ -109,6 +109,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
       Width = 335
       object btnEdit: TCEToolButton[0]
         Left = 85
+        Hint = 'open the selected file in an editor or as a new project'
         Top = 0
         Caption = 'btnEdit'
         OnClick = btnEditClick
@@ -117,6 +118,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
       end
       object btnShellOpen: TCEToolButton[1]
         Left = 57
+        Hint = 'open the selected folder or the selected file using the shell'
         Top = 0
         Caption = 'btnShellOpen'
         OnClick = btnShellOpenClick
@@ -125,6 +127,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
       end
       object btnRemFav: TCEToolButton[2]
         Left = 29
+        Hint = 'remove selected favorite folder'
         Top = 0
         Caption = 'btnRemFav'
         OnClick = btnRemFavClick
@@ -133,6 +136,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
       end
       object btnAddFav: TCEToolButton[3]
         Left = 1
+        Hint = 'add selected folder to the favorites'
         Top = 0
         Caption = 'btnAddFav'
         OnClick = btnAddFavClick
@@ -142,6 +146,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
       object lstFilter: TListFilterEdit[4]
         Left = 119
         Height = 26
+        Hint = 'filter the file names that contain the text typed here'
         Top = 2
         Width = 214
         ButtonWidth = 28

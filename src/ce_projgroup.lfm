@@ -28,17 +28,17 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
           item
             AutoSize = True
             Caption = 'Name'
-            Width = 316
+            Width = 47
           end        
           item
             AutoSize = True
             Caption = 'Type'
-            Width = 36
+            Width = 39
           end        
           item
             AutoSize = True
             Caption = 'Configuration'
-            Width = 77
+            Width = 230
           end>
         GridLines = True
         ReadOnly = True
@@ -96,6 +96,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       Width = 320
       object BtnAddProj: TCEToolButton[0]
         Left = 1
+        Hint = 'add a project to the group'
         Top = 0
         Caption = 'BtnAddProj'
         OnClick = BtnAddProjClick
@@ -104,6 +105,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
       object btnRemProj: TCEToolButton[1]
         Left = 29
+        Hint = 'remove the selected project from the group'
         Top = 0
         Caption = 'btnRemProj'
         OnClick = btnRemProjClick
@@ -112,6 +114,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
       object btnMoveDown: TCEToolButton[2]
         Left = 57
+        Hint = 'move the selected project down'
         Top = 0
         Caption = 'btnMoveDown'
         OnClick = btnMoveDownClick
@@ -120,6 +123,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
       object btnMoveUp: TCEToolButton[3]
         Left = 85
+        Hint = 'move the selected project up'
         Top = 0
         Caption = 'btnMoveUp'
         OnClick = btnMoveUpClick

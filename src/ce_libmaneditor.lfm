@@ -1,7 +1,7 @@
 inherited CELibManEditorWidget: TCELibManEditorWidget
-  Left = 1275
+  Left = 790
   Height = 297
-  Top = 725
+  Top = 274
   Width = 641
   Caption = 'Library manager'
   ClientHeight = 297
@@ -12,13 +12,13 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
     ClientHeight = 297
     ClientWidth = 641
     inherited Content: TPanel
-      Height = 263
+      Height = 261
       Width = 641
-      ClientHeight = 263
+      ClientHeight = 261
       ClientWidth = 641
       object List: TListView[0]
         Left = 4
-        Height = 255
+        Height = 253
         Top = 4
         Width = 633
         Align = alClient
@@ -61,9 +61,10 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Width = 637
+      Width = 633
       object btnSelProj: TCEToolButton[0]
         Left = 356
+        Hint = 'set the project that compiles the selected entry'
         Top = 0
         Caption = 'button3'
         OnClick = btnSelProjClick
@@ -72,6 +73,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnSelRoot: TCEToolButton[1]
         Left = 328
+        Hint = 'set the root of the library sources'
         Top = 0
         Caption = 'button4'
         OnClick = btnSelRootClick
@@ -80,6 +82,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnSelfoldOfFiles: TCEToolButton[2]
         Left = 300
+        Hint = 'select a folder containing several d sources (optional trick)'
         Top = 0
         Caption = 'button5'
         OnClick = btnSelfoldOfFilesClick
@@ -88,6 +91,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnSelFile: TCEToolButton[3]
         Left = 272
+        Hint = 'selected the static library file'
         Top = 0
         Caption = 'button6'
         OnClick = btnSelFileClick
@@ -96,6 +100,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnEditAlias: TCEToolButton[4]
         Left = 244
+        Hint = 'set the entry alias'
         Top = 0
         Caption = 'button7'
         OnClick = btnEditAliasClick
@@ -113,6 +118,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnEnabled: TCEToolButton[6]
         Left = 197
+        Hint = 'activate or dactivate the selected entry'
         Top = 0
         Caption = 'btnEnabled'
         OnClick = btnEnabledClick
@@ -121,6 +127,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnDubFetch: TCEToolButton[7]
         Left = 169
+        Hint = 'setup a new entry using an online DUB package'
         Top = 0
         Caption = 'btnDubFetch'
         OnClick = btnDubFetchClick
@@ -129,6 +136,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnOpenProj: TCEToolButton[8]
         Left = 141
+        Hint = 'open the project that matches to the selected entry'
         Top = 0
         Caption = 'btnOpenProj'
         OnClick = btnOpenProjClick
@@ -137,6 +145,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnReg: TCEToolButton[9]
         Left = 113
+        Hint = 'register a new entry using the active project'
         Top = 0
         Caption = 'btnReg'
         OnClick = btnRegClick
@@ -145,6 +154,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnMoveUp: TCEToolButton[10]
         Left = 85
+        Hint = 'move entry up'
         Top = 0
         Caption = 'btnMoveUp'
         OnClick = btnMoveUpClick
@@ -153,6 +163,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnMoveDown: TCEToolButton[11]
         Left = 57
+        Hint = 'move entry down'
         Top = 0
         Caption = 'btnMoveDown'
         OnClick = btnMoveDownClick
@@ -161,6 +172,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnRemLib: TCEToolButton[12]
         Left = 29
+        Hint = 'remove selected entry'
         Top = 0
         Caption = 'btnRemLib'
         OnClick = btnRemLibClick
@@ -169,6 +181,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnAddLib: TCEToolButton[13]
         Left = 1
+        Hint = 'add a new empty entry'
         Top = 0
         Caption = 'btnAddLib'
         OnClick = btnAddLibClick

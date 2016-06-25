@@ -1,5 +1,5 @@
 inherited CEProjectInspectWidget: TCEProjectInspectWidget
-  Left = 1575
+  Left = 1571
   Height = 258
   Top = 91
   Width = 341
@@ -56,6 +56,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
       Width = 333
       object btnRemFold: TCEToolButton[0]
         Left = 85
+        Hint = 'remove the selected source parent folder from the project'
         Top = 0
         Caption = 'btnRemFold'
         OnClick = btnRemFoldClick
@@ -64,6 +65,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
       end
       object btnAddFold: TCEToolButton[1]
         Left = 57
+        Hint = 'add a folder of sources to the project'
         Top = 0
         Caption = 'btnAddFold'
         OnClick = btnAddFoldClick
@@ -72,6 +74,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
       end
       object btnRemFile: TCEToolButton[2]
         Left = 29
+        Hint = 'remove selected source from the project'
         Top = 0
         Caption = 'btnRemFile'
         OnClick = btnRemFileClick
@@ -80,6 +83,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
       end
       object btnAddFile: TCEToolButton[3]
         Left = 1
+        Hint = 'add a source to the project'
         Top = 0
         Caption = 'btnAddFile'
         OnClick = btnAddFileClick
@@ -89,6 +93,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
       object TreeFilterEdit1: TTreeFilterEdit[4]
         Left = 117
         Height = 26
+        Hint = 'filter the source names that contain the text typed here'
         Top = 2
         Width = 214
         ButtonWidth = 28

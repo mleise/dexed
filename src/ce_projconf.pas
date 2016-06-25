@@ -16,7 +16,7 @@ type
 
   TCEProjectConfigurationWidget = class(TCEWidget, ICEProjectObserver)
     btnAddConf: TCEToolButton;
-    btnCLoneConf: TCEToolButton;
+    btnCloneConf: TCEToolButton;
     btnDelConf: TCEToolButton;
     btnSyncEdit: TCEToolButton;
     imgList: TImageList;

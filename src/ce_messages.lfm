@@ -63,6 +63,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
       end
       object btnSelMisc: TCEToolButton[1]
         Left = 454
+        Hint = 'filter the other messages'
         Top = 0
         Caption = 'Misc'
         scaledSeparator = False
@@ -78,6 +79,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
       end
       object btnSelApp: TCEToolButton[3]
         Left = 349
+        Hint = 'filter the messages related to Coedit'
         Top = 0
         Caption = 'Application'
         scaledSeparator = False
@@ -93,6 +95,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
       end
       object btnSelProj: TCEToolButton[5]
         Left = 244
+        Hint = 'filter the messages related to the active project'
         Top = 0
         Caption = 'Project'
         scaledSeparator = False
@@ -108,6 +111,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
       end
       object btnSelEdit: TCEToolButton[7]
         Left = 139
+        Hint = 'filter the messages related to the active editor'
         Top = 0
         Caption = 'Editor'
         scaledSeparator = False
@@ -123,6 +127,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
       end
       object btnSelAll: TCEToolButton[9]
         Left = 34
+        Hint = 'don''t filter the messages'
         Top = 0
         Caption = 'All'
         Down = True
@@ -140,6 +145,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
       object TreeFilterEdit1: TTreeFilterEdit[11]
         Left = 560
         Height = 26
+        Hint = 'in the selected category, filter the messages that contain the text typed here'
         Top = 1
         Width = 275
         OnAfterFilter = TreeFilterEdit1AfterFilter
@@ -156,6 +162,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
       object btnClearCat: TSpeedButton[12]
         Left = 1
         Height = 28
+        Hint = 'clear the messages that match to the selected category'
         Top = 0
         Width = 28
         Align = alLeft
