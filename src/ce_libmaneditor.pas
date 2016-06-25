@@ -15,11 +15,14 @@ type
 
   TDubPackageQueryForm = class(TForm)
   private
+    class var fList: TStringList;
     cbb: TComboBox;
     function getText: string;
     procedure getList(sender: TObject);
   public
     class function showAndWait(out value: string): TModalResult; static;
+    class procedure classCtor;
+    class procedure classDtor;
     constructor Create(TheOwner: TComponent); override;
     property text: string read getText;
   end;
@@ -177,6 +180,16 @@ begin
   itm.Selected := True;
 end;
 
+class procedure TDubPackageQueryForm.classCtor;
+begin
+  fList := TStringList.Create;
+end;
+
+class procedure TDubPackageQueryForm.classDtor;
+begin
+  fList.Free;
+end;
+
 constructor TDubPackageQueryForm.Create(TheOwner: TComponent);
 var
   bok: TBitBtn;
@@ -196,6 +209,7 @@ begin
   cbb.AutoComplete := true;
   cbb.Align := alClient;
   cbb.BorderSpacing.Around := 6;
+  cbb.Items.AddStrings(fList);
   cbb.Sorted:= true;
 
   bww := TBitBtn.Create(self);
@@ -240,28 +254,26 @@ var
   pge: string;
   cli: TFPHTTPClient;
 begin
-  cbb.Items.Clear;
+  fList.Clear;
   cli := TFPHTTPClient.Create(nil);
   try
     try
-      pge := cli.Get('https://code.dlang.org/');
+      pge := cli.Get('https://code.dlang.org/packages/index.json');
     except
       pge := '';
     end;
   finally
     cli.Free;
   end;
-  // note, also works with regex \"packages\/[a-zA-Z0-9_-]+\"
   with TStringRange.create(pge) do while not empty do
   begin
-    if popUntil('"')^.startsWith('"packages/') then
-    begin
-      popUntil('/')^.popFront;
-      cbb.Items.Add(takeUntil('"').yield);
-      popUntil('"')^.popFront;
-    end
-    else popFront;
+    popUntil('"');
+    popFront;
+    fList.Add(takeUntil('"').yield);
+    popFront;
   end;
+  cbb.Items.clear;
+  cbb.Items.AddStrings(fList);
 end;
 
 function TDubPackageQueryForm.getText: string;
@@ -785,4 +797,8 @@ begin
   end;
 end;
 
+initialization
+  TDubPackageQueryForm.classCtor;
+finalization
+  TDubPackageQueryForm.classDtor;
 end.
