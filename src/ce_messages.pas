@@ -9,7 +9,7 @@ uses
   EditBtn, lcltype, ce_widget, ActnList, Menus, clipbrd, AnchorDocking, math,
   TreeFilterEdit, Buttons, process, GraphType, fgl,
   ce_writableComponent, ce_common, ce_synmemo, ce_interfaces, ce_observer,
-  ce_processes, ce_sharedres, ce_stringrange;
+  ce_processes, ce_sharedres, ce_stringrange, ce_dsgncontrols;
 
 type
 
@@ -59,21 +59,20 @@ type
   { TCEMessagesWidget }
 
   TCEMessagesWidget = class(TCEWidget, ICEEditableOptions, ICEMultiDocObserver, ICEProjectObserver, ICEMessagesDisplay)
-    btnClearCat: TBitBtn;
+    btnSelAll: TCEToolButton;
+    btnSelApp: TCEToolButton;
+    btnSelEdit: TCEToolButton;
+    btnSelMisc: TCEToolButton;
+    btnSelProj: TCEToolButton;
+    button0: TCEToolButton;
+    button10: TCEToolButton;
+    button2: TCEToolButton;
+    button4: TCEToolButton;
+    button6: TCEToolButton;
+    button8: TCEToolButton;
     imgList: TImageList;
     List: TTreeView;
-    selCtxt: TToolBar;
-    btnSelAll: TToolButton;
-    ToolButton1: TToolButton;
-    ToolButton10: TToolButton;
-    btnSelMisc: TToolButton;
-    ToolButton11: TToolButton;
-    ToolButton2: TToolButton;
-    btnSelEdit: TToolButton;
-    ToolButton4: TToolButton;
-    btnSelProj: TToolButton;
-    ToolButton8: TToolButton;
-    btnSelApp: TToolButton;
+    btnClearCat: TSpeedButton;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure ListCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode;
       State: TCustomDrawState; var DefaultDraw: Boolean);
@@ -160,6 +159,7 @@ type
     procedure clearbyData(aData: Pointer);
     procedure scrollToBack;
   protected
+    procedure setToolBarFlat(value: boolean); override;
     procedure updateLoop; override;
     //
     function contextName: string; override;
@@ -343,6 +343,13 @@ begin
   inherited;
 end;
 
+procedure TCEMessagesWidget.setToolBarFlat(value: boolean);
+begin
+  inherited setToolBarFlat(value);
+  btnClearCat.Flat := value;
+  TreeFilterEdit1.Flat:=value;
+end;
+
 procedure TCEMessagesWidget.listDeletion(Sender: TObject; Node: TTreeNode);
 var
   i: integer;
@@ -402,8 +409,8 @@ begin
   //
   fCtxt := amcAll;
   btn := TToolButton(Sender);
-  for i := 0 to selCtxt.ButtonCount-1 do
-    selCtxt.Buttons[i].Down := selCtxt.Buttons[i] = btn;
+  for i := 0 to toolbar.ButtonCount-1 do
+    toolbar.Buttons[i].Down := toolbar.Buttons[i] = btn;
   if btn = btnSelAll  then
     fCtxt := amcAll
   else if btn = btnSelEdit then

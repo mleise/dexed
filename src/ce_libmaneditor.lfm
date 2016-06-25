@@ -1,7 +1,7 @@
 inherited CELibManEditorWidget: TCELibManEditorWidget
-  Left = 772
+  Left = 1275
   Height = 297
-  Top = 307
+  Top = 725
   Width = 641
   Caption = 'Library manager'
   ClientHeight = 297
@@ -12,165 +12,14 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
     ClientHeight = 297
     ClientWidth = 641
     inherited Content: TPanel
-      Height = 297
+      Height = 263
       Width = 641
-      ClientHeight = 297
+      ClientHeight = 263
       ClientWidth = 641
-      object Panel1: TPanel[0]
+      object List: TListView[0]
         Left = 4
-        Height = 26
+        Height = 255
         Top = 4
-        Width = 633
-        Align = alTop
-        BorderSpacing.Around = 4
-        BevelOuter = bvNone
-        ClientHeight = 26
-        ClientWidth = 633
-        TabOrder = 0
-        object btnAddLib: TBitBtn
-          Left = 0
-          Height = 26
-          Hint = 'add library alias'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnAddLibClick
-          Spacing = 0
-          TabOrder = 0
-        end
-        object btnRemLib: TBitBtn
-          Left = 28
-          Height = 26
-          Hint = 'remove library alias'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnRemLibClick
-          Spacing = 0
-          TabOrder = 1
-        end
-        object btnSelFile: TBitBtn
-          Left = 521
-          Height = 26
-          Hint = 'select the library file'
-          Top = 0
-          Width = 28
-          Align = alRight
-          OnClick = btnSelFileClick
-          Spacing = 0
-          TabOrder = 2
-        end
-        object btnSelRoot: TBitBtn
-          Left = 577
-          Height = 26
-          Hint = 'select the sources root'
-          Top = 0
-          Width = 28
-          Align = alRight
-          OnClick = btnSelRootClick
-          Spacing = 0
-          TabOrder = 3
-        end
-        object btnEditAlias: TBitBtn
-          Left = 493
-          Height = 26
-          Hint = 'edit the library alias'
-          Top = 0
-          Width = 28
-          Align = alRight
-          OnClick = btnEditAliasClick
-          Spacing = 0
-          TabOrder = 4
-        end
-        object btnMoveDown: TBitBtn
-          Left = 56
-          Height = 26
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnMoveDownClick
-          Spacing = 0
-          TabOrder = 5
-        end
-        object btnMoveUp: TBitBtn
-          Left = 84
-          Height = 26
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnMoveUpClick
-          Spacing = 0
-          TabOrder = 6
-        end
-        object btnSelfoldOfFiles: TBitBtn
-          Left = 549
-          Height = 26
-          Hint = 'select a folder of library files'
-          Top = 0
-          Width = 28
-          Align = alRight
-          OnClick = btnSelfoldOfFilesClick
-          Spacing = 0
-          TabOrder = 7
-        end
-        object btnReg: TBitBtn
-          Left = 112
-          Height = 26
-          Hint = 'register from the current project'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnRegClick
-          Spacing = 0
-          TabOrder = 8
-        end
-        object btnDubFetch: TBitBtn
-          Left = 168
-          Height = 26
-          Hint = 'register an online dub package'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnDubFetchClick
-          Spacing = 0
-          TabOrder = 9
-        end
-        object btnSelProj: TBitBtn
-          Left = 605
-          Height = 26
-          Hint = 'select the project file'
-          Top = 0
-          Width = 28
-          Align = alRight
-          OnClick = btnSelProjClick
-          Spacing = 0
-          TabOrder = 10
-        end
-        object btnOpenProj: TBitBtn
-          Left = 140
-          Height = 26
-          Hint = 'open the matching project'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnOpenProjClick
-          Spacing = 0
-          TabOrder = 11
-        end
-        object btnEnabled: TSpeedButton
-          Left = 196
-          Height = 26
-          Hint = 'disable or enable this library, without removing it from the collection'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnEnabledClick
-        end
-      end
-      object List: TListView[1]
-        Left = 4
-        Height = 259
-        Top = 34
         Width = 633
         Align = alClient
         BorderSpacing.Around = 4
@@ -205,10 +54,126 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         ReadOnly = True
         RowSelect = True
         SortType = stText
-        TabOrder = 1
+        TabOrder = 0
         ViewStyle = vsReport
         OnEdited = ListEdited
         OnSelectItem = ListSelectItem
+      end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 637
+      object btnSelProj: TCEToolButton[0]
+        Left = 356
+        Top = 0
+        Caption = 'button3'
+        OnClick = btnSelProjClick
+        resourceName = 'SCRIPT_BRICKS'
+        scaledSeparator = False
+      end
+      object btnSelRoot: TCEToolButton[1]
+        Left = 328
+        Top = 0
+        Caption = 'button4'
+        OnClick = btnSelRootClick
+        resourceName = 'FOLDER_ADD'
+        scaledSeparator = False
+      end
+      object btnSelfoldOfFiles: TCEToolButton[2]
+        Left = 300
+        Top = 0
+        Caption = 'button5'
+        OnClick = btnSelfoldOfFilesClick
+        resourceName = 'BRICKS'
+        scaledSeparator = False
+      end
+      object btnSelFile: TCEToolButton[3]
+        Left = 272
+        Top = 0
+        Caption = 'button6'
+        OnClick = btnSelFileClick
+        resourceName = 'FOLDER_BRICK'
+        scaledSeparator = False
+      end
+      object btnEditAlias: TCEToolButton[4]
+        Left = 244
+        Top = 0
+        Caption = 'button7'
+        OnClick = btnEditAliasClick
+        resourceName = 'BOOK_EDIT'
+        scaledSeparator = False
+      end
+      object button5: TCEToolButton[5]
+        Left = 225
+        Height = 28
+        Top = 0
+        Width = 19
+        Caption = 'button8'
+        Style = tbsDivider
+        scaledSeparator = False
+      end
+      object btnEnabled: TCEToolButton[6]
+        Left = 197
+        Top = 0
+        Caption = 'btnEnabled'
+        OnClick = btnEnabledClick
+        resourceName = 'BOOK'
+        scaledSeparator = False
+      end
+      object btnDubFetch: TCEToolButton[7]
+        Left = 169
+        Top = 0
+        Caption = 'btnDubFetch'
+        OnClick = btnDubFetchClick
+        resourceName = 'DUB'
+        scaledSeparator = False
+      end
+      object btnOpenProj: TCEToolButton[8]
+        Left = 141
+        Top = 0
+        Caption = 'btnOpenProj'
+        OnClick = btnOpenProjClick
+        resourceName = 'BOOK_OPEN'
+        scaledSeparator = False
+      end
+      object btnReg: TCEToolButton[9]
+        Left = 113
+        Top = 0
+        Caption = 'btnReg'
+        OnClick = btnRegClick
+        resourceName = 'BOOK_LINK'
+        scaledSeparator = False
+      end
+      object btnMoveUp: TCEToolButton[10]
+        Left = 85
+        Top = 0
+        Caption = 'btnMoveUp'
+        OnClick = btnMoveUpClick
+        resourceName = 'ARROW_UP'
+        scaledSeparator = False
+      end
+      object btnMoveDown: TCEToolButton[11]
+        Left = 57
+        Top = 0
+        Caption = 'btnMoveDown'
+        OnClick = btnMoveDownClick
+        resourceName = 'ARROW_DOWN'
+        scaledSeparator = False
+      end
+      object btnRemLib: TCEToolButton[12]
+        Left = 29
+        Top = 0
+        Caption = 'btnRemLib'
+        OnClick = btnRemLibClick
+        resourceName = 'BOOK_DELETE'
+        scaledSeparator = False
+      end
+      object btnAddLib: TCEToolButton[13]
+        Left = 1
+        Top = 0
+        Caption = 'btnAddLib'
+        OnClick = btnAddLibClick
+        resourceName = 'BOOK_ADD'
+        scaledSeparator = False
       end
     end
   end

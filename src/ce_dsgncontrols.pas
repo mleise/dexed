@@ -5,7 +5,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, buttons, graphics,
-  Menus, LMessages, LCLType;
+  Menus, LMessages, LCLType, Toolwin;
 
 type
 
@@ -87,6 +87,7 @@ begin
     fPng.FreeImage;
     fPng.LoadFromResourceName(HINSTANCE, fResourceName);
   end;
+  FToolBar.Repaint;
 end;
 
 procedure TCEToolButton.setScaledSeparator(value: boolean);
@@ -100,13 +101,16 @@ end;
 procedure TCEToolButton.Paint;
 var
   rc: TRect;
+  x, y: integer;
 begin
+  inherited;
   if (fResourceName <> '') and (style = tbsButton) then
   begin
     rc := ClientRect;
-    Canvas.Draw(rc.Left, rc.Top, fPng);
-  end
-  else inherited;
+    x := ((rc.Right - rc.Left) - fPng.width) div 2;
+    y := ((rc.Bottom - rc.Top) - fPng.Height) div 2;
+    Canvas.Draw(x, y, fPng);
+  end;
 end;
 
 constructor TCEToolBar.Create(TheOwner: TComponent);
@@ -139,6 +143,16 @@ begin
     item.OnClick:= @dsgnAddDropdown;
     fDesignMenu.Items.Add(item);
   end;
+  borderSpacing.Left := 2;
+  borderSpacing.Top := 2;
+  borderSpacing.Right := 2;
+  borderSpacing.Bottom := 0;
+  height := 30;
+  ButtonHeight := 28;
+  ButtonWidth := 28;
+  EdgeInner:= esNone;
+  EdgeOuter:= esNone;
+  Flat := false;
 end;
 
 destructor TCEToolBar.Destroy;
@@ -162,13 +176,24 @@ end;
 procedure TCEToolBar.dsgnAdd(style: TToolButtonStyle);
 var
   button: TCEToolButton;
+  str: string = '';
+  i: integer = 0;
 begin
   button := TCEToolButton.Create(owner);
-  button.Name:= format('button%d',[ButtonList.Count]);
+  while true do
+  begin
+    str := format('button%d',[i]);
+    if owner.FindComponent(str) = nil then
+      break;
+    i += 1;
+  end;
+  button.Name:= str;
   button.Style := style;
   InsertControl(button);
   ButtonList.add(button);
   button.setToolBar(self);
+  if style = tbsDivider then
+    width := 16;
 end;
 
 procedure TCEToolBar.dsgnAddButton(sender: TObject);

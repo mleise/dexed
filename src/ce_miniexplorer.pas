@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, FileUtil, ListFilterEdit, Forms, Controls, Graphics,
   ExtCtrls, Menus, ComCtrls, Buttons, lcltype, strutils, ce_widget, ce_sharedres,
   ce_common, ce_interfaces, ce_observer, ce_writableComponent, ce_dubproject,
-  ce_nativeproject, EditBtn, ce_dialogs, ce_synmemo, ce_projutils;
+  ce_nativeproject, EditBtn, ce_dialogs, ce_synmemo, ce_projutils, ce_dsgncontrols;
 
 type
 
@@ -61,15 +61,14 @@ type
   { TCEMiniExplorerWidget }
 
   TCEMiniExplorerWidget = class(TCEWidget, ICEProjectObserver, ICEMultiDocObserver, ICEExplorer)
-    btnAddFav: TBitBtn;
-    btnEdit: TBitBtn;
-    btnShellOpen: TBitBtn;
-    btnRemFav: TBitBtn;
+    btnAddFav: TCEToolButton;
+    btnEdit: TCEToolButton;
+    btnRemFav: TCEToolButton;
+    btnShellOpen: TCEToolButton;
     imgList: TImageList;
     lstFilter: TListFilterEdit;
     lstFiles: TListView;
     lstFav: TListView;
-    Panel1: TPanel;
     Panel2: TPanel;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
@@ -124,6 +123,8 @@ type
     function singleServiceName: string;
     procedure browse(const location: string);
     function currentLocation: string;
+  protected
+    procedure setToolBarFlat(value: boolean); override;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -250,11 +251,6 @@ begin
   //
   fEditableOptions:= TCEMiniExplorerEditableOptions.create(self);
   //
-  AssignPng(btnAddFav, 'FOLDER_ADD');
-  AssignPng(btnRemFav, 'FOLDER_DELETE');
-  AssignPng(btnShellOpen, 'FLASH');
-  AssignPng(btnEdit, 'PENCIL');
-  //
   fFavorites := TStringList.Create;
   fFavorites.onChange := @favStringsChange;
   lstFiles.OnDeletion := @lstDeletion;
@@ -306,6 +302,12 @@ procedure TCEMiniExplorerWidget.lstDeletion(Sender: TObject; Item: TListItem);
 begin
   if Item.Data.isNotNil then
     DisposeStr(PString(Item.Data));
+end;
+
+procedure TCEMiniExplorerWidget.setToolBarFlat(value: boolean);
+begin
+  inherited setToolBarFlat(value);
+  lstFilter.Flat:=value;
 end;
 {$ENDREGION}
 

@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, TreeFilterEdit, Forms, Controls, Graphics, ExtCtrls, Menus,
   ComCtrls, ce_widget, jsonparser, process, actnlist, Buttons, Clipbrd, LCLProc,
   ce_common, ce_observer, ce_synmemo, ce_interfaces, ce_writableComponent,
-  ce_processes, ce_sharedres;
+  ce_processes, ce_sharedres, ce_dsgncontrols;
 
 type
 
@@ -106,9 +106,8 @@ type
   { TCESymbolListWidget }
 
   TCESymbolListWidget = class(TCEWidget, ICEMultiDocObserver, ICEEditableOptions)
-    btnRefresh: TBitBtn;
+    btnRefresh: TCEToolButton;
     imgList: TImageList;
-    Panel1: TPanel;
     Tree: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure btnRefreshClick(Sender: TObject);
@@ -175,6 +174,7 @@ type
     function contextAction(index: integer): TAction; override;
     //
     procedure SetVisible(Value: boolean); override;
+    procedure setToolBarFlat(value: boolean); override;
   published
     property autoRefresh: boolean read fAutoRefresh write fAutoRefresh;
     property refreshOnChange: boolean read fRefreshOnChange write fRefreshOnChange;
@@ -380,8 +380,6 @@ begin
   ndWarn    := Tree.Items[12];
   ndErr     := Tree.Items[13];
   //
-  AssignPng(btnRefresh, 'ARROW_UPDATE');
-  //
   Tree.OnDblClick := @TreeDblClick;
   Tree.PopupMenu := contextMenu;
   //
@@ -408,6 +406,12 @@ begin
   getMessageDisplay(fMsgs);
   if Value then
     callToolProc;
+end;
+
+procedure TCESymbolListWidget.setToolBarFlat(value: boolean);
+begin
+  inherited setToolbarFlat(value);
+  TreeFilterEdit1.Flat:=value;
 end;
 {$ENDREGION}
 

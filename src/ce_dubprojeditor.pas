@@ -143,6 +143,7 @@ end;
 constructor TCEDubProjectEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
+  toolbarVisible:=false;
   fNodeSources := treeInspect.Items[0];
   fNodeConfig := treeInspect.Items[1];
   //

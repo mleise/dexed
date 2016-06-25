@@ -98,6 +98,7 @@ var
   fname: string;
 begin
   inherited;
+  toolbarVisible:=false;
   fDmtWrapper := TCEDmtWrapper.Create(self);
   fBackup := TStringList.Create;
   //

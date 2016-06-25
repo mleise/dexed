@@ -1,7 +1,7 @@
 inherited CEToolsEditorWidget: TCEToolsEditorWidget
-  Left = 1434
+  Left = 1395
   Height = 280
-  Top = 688
+  Top = 216
   Width = 441
   Caption = 'Tools editor'
   ClientHeight = 280
@@ -12,127 +12,44 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
     ClientHeight = 280
     ClientWidth = 441
     inherited Content: TPanel
-      Height = 280
+      Height = 244
       Width = 441
-      ClientHeight = 280
+      ClientHeight = 244
       ClientWidth = 441
-      object Panel1: TPanel[0]
+      object Panel2: TPanel[0]
         Left = 4
-        Height = 26
+        Height = 236
         Top = 4
-        Width = 433
-        Align = alTop
-        BorderSpacing.Around = 4
-        BevelOuter = bvNone
-        ClientHeight = 26
-        ClientWidth = 433
-        TabOrder = 0
-        object BtnAddTool: TBitBtn
-          Left = 0
-          Height = 26
-          Hint = 'add a tool'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          Layout = blGlyphBottom
-          OnClick = BtnAddToolClick
-          Spacing = 0
-          TabOrder = 0
-        end
-        object btnRemTool: TBitBtn
-          Left = 28
-          Height = 26
-          Hint = 'remove selected tool'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          Layout = blGlyphBottom
-          OnClick = btnRemToolClick
-          Spacing = 0
-          TabOrder = 1
-        end
-        object btnRun: TBitBtn
-          Left = 405
-          Height = 26
-          Hint = 'execute selected tool'
-          Top = 0
-          Width = 28
-          Align = alRight
-          Layout = blGlyphBottom
-          OnClick = btnRunClick
-          Spacing = 0
-          TabOrder = 2
-        end
-        object btnMoveDown: TBitBtn
-          Left = 56
-          Height = 26
-          Hint = 'move selected tool down'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          Layout = blGlyphBottom
-          OnClick = btnMoveDownClick
-          Spacing = 0
-          TabOrder = 3
-        end
-        object btnMoveUp: TBitBtn
-          Left = 84
-          Height = 26
-          Hint = 'move selected tool up'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          Layout = blGlyphBottom
-          OnClick = btnMoveUpClick
-          Spacing = 0
-          TabOrder = 4
-        end
-        object btnClone: TBitBtn
-          Left = 112
-          Height = 26
-          Hint = 'clone selected tool'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          Layout = blGlyphBottom
-          OnClick = btnCloneClick
-          Spacing = 0
-          TabOrder = 5
-        end
-      end
-      object Panel2: TPanel[1]
-        Left = 4
-        Height = 242
-        Top = 34
         Width = 433
         Align = alClient
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 242
+        ClientHeight = 236
         ClientWidth = 433
-        TabOrder = 1
+        TabOrder = 0
         object lstTools: TListBox
           Left = 0
-          Height = 242
+          Height = 236
           Top = 0
           Width = 160
           Align = alLeft
           ItemHeight = 0
           OnDblClick = lstToolsDblClick
           OnSelectionChange = lstToolsSelectionChange
-          ScrollWidth = 158
+          ScrollWidth = 156
           TabOrder = 0
+          TopIndex = -1
         end
         object Splitter1: TSplitter
           Left = 160
-          Height = 242
+          Height = 236
           Top = 0
           Width = 5
           AutoSnap = False
         end
         object propsEd: TTIPropertyGrid
           Left = 165
-          Height = 242
+          Height = 236
           Top = 0
           Width = 268
           Align = alClient
@@ -146,6 +63,66 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
           SplitterX = 150
           ValueFont.Color = clGreen
         end
+      end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 433
+      object btnRun: TCEToolButton[0]
+        Left = 157
+        Top = 0
+        Caption = 'btnRun'
+        OnClick = btnRunClick
+        resourceName = 'APPLICATION_FLASH'
+        scaledSeparator = False
+      end
+      object button1: TCEToolButton[1]
+        Left = 141
+        Height = 28
+        Top = 0
+        Width = 16
+        Caption = 'button1'
+        Style = tbsDivider
+        scaledSeparator = False
+      end
+      object btnClone: TCEToolButton[2]
+        Left = 113
+        Top = 0
+        Caption = 'btnClone'
+        OnClick = btnCloneClick
+        resourceName = 'APPLICATION_DOUBLE'
+        scaledSeparator = False
+      end
+      object btnMoveUp: TCEToolButton[3]
+        Left = 85
+        Top = 0
+        Caption = 'btnMoveUp'
+        OnClick = btnMoveUpClick
+        resourceName = 'ARROW_UP'
+        scaledSeparator = False
+      end
+      object btnMoveDown: TCEToolButton[4]
+        Left = 57
+        Top = 0
+        Caption = 'btnMoveDown'
+        OnClick = btnMoveDownClick
+        resourceName = 'ARROW_DOWN'
+        scaledSeparator = False
+      end
+      object btnRemTool: TCEToolButton[5]
+        Left = 29
+        Top = 0
+        Caption = 'btnRemTool'
+        OnClick = btnRemToolClick
+        resourceName = 'APPLICATION_DELETE'
+        scaledSeparator = False
+      end
+      object btnAddTool: TCEToolButton[6]
+        Left = 1
+        Top = 0
+        Caption = 'btnAddTool'
+        OnClick = BtnAddToolClick
+        resourceName = 'APPLICATION_ADD'
+        scaledSeparator = False
       end
     end
   end

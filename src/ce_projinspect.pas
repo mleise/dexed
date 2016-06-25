@@ -7,19 +7,18 @@ interface
 uses
   Classes, SysUtils, TreeFilterEdit, Forms, Controls, Graphics, actnlist,
   Dialogs, ExtCtrls, ComCtrls, Menus, Buttons, lcltype, ce_nativeproject, ce_interfaces,
-  ce_common, ce_widget, ce_observer, ce_dialogs, ce_sharedres;
+  ce_common, ce_widget, ce_observer, ce_dialogs, ce_sharedres, ce_dsgncontrols;
 
 type
 
   { TCEProjectInspectWidget }
 
   TCEProjectInspectWidget = class(TCEWidget, ICEProjectObserver)
-    btnRemFold: TSpeedButton;
+    btnAddFile: TCEToolButton;
+    btnAddFold: TCEToolButton;
+    btnRemFile: TCEToolButton;
+    btnRemFold: TCEToolButton;
     imgList: TImageList;
-    pnlToolBar: TPanel;
-    btnAddFile: TSpeedButton;
-    btnAddFold: TSpeedButton;
-    btnRemFile: TSpeedButton;
     Tree: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure btnAddFileClick(Sender: TObject);
@@ -34,6 +33,7 @@ type
     procedure updateImperative; override;
     procedure updateDelayed; override;
     procedure SetVisible(Value: boolean); override;
+    procedure setToolBarFlat(value: boolean); override;
   private
     fActOpenFile: TAction;
     fActSelConf: TAction;
@@ -86,11 +86,6 @@ begin
   //
   inherited;
   //
-  AssignPng(btnAddFile, 'DOCUMENT_ADD');
-  AssignPng(btnRemFile, 'DOCUMENT_DELETE');
-  AssignPng(btnAddFold, 'FOLDER_ADD');
-  AssignPng(btnRemFold, 'FOLDER_DELETE');
-  //
   Tree.OnDblClick := @TreeDblClick;
   fFileNode := Tree.Items[0];
   fConfNode := Tree.Items[1];
@@ -113,6 +108,12 @@ procedure TCEProjectInspectWidget.SetVisible(Value: boolean);
 begin
   inherited;
   if Value then updateImperative;
+end;
+
+procedure TCEProjectInspectWidget.setToolBarFlat(value: boolean);
+begin
+  inherited setToolBarFlat(value);
+  TreeFilterEdit1.Flat:=value;
 end;
 {$ENDREGION}
 

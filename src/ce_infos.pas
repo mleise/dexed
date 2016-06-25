@@ -173,6 +173,7 @@ var
   toolItem: TToolInfo;
 begin
   inherited;
+  toolbarVisible:=false;
   fIsModal := true;
   fIsDockable := false;
   //

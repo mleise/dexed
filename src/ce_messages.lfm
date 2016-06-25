@@ -1,27 +1,28 @@
 inherited CEMessagesWidget: TCEMessagesWidget
-  Left = 708
-  Height = 172
-  Top = 198
-  Width = 763
+  Left = 900
+  Height = 159
+  Top = 226
+  Width = 844
   Caption = 'Messages'
-  ClientHeight = 172
-  ClientWidth = 763
+  ClientHeight = 159
+  ClientWidth = 844
   inherited Back: TPanel
-    Height = 172
-    Width = 763
-    ClientHeight = 172
-    ClientWidth = 763
+    Height = 159
+    Width = 844
+    ClientHeight = 159
+    ClientWidth = 844
     inherited Content: TPanel
-      Height = 172
-      Width = 763
-      ClientHeight = 172
-      ClientWidth = 763
+      Height = 125
+      Top = 34
+      Width = 844
+      ClientHeight = 125
+      ClientWidth = 844
       PopupMenu = nil
       object List: TTreeView[0]
         Left = 2
-        Height = 140
-        Top = 30
-        Width = 759
+        Height = 121
+        Top = 2
+        Width = 840
         Align = alClient
         BorderSpacing.Around = 2
         DefaultItemHeight = 16
@@ -44,120 +45,120 @@ inherited CEMessagesWidget: TCEMessagesWidget
         OnKeyDown = ListKeyDown
         Options = [tvoAllowMultiselect, tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoThemedDraw]
       end
-      object selCtxt: TToolBar[1]
-        Left = 2
+    end
+    inherited toolbar: TCEToolBar
+      Height = 28
+      Width = 836
+      ButtonWidth = 100
+      ShowCaptions = True
+      Wrapable = False
+      object button0: TCEToolButton[0]
+        Left = 554
+        Height = 28
+        Top = 0
+        Width = 5
+        Caption = 'button0'
+        Style = tbsDivider
+        scaledSeparator = False
+      end
+      object btnSelMisc: TCEToolButton[1]
+        Left = 454
+        Top = 0
+        Caption = 'Misc'
+        scaledSeparator = False
+      end
+      object button2: TCEToolButton[2]
+        Left = 449
+        Height = 28
+        Top = 0
+        Width = 5
+        Caption = 'button2'
+        Style = tbsDivider
+        scaledSeparator = False
+      end
+      object btnSelApp: TCEToolButton[3]
+        Left = 349
+        Top = 0
+        Caption = 'Application'
+        scaledSeparator = False
+      end
+      object button4: TCEToolButton[4]
+        Left = 344
+        Height = 28
+        Top = 0
+        Width = 5
+        Caption = 'button4'
+        Style = tbsDivider
+        scaledSeparator = False
+      end
+      object btnSelProj: TCEToolButton[5]
+        Left = 244
+        Top = 0
+        Caption = 'Project'
+        scaledSeparator = False
+      end
+      object button6: TCEToolButton[6]
+        Left = 239
+        Height = 28
+        Top = 0
+        Width = 5
+        Caption = 'button6'
+        Style = tbsDivider
+        scaledSeparator = False
+      end
+      object btnSelEdit: TCEToolButton[7]
+        Left = 139
+        Top = 0
+        Caption = 'Editor'
+        scaledSeparator = False
+      end
+      object button8: TCEToolButton[8]
+        Left = 134
+        Height = 28
+        Top = 0
+        Width = 5
+        Caption = 'button8'
+        Style = tbsDivider
+        scaledSeparator = False
+      end
+      object btnSelAll: TCEToolButton[9]
+        Left = 34
+        Top = 0
+        Caption = 'All'
+        Down = True
+        scaledSeparator = False
+      end
+      object button10: TCEToolButton[10]
+        Left = 29
+        Height = 28
+        Top = 0
+        Width = 5
+        Caption = 'button10'
+        Style = tbsDivider
+        scaledSeparator = False
+      end
+      object TreeFilterEdit1: TTreeFilterEdit[11]
+        Left = 560
         Height = 26
-        Top = 2
-        Width = 759
-        AutoSize = True
-        BorderSpacing.Around = 2
-        ButtonHeight = 24
-        ButtonWidth = 100
-        ShowCaptions = True
-        TabOrder = 1
-        Wrapable = False
-        object btnSelAll: TToolButton
-          Left = 33
-          Hint = 'unfiltered messages'
-          Top = 2
-          Caption = 'All'
-          Down = True
-        end
-        object ToolButton2: TToolButton
-          Left = 133
-          Height = 24
-          Top = 2
-          Width = 5
-          Caption = 'ToolButton2'
-          Style = tbsDivider
-        end
-        object btnSelEdit: TToolButton
-          Left = 138
-          Hint = 'messages related to the current document'
-          Top = 2
-          Caption = 'Editor'
-        end
-        object ToolButton4: TToolButton
-          Left = 238
-          Height = 24
-          Top = 2
-          Width = 5
-          Caption = 'ToolButton4'
-          Style = tbsDivider
-        end
-        object btnSelProj: TToolButton
-          Left = 243
-          Hint = 'message related to the current project'
-          Top = 2
-          Caption = 'Project'
-        end
-        object ToolButton8: TToolButton
-          Left = 343
-          Height = 24
-          Top = 2
-          Width = 5
-          Caption = 'ToolButton8'
-          Style = tbsDivider
-        end
-        object btnSelApp: TToolButton
-          Left = 348
-          Hint = 'messages related to Coedit'
-          Top = 2
-          Caption = 'Application'
-        end
-        object ToolButton10: TToolButton
-          Left = 448
-          Height = 24
-          Top = 2
-          Width = 5
-          Caption = 'ToolButton10'
-          Style = tbsDivider
-        end
-        object btnSelMisc: TToolButton
-          Left = 453
-          Hint = 'miscellaneous messages, custom tools output, etc'
-          Top = 2
-          Caption = 'Misc.'
-        end
-        object btnClearCat: TBitBtn
-          Left = 1
-          Height = 24
-          Top = 2
-          Width = 27
-          TabOrder = 0
-        end
-        object ToolButton1: TToolButton
-          Left = 28
-          Height = 24
-          Top = 2
-          Width = 5
-          Caption = 'ToolButton1'
-          Style = tbsDivider
-        end
-        object ToolButton11: TToolButton
-          Left = 553
-          Height = 24
-          Top = 2
-          Width = 5
-          Caption = 'ToolButton11'
-          Style = tbsDivider
-        end
-        object TreeFilterEdit1: TTreeFilterEdit
-          Left = 559
-          Height = 22
-          Top = 3
-          Width = 199
-          OnAfterFilter = TreeFilterEdit1AfterFilter
-          ButtonWidth = 23
-          NumGlyphs = 1
-          Align = alRight
-          Anchors = [akTop, akLeft, akRight, akBottom]
-          BorderSpacing.Around = 1
-          MaxLength = 0
-          TabOrder = 1
-          OnButtonClick = TreeFilterEdit1ButtonClick
-          FilteredTreeview = List
-        end
+        Top = 1
+        Width = 275
+        OnAfterFilter = TreeFilterEdit1AfterFilter
+        ButtonWidth = 23
+        NumGlyphs = 1
+        Align = alRight
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BorderSpacing.Around = 1
+        MaxLength = 0
+        TabOrder = 0
+        OnButtonClick = TreeFilterEdit1ButtonClick
+        FilteredTreeview = List
+      end
+      object btnClearCat: TSpeedButton[12]
+        Left = 1
+        Height = 28
+        Top = 0
+        Width = 28
+        Align = alLeft
       end
     end
   end

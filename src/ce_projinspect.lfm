@@ -1,7 +1,7 @@
 inherited CEProjectInspectWidget: TCEProjectInspectWidget
-  Left = 960
+  Left = 1575
   Height = 258
-  Top = 260
+  Top = 91
   Width = 341
   ActiveControl = Tree
   AllowDropFiles = True
@@ -15,15 +15,15 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
     ClientHeight = 258
     ClientWidth = 341
     inherited Content: TPanel
-      Height = 258
+      Height = 222
       Width = 341
-      ClientHeight = 258
+      ClientHeight = 222
       ClientWidth = 341
       PopupMenu = nil
       object Tree: TTreeView[0]
         Left = 2
-        Height = 226
-        Top = 30
+        Height = 218
+        Top = 2
         Width = 337
         Align = alClient
         AutoExpand = True
@@ -51,71 +51,56 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
           20736F7572636573
         }
       end
-      object pnlToolBar: TPanel[1]
-        Left = 2
+    end
+    inherited toolbar: TCEToolBar
+      Width = 333
+      object btnRemFold: TCEToolButton[0]
+        Left = 85
+        Top = 0
+        Caption = 'btnRemFold'
+        OnClick = btnRemFoldClick
+        resourceName = 'FOLDER_DELETE'
+        scaledSeparator = False
+      end
+      object btnAddFold: TCEToolButton[1]
+        Left = 57
+        Top = 0
+        Caption = 'btnAddFold'
+        OnClick = btnAddFoldClick
+        resourceName = 'FOLDER_ADD'
+        scaledSeparator = False
+      end
+      object btnRemFile: TCEToolButton[2]
+        Left = 29
+        Top = 0
+        Caption = 'btnRemFile'
+        OnClick = btnRemFileClick
+        resourceName = 'DOCUMENT_DELETE'
+        scaledSeparator = False
+      end
+      object btnAddFile: TCEToolButton[3]
+        Left = 1
+        Top = 0
+        Caption = 'btnAddFile'
+        OnClick = btnAddFileClick
+        resourceName = 'DOCUMENT_ADD'
+        scaledSeparator = False
+      end
+      object TreeFilterEdit1: TTreeFilterEdit[4]
+        Left = 117
         Height = 26
         Top = 2
-        Width = 337
-        Align = alTop
+        Width = 214
+        ButtonWidth = 28
+        NumGlyphs = 1
+        Align = alClient
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 114
         BorderSpacing.Around = 2
-        BevelOuter = bvNone
-        ClientHeight = 26
-        ClientWidth = 337
-        TabOrder = 1
-        object btnAddFile: TSpeedButton
-          Left = 0
-          Height = 26
-          Hint = 'add a source file to the project'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnAddFileClick
-          ShowCaption = False
-        end
-        object btnAddFold: TSpeedButton
-          Left = 56
-          Height = 26
-          Hint = 'add a folder of source  to the project'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnAddFoldClick
-          ShowCaption = False
-        end
-        object TreeFilterEdit1: TTreeFilterEdit
-          Left = 114
-          Height = 22
-          Top = 2
-          Width = 221
-          ButtonWidth = 28
-          NumGlyphs = 1
-          Align = alClient
-          Anchors = [akTop, akLeft, akRight]
-          BorderSpacing.Around = 2
-          MaxLength = 0
-          TabOrder = 0
-          FilteredTreeview = Tree
-          ExpandAllInitially = True
-        end
-        object btnRemFile: TSpeedButton
-          Left = 28
-          Height = 26
-          Hint = 'remove selected sources file(s) from the project'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnRemFileClick
-        end
-        object btnRemFold: TSpeedButton
-          Left = 84
-          Height = 26
-          Hint = 'remove a folder of source  from the project'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          OnClick = btnRemFoldClick
-          ShowCaption = False
-        end
+        MaxLength = 0
+        TabOrder = 0
+        FilteredTreeview = Tree
+        ExpandAllInitially = True
       end
     end
   end

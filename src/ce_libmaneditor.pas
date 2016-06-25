@@ -9,7 +9,7 @@ uses
   Menus, ComCtrls, Buttons, LazFileUtils, strutils, fphttpclient, StdCtrls, xfpjson,
   ce_widget, ce_interfaces, ce_nativeproject, ce_dmdwrap, ce_common, ce_dialogs,
   ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_stringrange,
-  ce_libman, ce_projutils;
+  ce_libman, ce_projutils, ce_dsgncontrols;
 
 type
 
@@ -26,21 +26,20 @@ type
 
   { TCELibManEditorWidget }
   TCELibManEditorWidget = class(TCEWidget, ICEProjectObserver)
-    btnOpenProj: TBitBtn;
-    btnMoveDown: TBitBtn;
-    btnMoveUp: TBitBtn;
-    btnReg: TBitBtn;
-    btnDubFetch: TBitBtn;
-    btnSelFile: TBitBtn;
-    btnAddLib: TBitBtn;
-    btnRemLib: TBitBtn;
-    btnEditAlias: TBitBtn;
-    btnSelfoldOfFiles: TBitBtn;
-    btnSelRoot: TBitBtn;
-    btnSelProj: TBitBtn;
+    btnAddLib: TCEToolButton;
+    btnDubFetch: TCEToolButton;
+    btnEditAlias: TCEToolButton;
+    btnEnabled: TCEToolButton;
+    btnMoveDown: TCEToolButton;
+    btnMoveUp: TCEToolButton;
+    btnOpenProj: TCEToolButton;
+    btnReg: TCEToolButton;
+    btnRemLib: TCEToolButton;
+    btnSelFile: TCEToolButton;
+    btnSelfoldOfFiles: TCEToolButton;
+    btnSelProj: TCEToolButton;
+    btnSelRoot: TCEToolButton;
     List: TListView;
-    Panel1: TPanel;
-    btnEnabled: TSpeedButton;
     procedure btnAddLibClick(Sender: TObject);
     procedure btnEnabledClick(Sender: TObject);
     procedure btnDubFetchClick(Sender: TObject);
@@ -91,19 +90,6 @@ const
 constructor TCELibManEditorWidget.Create(aOwner: TComponent);
 begin
   inherited;
-  AssignPng(btnMoveDown, 'ARROW_DOWN');
-  AssignPng(btnMoveUp, 'ARROW_UP');
-  AssignPng(btnAddLib, 'BOOK_ADD');
-  AssignPng(btnRemLib, 'BOOK_DELETE');
-  AssignPng(btnEditAlias, 'BOOK_EDIT');
-  AssignPng(btnSelFile, 'FOLDER_BRICK');
-  AssignPng(btnSelfoldOfFiles, 'BRICKS');
-  AssignPng(btnSelRoot, 'FOLDER_ADD');
-  AssignPng(btnReg, 'BOOK_LINK');
-  AssignPng(btnDubFetch, 'DUB');
-  AssignPng(btnSelProj, 'SCRIPT_BRICKS');
-  AssignPng(btnOpenProj, 'BOOK_OPEN');
-  AssignPng(btnEnabled, 'BOOK');
 end;
 
 procedure TCELibManEditorWidget.updateButtonsState;
@@ -114,9 +100,9 @@ begin
     List.Selected.SubItems[2].fileExists;
   if List.Selected.isNotNil and itemForRow(List.Selected).isNotNil and
     itemForRow(List.Selected).enabled then
-      AssignPng(btnEnabled, 'BOOK')
+      btnEnabled.resourceName := 'BOOK'
   else
-    AssignPng(btnEnabled, 'BOOK_GREY');
+    btnEnabled.resourceName := 'BOOK_GREY';
 end;
 
 procedure TCELibManEditorWidget.projNew(aProject: ICECommonProject);

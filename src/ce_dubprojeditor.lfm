@@ -12,23 +12,23 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
     ClientHeight = 424
     ClientWidth = 411
     inherited Content: TPanel
-      Height = 424
+      Height = 390
       Width = 411
-      ClientHeight = 424
+      ClientHeight = 390
       ClientWidth = 411
       object PageControl1: TPageControl[0]
         Left = 4
-        Height = 416
+        Height = 382
         Top = 4
         Width = 403
-        ActivePage = TabSheet1
+        ActivePage = TabSheet2
         Align = alClient
         BorderSpacing.Around = 4
-        TabIndex = 0
+        TabIndex = 1
         TabOrder = 0
         object TabSheet1: TTabSheet
           Caption = 'Inspector'
-          ClientHeight = 380
+          ClientHeight = 346
           ClientWidth = 395
           object pnlToolBar1: TPanel
             Left = 4
@@ -71,7 +71,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
           end
           object treeInspect: TTreeView
             Left = 4
-            Height = 344
+            Height = 310
             Top = 32
             Width = 387
             Align = alClient
@@ -95,16 +95,16 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         end
         object TabSheet2: TTabSheet
           Caption = 'Editor'
-          ClientHeight = 380
+          ClientHeight = 346
           ClientWidth = 395
           object propTree: TTreeView
             Left = 4
-            Height = 316
+            Height = 282
             Top = 32
             Width = 387
             Align = alClient
             BorderSpacing.Around = 4
-            DefaultItemHeight = 18
+            DefaultItemHeight = 16
             HideSelection = False
             Images = imgList
             ReadOnly = True
@@ -166,7 +166,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
           object Panel1: TPanel
             Left = 2
             Height = 26
-            Top = 352
+            Top = 318
             Width = 391
             Align = alBottom
             BorderSpacing.Around = 2
@@ -197,6 +197,9 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
           end
         end
       end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 407
     end
   end
   inherited contextMenu: TPopupMenu

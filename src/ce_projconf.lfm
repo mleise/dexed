@@ -1,7 +1,7 @@
 inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
-  Left = 631
+  Left = 1488
   Height = 273
-  Top = 296
+  Top = 349
   Width = 445
   Caption = 'Native project configuration'
   ClientHeight = 273
@@ -12,92 +12,24 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
     ClientHeight = 273
     ClientWidth = 445
     inherited Content: TPanel
-      Height = 273
+      Height = 237
       Width = 445
-      ClientHeight = 273
+      ClientHeight = 237
       ClientWidth = 445
-      object pnlToolBar: TPanel[0]
+      object Panel2: TPanel[0]
         Left = 4
-        Height = 26
-        Top = 2
-        Width = 437
-        Align = alTop
-        BorderSpacing.Left = 2
-        BorderSpacing.Right = 2
-        BorderSpacing.Around = 2
-        BevelOuter = bvNone
-        ClientHeight = 26
-        ClientWidth = 437
-        TabOrder = 0
-        object selConf: TComboBox
-          Left = 0
-          Height = 25
-          Hint = 'select a configuration'
-          Top = 1
-          Width = 324
-          Align = alClient
-          BorderSpacing.Top = 1
-          BorderSpacing.Right = 1
-          ItemHeight = 0
-          OnChange = selConfChange
-          Style = csDropDownList
-          TabOrder = 0
-        end
-        object btnAddConf: TSpeedButton
-          Left = 325
-          Height = 26
-          Hint = 'add an empty configuration'
-          Top = 0
-          Width = 28
-          Align = alRight
-          OnClick = btnAddConfClick
-          ShowCaption = False
-        end
-        object btnDelConf: TSpeedButton
-          Left = 353
-          Height = 26
-          Hint = 'remove selected configuration'
-          Top = 0
-          Width = 28
-          Align = alRight
-          OnClick = btnDelConfClick
-          ShowCaption = False
-        end
-        object btnCloneConf: TSpeedButton
-          Left = 381
-          Height = 26
-          Hint = 'clone selected configuration'
-          Top = 0
-          Width = 28
-          Align = alRight
-          OnClick = btnCloneCurrClick
-          ShowCaption = False
-        end
-        object btnSyncEdit: TSpeedButton
-          Left = 409
-          Height = 26
-          Hint = 'syncrhonize each configuration'
-          Top = 0
-          Width = 28
-          Align = alRight
-          OnClick = btnSyncEditClick
-          ShowCaption = False
-        end
-      end
-      object Panel2: TPanel[1]
-        Left = 4
-        Height = 237
-        Top = 32
+        Height = 229
+        Top = 4
         Width = 437
         Align = alClient
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 237
+        ClientHeight = 229
         ClientWidth = 437
-        TabOrder = 1
+        TabOrder = 0
         object Tree: TTreeView
           Left = 0
-          Height = 237
+          Height = 229
           Hint = 'filter configuration elements'
           Top = 0
           Width = 160
@@ -132,14 +64,14 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         end
         object Splitter1: TSplitter
           Left = 160
-          Height = 237
+          Height = 229
           Top = 0
           Width = 5
           AutoSnap = False
         end
         object inspector: TTIPropertyGrid
           Left = 165
-          Height = 237
+          Height = 229
           Top = 0
           Width = 272
           Align = alClient
@@ -153,6 +85,57 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
           SplitterX = 150
           ValueFont.Color = clGreen
         end
+      end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 437
+      object btnSyncEdit: TCEToolButton[0]
+        Left = 85
+        Top = 0
+        Caption = 'btnSyncEdit'
+        OnClick = btnSyncEditClick
+        resourceName = 'LINK_BREAK'
+        scaledSeparator = False
+      end
+      object btnCLoneConf: TCEToolButton[1]
+        Left = 57
+        Top = 0
+        Caption = 'btnCLoneConf'
+        OnClick = btnCloneCurrClick
+        resourceName = 'COG_GO'
+        scaledSeparator = False
+      end
+      object btnDelConf: TCEToolButton[2]
+        Left = 29
+        Top = 0
+        Caption = 'btnDelConf'
+        OnClick = btnDelConfClick
+        resourceName = 'COG_DELETE'
+        scaledSeparator = False
+      end
+      object btnAddConf: TCEToolButton[3]
+        Left = 1
+        Top = 0
+        Caption = 'btnAddConf'
+        OnClick = btnAddConfClick
+        resourceName = 'COG_ADD'
+        scaledSeparator = False
+      end
+      object selConf: TComboBox[4]
+        Left = 117
+        Height = 25
+        Hint = 'select a configuration'
+        Top = 3
+        Width = 317
+        Align = alClient
+        BorderSpacing.Left = 114
+        BorderSpacing.Top = 1
+        BorderSpacing.Right = 1
+        BorderSpacing.Around = 2
+        ItemHeight = 0
+        OnChange = selConfChange
+        Style = csDropDownList
+        TabOrder = 0
       end
     end
   end

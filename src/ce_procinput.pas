@@ -24,6 +24,8 @@ type
     procedure btnKillClick(Sender: TObject);
     procedure btnSendClick(Sender: TObject);
     procedure txtInpKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  protected
+    procedure setToolBarFlat(value: boolean); override;
   private
     fMruPos: Integer;
     fMru: TCEMRUList;
@@ -67,6 +69,7 @@ begin
   AssignPng(btnClose, 'PENCIL_DELETE');
   AssignPng(btnSend, 'PENCIL_GO');
   AssignPng(btnKill, 'CANCEL');
+  toolbarVisible:=false;
 end;
 
 destructor TCEProcInputWidget.destroy;
@@ -75,6 +78,12 @@ begin
   fMru.SaveToFile(getCoeditDocPath + OptsFname);
   fMru.Free;
   inherited;
+end;
+
+procedure TCEProcInputWidget.setToolBarFlat(value: boolean);
+begin
+  inherited;
+  //btnClose.flat = fToolbarFlat;
 end;
 {$ENDREGION --------------------------------------------------------------------}
 

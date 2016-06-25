@@ -65,6 +65,7 @@ const
 constructor TCEOptionEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
+  toolbarVisible:=false;
   fIsDockable := false;
   fIsModal:= true;
   fEdOptsSubj := TCEEditableOptionsSubject.create;

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, ExtCtrls, ActnList, Menus,
-  AnchorDocking, ce_interfaces;
+  AnchorDocking, ce_interfaces, ce_dsgncontrols;
 
 type
 
@@ -14,7 +14,11 @@ type
    * Base type for an UI module.
    *)
   PTCEWidget = ^TCEWidget;
+
+  { TCEWidget }
+
   TCEWidget = class(TForm, ICEContextualActions)
+    toolbar: TCEToolBar;
     Content: TPanel;
     Back: TPanel;
     contextMenu: TPopupMenu;
@@ -33,6 +37,8 @@ type
   protected
     fIsDockable: boolean;
     fIsModal: boolean;
+    fToolBarFlat: boolean;
+    fToolBarVisible: boolean;
     // a descendant overrides to implement a periodic update.
     procedure updateLoop; virtual;
     // a descendant overrides to implement an imperative update.
@@ -45,6 +51,9 @@ type
     function contextAction(index: integer): TAction; virtual;
     //
     function getIfModal: boolean;
+    //
+    procedure setToolBarVisible(value: boolean); virtual;
+    procedure setToolBarFlat(value: boolean); virtual;
   published
     property updaterByLoopInterval: Integer read fLoopInter write setLoopInt;
     property updaterByDelayDuration: Integer read fDelayDur write setDelayDur;
@@ -81,6 +90,9 @@ type
     property isDockable: boolean read fIsDockable;
     // not if isDockable, otherwise a the widget is shown as modal form.
     property isModal: boolean read getIfModal;
+
+    property toolbarFlat: boolean read fToolBarFlat write setToolBarFlat;
+    property toolbarVisible: boolean read fToolBarVisible write setToolBarVisible;
   end;
 
   (**
@@ -112,6 +124,8 @@ implementation
 uses
   ce_observer;
 
+//TODO-cNewToolbar: button hints have not been copied
+
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEWidget.create(aOwner: TComponent);
 var
@@ -119,6 +133,7 @@ var
   itm: TmenuItem;
 begin
   inherited;
+  fToolBarVisible := true;
   fIsDockable := true;
   fUpdaterAuto := TTimer.Create(self);
   fUpdaterAuto.Interval := 70;
@@ -179,6 +194,22 @@ begin
       BringToFront;
     end;
   end;
+end;
+
+procedure TCEWidget.setToolBarVisible(value: boolean);
+begin
+  if fToolBarVisible = value then
+    exit;
+  toolbar.Visible := value;
+  fToolBarVisible := value;
+end;
+
+procedure TCEWidget.setToolBarFlat(value: boolean);
+begin
+    if fToolBarFlat = value then
+      exit;
+    toolbar.Flat := value;
+    fToolBarFlat := value;
 end;
 {$ENDREGION}
 

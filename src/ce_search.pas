@@ -200,6 +200,7 @@ var
   fname: string;
 begin
   inherited;
+  toolbarVisible:=false;
   fActFindNext := TAction.Create(self);
   fActFindNext.Caption := 'Find';
   fActFindNext.OnExecute := @actFindNextExecute;

@@ -96,6 +96,7 @@ type
   protected
     procedure updateDelayed; override;
     procedure updateImperative; override;
+    procedure setToolBarFlat(value: boolean); override;
   private
     fOptions: TCEPagesOptions;
     pageControl: TCEPageControl;
@@ -269,6 +270,7 @@ end;
 constructor TCEEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
+  toolbarVisible:=false;
   //
   pageControl := TCEPageControl.Create(self);
   pageControl.Parent := Content;
@@ -323,6 +325,14 @@ begin
   result := inherited and Parent.isNil;
 end;
 
+procedure TCEEditorWidget.setToolBarFlat(value: boolean);
+begin
+  inherited setToolBarFlat(value);
+  if value then
+    pageControl.options := pageControl.options + [poFlatButtons]
+  else
+    pageControl.options := pageControl.options - [poFlatButtons];
+end;
 {$ENDREGION}
 
 {$REGION ICEMultiDocObserver ---------------------------------------------------}

@@ -7,7 +7,7 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, ExtCtrls, Menus,
   Buttons, dialogs, ComCtrls, StdCtrls,
   ce_widget, ce_common, ce_interfaces, ce_writableComponent, ce_observer,
-  ce_nativeproject, ce_dubproject, ce_projutils, ce_sharedres;
+  ce_nativeproject, ce_dubproject, ce_projutils, ce_sharedres, ce_dsgncontrols;
 
 type
 
@@ -76,14 +76,13 @@ type
   { TCEProjectGroupWidget }
 
   TCEProjectGroupWidget = class(TCEWidget, ICEProjectObserver)
-    BtnAddProj: TBitBtn;
-    btnAddUnfocused: TBitBtn;
-    btnMoveDown: TBitBtn;
-    btnMoveUp: TBitBtn;
-    btnFreeFocus: TBitBtn;
-    btnRemProj: TBitBtn;
+    BtnAddProj: TCEToolButton;
+    btnAddUnfocused: TSpeedButton;
+    btnFreeFocus: TSpeedButton;
+    btnMoveDown: TCEToolButton;
+    btnMoveUp: TCEToolButton;
+    btnRemProj: TCEToolButton;
     lstProj: TListView;
-    Panel1: TPanel;
     Panel2: TPanel;
     StaticText1: TStaticText;
     procedure btnAddUnfocusedClick(Sender: TObject);
@@ -109,6 +108,7 @@ type
     procedure handleChanged(sender: TObject);
   protected
     procedure DoShow; override;
+    procedure setToolBarFlat(value: boolean); override;
   public
     constructor create(aOwner: TCOmponent); override;
     destructor destroy; override;
@@ -311,10 +311,6 @@ end;
 constructor TCEProjectGroupWidget.create(aOwner: TCOmponent);
 begin
   inherited;
-  AssignPng(btnMoveUp, 'ARROW_UP');
-  AssignPng(btnMoveDown, 'ARROW_DOWN');
-  AssignPng(BtnAddProj, 'DOCUMENT_ADD');
-  AssignPng(btnRemProj, 'DOCUMENT_DELETE');
   AssignPng(btnFreeFocus, 'PENCIL');
   AssignPng(btnAddUnfocused, 'DOCUMENT_ADD');
   projectGroup.onChanged:= @handleChanged;
@@ -331,6 +327,13 @@ procedure TCEProjectGroupWidget.DoShow;
 begin
   inherited;
   updateList;
+end;
+
+procedure TCEProjectGroupWidget.setToolBarFlat(value: boolean);
+begin
+  inherited setToolBarFlat(value);
+  btnFreeFocus.flat := value;
+  btnAddUnfocused.flat := value;
 end;
 {$ENDREGION}
 

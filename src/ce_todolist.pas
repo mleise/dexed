@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, FileUtil, ListFilterEdit, Forms, Controls,
   strutils, Graphics, Dialogs, ExtCtrls, Menus, Buttons, ComCtrls,
   ce_widget, process, ce_common, ce_interfaces, ce_synmemo, ce_processes,
-  ce_nativeproject, ce_writableComponent, ce_observer, ce_sharedres;
+  ce_nativeproject, ce_writableComponent, ce_observer, ce_sharedres,
+  ce_dsgncontrols;
 
 type
 
@@ -75,12 +76,11 @@ type
   { TCETodoListWidget }
 
   TCETodoListWidget = class(TCEWidget, ICEMultiDocObserver, ICEProjectObserver, ICEEditableOptions)
-    btnRefresh: TBitBtn;
-    btnGo: TBitBtn;
+    btnGo: TCEToolButton;
+    btnRefresh: TCEToolButton;
     lstItems: TListView;
     lstfilter: TListFilterEdit;
     mnuAutoRefresh: TMenuItem;
-    Panel1: TPanel;
     procedure handleListClick(Sender: TObject);
     procedure mnuAutoRefreshClick(Sender: TObject);
   private
@@ -129,6 +129,7 @@ type
     procedure refreshVisibleColumns;
   protected
     procedure SetVisible(Value: boolean); override;
+    procedure setToolBarFlat(value: boolean); override;
   public
     constructor Create(aOwner: TComponent); override;
     destructor Destroy; override;
@@ -221,9 +222,6 @@ begin
   lstfilter.OnChange := @filterItems;
   btnGo.OnClick := @handleListClick;
   //
-  AssignPng(btnRefresh, 'ARROW_UPDATE');
-  AssignPng(btnGo, 'ARROW_PEN');
-  //
   fname := getCoeditDocPath + OptFname;
   if fname.fileExists then
     fOptions.loadFromFile(fname);
@@ -247,6 +245,11 @@ begin
   refreshVisibleColumns;
 end;
 
+procedure TCETodoListWidget.setToolBarFlat(value: boolean);
+begin
+  inherited setToolBarFlat(value);
+  lstfilter.Flat:=value;
+end;
 {$ENDREGION}
 
 {$REGION ICEEditableOptions ----------------------------------------------------}

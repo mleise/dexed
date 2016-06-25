@@ -15,13 +15,13 @@ inherited CEDfmtWidget: TCEDfmtWidget
     ClientHeight = 357
     ClientWidth = 450
     inherited Content: TPanel
-      Height = 357
+      Height = 323
       Width = 450
-      ClientHeight = 357
+      ClientHeight = 323
       ClientWidth = 450
       object dfmtOptionEditor: TTIPropertyGrid[0]
         Left = 4
-        Height = 313
+        Height = 279
         Top = 4
         Width = 442
         Align = alClient
@@ -39,7 +39,7 @@ inherited CEDfmtWidget: TCEDfmtWidget
       object pnlFooter: TPanel[1]
         Left = 4
         Height = 32
-        Top = 321
+        Top = 287
         Width = 442
         Align = alBottom
         BorderSpacing.Around = 4
@@ -68,6 +68,9 @@ inherited CEDfmtWidget: TCEDfmtWidget
           BorderSpacing.Around = 2
         end
       end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 446
     end
   end
 end

@@ -6,20 +6,20 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, RTTIGrids, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, Menus, Buttons, StdCtrls, ce_widget, ce_tools, ce_sharedres;
+  ExtCtrls, Menus, Buttons, StdCtrls, ce_widget, ce_tools, ce_sharedres,
+  ce_dsgncontrols;
 
 type
 
   { TCEToolsEditorWidget }
   TCEToolsEditorWidget = class(TCEWidget)
-    BtnAddTool: TBitBtn;
-    btnMoveDown: TBitBtn;
-    btnMoveUp: TBitBtn;
-    btnClone: TBitBtn;
-    btnRemTool: TBitBtn;
-    btnRun: TBitBtn;
+    btnAddTool: TCEToolButton;
+    btnClone: TCEToolButton;
+    btnMoveDown: TCEToolButton;
+    btnMoveUp: TCEToolButton;
+    btnRemTool: TCEToolButton;
+    btnRun: TCEToolButton;
     lstTools: TListBox;
-    Panel1: TPanel;
     Panel2: TPanel;
     Splitter1: TSplitter;
     propsEd: TTIPropertyGrid;
@@ -47,14 +47,6 @@ implementation
 constructor TCEToolsEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
-  //
-  AssignPng(btnMoveUp, 'ARROW_UP');
-  AssignPng(btnMoveDown, 'ARROW_DOWN');
-  AssignPng(BtnAddTool, 'APPLICATION_ADD');
-  AssignPng(btnRemTool, 'APPLICATION_DELETE');
-  AssignPng(btnRun, 'APPLICATION_FLASH');
-  AssignPng(btnClone, 'APPLICATION_DOUBLE');
-  //
   propsEd.CheckboxForBoolean := true;
   rebuildToolList;
 end;

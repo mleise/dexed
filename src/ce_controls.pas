@@ -26,7 +26,7 @@ type
     property index: integer read getIndex;
   end;
 
-  TCEPageControlOption = (poPageHistory, poBottomHeader);
+  TCEPageControlOption = (poPageHistory, poBottomHeader, poFlatButtons);
   TCEPageControlOptions = set of TCEPageControlOption;
 
 const
@@ -264,12 +264,20 @@ begin
 end;
 
 procedure TCEPageControl.setPagesOptions(value: TCEPageControlOptions);
+var
+  flat: boolean;
 begin
   if fOptions = value then
     exit;
   fOptions := value;
   fPagesHistory.Clear;
   setHeaderPosition(poBottomHeader in fOptions);
+  flat := poFlatButtons in fOptions;
+  fAddBtn.Flat:= flat;
+  fCloseBtn.Flat:= flat;
+  fMoveLeftBtn.Flat:=flat;
+  fMoveRightBtn.Flat:=flat;
+  fSplitBtn.Flat:=flat;
 end;
 
 procedure TCEPageControl.setHeaderPosition(bottom: boolean);

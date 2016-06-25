@@ -12,74 +12,14 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
     ClientHeight = 195
     ClientWidth = 328
     inherited Content: TPanel
-      Height = 195
+      Height = 159
       Width = 328
-      ClientHeight = 195
+      ClientHeight = 159
       ClientWidth = 328
-      object Panel1: TPanel[0]
+      object lstProj: TListView[0]
         Left = 4
-        Height = 26
+        Height = 121
         Top = 4
-        Width = 320
-        Align = alTop
-        BorderSpacing.Around = 4
-        BevelOuter = bvNone
-        ClientHeight = 26
-        ClientWidth = 320
-        TabOrder = 0
-        object BtnAddProj: TBitBtn
-          Left = 0
-          Height = 26
-          Hint = 'add a project to the group'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          Layout = blGlyphBottom
-          OnClick = BtnAddProjClick
-          Spacing = 0
-          TabOrder = 0
-        end
-        object btnRemProj: TBitBtn
-          Left = 28
-          Height = 26
-          Hint = 'remove selected project from the group'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          Layout = blGlyphBottom
-          OnClick = btnRemProjClick
-          Spacing = 0
-          TabOrder = 1
-        end
-        object btnMoveDown: TBitBtn
-          Left = 56
-          Height = 26
-          Hint = 'move selected project down'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          Layout = blGlyphBottom
-          OnClick = btnMoveDownClick
-          Spacing = 0
-          TabOrder = 2
-        end
-        object btnMoveUp: TBitBtn
-          Left = 84
-          Height = 26
-          Hint = 'move selected project up'
-          Top = 0
-          Width = 28
-          Align = alLeft
-          Layout = blGlyphBottom
-          OnClick = btnMoveUpClick
-          Spacing = 0
-          TabOrder = 3
-        end
-      end
-      object lstProj: TListView[1]
-        Left = 4
-        Height = 127
-        Top = 34
         Width = 320
         Align = alClient
         AutoSort = False
@@ -88,72 +28,103 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
           item
             AutoSize = True
             Caption = 'Name'
-            Width = 44
+            Width = 47
           end        
           item
             AutoSize = True
             Caption = 'Type'
-            Width = 38
+            Width = 39
           end        
           item
             AutoSize = True
             Caption = 'Configuration'
-            Width = 86
+            Width = 230
           end>
         GridLines = True
         ReadOnly = True
         ScrollBars = ssAutoBoth
-        TabOrder = 1
+        TabOrder = 0
         ViewStyle = vsReport
         OnDblClick = lstProjDblClick
       end
-      object Panel2: TPanel[2]
+      object Panel2: TPanel[1]
         Left = 4
         Height = 26
-        Top = 165
+        Top = 129
         Width = 320
         Align = alBottom
         BorderSpacing.Around = 4
         BevelOuter = bvNone
         ClientHeight = 26
         ClientWidth = 320
-        TabOrder = 2
-        object btnFreeFocus: TBitBtn
-          Left = 262
-          Height = 24
+        TabOrder = 1
+        object btnFreeFocus: TSpeedButton
+          Left = 264
+          Height = 26
           Hint = 'Put the focus on the ungrouped project'
-          Top = 1
+          Top = 0
           Width = 28
           Align = alRight
-          BorderSpacing.Around = 1
           Layout = blGlyphBottom
-          OnClick = btnFreeFocusClick
           Spacing = 0
-          TabOrder = 0
+          OnClick = btnFreeFocusClick
         end
         object StaticText1: TStaticText
           Left = 2
           Height = 22
           Top = 2
-          Width = 258
+          Width = 260
           Align = alClient
           BorderSpacing.Around = 2
           BorderStyle = sbsSunken
-          TabOrder = 1
+          TabOrder = 0
         end
-        object btnAddUnfocused: TBitBtn
-          Left = 291
-          Height = 24
+        object btnAddUnfocused: TSpeedButton
+          Left = 292
+          Height = 26
           Hint = 'Put the ungrouped project in the group'
-          Top = 1
+          Top = 0
           Width = 28
           Align = alRight
-          BorderSpacing.Around = 1
           Layout = blGlyphBottom
-          OnClick = btnAddUnfocusedClick
           Spacing = 0
-          TabOrder = 2
+          OnClick = btnAddUnfocusedClick
         end
+      end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 320
+      object BtnAddProj: TCEToolButton[0]
+        Left = 1
+        Top = 0
+        Caption = 'BtnAddProj'
+        OnClick = BtnAddProjClick
+        resourceName = 'DOCUMENT_ADD'
+        scaledSeparator = False
+      end
+      object btnRemProj: TCEToolButton[1]
+        Left = 29
+        Top = 0
+        Caption = 'btnRemProj'
+        OnClick = btnRemProjClick
+        resourceName = 'DOCUMENT_DELETE'
+        scaledSeparator = False
+      end
+      object btnMoveDown: TCEToolButton[2]
+        Left = 57
+        Top = 0
+        Caption = 'btnMoveDown'
+        OnClick = btnMoveDownClick
+        resourceName = 'ARROW_DOWN'
+        scaledSeparator = False
+      end
+      object btnMoveUp: TCEToolButton[3]
+        Left = 85
+        Top = 0
+        Caption = 'btnMoveUp'
+        OnClick = btnMoveUpClick
+        resourceName = 'ARROW_UP'
+        scaledSeparator = False
       end
     end
   end

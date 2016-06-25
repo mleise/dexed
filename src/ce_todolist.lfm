@@ -3,7 +3,6 @@ inherited CETodoListWidget: TCETodoListWidget
   Height = 337
   Top = 196
   Width = 584
-  ActiveControl = btnRefresh
   Caption = 'Todo list'
   ClientHeight = 337
   ClientWidth = 584
@@ -13,64 +12,14 @@ inherited CETodoListWidget: TCETodoListWidget
     ClientHeight = 337
     ClientWidth = 584
     inherited Content: TPanel
-      Height = 337
+      Height = 301
       Width = 584
-      ClientHeight = 337
+      ClientHeight = 301
       ClientWidth = 584
-      object Panel1: TPanel[0]
-        Left = 2
-        Height = 30
-        Top = 2
-        Width = 580
-        Align = alTop
-        BorderSpacing.Around = 2
-        BevelOuter = bvNone
-        ClientHeight = 30
-        ClientWidth = 580
-        PopupMenu = contextMenu
-        TabOrder = 0
-        object btnRefresh: TBitBtn
-          Left = 2
-          Height = 26
-          Hint = 'refresh the list'
-          Top = 2
-          Width = 28
-          Align = alLeft
-          BorderSpacing.Around = 2
-          Layout = blGlyphBottom
-          Spacing = 0
-          TabOrder = 0
-        end
-        object lstfilter: TListFilterEdit
-          Left = 62
-          Height = 26
-          Top = 2
-          Width = 516
-          ButtonWidth = 28
-          NumGlyphs = 1
-          Align = alClient
-          Anchors = [akTop, akLeft, akRight]
-          BorderSpacing.Around = 2
-          MaxLength = 0
-          TabOrder = 1
-        end
-        object btnGo: TBitBtn
-          Left = 32
-          Height = 26
-          Hint = 'refresh the list'
-          Top = 2
-          Width = 28
-          Align = alLeft
-          BorderSpacing.Around = 2
-          Layout = blGlyphBottom
-          Spacing = 0
-          TabOrder = 2
-        end
-      end
-      object lstItems: TListView[1]
+      object lstItems: TListView[0]
         Left = 4
-        Height = 297
-        Top = 36
+        Height = 293
+        Top = 4
         Width = 576
         Align = alClient
         BorderSpacing.Around = 4
@@ -107,8 +56,39 @@ inherited CETodoListWidget: TCETodoListWidget
           end>
         ReadOnly = True
         SortType = stText
-        TabOrder = 1
+        TabOrder = 0
         ViewStyle = vsReport
+      end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 576
+      object btnGo: TCEToolButton[0]
+        Left = 29
+        Top = 0
+        Caption = 'btnGo'
+        resourceName = 'ARROW_PEN'
+        scaledSeparator = False
+      end
+      object btnRefresh: TCEToolButton[1]
+        Left = 1
+        Top = 0
+        Caption = 'btnRefresh'
+        resourceName = 'ARROW_UPDATE'
+        scaledSeparator = False
+      end
+      object lstfilter: TListFilterEdit[2]
+        Left = 61
+        Height = 26
+        Top = 2
+        Width = 513
+        ButtonWidth = 28
+        NumGlyphs = 1
+        Align = alClient
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 58
+        BorderSpacing.Around = 2
+        MaxLength = 0
+        TabOrder = 0
       end
     end
   end

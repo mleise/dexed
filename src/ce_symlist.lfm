@@ -1,27 +1,27 @@
 inherited CESymbolListWidget: TCESymbolListWidget
-  Left = 984
+  Left = 1515
   Height = 430
-  Top = 189
-  Width = 310
+  Top = 270
+  Width = 382
   Caption = 'Symbol list'
   ClientHeight = 430
-  ClientWidth = 310
+  ClientWidth = 382
   inherited Back: TPanel
     Height = 430
-    Width = 310
+    Width = 382
     ClientHeight = 430
-    ClientWidth = 310
+    ClientWidth = 382
     inherited Content: TPanel
-      Height = 430
-      Width = 310
-      ClientHeight = 430
-      ClientWidth = 310
+      Height = 396
+      Width = 382
+      ClientHeight = 396
+      ClientWidth = 382
       PopupMenu = nil
       object Tree: TTreeView[0]
         Left = 4
-        Height = 390
-        Top = 36
-        Width = 302
+        Height = 388
+        Top = 4
+        Width = 374
         Align = alClient
         BorderSpacing.Around = 4
         DefaultItemHeight = 16
@@ -55,48 +55,33 @@ inherited CESymbolListWidget: TCESymbolListWidget
         }
         TreeLineColor = clDefault
       end
-      object Panel1: TPanel[1]
-        Left = 2
-        Height = 30
+    end
+    inherited toolbar: TCEToolBar
+      Width = 378
+      object btnRefresh: TCEToolButton[0]
+        Left = 1
+        Top = 0
+        Caption = 'btnRefresh'
+        OnClick = btnRefreshClick
+        resourceName = 'ARROW_UPDATE'
+        scaledSeparator = False
+      end
+      object TreeFilterEdit1: TTreeFilterEdit[1]
+        Left = 33
+        Height = 26
         Top = 2
-        Width = 306
-        Align = alTop
+        Width = 343
+        OnAfterFilter = TreeFilterEdit1AfterFilter
+        OnFilterItem = TreeFilterEdit1FilterItem
+        ButtonWidth = 28
+        NumGlyphs = 1
+        Align = alClient
+        BorderSpacing.Left = 30
         BorderSpacing.Around = 2
-        BevelOuter = bvNone
-        ClientHeight = 30
-        ClientWidth = 306
-        PopupMenu = contextMenu
-        TabOrder = 1
-        object TreeFilterEdit1: TTreeFilterEdit
-          Left = 32
-          Height = 26
-          Top = 2
-          Width = 272
-          OnAfterFilter = TreeFilterEdit1AfterFilter
-          OnFilterItem = TreeFilterEdit1FilterItem
-          ButtonWidth = 28
-          NumGlyphs = 1
-          Align = alClient
-          Anchors = [akTop, akLeft, akRight]
-          BorderSpacing.Around = 2
-          MaxLength = 0
-          TabOrder = 0
-          OnMouseEnter = TreeFilterEdit1MouseEnter
-          FilteredTreeview = Tree
-        end
-        object btnRefresh: TBitBtn
-          Left = 2
-          Height = 26
-          Hint = 'refresh the list'
-          Top = 2
-          Width = 28
-          Align = alLeft
-          BorderSpacing.Around = 2
-          Layout = blGlyphBottom
-          OnClick = btnRefreshClick
-          Spacing = 0
-          TabOrder = 1
-        end
+        MaxLength = 0
+        TabOrder = 0
+        OnMouseEnter = TreeFilterEdit1MouseEnter
+        FilteredTreeview = Tree
       end
     end
   end

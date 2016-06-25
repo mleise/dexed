@@ -8,21 +8,20 @@ uses
   Classes, SysUtils, FileUtil, RTTIGrids, RTTICtrls, Forms, Controls, Graphics,
   Dialogs, ExtCtrls, ComCtrls, StdCtrls, Menus, Buttons, rttiutils, typinfo,
   PropEdits, ObjectInspector, ce_dmdwrap, ce_nativeproject, ce_widget,
-  ce_interfaces, ce_observer, ce_sharedres, ce_common;
+  ce_interfaces, ce_observer, ce_sharedres, ce_common, ce_dsgncontrols;
 
 type
 
   { TCEProjectConfigurationWidget }
 
   TCEProjectConfigurationWidget = class(TCEWidget, ICEProjectObserver)
-    btnSyncEdit: TSpeedButton;
+    btnAddConf: TCEToolButton;
+    btnCLoneConf: TCEToolButton;
+    btnDelConf: TCEToolButton;
+    btnSyncEdit: TCEToolButton;
     imgList: TImageList;
     Panel2: TPanel;
     selConf: TComboBox;
-    pnlToolBar: TPanel;
-    btnAddConf: TSpeedButton;
-    btnDelConf: TSpeedButton;
-    btnCloneConf: TSpeedButton;
     Splitter1: TSplitter;
     inspector: TTIPropertyGrid;
     Tree: TTreeView;
@@ -66,11 +65,6 @@ implementation
 constructor TCEProjectConfigurationWidget.create(aOwner: TComponent);
 begin
   inherited;
-  //
-  AssignPng(btnAddConf, 'COG_ADD');
-  AssignPng(btnDelConf, 'COG_DELETE');
-  AssignPng(btnCloneConf, 'COG_GO');
-  AssignPng(btnSyncEdit, 'LINK_BREAK');
   //
   fSynchroItem := TStringList.Create;
   fSynchroValue := TStringList.Create;
@@ -174,11 +168,13 @@ end;
 
 procedure TCEProjectConfigurationWidget.setSyncroMode(aValue: boolean);
 begin
-  if fSyncroMode = aValue then exit;
-  //
+  if fSyncroMode = aValue then
+    exit;
   fSyncroMode := aValue;
-  if fSyncroMode then  AssignPng(btnSyncEdit, 'LINK')
-  else AssignPng(btnSyncEdit, 'LINK_BREAK');
+  if fSyncroMode then
+    btnSyncEdit.resourceName := 'LINK'
+  else
+    btnSyncEdit.resourceName := 'LINK_BREAK';
 end;
 
 function TCEProjectConfigurationWidget.syncroSetPropAsString(const ASection, Item, Default: string): string;

@@ -464,6 +464,7 @@ type
     fAlwaysUseDest: boolean;
     fDscanUnittests: boolean;
     fAutoSaveProjectFiles: boolean;
+    fFlatLook: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
@@ -473,6 +474,7 @@ type
     function getNativeProjecCompiler: TCECompiler;
     procedure setNativeProjecCompiler(value: TCECompiler);
     procedure setRunnableDestination(const value: TCEPathname);
+    procedure setFlatLook(value: boolean);
   published
     property additionalPATH: string read getAdditionalPATH write setAdditionalPath;
     property coverModuleTests: boolean read fCovModUt write fCovModUt;
@@ -487,6 +489,8 @@ type
     property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest;
     property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
     property autoSaveProjectFiles: boolean read fAutoSaveProjectFiles write fAutoSaveProjectFiles default false;
+    property flatLook: boolean read fFlatLook write setFlatLook;
+
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
@@ -570,6 +574,11 @@ begin
       fRunnableDest += DirectorySeparator;
 end;
 
+procedure TCEApplicationOptionsBase.setFlatLook(value: boolean);
+begin
+  fFlatLook := value;
+end;
+
 function TCEApplicationOptionsBase.getAdditionalPATH: string;
 begin
   exit(ce_common.additionalPath);
@@ -620,6 +629,7 @@ begin
     fMaxRecentProjs:= fBackup.fMaxRecentProjs;
     fReloadLastDocuments:=fBackup.fReloadLastDocuments;
     fFloatingWidgetOnTop := fBackup.fFloatingWidgetOnTop;
+    fFlatLook:=fBackup.fFlatLook;
     CEMainForm.fRunnableDestination := fBackup.fRunnableDest;
     CEmainForm.fAlwaysUseDest := fBackup.fAlwaysUseDest;
     CEMainForm.fDscanUnittests := fDscanUnittests;
@@ -628,6 +638,8 @@ begin
 end;
 
 procedure TCEApplicationOptions.assignTo(dst: TPersistent);
+var
+  i: integer;
 begin
   if dst = CEMainForm then
   begin
@@ -639,6 +651,8 @@ begin
     CEMainForm.fAlwaysUseDest := fAlwaysUseDest;
     CEMainForm.fDscanUnittests := fDscanUnittests;
     DcdWrapper.port:=fDcdPort;
+    for i := 0 to CEMainForm.fWidgList.Count-1 do
+        CEMainForm.fWidgList.widget[i].toolbarFlat:=fFlatLook;
   end else if dst = fBackup then
   begin
     fBackup.fMaxRecentDocs:= fMaxRecentDocs;
@@ -650,6 +664,7 @@ begin
     fBackup.fRunnableDest:= fRunnableDest;
     fBackup.fAlwaysUseDest := fAlwaysUseDest;
     fBackup.fDscanUnittests:= fDscanUnittests;
+    fBackup.fFlatLook:= fFlatLook;
   end
   else inherited;
 end;
