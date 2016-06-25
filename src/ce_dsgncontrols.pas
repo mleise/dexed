@@ -153,6 +153,7 @@ begin
   EdgeInner:= esNone;
   EdgeOuter:= esNone;
   Flat := false;
+  Transparent := true;
 end;
 
 destructor TCEToolBar.Destroy;
