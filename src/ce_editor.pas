@@ -9,7 +9,7 @@ uses
   ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder, dialogs,
   SynPluginSyncroEdit, SynEdit, SynHighlighterMulti, ce_dialogs,
   ce_widget, ce_interfaces, ce_synmemo, ce_dlang, ce_common, ce_dcd, ce_observer,
-  ce_sharedres, ce_controls, ce_writableComponent;
+  ce_sharedres, ce_controls, ce_writableComponent, ce_dsgncontrols;
 
 type
 
@@ -53,11 +53,18 @@ type
 
   TCEEditorWidget = class(TCEWidget, ICEMultiDocObserver, ICEMultiDocHandler, ICEProjectObserver)
     MenuItem1: TMenuItem;
+    MenuItem10: TMenuItem;
+    MenuItem11: TMenuItem;
+    mnuedNextCarea: TMenuItem;
+    mnuedPrevCarea: TMenuItem;
+    mnuedLowcase: TMenuItem;
+    mnuedUpcase: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MenuItem8: TMenuItem;
+    MenuItem9: TMenuItem;
     mnuedRename: TMenuItem;
     mnuedInvAllNone: TMenuItem;
     mnuedComm: TMenuItem;
@@ -76,6 +83,10 @@ type
     macRecorder: TSynMacroRecorder;
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
+    procedure mnuedNextCareaClick(Sender: TObject);
+    procedure mnuedPrevCareaClick(Sender: TObject);
+    procedure mnuedLowcaseClick(Sender: TObject);
+    procedure mnuedUpcaseClick(Sender: TObject);
     procedure MenuItem5Click(Sender: TObject);
     procedure MenuItem6Click(Sender: TObject);
     procedure MenuItem8Click(Sender: TObject);
@@ -299,6 +310,10 @@ begin
   AssignPng(mnuedNext.Bitmap, 'GO_NEXT');
   AssignPng(mnuedPrev.Bitmap, 'GO_PREVIOUS');
   AssignPng(mnuedRename.Bitmap, 'PENCIL');
+  AssignPng(mnuedUpcase.Bitmap, 'CASE');
+  AssignPng(mnuedLowcase.Bitmap, 'CASE');
+  AssignPng(mnuedNextCarea.Bitmap, 'GO_NEXT');
+  AssignPng(mnuedPrevCarea.Bitmap, 'GO_PREVIOUS');
   //
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
@@ -812,6 +827,31 @@ begin
   finally
     free;
   end;
+end;
+
+procedure TCEEditorWidget.mnuedUpcaseClick(Sender: TObject);
+begin
+  //TODO-ceditor: case-related commands are not implemented in synedit
+  if fDoc.isNotNil then
+    fDoc.ExecuteCommand(ecLowerCaseBlock, #0, nil);
+end;
+
+procedure TCEEditorWidget.mnuedLowcaseClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.ExecuteCommand(ecUpperCaseBlock, #0, nil);
+end;
+
+procedure TCEEditorWidget.mnuedNextCareaClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.nextChangedArea;
+end;
+
+procedure TCEEditorWidget.mnuedPrevCareaClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.previousChangedArea;
 end;
 
 procedure TCEEditorWidget.MenuItem8Click(Sender: TObject);

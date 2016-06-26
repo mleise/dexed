@@ -313,6 +313,8 @@ begin
   fBtns[amcMisc]:= btnSelMisc;
   fBtns[amcProj]:= btnSelProj;
   //
+  // reminder: a tollbar button can be used here because it would have the
+  // same size as the buttons used to select a category.
   btnClearCat.OnClick := @actClearCurCatExecute;
   AssignPng(btnClearCat, 'CLEAN');
   //

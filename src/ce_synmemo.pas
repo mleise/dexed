@@ -175,6 +175,7 @@ type
     procedure showCallTips(const tips: string);
     function lexCanCloseBrace: boolean;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
+    procedure gotoToChangedArea(next: boolean);
   protected
     procedure DoEnter; override;
     procedure DoExit; override;
@@ -211,6 +212,8 @@ type
     procedure showDDocs;
     procedure hideDDocs;
     procedure ShowPhobosDoc;
+    procedure nextChangedArea;
+    procedure previousChangedArea;
     procedure copy;
     //
     function breakPointsCount: integer;
@@ -263,6 +266,8 @@ const
   ecRenameIdentifier    = ecUserFirst + 12;
   ecCommentIdentifier   = ecUserFirst + 13;
   ecShowPhobosDoc       = ecUserFirst + 14;
+  ecPreviousChangedArea = ecUserFirst + 15;
+  ecNextChangedArea     = ecUserFirst + 16;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -753,6 +758,8 @@ begin
     AddKey(ecRenameIdentifier, VK_F2, [], 0, []);
     AddKey(ecCommentIdentifier, 0, [], 0, []);
     AddKey(ecShowPhobosDoc, VK_F1, [], 0, []);
+    AddKey(ecPreviousChangedArea, VK_UP, [ssAlt], 0, []);
+    AddKey(ecNextChangedArea, VK_DOWN, [ssAlt], 0, []);
   end;
 end;
 
@@ -773,6 +780,8 @@ begin
     'ecRenameIdentifier':   begin Int := ecRenameIdentifier; exit(true); end;
     'ecCommentIdentifier':  begin Int := ecCommentIdentifier; exit(true); end;
     'ecShowPhobosDoc':      begin Int := ecShowPhobosDoc; exit(true); end;
+    'ecNextChangedArea':    begin Int := ecNextChangedArea; exit(true); end;
+    'ecPreviousChangedArea':begin Int := ecPreviousChangedArea; exit(true); end;
     else exit(false);
   end;
 end;
@@ -794,6 +803,8 @@ begin
     ecRenameIdentifier:   begin Ident := 'ecRenameIdentifier'; exit(true); end;
     ecCommentIdentifier:  begin Ident := 'ecCommentIdentifier'; exit(true); end;
     ecShowPhobosDoc:      begin Ident := 'ecShowPhobosDoc'; exit(true); end;
+    ecNextChangedArea:    begin Ident := 'ecNextChangedArea'; exit(true); end;
+    ecPreviousChangedArea:begin Ident := 'ecPreviousChangedArea'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -843,6 +854,10 @@ begin
       commentIdentifier;
     ecShowPhobosDoc:
       ShowPhobosDoc;
+    ecNextChangedArea:
+      gotoToChangedArea(true);
+    ecPreviousChangedArea:
+      gotoToChangedArea(false);
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1223,6 +1238,56 @@ begin
   {$ENDIF}
 end;
 
+procedure TCESynMemo.nextChangedArea;
+begin
+  gotoToChangedArea(true);
+end;
+
+procedure TCESynMemo.previousChangedArea;
+begin
+  gotoToChangedArea(false);
+end;
+
+procedure TCESynMemo.gotoToChangedArea(next: boolean);
+var
+  i: integer;
+  s: TSynLineState;
+  d: integer;
+  b: integer = 0;
+  p: TPoint;
+begin
+  i := CaretY - 1;
+  s := GetLineState(i);
+  case next of
+    true: begin d := 1; b := lines.count-1; end;
+    false:d := -1;
+  end;
+  if i = b then
+    exit;
+  // exit the current area if it's modified
+  while s <> slsNone do
+  begin
+    s := GetLineState(i);
+    if i = b then
+      exit;
+    i += d;
+  end;
+  // find next modified area
+  while s = slsNone do
+  begin
+    s := GetLineState(i);
+    if i = b then
+      break;
+    i += d;
+  end;
+  // goto area beg/end
+  if (s <> slsNone) and (i <> CaretY + 1) then
+  begin
+    p.X:= 1;
+    p.Y:= i + 1 - d;
+    ExecuteCommand(ecGotoXY, #0, @p);
+  end;
+end;
 {$ENDREGION}
 
 {$REGION DDoc & CallTip --------------------------------------------------------}

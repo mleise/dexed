@@ -12,14 +12,14 @@ inherited CEEditorWidget: TCEEditorWidget
     ClientHeight = 434
     ClientWidth = 465
     inherited Content: TPanel
-      Height = 434
+      Height = 398
       Width = 465
-      ClientHeight = 434
+      ClientHeight = 398
       ClientWidth = 465
       object editorStatus: TStatusBar[0]
         Left = 0
         Height = 20
-        Top = 412
+        Top = 376
         Width = 465
         AutoSize = False
         BorderSpacing.Bottom = 2
@@ -44,6 +44,9 @@ inherited CEEditorWidget: TCEEditorWidget
         SizeGrip = False
         UseSystemFont = False
       end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 457
     end
   end
   inherited contextMenu: TPopupMenu
@@ -86,6 +89,9 @@ inherited CEEditorWidget: TCEEditorWidget
       Caption = 'Redo'
       OnClick = mnuedRedoClick
     end
+    object MenuItem11: TMenuItem
+      Caption = '-'
+    end
     object mnuedPrev: TMenuItem
       Caption = 'Previous location'
       OnClick = mnuedPrevClick
@@ -93,6 +99,28 @@ inherited CEEditorWidget: TCEEditorWidget
     object mnuedNext: TMenuItem
       Caption = 'Next location'
       OnClick = mnuedNextClick
+    end
+    object MenuItem10: TMenuItem
+      Caption = '-'
+    end
+    object mnuedPrevCarea: TMenuItem
+      Caption = 'Previous changed area'
+      OnClick = mnuedPrevCareaClick
+    end
+    object mnuedNextCarea: TMenuItem
+      Caption = 'Next changed area'
+      OnClick = mnuedNextCareaClick
+    end
+    object MenuItem9: TMenuItem
+      Caption = '-'
+    end
+    object mnuedUpcase: TMenuItem
+      Caption = 'Upper case selection'
+      OnClick = mnuedUpcaseClick
+    end
+    object mnuedLowcase: TMenuItem
+      Caption = 'Lower case selection'
+      OnClick = mnuedLowcaseClick
     end
     object MenuItem7: TMenuItem
       Caption = '-'
