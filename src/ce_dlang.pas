@@ -992,10 +992,9 @@ end;
 function getModuleName(const list: TLexTokenList): string;
 var
   ltk: PLexToken;
-  mtok: boolean;
+  mtok: boolean = false;
 begin
   Result := '';
-  mtok := False;
   for ltk in list do
   begin
     if mtok then
@@ -1020,7 +1019,7 @@ end;
 procedure getImports(const list: TLexTokenList; imports: TStrings);
 var
   i: integer;
-  imp: boolean;
+  imp: boolean = false;
   tok: PLexToken;
   itm: string = '';
 begin
