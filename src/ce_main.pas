@@ -465,6 +465,7 @@ type
     fDscanUnittests: boolean;
     fAutoSaveProjectFiles: boolean;
     fFlatLook: boolean;
+    fDetectMain: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
@@ -490,7 +491,7 @@ type
     property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
     property autoSaveProjectFiles: boolean read fAutoSaveProjectFiles write fAutoSaveProjectFiles default false;
     property flatLook: boolean read fFlatLook write setFlatLook;
-
+    property detectMain: boolean read fDetectMain write fDetectMain;
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
@@ -2252,9 +2253,12 @@ begin
     dmdproc.Parameters.AddText(fRunnableSw);
     if lst.isNotNil and (lst.Count <> 0) then
       dmdproc.Parameters.AddStrings(lst);
+    if fAppliOpts.detectMain and not fDoc.implementMain then
+      dmdproc.Parameters.Add('-main');
     if unittest then
     begin
-      dmdproc.Parameters.Add('-main');
+      if not fAppliOpts.detectMain then
+        dmdproc.Parameters.Add('-main');
       dmdproc.Parameters.Add('-unittest');
       if fCovModUt then
         dmdproc.Parameters.Add('-cov');

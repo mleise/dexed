@@ -5,10 +5,11 @@ unit ce_synmemo;
 interface
 
 uses
-  Classes, SysUtils, controls,lcltype, Forms, graphics, ExtCtrls, crc,
+  Classes, SysUtils, controls,lcltype, Forms, graphics, ExtCtrls, crc, process,
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
+  fpjson, jsonparser,
   ce_common, ce_observer, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange;
 
@@ -215,6 +216,7 @@ type
     procedure nextChangedArea;
     procedure previousChangedArea;
     procedure copy;
+    function implementMain: boolean;
     //
     function breakPointsCount: integer;
     function breakPointLine(index: integer): integer;
@@ -1286,6 +1288,76 @@ begin
     p.X:= 1;
     p.Y:= i + 1 - d;
     ExecuteCommand(ecGotoXY, #0, @p);
+  end;
+end;
+
+function TCESynMemo.implementMain: boolean;
+  function search(root: TJSONData): boolean;
+  var
+    i: integer;
+    p: TJSONData;
+  begin
+    if root.isNil then
+      exit(false);
+    root := root.FindPath('members');
+    if root.isNil then
+      exit(false);
+    for i := 0 to root.Count-1 do
+    begin
+      p := root.Items[i].FindPath('kind');
+      if p.isNotNil and (p.AsString = 'function') then
+      begin
+        p := root.Items[i].FindPath('name');
+        if p.isNotNil and (p.AsString = 'main') then
+          exit(true);
+      end;
+      if search(root.Items[i]) then
+        exit(true);
+    end;
+    exit(false);
+  end;
+var
+  prc: TProcess;
+  jfn: string;
+  jdt: string;
+begin
+  if fileName.fileExists then
+    save
+  else
+    saveTempFile;
+  jfn := tempFilename + '.json';
+  prc := TProcess.Create(nil);
+  try
+    prc.Executable:= 'dmd' + exeExt;
+    prc.Parameters.Add(fileName);
+    prc.Parameters.Add('-c');
+    prc.Parameters.Add('-o-');
+    prc.Parameters.Add('-Xf' + jfn);
+    prc.Execute;
+    while prc.Running do Sleep(5);
+  finally
+    prc.Free;
+  end;
+  if not jfn.fileExists then
+    exit(false);
+  with TMemoryStream.Create do
+  try
+    LoadFromFile(jfn);
+    setLength(jdt, size);
+    read(jdt[1], size);
+  finally
+    free;
+    DeleteFile(jfn);
+  end;
+  with TJSONParser.Create(jdt) do
+  try
+    try
+      result := search(Parse.Items[0]);
+    except
+      exit(false);
+    end;
+  finally
+    free;
   end;
 end;
 {$ENDREGION}
