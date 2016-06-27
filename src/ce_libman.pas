@@ -6,9 +6,32 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, ce_common, ce_writableComponent, ce_dcd, LazFileUtils,
-  ce_dialogs;
+  ce_dialogs, ce_projutils, ce_interfaces, ce_dlang;
 
 type
+
+  (**
+   * Information for a module in a library manager entry
+   *)
+  TModuleInfo = class(TCollectionItem)
+  private
+    fName: string;
+    fImports: TStringList;
+    fDeps: TstringList;
+    procedure setImports(value: TStringList);
+    procedure setDependencies(value: TStringList);
+  published
+    // the.module.name
+    property name: string read fName write fname;
+    // all the imports in this module
+    property imports: TStringList read fImports write setImports;
+    // the aliases to the libraries used by this module.
+    property dependencies: TStringList read fDeps write setDependencies;
+  public
+    constructor Create(ACollection: TCollection); override;
+    destructor Destroy; override;
+  end;
+
 
   (**
    * Represents a D static library. In a project libAlias allows to
@@ -21,14 +44,23 @@ type
     fLibFile: string;
     fProjFile: string;
     fEnabled: boolean;
+    fModules: TOwnedCollection;
+    procedure setModules(value: TOwnedCollection);
+    function getModuleInfo(ix: integer): TModuleInfo;
   published
     property libAlias: string read fAlias write fAlias;
     property libSourcePath: string read fSourcePath write fSourcePath;
     property libFile: string read fLibFile write fLibFile;
     property projectFile: string read fProjFile write fProjFile;
     property enabled: boolean read fEnabled write fEnabled default true;
+    // TODO-creminder: dont forget that this prop is not written
+    property modules: TOwnedCollection read fModules write setModules stored false;
   public
     constructor Create(ACollection: TCollection); override;
+    procedure updateModulesInfo;
+    procedure updateModulesDependencies;
+    function addModuleInfo: TModuleInfo;
+    function hasModule(const value: string): boolean;
   end;
 
   (**
@@ -37,6 +69,7 @@ type
   TLibraryManager = class(TWritableLfmTextComponent)
   private
     fCol: TCollection;
+    function getLibrary(index: integer): TLibraryItem;
     procedure setCol(value: TCollection);
   published
     property libraries: TCollection read fCol write setCol;
@@ -44,10 +77,24 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     //
+    (**
+     * the caller gets all the *.lib/*.a files in aList if someAliases is nil
+     * otherwise the static libs selected by the aliases in someAliases.
+     *)
     procedure getLibFiles(someAliases, aList: TStrings);
+    (**
+     * the caller gets all the paths were are located the lib sources in aList if someAliases is nil
+     * otherwise the paths where are located the lib sources selected by the aliases in someAliases.
+     *)
     procedure getLibSources(someAliases, aList: TStrings);
+    (**
+     * The caller gets all the static library files and their source root
+     * that are required by the specified source code.
+     *)
+    procedure getLibsForSource(source, libs, paths: TStrings);
     //
     procedure updateDCD;
+    property lib[index: integer]: TLibraryItem read getLibrary; default;
   end;
 
 const
@@ -58,10 +105,127 @@ var
 
 implementation
 
+constructor TModuleInfo.Create(ACollection: TCollection);
+begin
+  inherited create(ACollection);
+  fImports := TStringList.Create;
+  fDeps := TstringList.Create;
+end;
+
+destructor TModuleInfo.Destroy;
+begin
+  fImports.free;
+  fDeps.Free;
+  inherited;
+end;
+
+procedure TModuleInfo.setImports(value: TStringList);
+begin
+  fImports.Assign(value);
+end;
+
+procedure TModuleInfo.setDependencies(value: TStringList);
+begin
+  fDeps.Assign(value);
+end;
+
 constructor TLibraryItem.Create(ACollection: TCollection);
 begin
   inherited create(ACollection);
+  fModules := TOwnedCollection.Create(self, TModuleInfo);
   fEnabled:=true;
+end;
+
+function TLibraryItem.getModuleInfo(ix: integer): TModuleInfo;
+begin
+  exit(TModuleInfo(fModules.Items[ix]));
+end;
+
+function TLibraryItem.addModuleInfo: TModuleInfo;
+begin
+  exit(TModuleInfo(fModules.Add));
+end;
+
+function TLibraryItem.hasModule(const value: string): boolean;
+var
+  i: integer;
+begin
+  for i:= 0 to fModules.Count-1 do
+    if getModuleInfo(i).name = value then
+      exit(true);
+  exit(false);
+end;
+
+procedure TLibraryItem.setModules(value: TOwnedCollection);
+begin
+  fModules.Assign(value);
+end;
+
+procedure TLibraryItem.updateModulesInfo;
+var
+  prj: ICECommonProject;
+  tks: TLexTokenList;
+  str: TStringList;
+  lst: TStringList;
+  mdi: TModuleInfo;
+  fle: string;
+  i: integer;
+begin
+  fModules.Clear;
+  if fProjFile.fileExists then
+  begin
+    prj := loadProject(fProjFile, true);
+    tks := TLexTokenList.Create;
+    str := TStringList.Create;
+    try
+      for i:= 0 to prj.sourcesCount-1 do
+      begin
+        fle := prj.sourceAbsolute(i);
+        // note: in CE, object files are considered as source since they're taken in the cmdline file list
+        if not hasDlangSyntax(fle.extractFileExt) then
+          continue;
+        str.LoadFromFile(fle);
+        lex(str.Text, tks, nil, [lxoNoComments]);
+        mdi := addModuleInfo;
+        mdi.name := getModuleName(tks);
+        getImports(tks, mdi.imports);
+        tks.Clear;
+      end;
+    finally
+      tks.Free;
+      str.Free;
+      prj.getProject.Free;
+    end;
+  end else if fSourcePath.dirExists then
+  begin
+    lst := TStringList.Create;
+    str := TStringList.Create;
+    tks := TLexTokenList.Create;
+    try
+      listFiles(lst, fSourcePath, true);
+      for i := 0 to lst.Count-1 do
+      begin
+        fle := lst[i];
+        if not hasDlangSyntax(fle.extractFileExt) then
+          continue;
+        str.LoadFromFile(fle);
+        lex(str.Text, tks, nil, [lxoNoComments]);
+        mdi := addModuleInfo;
+        mdi.name := getModuleName(tks);
+        getImports(tks, mdi.imports);
+        tks.Clear;
+      end;
+    finally
+      lst.Free;
+      str.Free;
+      tks.Free;
+    end;
+  end;
+end;
+
+procedure TLibraryItem.updateModulesDependencies;
+begin
+
 end;
 
 constructor TLibraryManager.create(aOwner: TComponent);
@@ -70,6 +234,7 @@ var
   {$IFDEF WINDOWS}
   fDmdPath: string;
   {$ENDIF}
+  i: integer;
 begin
   inherited;
   fCol := TCollection.Create(TLibraryItem);
@@ -148,6 +313,11 @@ begin
     + 'completion will not work properly');
   end;
   updateDCD;
+  //
+  for i := 2 to fCol.Count-1 do
+  begin
+    TLibraryItem(fCol.Items[i]).updateModulesInfo;
+  end;
 end;
 
 destructor TLibraryManager.destroy;
@@ -161,6 +331,11 @@ end;
 procedure TLibraryManager.setCol(value: TCollection);
 begin
   fCol.assign(value);
+end;
+
+function TLibraryManager.getLibrary(index: integer): TLibraryItem;
+begin
+  exit(TLibraryItem(fCol.Items[index]));
 end;
 
 procedure TLibraryManager.updateDCD;
@@ -185,10 +360,6 @@ begin
   end;
 end;
 
-(**
- * the caller gets all the *.lib/*.a files in aList if someAliases is nil
- * otherwise the static libs selected by the aliases in someAliases.
- *)
 procedure TLibraryManager.getLibFiles(someAliases, aList: TStrings);
 var
   itm: TLibraryItem;
@@ -231,10 +402,7 @@ begin
   end;
 end;
 
-(**
- * the caller gets all the paths were are located the lib sources in aList if someAliases is nil
- * otherwise the paths where are located the lib sources selected by the aliases in someAliases.
- *)
+
 procedure TLibraryManager.getLibSources(someAliases, aList: TStrings);
 var
   itm: TLibraryItem;
@@ -252,6 +420,36 @@ begin
     if not itm.libSourcePath.dirExists then
       continue;
     aList.Add('-I' + itm.libSourcePath);
+  end;
+end;
+
+procedure TLibraryManager.getLibsForSource(source, libs, paths: TStrings);
+var
+  tks: TLexTokenList;
+  imp: TStringList;
+  i,j: integer;
+  itm: TLibraryItem;
+begin
+  tks := TLexTokenList.Create;
+  imp := TStringList.Create;
+  try
+    lex(source.Text, tks, nil, [lxoNoComments]);
+    getImports(tks, imp);
+    for i := 0 to fCol.Count-1 do
+    begin
+      itm := lib[i];
+      for j := imp.Count-1 downto 0 do if itm.hasModule(imp[j]) then
+      begin
+        imp.Delete(j);
+        if (libs.IndexOf(itm.libFile) <> -1) then
+          continue;
+        libs.Add(itm.libFile);
+        paths.Add('-I'+itm.libSourcePath);
+      end;
+    end;
+  finally
+    tks.Free;
+    imp.Free;
   end;
 end;
 

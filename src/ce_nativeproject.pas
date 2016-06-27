@@ -352,15 +352,15 @@ begin
   subjProjChanged(fProjectSubject, self);
   if assigned(fOnChange) then fOnChange(Self);
   {$IFDEF DEBUG}
-  lst := TStringList.Create;
-  try
-    lst.Add('---------begin----------');
-    getOpts(lst);
-    lst.Add('---------end-----------');
-    DebugLn(lst.Text);
-  finally
-    lst.Free;
-  end;
+  //lst := TStringList.Create;
+  //try
+  //  lst.Add('---------begin----------');
+  //  getOpts(lst);
+  //  lst.Add('---------end-----------');
+  //  DebugLn(lst.Text);
+  //finally
+  //  lst.Free;
+  //end;
   {$ENDIF}
 end;
 
@@ -646,7 +646,8 @@ begin
   // field is specified
   if fOutputFilename.isNotEmpty then
   begin
-    fOutputFilename := fSymStringExpander.expand(fOutputFilename);
+    if (fSymStringExpander <> nil) then
+      fOutputFilename := fSymStringExpander.expand(fOutputFilename);
     fOutputFilename := expandFilenameEx(fBasePath, fOutputFilename);
     {$IFDEF WINDOWS}
     // field is specified without ext or with a dot in the name.

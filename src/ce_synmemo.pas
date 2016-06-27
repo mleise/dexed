@@ -1328,6 +1328,7 @@ begin
   jfn := tempFilename + '.json';
   prc := TProcess.Create(nil);
   try
+    //TODO-crunnables: the main() detector that uses DMD, libman entries must be passd to DMD.
     prc.Executable:= 'dmd' + exeExt;
     prc.Parameters.Add(fileName);
     prc.Parameters.Add('-c');

@@ -2264,8 +2264,13 @@ begin
         dmdproc.Parameters.Add('-cov');
     end
     else dmdproc.Parameters.Add('-version=runnable_module');
+
     LibMan.getLibFiles(nil, dmdproc.Parameters);
     LibMan.getLibSources(nil, dmdproc.Parameters);
+
+    //LibMan.getLibsForSource(fDoc.Lines, dmdproc.Parameters, dmdproc.Parameters);
+
+
     deleteDups(dmdproc.Parameters);
     dmdproc.Execute;
     while dmdproc.Running do
