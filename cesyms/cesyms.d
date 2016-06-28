@@ -22,7 +22,7 @@ Usage
 */
 module cesyms;
 
-import std.stdio, std.path, std.file, std.array, std.string;
+import std.stdio, std.path, std.file, std.array, std.string, std.algorithm;
 import std.getopt, std.json, std.conv, std.format;
 import dparse.lexer, dparse.ast, dparse.parser, dparse.rollback_allocator;
 import std.traits;
@@ -383,13 +383,8 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             if (!si.identifierChain.identifiers.length)
                 continue;
 
-            string[] modules;
-            foreach (ident; si.identifierChain.identifiers)
-            {
-                modules ~= ident.text;
-                modules ~= ".";
-            }
-            otherVisitorImpl(decl, SymbolType._import, modules[0 .. $ - 1].join,
+            otherVisitorImpl(decl, SymbolType._import,
+                si.identifierChain.identifiers.map!(a => a.text).join("."),
                 si.identifierChain.identifiers[0].line,
                 si.identifierChain.identifiers[0].column);
         }
