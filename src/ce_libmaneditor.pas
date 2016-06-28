@@ -486,9 +486,15 @@ begin
   if List.Selected.isNil then
     exit;
   al := List.Selected.Caption;
-  if inputQuery('library alias', '', al) then
+  if (al = 'phobos') or (al = 'druntime') then
+  begin
+    dlgOkInfo('phobos and druntime cannot be renamed');
+  end else
+  begin
+    if inputQuery('library alias', '', al) then
     List.Selected.Caption := al;
-  RowToLibrary(List.Selected);
+    RowToLibrary(List.Selected);
+  end;
 end;
 
 procedure TCELibManEditorWidget.btnEnabledClick(Sender: TObject);
@@ -732,8 +738,10 @@ begin
   itm.libSourcePath := row.SubItems[1];
   itm.projectFile   := row.SubItems[2];
   itm.enabled       := row.SubItems[3] = enableStr[true];
+  itm.updateModulesInfo;
 
   LibMan.updateDCD;
+  LibMan.updateCrossDependencies;
 end;
 
 function sourceRoot(project: ICECommonProject): string;

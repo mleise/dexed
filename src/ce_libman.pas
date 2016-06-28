@@ -10,6 +10,8 @@ uses
 
 type
 
+  // TODO-clibman: improve import analysis, caching, hashmap, backup, update.
+
   (**
    * Information for a module in a library manager entry
    *)
@@ -17,16 +19,12 @@ type
   private
     fName: string;
     fImports: TStringList;
-    fDeps: TstringList;
     procedure setImports(value: TStringList);
-    procedure setDependencies(value: TStringList);
   published
     // the.module.name
     property name: string read fName write fname;
     // all the imports in this module
     property imports: TStringList read fImports write setImports;
-    // the aliases to the libraries used by this module.
-    property dependencies: TStringList read fDeps write setDependencies;
   public
     constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
@@ -44,8 +42,10 @@ type
     fLibFile: string;
     fProjFile: string;
     fEnabled: boolean;
-    fModules: TOwnedCollection;
-    procedure setModules(value: TOwnedCollection);
+    fDependencies: TStringList;
+    fModules: TCollection;
+    procedure setDependencies(value: TStringList);
+    procedure setModules(value: TCollection);
     function getModuleInfo(ix: integer): TModuleInfo;
   published
     property libAlias: string read fAlias write fAlias;
@@ -53,14 +53,16 @@ type
     property libFile: string read fLibFile write fLibFile;
     property projectFile: string read fProjFile write fProjFile;
     property enabled: boolean read fEnabled write fEnabled default true;
-    // TODO-creminder: dont forget that this prop is not written
-    property modules: TOwnedCollection read fModules write setModules stored false;
+    // TODO-clibman: dont forget that these props are not written
+    property dependencies: TStringList read fDependencies write setDependencies stored false;
+    property modules: TCollection read fModules write setModules stored false;
   public
     constructor Create(ACollection: TCollection); override;
+    destructor Destroy; override;
     procedure updateModulesInfo;
-    procedure updateModulesDependencies;
     function addModuleInfo: TModuleInfo;
     function hasModule(const value: string): boolean;
+    property moduleInfos[ix: integer]: TModuleInfo read getModuleInfo;
   end;
 
   (**
@@ -69,32 +71,34 @@ type
   TLibraryManager = class(TWritableLfmTextComponent)
   private
     fCol: TCollection;
-    function getLibrary(index: integer): TLibraryItem;
+    function getItems(index: integer): TLibraryItem;
     procedure setCol(value: TCollection);
   published
     property libraries: TCollection read fCol write setCol;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
-    //
     (**
-     * the caller gets all the *.lib/*.a files in aList if someAliases is nil
-     * otherwise the static libs selected by the aliases in someAliases.
+     * The caller gets all the static library files in list if aliases is nil
+     * otherwise the static library files selected by the aliases.
      *)
-    procedure getLibFiles(someAliases, aList: TStrings);
+    procedure getLibFiles(aliases, list: TStrings);
     (**
-     * the caller gets all the paths were are located the lib sources in aList if someAliases is nil
-     * otherwise the paths where are located the lib sources selected by the aliases in someAliases.
+     * The caller gets all the paths were are located the library sources in list
+     * if aliases is nil otherwise the paths where are located the sources of the
+     * livraries selected by aliases.
      *)
-    procedure getLibSources(someAliases, aList: TStrings);
+    procedure getLibSources(aliases, list: TStrings);
     (**
-     * The caller gets all the static library files and their source root
+     * The caller gets all the static library files and the source path
      * that are required by the specified source code.
      *)
     procedure getLibsForSource(source, libs, paths: TStrings);
     //
     procedure updateDCD;
-    property lib[index: integer]: TLibraryItem read getLibrary; default;
+    // find the aliases of the libraries used by this library.
+    procedure updateCrossDependencies;
+    property items[index: integer]: TLibraryItem read getItems; default;
   end;
 
 const
@@ -109,13 +113,11 @@ constructor TModuleInfo.Create(ACollection: TCollection);
 begin
   inherited create(ACollection);
   fImports := TStringList.Create;
-  fDeps := TstringList.Create;
 end;
 
 destructor TModuleInfo.Destroy;
 begin
   fImports.free;
-  fDeps.Free;
   inherited;
 end;
 
@@ -124,16 +126,19 @@ begin
   fImports.Assign(value);
 end;
 
-procedure TModuleInfo.setDependencies(value: TStringList);
-begin
-  fDeps.Assign(value);
-end;
-
 constructor TLibraryItem.Create(ACollection: TCollection);
 begin
   inherited create(ACollection);
-  fModules := TOwnedCollection.Create(self, TModuleInfo);
+  fModules := TCollection.Create(TModuleInfo);
+  fDependencies := TStringList.Create;
   fEnabled:=true;
+end;
+
+destructor TLibraryItem.Destroy;
+begin
+  fDependencies.Free;
+  fModules.Free;
+  inherited;
 end;
 
 function TLibraryItem.getModuleInfo(ix: integer): TModuleInfo;
@@ -156,9 +161,14 @@ begin
   exit(false);
 end;
 
-procedure TLibraryItem.setModules(value: TOwnedCollection);
+procedure TLibraryItem.setModules(value: TCollection);
 begin
   fModules.Assign(value);
+end;
+
+procedure TLibraryItem.setDependencies(value: TStringList);
+begin
+  fDependencies.Assign(value);
 end;
 
 procedure TLibraryItem.updateModulesInfo;
@@ -223,11 +233,6 @@ begin
   end;
 end;
 
-procedure TLibraryItem.updateModulesDependencies;
-begin
-
-end;
-
 constructor TLibraryManager.create(aOwner: TComponent);
 var
   fName: string;
@@ -275,7 +280,7 @@ begin
         libSourcePath := '/usr/include/dmd/phobos';
       end;
     end;
-    // add druntime (no lib - only for DCD)
+    // add druntime (no items - only for DCD)
     if '/usr/include/dmd/druntime/import'.dirExists then
     begin
       with TLibraryItem(fCol.Add) do begin
@@ -314,10 +319,12 @@ begin
   end;
   updateDCD;
   //
-  for i := 2 to fCol.Count-1 do
+  for i := 0 to fCol.Count-1 do
   begin
-    TLibraryItem(fCol.Items[i]).updateModulesInfo;
+    if (items[i].libAlias <> 'phobos') and (items[i].libAlias <> 'druntime') then
+      items[i].updateModulesInfo;
   end;
+  updateCrossDependencies;
 end;
 
 destructor TLibraryManager.destroy;
@@ -333,7 +340,7 @@ begin
   fCol.assign(value);
 end;
 
-function TLibraryManager.getLibrary(index: integer): TLibraryItem;
+function TLibraryManager.getItems(index: integer): TLibraryItem;
 begin
   exit(TLibraryItem(fCol.Items[index]));
 end;
@@ -360,7 +367,7 @@ begin
   end;
 end;
 
-procedure TLibraryManager.getLibFiles(someAliases, aList: TStrings);
+procedure TLibraryManager.getLibFiles(aliases, list: TStrings);
 var
   itm: TLibraryItem;
   lst: TStringList;
@@ -371,16 +378,16 @@ begin
   begin
     itm := TLibraryItem(fCol.Items[i]);
     if (not itm.enabled) or
-      (someAliases.isNotNil and (someAliases.IndexOf(itm.libAlias) = -1)) then
+      (aliases.isNotNil and (aliases.IndexOf(itm.libAlias) = -1)) then
         continue;
-    // single lib files
+    // single items files
     if fileExists(itm.libFile) then
     begin
-      if aList.IndexOf(itm.libFile) <> -1 then
+      if list.IndexOf(itm.libFile) <> -1 then
         continue;
-      aList.Add(itm.libFile);
+      list.Add(itm.libFile);
     end
-    // folder of lib file
+    // folder of items file
     else if itm.libFile.dirExists then
     begin
       lst := TStringList.Create;
@@ -392,8 +399,8 @@ begin
         for j:= 0 to lst.Count-1 do
         begin
           if lst[j].extractFileExt = libExt then
-            if aList.IndexOf(lst[j]) = -1 then
-              aList.Add(lst[j]);
+            if list.IndexOf(lst[j]) = -1 then
+              list.Add(lst[j]);
         end;
       finally
         lst.Free;
@@ -402,8 +409,7 @@ begin
   end;
 end;
 
-
-procedure TLibraryManager.getLibSources(someAliases, aList: TStrings);
+procedure TLibraryManager.getLibSources(aliases, list: TStrings);
 var
   itm: TLibraryItem;
   i: Integer;
@@ -412,14 +418,14 @@ begin
   begin
     itm := TLibraryItem(fCol.Items[i]);
     if (not itm.enabled) or
-      (someAliases.isNotNil and (someAliases.IndexOf(itm.libAlias) = -1)) then
+      (aliases.isNotNil and (aliases.IndexOf(itm.libAlias) = -1)) then
         continue;
     //
-    if aList.IndexOf(itm.libSourcePath) <> -1 then
+    if list.IndexOf(itm.libSourcePath) <> -1 then
       continue;
     if not itm.libSourcePath.dirExists then
       continue;
-    aList.Add('-I' + itm.libSourcePath);
+    list.Add('-I' + itm.libSourcePath);
   end;
 end;
 
@@ -437,7 +443,7 @@ begin
     getImports(tks, imp);
     for i := 0 to fCol.Count-1 do
     begin
-      itm := lib[i];
+      itm := items[i];
       for j := imp.Count-1 downto 0 do if itm.hasModule(imp[j]) then
       begin
         imp.Delete(j);
@@ -445,11 +451,44 @@ begin
           continue;
         libs.Add(itm.libFile);
         paths.Add('-I'+itm.libSourcePath);
+        if itm.dependencies.Count > 0 then
+        begin
+          getLibFiles(itm.dependencies, libs);
+          getLibSources(itm.dependencies, paths);
+        end;
       end;
     end;
   finally
     tks.Free;
     imp.Free;
+  end;
+end;
+
+procedure TLibraryManager.updateCrossDependencies;
+var
+  i, j, k, m: integer;
+begin
+  for i := 0 to fCol.Count-1 do
+  begin
+    if (items[i].libAlias = 'phobos') or (items[i].libAlias = 'druntime') then
+      continue;
+    items[i].dependencies.Clear;
+    for j := 0 to items[i].modules.Count-1 do
+      for m := 0 to items[i].moduleInfos[j].imports.Count-1 do
+    begin
+      for k := 0 to fCol.Count-1 do
+      begin
+        if k = i then
+          continue;
+        if (items[k].libAlias = 'phobos') or (items[k].libAlias = 'druntime') then
+          continue;
+        if items[k].hasModule(items[i].moduleInfos[j].imports[m]) then
+        begin
+          items[i].dependencies.Add(items[k].libAlias);
+          break;
+        end;
+      end;
+    end;
   end;
 end;
 

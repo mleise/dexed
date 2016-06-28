@@ -466,6 +466,7 @@ type
     fAutoSaveProjectFiles: boolean;
     fFlatLook: boolean;
     fDetectMain: boolean;
+    fDetectRunnableImports: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
@@ -492,6 +493,7 @@ type
     property autoSaveProjectFiles: boolean read fAutoSaveProjectFiles write fAutoSaveProjectFiles default false;
     property flatLook: boolean read fFlatLook write setFlatLook;
     property detectMain: boolean read fDetectMain write fDetectMain;
+    property detectRunnableImports: boolean read fDetectRunnableImports write fDetectRunnableImports;
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
@@ -2265,11 +2267,13 @@ begin
     end
     else dmdproc.Parameters.Add('-version=runnable_module');
 
-    LibMan.getLibFiles(nil, dmdproc.Parameters);
-    LibMan.getLibSources(nil, dmdproc.Parameters);
-
-    //LibMan.getLibsForSource(fDoc.Lines, dmdproc.Parameters, dmdproc.Parameters);
-
+    if fAppliOpts.detectRunnableImports then
+      LibMan.getLibsForSource(fDoc.Lines, dmdproc.Parameters, dmdproc.Parameters)
+    else
+    begin
+      LibMan.getLibFiles(nil, dmdproc.Parameters);
+      LibMan.getLibSources(nil, dmdproc.Parameters);
+    end;
 
     deleteDups(dmdproc.Parameters);
     dmdproc.Execute;
