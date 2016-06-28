@@ -15,7 +15,7 @@ uses
   {$IFNDEF CEBUILD}
   forms,
   {$ENDIF}
-  process, asyncprocess, fgl;
+  process, asyncprocess;
 
 const
   exeExt = {$IFDEF WINDOWS} '.exe' {$ELSE} ''   {$ENDIF};
@@ -24,8 +24,6 @@ const
   dynExt = {$IFDEF WINDOWS} '.dll' {$ENDIF} {$IFDEF LINUX}'.so'{$ENDIF} {$IFDEF DARWIN}'.dylib'{$ENDIF};
 
 type
-
-  TIntByString = class(specialize TFPGMap<string, integer>);
 
   TIndentationMode = (imSpaces, imTabs);
 

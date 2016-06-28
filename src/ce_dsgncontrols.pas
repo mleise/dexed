@@ -17,11 +17,13 @@ type
     fResourceName: string;
     fScaledSeparator: boolean;
     fPng: TPortableNetworkGraphic;
+    fDPng: TPortableNetworkGraphic;
     procedure setResourceName(const value: string);
     procedure setScaledSeparator(value: boolean);
     procedure setToolBar(value: TToolbar);
   protected
     procedure Paint; override;
+    procedure SetEnabled(Value: Boolean); override;
   published
     property resourceName: string read fResourceName write setResourceName;
     property scaledSeparator: boolean read fScaledSeparator write setScaledSeparator;
@@ -61,12 +63,15 @@ constructor TCEToolButton.Create(TheOwner: TComponent);
 begin
   inherited;
   fPng := TPortableNetworkGraphic.Create;
+  fDPng := TPortableNetworkGraphic.Create;
 end;
 
 destructor TCEToolButton.Destroy;
 begin
   fPng.FreeImage;
   fPng.Free;
+  fDPng.FreeImage;
+  fDPng.Free;
   inherited;
 end;
 
@@ -76,6 +81,10 @@ begin
 end;
 
 procedure TCEToolButton.setResourceName(const value: string);
+var
+  i,j:integer;
+  px: PRGBAQuad;
+  gr: byte;
 begin
   if fResourceName = value then
     exit;
@@ -86,8 +95,25 @@ begin
   begin
     fPng.FreeImage;
     fPng.LoadFromResourceName(HINSTANCE, fResourceName);
+    fDPng.FreeImage;
+    fDPng.LoadFromResourceName(HINSTANCE, fResourceName);
+    if fDpng.PixelFormat = pf32bit then for i:= 0 to fDPng.Height-1 do
+    begin
+      {$PUSH}{$HINTS OFF}{$WARNINGS OFF}{$R-}
+      px := PRGBAQuad(fDPng.ScanLine[i]);
+      {$POP}
+      for j:= 0 to fDPng.Width-1 do
+      begin
+        gr := (px^.Red div 5) + (px^.Green div 100) * 70 + (px^.Blue div 11);
+        px^.Green:=gr;
+        px^.Blue:=gr;
+        px^.Red:=gr;
+        px += 1;
+      end;
+    end;
   end;
-  FToolBar.Repaint;
+  if assigned(fToolBar) then
+    FToolBar.Repaint;
 end;
 
 procedure TCEToolButton.setScaledSeparator(value: boolean);
@@ -96,6 +122,16 @@ begin
     exit;
   fScaledSeparator:=value;
   // store ratio if true
+end;
+
+procedure TCEToolButton.SetEnabled(Value: Boolean);
+var
+  old: boolean;
+begin
+  old := Enabled;
+  inherited;
+  if (old <> Enabled) and assigned(fToolBar) then
+    FToolBar.Repaint;
 end;
 
 procedure TCEToolButton.Paint;
@@ -109,7 +145,10 @@ begin
     rc := ClientRect;
     x := ((rc.Right - rc.Left) - fPng.width) div 2;
     y := ((rc.Bottom - rc.Top) - fPng.Height) div 2;
-    Canvas.Draw(x, y, fPng);
+    if Enabled then
+      Canvas.Draw(x, y, fPng)
+    else
+      Canvas.Draw(x, y, fDPng);
   end;
 end;
 
