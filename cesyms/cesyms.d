@@ -388,6 +388,11 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
                 si.identifierChain.identifiers[0].line,
                 si.identifierChain.identifiers[0].column);
         }
+        if (decl.importBindings) with (decl.importBindings.singleImport)
+            otherVisitorImpl(decl, SymbolType._import,
+                identifierChain.identifiers.map!(a => a.text).join("."),
+                identifierChain.identifiers[0].line,
+                identifierChain.identifiers[0].column);
     }
 
     final override void visit(const MixinTemplateDeclaration decl)
