@@ -348,7 +348,7 @@ end;
 
 procedure TCEEditorOptionsBase.setPhobosDocRoot(value: TCEPathname);
 begin
-  if not DirectoryExists(value)  or (value <> 'https://dlang.org/phobos/') then
+  if not DirectoryExists(value)  and (value <> 'https://dlang.org/phobos/') then
     value := 'https://dlang.org/phobos/';
   if (value[length(value)] <> DirectorySeparator) and DirectoryExists(value) then
     value += DirectorySeparator;

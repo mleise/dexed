@@ -1198,7 +1198,7 @@ begin
         edt.CaretY := i + 1;
         edt.CaretX := pos - sum + len;
         edt.SelectWord;
-        idt := '#.' + edt.SelText;
+        idt := '.html#.' + edt.SelText;
         break;
       end;
       sum += linelen;
