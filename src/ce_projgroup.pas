@@ -463,6 +463,8 @@ begin
   //
   projectGroup.items.Exchange(lstProj.ItemIndex, lstProj.ItemIndex + 1);
   lstProj.Items.Exchange(lstProj.ItemIndex, lstProj.ItemIndex + 1);
+  projectGroup.index:=projectGroup.index+1;
+  lstProj.ItemIndex:=lstProj.ItemIndex+1;
 end;
 
 procedure TCEProjectGroupWidget.btnMoveUpClick(Sender: TObject);
@@ -472,6 +474,8 @@ begin
   //
   projectGroup.items.Exchange(lstProj.ItemIndex, lstProj.ItemIndex - 1);
   lstProj.Items.Exchange(lstProj.ItemIndex, lstProj.ItemIndex - 1);
+  projectGroup.index:=projectGroup.index-1;
+  lstProj.ItemIndex:=lstProj.ItemIndex-1;
 end;
 
 procedure TCEProjectGroupWidget.btnRemProjClick(Sender: TObject);
