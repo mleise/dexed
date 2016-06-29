@@ -9,7 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
-  fpjson, jsonparser,
+  fpjson, jsonparser, LCLIntf,
   ce_common, ce_observer, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange;
 
@@ -1219,7 +1219,10 @@ begin
       or rng.startsWith('etc' + DirectorySeparator) then
         break;
   end;
-  pth := fPhobosDocRoot;
+  if fPhobosDocRoot.dirExists then
+    pth := 'file://' + fPhobosDocRoot
+  else
+    pth := fPhobosDocRoot;
   while not rng.empty do
   begin
     pth += rng.takeUntil([DirectorySeparator, '.']).yield;
@@ -1229,7 +1232,13 @@ begin
     rng.popFront;
   end;
   pth += idt;
-  shellOpen(pth);
+  {$IFDEF WINDOWS}
+  if fPhobosDocRoot.dirExists then
+    for i:= 1 to pth.length do
+      if pth[i] = '\' then
+        pth[i] := '/';
+  {$ENDIF}
+  OpenURL(pth);
 end;
 
 procedure TCESynMemo.copy;
