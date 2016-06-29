@@ -321,10 +321,10 @@ begin
       identifierMatch.BackAlpha:=70;
       identifierMatch.BackPriority:= 10;
       //
-      selection.Background:= $CCCCCC;
+      selection.Background:= 15984598;
       selection.Foreground:= clNone;
       //
-      currentLine.Background:= $DEDEDE;
+      currentLine.Background:= 15727098;
       currentLine.Foreground:= clNone;
     end;
     with fPresets.addPreset do
@@ -361,10 +361,11 @@ begin
       folding.Background := 7303023;
       folding.Foreground := clYellow;
       identifierMatch.Background := 7697781;
-      identifierMatch.BackPriority:= 10;
+      identifierMatch.BackPriority:= 2;
       identifierMatch.Foreground := clNone;
       selection.Background := 10132122;
       selection.Foreground := clNone;
+      selection.BackPriority:= 2;
     end;
     with fPresets.addPreset do
     begin
@@ -397,10 +398,11 @@ begin
       folding.Foreground := clYellow;
       folding.FrameColor := clYellow;
       identifierMatch.Background := 10278890;
-      identifierMatch.BackPriority:= 10;
+      identifierMatch.BackPriority:= 2;
       identifierMatch.Foreground := clNone;
       selection.Background := 8448232;
       selection.Foreground := clNone;
+      selection.BackPriority := 1;
     end;
     with fPresets.addPreset do
     begin
@@ -412,23 +414,24 @@ begin
       getHl.ddoc.Foreground := 7105644;
       getHl.special.Foreground := 2631874;
       getHl.attributes.Foreground := 2631874;
-      background := 16448250;
-      bracketMatch.Background := 9276865;
+      background := 16579836;
+      bracketMatch.Background := 12698077;
       bracketMatch.Foreground := clNone;
-      currentLine.Background := 13421772;
+      currentLine.Background := 15263976;
       currentLine.Foreground := clNone;
       folding.Background := clNone;
       folding.Foreground := clNone;
       folding.FrameColor := clBlack;
       identifierMatch.Background := 14145500;
       identifierMatch.Foreground := clNone;
-      identifierMatch.BackPriority := 10;
+      identifierMatch.BackPriority := 2;
       mouseLink.Background := clNone;
       mouseLink.Foreground := clNone;
-      mouseLink.FrameColor := clRed;
+      mouseLink.FrameColor := 3166415;
       mouseLink.FrameEdges := sfeBottom;
-      selection.Background := 12837345;
+      selection.Background := 14014190;
       selection.Foreground := clNone;
+      selection.BackPriority := 1;
     end;
     with fPresets.addPreset do
     begin
