@@ -166,6 +166,17 @@ enum SymbolType
     _warning
 }
 
+string makeSymbolTypeArray()
+{
+    string result = "string[SymbolType.max + 1] symbolTypeStrings = [";
+    foreach(st; EnumMembers!SymbolType)
+        result ~= `"` ~ to!string(st) ~ `",`;
+    result ~= "];";
+    return result;
+}
+
+mixin(makeSymbolTypeArray);
+
 // AST visitor/Symbol list ----------------------------------------------------+
 class SymbolListBuilder(ListFmt Fmt): ASTVisitor
 {
@@ -199,7 +210,8 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
 
     static void astError(string fname, size_t line, size_t col, string msg, bool isErr)
     {
-        SymbolType type = isErr ? SymbolType._error : SymbolType._warning;
+        string type = isErr ? symbolTypeStrings[SymbolType._error] :
+            symbolTypeStrings[SymbolType._warning];
         static if (Fmt == ListFmt.Pas)
         {
             pasStream.put("\ritem\r");
@@ -215,7 +227,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             item["line"] = JSONValue(line);
             item["col"]  = JSONValue(col);
             item["name"] = JSONValue(msg);
-            item["type"] = JSONValue(to!string(type));
+            item["type"] = JSONValue(type);
             jarray.array ~= item;
         }
     }
@@ -248,7 +260,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             pasStream.put(format("line = %d\r", dt.name.line));
             pasStream.put(format("col = %d\r", dt.name.column));
             pasStream.put(format("name = '%s'\r", dt.name.text));
-            pasStream.put(format("symType = %s\r", st));
+            pasStream.put("symType = " ~ symbolTypeStrings[st] ~ "\r");
             static if (dig) if (deep)
             {
                 pasStream.put("subs = <");
@@ -263,7 +275,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             item["line"] = JSONValue(dt.name.line);
             item["col"]  = JSONValue(dt.name.column);
             item["name"] = JSONValue(dt.name.text);
-            item["type"] = JSONValue(to!string(st));
+            item["type"] = JSONValue(symbolTypeStrings[st]);
             static if (dig) if (deep)
             {
                 JSONValue subs = parseJSON("[]");
@@ -287,7 +299,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             pasStream.put(format("line = %d\r", line));
             pasStream.put(format("col = %d\r", col));
             pasStream.put(format("name = '%s'\r", name));
-            pasStream.put(format("symType = %s\r", st));
+            pasStream.put("symType = " ~ symbolTypeStrings[st] ~ "\r");
             static if (dig)
             {
                 pasStream.put("subs = <");
@@ -302,7 +314,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             item["line"] = JSONValue(line);
             item["col"]  = JSONValue(col);
             item["name"] = JSONValue(name);
-            item["type"] = JSONValue(to!string(st));
+            item["type"] = JSONValue(symbolTypeStrings[st]);
             static if (dig)
             {
                 JSONValue subs = parseJSON("[]");
