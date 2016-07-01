@@ -485,7 +485,7 @@ type
     property maxRecentProjects: integer read fMaxRecentProjs write fMaxRecentProjs;
     property maxRecentDocuments: integer read fMaxRecentDocs write fMaxRecentDocs;
     property dubCompiler: TCECompiler read getDubCompiler write setDubCompiler;
-    property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
+    property nativeProjectCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
     property runnableCompiler: TCECompiler read getRunnableCompiler write setRunnableCompiler;
     property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination;
     property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest;
@@ -497,6 +497,9 @@ type
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
+
+    // TODO-cmaintenance: remove this property from version 3 update 1
+    property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler stored false;
   end;
 
   TCEApplicationOptions = class(TCEApplicationOptionsBase, ICEEditableOptions)
