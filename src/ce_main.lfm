@@ -1551,6 +1551,9 @@ object CEMainForm: TCEMainForm
           07FFB47A07FFB47A08FFB57C0AFFB67F0FFFB88114FFBA851B23
         }
       end
+      object MenuItem97: TMenuItem
+        Action = actFileNewDubScript
+      end
       object MenuItem2: TMenuItem
         Action = actFileOpen
         Bitmap.Data = {
@@ -4920,6 +4923,12 @@ object CEMainForm: TCEMainForm
       ImageIndex = 36
       OnExecute = actFileRunDubOutExecute
       OnUpdate = updateDocumentBasedAction
+    end
+    object actFileNewDubScript: TAction
+      Category = 'File'
+      Caption = 'New DUB script'
+      ImageIndex = 36
+      OnExecute = actFileNewDubScriptExecute
     end
   end
   object imgList: TImageList

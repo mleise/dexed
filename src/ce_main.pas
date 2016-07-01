@@ -50,6 +50,7 @@ type
     actFileRunOut: TAction;
     actFileRunDub: TAction;
     actFileRunDubOut: TAction;
+    actFileNewDubScript: TAction;
     actProjGroupCompile: TAction;
     actProjSelUngrouped: TAction;
     actProjAddToGroup: TAction;
@@ -177,6 +178,7 @@ type
     MenuItem94: TMenuItem;
     MenuItem95: TMenuItem;
     MenuItem96: TMenuItem;
+    MenuItem97: TMenuItem;
     mnuLayout: TMenuItem;
     mnuItemMruFile: TMenuItem;
     mnuItemMruProj: TMenuItem;
@@ -189,6 +191,7 @@ type
     MenuItem9: TMenuItem;
     procedure actFileCompileExecute(Sender: TObject);
     procedure actFileDscannerExecute(Sender: TObject);
+    procedure actFileNewDubScriptExecute(Sender: TObject);
     procedure actFileRunDubExecute(Sender: TObject);
     procedure actFileRunDubOutExecute(Sender: TObject);
     procedure actFileRunExecute(Sender: TObject);
@@ -2460,6 +2463,21 @@ begin
     prc.Free;
     lst.Free;
   end;
+end;
+
+procedure TCEMainForm.actFileNewDubScriptExecute(Sender: TObject);
+begin
+  newFile;
+  fDoc.Text :=
+  '/+ dub.sdl:' + LineEnding +
+  '   name "dub_script" +/' + LineEnding +
+  'module dub_script;' + LineEnding +
+  LineEnding +
+  'import std.stdio;' + LineEnding +
+  LineEnding +
+  'void main(string[] args)' + LineEnding +
+  '{' + LineEnding + '}';
+  fDoc.setFocus;
 end;
 
 procedure TCEMainForm.actFileRunDubExecute(Sender: TObject);
