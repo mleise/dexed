@@ -1,0 +1,29 @@
+object CurrentProject: TCENativeProject
+  OptionsCollection = <  
+    item
+      name = 'devel'
+      outputOptions.inlining = True
+      outputOptions.boundsCheck = offAlways
+      outputOptions.optimizations = True
+      outputOptions.release = True
+      outputOptions.versionIdentifiers.Strings = (
+        'devel'
+      )
+      pathsOptions.outputFilename = '../bin/dastworx'
+      runOptions.options = [poUsePipes, poStderrToOutPut]
+    end>
+  Sources.Strings = (
+    'src/main.d'
+    'src/todos.d'
+    'src/symlist.d'
+    'src/imports.d'
+    'src/mainfun.d'
+    'src/common.d'
+    'src/runnableflags.d'
+  )
+  ConfigurationIndex = 0
+  LibraryAliases.Strings = (
+    'iz'
+    'libdparse'
+  )
+end

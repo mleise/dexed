@@ -13,6 +13,9 @@ type
 
   TProjectGroup = class;
 
+  //TODO-projectgroups: bug, load a free standing project, load a group that contains a link to the FSP.
+  //=> the FSP should be either closed or the lazy loader should trap the FSP
+
   (**
    * Represents a project in a project group
    *)
@@ -129,6 +132,7 @@ var
 constructor TProjectGroup.create(aOwner: TComponent);
 begin
   inherited;
+  Name := 'projectGroup';
   fItems := TCollection.Create(TProjectGroupItem);
   fItems.FPOAttachObserver(self);
   EntitiesConnector.addSingleService(self);

@@ -1,0 +1,13 @@
+object _1: TProjectGroup
+  items = <  
+    item
+      filename = '../../../dproj/iz/iz.coedit'
+    end  
+    item
+      filename = '../../../metad/projects/libdparse.coedit'
+    end  
+    item
+      filename = 'dastworx.ce'
+    end>
+  index = 0
+end
