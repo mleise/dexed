@@ -9,5 +9,5 @@ object _1: TProjectGroup
     item
       filename = 'dastworx.ce'
     end>
-  index = 0
+  index = 2
 end

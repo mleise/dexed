@@ -27,6 +27,8 @@ type
 
   TIndentationMode = (imSpaces, imTabs);
 
+  THasMain = (mainNo, mainYes, mainDefaultBehavior);
+
   TCECompiler = (dmd, gdc, ldc);
 
   // aliased to get a custom prop inspector

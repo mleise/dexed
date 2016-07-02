@@ -108,6 +108,7 @@ type
   TCESynMemo = class(TSynEdit)
   private
     fFilename: string;
+    fDastWorxExename: string;
     fModified: boolean;
     fFileDate: double;
     fCacheLoaded: boolean;
@@ -216,7 +217,7 @@ type
     procedure nextChangedArea;
     procedure previousChangedArea;
     procedure copy;
-    function implementMain: boolean;
+    function implementMain: THasMain;
     //
     function breakPointsCount: integer;
     function breakPointLine(index: integer): integer;
@@ -578,6 +579,8 @@ begin
   //
   LineHighlightColor.Background := color - $080808;
   LineHighlightColor.Foreground := clNone;
+  //
+  fDastWorxExename:= exeFullName('dastworx' + exeExt);
   //
   subjDocNew(TCEMultiDocSubject(fMultiDocSubject), self);
 end;
@@ -1300,74 +1303,33 @@ begin
   end;
 end;
 
-function TCESynMemo.implementMain: boolean;
-  function search(root: TJSONData): boolean;
-  var
-    i: integer;
-    p: TJSONData;
-  begin
-    if root.isNil then
-      exit(false);
-    root := root.FindPath('members');
-    if root.isNil then
-      exit(false);
-    for i := 0 to root.Count-1 do
-    begin
-      p := root.Items[i].FindPath('kind');
-      if p.isNotNil and (p.AsString = 'function') then
-      begin
-        p := root.Items[i].FindPath('name');
-        if p.isNotNil and (p.AsString = 'main') then
-          exit(true);
-      end;
-      if search(root.Items[i]) then
-        exit(true);
-    end;
-    exit(false);
-  end;
+function TCESynMemo.implementMain: THasMain;
 var
+  res: char = '0';
   prc: TProcess;
-  jfn: string;
-  jdt: string;
+  src: string;
 begin
-  if fileName.fileExists then
-    save
-  else
-    saveTempFile;
-  jfn := tempFilename + '.json';
+  if fDastWorxExename.length = 0 then
+    exit(mainDefaultBehavior);
+  src := Lines.Text;
   prc := TProcess.Create(nil);
   try
-    //TODO-crunnables: the main() detector that uses DMD, libman entries must be passd to DMD.
-    prc.Executable:= 'dmd' + exeExt;
-    prc.Parameters.Add(fileName);
-    prc.Parameters.Add('-c');
-    prc.Parameters.Add('-o-');
-    prc.Parameters.Add('-Xf' + jfn);
+    prc.Executable:= fDastWorxExename;
+    prc.Parameters.Add('-m');
+    prc.Options := [poUsePipes{$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
+    prc.ShowWindow := swoHIDE;
     prc.Execute;
-    while prc.Running do Sleep(5);
+    prc.Input.Write(src[1], src.length);
+    prc.CloseInput;
+    while prc.Running do
+      sleep(1);
+    prc.Output.Read(res, 1);
   finally
     prc.Free;
   end;
-  if not jfn.fileExists then
-    exit(false);
-  with TMemoryStream.Create do
-  try
-    LoadFromFile(jfn);
-    setLength(jdt, size);
-    read(jdt[1], size);
-  finally
-    free;
-    DeleteFile(jfn);
-  end;
-  with TJSONParser.Create(jdt) do
-  try
-    try
-      result := search(Parse.Items[0]);
-    except
-      exit(false);
-    end;
-  finally
-    free;
+  case res = '1' of
+    false:result := mainNo;
+    true: result := mainYes;
   end;
 end;
 {$ENDREGION}

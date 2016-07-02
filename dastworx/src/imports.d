@@ -36,8 +36,8 @@ private final class ImportLister: ASTVisitor
     size_t mixinDepth;
 
     override void visit(const ConditionalDeclaration decl)
-	{
-	    const VersionCondition ver = decl.compileCondition.versionCondition;
+    {
+        const VersionCondition ver = decl.compileCondition.versionCondition;
         if (ver is null || !canFind(badVersions, ver.token.text))
             decl.accept(this);
     }
@@ -55,23 +55,23 @@ private final class ImportLister: ASTVisitor
     }
 
     override void visit(const(MixinExpression) mix)
-	{
-		++mixinDepth;
-		mix.accept(this);
-		--mixinDepth;
-	}
+    {
+        ++mixinDepth;
+        mix.accept(this);
+        --mixinDepth;
+    }
 
     override void visit(const PrimaryExpression primary)
-	{
-		if (mixinDepth && primary.primary.type.isStringLiteral)
-		{
+    {
+        if (mixinDepth && primary.primary.type.isStringLiteral)
+        {
             assert(primary.primary.text.length > 1);
 
             size_t startIndex = 1;
             startIndex += primary.primary.text[0] == 'q';
             parseAndVisit!(ImportLister)(primary.primary.text[startIndex..$-1]);
-		}
-		primary.accept(this);
-	}
+        }
+        primary.accept(this);
+    }
 }
 

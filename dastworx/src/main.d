@@ -1,4 +1,4 @@
-module ceasttools;
+module dastworx;
 
 import
     core.memory;
@@ -18,6 +18,7 @@ private __gshared Module module_ = void;
 private __gshared static Appender!(ubyte[]) source;
 private __gshared RollbackAllocator allocator;
 private __gshared LexerConfig config;
+private __gshared StringCache* cache;
 private __gshared static Appender!(AstErrors) errors;
 private __gshared string[] files;
 
@@ -49,8 +50,7 @@ void main(string[] args)
         files = args[1].splitter(pathSeparator).array;
 
     config = LexerConfig("", StringBehavior.source, WhitespaceBehavior.skip);
-    StringCache cache = StringCache(StringCache.defaultBucketCount);
-    tokens = getTokensForParser(source.data, config, &cache);
+    cache = construct!(StringCache)(StringCache.defaultBucketCount);
 
     getopt(args, std.getopt.config.passThrough,
         "d", &deepSymList
@@ -77,9 +77,10 @@ void handleSymListOption()
 void handleTodosOption()
 {
     mixin(logCall);
-    const(Token)[]*[] tokensArray;
+    lex!true;
+    const(Token)[][] tokensArray;
     if (tokens.length)
-        tokensArray ~= &tokens;
+        tokensArray ~= tokens;
 
     import std.file: exists;
     if (files.length)
@@ -94,7 +95,7 @@ void handleTodosOption()
                 ubyte[] src;
                 foreach(buffer; f.byChunk(4096))
                     src ~= buffer;
-                //tokensArray ~= getTokensForParser(src, config, &cache);
+                tokensArray ~= getTokensForParser(src, config, &cache);
                 f.close;
             }
             catch (Exception e) continue;
@@ -106,6 +107,7 @@ void handleTodosOption()
 void handleRunnableFlags()
 {
     mixin(logCall);
+    lex!true;
     getRunnableFlags(tokens);
 }
 
@@ -113,6 +115,7 @@ void handleImportsOption()
 {
     mixin(logCall);
     storeAstErrors = false;
+    lex!false;
     parseTokens;
     listImports(module_);
 }
@@ -121,6 +124,7 @@ void handleMainfunOption()
 {
     mixin(logCall);
     storeAstErrors = false;
+    lex!false;
     parseTokens;
     detectMainFun(module_);
 }
@@ -129,6 +133,17 @@ void handleErrors(string fname, size_t line, size_t col, string message, bool er
 {
     if (storeAstErrors)
         errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
+}
+
+void lex(bool keepComments = false)()
+{
+    static if (keepComments)
+    {
+        DLexer dlx = DLexer(source.data, config, cache);
+        tokens = dlx.array;
+    }
+    else
+        tokens = getTokensForParser(source.data, config, cache);
 }
 
 void parseTokens()
@@ -144,6 +159,6 @@ version(devel)
     version(all) import std.uri;
     mixin(q{import std.c.time;});
 
-    //TODO: something
+    // TODO:something
 }
 

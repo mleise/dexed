@@ -2193,6 +2193,7 @@ var
   lst: TStringList = nil;
   firstLineFlags: string = '';
   asObj: boolean = false;
+  hasMain: THasMain;
 begin
 
   result := false;
@@ -2261,8 +2262,17 @@ begin
     dmdproc.Parameters.AddText(fRunnableSw);
     if lst.isNotNil and (lst.Count <> 0) then
       dmdproc.Parameters.AddStrings(lst);
-    if fAppliOpts.detectMain and not fDoc.implementMain then
-      dmdproc.Parameters.Add('-main');
+    if fAppliOpts.detectMain then
+    begin
+      hasMain := fDoc.implementMain;
+      case hasMain of
+        mainNo:
+          dmdproc.Parameters.Add('-main');
+        mainDefaultBehavior:
+          if unittest then
+            dmdproc.Parameters.Add('-main');
+      end;
+    end;
     if unittest then
     begin
       if not fAppliOpts.detectMain then

@@ -10,18 +10,17 @@ import
 
 private __gshared Appender!string stream;
 
-void getTodos(const(Token)[]*[] tokensArray)
+void getTodos(const(Token)[][] tokensArray)
 {
     mixin(logCall);
     stream.reserve(2^^16);
-    stream.put("object TTodoItems\r  items = <");
+    stream.put("object TTodoItems\ritems = <");
     assert(tokensArray.length);
+    assert(tokensArray[0].length);
     foreach(tokens; tokensArray)
-        //foreach(token; (*tokens).filter!((a) => a.type == tok!"comment")())
-        foreach(token; *tokens)
-            if (token.type == tok!"comment")
-                token.analyze;
-    stream.put(">\rend\r\n");
+        foreach(token; tokens.filter!((a) => a.type == tok!"comment"))
+            token.analyze;
+    stream.put(">\rend\r");
     writeln(stream.data);
 }
 
@@ -111,7 +110,7 @@ private void analyze(const(Token) token)
 
 
 
-    stream.put("item\r");
+    stream.put("\ritem\r");
     //stream.put(format("filename = '%s'\r", fname));
     stream.put(format("line = '%d'\r", token.line));
     stream.put(format("text = '%s'\r", text));
@@ -123,5 +122,5 @@ private void analyze(const(Token) token)
         stream.put(format("priority = '%s'\r", p));
     if (s.length)
         stream.put(format("status = '%s'\r", s));
-    stream.put("end\r");
+    stream.put("end");
 }

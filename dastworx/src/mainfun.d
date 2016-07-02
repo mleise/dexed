@@ -39,8 +39,8 @@ private final class MainFunctionDetector: ASTVisitor
     }
 
     override void visit(const ConditionalDeclaration decl)
-	{
-	    const VersionCondition ver = decl.compileCondition.versionCondition;
+    {
+        const VersionCondition ver = decl.compileCondition.versionCondition;
         if (ver is null || !canFind(badVersions, ver.token.text))
             decl.accept(this);
     }
