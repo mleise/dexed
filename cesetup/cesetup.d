@@ -30,8 +30,7 @@ struct Resource
 Resource[] ceResources =
 [
     Resource(cast(ImpType) import("coedit" ~ exeExt), "coedit" ~ exeExt, Kind.exe),
-    Resource(cast(ImpType) import("cesyms" ~ exeExt), "cesyms" ~ exeExt, Kind.exe),
-    Resource(cast(ImpType) import("cetodo" ~ exeExt), "cetodo" ~ exeExt, Kind.exe),
+    Resource(cast(ImpType) import("dastworx" ~ exeExt), "dastworx" ~ exeExt, Kind.exe),
     Resource(cast(ImpType) import("coedit.ico"), "coedit.ico", Kind.dat),
     Resource(cast(ImpType) import("coedit.png"), "coedit.png", Kind.dat),
     Resource(cast(ImpType) import("coedit.license.txt"), "coedit.license.txt", Kind.doc)
@@ -44,6 +43,11 @@ Resource[] dcdResources =
     Resource(cast(ImpType) import("dcd.license.txt"), "dcd.license.txt", Kind.doc)
 ];
 
+Resource[] oldResources =
+[
+    Resource(cast(ImpType) [], "cesyms" ~ exeExt, Kind.exe),
+    Resource(cast(ImpType) [], "cetodo" ~ exeExt, Kind.exe),
+];
 
 static struct Formater
 {
@@ -179,11 +183,20 @@ void main(string[] args)
     bool done;
     if(!uninstall)
     {
-        static immutable extractMsg = [": FAILURE", ": extracted"];
+        enum extractMsg = [": FAILURE", ": extracted"];
+        enum oldMsg = [": FAILURE", ": removed old file"];
         foreach(res; ceResources)
         {
             done = installResource(res);
             Formater.justify!'L'(res.destName ~ extractMsg[done]);
+            failures += !done;
+        }
+        foreach(res; oldResources)
+        {
+            if (!res.targetFilename.exists)
+                continue;
+            done = uninstallResource(res);
+            Formater.justify!'L'(res.destName ~ oldMsg[done]);
             failures += !done;
         }
         if (!nodcd) foreach(res; dcdResources)
@@ -231,6 +244,14 @@ void main(string[] args)
         }
         if (!nodcd) foreach(res; dcdResources)
         {
+            done = uninstallResource(res);
+            Formater.justify!'L'(res.destName ~ rmMsg[done]);
+            failures += !done;
+        }
+        foreach(res; oldResources)
+        {
+            if (!res.targetFilename.exists)
+                continue;
             done = uninstallResource(res);
             Formater.justify!'L'(res.destName ~ rmMsg[done]);
             failures += !done;
