@@ -137,6 +137,7 @@ version(devel)
 {
     version(none) import std.compiler;
     version(all) import std.uri;
+    version(WatchOS) import std.math;
     mixin(q{import std.c.time;});
     // TODO: something
     // NOTE: there was a bug here...

@@ -50,15 +50,128 @@ q{
     else version(unittest) log();
 };
 
-// TODO: define accurately the list of bad versions
-version(linux)
-    enum badVersions = ["none", "Windows", "Win32", "Win64", "OSX"];
-else version(Windows)
-    enum badVersions = ["none", "linux", "OSX", "Posix",
-        "FreeBSD", "Solaris"];
-else version(OSX)
-    enum badVersions = ["none", "linux", "Windows", "Win32", "Win64"];
-else static assert(0);
+immutable string[] badVersions;
+
+private enum predefinedVersions = [
+	"AArch64",
+	"AIX",
+	"all",
+	"Alpha",
+	"Alpha_HardFloat",
+	"Alpha_SoftFloat",
+	"Android",
+	"ARM",
+	"ARM_HardFloat",
+	"ARM_SoftFloat",
+	"ARM_SoftFP",
+	"ARM_Thumb",
+	"assert",
+	"BigEndian",
+	"BSD",
+	"CRuntime_Bionic",
+	"CRuntime_DigitalMars",
+	"CRuntime_Glibc",
+	"CRuntime_Microsoft",
+	"Cygwin",
+	"DigitalMars",
+	"DragonFlyBSD",
+	"D_Coverage",
+	"D_Ddoc",
+	"D_HardFloat",
+	"D_InlineAsm_X86",
+	"D_InlineAsm_X86_64",
+	"D_LP64",
+	"D_NoBoundsChecks",
+	"D_PIC",
+	"D_SIMD",
+	"D_SoftFloat",
+	"D_Version2",
+	"D_X32",
+	"ELFv1",
+	"ELFv2",
+	"Epiphany",
+	"FreeBSD",
+	"FreeStanding",
+	"GNU",
+	"Haiku",
+	"HPPA",
+	"HPPA64",
+	"Hurd",
+	"IA64",
+	"iOS",
+	"LDC",
+	"linux",
+	"LittleEndian",
+	"MinGW",
+	"MIPS32",
+	"MIPS64",
+	"MIPS_EABI",
+	"MIPS_HardFloat",
+	"MIPS_N32",
+	"MIPS_N64",
+	"MIPS_O32",
+	"MIPS_O64",
+	"MIPS_SoftFloat",
+	"NetBSD",
+	"none",
+	"NVPTX",
+	"NVPTX64",
+	"OpenBSD",
+	"OSX",
+	"PlayStation",
+	"PlayStation4",
+	"Posix",
+	"PPC",
+	"PPC64",
+	"PPC_HardFloat",
+	"PPC_SoftFloat",
+	"S390",
+	"S390X",
+	"SDC",
+	"SH",
+	"SH64",
+	"SkyOS",
+	"Solaris",
+	"SPARC",
+	"SPARC64",
+	"SPARC_HardFloat",
+	"SPARC_SoftFloat",
+	"SPARC_V8Plus",
+	"SystemZ",
+	"SysV3",
+	"SysV4",
+	"TVOS",
+	"unittest",
+	"WatchOS",
+	"Win32",
+	"Win64",
+	"Windows",
+	"X86",
+	"X86_64"
+];
+
+static this()
+{
+    // note: compiler switch -m32/64 can lead to wrong results
+    string addVersionidentifier(string ver)()
+    {
+        return `version(` ~ ver ~ `){} else badVersions ~= "` ~ ver ~ "\";\n";
+    }
+
+    string addVerionIdentifiers()
+    {
+        import std.meta: aliasSeqOf;
+        import std.range: iota;
+        string result;
+        foreach(i; aliasSeqOf!(iota(0, predefinedVersions.length)))
+        {
+            result ~= addVersionidentifier!(predefinedVersions[i]);
+        }
+        return result;
+    }
+
+    mixin(addVerionIdentifiers);
+}
 
 /**
  * Make a D string compatible with an Object Pascal string literal.
