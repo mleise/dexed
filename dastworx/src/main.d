@@ -138,7 +138,8 @@ version(devel)
     version(none) import std.compiler;
     version(all) import std.uri;
     mixin(q{import std.c.time;});
-
-    // TODO:something
+    // TODO: something
+    // NOTE: there was a bug here...
+    // FIXME-cmain-aMrFreeze-p8: there's an infinite recursion whith the option -x
 }
 

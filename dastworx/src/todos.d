@@ -66,7 +66,7 @@ private void analyze(const(Token) token, string fname)
     {
         identifier ~= std.ascii.toUpper(text.front);
         text.popFront;
-        if (identifier.among("TODO","FIXME, NOTE"))
+        if (identifier.among("TODO", "FIXME", "NOTE"))
         {
             isTodoComment = true;
             break;

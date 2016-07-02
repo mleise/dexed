@@ -12,7 +12,7 @@ import
  * ModuleDeclaration and that are passed to the compiler when a runnable is
  * launched.
  *
- * each line of the soutput contains an option.
+ * each line of the output contains an option.
  */
 void getRunnableFlags(const(Token)[] tokens)
 {
