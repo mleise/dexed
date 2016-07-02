@@ -13,9 +13,9 @@ inherited CEInfoWidget: TCEInfoWidget
     ClientHeight = 502
     ClientWidth = 411
     inherited Content: TPanel
-      Height = 468
+      Height = 466
       Width = 411
-      ClientHeight = 468
+      ClientHeight = 466
       ClientWidth = 411
       object GroupBox1: TGroupBox[0]
         Left = 4
@@ -36,7 +36,7 @@ inherited CEInfoWidget: TCEInfoWidget
           Align = alClient
           Alignment = taCenter
           AutoSize = False
-          Caption = 'Coedit 2 - update 6'
+          Caption = 'Coedit 3 - devel'
           Font.Height = -16
           Font.Style = [fsBold]
           Layout = tlCenter
@@ -46,18 +46,18 @@ inherited CEInfoWidget: TCEInfoWidget
       end
       object GroupBox2: TGroupBox[1]
         Left = 4
-        Height = 351
+        Height = 349
         Top = 113
         Width = 403
         Align = alClient
         BorderSpacing.Around = 4
         Caption = 'tools status'
-        ClientHeight = 321
+        ClientHeight = 319
         ClientWidth = 399
         TabOrder = 1
         object boxTools: TScrollBox
           Left = 4
-          Height = 313
+          Height = 311
           Top = 4
           Width = 391
           HorzScrollBar.Page = 1
@@ -70,7 +70,7 @@ inherited CEInfoWidget: TCEInfoWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Width = 407
+      Width = 403
     end
   end
 end

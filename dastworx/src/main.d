@@ -70,6 +70,7 @@ void handleSymListOption()
     mixin(logCall);
     bool deep;
     storeAstErrors = true;
+    lex!false;
     parseTokens;
     listSymbols(module_, errors.data, deepSymList);
 }

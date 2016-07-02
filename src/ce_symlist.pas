@@ -189,7 +189,7 @@ implementation
 
 const
   OptsFname = 'symbollist.txt';
-  toolExeName = 'cesyms' + exeExt;
+  toolExeName = 'dastworx' + exeExt;
 
 {$REGION Serializable symbols---------------------------------------------------}
 constructor TSymbol.create(ACollection: TCollection);
@@ -684,7 +684,9 @@ begin
   fToolProc.Executable := fToolExeName;
   fToolProc.OnTerminate := @toolTerminated;
   fToolProc.CurrentDirectory := Application.ExeName.extractFileDir;
-  if fDeep then fToolProc.Parameters.Add('-d');
+  if fDeep then
+    fToolProc.Parameters.Add('-d');
+  fToolProc.Parameters.Add('-s');
   fToolProc.Execute;
   str := fDoc.Text;
   fToolProc.Input.Write(str[1], str.length);

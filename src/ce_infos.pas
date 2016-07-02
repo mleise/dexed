@@ -210,8 +210,8 @@ begin
     'mandatory, provides IDE-level features such as the completion');
   toolItem.Parent := boxTools;
   toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikFindable, 'cesyms',
-    'background tool that collects information for the symbol list widget');
+  toolItem := TToolInfo.Construct(self, tikFindable, 'dastworx',
+    'background tool that works on the D modules AST');
   toolItem.Parent := boxTools;
   toolItem.ReAlign;
   toolItem := TToolInfo.Construct(self, tikFindable, 'cetodo',
