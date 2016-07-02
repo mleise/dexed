@@ -4,3 +4,6 @@
 [submodule "etc/travis-lazarus"]
 	path = etc/travis-lazarus
 	url = https://github.com/nielsAD/travis-lazarus.git
+[submodule "etc/iz"]
+	path = etc/iz
+	url = https://www.github.com/BBasile/iz.git

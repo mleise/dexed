@@ -8,6 +8,14 @@ object CurrentProject: TCENativeProject
         'devel'
       )
       pathsOptions.outputFilename = '../bin/dastworx'
+      pathsOptions.extraSources.Strings = (
+        '../etc/iz/import/*'
+        '../etc/libdparse/src/*'
+      )
+      pathsOptions.importModulePaths.Strings = (
+        '../etc/iz/import'
+        '../etc/libdparse/src'
+      )
       runOptions.options = [poUsePipes, poStderrToOutPut]
     end  
     item
@@ -17,6 +25,14 @@ object CurrentProject: TCENativeProject
       outputOptions.optimizations = True
       outputOptions.release = True
       pathsOptions.outputFilename = '../bin/dastworx'
+      pathsOptions.extraSources.Strings = (
+        '../etc/iz/import/*'
+        '../etc/libdparse/src/*'
+      )
+      pathsOptions.importModulePaths.Strings = (
+        '../etc/iz/import'
+        '../etc/libdparse/src'
+      )
       runOptions.options = [poUsePipes, poStderrToOutPut]
     end>
   Sources.Strings = (
@@ -29,8 +45,4 @@ object CurrentProject: TCENativeProject
     'src/runnableflags.d'
   )
   ConfigurationIndex = 1
-  LibraryAliases.Strings = (
-    'iz'
-    'libdparse'
-  )
 end
