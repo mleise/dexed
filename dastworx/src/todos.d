@@ -10,21 +10,31 @@ import
 
 private __gshared Appender!string stream;
 
-void getTodos(const(Token)[][] tokensArray)
+//TODO: sdfsfd
+
+void getTodos(string[] files)
 {
     mixin(logCall);
-    stream.reserve(2^^16);
-    stream.put("object TTodoItems\ritems = <");
-    assert(tokensArray.length);
-    assert(tokensArray[0].length);
-    foreach(tokens; tokensArray)
-        foreach(token; tokens.filter!((a) => a.type == tok!"comment"))
-            token.analyze;
-    stream.put(">\rend\r");
+    //stream.reserve(2^^16);
+    stream.put("object TTodoItems\r items = <");
+    foreach(fname; files)
+    {
+        ubyte[] source;
+        StringCache cache = StringCache(StringCache.defaultBucketCount);
+        LexerConfig config = LexerConfig(fname, StringBehavior.source);
+        File f = File(fname, "r");
+        foreach (buffer; f.byChunk(4096))
+            source ~= buffer;
+        f.close;
+        foreach(token; DLexer(source, config, &cache).array
+            .filter!((a) => a.type == tok!"comment"))
+                analyze(token, fname);
+    }
+    stream.put(">\rend\r\n");
     writeln(stream.data);
 }
 
-private void analyze(const(Token) token)
+private void analyze(const(Token) token, string fname)
 {
     string text = token.text.strip.patchPascalString;
     string identifier;
@@ -110,9 +120,9 @@ private void analyze(const(Token) token)
 
 
 
-    stream.put("\ritem\r");
-    //stream.put(format("filename = '%s'\r", fname));
-    stream.put(format("line = '%d'\r", token.line));
+    stream.put("\r item\r");
+    stream.put(format("filename = '%s'\r", fname));
+    stream.put(format("line = '%s'\r", token.line));
     stream.put(format("text = '%s'\r", text));
     if (c.length)
         stream.put(format("category = '%s'\r", c));

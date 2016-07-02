@@ -46,7 +46,7 @@ type
   published
     property filename: string read fFile write fFile;
     property line: string read fLine write fLine;
-    property Text: string read fText write fText;
+    property text: string read fText write fText;
     property assignee: string read fAssignee write fAssignee;
     property category: string read fCategory write fCategory;
     property status: string read fStatus write fStatus;
@@ -144,7 +144,7 @@ implementation
 {$R *.lfm}
 
 const
-  ToolExeName = 'cetodo' + exeExt;
+  ToolExeName = 'dastworx' + exeExt;
   OptFname = 'todolist.txt';
 
 {$REGION TTodoItems ------------------------------------------------------------}
@@ -410,7 +410,9 @@ end;
 procedure TCETodoListWidget.callToolProcess;
 var
   ctxt: TTodoContext;
-  i: integer;
+  i,j: integer;
+  nme: string;
+  str: string = '';
 begin
   clearTodoList;
   if not exeInSysPath(ToolExeName) then
@@ -429,14 +431,23 @@ begin
   fToolProc.OnTerminate := @toolTerminated;
 
   // files passed to the tool argument
-  if ctxt = tcProject then
+  i := 0;
+  j := fProj.sourcesCount-1;
+  if ctxt = tcProject then for i := 0 to j do
   begin
-    for i := 0 to fProj.sourcesCount-1 do
-      fToolProc.Parameters.Add(fProj.sourceAbsolute(i));
+    nme := fProj.sourceAbsolute(i);
+    if not hasDlangSyntax(nme.extractFileExt) then
+      continue;
+    str += nme;
+    if i <> j then
+      str += PathSeparator;
   end
-  else fToolProc.Parameters.Add(fDoc.fileName);
+  else str := fDoc.fileName;
+  fToolProc.Parameters.Add(str);
+  fToolProc.Parameters.Add('-t');
   //
   fToolProc.Execute;
+  fToolProc.CloseInput;
 end;
 
 procedure TCETodoListWidget.procOutputDbg(Sender: TObject);
@@ -463,8 +474,6 @@ end;
 
 procedure TCETodoListWidget.toolTerminated(Sender: TObject);
 begin
-  //WASTODO-cbugfix: UTF chars in TODO comments bug either in the widget or the tool, symptom: empty todo list, conditions: to determine.
-  // seems to be fixed since the TODO scanner 's been rewritten using ranges (std.range.front() => autodecoding).
   fToolProc.OutputStack.Position := 0;
   fTodos.loadFromTxtStream(fToolProc.OutputStack);
   fillTodoList;

@@ -47,7 +47,10 @@ void main(string[] args)
     }
 
     if (args.length > 2)
+    {
         files = args[1].splitter(pathSeparator).array;
+        version(devel) writeln(files);
+    }
 
     config = LexerConfig("", StringBehavior.source, WhitespaceBehavior.skip);
     cache = construct!(StringCache)(StringCache.defaultBucketCount);
@@ -78,31 +81,7 @@ void handleSymListOption()
 void handleTodosOption()
 {
     mixin(logCall);
-    lex!true;
-    const(Token)[][] tokensArray;
-    if (tokens.length)
-        tokensArray ~= tokens;
-
-    import std.file: exists;
-    if (files.length)
-    {
-        StringCache cache = StringCache(StringCache.defaultBucketCount);
-        foreach(fname; files)
-            if (fname.exists)
-        {
-            try
-            {
-                File f = File(fname, "r");
-                ubyte[] src;
-                foreach(buffer; f.byChunk(4096))
-                    src ~= buffer;
-                tokensArray ~= getTokensForParser(src, config, &cache);
-                f.close;
-            }
-            catch (Exception e) continue;
-        }
-    }
-    getTodos(tokensArray);
+    getTodos(files);
 }
 
 void handleRunnableFlags()

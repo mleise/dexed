@@ -211,11 +211,8 @@ begin
   toolItem.Parent := boxTools;
   toolItem.ReAlign;
   toolItem := TToolInfo.Construct(self, tikFindable, 'dastworx',
-    'background tool that works on the D modules AST');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikFindable, 'cetodo',
-    'background tool that collects information for the todo list widget');
+    'background tool that works on the D modules AST to extract informations' +
+    LineEnding + 'such as the declarations, the imports, the "TODO" comments, etc.');
   toolItem.Parent := boxTools;
   toolItem.ReAlign;
   toolItem := TToolInfo.Construct(self, tikOptional, 'dub',
