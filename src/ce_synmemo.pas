@@ -1783,10 +1783,10 @@ begin
       str := TStringList.Create;
       try
         str.LoadFromFile(fFilename);
-        SelectAll;
-        SelText:= str.Text;
-        SelStart:=0;
-        SelEnd:=0;
+        ClearAll;
+        InsertTextAtCaret(str.Text);
+        SelStart:= high(integer);
+        ExecuteCommand(ecDeleteLastChar, #0, nil);
         fModified := true;
       finally
         str.Free;

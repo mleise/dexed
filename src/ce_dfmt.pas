@@ -6,8 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, RTTIGrids, Forms, Controls, Graphics, ExtCtrls,
-  Menus, Buttons, process, ce_widget, ce_interfaces, ce_observer, ce_synmemo,
-  ce_writableComponent, ce_common, ce_sharedres, PropEdits, ObjectInspector;
+  Menus, Buttons, process, SynEditKeyCmds, ce_widget, ce_interfaces, ce_observer,
+  ce_synmemo, ce_writableComponent, ce_common, ce_sharedres, PropEdits,
+  ObjectInspector;
 
 type
 
@@ -301,12 +302,15 @@ begin
     inp := fDoc.Lines.Text;
     prc.Input.Write(inp[1], inp.length);
     prc.CloseInput;
-    while prc.Running do (*!*);
+    while prc.Running do
+      sleep(1);
     try
       str := TStringList.Create;
       processOutputToStrings(prc,str);
-      fDoc.SelectAll;
-      fDoc.SelText:= str.Text;
+      fDoc.ClearAll;
+      fDoc.InsertTextAtCaret(str.Text);
+      fDoc.SelStart:= high(integer);
+      fDoc.ExecuteCommand(ecDeleteLastChar, #0, nil);
     except
       fDoc.Lines.Assign(fBackup);
     end;
