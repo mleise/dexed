@@ -49,7 +49,7 @@ Resource[] oldResources =
     Resource(cast(ImpType) [], "cetodo" ~ exeExt, Kind.exe),
 ];
 
-static struct Formater
+struct Formater
 {
     private enum width = 48;
     private static __gshared char[] separator;
@@ -128,22 +128,28 @@ void main(string[] args)
 
     if (listfiles)
     {
-        static immutable fmtRes = "%s installed: %s";
+        static immutable fmtRes = "\"%s\" installed: %s";
+        static immutable fmtOldRes = "obsolete \"%s\" installed: %s";
         string fname;
 
         Formater.separate;
         Formater.justify!'C'("files list and status");
         Formater.separate;
 
-        foreach(res; ceResources)
+        foreach (ref res; ceResources)
         {
             fname = targetFilename(res);
             writefln(fmtRes, fname, exists(fname));
         }
-        foreach(res; dcdResources)
+        foreach (ref res; dcdResources)
         {
             fname = targetFilename(res);
             writefln(fmtRes, fname, exists(fname));
+        }
+        foreach (ref res; oldResources)
+        {
+            fname = targetFilename(res);
+            writefln(fmtOldRes, fname, exists(fname));
         }
 
         Formater.separate;
@@ -183,15 +189,15 @@ void main(string[] args)
     bool done;
     if(!uninstall)
     {
-        enum extractMsg = [": FAILURE", ": extracted"];
-        enum oldMsg = [": FAILURE", ": removed old file"];
-        foreach(res; ceResources)
+        static immutable extractMsg = [": FAILURE", ": extracted"];
+        static immutable oldMsg = [": FAILURE", ": removed old file"];
+        foreach (ref res; ceResources)
         {
             done = installResource(res);
             Formater.justify!'L'(res.destName ~ extractMsg[done]);
             failures += !done;
         }
-        foreach(res; oldResources)
+        foreach (ref res; oldResources)
         {
             if (!res.targetFilename.exists)
                 continue;
@@ -199,7 +205,7 @@ void main(string[] args)
             Formater.justify!'L'(res.destName ~ oldMsg[done]);
             failures += !done;
         }
-        if (!nodcd) foreach(res; dcdResources)
+        if (!nodcd) foreach (ref res; dcdResources)
         {
             done = installResource(res);
             Formater.justify!'L'(res.destName ~ extractMsg[done]);
@@ -236,19 +242,19 @@ void main(string[] args)
         }
         // uninstall
         static immutable rmMsg = [": FAILURE", ": deleted"];
-        foreach(res; ceResources)
+        foreach (ref res; ceResources)
         {
             done = uninstallResource(res);
             Formater.justify!'L'(res.destName ~ rmMsg[done]);
             failures += !done;
         }
-        if (!nodcd) foreach(res; dcdResources)
+        if (!nodcd) foreach (ref res; dcdResources)
         {
             done = uninstallResource(res);
             Formater.justify!'L'(res.destName ~ rmMsg[done]);
             failures += !done;
         }
-        foreach(res; oldResources)
+        foreach (ref res; oldResources)
         {
             if (!res.targetFilename.exists)
                 continue;
@@ -259,8 +265,10 @@ void main(string[] args)
         // remove $PF folder
         version(Windows)
         {
-            try rmdir(exePath);
-            catch(FileException e) failures++;
+            try
+                rmdir(exePath);
+            catch(FileException e)
+                failures++;
         }
 
         Formater.separate;
@@ -326,8 +334,10 @@ bool uninstallResource(Resource resource)
 bool tryRemove(string fname)
 {
     bool result = true;
-    try remove(fname);
-    catch (FileException e) {result = false;}
+    try
+        remove(fname);
+    catch (FileException e)
+        result = false;
     return result;  
 }
 
@@ -392,8 +402,8 @@ void postUninstall()
 /// splits the version identifier used in filenames
 string splitVer()
 {
-    import std.regex: matchAll, regex;
-    return matchAll(import("version.txt"), regex("\\d+|\\D+"))
+    import std.regex: matchAll, ctRegex;
+    return matchAll(import("version.txt"), ctRegex!("\\d+|\\D+"))
         .join.join(" ").stripRight;
 }
 
