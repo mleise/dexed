@@ -2,7 +2,7 @@ module todos;
 
 import
     std.stdio, std.string, std.algorithm, std.array, std.conv, std.traits,
-    std.ascii, std.range;
+    std.ascii, std.range, std.file;
 import
     dparse.lexer;
 import
@@ -10,27 +10,21 @@ import
 
 private __gshared Appender!string stream;
 
-//TODO: sdfsfd
-
 void getTodos(string[] files)
 {
     mixin(logCall);
-    //stream.reserve(2^^16);
-    stream.put("object TTodoItems\r items = <");
+    stream.reserve(32 + 256 * files.length);
+    stream.put("object TTodoItems\ritems=<");
     foreach(fname; files)
     {
-        ubyte[] source;
         StringCache cache = StringCache(StringCache.defaultBucketCount);
         LexerConfig config = LexerConfig(fname, StringBehavior.source);
-        File f = File(fname, "r");
-        foreach (buffer; f.byChunk(4096))
-            source ~= buffer;
-        f.close;
-        foreach(token; DLexer(source, config, &cache).array
+        ubyte[] source = cast(ubyte[]) std.file.read(fname);
+        foreach(ref token; DLexer(source, config, &cache).array
             .filter!((a) => a.type == tok!"comment"))
                 analyze(token, fname);
     }
-    stream.put(">\rend\r\n");
+    stream.put(">end");
     writeln(stream.data);
 }
 
@@ -101,7 +95,7 @@ private void analyze(const(Token) token, string fname)
         fields.popFront;
         if ((front == '-' || fields.empty) && identifier.length > 2)
         {
-            string fieldContent = identifier[2..$].strip;
+            const string fieldContent = identifier[2..$].strip;
             switch(identifier[0..2].toUpper)
             {
                 default: break;
@@ -118,19 +112,17 @@ private void analyze(const(Token) token, string fname)
     if (text.length > 1 && text[$-2..$].among("*/", "+/"))
         text.length -=2;
 
-
-
-    stream.put("\r item\r");
-    stream.put(format("filename = '%s'\r", fname));
-    stream.put(format("line = '%s'\r", token.line));
-    stream.put(format("text = '%s'\r", text));
+    stream.put("\ritem\r");
+    stream.put(format("filename='%s'\r", fname));
+    stream.put(format("line='%s'\r", token.line));
+    stream.put(format("text='%s'\r", text));
     if (c.length)
-        stream.put(format("category = '%s'\r", c));
+        stream.put(format("category='%s'\r", c));
     if (a.length)
-        stream.put(format("assignee = '%s'\r", a));
+        stream.put(format("assignee='%s'\r", a));
     if (p.length)
-        stream.put(format("priority = '%s'\r", p));
+        stream.put(format("priority='%s'\r", p));
     if (s.length)
-        stream.put(format("status = '%s'\r", s));
+        stream.put(format("status='%s'\r", s));
     stream.put("end");
 }

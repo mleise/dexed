@@ -50,9 +50,13 @@ q{
     else version(unittest) log();
 };
 
+/**
+ * Contains all the D version identifiers that are not valid
+ * for this operating system.
+ */
 immutable string[] badVersions;
 
-private enum predefinedVersions = [
+private static immutable predefinedVersions = [
 	"AArch64",
 	"AIX",
 	"all",
@@ -183,7 +187,7 @@ string patchPascalString(string value)
     bool skip;
     foreach (immutable i; 0..value.length)
     {
-        char c = value[i];
+        const char c = value[i];
         if (c > 0x7F)
         {
             app ~= value[i];

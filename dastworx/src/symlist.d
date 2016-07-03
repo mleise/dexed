@@ -15,16 +15,18 @@ private __gshared bool deep = void;
 /**
  * Serializes the symbols in the standard output
  */
-void listSymbols(const(Module) mod, AstErrors errors, bool deep = true)
+void listSymbols(const(Module) mod, AstErrors errors, bool ddeep = true)
 {
     mixin(logCall);
-    symlist.deep = deep;
+    symlist.deep = ddeep;
     alias SL = SymbolListBuilder!(ListFmt.Pas);
     SL.addAstErrors(errors);
     SL sl = construct!(SL);
     sl.visit(mod);
     sl.serialize.writeln;
 }
+
+private:
 
 enum ListFmt
 {
@@ -81,7 +83,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
     {
         static if (Fmt == ListFmt.Pas)
         {
-            pasStream.put("object TSymbolList\rsymbols = <");
+            pasStream.put("object TSymbolList\rsymbols=<");
         }
         else
         {
@@ -100,10 +102,10 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             static if (Fmt == ListFmt.Pas)
             {
                 pasStream.put("\ritem\r");
-                pasStream.put(format("line = %d\r", error.line));
-                pasStream.put(format("col = %d\r", error.column));
-                pasStream.put(format("name = '%s'\r", patchPascalString(error.message)));
-                pasStream.put(format("symType = %s\r", type));
+                pasStream.put(format("line=%d\r", error.line));
+                pasStream.put(format("col=%d\r", error.column));
+                pasStream.put(format("name='%s'\r", patchPascalString(error.message)));
+                pasStream.put(format("symType=%s\r", type));
                 pasStream.put("end");
             }
             else
@@ -122,7 +124,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
     {
         static if (Fmt == ListFmt.Pas)
         {
-            pasStream.put(">\rend\r\n");
+            pasStream.put(">\rend");
             return pasStream.data;
         }
         else
@@ -143,10 +145,10 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
         static if (Fmt == ListFmt.Pas)
         {
             pasStream.put("\ritem\r");
-            pasStream.put(format("line = %d\r", dt.name.line));
-            pasStream.put(format("col = %d\r", dt.name.column));
-            pasStream.put(format("name = '%s'\r", dt.name.text));
-            pasStream.put("symType = " ~ symbolTypeStrings[st] ~ "\r");
+            pasStream.put(format("line=%d\r", dt.name.line));
+            pasStream.put(format("col=%d\r", dt.name.column));
+            pasStream.put(format("name='%s'\r", dt.name.text));
+            pasStream.put("symType=" ~ symbolTypeStrings[st] ~ "\r");
             static if (dig) if (deep)
             {
                 pasStream.put("subs = <");
@@ -165,7 +167,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             static if (dig) if (deep)
             {
                 JSONValue subs = parseJSON("[]");
-                JSONValue* old = jarray;
+                const JSONValue* old = jarray;
                 jarray = &subs;
                 dt.accept(this);
                 item["items"] = subs;
@@ -182,10 +184,10 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
         static if (Fmt == ListFmt.Pas)
         {
             pasStream.put("\ritem\r");
-            pasStream.put(format("line = %d\r", line));
-            pasStream.put(format("col = %d\r", col));
-            pasStream.put(format("name = '%s'\r", name));
-            pasStream.put("symType = " ~ symbolTypeStrings[st] ~ "\r");
+            pasStream.put(format("line=%d\r", line));
+            pasStream.put(format("col=%d\r", col));
+            pasStream.put(format("name='%s'\r", name));
+            pasStream.put("symType=" ~ symbolTypeStrings[st] ~ "\r");
             static if (dig)
             {
                 pasStream.put("subs = <");
@@ -204,7 +206,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             static if (dig)
             {
                 JSONValue subs = parseJSON("[]");
-                JSONValue* old = jarray;
+                const JSONValue* old = jarray;
                 jarray = &subs;
                 dt.accept(this);
                 item["items"] = subs;

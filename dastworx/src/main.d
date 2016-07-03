@@ -12,7 +12,7 @@ import
     common, todos, symlist, imports, mainfun, runnableflags;
 
 
-private __gshared bool storeAstErrors = void, deepSymList = true;
+private __gshared bool storeAstErrors = void, deepSymList;
 private __gshared const(Token)[] tokens;
 private __gshared Module module_ = void;
 private __gshared static Appender!(ubyte[]) source;
@@ -36,13 +36,13 @@ void main(string[] args)
     {
         mixin(logCall);
         File f = File(__FILE__, "r");
-        foreach(buffer; f.byChunk(4096))
+        foreach(ref buffer; f.byChunk(4096))
             source.put(buffer);
         f.close;
     }
     else
     {
-        foreach(buffer; stdin.byChunk(4096))
+        foreach(ref buffer; stdin.byChunk(4096))
             source.put(buffer);
     }
 
@@ -68,22 +68,24 @@ void main(string[] args)
     );
 }
 
+/// Handles the "-s" option: create the symbol list in the output
 void handleSymListOption()
 {
     mixin(logCall);
-    bool deep;
     storeAstErrors = true;
     lex!false;
     parseTokens;
     listSymbols(module_, errors.data, deepSymList);
 }
 
+/// Handles the "-t" option: create the list of todo comments in the output
 void handleTodosOption()
 {
     mixin(logCall);
     getTodos(files);
 }
 
+/// Handles the "-r" option:
 void handleRunnableFlags()
 {
     mixin(logCall);
@@ -91,6 +93,7 @@ void handleRunnableFlags()
     getRunnableFlags(tokens);
 }
 
+/// Handles the "-i" option: create the import list in the output
 void handleImportsOption()
 {
     mixin(logCall);
@@ -100,6 +103,7 @@ void handleImportsOption()
     listImports(module_);
 }
 
+/// Handles the "-m" option: writes if a main() is present in the module
 void handleMainfunOption()
 {
     mixin(logCall);
@@ -109,24 +113,21 @@ void handleMainfunOption()
     detectMainFun(module_);
 }
 
-void handleErrors(string fname, size_t line, size_t col, string message, bool err)
+private void handleErrors(string fname, size_t line, size_t col, string message, bool err)
 {
     if (storeAstErrors)
         errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
 }
 
-void lex(bool keepComments = false)()
+private void lex(bool keepComments = false)()
 {
     static if (keepComments)
-    {
-        DLexer dlx = DLexer(source.data, config, cache);
-        tokens = dlx.array;
-    }
+        tokens = DLexer(source.data, config, cache).array;
     else
         tokens = getTokensForParser(source.data, config, cache);
 }
 
-void parseTokens()
+private void parseTokens()
 {
     mixin(logCall);
     if (!module_)

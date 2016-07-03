@@ -20,7 +20,6 @@ object CurrentProject: TCENativeProject
     end  
     item
       name = 'release'
-      outputOptions.inlining = True
       outputOptions.boundsCheck = offAlways
       outputOptions.optimizations = True
       outputOptions.release = True
