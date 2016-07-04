@@ -97,10 +97,17 @@ void handleRunnableFlags()
 void handleImportsOption()
 {
     mixin(logCall);
-    storeAstErrors = false;
-    lex!false;
-    parseTokens;
-    listImports(module_);
+    if (files.length)
+    {
+        listFilesImports(files);
+    }
+    else
+    {
+        storeAstErrors = false;
+        lex!false;
+        parseTokens;
+        listImports(module_);
+    }
 }
 
 /// Handles the "-m" option: writes if a main() is present in the module

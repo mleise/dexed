@@ -1,18 +1,19 @@
 module imports;
 
 import
-    std.stdio, std.algorithm, std.array;
+    std.stdio, std.algorithm, std.array, std.file;
 import
     iz.memory;
 import
-    dparse.lexer, dparse.ast, dparse.parser;
+    dparse.lexer, dparse.ast, dparse.parser, dparse.rollback_allocator;
 import
     common;
 
 /**
- * Lists the modules imported b y a module
+ * Lists the modules imported by a module
  *
- * Each import is written in a new line. Import detection is not accurate,
+ * On the first line writes the module name between double quotes then
+ * each import is written in a new line. Import detection is not accurate,
  * the imports injected by a mixin template or by a string variable are not detected,
  * the imports deactivated by a static condition neither.
  *
@@ -27,8 +28,38 @@ in
 body
 {
     mixin(logCall);
+    writeln('"', mod.moduleDeclaration.moduleName.identifiers
+        .map!(a => a.text).join("."), '"');
     construct!(ImportLister).visit(mod);
 }
+
+/**
+ * Lists the modules imported by several modules
+ *
+ * The output consists of several consecutive lists, as formated for
+ * listImports.
+ *
+ * The results are used by to detect which are the static libraries used by a
+ * runnable module.
+ */
+void listFilesImports(string[] files)
+{
+    mixin(logCall);
+    RollbackAllocator allocator;
+    StringCache cache = StringCache(StringCache.defaultBucketCount);
+    LexerConfig config = LexerConfig("", StringBehavior.source);
+    ImportLister il = construct!(ImportLister);
+    foreach(fname; files)
+    {
+        ubyte[] source = cast(ubyte[]) std.file.read(fname);
+        Module mod = parseModule(getTokensForParser(source, config, &cache),
+            fname, &allocator);
+        writeln('"', mod.moduleDeclaration.moduleName.identifiers
+            .map!(a => a.text).join("."), '"');
+        il.visit(mod);
+    }
+}
+
 
 private final class ImportLister: ASTVisitor
 {
