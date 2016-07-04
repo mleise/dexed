@@ -31,7 +31,7 @@ type
 
   TCECompiler = (dmd, gdc, ldc);
 
-  // function used as hash in gXXX sets & maps
+  // function used as string hasher in fcl-stl
   TStringHash = class
     class function hash(const key: string; maxBucketsPow2: longint): longint;
   end;
@@ -39,12 +39,16 @@ type
   // HashMap for TValue by string
   generic TStringHashMap<TValue> = class(specialize THashmap<string, TValue, TStringHash>);
 
-  // function used as objects in gXXX sets & maps
+  // function used as objects haser in fcl-stl
   TObjectHash = class
     class function hash(key: TObject; maxBucketsPow2: longint): longint;
   end;
 
-  generic TObjectHashSet<TValue> = class(specialize THashSet<TValue, TObjectHash>);
+  // HashSet for any object
+  generic TObjectHashSet<TValue: TObject> = class(specialize THashSet<TValue, TObjectHash>);
+
+  // Used instead of TStringList when the usage would mostly be ".IndexOf"
+  TStringHashSet = class(specialize THashSet<string, TStringHash>);
 
   // aliased to get a custom prop inspector
   TCEPathname = type string;
@@ -322,7 +326,7 @@ begin
   {$IFDEF CPU32}
   Result := longint(Pointer(key)) and (maxBucketsPow2 -1);
   {$ELSE}
-  Result := (longInt(Pointer(key)) xor PlongInt(PInteger(&key) + 4)^) and (maxBucketsPow2 -1);
+  Result := longInt(Pointer(key)){ xor PlongInt(PInteger(&key) + 4)^)} and (maxBucketsPow2 -1);
   {$ENDIF}
   {$POP}
 end;

@@ -27,7 +27,7 @@ type
   private
     fTempLines: TStringList;
     fInputSource: string;
-    fImportCache: TStringList;
+    fImportCache: TStringHashSet;
     fPortNum: Word;
     fServerWasRunning: boolean;
     fClient, fServer: TProcess;
@@ -114,7 +114,7 @@ begin
       fServer.Parameters.Add('-p' + intToStr(port));
   end;
   fTempLines := TStringList.Create;
-  fImportCache := TStringList.Create;
+  fImportCache := TStringHashSet.Create;
 
   if fServer.isNotNil then
   begin
@@ -339,8 +339,9 @@ begin
   if not fAvailable then exit;
   if not fServerListening then exit;
   //
-  if fImportCache.IndexOf(aFolder) <> -1 then exit;
-  fImportCache.Add(aFolder);
+  if fImportCache.contains(aFolder) then
+    exit;
+  fImportCache.insert(aFolder);
   fClient.Parameters.Clear;
   fClient.Parameters.Add('-I' + aFolder);
   fClient.Execute;
@@ -357,9 +358,9 @@ begin
   fClient.Parameters.Clear;
   for imp in folders do
   begin
-    if fImportCache.IndexOf(imp) <> -1 then
+    if fImportCache.contains(imp) then
       continue;
-    fImportCache.Add(imp);
+    fImportCache.insert(imp);
     fClient.Parameters.Add('-I' + imp);
   end;
   if fClient.Parameters.Count <> 0 then
