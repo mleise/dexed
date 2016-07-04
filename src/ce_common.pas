@@ -15,7 +15,7 @@ uses
   {$IFNDEF CEBUILD}
   forms,
   {$ENDIF}
-  process, asyncprocess;
+  process, asyncprocess, ghashmap, ghashset;
 
 const
   exeExt = {$IFDEF WINDOWS} '.exe' {$ELSE} ''   {$ENDIF};
@@ -30,6 +30,21 @@ type
   THasMain = (mainNo, mainYes, mainDefaultBehavior);
 
   TCECompiler = (dmd, gdc, ldc);
+
+  // function used as hash in gXXX sets & maps
+  TStringHash = class
+    class function hash(const key: string; maxBucketsPow2: longint): longint;
+  end;
+
+  // HashMap for TValue by string
+  generic TStringHashMap<TValue> = class(specialize THashmap<string, TValue, TStringHash>);
+
+  // function used as objects in gXXX sets & maps
+  TObjectHash = class
+    class function hash(key: TObject; maxBucketsPow2: longint): longint;
+  end;
+
+  generic TObjectHashSet<TValue> = class(specialize THashSet<TValue, TObjectHash>);
 
   // aliased to get a custom prop inspector
   TCEPathname = type string;
@@ -279,6 +294,32 @@ implementation
 
 uses
   ce_main;
+
+
+class function TStringHash.hash(const key: string; maxBucketsPow2: longint): longint;
+var
+  i: integer;
+begin
+  {$PUSH}{$R-}
+  result := 5381;
+  for i:= 1 to key.length do
+  begin
+    result := ((result shl 5) + result) + Byte(key[i]);
+  end;
+  result := result and (maxBucketsPow2-1);
+  {$POP}
+end;
+
+class function TObjectHash.hash(key: TObject; maxBucketsPow2: longint): longint;
+begin
+  {$PUSH}{$R-}{$WARNINGS OFF}{$HINTS OFF}
+  {$IFDEF CPU32}
+  Result := longint(Pointer(key)) and (maxBucketsPow2 -1);
+  {$ELSE}
+  Result := (longInt(Pointer(key)) xor PlongInt(PInteger(&key) + 4)^) and (maxBucketsPow2 -1);
+  {$ENDIF}
+  {$POP}
+end;
 
 procedure TCEPersistentShortcut.assign(aValue: TPersistent);
 var

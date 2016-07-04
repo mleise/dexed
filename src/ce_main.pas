@@ -2288,7 +2288,7 @@ begin
     else
     begin
       LibMan.getLibFiles(nil, dmdproc.Parameters);
-      LibMan.getLibSources(nil, dmdproc.Parameters);
+      LibMan.getLibSourcePath(nil, dmdproc.Parameters);
     end;
 
     deleteDups(dmdproc.Parameters);

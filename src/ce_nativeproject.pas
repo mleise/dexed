@@ -341,27 +341,13 @@ begin
 end;
 
 procedure TCENativeProject.doChanged;
-{$IFDEF DEBUG}
-var
-  lst: TStringList;
-{$ENDIF}
 begin
   fModified := true;
   updateOutFilename;
   getBaseConfig;
   subjProjChanged(fProjectSubject, self);
-  if assigned(fOnChange) then fOnChange(Self);
-  {$IFDEF DEBUG}
-  //lst := TStringList.Create;
-  //try
-  //  lst.Add('---------begin----------');
-  //  getOpts(lst);
-  //  lst.Add('---------end-----------');
-  //  DebugLn(lst.Text);
-  //finally
-  //  lst.Free;
-  //end;
-  {$ENDIF}
+  if assigned(fOnChange) then
+    fOnChange(Self);
 end;
 
 function TCENativeProject.getConfig(const ix: integer): TCompilerConfiguration;
@@ -468,7 +454,7 @@ begin
     LibMan.getLibFiles(libAliasesPtr, aList);
 
     // but always adds -I<path>
-    LibMan.getLibSources(libAliasesPtr, aList);
+    LibMan.getLibSourcePath(libAliasesPtr, aList);
     // config
     if currentConfiguration.isOverriddenConfiguration then
       currentConfiguration.getOpts(aList, fBaseConfig)
