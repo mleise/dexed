@@ -568,31 +568,30 @@ end;
 
 procedure TLibraryManager.getLibsForSource(source, libs, paths: TStrings);
 var
-  tks: TLexTokenList;
   imp: TStringList;
   i,j: integer;
   itm: TLibraryItem;
   dep: TLibraryItem;
   sel: TLibraryList;
 begin
-  tks := TLexTokenList.Create;
   imp := TStringList.Create;
-  sel := TLibraryList.Create;
+  sel := TLibraryList.create;
   try
-    lex(source.Text, tks, nil, [lxoNoComments]);
-    getImports(tks, imp);
-    for i:= 0 to imp.Count-1 do
+    getModuleImports(source, imp);
+    for i:= 1 to imp.Count-1 do
     begin
       // get library for import I
       itm := libraryByImport[imp[i]];
       if itm.isNotNil then
       begin
+        if sel.contains(itm) then
+          continue;
         sel.insert(itm);
         // get libraries for import I dependencies
         for j:= itm.dependencies.Count-1 downto 0 do
         begin
           dep := libraryByAlias[itm.dependencies[j]];
-          if dep.isNotNil then
+          if dep.isNotNil and not sel.contains(dep) then
             sel.insert(dep)
             //auto update: item removed, detect on usage that it has disapeared
           else
@@ -614,7 +613,6 @@ begin
     end;
   finally
     sel.Free;
-    tks.Free;
     imp.Free;
   end;
 end;
@@ -647,7 +645,9 @@ begin
       if dep.isNil or (dep.libAlias = 'phobos') or (dep.libAlias = 'druntime') then
         continue;
       // add deps
-      libraryByIndex[i].dependencies.Add(dep.libAlias);
+      if lib.dependencies.IndexOf(dep.libAlias) > -1 then
+        continue;
+      lib.dependencies.Add(dep.libAlias);
     end;
   end;
 end;

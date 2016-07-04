@@ -205,7 +205,7 @@ type
   (**
    * Clears then fills aList with aProcess output stream.
    *)
-  procedure processOutputToStrings(aProcess: TProcess; var aList: TStringList);
+  procedure processOutputToStrings(aProcess: TProcess; aList: TStrings);
 
   (**
    * Copy available process output to a stream.
@@ -856,7 +856,7 @@ begin
   exit(ExeSearch(anExeName, env));
 end;
 
-procedure processOutputToStrings(aProcess: TProcess; var aList: TStringList);
+procedure processOutputToStrings(aProcess: TProcess; aList: TStrings);
 var
   str: TMemoryStream;
   sum: Integer = 0;
