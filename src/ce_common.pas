@@ -33,15 +33,15 @@ type
 
   // function used as string hasher in fcl-stl
   TStringHash = class
-    class function hash(const key: string; maxBucketsPow2: longint): longint;
+    class function hash(const key: string; maxBucketsPow2: longword): longword;
   end;
 
   // HashMap for TValue by string
   generic TStringHashMap<TValue> = class(specialize THashmap<string, TValue, TStringHash>);
 
-  // function used as objects haser in fcl-stl
+  // function used as object ptr hasher in fcl-stl
   TObjectHash = class
-    class function hash(key: TObject; maxBucketsPow2: longint): longint;
+    class function hash(key: TObject; maxBucketsPow2: longword): longword;
   end;
 
   // HashSet for any object
@@ -305,30 +305,37 @@ implementation
 uses
   ce_main;
 
-
-class function TStringHash.hash(const key: string; maxBucketsPow2: longint): longint;
+class function TStringHash.hash(const key: string; maxBucketsPow2: longword): longword;
 var
   i: integer;
 begin
-  {$PUSH}{$R-}
-  result := 5381;
+  result := 2166136261;
   for i:= 1 to key.length do
   begin
-    result := ((result shl 5) + result) + Byte(key[i]);
+    result := result xor Byte(key[i]);
+    result *= 16777619;
   end;
   result := result and (maxBucketsPow2-1);
-  {$POP}
 end;
 
-class function TObjectHash.hash(key: TObject; maxBucketsPow2: longint): longint;
+class function TObjectHash.hash(key: TObject; maxBucketsPow2: longword): longword;
+var
+  ptr: PByte;
+  i: integer;
 begin
-  {$PUSH}{$R-}{$WARNINGS OFF}{$HINTS OFF}
+  ptr := PByte(key);
+  result := 2166136261;
   {$IFDEF CPU32}
-  Result := longint(Pointer(key)) and (maxBucketsPow2 -1);
+  for i:= 0 to 3 do
   {$ELSE}
-  Result := longInt(Pointer(key)){ xor PlongInt(PInteger(&key) + 4)^)} and (maxBucketsPow2 -1);
+  for i:= 0 to 7 do
   {$ENDIF}
-  {$POP}
+  begin
+    result := result xor ptr^;
+    result *= 16777619;
+    ptr += 1;
+  end;
+  result := result and (maxBucketsPow2-1);
 end;
 
 procedure TCEPersistentShortcut.assign(aValue: TPersistent);
