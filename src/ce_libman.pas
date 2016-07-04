@@ -318,7 +318,7 @@ begin
       // add phobos
       fname := fDmdPath.ExtractFileDir;
       fname := fname.ExtractFileDir;
-      with TLibraryItem(fCol.Add) do begin
+      with TLibraryItem(fCollection.Add) do begin
         libAlias := 'phobos';
         libFile  := fname + '\lib\phobos.lib';
         libSourcePath := fname.ExtractFileDir + '\src\phobos';
@@ -326,7 +326,7 @@ begin
       // add druntime (no lib - only for DCD)
       fname := fDmdPath.ExtractFileDir;
       fname := fname.ExtractFileDir;
-      with TLibraryItem(fCol.Add) do begin
+      with TLibraryItem(fCollection.Add) do begin
         libAlias := 'druntime';
         libFile  := '';
         libSourcePath := fname.ExtractFileDir + '\src\druntime\import';
