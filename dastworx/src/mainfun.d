@@ -25,6 +25,7 @@ void detectMainFun(const(Module) mod)
     MainFunctionDetector mfd = construct!(MainFunctionDetector);
     mfd.visit(mod);
     write(mfd.hasMain);
+    stdout.flush;
 }
 
 private final class MainFunctionDetector: ASTVisitor

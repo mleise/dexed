@@ -53,18 +53,24 @@ void listFilesImports(string[] files)
     {
         ubyte[] source = cast(ubyte[]) std.file.read(fname);
         Module mod = parseModule(getTokensForParser(source, config, &cache),
-            fname, &allocator);
+            fname, &allocator, &handleErrors);
         writeln('"', mod.moduleDeclaration.moduleName.identifiers
             .map!(a => a.text).join("."), '"');
         il.visit(mod);
+        stdout.flush;
     }
 }
-
 
 private final class ImportLister: ASTVisitor
 {
     alias visit = ASTVisitor.visit;
     size_t mixinDepth;
+
+    override void visit(const(Module) mod)
+    {
+        mixinDepth = 0;
+        mod.accept(this);
+    }
 
     override void visit(const ConditionalDeclaration decl)
     {

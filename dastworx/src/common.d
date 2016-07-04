@@ -340,9 +340,19 @@ T parseAndVisit(T : ASTVisitor)(const(char)[] source)
     LexerConfig config = LexerConfig("", StringBehavior.source, WhitespaceBehavior.skip);
     StringCache cache = StringCache(StringCache.defaultBucketCount);
     const(Token)[] tokens = getTokensForParser(cast(ubyte[]) source, config, &cache);
-    Module mod = parseModule(tokens, "", &allocator);
+    Module mod = parseModule(tokens, "", &allocator, &handleErrors);
     T result = construct!(T);
     result.visit(mod);
     return result;
+}
+
+/**
+ * By default libdparse outputs errors and warnings to the standard streams.
+ * This function prevents that.
+ */
+void handleErrors(string fname, size_t line, size_t col, string message,
+    bool err)
+{
+    // dont pollute output
 }
 

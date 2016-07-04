@@ -26,6 +26,7 @@ void getTodos(string[] files)
     }
     stream.put(">end");
     writeln(stream.data);
+    stdout.flush;
 }
 
 private void analyze(const(Token) token, string fname)
