@@ -8,14 +8,14 @@ uses
 
   Classes, SysUtils,
   {$IFDEF WINDOWS}
-  Windows, JwaTlHelp32,
+  Windows, JwaTlHelp32, registry,
   {$ELSE}
   ExtCtrls, FileUtil, LazFileUtils,
   {$ENDIF}
   {$IFNDEF CEBUILD}
   forms,
   {$ENDIF}
-  process, asyncprocess, ghashmap, ghashset;
+  process, asyncprocess, ghashmap, ghashset, LCLIntf;
 
 const
   exeExt = {$IFDEF WINDOWS} '.exe' {$ELSE} ''   {$ENDIF};
@@ -280,10 +280,16 @@ type
    *)
   function indentationMode(strings: TStrings): TIndentationMode;
 
-    (**
+  (**
    * Detects the main indetation mode used in a file
    *)
   function indentationMode(const fname: string): TIndentationMode;
+
+  (**
+   * like LCLIntf eponymous function but includes a woraround that's gonna
+   * be in Lazarus from version 1.8 (anchor + file:/// protocol under win).
+   *)
+  function openUrl(const value: string): boolean;
 
 var
   // supplementatl directories to find background tools
@@ -1241,6 +1247,58 @@ begin
   finally
     str.Free;
   end;
+end;
+
+function openUrl(const value: string): boolean;
+{$IFDEF WINDOWS}
+function GetDefaultBrowserForCurrentUser: String;
+begin
+  result := '';
+  with TRegistry.Create do
+  try
+    RootKey := HKEY_CURRENT_USER;
+    if OpenKeyReadOnly('Software\Classes\http\shell\open\command') then
+    begin
+      result := ReadString('');
+      CloseKey;
+    end;
+  finally
+    Free;
+  end;
+end;
+var
+  browser: string;
+  i: integer = 2;
+{$ENDIF}
+begin
+  {$IFNDEF WINDOWS}
+  result := LCLIntf.OpenURL(value);
+  {$ELSE}
+  if pos('file://', value) = 0 then
+    result := LCLIntf.OpenURL(value)
+  else
+  begin
+    browser := GetDefaultBrowserForCurrentUser;
+    if browser.isEmpty then
+      result := LCLIntf.OpenURL(value)
+    else
+    begin
+      if browser[1] = '"' then
+      begin
+        while browser[i] <> '"' do
+        begin
+          if i > browser.length then
+            break;
+          i += 1;
+        end;
+        if i <= browser.length then
+          browser := browser[1..i];
+      end;
+      result := ShellExecuteW(0, 'open', PWideChar(WideString(browser)),
+        PWideChar(WideString(value)), nil, SW_SHOWNORMAL) > 32;
+    end;
+  end;
+  {$ENDIF}
 end;
 
 initialization

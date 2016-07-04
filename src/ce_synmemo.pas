@@ -9,7 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
-  fpjson, jsonparser, LCLIntf,
+  fpjson, jsonparser,
   ce_common, ce_observer, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange;
 
