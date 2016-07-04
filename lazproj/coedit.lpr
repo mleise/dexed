@@ -11,7 +11,8 @@ uses
   ce_writableComponent, ce_staticmacro, ce_inspectors, ce_editoroptions,
   ce_dockoptions, ce_shortcutseditor, ce_mru, ce_processes, ce_dubproject,
   ce_dialogs, ce_dubprojeditor, ce_controls, ce_dfmt, ce_lcldragdrop,
-  ce_stringrange, ce_dlangmaps, ce_projgroup, ce_projutils, ce_d2synpresets;
+  ce_stringrange, ce_dlangmaps, ce_projgroup, ce_projutils, ce_d2synpresets,
+  ce_dastworx;
 
 {$R *.res}
 

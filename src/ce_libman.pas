@@ -5,8 +5,9 @@ unit ce_libman;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, ce_common, ce_writableComponent, ce_dcd, LazFileUtils,
-  ce_dialogs, ce_projutils, ce_interfaces, ce_dlang, ghashmap, ghashset;
+  Classes, SysUtils, FileUtil, ce_common, ce_writableComponent, LazFileUtils,
+  ghashmap, ghashset, process,
+  ce_dcd, ce_dialogs, ce_projutils, ce_interfaces, ce_dlang, ce_dastworx;
 
 type
 
@@ -220,11 +221,11 @@ end;
 procedure TLibraryItem.updateModulesInfo;
 var
   prj: ICECommonProject;
-  tks: TLexTokenList;
   str: TStringList;
-  lst: TStringList;
-  mdi: TModuleInfo;
+  mdi: TModuleInfo = nil;
+  fls: string = '';
   fle: string;
+  lne: string;
   i: integer;
 begin
   fModules.Clear;
@@ -233,52 +234,70 @@ begin
   if hasValidLibProject then
   begin
     prj := loadProject(fLibProject, true);
-    tks := TLexTokenList.Create;
     str := TStringList.Create;
     try
       for i:= 0 to prj.sourcesCount-1 do
       begin
         fle := prj.sourceAbsolute(i);
-        // note: in CE, object files are considered as source since they're taken in the cmdline file list
         if not hasDlangSyntax(fle.extractFileExt) then
           continue;
-        str.LoadFromFile(fle);
-        lex(str.Text, tks, nil, [lxoNoComments]);
-        mdi := addModuleInfo;
-        mdi.name := getModuleName(tks);
-        fModulesByName.insert(mdi.name, mdi);
-        getImports(tks, mdi.imports);
-        tks.Clear;
+        fls += fle;
+        if i <> prj.sourcesCount-1 then
+          fls += PathSeparator;
+      end;
+      getModulesImports(fls, str);
+      for i := 0 to str.Count-1 do
+      begin
+        lne := str[i];
+        if lne[1] = '"' then
+        begin
+          lne := lne[2..lne.length-1];
+          mdi := addModuleInfo;
+          mdi.name:= lne;
+          fModulesByName.insert(lne, mdi);
+        end else
+        begin
+          if not lne.isEmpty and mdi.isNotNil then
+            mdi.imports.Add(lne);
+        end;
       end;
     finally
-      tks.Free;
       str.Free;
       prj.getProject.Free;
     end;
   end else if hasValidLibSourcePath then
   begin
-    lst := TStringList.Create;
     str := TStringList.Create;
-    tks := TLexTokenList.Create;
     try
-      listFiles(lst, fLibSourcePath, true);
-      for i := 0 to lst.Count-1 do
+      listFiles(str, fLibSourcePath, true);
+      for i:= 0 to str.Count-1 do
       begin
-        fle := lst[i];
+        fle := str[i];
         if not hasDlangSyntax(fle.extractFileExt) then
           continue;
-        str.LoadFromFile(fle);
-        lex(str.Text, tks, nil, [lxoNoComments]);
-        mdi := addModuleInfo;
-        mdi.name := getModuleName(tks);
-        fModulesByName.insert(mdi.name, mdi);
-        getImports(tks, mdi.imports);
-        tks.Clear;
+        fls += fle;
+        if i <> str.Count-1 then
+          fls += PathSeparator;
+      end;
+      str.Clear;
+      getModulesImports(fls, str);
+      for i := 0 to str.Count-1 do
+      begin
+        lne := str[i];
+        if lne[1] = '"' then
+        begin
+          lne := lne[2..lne.length-1];
+          mdi := addModuleInfo;
+          mdi.name:= lne;
+          fModulesByName.insert(lne, mdi);
+        end else
+        begin
+          if not lne.isEmpty and mdi.isNotNil then
+            mdi.imports.Add(lne);
+        end;
       end;
     finally
-      lst.Free;
       str.Free;
-      tks.Free;
     end;
   end;
 end;
