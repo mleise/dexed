@@ -49,8 +49,6 @@ type
     fHasValidSourcePath: boolean;
     fHasValidLibFile: boolean;
     fHasValidLibProject: boolean;
-    procedure setDependencies(value: TStringList);
-    procedure setModules(value: TCollection);
     procedure setLibProject(const value: string);
     procedure setLibFile(const value: string);
     procedure setLibSourcePath(const value: string);
@@ -63,9 +61,6 @@ type
     property libFile: string read fLibFile write setLibFile;
     property libProject: string read fLibProject write setLibProject;
     property enabled: boolean read fEnabled write fEnabled default true;
-    // TODO-clibman: dont forget that these props are not written
-    property dependencies: TStringList read fDependencies write setDependencies stored false;
-    property modules: TCollection read fModules write setModules stored false;
     // TODO-cmaintenace: remove this property from 3 update 1
     property projectFile: string read fLibProject write fLibProject stored false;
   public
@@ -77,6 +72,8 @@ type
     property hasValidLibFile: boolean read fHasValidLibFile;
     property hasValidLibProject: boolean read fHasValidLibProject;
     property hasValidLibSourcePath: boolean read fHasValidSourcePath;
+    property dependencies: TStringList read fDependencies;
+    property modules: TCollection read fModules;
     property moduleByIndex[value: integer]: TModuleInfo read getModule;
   end;
 
@@ -85,7 +82,7 @@ type
   (**
    * Represents all the D libraries handled by Coedit.
    *)
-  TLibraryManager = class(TWritableLfmTextComponent)
+  TLibraryManager = class(TWritableLfmTextComponent, IFPObserver)
   type
     TItemsByAlias = specialize TStringHashMap<TLibraryItem>;
   strict private
@@ -97,6 +94,7 @@ type
     procedure setCollection(value: TCollection);
     procedure updateItemsByAlias;
     function getLibrariesCount: integer;
+    procedure FPOObservedChanged(ASender : TObject; Operation : TFPObservedOperation; Data : Pointer);
   published
     property libraries: TCollection read fCollection write setCollection;
   public
@@ -120,7 +118,7 @@ type
     procedure getLibsForSource(source, libs, paths: TStrings);
     //
     procedure updateDCD;
-    // find the aliases of the libraries used by this library.
+    // find the aliases of the libraries used by the libraries.
     procedure updateCrossDependencies;
     property librariesCount: integer read getLibrariesCount;
     property libraryByIndex[value: integer]: TLibraryItem read getLibraryByIndex;
@@ -193,16 +191,6 @@ end;
 function TLibraryItem.hasModule(const value: string): boolean;
 begin
   exit(fModulesByName.contains(value));
-end;
-
-procedure TLibraryItem.setModules(value: TCollection);
-begin
-  fModules.Assign(value);
-end;
-
-procedure TLibraryItem.setDependencies(value: TStringList);
-begin
-  fDependencies.Assign(value);
 end;
 
 procedure TLibraryItem.setLibProject(const value: string);
@@ -306,6 +294,7 @@ begin
   inherited;
   fItemsByAlias:= TItemsByAlias.create;
   fCollection := TCollection.Create(TLibraryItem);
+  fCollection.FPOAttachObserver(self);
   fname := getCoeditDocPath + libFname;
   if fname.fileExists then
     loadFromFile(fname);
@@ -415,6 +404,17 @@ begin
   fCollection.assign(value);
 end;
 
+procedure TLibraryManager.FPOObservedChanged(ASender: TObject; Operation:
+  TFPObservedOperation; Data: Pointer);
+begin
+  if (Operation = ooDeleteItem) and data.isNotNil and
+    fItemsByAlias.contains(TLibraryItem(data).libAlias) then
+  begin
+    fItemsByAlias.delete(TLibraryItem(data).libAlias);
+    updateCrossDependencies;
+  end;
+end;
+
 function TLibraryManager.getLibraryByIndex(index: integer): TLibraryItem;
 begin
   exit(TLibraryItem(fCollection.Items[index]));
@@ -451,7 +451,8 @@ var
   i: Integer;
 begin
   if not DcdWrapper.available then exit;
-  // note: new libraryByIndex are directly handled but removed ones still in cache until server restarts.
+  // note: new libraries are directly handled but those who are removed
+  // remain in cache until next session.
   str := TStringList.Create;
   try
     for i := 0 to fCollection.Count-1 do
@@ -569,11 +570,14 @@ begin
       begin
         sel.insert(itm);
         // get libraries for import I dependencies
-        for j:= 0 to itm.dependencies.Count-1 do
+        for j:= itm.dependencies.Count-1 downto 0 do
         begin
           dep := libraryByAlias[itm.dependencies[j]];
           if dep.isNotNil then
-            sel.insert(dep);
+            sel.insert(dep)
+            //auto update: item removed, detect on usage that it has disapeared
+          else
+            itm.dependencies.Delete(j);
         end;
       end;
     end;
