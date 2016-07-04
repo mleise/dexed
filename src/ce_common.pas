@@ -309,6 +309,7 @@ class function TStringHash.hash(const key: string; maxBucketsPow2: longword): lo
 var
   i: integer;
 begin
+  {$PUSH}{$R-}
   result := 2166136261;
   for i:= 1 to key.length do
   begin
@@ -316,6 +317,7 @@ begin
     result *= 16777619;
   end;
   result := result and (maxBucketsPow2-1);
+  {$POP}
 end;
 
 class function TObjectHash.hash(key: TObject; maxBucketsPow2: longword): longword;
@@ -323,6 +325,7 @@ var
   ptr: PByte;
   i: integer;
 begin
+  {$PUSH}{$R-}
   ptr := PByte(key);
   result := 2166136261;
   {$IFDEF CPU32}
@@ -336,6 +339,7 @@ begin
     ptr += 1;
   end;
   result := result and (maxBucketsPow2-1);
+  {$POP}
 end;
 
 procedure TCEPersistentShortcut.assign(aValue: TPersistent);
