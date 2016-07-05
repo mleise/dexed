@@ -17,14 +17,18 @@ type
   private
     class var fList: TStringList;
     cbb: TComboBox;
-    function getText: string;
+    fGetLatestTag: boolean;
+    function getPackageName: string;
+    function getPackageVersion: string;
     procedure getList(sender: TObject);
+    procedure btnTagCLick(sender: TObject);
   public
-    class function showAndWait(out value: string): TModalResult; static;
+    class function showAndWait(out pName, pVersion: string): TModalResult; static;
     class constructor classCtor;
     class destructor classDtor;
     constructor Create(TheOwner: TComponent); override;
-    property text: string read getText;
+    property packageName: string read getPackageName;
+    property packageVersion: string read getPackageVersion;
   end;
 
   { TCELibManEditorWidget }
@@ -195,6 +199,7 @@ var
   bok: TBitBtn;
   bno: TBitBtn;
   bww: TBitBtn;
+  bsv: TSpeedButton;
 begin
   inherited;
 
@@ -211,6 +216,20 @@ begin
   cbb.BorderSpacing.Around := 6;
   cbb.Items.AddStrings(fList);
   cbb.Sorted:= true;
+
+  bsv := TSpeedButton.Create(self);
+  bsv.Parent := self;
+  bsv.Align := alRight;
+  bsv.Width:= 28;
+  bsv.BorderSpacing.Around := 4;
+  bsv.ShowHint := true;
+  bsv.Hint := 'get latest tag, by default get master';
+  bsv.OnClick:= @btnTagCLick;
+  bsv.AllowAllUp := true;
+  bsv.GroupIndex := 1;
+  bsv.Layout:= blGlyphTop;
+  bsv.Spacing:= 2;
+  AssignPng(bsv, 'TAG_PURPLE');
 
   bww := TBitBtn.Create(self);
   bww.Parent := self;
@@ -249,6 +268,11 @@ begin
   AssignPng(bno, 'CANCEL');
 end;
 
+procedure TDubPackageQueryForm.btnTagCLick(sender: TObject);
+begin
+  fGetLatestTag:= TSpeedButton(sender).down;
+end;
+
 procedure TDubPackageQueryForm.getList(sender: TObject);
 var
   pge: string;
@@ -276,21 +300,49 @@ begin
   cbb.Items.AddStrings(fList);
 end;
 
-function TDubPackageQueryForm.getText: string;
+function TDubPackageQueryForm.getPackageName: string;
 begin
   result := cbb.Text;
 end;
 
-class function TDubPackageQueryForm.showAndWait(out value: string): TModalResult;
+function TDubPackageQueryForm.getPackageVersion: string;
+begin
+  if fGetLatestTag then
+  begin
+    with TFPHTTPClient.Create(nil) do
+    try
+      try
+        result := Get('https://code.dlang.org/api/packages/' + packageName + '/latest');
+      except
+        result := 'master';
+      end;
+    finally
+      Free;
+    end;
+    if (result.length >= 7) and (result[2] in ['0'..'9']) then
+      result := result[2..result.length-1]
+    else
+      result := 'master';
+  end
+  else result := 'master';
+end;
+
+class function TDubPackageQueryForm.showAndWait(out pName, pVersion: string): TModalResult;
 var
   frm: TDubPackageQueryForm;
 begin
   frm := TDubPackageQueryForm.Create(nil);
   result := frm.ShowModal;
   if result = mrOk then
-    value := frm.text
+  begin
+    pName := frm.packageName;
+    pVersion := frm.packageVersion;
+  end
   else
-    value := '';
+  begin
+    pName := '';
+    pVersion := ''
+  end;
   frm.Free;
 end;
 
@@ -298,6 +350,7 @@ procedure TCELibManEditorWidget.btnDubFetchClick(Sender: TObject);
 var
   dub: TProcess;
   nme: string = '';
+  ver: string;
   msg: string;
   pth: string;
   dfn: string;
@@ -305,11 +358,10 @@ var
   itf: ICEMessagesDisplay;
   err: integer;
   prj: TCEDubProject;
-  upd: boolean = false;
   ovw: boolean = false;
   row: TListItem = nil;
 begin
-  if TDubPackageQueryForm.showAndWait(nme) <> mrOk then
+  if TDubPackageQueryForm.showAndWait(nme, ver) <> mrOk then
     exit;
   if List.Items.FindCaption(0, nme, false, false, false).isNotNil then
   begin
@@ -318,35 +370,28 @@ begin
     else ovw := true;
   end;
   {$IFDEF WINDOWS}
-  pth := GetEnvironmentVariable('APPDATA') + '\dub\packages\' + nme + '-master';
+  pth := GetEnvironmentVariable('APPDATA') + '\dub\packages\' + nme + '-' + ver;
   {$ELSE}
-  pth := GetEnvironmentVariable('HOME') + '/.dub/packages/' + nme + '-master';
+  pth := GetEnvironmentVariable('HOME') + '/.dub/packages/' + nme + '-' + ver;
   {$ENDIF}
   itf := getMessageDisplay;
   if pth.dirExists and not DeleteDirectory(pth, false) then
   begin
-    upd := true;
-    itf.message('information, the dub package is already fetched and will be upgraded', nil, amcMisc, amkInf);
+    itf.message('the existing package cant be deleted. To be updated the package must be deleted manually',
+      nil, amcMisc, amkWarn);
+    exit;
   end;
 
-  // fetch / updgrade
+  // fetch
   dub := TProcess.Create(nil);
   try
     dub.Executable:= 'dub';
     dub.Options:= [poUsePipes, poStderrToOutPut];
     dub.ShowWindow:= swoHIDE;
-    if not upd then
-    begin
-      dub.Parameters.Add('fetch');
-      dub.Parameters.Add(nme);
-      // fetch project, version handling, pth is hard to set because of semVer suffix.
-      // needed: a folder monitor to detect the one created by dub.
+    dub.Parameters.Add('fetch');
+    dub.Parameters.Add(nme);
+    if ver = 'master' then
       dub.Parameters.Add('--version=~master');
-    end else
-    begin
-      dub.CurrentDirectory := pth;
-      dub.Parameters.Add('upgrade');
-    end;
     dub.Execute;
     while dub.Running do sleep(10);
     err := dub.ExitStatus;
