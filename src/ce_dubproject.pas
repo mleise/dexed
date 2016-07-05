@@ -7,9 +7,50 @@ interface
 uses
   Classes, SysUtils, xfpjson, xjsonparser, xjsonscanner, process, strutils,
   LazFileUtils, RegExpr,
-  ce_common, ce_interfaces, ce_observer, ce_dialogs, ce_processes;
+  ce_common, ce_interfaces, ce_observer, ce_dialogs, ce_processes,
+  ce_writableComponent;
 
 type
+
+  TDubLinkMode = (dlmSeparate, dlmAllAtOnce, dlmSingleFile);
+
+  (**
+   * Stores the build options, always applied when a project is build
+   *)
+  TCEDubBuildOptionsBase = class(TWritableLfmTextComponent)
+  strict private
+    fParallel: boolean;
+    fForceRebuild: boolean;
+    fLinkMode: TDubLinkMode;
+    fCombined: boolean;
+    fOther: string;
+    procedure setLinkMode(value: TDubLinkMode);
+  published
+    property parallel: boolean read fParallel write fParallel;
+    property forceRebuild: boolean read fForceRebuild write fForceRebuild;
+    property linkMode: TDubLinkMode read fLinkMode write setLinkMode;
+    property combined: boolean read fCombined write fCombined;
+    property other: string read fOther write fOther;
+  public
+    procedure assign(source: TPersistent); override;
+    procedure getOpts(options: TStrings);
+  end;
+
+  (**
+   * Make the build options editable
+   *)
+   TCEDubBuildOptions = class(TCEDubBuildOptionsBase, ICEEditableOptions)
+   strict private
+     fBackup: TCEDubBuildOptionsBase;
+     function optionedWantCategory(): string;
+     function optionedWantEditorKind: TOptionEditorKind;
+     function optionedWantContainer: TPersistent;
+     procedure optionedEvent(anEvent: TOptionEditorEvent);
+     function optionedOptionsModified: boolean;
+   public
+     constructor create(aOwner: TComponent); override;
+     destructor destroy; override;
+   end;
 
   TCEDubProject = class(TComponent, ICECommonProject)
   private
@@ -106,7 +147,12 @@ var
 
 implementation
 
+var
+  dubBuildOptions: TCEDubBuildOptions;
+
 const
+
+  optFname = 'dubbuild.txt';
 
   DubBuiltTypeName: array[TDubBuildType] of string = ('plain', 'debug', 'release',
     'unittest', 'docs', 'ddox', 'profile', 'cov', 'unittest-cov'
@@ -114,6 +160,98 @@ const
 
   DubDefaultConfigName = '(default config)';
 
+{$REGION Options ---------------------------------------------------------------}
+procedure TCEDubBuildOptionsBase.setLinkMode(value: TDubLinkMode);
+begin
+  if fLinkMode = value then
+    exit;
+  if not (value in [low(TDubLinkMode)..high(TDubLinkMode)]) then
+    value := low(TDubLinkMode);
+  fLinkMode:=value;
+end;
+
+procedure TCEDubBuildOptionsBase.assign(source: TPersistent);
+var
+  opts: TCEDubBuildOptionsBase;
+begin
+  if source is TCEDubBuildOptionsBase then
+  begin
+    opts := TCEDubBuildOptionsBase(source);
+    parallel:=opts.parallel;
+    forceRebuild:=opts.forceRebuild;
+    combined:=opts.combined;
+    linkMode:=opts.linkMode;
+    other:=opts.other;
+  end
+  else inherited;
+end;
+
+procedure TCEDubBuildOptionsBase.getOpts(options: TStrings);
+begin
+  if parallel then
+    options.Add('--parallel');
+  if forceRebuild then
+    options.Add('--force');
+  if combined then
+    options.Add('--combined');
+  case linkMode of
+    dlmAllAtOnce: options.Add('--build-mode=allAtOnce');
+    dlmSingleFile: options.Add('--build-mode=singleFile');
+  end;
+  if other.isNotEmpty then
+    CommandToList(other, options);
+end;
+
+constructor TCEDubBuildOptions.create(aOwner: TComponent);
+var
+  fname: string;
+begin
+  inherited;
+  fBackup := TCEDubBuildOptionsBase.Create(nil);
+  EntitiesConnector.addObserver(self);
+  fname := getCoeditDocPath + optFname;
+  if fname.fileExists then
+    loadFromFile(fname);
+end;
+
+destructor TCEDubBuildOptions.destroy;
+begin
+  saveToFile(getCoeditDocPath + optFname);
+  EntitiesConnector.removeObserver(self);
+  fBackup.free;
+  inherited;
+end;
+
+function TCEDubBuildOptions.optionedWantCategory(): string;
+begin
+  exit('DUB build');
+end;
+
+function TCEDubBuildOptions.optionedWantEditorKind: TOptionEditorKind;
+begin
+  exit(oekGeneric);
+end;
+
+function TCEDubBuildOptions.optionedWantContainer: TPersistent;
+begin
+  exit(self);
+  fBackup.assign(self);
+end;
+
+procedure TCEDubBuildOptions.optionedEvent(anEvent: TOptionEditorEvent);
+begin
+  case anEvent of
+    oeeAccept: fBackup.assign(self);
+    oeeCancel: self.assign(fBackup);
+    oeeSelectCat:fBackup.assign(self);
+  end;
+end;
+
+function TCEDubBuildOptions.optionedOptionsModified: boolean;
+begin
+  exit(false);
+end;
+{$ENDREGION}
 
 {$REGION Standard Comp/Obj -----------------------------------------------------}
 constructor TCEDubProject.create(aOwner: TComponent);
@@ -295,6 +433,7 @@ begin
     if (fConfigs.Count <> 1) and (fConfigs[0] <> DubDefaultConfigName) then
       str.Add('--config=' + fConfigs[fConfigIx]);
     str.Add('--compiler=' + DubCompilerFilename);
+    dubBuildOptions.getOpts(str);
     result := str.Text;
   finally
     str.Free;
@@ -465,6 +604,7 @@ begin
     if (fConfigs.Count <> 1) and (fConfigs[0] <> DubDefaultConfigName) then
       fDubProc.Parameters.Add('--config=' + fConfigs[fConfigIx]);
     fDubProc.Parameters.Add('--compiler=' + DubCompilerFilename);
+    dubBuildOptions.getOpts(fDubProc.Parameters);
     if run and runArgs.isNotEmpty then
       fDubProc.Parameters.Add('--' + runArgs);
     fDubProc.Execute;
@@ -982,5 +1122,8 @@ end;
 
 initialization
   setDubCompiler(dmd);
+  dubBuildOptions:= TCEDubBuildOptions.create(nil);
+finalization
+  dubBuildOptions.free;
 end.
 
