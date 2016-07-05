@@ -45,7 +45,7 @@ type
   end;
 
   TLexTokenKind = (ltkIllegal, ltkChar, ltkComment, ltkIdentifier, ltkKeyword,
-    ltkNumber, ltkOperator, ltkString, ltkSymbol);
+    ltkNumber, ltkOperator, ltkString, ltkSymbol, ltkWhite);
 
 const
   LexTokenKindString: array[TLexTokenKind] of string =
@@ -57,7 +57,8 @@ const
     'Number    ',
     'Operator  ',
     'String    ',
-    'Symbol    ');
+    'Symbol    ',
+    'White     ');
 
 type
 
@@ -73,7 +74,7 @@ type
     Data: string;
   end;
 
-  TLexOption = (lxoNoComments);
+  TLexOption = (lxoNoComments, lxoNoWhites);
   TLexOptions = set of TLexOption;
 
   TLexFoundEvent = procedure(const aToken: PLexToken; out doStop: boolean) of Object;
@@ -140,12 +141,12 @@ procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = n
 (**
  * Outputs the module name from a tokenized D source.
  *)
-function getModuleName(const list: TLexTokenList): string;
+function getModuleName(list: TLexTokenList): string;
 
 (**
  * Fills a list with all the modules imported in a tokenized D source.
  *)
-procedure getImports(const list: TLexTokenList; imports: TStrings);
+procedure getImports(list: TLexTokenList; imports: TStrings);
 
 (**
  * Compares two TPoints.
@@ -333,11 +334,17 @@ begin
     identifier := '';
 
     // skip blanks
-    while isWhite(reader.head^) do
+    if isWhite(reader.head^) then
     begin
-      if isOutOfBound then
-        exit;
-      reader.Next;
+      reader.saveBeginning;
+      while isWhite(reader.head^) do
+      begin
+        if isOutOfBound then
+          exit;
+        reader.Next;
+      end;
+      if not (lxoNoWhites in Options) then
+        addToken(ltkWhite);
     end;
 
     // line comment
@@ -989,7 +996,7 @@ begin
   Result.fIndex := -1;
 end;
 
-function getModuleName(const list: TLexTokenList): string;
+function getModuleName(list: TLexTokenList): string;
 var
   ltk: PLexToken;
   mtok: boolean = false;
@@ -1016,7 +1023,7 @@ begin
   end;
 end;
 
-procedure getImports(const list: TLexTokenList; imports: TStrings);
+procedure getImports(list: TLexTokenList; imports: TStrings);
 var
   i: integer;
   imp: boolean = false;

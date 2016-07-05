@@ -468,7 +468,7 @@ begin
   if not fServerListening then exit;
   if fDoc = nil then exit;
   //
-  i := fDoc.MouseStart;
+  i := fDoc.MouseBytePosition;
   if i = 0 then exit;
   //
   terminateClient;

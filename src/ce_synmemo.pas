@@ -167,7 +167,7 @@ type
     fAutoClosedPairs: TAutoClosePairs;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
-    function getMouseFileBytePos: Integer;
+    function getMouseBytePosition: Integer;
     procedure changeNotify(Sender: TObject);
     procedure highlightCurrentIdentifier;
     procedure saveCache;
@@ -257,7 +257,7 @@ type
     property phobosDocRoot: string read fPhobosDocRoot write fPhobosDocRoot;
     property detectIndentMode: boolean read fDetectIndentMode write fDetectIndentMode;
     property disableFileDateCheck: boolean read fDisableFileDateCheck write fDisableFileDateCheck;
-    property MouseStart: Integer read getMouseFileBytePos;
+    property MouseBytePosition: Integer read getMouseBytePosition;
     property D2Highlighter: TSynD2Syn read fD2Highlighter;
     property TxtHighlighter: TSynTxtSyn read fTxtHighlighter;
     property defaultFontSize: Integer read fDefaultFontSize write setDefaultFontSize;
@@ -1355,9 +1355,10 @@ procedure TCESynMemo.autoClosePair(value: TAutoClosedPair);
 var
   i, p: integer;
   tk0, tk1: PLexToken;
+  str: string;
 begin
   // TODO: editor SelStart doesnt match exactly, see why, also a problem in lexCanCloseBrace().
-  if value <> autoCloseSquareBracket then
+  if value in [autoCloseBackTick, autoCloseDoubleQuote] then
   begin
     p := selStart;
     lex(Lines.Text, fLexToks);
@@ -1369,6 +1370,24 @@ begin
         if tk0^.kind = TLexTokenKind.ltkString then
           exit;
     end;
+  end else if value = autoCloseSingleQuote then
+  begin
+    p := selStart;
+    lex(Lines.Text, fLexToks);
+    for i:=0 to fLexToks.Count-2 do
+    begin
+      tk0 := fLexToks[i];
+      tk1 := fLexToks[i+1];
+      if (tk0^.offset+1 <= p) and (tk1^.offset+1 > p) then
+        if tk0^.kind = TLexTokenKind.ltkChar then
+          exit;
+    end;
+  end else if value = autoCloseSquareBracket then
+  begin
+    str := lineText;
+    i := LogicalCaretXY.X;
+    if (i <= str.length) and (lineText[i] = ']') then
+      exit;
   end;
   BeginUndoBlock;
   ExecuteCommand(ecChar, autoClosePair2Char[value], nil);
@@ -1839,7 +1858,7 @@ begin
   fFileDate := newDate;
 end;
 
-function TCESynMemo.getMouseFileBytePos: Integer;
+function TCESynMemo.getMouseBytePosition: Integer;
 var
   i, len, llen: Integer;
 begin
@@ -1847,10 +1866,6 @@ begin
   if fMousePos.y-1 > Lines.Count-1 then exit;
   llen := Lines[fMousePos.y-1].length;
   if fMousePos.X > llen  then exit;
-  //
-  // something note really clear:
-  // TCEEditorWidget.getSymbolLoc works when using the line ending of the file.
-  // TCESynMemo.getMouseFileBytePos works when using the line ending from the system.
   len := getSysLineEndLen;
   for i:= 0 to fMousePos.y-2 do
     result += Lines[i].length + len;
