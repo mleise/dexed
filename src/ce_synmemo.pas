@@ -32,6 +32,21 @@ type
     autoCloseOnNewLineLexically
   );
 
+  TAutoClosedPair = (
+    autoCloseSingleQuote,
+    autoCloseDoubleQuote,
+    autoCloseBackTick,
+    autoCloseSquareBracket
+  );
+
+  TAutoClosePairs = set of TAutoClosedPair;
+
+const
+
+  autoClosePair2Char: array[TAutoClosedPair] of char = (#39, '"', '`', ']');
+
+type
+
   TIdentifierMatchOptions = set of TIdentifierMatchOption;
 
   TBreakPointModification = (bpAdded, bpRemoved);
@@ -149,6 +164,7 @@ type
     fPhobosDocRoot: string;
     fAlwaysAdvancedFeatures: boolean;
     fIsProjectDescription: boolean;
+    fAutoClosedPairs: TAutoClosePairs;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseFileBytePos: Integer;
@@ -178,6 +194,7 @@ type
     function lexCanCloseBrace: boolean;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
     procedure gotoToChangedArea(next: boolean);
+    procedure autoClosePair(value: TAutoClosedPair);
   protected
     procedure DoEnter; override;
     procedure DoExit; override;
@@ -247,6 +264,7 @@ type
     property ddocDelay: Integer read fDDocDelay write setDDocDelay;
     property autoDotDelay: Integer read fAutoDotDelay write setAutoDotDelay;
     property autoCloseCurlyBrace: TBraceAutoCloseStyle read fAutoCloseCurlyBrace write fAutoCloseCurlyBrace;
+    property autoClosedPairs: TAutoClosePairs read fAutoClosedPairs write fAutoClosedPairs;
   end;
 
   procedure SetDefaultCoeditKeystrokes(ed: TSynEdit);
@@ -1332,6 +1350,31 @@ begin
     true: result := mainYes;
   end;
 end;
+
+procedure TCESynMemo.autoClosePair(value: TAutoClosedPair);
+var
+  i, p: integer;
+  tk0, tk1: PLexToken;
+begin
+  // TODO: editor SelStart doesnt match exactly, see why, also a problem in lexCanCloseBrace().
+  if value <> autoCloseSquareBracket then
+  begin
+    p := selStart;
+    lex(Lines.Text, fLexToks);
+    for i:=0 to fLexToks.Count-2 do
+    begin
+      tk0 := fLexToks[i];
+      tk1 := fLexToks[i+1];
+      if (tk0^.offset+1 <= p) and (tk1^.offset+1 > p) then
+        if tk0^.kind = TLexTokenKind.ltkString then
+          exit;
+    end;
+  end;
+  BeginUndoBlock;
+  ExecuteCommand(ecChar, autoClosePair2Char[value], nil);
+  ExecuteCommand(ecLeft, #0, nil);
+  EndUndoBlock;
+end;
 {$ENDREGION}
 
 {$REGION DDoc & CallTip --------------------------------------------------------}
@@ -1896,6 +1939,14 @@ begin
   c := Key;
   inherited;
   case c of
+    #39: if autoCloseSingleQuote in fAutoClosedPairs then
+      autoClosePair(autoCloseSingleQuote);
+    '"': if autoCloseDoubleQuote in fAutoClosedPairs then
+      autoClosePair(autoCloseDoubleQuote);
+    '`': if autoCloseBackTick in fAutoClosedPairs then
+      autoClosePair(autoCloseBackTick);
+    '[': if autoCloseSquareBracket in fAutoClosedPairs then
+      autoClosePair(autoCloseSquareBracket);
     '(': showCallTips(false);
     ')': if fCallTipWin.Visible then decCallTipsLvl;
     '{':

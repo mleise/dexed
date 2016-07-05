@@ -61,6 +61,7 @@ type
     fAutoCLoseCurlyBrace: TBraceAutoCloseStyle;
     fPhobosDocRoot: TCEPathname;
     fAlwaysAdvancedFeatures: boolean;
+    fAutoClosedPairs: TAutoClosePairs;
     //
     procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
@@ -80,6 +81,7 @@ type
   published
     property alwaysAdvancedFeatures: boolean read fAlwaysAdvancedFeatures write fAlwaysAdvancedFeatures;
     property autoCloseCurlyBrace: TBraceAutoCloseStyle read fAutoCLoseCurlyBrace write fAutoCLoseCurlyBrace default TBraceAutoCloseStyle.autoCloseNever;
+    property autoClosedPairs: TAutoClosePairs read fAutoClosedPairs write fAutoClosedPairs default[];
     property autoDotDelay: integer read fAutoDotDelay write SetautoDotDelay;
     property background: TColor read fBackground write fBackground default clWhite;
     property blockIndentation: Integer read fBlockIdent write fBlockIdent default 4;
@@ -273,7 +275,8 @@ begin
     //
     fAlwaysAdvancedFeatures:=srcopt.fAlwaysAdvancedFeatures;
     fResetFontSize:=srcopt.fResetFontSize;
-    fAutoCLoseCurlyBrace := srcopt.fAutoCLoseCurlyBrace;
+    fAutoCloseCurlyBrace := srcopt.fAutoCloseCurlyBrace;
+    fAutoClosedPairs := srcopt.fAutoClosedPairs;
     fCompletionMenuWidth:=srcopt.fCompletionMenuWidth;
     fCompletionMenuLines:=srcopt.fCompletionMenuLines;
     fCompletionMenuCaseCare:=srcopt.fCompletionMenuCaseCare;
@@ -629,6 +632,7 @@ begin
     anEditor.Font.Size := savedSize;
 
   anEditor.autoCloseCurlyBrace            := fAutoCLoseCurlyBrace;
+  anEditor.autoClosedPairs                := fAutoClosedPairs;
   anEditor.completionMenu.TheForm.Width   := fCompletionMenuWidth;
   anEditor.completionMenu.LinesInWindow   := fCompletionMenuLines;
   anEditor.completionMenu.CaseSensitive   := fCompletionMenuCaseCare;
