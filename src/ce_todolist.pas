@@ -433,16 +433,19 @@ begin
   fToolProc.OnTerminate := @toolTerminated;
 
   // files passed to the tool argument
-  i := 0;
-  j := fProj.sourcesCount-1;
-  if ctxt = tcProject then for i := 0 to j do
+  if (ctxt = tcProject) and (fProj <> nil) then
   begin
-    nme := fProj.sourceAbsolute(i);
-    if not hasDlangSyntax(nme.extractFileExt) then
-      continue;
-    str += nme;
-    if i <> j then
-      str += PathSeparator;
+    i := 0;
+    j := fProj.sourcesCount-1;
+    for i := 0 to j do
+    begin
+      nme := fProj.sourceAbsolute(i);
+      if not hasDlangSyntax(nme.extractFileExt) then
+        continue;
+      str += nme;
+      if i <> j then
+        str += PathSeparator;
+    end;
   end
   else str := fDoc.fileName;
   fToolProc.Parameters.Add(str);
