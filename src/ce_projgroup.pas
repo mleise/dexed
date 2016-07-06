@@ -431,15 +431,24 @@ end;
 
 {$REGION Widget project group things -------------------------------------------}
 procedure TCEProjectGroupWidget.BtnAddProjClick(Sender: TObject);
+var
+  fname: string;
+  added: boolean;
 begin
   with TOpenDialog.Create(nil) do
   try
+    Options:= [ofAllowMultiSelect, ofEnableSizing];
     if not execute then
       exit;
-    if projectGroup.findProject(filename) <> nil then
-      exit;
-    projectGroup.addItem(filename);
-    updateList;
+    for fname in Files do
+    begin
+      if projectGroup.findProject(fname) <> nil then
+        continue;
+      projectGroup.addItem(fname);
+      added := true;
+    end;
+    if added then
+      updateList;
   finally
     free;
   end;
