@@ -224,8 +224,10 @@ begin
   //
   fname := getCoeditDocPath + OptFname;
   if fname.fileExists then
+  begin
     fOptions.loadFromFile(fname);
-  fOptions.AssignTo(self);
+    fOptions.AssignTo(self);
+  end;
   //
   EntitiesConnector.addObserver(self);
 end;

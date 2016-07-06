@@ -470,6 +470,7 @@ type
     fFlatLook: boolean;
     fDetectMain: boolean;
     fDetectRunnableImports: boolean;
+    fSplitterScrollSpeed: byte;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
@@ -479,7 +480,7 @@ type
     function getNativeProjecCompiler: TCECompiler;
     procedure setNativeProjecCompiler(value: TCECompiler);
     procedure setRunnableDestination(const value: TCEPathname);
-    procedure setFlatLook(value: boolean);
+    procedure setSplitterScsrollSpeed(value: byte);
   published
     property additionalPATH: string read getAdditionalPATH write setAdditionalPath;
     property coverModuleTests: boolean read fCovModUt write fCovModUt;
@@ -494,9 +495,10 @@ type
     property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest;
     property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
     property autoSaveProjectFiles: boolean read fAutoSaveProjectFiles write fAutoSaveProjectFiles default false;
-    property flatLook: boolean read fFlatLook write setFlatLook;
+    property flatLook: boolean read fFlatLook write fFlatLook;
     property detectMain: boolean read fDetectMain write fDetectMain;
     property detectRunnableImports: boolean read fDetectRunnableImports write fDetectRunnableImports;
+    property splitterScrollSpeed: byte read fSplitterScrollSpeed write setSplitterScsrollSpeed;
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
@@ -537,6 +539,9 @@ begin
   fBackup := TCEApplicationOptionsBase.Create(self);
   EntitiesConnector.addObserver(self);
   fDscanUnittests := true;
+  fSplitterScrollSpeed := 2;
+  fMaxRecentProjs := 10;
+  fMaxRecentDocs :=10;
 end;
 
 function TCEApplicationOptionsBase.getDubCompiler: TCECompiler;
@@ -583,9 +588,13 @@ begin
       fRunnableDest += DirectorySeparator;
 end;
 
-procedure TCEApplicationOptionsBase.setFlatLook(value: boolean);
+procedure TCEApplicationOptionsBase.setSplitterScsrollSpeed(value: byte);
 begin
-  fFlatLook := value;
+  if value < 1 then
+    value := 1
+  else if value > 10 then
+    value := 10;
+  fSplitterScrollSpeed:=value;
 end;
 
 function TCEApplicationOptionsBase.getAdditionalPATH: string;
@@ -1074,7 +1083,7 @@ var
   offs: integer;
   splt: TAnchorDockSplitter;
 begin
-  offs := -480 div WheelDelta;
+  offs := -240 * fAppliOpts.splitterScrollSpeed div WheelDelta;
   splt := TAnchorDockSplitter(sender);
   splt.MoveSplitter(offs);
   if splt.ResizeAnchor in [akLeft, akRight] then
