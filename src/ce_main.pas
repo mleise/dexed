@@ -2977,13 +2977,6 @@ end;
 
 procedure TCEMainForm.actProjOpenGroupExecute(Sender: TObject);
 begin
-  if (fProject <> nil) and not fProject.inGroup and
-    fProject.modified then
-  begin
-    if dlgFileChangeClose(fProject.filename) = mrCancel then
-      exit;
-    fProject.getProject.Free;
-  end;
   if fProjectGroup.groupModified then
   begin
     if dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel then
