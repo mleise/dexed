@@ -58,7 +58,7 @@ type
     fCompletionMenuCaseCare: boolean;
     fCompletionMenuWidth: integer;
     fCompletionMenuLines: Byte;
-    fAutoCLoseCurlyBrace: TBraceAutoCloseStyle;
+    fAutoCloseCurlyBrace: TBraceAutoCloseStyle;
     fPhobosDocRoot: TCEPathname;
     fAlwaysAdvancedFeatures: boolean;
     fAutoClosedPairs: TAutoClosePairs;
@@ -80,7 +80,7 @@ type
     procedure setLineNumEvery(value: integer);
   published
     property alwaysAdvancedFeatures: boolean read fAlwaysAdvancedFeatures write fAlwaysAdvancedFeatures;
-    property autoCloseCurlyBrace: TBraceAutoCloseStyle read fAutoCLoseCurlyBrace write fAutoCLoseCurlyBrace default TBraceAutoCloseStyle.autoCloseNever;
+    property autoCloseCurlyBrace: TBraceAutoCloseStyle read fAutoCloseCurlyBrace write fAutoCloseCurlyBrace default TBraceAutoCloseStyle.autoCloseNever;
     property autoClosedPairs: TAutoClosePairs read fAutoClosedPairs write fAutoClosedPairs default[];
     property autoDotDelay: integer read fAutoDotDelay write SetautoDotDelay;
     property background: TColor read fBackground write fBackground default clWhite;
@@ -214,7 +214,10 @@ begin
   fIdentifierMarkup.BackAlpha:=70;
   fIdentiMatchOpts := [caseSensitive];
   //
-  fCompletionMenuWidth:= 160;
+  fAutoCloseCurlyBrace:= autoCloseOnNewLineLexically;
+  fAutoClosedPairs:= [autoCloseSquareBracket];
+  //
+  fCompletionMenuWidth:= 250;
   fCompletionMenuLines:= 15;
   //
   fLineNumEvery := 5;
@@ -631,7 +634,7 @@ begin
   if not fResetFontSize then
     anEditor.Font.Size := savedSize;
 
-  anEditor.autoCloseCurlyBrace            := fAutoCLoseCurlyBrace;
+  anEditor.autoCloseCurlyBrace            := fAutoCloseCurlyBrace;
   anEditor.autoClosedPairs                := fAutoClosedPairs;
   anEditor.completionMenu.TheForm.Width   := fCompletionMenuWidth;
   anEditor.completionMenu.LinesInWindow   := fCompletionMenuLines;

@@ -26,10 +26,6 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Align = alClient
         BorderSpacing.Around = 2
         DefaultItemHeight = 16
-        Font.Height = -12
-        Font.Name = 'Courier New'
-        Font.Quality = fqProof
-        Font.Style = [fsBold]
         HideSelection = False
         Images = imgList
         MultiSelect = True

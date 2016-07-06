@@ -192,6 +192,8 @@ constructor TCEMessagesOptions.Create(AOwner: TComponent);
 begin
   inherited;
   fFont := TFont.Create;
+  fAutoSelect:=true;
+  fMaxCount := 1000;
 end;
 
 destructor TCEMessagesOptions.destroy;
@@ -259,6 +261,7 @@ var
   fname: string;
 begin
   fMaxMessCnt := 500;
+  fAutoSelect := true;
   fCtxt := amcAll;
   //
   fActAutoSel := TAction.Create(self);
@@ -313,8 +316,8 @@ begin
   fBtns[amcMisc]:= btnSelMisc;
   fBtns[amcProj]:= btnSelProj;
   //
-  // reminder: a tollbar button can be used here because it would have the
-  // same size as the buttons used to select a category.
+  // reminder: a toolbar button can be used here because it would have the
+  // same size as the buttons used to select the categories.
   btnClearCat.OnClick := @actClearCurCatExecute;
   AssignPng(btnClearCat, 'CLEAN');
   //

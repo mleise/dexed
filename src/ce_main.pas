@@ -542,6 +542,7 @@ begin
   fSplitterScrollSpeed := 2;
   fMaxRecentProjs := 10;
   fMaxRecentDocs :=10;
+  fFlatLook:=true;
 end;
 
 function TCEApplicationOptionsBase.getDubCompiler: TCECompiler;
@@ -941,6 +942,7 @@ begin
   fProjectGroup := getProjectGroup;
   //
   getCMdParams;
+  fAppliOpts.assignTo(self);
   //
   fInitialized := true;
 end;

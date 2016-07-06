@@ -564,6 +564,7 @@ begin
   fCompletion.TheForm.ShowInTaskBar:=stNever;
   fCompletion.ShortCut:=0;
   fCompletion.LinesInWindow:=15;
+  fCompletion.Width:= 250;
   fCallTipStrings:= TStringList.Create;
   //
   MouseLinkColor.Style:= [fsUnderline];
@@ -597,6 +598,9 @@ begin
   //
   LineHighlightColor.Background := color - $080808;
   LineHighlightColor.Foreground := clNone;
+  //
+  fAutoCloseCurlyBrace:= autoCloseOnNewLineLexically;
+  fAutoClosedPairs:= [autoCloseSquareBracket];
   //
   fDastWorxExename:= exeFullName('dastworx' + exeExt);
   //
