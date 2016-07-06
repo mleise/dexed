@@ -417,23 +417,24 @@ var
   str: string = '';
 begin
   clearTodoList;
-  if not exeInSysPath(ToolExeName) then
-    exit;
   ctxt := getContext;
-  if ctxt = tcNone then
+  case ctxt of
+    tcNone: exit;
+    tcProject: if fProj = nil then exit;
+    tcFile: if fProj = nil then exit;
+  end;
+  if not exeInSysPath(ToolExeName) then
     exit;
   //
   killToolProcess;
-  // process parameter
   fToolProc := TCEProcess.Create(nil);
   fToolProc.Executable := exeFullName(ToolExeName);
   fToolProc.Options := [poUsePipes];
   fToolProc.ShowWindow := swoHIDE;
   fToolProc.CurrentDirectory := Application.ExeName.extractFileDir;
   fToolProc.OnTerminate := @toolTerminated;
-
   // files passed to the tool argument
-  if (ctxt = tcProject) and (fProj <> nil) then
+  if (ctxt = tcProject) then
   begin
     i := 0;
     j := fProj.sourcesCount-1;
