@@ -89,6 +89,7 @@ type
   strict private
     fCollection: TCollection;
     fItemsByAlias: TItemsByAlias;
+    fMsgs: ICEMessagesDisplay;
     function getLibraryByIndex(index: integer): TLibraryItem;
     function getLibraryByAlias(const value: string): TLibraryItem;
     function getLibraryByImport(const value: string): TLibraryItem;
@@ -134,6 +135,10 @@ var
   LibMan: TLibraryManager;
 
 implementation
+
+const
+  deactivatedMessage = 'Library item "%s" could be detected but it is marked disabled, ' +
+      'the compilation will fail.';
 
 constructor TModuleInfo.Create(ACollection: TCollection);
 begin
@@ -544,14 +549,22 @@ var
   lib: TLibraryItem;
   i: Integer;
 begin
+  if fMsgs = nil then
+    fMsgs := getMessageDisplay;
   // no selector = all libs
   if aliases.isNil then
   begin
     for i:= 0 to librariesCount-1 do
     begin
       lib := libraryByIndex[i];
-      if lib.enabled and lib.hasValidLibSourcePath then
-        list.Add('-I' + lib.libSourcePath);
+      if lib.hasValidLibSourcePath then
+      begin
+        if not lib.enabled then
+          fMsgs.message(format(deactivatedMessage, [lib.libAlias]),
+            nil, amcAutoCompile, amkWarn)
+        else
+          list.Add('-I' + lib.libSourcePath);
+      end;
     end;
   end
   // else get selected libs
@@ -574,6 +587,8 @@ var
   dep: TLibraryItem;
   sel: TLibraryList;
 begin
+  if fMsgs = nil then
+    fMsgs := getMessageDisplay;
   imp := TStringList.Create;
   sel := TLibraryList.create;
   try
@@ -604,8 +619,14 @@ begin
     begin
       while true do if data.hasValidLibFile then
       begin
-        libs.Add(Data.libFile);
-        paths.Add('-I' + Data.libSourcePath);
+        if not data.enabled then
+          fMsgs.message(format(deactivatedMessage, [data.libAlias]),
+            nil, amcAutoCompile, amkWarn)
+        else
+        begin
+          libs.Add(Data.libFile);
+          paths.Add('-I' + Data.libSourcePath);
+        end;
         if not Next then
           break;
       end;
