@@ -7,7 +7,8 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, ExtCtrls, Menus,
   Buttons, dialogs, ComCtrls, StdCtrls,
   ce_widget, ce_common, ce_interfaces, ce_writableComponent, ce_observer,
-  ce_nativeproject, ce_dubproject, ce_projutils, ce_sharedres, ce_dsgncontrols;
+  ce_nativeproject, ce_dubproject, ce_projutils, ce_sharedres, ce_dsgncontrols,
+  ce_dialogs;
 
 type
 
@@ -219,9 +220,28 @@ begin
 end;
 
 procedure TProjectGroup.afterLoad;
+var
+  p: TProjectGroupItem;
+  i: integer;
+  b: boolean = false;
+  f: string = '';
 begin
   inherited;
-  fModified:=false;
+  for i:= projectCount-1 downto 0 do
+  begin
+    p := item[i];
+    p.fGroup := self;
+    if not p.absoluteFilename.fileExists then
+    begin
+      f += LineEnding + '"' + p.absoluteFilename + '"';
+      fItems.Delete(i);
+      b := true;
+    end;
+  end;
+  fModified := b;
+  if b then
+    dlgOkError('the following projects are missing and are removed from the group:' + f,
+      'Project group error');
 end;
 
 procedure TProjectGroup.afterSave;

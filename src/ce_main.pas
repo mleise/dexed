@@ -3075,10 +3075,8 @@ begin
   fFreeProj := nil;
 end;
 
-// TODO-cFIleOpenDialog: allow multi selection when possible
+// TODO-cFileOpenDialog: allow multi selection when possible
 //(open file, add file to project, ...)
-
-// TODO-cprojectgroup: handle invalid projects filename when reloading a group
 
 procedure TCEMainForm.actProjGroupCompileExecute(Sender: TObject);
 var
