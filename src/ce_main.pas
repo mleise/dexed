@@ -1849,12 +1849,18 @@ begin
 end;
 
 procedure TCEMainForm.actFileOpenExecute(Sender: TObject);
+var
+  fname: string;
 begin
   with TOpenDialog.Create(nil) do
   try
+    if fDoc.isNotNil and not fDoc.isTemporary then
+      initialDir := fDoc.fileName.extractFileDir;
+    options := [ofAllowMultiSelect, ofEnableSizing];
     filter := DdiagFilter;
     if execute then
-      openFile(filename);
+      for fname in files do
+        openFile(fname);
   finally
     free;
   end;
