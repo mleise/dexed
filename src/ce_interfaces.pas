@@ -252,7 +252,16 @@ type
   /// describes the message kind, 'amkAuto' implies that an ICELogMessageObserver guess the kind.
   TCEAppMessageKind = (amkAuto, amkBub, amkInf, amkHint, amkWarn, amkErr);
   /// describes the message context. Used by a ICELogMessageObserver to filter the messages.
-  TCEAppMessageCtxt = (amcAll, amcEdit, amcProj, amcApp, amcMisc);
+  TCEAppMessageCtxt = (
+    amcAll,         // used as filter
+    amcEdit,        // used as filter
+    amcProj,        // used as filter
+    amcApp,         // used as filter
+    amcMisc,        // used as filter
+    amcAutoEdit,    // same as amcEdit but the message data is set automatically from the widget side
+    amcAutoProj,    // same as amcProj but the message data is set automatically from the widget side
+    amcAutoCompile  // same as amcAutoEdit or amcAutoProj, according to what's being compiled.
+  );
 
   (**
    * Single service provided by the messages widget.

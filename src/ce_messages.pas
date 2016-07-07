@@ -83,6 +83,7 @@ type
     fEditorMessagePos: TCEEditorMessagePos;
     fDemanglerAvailable: boolean;
     fMsgColors: array[TCEAppMessageKind] of TColor;
+    fProjCompile: boolean;
     fActAutoSel: TAction;
     fActClearAll: TAction;
     fActClearCurCat: TAction;
@@ -674,10 +675,12 @@ end;
 
 procedure TCEMessagesWidget.projCompiling(aProject: ICECommonProject);
 begin
+  fProjCompile := true;
 end;
 
 procedure TCEMessagesWidget.projCompiled(aProject: ICECommonProject; success: boolean);
 begin
+  fProjCompile := false;
 end;
 {$ENDREGION}
 
@@ -761,6 +764,23 @@ begin
   msg := aValue;
   if aKind = amkAuto then
     aKind := guessMessageKind(msg);
+  if aCtxt = amcAutoCompile then
+  begin
+    case fProjCompile of
+      false: aCtxt := amcAutoEdit;
+      true: aCtxt := amcAutoProj;
+    end;
+  end;
+  if aCtxt = amcAutoEdit then
+  begin
+    aData := fDoc;
+    aCtxt := amcEdit;
+  end
+  else if aCtxt = amcAutoProj then
+  begin
+    aData := fProj;
+    aCtxt := amcProj;
+  end;
   dt := new(PMessageData);
   dt^.data := aData;
   dt^.ctxt := aCtxt;
