@@ -316,6 +316,7 @@ type
     fProjActionsLock: boolean;
     procedure updateMainMenuProviders;
     procedure updateFloatingWidgetOnTop(onTop: boolean);
+    procedure widgetDockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
 
     // action provider handling;
     procedure clearActProviderEntries;
@@ -1097,7 +1098,6 @@ begin
   Handled := true;
 end;
 
-//TODO-cdocking: set splitter MW event when a new widget is docked
 procedure TCEMainForm.setSplitterWheelEvent;
 var
   i: integer;
@@ -1120,6 +1120,11 @@ begin
           TAnchorDockSplitterEx(TAnchorDockSplitter(site)).OnMouseWheel:=@DockSplitterMw;
       end;
   end;
+end;
+
+procedure TCEMainForm.widgetDockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
+begin
+  setSplitterWheelEvent;
 end;
 
 procedure TCEMainForm.InitDocking;
@@ -1148,6 +1153,7 @@ begin
     if not widg.isDockable then continue;
     DockMaster.MakeDockable(widg, true);
     DockMaster.GetAnchorSite(widg).Header.HeaderPosition := adlhpTop;
+    widg.onDockingChanged:= @widgetDockingChanged;
   end;
 
   // load existing or default docking

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, ExtCtrls, ActnList, Menus,
-  AnchorDocking, ce_interfaces, ce_dsgncontrols;
+  AnchorDocking, ce_interfaces, ce_dsgncontrols, ce_common;
 
 type
 
@@ -14,6 +14,11 @@ type
    * Base type for an UI module.
    *)
   PTCEWidget = ^TCEWidget;
+
+  TCEWidget = class;
+
+  TWidgetDockingState = (wdsUndocked, wdsDocked);
+  TWidgetDockingChangedEvent = procedure(sender: TCEWidget; newState: TWidgetDockingState) of object;
 
   { TCEWidget }
 
@@ -30,6 +35,7 @@ type
     fUpdaterDelay: TTimer;
     fImperativeUpdateCount: Integer;
     fLoopUpdateCount: Integer;
+    fOnDockingChanged: TWidgetDockingChangedEvent;
     procedure setDelayDur(aValue: Integer);
     procedure setLoopInt(aValue: Integer);
     procedure updaterAutoProc(Sender: TObject);
@@ -39,6 +45,9 @@ type
     fIsModal: boolean;
     fToolBarFlat: boolean;
     fToolBarVisible: boolean;
+    fOldParent: TWinControl;
+    // TODO-cdocking: find a better way to detect that the docking state changed
+    procedure Resize; override;
     // a descendant overrides to implement a periodic update.
     procedure updateLoop; virtual;
     // a descendant overrides to implement an imperative update.
@@ -93,6 +102,7 @@ type
 
     property toolbarFlat: boolean read fToolBarFlat write setToolBarFlat;
     property toolbarVisible: boolean read fToolBarVisible write setToolBarVisible;
+    property onDockingChanged: TWidgetDockingChangedEvent read fOnDockingChanged write fOnDockingChanged;
   end;
 
   (**
@@ -209,6 +219,26 @@ begin
     toolbar.Flat := value;
     fToolBarFlat := value;
 end;
+
+procedure TCEWidget.Resize;
+var
+  newParent: TWinControl;
+  site: TAnchorDockHostSite;
+begin
+  inherited;
+  site := DockMaster.GetAnchorSite(self);
+  if site.isNil then
+    exit;
+  newParent := site.Parent;
+  if fOldParent <> newParent then
+  begin
+    if fOldParent.isNil and newParent.isNotNil and assigned(fOnDockingChanged) then
+      fOnDockingChanged(self, wdsDocked)
+    else if fOldParent.isNotNil and newParent.isNil and assigned(fOnDockingChanged) then
+      fOnDockingChanged(self, wdsUndocked);
+  end;
+end;
+
 {$ENDREGION}
 
 {$REGION ICEContextualActions---------------------------------------------------}
