@@ -11,67 +11,80 @@ uses
 (**
  * Ok/Cancel modal dialog
  *)
-function dlgOkCancel(const message: string): TModalResult;
+function dlgOkCancel(const message: string; title: string = ''): TModalResult;
 
 (**
  * Yes/No modal dialog
  *)
-function dlgYesNo(const message: string): TModalResult;
+function dlgYesNo(const message: string; title: string = ''): TModalResult;
 
 (**
  * Info message
  *)
-function dlgOkInfo(const message: string): TModalResult;
+function dlgOkInfo(const message: string; title: string = ''): TModalResult;
 
 (**
  * Error message
  *)
-function dlgOkError(const message: string): TModalResult;
+function dlgOkError(const message: string; title: string = ''): TModalResult;
 
 (**
  * close aFilename Ok/Cancel.
  *)
-function dlgFileChangeClose(const fname: string): TModalResult;
+function dlgFileChangeClose(fname: string; title: string = ''): TModalResult;
 
 const
   DdiagFilter = 'D source|*.d|D interface|*.di|All files|*.*';
+  UnsavedFile = 'Modified file';
+  UnsavedProj = 'Modified project';
+  UnsavedPGrp = 'Modified project group';
 
 implementation
 
 
-function dlgOkCancel(const message: string): TModalResult;
+function dlgOkCancel(const message: string; title: string = ''): TModalResult;
 const
   Btns = [mbOK,mbCancel];
 begin
-  exit( MessageDlg('Coedit', message, mtConfirmation, Btns, ''));
+  if title = '' then
+    title := 'Coedit';
+  exit( MessageDlg(title, message, mtConfirmation, Btns, ''));
 end;
 
-function dlgYesNo(const message: string): TModalResult;
+function dlgYesNo(const message: string; title: string = ''): TModalResult;
 const
   Btns = [mbYes,mbNo];
 begin
-  exit( MessageDlg('Coedit', message, mtConfirmation, Btns, ''));
+  if title = '' then
+    title := 'Coedit';
+  exit( MessageDlg(title, message, mtConfirmation, Btns, ''));
 end;
 
-function dlgOkInfo(const message: string): TModalResult;
+function dlgOkInfo(const message: string; title: string = ''): TModalResult;
 const
   Btns = [mbOK];
 begin
-  exit( MessageDlg('Coedit', message, mtInformation, Btns, ''));
+  if title = '' then
+    title := 'Coedit';
+  exit( MessageDlg(title, message, mtInformation, Btns, ''));
 end;
 
-function dlgOkError(const message: string): TModalResult;
+function dlgOkError(const message: string; title: string = ''): TModalResult;
 const
   Btns = [mbOK];
 begin
-  exit( MessageDlg('Coedit', message, mtError, Btns, ''));
+  if title = '' then
+    title := 'Coedit';
+  exit(MessageDlg(title, message, mtError, Btns, ''));
 end;
 
-function dlgFileChangeClose(const fname: string): TModalResult;
+function dlgFileChangeClose(fname: string; title: string = ''): TModalResult;
 const
   fmt = '"%s" latest modifications are not saved.'#13#10#13#10'Close it without saving ?';
 begin
-  exit(dlgOkCancel(format(fmt, [fname])));
+  if fname = '' then
+      fname := '<not saved yet>';
+  exit(dlgOkCancel(format(fmt, [fname]), title));
 end;
 
 end.

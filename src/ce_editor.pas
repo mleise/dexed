@@ -489,7 +489,7 @@ begin
   doc := getDocument(index);
   if doc.isNil then exit(false);
   if (doc.modified or (doc.fileName = doc.tempFilename)) and
-    (dlgFileChangeClose(doc.fileName) = mrCancel) then exit(false);
+    (dlgFileChangeClose(doc.fileName, UnsavedFile) = mrCancel) then exit(false);
   doc.disableFileDateCheck:=true;
   pageControl.pageIndex:=index;
   doc.Free;

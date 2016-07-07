@@ -1175,6 +1175,10 @@ begin
 end;
 
 procedure TCESynMemo.ShowPhobosDoc;
+  procedure errorMessage;
+  begin
+    dlgOkError('html documentation cannot be found for "' + Identifier + '"');
+  end;
 var
   str: string;
   pth: string;
@@ -1190,7 +1194,7 @@ begin
   DcdWrapper.getDeclFromCursor(str, pos);
   if not str.fileExists then
   begin
-    dlgOkInfo('html documentation cannot be found for "' + Identifier + '"');
+    errorMessage;
     exit;
   end;
   // verify that the decl is in phobos
@@ -1199,7 +1203,7 @@ begin
   begin
     if pth.extractFilePath = pth then
     begin
-      dlgOkInfo('html documentation cannot be found for "' + Identifier + '"');
+      errorMessage;
       exit;
     end;
     pth := pth.extractFilePath;

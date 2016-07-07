@@ -313,6 +313,7 @@ type
     fMsgs: ICEMessagesDisplay;
     fMainMenuSubj: TCEMainMenuSubject;
     fAppliOpts: TCEApplicationOptions;
+    fProjActionsLock: boolean;
     procedure updateMainMenuProviders;
     procedure updateFloatingWidgetOnTop(onTop: boolean);
 
@@ -380,8 +381,9 @@ type
     procedure saveProj;
     procedure saveProjAs(const aFilename: string);
     procedure openProj(const aFilename: string);
-    procedure closeProj;
+    function closeProj: boolean;
     procedure showProjTitle;
+    function  checkProjectLock(message: boolean = true): boolean;
 
     // mru
     procedure mruChange(Sender: TObject);
@@ -1459,7 +1461,7 @@ begin
   if (fFreeProj <> nil) then
   begin
     if fFreeProj.modified and
-      (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
+      (dlgFileChangeClose(fFreeProj.filename, UnsavedProj) = mrCancel) then
         exit;
     fFreeProj.getProject.Free;
     fFreeProj := nil;
@@ -1467,7 +1469,7 @@ begin
   for i := fMultidoc.documentCount-1 downto 0 do
     if not fMultidoc.closeDocument(i) then exit;
   if fProjectGroup.groupModified then if
-    (dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel) then exit;
+    (dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel) then exit;
   canClose := true;
   fProjectGroup.closeGroup;
 end;
@@ -1479,7 +1481,7 @@ end;
 
 procedure TCEMainForm.updateProjectBasedAction(sender: TObject);
 begin
-  TAction(sender).Enabled := fProject <> nil;
+  TAction(sender).Enabled := (fProject <> nil) {and not fProjActionsLock};
 end;
 
 procedure TCEMainForm.updateDocEditBasedAction(sender: TObject);
@@ -1660,6 +1662,7 @@ end;
 
 procedure TCEMainForm.projCompiling(aProject: ICECommonProject);
 begin
+  fProjActionsLock := true;
 end;
 
 procedure TCEMainForm.projCompiled(aProject: ICECommonProject; success: boolean);
@@ -1668,6 +1671,7 @@ var
   runprev: boolean = true;
   i: integer;
 begin
+  fProjActionsLock := false;
   if not fIsCompilingGroup then
   begin
     if fRunProjAfterCompile and assigned(fProject) then
@@ -2807,6 +2811,18 @@ end;
 {$ENDREGION}
 
 {$REGION project ---------------------------------------------------------------}
+function  TCEMainForm.checkProjectLock(message: boolean = true): boolean;
+begin
+  result := false;
+  if fProjActionsLock then
+  begin
+    result := true;
+    if message then
+      dlgOkInfo('This action is disabled while a project compiles',
+        'Project lock warning');
+  end
+end;
+
 procedure TCEMainForm.showProjTitle;
 begin
   if (fProject <> nil) and fProject.filename.fileExists then
@@ -2821,6 +2837,7 @@ var
 begin
   if fProject = nil then exit;
   if fProject.filename <> aEditor.fileName then exit;
+  if checkProjectLock then exit;
   //
   fname := fProject.filename;
   fProject.getProject.Free;
@@ -2828,12 +2845,15 @@ begin
   openProj(fname);
 end;
 
-procedure TCEMainForm.closeProj;
+function TCEMainForm.closeProj: boolean;
 begin
+  result := true;
   if fProject = nil then exit;
+  result := false;
   //
   if fProject = fFreeProj then
   begin
+    if checkProjectLock then exit;
     fProject.getProject.Free;
     fFreeProj := nil;
   end;
@@ -2841,14 +2861,16 @@ begin
   fNativeProject := nil;
   fDubProject := nil;
   showProjTitle;
+  result := true;
 end;
 
 procedure TCEMainForm.actProjNewDubJsonExecute(Sender: TObject);
 begin
   if (fProject <> nil) and not fProject.inGroup
     and fProject.modified and
-      (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
-  closeProj;
+      (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then exit;
+  if not closeProj then
+    exit;
   newDubProj;
 end;
 
@@ -2856,8 +2878,9 @@ procedure TCEMainForm.actProjNewNativeExecute(Sender: TObject);
 begin
   if (fProject <> nil) and not fProject.inGroup
     and fProject.modified and
-      (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
-  closeProj;
+      (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then exit;
+  if not closeProj then
+    exit;
   newNativeProj;
 end;
 
@@ -2892,7 +2915,8 @@ end;
 
 procedure TCEMainForm.openProj(const aFilename: string);
 begin
-  closeProj;
+  if not closeProj then
+    exit;
   if aFilename.extractFileExt.upperCase = '.JSON' then
     newDubProj
   else
@@ -2904,21 +2928,25 @@ end;
 
 procedure TCEMainForm.mruProjItemClick(Sender: TObject);
 begin
+  if checkProjectLock then
+    exit;
   if (fProject <> nil) and not fProject.inGroup and
       fProject.modified and
-        (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
+        (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then exit;
   openProj(TMenuItem(Sender).Hint);
 end;
 
 procedure TCEMainForm.actProjCloseExecute(Sender: TObject);
 begin
   if (fProject <> nil) and not fProject.inGroup and fProject.modified and
-    (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
+    (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then exit;
   closeProj;
 end;
 
 procedure TCEMainForm.actProjSaveAsExecute(Sender: TObject);
 begin
+  if checkProjectLock then
+    exit;
   with TSaveDialog.Create(nil) do
   try
     if execute then saveProjAs(filename);
@@ -2930,14 +2958,18 @@ end;
 procedure TCEMainForm.actProjSaveExecute(Sender: TObject);
 begin
   if fProject = nil then exit;
+  if checkProjectLock then
+    exit;
   if fProject.filename.isNotEmpty then saveProj
   else actProjSaveAs.Execute;
 end;
 
 procedure TCEMainForm.actProjOpenExecute(Sender: TObject);
 begin
+  if checkProjectLock then
+      exit;
   if (fProject <> nil) and fProject.modified and
-    (dlgFileChangeClose(fProject.filename) = mrCancel) then exit;
+    (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then exit;
   with TOpenDialog.Create(nil) do
   try
     if execute then openProj(filename);
@@ -2978,14 +3010,14 @@ end;
 procedure TCEMainForm.actProjOptViewExecute(Sender: TObject);
 begin
   if fProject = nil then exit;
-  dlgOkInfo(fProject.getCommandLine);
+  dlgOkInfo(fProject.getCommandLine, 'Compilation command line');
 end;
 
 procedure TCEMainForm.actProjOpenGroupExecute(Sender: TObject);
 begin
   if fProjectGroup.groupModified then
   begin
-    if dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel then
+    if dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel then
       exit;
   end;
   fProjectGroup.closeGroup;
@@ -3027,7 +3059,7 @@ procedure TCEMainForm.actNewGroupExecute(Sender: TObject);
 begin
   if fProjectGroup.groupModified then
   begin
-    if dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel then
+    if dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel then
       exit;
   end;
   fProjectGroup.closeGroup;
@@ -3043,10 +3075,17 @@ begin
   fFreeProj := nil;
 end;
 
+// TODO-cFIleOpenDialog: allow multi selection when possible
+//(open file, add file to project, ...)
+
+// TODO-cprojectgroup: handle invalid projects filename when reloading a group
+
 procedure TCEMainForm.actProjGroupCompileExecute(Sender: TObject);
 var
   i: integer;
 begin
+  if checkProjectLock then
+    exit;
   if fProjectGroup.projectCount = 0 then
     exit;
   fGroupCompilationCnt := 0;
@@ -3064,7 +3103,7 @@ procedure TCEMainForm.actProjNewGroupExecute(Sender: TObject);
 begin
   if fProjectGroup.groupModified then
   begin
-    if dlgFileChangeClose(fProjectGroup.groupFilename) = mrCancel then
+    if dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel then
       exit;
   end;
   fProjectGroup.closeGroup;

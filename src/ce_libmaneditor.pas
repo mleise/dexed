@@ -569,7 +569,7 @@ begin
   begin
     if assigned(fFreeProj) then
     begin
-      if fFreeProj.modified and (dlgFileChangeClose(fFreeProj.filename) = mrCancel) then
+      if fFreeProj.modified and (dlgFileChangeClose(fFreeProj.filename, UnsavedProj) = mrCancel) then
         exit;
       fFreeProj.getProject.Free;
     end;
