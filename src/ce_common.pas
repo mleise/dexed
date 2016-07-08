@@ -80,6 +80,8 @@ type
     function dirExists: boolean;
     function upperCase: string;
     function length: integer;
+    function toIntNoExcept(default: integer = -1): integer;
+    function toInt: integer;
   end;
 
   (**
@@ -428,6 +430,16 @@ end;
 function TStringHelper.length: integer;
 begin
   exit(system.length(self));
+end;
+
+function TStringHelper.toInt: integer;
+begin
+  exit(strToInt(self));
+end;
+
+function TStringHelper.toIntNoExcept(default: integer = -1): integer;
+begin
+  exit(StrToIntDef(self, default));
 end;
 
 procedure TProcessEx.Assign(aValue: TPersistent);
