@@ -527,6 +527,7 @@ end;
 procedure TCELibManEditorWidget.btnEditAliasClick(Sender: TObject);
 var
   al: string;
+  i: integer;
 begin
   if List.Selected.isNil then
     exit;
@@ -537,8 +538,17 @@ begin
   end else
   begin
     if inputQuery('library alias', '', al) then
-    List.Selected.Caption := al;
-    RowToLibrary(List.Selected);
+    begin
+      for i := 0 to LibMan.librariesCount-1 do
+        if (LibMan.libraryByIndex[i].libAlias = al) and
+          (LibMan.libraryByIndex[i] <> itemForRow(List.Selected)) then
+      begin
+        dlgOkError('This alias is already used by another library, the renaming is canceled');
+        exit;
+      end;
+      List.Selected.Caption := al;
+      RowToLibrary(List.Selected);
+    end;
   end;
 end;
 
