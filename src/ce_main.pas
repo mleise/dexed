@@ -8,13 +8,13 @@ uses
   Classes, SysUtils, LazFileUtils, SynEditKeyCmds, SynHighlighterLFM, Forms,
   StdCtrls, AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls,
   Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
-  XMLPropStorage, SynExportHTML,
+  XMLPropStorage, SynExportHTML, fphttpclient, xfpjson, xjsonparser, xjsonscanner,
   ce_common, ce_dmdwrap, ce_nativeproject, ce_synmemo, ce_writableComponent,
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor, (*ce_gdb,*) ce_dfmt,
-  ce_lcldragdrop, ce_projgroup, ce_projutils;
+  ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange;
 
 type
 
@@ -474,6 +474,7 @@ type
     fDetectMain: boolean;
     fDetectRunnableImports: boolean;
     fSplitterScrollSpeed: byte;
+    fAutoCheckUpdates: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
@@ -486,6 +487,7 @@ type
     procedure setSplitterScsrollSpeed(value: byte);
   published
     property additionalPATH: string read getAdditionalPATH write setAdditionalPath;
+    property autoCheckUpdates: boolean read fAutoCheckUpdates write fAutoCheckUpdates;
     property coverModuleTests: boolean read fCovModUt write fCovModUt;
     property floatingWidgetOnTop: boolean read fFloatingWidgetOnTop write fFloatingWidgetOnTop;
     property reloadLastDocuments: boolean read fReloadLastDocuments write fReloadLastDocuments;
@@ -1395,7 +1397,99 @@ begin
   end;
 end;
 
+function checkForUpdate: string;
+var
+  prs: TJSONParser = nil;
+  dat: TJSONData = nil;
+  tgg: TJSONData = nil;
+  url: TJSONData = nil;
+  str: string;
+  mn0: byte = 0;
+  mj0: byte;
+  kd0: string;
+  mn1: byte = 0;
+  mj1: byte;
+  kd1: string;
+  can: boolean = false;
+  rng: TStringRange = (ptr:nil; pos:0; len: 0);
+  cli: TFPHTTPClient;
+  lst: TStringList = nil;
+  res: TResourceStream = nil;
+begin
+  result := '';
+  cli := TFPHTTPClient.Create(nil);
+  try
+    try
+      cli.AddHeader('User-Agent','Mozilla/5.0 (compatible; fpweb)');
+      str := cli.Get('https://api.github.com/repos/BBasile/Coedit/releases/latest');
+      prs := TJSONParser.Create(str, [joUTF8, joIgnoreTrailingComma]);
+      dat := prs.Parse;
+      if dat.isNotNil then
+      begin
+        url := dat.FindPath('html_url');
+        tgg := dat.FindPath('tag_name');
+        if url.isNotNil and tgg.isNotNil then
+        begin
+          // TODO: change version.txt format
+          // version.txt has a different format than the git tags
+          // txt: <major><kind><minor>
+          // git: <major>_<kind>_<minor>
+          // when <kind> = 'gold' no minor version is present
+          // => related to regexp on txt, could be changed with #54
+          res:= TResourceStream.Create(HINSTANCE, 'VERSION', RT_RCDATA);
+          lst := TstringList.Create;
+          lst.LoadFromStream(res);
+          str := lst.Text;
+          if str.length < 6 then
+            raise Exception.Create('');
+
+          rng.init(str);
+          mj0 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
+          kd0 := rng.takeUntil(['0'..'9']).yield;
+          mn0 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
+
+          str := tgg.AsString;
+          rng.init(str);
+          mj1 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
+          rng.popFront;
+          kd1 := rng.takeUntil('_').yield;
+          if (kd1 <> 'gold') and not rng.empty then
+          begin
+            rng.popFront;
+            mn1 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
+          end;
+
+          if mj1 > mj0 then
+            can := true
+          else if mj1 < mj0 then
+            can := false
+          else if kd0 = kd1 then
+            can := (mj1 = mj0) and (mn1 > mn0)
+          else if (kd0 = 'alpha') and (kd1 <> 'alpha') then
+            can := (mj1 = mj0) and (mn1 > mn0)
+          else if (kd0 = 'beta') and (kd1 <> 'alpha') and (kd1 <> 'beta') then
+            can := (mj1 = mj0) and (mn1 > mn0)
+          else if (kd0 = 'gold') and (kd1 = 'update') and (kd1 <> 'beta') then
+            can := (mj1 = mj0) and (mn1 > mn0);
+          if can then
+            result := url.AsString;
+        end;
+      end;
+    except
+      dlgOkError('The latest release cannot be determined');
+    end;
+  finally
+    cli.free;
+    prs.free;
+    dat.free;
+    lst.free;
+    res.free;
+  end;
+end;
+
 procedure TCEMainForm.DoShow;
+var
+  url: string;
 begin
   inherited;
   if (not fFirstShown) then
@@ -1411,6 +1505,17 @@ begin
 
     if fFirstTimeCoedit then
       actFileNewRun.Execute;
+
+    if fAppliOpts.autoCheckUpdates then
+    begin
+      url := checkForUpdate;
+      if url <> '' then
+      begin
+        if dlgYesNo('An new release is available, do you wish to visit the release page ?' +
+          lineEnding + '(' + url +')') = mrYes then
+            openUrl(url);
+      end;
+    end;
 
     fFirstShown := true;
   end;
@@ -1597,6 +1702,7 @@ begin
   //
   srcLst.Clear;
 end;
+
 {$ENDREGION}
 
 {$REGION ICEMultiDocMonitor ----------------------------------------------------}
