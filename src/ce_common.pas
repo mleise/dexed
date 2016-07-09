@@ -89,7 +89,7 @@ type
    *)
   TProcessEx = class helper for TProcess
   public
-    procedure Assign(aValue: TPersistent);
+    procedure Assign(value: TPersistent);
   end;
 
   (**
@@ -103,55 +103,55 @@ type
     property shortcut: TShortCut read fShortcut write fShortcut;
     property actionName: string read fActionName write fActionName;
   public
-    procedure assign(aValue: TPersistent); override;
+    procedure assign(value: TPersistent); override;
   end;
 
   (**
    * Save a component with a readable aspect.
    *)
-  procedure saveCompToTxtFile(const aComp: TComponent; const aFilename: string);
+  procedure saveCompToTxtFile(value: TComponent; const fname: string);
 
   (**
    * Load a component. Works in pair with saveCompToTxtFile().
    *)
-  procedure loadCompFromTxtFile(const aComp: TComponent; const aFilename: string;
-    aPropNotFoundHandler: TPropertyNotFoundEvent = nil; anErrorHandler: TReaderError = nil);
+  procedure loadCompFromTxtFile(value: TComponent; const fname: string;
+    notFoundClbck: TPropertyNotFoundEvent = nil; errorClbck: TReaderError = nil);
 
   (**
    * Converts a relative path to an absolute path.
    *)
-  function expandFilenameEx(const aBasePath, aFilename: string): string;
+  function expandFilenameEx(const basePath, fname: string): string;
 
   (**
    * Patches the directory separators from a string.
    * This is used to ensure that a project saved on a platform can be loaded
    * on another one.
    *)
-  function patchPlateformPath(const aPath: string): string;
-  procedure patchPlateformPaths(const sPaths: TStrings);
+  function patchPlateformPath(const path: string): string;
+  procedure patchPlateformPaths(const paths: TStrings);
 
   (**
    * Patches the file extension from a string.
    * This is used to ensure that a project saved on a platform can be loaded
    * on another one. Note that the ext which are handled are specific to coedit projects.
    *)
-  function patchPlateformExt(const aFilename: string): string;
+  function patchPlateformExt(const fname: string): string;
 
   (**
    * Returns aFilename without its extension.
    *)
-  function stripFileExt(const aFilename: string): string;
+  function stripFileExt(const fname: string): string;
 
   (**
    * Returns an unique object identifier, based on its heap address.
    *)
-  function uniqueObjStr(const aObject: TObject): string;
+  function uniqueObjStr(const value: TObject): string;
 
   (**
    * Reduces a filename if its length is over the threshold defined by charThresh.
    * Even if the result is not usable anymore, it avoids any "visually-overloaded" MRU menu.
    *)
-  function shortenPath(const aPath: string; charThresh: Word = 60): string;
+  function shortenPath(const path: string; thresh: Word = 60): string;
 
   (**
    * Returns the user data dir.
@@ -166,73 +166,73 @@ type
   (**
    * Fills aList with the names of the files located in aPath.
    *)
-  procedure listFiles(aList: TStrings; const aPath: string; recursive: boolean = false);
+  procedure listFiles(list: TStrings; const path: string; recursive: boolean = false);
 
   (**
    * Fills aList with the names of the folders located in aPath.
    *)
-  procedure listFolders(aList: TStrings; const aPath: string);
+  procedure listFolders(list: TStrings; const path: string);
 
   (**
    * Returns true if aPath contains at least one sub-folder.
    *)
-  function hasFolder(const aPath: string): boolean;
+  function hasFolder(const path: string): boolean;
 
   (**
    * Fills aList with the system drives.
    *)
-  procedure listDrives(aList: TStrings);
+  procedure listDrives(list: TStrings);
 
   (**
    * If aPath ends with an asterisk then fills aList with the names of the files located in aPath.
    * Returns true if aPath was 'asterisk-ifyed'.
    *)
-  function listAsteriskPath(const aPath: string; aList: TStrings; someExts: TStrings = nil): boolean;
+  function listAsteriskPath(const path: string; list: TStrings; exts: TStrings = nil): boolean;
 
   (**
    * Lets the shell open a file.
    *)
-  function shellOpen(const aFilename: string): boolean;
+  function shellOpen(const fname: string): boolean;
 
   (**
    * Returns true if anExeName can be spawn without its full path.
    *)
-  function exeInSysPath(anExeName: string): boolean;
+  function exeInSysPath(fname: string): boolean;
 
   (**
    * Returns the full path to anExeName. Works if exeInSysPath() returns true.
    *)
-  function exeFullName(anExeName: string): string;
+  function exeFullName(fname: string): string;
 
   (**
    * Clears then fills aList with aProcess output stream.
    *)
-  procedure processOutputToStrings(aProcess: TProcess; aList: TStrings);
+  procedure processOutputToStrings(process: TProcess; list: TStrings);
 
   (**
    * Copy available process output to a stream.
    *)
-  procedure processOutputToStream(aProcess: TProcess; output: TMemoryStream);
+  procedure processOutputToStream(process: TProcess; output: TMemoryStream);
 
   (**
    * Terminates and frees aProcess.
    *)
-  procedure killProcess(var aProcess: TAsyncProcess);
+  procedure killProcess(var process: TAsyncProcess);
 
   (**
    * Ensures that the i/o process pipes are not redirected if it waits on exit.
    *)
-  procedure ensureNoPipeIfWait(aProcess: TProcess);
+  procedure ensureNoPipeIfWait(process: TProcess);
 
   (**
    * Returns true if ExeName is already running.
    *)
-  function AppIsRunning(const ExeName: string):Boolean;
+  function AppIsRunning(const fname: string):Boolean;
 
   (**
-   * Returns the length of the line ending in aFilename.
+   * Returns the length of the line ending in fname.
    *)
-  function getLineEndingLength(const aFilename: string): byte;
+  function getLineEndingLength(const fname: string): byte;
 
   (**
    * Returns the length of the line ending for the current platform.
@@ -242,7 +242,7 @@ type
   (**
    * Returns the common folder of the file names stored in aList.
    *)
-  function commonFolder(const someFiles: TStringList): string;
+  function commonFolder(const files: TStringList): string;
 
   (**
    * Returns true if ext matches a file extension whose type is highlightable.
@@ -344,13 +344,13 @@ begin
   {$POP}
 end;
 
-procedure TCEPersistentShortcut.assign(aValue: TPersistent);
+procedure TCEPersistentShortcut.assign(value: TPersistent);
 var
   src: TCEPersistentShortcut;
 begin
-  if aValue is TCEPersistentShortcut then
+  if value is TCEPersistentShortcut then
   begin
-    src := TCEPersistentShortcut(Avalue);
+    src := TCEPersistentShortcut(value);
     fActionName := src.fActionName;
     fShortcut := src.fShortcut;
   end
@@ -442,13 +442,13 @@ begin
   exit(StrToIntDef(self, default));
 end;
 
-procedure TProcessEx.Assign(aValue: TPersistent);
+procedure TProcessEx.Assign(value: TPersistent);
 var
   src: TProcess;
 begin
-  if aValue is TProcess then
+  if value is TProcess then
   begin
-    src := TProcess(aValue);
+    src := TProcess(value);
     PipeBufferSize := src.PipeBufferSize;
     Active := src.Active;
     Executable := src.Executable;
@@ -473,26 +473,26 @@ begin
   else inherited;
 end;
 
-procedure saveCompToTxtFile(const aComp: TComponent; const aFilename: string);
+procedure saveCompToTxtFile(value: TComponent; const fname: string);
 var
   str1, str2: TMemoryStream;
 begin
   str1 := TMemoryStream.Create;
   str2 := TMemoryStream.Create;
   try
-    str1.WriteComponent(aComp);
+    str1.WriteComponent(value);
     str1.Position := 0;
     ObjectBinaryToText(str1,str2);
-    ForceDirectories(aFilename.extractFilePath);
-    str2.SaveToFile(aFilename);
+    ForceDirectories(fname.extractFilePath);
+    str2.SaveToFile(fname);
   finally
     str1.Free;
     str2.Free;
   end;
 end;
 
-procedure loadCompFromTxtFile(const aComp: TComponent; const aFilename: string;
-  aPropNotFoundHandler: TPropertyNotFoundEvent = nil; anErrorHandler: TReaderError = nil);
+procedure loadCompFromTxtFile(value: TComponent; const fname: string;
+  notFoundClbck: TPropertyNotFoundEvent = nil; errorClbck: TReaderError = nil);
 var
   str1, str2: TMemoryStream;
   rdr: TReader;
@@ -500,16 +500,16 @@ begin
   str1 := TMemoryStream.Create;
   str2 := TMemoryStream.Create;
   try
-    str1.LoadFromFile(aFilename);
+    str1.LoadFromFile(fname);
     str1.Position := 0;
     ObjectTextToBinary(str1, str2);
     str2.Position := 0;
     try
       rdr := TReader.Create(str2, 4096);
       try
-        rdr.OnPropertyNotFound := aPropNotFoundHandler;
-        rdr.OnError := anErrorHandler;
-        rdr.ReadRootComponent(aComp);
+        rdr.OnPropertyNotFound := notFoundClbck;
+        rdr.OnError := errorClbck;
+        rdr.ReadRootComponent(value);
       finally
         rdr.Free;
       end;
@@ -521,44 +521,44 @@ begin
   end;
 end;
 
-function expandFilenameEx(const aBasePath, aFilename: string): string;
+function expandFilenameEx(const basePath, fname: string): string;
 var
   curr: string = '';
 begin
   getDir(0, curr);
   try
-    if (curr <> aBasePath) and aBasePath.dirExists then
-      chDir(aBasePath);
-    result := expandFileName(aFilename);
+    if (curr <> basePath) and basePath.dirExists then
+      chDir(basePath);
+    result := expandFileName(fname);
   finally
     chDir(curr);
   end;
 end;
 
-function patchPlateformPath(const aPath: string): string;
-function patchProc(const src: string; const invalid: char): string;
-var
-  i: Integer;
-  dir: string;
-begin
-  dir := ExtractFileDrive(src);
-  if dir.length > 0 then
-    result := src[dir.length+1..src.length]
-  else
-    result := src;
-  i := pos(invalid, result);
-  if i <> 0 then
+function patchPlateformPath(const path: string): string;
+  function patchProc(const src: string; const invalid: char): string;
+  var
+    i: Integer;
+    dir: string;
   begin
-    repeat
-      result[i] := directorySeparator;
-      i := pos(invalid,result);
-    until
-      i = 0;
+    dir := ExtractFileDrive(src);
+    if dir.length > 0 then
+      result := src[dir.length+1..src.length]
+    else
+      result := src;
+    i := pos(invalid, result);
+    if i <> 0 then
+    begin
+      repeat
+        result[i] := directorySeparator;
+        i := pos(invalid,result);
+      until
+        i = 0;
+    end;
+    result := dir + result;
   end;
-  result := dir + result;
-end;
 begin
-  result := aPath;
+  result := path;
   {$IFDEF WINDOWS}
   result := patchProc(result, '/');
   {$ELSE}
@@ -566,23 +566,23 @@ begin
   {$ENDIF}
 end;
 
-procedure patchPlateformPaths(const sPaths: TStrings);
+procedure patchPlateformPaths(const paths: TStrings);
 var
   i: Integer;
   str: string;
 begin
-  for i:= 0 to sPaths.Count-1 do
+  for i:= 0 to paths.Count-1 do
   begin
-    str := sPaths[i];
-    sPaths[i] := patchPlateformPath(str);
+    str := paths[i];
+    paths[i] := patchPlateformPath(str);
   end;
 end;
 
-function patchPlateformExt(const aFilename: string): string;
+function patchPlateformExt(const fname: string): string;
 var
   ext, newext: string;
 begin
-  ext := aFilename.extractFileExt;
+  ext := fname.extractFileExt;
   newext := '';
   {$IFDEF MSWINDOWS}
   case ext of
@@ -613,44 +613,44 @@ begin
     else    newext := ext;
   end;
   {$ENDIF}
-  result := ChangeFileExt(aFilename, newext);
+  result := ChangeFileExt(fname, newext);
 end;
 
-function stripFileExt(const aFilename: string): string;
+function stripFileExt(const fname: string): string;
 begin
-  if Pos('.', aFilename) > 1 then
-    exit(ChangeFileExt(aFilename, ''))
+  if Pos('.', fname) > 1 then
+    exit(ChangeFileExt(fname, ''))
   else
-    exit(aFilename);
+    exit(fname);
 end;
 
-function uniqueObjStr(const aObject: Tobject): string;
+function uniqueObjStr(const value: TObject): string;
 begin
   {$PUSH}{$HINTS OFF}{$WARNINGS OFF}{$R-}
-  exit( format('%.8X',[NativeUint(aObject)]));
+  exit( format('%.8X',[NativeUint(value)]));
   {$POP}
 end;
 
-function shortenPath(const aPath: string; charThresh: Word = 60): string;
+function shortenPath(const path: string; thresh: Word = 60): string;
 var
   i: NativeInt;
   sepCnt: integer = 0;
   drv: string;
   pth1: string;
 begin
-  if aPath.length <= charThresh then
-    exit(aPath);
+  if path.length <= thresh then
+    exit(path);
 
-  drv := extractFileDrive(aPath);
-  i := aPath.length;
+  drv := extractFileDrive(path);
+  i := path.length;
   while(i <> drv.length+1) do
   begin
-    Inc(sepCnt, Byte(aPath[i] = directorySeparator));
+    Inc(sepCnt, Byte(path[i] = directorySeparator));
     if sepCnt = 2 then
       break;
     Dec(i);
   end;
-  pth1 := aPath[i..aPath.length];
+  pth1 := path[i..path.length];
   exit(format('%s%s...%s', [drv, directorySeparator, pth1]));
 end;
 
@@ -682,21 +682,21 @@ begin
     (sr.Attr and faDirectory = faDirectory);
 end;
 
-procedure listFiles(aList: TStrings; const aPath: string; recursive: boolean = false);
+procedure listFiles(list: TStrings; const path: string; recursive: boolean = false);
 var
   sr: TSearchrec;
 procedure tryAdd;
 begin
   if sr.Attr and faDirectory <> faDirectory then
-    aList.Add(aPath+ directorySeparator + sr.Name);
+    list.Add(path+ directorySeparator + sr.Name);
 end;
 begin
-  if findFirst(aPath + directorySeparator + '*', faAnyFile, sr) = 0 then
+  if findFirst(path + directorySeparator + '*', faAnyFile, sr) = 0 then
   try
     repeat
       tryAdd;
       if recursive then if isFolder(sr) then
-        listFiles(aList, aPath + directorySeparator + sr.Name, recursive);
+        listFiles(list, path + directorySeparator + sr.Name, recursive);
     until
       findNext(sr) <> 0;
   finally
@@ -704,27 +704,27 @@ begin
   end;
 end;
 
-procedure listFolders(aList: TStrings; const aPath: string);
+procedure listFolders(list: TStrings; const path: string);
 var
   sr: TSearchrec;
 begin
-  if findFirst(aPath + '*', faAnyFile, sr) = 0 then
+  if findFirst(path + '*', faAnyFile, sr) = 0 then
   try
     repeat if isFolder(sr) then
-      aList.Add(aPath + sr.Name);
+      list.Add(path + sr.Name);
     until findNext(sr) <> 0;
   finally
     sysutils.FindClose(sr);
   end;
 end;
 
-function hasFolder(const aPath: string): boolean;
+function hasFolder(const path: string): boolean;
 var
   sr: TSearchrec;
   res: boolean;
 begin
   res := false;
-  if findFirst(aPath + directorySeparator + '*', faDirectory, sr) = 0 then
+  if findFirst(path + directorySeparator + '*', faDirectory, sr) = 0 then
   try
     repeat if isFolder(sr) then
     begin
@@ -738,18 +738,18 @@ begin
   result := res;
 end;
 
-function listAsteriskPath(const aPath: string; aList: TStrings; someExts: TStrings = nil): boolean;
+function listAsteriskPath(const path: string; list: TStrings; exts: TStrings = nil): boolean;
 var
   pth, ext, fname: string;
   files: TStringList;
 begin
   result := false;
-  if aPath.isEmpty then
+  if path.isEmpty then
     exit;
   //
-  if aPath[aPath.length] = '*' then
+  if path[path.length] = '*' then
   begin
-    pth := aPath[1..aPath.length-1];
+    pth := path[1..path.length-1];
     if pth[pth.length] in ['/', '\'] then
       pth := pth[1..pth.length-1];
     if not pth.dirExists then exit(false);
@@ -759,13 +759,13 @@ begin
       listFiles(files, pth, true);
       for fname in files do
       begin
-        if someExts = nil then
-          aList.Add(fname)
+        if exts = nil then
+          list.Add(fname)
         else
         begin
           ext := fname.extractFileExt;
-          if someExts.IndexOf(ext) <> -1 then
-            aList.Add(fname);
+          if exts.IndexOf(ext) <> -1 then
+            list.Add(fname);
         end;
       end;
     finally
@@ -776,7 +776,7 @@ begin
   exit(false);
 end;
 
-procedure listDrives(aList: TStrings);
+procedure listDrives(list: TStrings);
 {$IFDEF WINDOWS}
 var
   drv: char;
@@ -805,11 +805,11 @@ begin
     SetErrorMode(OldMode);
   end;
   {$ELSE}
-  aList.Add('//');
+  list.Add('//');
   {$ENDIF}
 end;
 
-function shellOpen(const aFilename: string): boolean;
+function shellOpen(const fname: string): boolean;
 begin
   {$IFDEF WINDOWS}
   result := ShellExecute(0, 'OPEN', PChar(aFilename), nil, nil, SW_SHOW) > 32;
@@ -818,7 +818,7 @@ begin
   with TProcess.Create(nil) do
   try
     Executable := 'xdg-open';
-    Parameters.Add(aFilename);
+    Parameters.Add(fname);
     Execute;
   finally
     result := true;
@@ -838,26 +838,26 @@ begin
   {$ENDIF}
 end;
 
-function exeInSysPath(anExeName: string): boolean;
+function exeInSysPath(fname: string): boolean;
 begin
-  exit(exeFullName(anExeName) <> '');
+  exit(exeFullName(fname) <> '');
 end;
 
-function exeFullName(anExeName: string): string;
+function exeFullName(fname: string): string;
 var
   ext: string;
   env: string;
 begin
-  ext := anExeName.extractFileExt;
+  ext := fname.extractFileExt;
   if ext.isEmpty then
-    anExeName += exeExt;
+    fname += exeExt;
   //full path already specified
-  if anExeName.fileExists and (not anExeName.extractFileName.fileExists) then
-    exit(anExeName);
+  if fname.fileExists and (not fname.extractFileName.fileExists) then
+    exit(fname);
   //
   env := sysutils.GetEnvironmentVariable('PATH');
   // maybe in current dir
-  if anExeName.fileExists then
+  if fname.fileExists then
     env += PathSeparator + GetCurrentDir;
   if additionalPath.isNotEmpty then
     env += PathSeparator + additionalPath;
@@ -865,20 +865,20 @@ begin
   if Application <> nil then
     env += PathSeparator + ExtractFileDir(application.ExeName.ExtractFilePath);
   {$ENDIF}
-  exit(ExeSearch(anExeName, env));
+  exit(ExeSearch(fname, env));
 end;
 
-procedure processOutputToStrings(aProcess: TProcess; aList: TStrings);
+procedure processOutputToStrings(process: TProcess; list: TStrings);
 var
   str: TMemoryStream;
   sum: Integer = 0;
   cnt: Integer;
   buffSz: Integer;
 begin
-  if not (poUsePipes in aProcess.Options) then
+  if not (poUsePipes in process.Options) then
     exit;
   //
-  // note: aList.LoadFromStream() does not work, lines can be split, which breaks message parsing (e.g filename detector).
+  // note: list.LoadFromStream() does not work, lines can be split, which breaks message parsing (e.g filename detector).
   //
   {
     Split lines:
@@ -896,76 +896,76 @@ begin
   }
   str := TMemoryStream.Create;
   try
-    buffSz := aProcess.PipeBufferSize;
+    buffSz := process.PipeBufferSize;
     // temp fix: messages are cut if the TAsyncProcess version is used on simple TProcess.
-    if aProcess is TAsyncProcess then begin
-      while aProcess.Output.NumBytesAvailable <> 0 do begin
+    if process is TAsyncProcess then begin
+      while process.Output.NumBytesAvailable <> 0 do begin
         str.SetSize(sum + buffSz);
-        cnt := aProcess.Output.Read((str.Memory + sum)^, buffSz);
+        cnt := process.Output.Read((str.Memory + sum)^, buffSz);
         sum += cnt;
       end;
     end else begin
       repeat
         str.SetSize(sum + buffSz);
-        cnt := aProcess.Output.Read((str.Memory + sum)^, buffSz);
+        cnt := process.Output.Read((str.Memory + sum)^, buffSz);
         sum += cnt;
       until
         cnt = 0;
     end;
     str.Size := sum;
-    aList.LoadFromStream(str);
+    list.LoadFromStream(str);
   finally
     str.Free;
   end;
 end;
 
-procedure processOutputToStream(aProcess: TProcess; output: TMemoryStream);
+procedure processOutputToStream(process: TProcess; output: TMemoryStream);
 var
   sum, cnt: Integer;
 const
   buffSz = 2048;
 begin
-  if not (poUsePipes in aProcess.Options) then
+  if not (poUsePipes in process.Options) then
     exit;
   //
   sum := output.Size;
-  while aProcess.Output.NumBytesAvailable <> 0 do begin
+  while process.Output.NumBytesAvailable <> 0 do begin
     output.SetSize(sum + buffSz);
-    cnt := aProcess.Output.Read((output.Memory + sum)^, buffSz);
+    cnt := process.Output.Read((output.Memory + sum)^, buffSz);
     sum += cnt;
   end;
   output.SetSize(sum);
   output.Position := sum;
 end;
 
-procedure killProcess(var aProcess: TAsyncProcess);
+procedure killProcess(var process: TAsyncProcess);
 begin
-  if aProcess = nil then
+  if process = nil then
     exit;
-  if aProcess.Running then
-    aProcess.Terminate(0);
-  aProcess.Free;
-  aProcess := nil;
+  if process.Running then
+    process.Terminate(0);
+  process.Free;
+  process := nil;
 end;
 
-procedure ensureNoPipeIfWait(aProcess: TProcess);
+procedure ensureNoPipeIfWait(process: TProcess);
 begin
-  if not (poWaitonExit in aProcess.Options) then
+  if not (poWaitonExit in process.Options) then
     exit;
-  aProcess.Options := aProcess.Options - [poStderrToOutPut, poUsePipes];
+  process.Options := process.Options - [poStderrToOutPut, poUsePipes];
 end;
 
-function getLineEndingLength(const aFilename: string): byte;
+function getLineEndingLength(const fname: string): byte;
 var
   value: char = #0;
   le: string = LineEnding;
 begin
   result := le.length;
-  if not fileExists(aFilename) then
+  if not fileExists(fname) then
     exit;
   with TMemoryStream.Create do
   try
-    LoadFromFile(aFilename);
+    LoadFromFile(fname);
     while true do
     begin
       if Position = Size then
@@ -990,21 +990,21 @@ begin
   {$ENDIF}
 end;
 
-function countFolder(aFilename: string): integer;
+function countFolder(fname: string): integer;
 var
   parent: string;
 begin
   result := 0;
   while(true) do begin
-    parent := aFilename.extractFileDir;
-    if parent = aFilename then exit;
-    aFilename := parent;
+    parent := fname.extractFileDir;
+    if parent = fname then exit;
+    fname := parent;
     result += 1;
   end;
 end;
 
 //TODO-cfeature: make it working with relative paths
-function commonFolder(const someFiles: TStringList): string;
+function commonFolder(const files: TStringList): string;
 var
   i,j,k: integer;
   sink: TStringList;
@@ -1012,10 +1012,10 @@ var
   cnt: integer;
 begin
   result := '';
-  if someFiles.Count = 0 then exit;
+  if files.Count = 0 then exit;
   sink := TStringList.Create;
   try
-    sink.Assign(someFiles);
+    sink.Assign(files);
     for i := sink.Count-1 downto 0 do
       if (not sink[i].fileExists) and (not sink[i].dirExists) then
         sink.Delete(i);
@@ -1135,9 +1135,9 @@ begin
 end;
 {$ENDIF}
 
-function AppIsRunning(const ExeName: string):Boolean;
+function AppIsRunning(const fname: string):Boolean;
 begin
-  Result:= internalAppIsRunning(ExeName) > 0;
+  Result:= internalAppIsRunning(fname) > 0;
 end;
 
 function hasDlangSyntax(const ext: string): boolean;

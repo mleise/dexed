@@ -34,11 +34,11 @@ type
     // => don't skip '"' following '\'
     rString: boolean;
   public
-    procedure Assign(Src: TSynCustomHighlighterRange); override;
-    function Compare(Range: TSynCustomHighlighterRange): integer; override;
+    procedure Assign(source: TSynCustomHighlighterRange); override;
+    function Compare(range: TSynCustomHighlighterRange): integer; override;
     procedure Clear; override;
     //
-    procedure copyFrom(aSource: TSynD2SynRange);
+    procedure copyFrom(source: TSynD2SynRange);
   end;
 
 	TSynD2Syn = class (TSynCustomFoldHighlighter)
@@ -108,41 +108,41 @@ type
     function GetTokenKind: integer; override;
     function GetTokenPos: Integer; override;
     function GetEol: Boolean; override;
-    procedure SetRange(Value: Pointer); override;
+    procedure SetRange(value: Pointer); override;
     procedure ResetRange; override;
     function GetRange: Pointer; override;
 	end;
 
 implementation
 
-procedure TSynD2SynRange.Assign(Src: TSynCustomHighlighterRange);
+procedure TSynD2SynRange.Assign(source: TSynCustomHighlighterRange);
 var
-  src_t: TSynD2SynRange;
+  rng: TSynD2SynRange;
 begin
   inherited;
-  if Src is TSynD2SynRange then
+  if source is TSynD2SynRange then
   begin
-    src_t := TSynD2SynRange(Src);
-    rangeKinds := src_t.rangeKinds;
-    nestedCommentsCount := src_t.nestedCommentsCount;
-    tokenStringBracketsCount := src_t.tokenStringBracketsCount;
-    namedRegionCount := src_t.namedRegionCount;
+    rng := TSynD2SynRange(source);
+    rangeKinds := rng.rangeKinds;
+    nestedCommentsCount := rng.nestedCommentsCount;
+    tokenStringBracketsCount := rng.tokenStringBracketsCount;
+    namedRegionCount := rng.namedRegionCount;
   end;
 end;
 
-function TSynD2SynRange.Compare(Range: TSynCustomHighlighterRange): integer;
+function TSynD2SynRange.Compare(range: TSynCustomHighlighterRange): integer;
 var
   src_t: TSynD2SynRange;
 const
   cmpRes: array[boolean] of integer = (-1, 1);
 begin
-  result := inherited Compare(Range);
-  assert(Range <> nil);
+  result := inherited Compare(range);
+  assert(range <> nil);
   if result <> 0 then exit;
   //
-  if Range is TSynD2SynRange then
+  if range is TSynD2SynRange then
   begin
-    src_t := TSynD2SynRange(Range);
+    src_t := TSynD2SynRange(range);
     if src_t.rangeKinds <> rangeKinds then exit(1);
     if src_t.rString <> rString then exit(1);
     if src_t.nestedCommentsCount <> nestedCommentsCount then
@@ -164,13 +164,13 @@ begin
   rString := false;
 end;
 
-procedure TSynD2SynRange.copyFrom(aSource: TSynD2SynRange);
+procedure TSynD2SynRange.copyFrom(source: TSynD2SynRange);
 begin
-  nestedCommentsCount := aSource.nestedCommentsCount;
-  namedRegionCount := aSource.namedRegionCount;
-  tokenStringBracketsCount := aSource.tokenStringBracketsCount;
-  rangeKinds := aSource.rangeKinds;
-  rString := aSource.rString;
+  nestedCommentsCount := source.nestedCommentsCount;
+  namedRegionCount := source.namedRegionCount;
+  tokenStringBracketsCount := source.tokenStringBracketsCount;
+  rangeKinds := source.rangeKinds;
+  rString := source.rString;
 end;
 
 constructor TSynD2Syn.create(aOwner: TComponent);
@@ -960,11 +960,11 @@ begin
   result := fAttribLut[fTokKind];
 end;
 
-procedure TSynD2Syn.SetRange(Value: Pointer);
+procedure TSynD2Syn.SetRange(value: Pointer);
 var
   stored: TSynD2SynRange;
 begin
-  inherited SetRange(Value);
+  inherited SetRange(value);
   stored := TSynD2SynRange(CodeFoldRange.RangeType);
   fCurrRange.copyFrom(stored);
 end;

@@ -20,15 +20,15 @@ type
   protected
     fChecking: boolean;
     procedure clearOutOfRange;
-    procedure setMaxCount(aValue: Integer);
-    function checkItem(const S: string): boolean; virtual;
-    procedure Put(Index: Integer; const S: string); override;
-    procedure InsertItem(Index: Integer; const S: string); override;
+    procedure setMaxCount(value: Integer);
+    function checkItem(const value: string): boolean; virtual;
+    procedure Put(index: Integer; const value: string); override;
+    procedure InsertItem(index: Integer; const value: string); override;
   published
     property maxCount: Integer read fMaxCount write setMaxCount;
   public
     constructor Create; virtual;
-    procedure Insert(Index: Integer; const S: string); override;
+    procedure Insert(index: Integer; const value: string); override;
     property objectTag: TObject read fObj write fObj;
   end;
 
@@ -37,9 +37,9 @@ type
    *)
   TCEMRUFileList = class(TCEMruList)
   protected
-    function checkItem(const S: string): boolean; override;
+    function checkItem(const value: string): boolean; override;
   public
-    procedure assign(src: TPersistent); override;
+    procedure assign(source: TPersistent); override;
   end;
 
   (**
@@ -48,10 +48,10 @@ type
    *)
   TCEMRUDocumentList = class(TCEMRUFileList, ICEDocumentObserver)
   private
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
   public
     constructor create; override;
     destructor destroy; override;
@@ -63,12 +63,12 @@ type
    *)
   TCEMRUProjectList = class(TCEMRUFileList, ICEProjectObserver)
   private
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
   public
     constructor create; override;
     destructor destroy; override;
@@ -87,21 +87,21 @@ begin
     delete(Count-1);
 end;
 
-procedure TCEMruList.setMaxCount(aValue: Integer);
+procedure TCEMruList.setMaxCount(value: Integer);
 begin
-  if aValue < 0 then
-    aValue := 0;
-  if fMaxCount = aValue then
+  if value < 0 then
+    value := 0;
+  if fMaxCount = value then
     exit;
-  fMaxCount := aValue;
+  fMaxCount := value;
   clearOutOfRange;
 end;
 
-function TCEMruList.checkItem(const S: string): boolean;
+function TCEMruList.checkItem(const value: string): boolean;
 var
   i: NativeInt;
 begin
-  i := indexOf(S);
+  i := indexOf(value);
   if i = -1 then
     exit(true);
   if i = 0 then
@@ -112,31 +112,31 @@ begin
   exit( false);
 end;
 
-procedure TCEMruList.Put(Index: Integer; const S: string);
+procedure TCEMruList.Put(index: Integer; const value: string);
 begin
-  if not (checkItem(S)) then
+  if not (checkItem(value)) then
     exit;
   inherited;
   clearOutOfRange;
 end;
 
-procedure TCEMruList.InsertItem(Index: Integer; const S: string);
+procedure TCEMruList.InsertItem(index: Integer; const value: string);
 begin
-  if not (checkItem(S)) then
+  if not (checkItem(value)) then
     exit;
   inherited;
   clearOutOfRange;
 end;
 
-procedure TCEMruList.Insert(Index: Integer; const S: string);
+procedure TCEMruList.Insert(index: Integer; const value: string);
 begin
-  if not (checkItem(S)) then
+  if not (checkItem(value)) then
     exit;
   inherited;
   clearOutOfRange;
 end;
 
-procedure TCEMRUFileList.assign(src: TPersistent);
+procedure TCEMRUFileList.assign(source: TPersistent);
 var
   i: Integer;
 begin
@@ -146,9 +146,9 @@ begin
       Delete(i);
 end;
 
-function TCEMRUFileList.checkItem(const S: string): boolean;
+function TCEMRUFileList.checkItem(const value: string): boolean;
 begin
-  exit( inherited checkItem(S) and S.fileExists);
+  exit( inherited checkItem(value) and value.fileExists);
 end;
 
 constructor TCEMRUDocumentList.create;
@@ -163,22 +163,22 @@ begin
   inherited;
 end;
 
-procedure TCEMRUDocumentList.docNew(aDoc: TCESynMemo);
+procedure TCEMRUDocumentList.docNew(document: TCESynMemo);
 begin
 end;
 
-procedure TCEMRUDocumentList.docFocused(aDoc: TCESynMemo);
+procedure TCEMRUDocumentList.docFocused(document: TCESynMemo);
 begin
 end;
 
-procedure TCEMRUDocumentList.docChanged(aDoc: TCESynMemo);
+procedure TCEMRUDocumentList.docChanged(document: TCESynMemo);
 begin
 end;
 
-procedure TCEMRUDocumentList.docClosing(aDoc: TCESynMemo);
+procedure TCEMRUDocumentList.docClosing(document: TCESynMemo);
 begin
-  if aDoc.fileName.fileExists and not aDoc.isTemporary then
-    Insert(0, aDoc.fileName);
+  if document.fileName.fileExists and not document.isTemporary then
+    Insert(0, document.fileName);
 end;
 
 constructor TCEMRUProjectList.create;
@@ -193,33 +193,33 @@ begin
   inherited;
 end;
 
-procedure TCEMRUProjectList.projNew(aProject: ICECommonProject);
+procedure TCEMRUProjectList.projNew(project: ICECommonProject);
 begin
 end;
 
-procedure TCEMRUProjectList.projFocused(aProject: ICECommonProject);
+procedure TCEMRUProjectList.projFocused(project: ICECommonProject);
 begin
 end;
 
-procedure TCEMRUProjectList.projChanged(aProject: ICECommonProject);
+procedure TCEMRUProjectList.projChanged(project: ICECommonProject);
 begin
 end;
 
-procedure TCEMRUProjectList.projCompiling(aProject: ICECommonProject);
+procedure TCEMRUProjectList.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCEMRUProjectList.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCEMRUProjectList.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 
-procedure TCEMRUProjectList.projClosing(aProject: ICECommonProject);
+procedure TCEMRUProjectList.projClosing(project: ICECommonProject);
 var
   fname: string;
 begin
-  if aProject = nil then exit;
+  if project = nil then exit;
   //
-  fname := aProject.filename;
+  fname := project.filename;
   if fname.fileExists then
     Insert(0, fname);
 end;

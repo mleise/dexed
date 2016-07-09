@@ -35,22 +35,22 @@ function isIdentifier(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isFirstIdentifier(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 
 
-function readLine(var aReader: PChar; var aPosition: Integer): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+function readLine(var reader: PChar; var position: Integer): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 
-function readUntil(var aReader: PChar; var aPosition: Integer; const aDelim: Char): boolean; overload;    {$IFNDEF DEBUG}inline;{$ENDIF}
-function readUntil(var aReader: PChar; var aPosition: Integer; const aDelim: string): boolean; overload;  {$IFNDEF DEBUG}inline;{$ENDIF}
+function readUntil(var reader: PChar; var position: Integer; const aDelim: Char): boolean; overload;    {$IFNDEF DEBUG}inline;{$ENDIF}
+function readUntil(var reader: PChar; var position: Integer; const aDelim: string): boolean; overload;  {$IFNDEF DEBUG}inline;{$ENDIF}
 
-function readUntilAmong(var aReader: PChar; var aPosition: Integer; const aDelim: TCharSet): boolean;     {$IFNDEF DEBUG}inline;{$ENDIF}
+function readUntilAmong(var reader: PChar; var position: Integer; const aDelim: TCharSet): boolean;     {$IFNDEF DEBUG}inline;{$ENDIF}
 
-function readWhile(var aReader: PChar; var aPosition: Integer; const aDelim: Char): boolean;  overload;   {$IFNDEF DEBUG}inline;{$ENDIF}
-function readWhile(var aReader: PChar; var aPosition: Integer; const aDelim: TCharSet): boolean; overload;{$IFNDEF DEBUG}inline;{$ENDIF}
+function readWhile(var reader: PChar; var position: Integer; const aDelim: Char): boolean;  overload;   {$IFNDEF DEBUG}inline;{$ENDIF}
+function readWhile(var aReader: PChar; var position: Integer; const aDelim: TCharSet): boolean; overload;{$IFNDEF DEBUG}inline;{$ENDIF}
 
-function readDelim(var aReader: PChar; var aPosition: Integer; const aDelim: Char): boolean; overload;      {$IFNDEF DEBUG}inline;{$ENDIF}
-function readDelim(var aReader: PChar; var aPosition: Integer; const aDelim: string): boolean; overload;    {$IFNDEF DEBUG}inline;{$ENDIF}
-function readDelim(var aReader: PChar; var aPosition: Integer; const aDelims: TCharSet): boolean; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
+function readDelim(var reader: PChar; var position: Integer; const aDelim: Char): boolean; overload;      {$IFNDEF DEBUG}inline;{$ENDIF}
+function readDelim(var reader: PChar; var position: Integer; const aDelim: string): boolean; overload;    {$IFNDEF DEBUG}inline;{$ENDIF}
+function readDelim(var reader: PChar; var position: Integer; const aDelims: TCharSet): boolean; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
 
-function tryReadDelim(var aReader: PChar; var aPosition: Integer; const aDelim: Char): boolean; overload;   {$IFNDEF DEBUG}inline;{$ENDIF}
-function tryReadDelim(var aReader: PChar; var aPosition: Integer; const aDelim: string): boolean; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
+function tryReadDelim(var reader: PChar; var position: Integer; const aDelim: Char): boolean; overload;   {$IFNDEF DEBUG}inline;{$ENDIF}
+function tryReadDelim(var reader: PChar; var position: Integer; const aDelim: string): boolean; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
 
 implementation
 
@@ -158,138 +158,138 @@ begin
   exit(isIdentifier(c) and (not isNumber(c)));
 end;
 
-function readLine(var aReader: PChar; var aPosition: Integer): boolean;
+function readLine(var reader: PChar; var position: Integer): boolean;
 begin
   result := true;
-  while aReader^ <> #10 do
+  while reader^ <> #10 do
   begin
-    inc(aReader);
-    inc(aPosition);
+    inc(reader);
+    inc(position);
   end;
 end;
 
-function readUntil(var aReader: PChar; var aPosition: Integer; const aDelim: Char): boolean;
+function readUntil(var reader: PChar; var position: Integer; const aDelim: Char): boolean;
 begin
-  while aReader^ <> aDelim do
+  while reader^ <> aDelim do
   begin
-    if aReader^ = #10 then
+    if reader^ = #10 then
       exit(false);
-    inc(aReader);
-    inc(aPosition);
+    inc(reader);
+    inc(position);
   end;
-  inc(aReader);
-  inc(aPosition);
+  inc(reader);
+  inc(position);
   exit(true);
 end;
 
-function readUntil(var aReader: PChar; var aPosition: Integer; const aDelim: string): boolean;
+function readUntil(var reader: PChar; var position: Integer; const aDelim: string): boolean;
 begin
-  while aReader[0..length(aDelim)-1] <> aDelim do
+  while reader[0..length(aDelim)-1] <> aDelim do
   begin
-    if aReader^ = #10 then
+    if reader^ = #10 then
       exit(false);
-    inc(aReader);
-    inc(aPosition);
+    inc(reader);
+    inc(position);
   end;
-  inc(aReader, length(aDelim));
-  inc(aPosition, length(aDelim));
+  inc(reader, length(aDelim));
+  inc(position, length(aDelim));
   exit(true);
 end;
 
-function readUntilAmong(var aReader: PChar; var aPosition: Integer; const aDelim: TCharSet): boolean;
+function readUntilAmong(var reader: PChar; var position: Integer; const aDelim: TCharSet): boolean;
 begin
-  while not (aReader^ in aDelim) do
+  while not (reader^ in aDelim) do
   begin
-    if aReader^ = #10 then
+    if reader^ = #10 then
       exit(false);
-    inc(aReader);
-    inc(aPosition);
+    inc(reader);
+    inc(position);
   end;
   exit(true);
 end;
 
-function readWhile(var aReader: PChar; var aPosition: Integer; const aDelim: Char): boolean;
+function readWhile(var reader: PChar; var position: Integer; const aDelim: Char): boolean;
 begin
   result := false;
-  while aReader^ = aDelim do
+  while reader^ = aDelim do
   begin
-    inc(aReader);
-    inc(aPosition);
+    inc(reader);
+    inc(position);
     result := true;
   end;
 end;
 
-function readWhile(var aReader: PChar; var aPosition: Integer; const aDelim: TCharSet): boolean;
+function readWhile(var aReader: PChar; var position: Integer; const aDelim: TCharSet): boolean;
 begin
   result := false;
   while aReader^ in aDelim do
   begin
     inc(aReader);
-    inc(aPosition);
+    inc(position);
     result := true;
   end;
 end;
 
 
-function readDelim(var aReader: PChar; var aPosition: Integer; const aDelim: Char): boolean;
+function readDelim(var reader: PChar; var position: Integer; const aDelim: Char): boolean;
 begin
-  if aReader^ <> aDelim then
+  if reader^ <> aDelim then
     exit(false);
-  inc(aReader);
-  inc(aPosition);
+  inc(reader);
+  inc(position);
   exit(true);
 end;
 
-function readDelim(var aReader: PChar; var aPosition: Integer; const aDelims: TCharSet): boolean;
+function readDelim(var reader: PChar; var position: Integer; const aDelims: TCharSet): boolean;
 begin
-  if not (aReader^ in aDelims) then
+  if not (reader^ in aDelims) then
     exit(false);
-  inc(aReader);
-  inc(aPosition);
+  inc(reader);
+  inc(position);
   exit(true);
 end;
 
-function readDelim(var aReader: PChar; var aPosition: Integer; const aDelim: string): boolean;
+function readDelim(var reader: PChar; var position: Integer; const aDelim: string): boolean;
 var
   i: Integer;
 begin
   for i := 1 to length(aDelim) do
   begin
-    if aReader^ = #10 then
+    if reader^ = #10 then
       exit(false);
-    if aReader^ <> aDelim[i] then
+    if reader^ <> aDelim[i] then
       exit(false);
-    inc(aReader);
-    inc(aPosition);
+    inc(reader);
+    inc(position);
   end;
   exit(true);
 end;
 
-function tryReadDelim(var aReader: PChar; var aPosition: Integer; const aDelim: Char): boolean;
+function tryReadDelim(var reader: PChar; var position: Integer; const aDelim: Char): boolean;
 var
   savedReader: PChar;
   savedPos: Integer;
 begin
-  savedReader := aReader;
-  savedPos := aPosition;
-  if readDelim(aReader, aPosition, aDelim) then
+  savedReader := reader;
+  savedPos := position;
+  if readDelim(reader, position, aDelim) then
       exit(true);
-  aReader := savedReader;
-  aPosition := savedPos;
+  reader := savedReader;
+  position := savedPos;
   exit(false);
 end;
 
-function tryReadDelim(var aReader: PChar; var aPosition: Integer; const aDelim: string): boolean;
+function tryReadDelim(var reader: PChar; var position: Integer; const aDelim: string): boolean;
 var
   savedReader: PChar;
   savedPos: Integer;
 begin
-  savedReader := aReader;
-  savedPos := aPosition;
-  if readDelim(aReader, aPosition, aDelim) then
+  savedReader := reader;
+  savedPos := position;
+  if readDelim(reader, position, aDelim) then
     exit(true);
-  aReader := savedReader;
-  aPosition := savedPos;
+  reader := savedReader;
+  position := savedPos;
   exit(false);
 end;
 

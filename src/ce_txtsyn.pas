@@ -20,9 +20,9 @@ type
     fToken: TTokenKind;
     fTokStart, fTokStop: Integer;
     fLineBuf: string;
-    procedure setSymAttribs(aValue: TSynHighlighterAttributes);
-    procedure setTxtAttribs(aValue: TSynHighlighterAttributes);
-    procedure setWhiAttribs(aValue: TSynHighlighterAttributes);
+    procedure setSymAttribs(value: TSynHighlighterAttributes);
+    procedure setTxtAttribs(value: TSynHighlighterAttributes);
+    procedure setWhiAttribs(value: TSynHighlighterAttributes);
   published
     property symbols: TSynHighlighterAttributes read fSymAttribs write setSymAttribs;
     property text:    TSynHighlighterAttributes read fTxtAttribs write setTxtAttribs;
@@ -79,19 +79,19 @@ begin
   Next;
 end;
 
-procedure TSynTxtSyn.setSymAttribs(aValue: TSynHighlighterAttributes);
+procedure TSynTxtSyn.setSymAttribs(value: TSynHighlighterAttributes);
 begin
-  fSymAttribs.Assign(aValue);
+  fSymAttribs.Assign(value);
 end;
 
-procedure TSynTxtSyn.setTxtAttribs(aValue: TSynHighlighterAttributes);
+procedure TSynTxtSyn.setTxtAttribs(value: TSynHighlighterAttributes);
 begin
-  fTxtAttribs.Assign(aValue);
+  fTxtAttribs.Assign(value);
 end;
 
-procedure TSynTxtSyn.setWhiAttribs(aValue: TSynHighlighterAttributes);
+procedure TSynTxtSyn.setWhiAttribs(value: TSynHighlighterAttributes);
 begin
-  fWhiAttribs.Assign(aValue);
+  fWhiAttribs.Assign(value);
 end;
 
 procedure TSynTxtSyn.setLine(const NewValue: String; LineNumber: Integer);

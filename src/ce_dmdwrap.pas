@@ -32,7 +32,7 @@ type
     fSymStringExpander: ICESymStringExpander;
     property onChange: TNotifyEvent read fOnChange write fOnChange;
   public
-    procedure getOpts(aList: TStrings; base: TOptsGroup = nil); virtual; abstract;
+    procedure getOpts(list: TStrings; base: TOptsGroup = nil); virtual; abstract;
     constructor create; virtual;
   end;
 
@@ -45,18 +45,18 @@ type
     fDocDir: TCEPathname;
     fGenJson: boolean;
     fJsonFname: TCEFilename;
-    procedure setGenDoc(const aValue: boolean);
-    procedure setGenJSON(const aValue: boolean);
-    procedure setDocDir(const aValue: TCEPathname);
-    procedure setJSONFile(const aValue: TCEFilename);
+    procedure setGenDoc(const value: boolean);
+    procedure setGenJSON(const value: boolean);
+    procedure setDocDir(const value: TCEPathname);
+    procedure setJSONFile(const value: TCEFilename);
   published
     property generateDocumentation: boolean read fGenDoc write setGenDoc default false;
     property generateJSON: boolean read fGenJson write setGenJSON default false;
     property DocumentationDirectory: TCEPathname read fDocDir write setDocDir;
     property JSONFilename: TCEFilename read fJsonFname write setJSONFile;
   public
-    procedure assign(aValue: TPersistent); override;
-    procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
+    procedure assign(source: TPersistent); override;
+    procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
   end;
 
 
@@ -78,14 +78,14 @@ type
     fQuiet: boolean;
     fVgc: boolean;
     fCol: boolean;
-    procedure setDepHandling(const aValue: TDepHandling);
-    procedure setVerbose(const aValue: boolean);
-    procedure setWarnings(const aValue: boolean);
-    procedure setWarnInfo(const aValue: boolean);
-    procedure setVtls(const aValue: boolean);
-    procedure setQuiet(const aValue: boolean);
-    procedure setVgc(const aValue: boolean);
-    procedure setCol(const aValue: boolean);
+    procedure setDepHandling(const value: TDepHandling);
+    procedure setVerbose(const value: boolean);
+    procedure setWarnings(const value: boolean);
+    procedure setWarnInfo(const value: boolean);
+    procedure setVtls(const value: boolean);
+    procedure setQuiet(const value: boolean);
+    procedure setVgc(const value: boolean);
+    procedure setCol(const value: boolean);
   published
     property deprecationHandling: TDepHandling read fDepHandling write setDepHandling default warning;
     property verbose: boolean read fVerbose write setVerbose default false;
@@ -97,8 +97,8 @@ type
     property showColumnsNumber: boolean read fCol write setCol default false;
   public
     constructor create; override;
-    procedure assign(aValue: TPersistent); override;
-    procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
+    procedure assign(source: TPersistent); override;
+    procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
   end;
 
   (**
@@ -129,19 +129,19 @@ type
     fAllInst: boolean;
     fStackStomp: boolean;
     fAlwayLinkLibs: boolean;
-    procedure setAlwaysLinkLibs(const aValue: boolean);
-    procedure setAllInst(const aValue: boolean);
-    procedure setUnittest(const aValue: boolean);
-    procedure setTrgKind(const aValue: TTargetSystem);
-    procedure setBinKind(const aValue: TProjectBinaryKind);
-    procedure setInline(const aValue: boolean);
-    procedure setBoundsCheck(const aValue: TBoundCheckKind);
-    procedure setOptims(const aValue: boolean);
-    procedure setGenStack(const aValue: boolean);
-    procedure setAddMain(const aValue: boolean);
-    procedure setRelease(const aValue: boolean);
-    procedure setVerIds(const aValue: TStringList);
-    procedure setStackStomp(const aValue: boolean);
+    procedure setAlwaysLinkLibs(const value: boolean);
+    procedure setAllInst(const value: boolean);
+    procedure setUnittest(const value: boolean);
+    procedure setTrgKind(const value: TTargetSystem);
+    procedure setBinKind(const value: TProjectBinaryKind);
+    procedure setInline(const value: boolean);
+    procedure setBoundsCheck(const value: TBoundCheckKind);
+    procedure setOptims(const value: boolean);
+    procedure setGenStack(const value: boolean);
+    procedure setAddMain(const value: boolean);
+    procedure setRelease(const value: boolean);
+    procedure setVerIds(const value: TStringList);
+    procedure setStackStomp(const value: boolean);
   published
     property alwaysLinkStaticLibs: boolean read fAlwayLinkLibs write setAlwaysLinkLibs default false;
     property targetKind: TTargetSystem read fTrgKind write setTrgKind default auto;
@@ -158,8 +158,8 @@ type
   public
     constructor create; override;
     destructor destroy; override;
-    procedure assign(aValue: TPersistent); override;
-    procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
+    procedure assign(source: TPersistent); override;
+    procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
   end;
 
   (*****************************************************************************
@@ -176,13 +176,13 @@ type
     fForceDbgBool: boolean;
     fGenFrame: boolean;
     procedure updateForceDbgBool;
-    procedure setGenFrame(const aValue: boolean);
-    procedure setDebugConditions(const aValue: boolean);
-    procedure setGenInfos(const aValue: boolean);
-    procedure setDbgC(const aValue: boolean);
-    procedure setGenMap(const aValue: boolean);
-    procedure setDbgLevel(const aValue: Integer);
-    procedure setDbgIdents(aValue: TStringList);
+    procedure setGenFrame(const value: boolean);
+    procedure setDebugConditions(const value: boolean);
+    procedure setGenInfos(const value: boolean);
+    procedure setDbgC(const value: boolean);
+    procedure setGenMap(const value: boolean);
+    procedure setDbgLevel(const value: Integer);
+    procedure setDbgIdents(value: TStringList);
   published
     property debugConditions: boolean read fDebugConditions write setDebugConditions default false;
     property debugIdentifiers: TStringList read fDbgIdents write setDbgIdents;
@@ -193,8 +193,8 @@ type
   public
     constructor create; override;
     destructor destroy; override;
-    procedure assign(aValue: TPersistent); override;
-    procedure getOpts(aList: TStrings;base: TOptsGroup = nil); override;
+    procedure assign(source: TPersistent); override;
+    procedure getOpts(list: TStrings;base: TOptsGroup = nil); override;
   end;
 
   (*****************************************************************************
@@ -209,13 +209,13 @@ type
     fFname: TCEFilename;
     fObjDir: TCEPathname;
     fForceExt: boolean;
-    procedure setForceExt(aValue: boolean);
-    procedure setFname(const aValue: TCEFilename);
-    procedure setObjDir(const aValue: TCEPathname);
-    procedure setSrcs(aValue: TStringList);
-    procedure setIncl(aValue: TStringList);
-    procedure setImpt(aValue: TStringList);
-    procedure setExcl(aValue: TStringList);
+    procedure setForceExt(value: boolean);
+    procedure setFname(const value: TCEFilename);
+    procedure setObjDir(const value: TCEPathname);
+    procedure setSrcs(value: TStringList);
+    procedure setIncl(value: TStringList);
+    procedure setImpt(value: TStringList);
+    procedure setExcl(value: TStringList);
     procedure strLstChange(sender: TObject);
   published
     property outputFilename: TCEFilename read fFname write setFname;
@@ -228,8 +228,8 @@ type
   public
     constructor create; override;
     destructor destroy; override;
-    procedure assign(aValue: TPersistent); override;
-    procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
+    procedure assign(source: TPersistent); override;
+    procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
   end;
 
   (*****************************************************************************
@@ -239,16 +239,16 @@ type
   private
     fCov: boolean;
     fCustom: TStringList;
-    procedure setCov(const aValue: boolean);
-    procedure setCustom(aValue: TStringList);
+    procedure setCov(const value: boolean);
+    procedure setCustom(value: TStringList);
   published
     property coverage: boolean read fCov write setCov default false;
     property customOptions: TStringList read fCustom write setCustom;
   public
     constructor create; override;
     destructor destroy; override;
-    procedure assign(aValue: TPersistent); override;
-    procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
+    procedure assign(source: TPersistent); override;
+    procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
   end;
 
   (*****************************************************************************
@@ -263,12 +263,12 @@ type
     fParameters: TStringList;
     fShowWin: TShowWindowOptions;
     fCommands: TStringList;
-    procedure setExecutable(const aValue: TCEFilename);
-    procedure setWorkDir(const aValue: TCEPathname);
-    procedure setOptions(const aValue: TProcessOptions);
-    procedure setParameters(aValue: TStringList);
-    procedure setShowWin(const aValue: TShowWindowOptions);
-    procedure setCommands(aValue: TStringList);
+    procedure setExecutable(const value: TCEFilename);
+    procedure setWorkDir(const value: TCEPathname);
+    procedure setOptions(const value: TProcessOptions);
+    procedure setParameters(value: TStringList);
+    procedure setShowWin(value: TShowWindowOptions);
+    procedure setCommands(value: TStringList);
   protected
     property executable: TCEFilename read fExecutable write setExecutable;
     property workingDirectory: TCEPathname read fWorkDir write setWorkDir;
@@ -280,13 +280,13 @@ type
     constructor create; override;
     destructor destroy; override;
     procedure assign(source: TPersistent); override;
-    procedure getOpts(aList: TStrings; base: TOptsGroup = nil); override;
+    procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
     { TAsyncProcess "Parameters" inherits from UTF8 process,
       and the property reader is not anymore "fParameters" but "fUTF8Parameters"
       without the overload aProcess does not get the Parameters if aProcess is TAsynProcess...}
-    procedure setProcess(var aProcess: TProcess);
-    procedure setProcess(var aProcess: TAsyncProcess);
-    procedure setProcess(var aProcess: TCEProcess);
+    procedure setProcess(var process: TProcess);
+    procedure setProcess(var process: TAsyncProcess);
+    procedure setProcess(var process: TCEProcess);
   end;
 
   (*****************************************************************************
@@ -335,18 +335,18 @@ type
     fIsOverriddenConfiguration: boolean;
     procedure doChanged;
     procedure subOptsChanged(sender: TObject);
-    procedure setName(const aValue: string);
-    procedure setDocOpts(const aValue: TDocOpts);
-    procedure setDebugOpts(const aValue: TDebugOpts);
-    procedure setMsgOpts(const aValue: TMsgOpts);
-    procedure setOutputOpts(const aValue: TOutputOpts);
-    procedure setPathsOpts(const aValue: TPathsOpts);
-    procedure setOthers(const aValue: TOtherOpts);
-    procedure setPreProcOpt(const aValue: TCompileProcOptions);
-    procedure setPostProcOpt(const aValue: TCompileProcOptions);
-    procedure setRunProjOpt(const aValue: TProjectRunOptions);
-    procedure setisBaseConfiguration(const aValue: boolean);
-    procedure setisOverriddenConfiguration(const aValue: boolean);
+    procedure setName(const value: string);
+    procedure setDocOpts(const value: TDocOpts);
+    procedure setDebugOpts(const value: TDebugOpts);
+    procedure setMsgOpts(const value: TMsgOpts);
+    procedure setOutputOpts(const value: TOutputOpts);
+    procedure setPathsOpts(const value: TPathsOpts);
+    procedure setOthers(const value: TOtherOpts);
+    procedure setPreProcOpt(const value: TCompileProcOptions);
+    procedure setPostProcOpt(const value: TCompileProcOptions);
+    procedure setRunProjOpt(const value: TProjectRunOptions);
+    procedure setisBaseConfiguration(const value: boolean);
+    procedure setisOverriddenConfiguration(const value: boolean);
   protected
     function nameFromID: string;
   published
@@ -365,8 +365,8 @@ type
   public
     constructor create(aCollection: TCollection); override;
     destructor destroy; override;
-    procedure assign(aValue: TPersistent); override;
-    procedure getOpts(aList: TStrings; base: TCompilerConfiguration = nil);
+    procedure assign(source: TPersistent); override;
+    procedure getOpts(list: TStrings; base: TCompilerConfiguration = nil);
     property onChanged: TNotifyEvent read fOnChanged write fOnChanged;
   end;
 
@@ -383,49 +383,49 @@ begin
 end;
 
 {$REGION TDocOpts --------------------------------------------------------------}
-procedure TDocOpts.getOpts(aList: TStrings; base: TOptsGroup = nil);
+procedure TDocOpts.getOpts(list: TStrings; base: TOptsGroup = nil);
 var
   baseopt: TDocOpts;
 begin
   if base.isNil then
   begin
     if fGenDoc then
-      aList.Add('-D');
+      list.Add('-D');
     if fGenJson then
-      aList.Add('-X');
+      list.Add('-X');
     if fDocDir <> '' then
-      aList.Add('-Dd' + fSymStringExpander.expand(fDocDir));
+      list.Add('-Dd' + fSymStringExpander.expand(fDocDir));
     if fJsonFname <> '' then
-      aList.Add('-Xf' + fSymStringExpander.expand(fJsonFname));
+      list.Add('-Xf' + fSymStringExpander.expand(fJsonFname));
   end else
   begin
     baseopt := TDocOpts(base);
     if baseopt.fGenDoc or fGenDoc then
-      aList.Add('-D');
+      list.Add('-D');
     if baseopt.fGenJson or fGenJson then
-      aList.Add('-X');
+      list.Add('-X');
     if (baseopt.fDocDir <> '') and (fDocDir <> '') then
-      aList.Add('-Dd' + fSymStringExpander.expand(fDocDir))
+      list.Add('-Dd' + fSymStringExpander.expand(fDocDir))
     else if (fDocDir <> '') then
-      aList.Add('-Dd' + fSymStringExpander.expand(fDocDir))
+      list.Add('-Dd' + fSymStringExpander.expand(fDocDir))
     else if (baseopt.fDocDir <> '') then
-      aList.Add('-Dd' + fSymStringExpander.expand(baseopt.fDocDir));
+      list.Add('-Dd' + fSymStringExpander.expand(baseopt.fDocDir));
     if (baseopt.fJsonFname <> '') and (fJsonFname <> '') then
-      aList.Add('-Xf' + fSymStringExpander.expand(fJsonFname))
+      list.Add('-Xf' + fSymStringExpander.expand(fJsonFname))
     else if fJsonFname <> '' then
-      aList.Add('-Xf' + fSymStringExpander.expand(fJsonFname))
+      list.Add('-Xf' + fSymStringExpander.expand(fJsonFname))
     else if (baseopt.fJsonFname <> '') then
-      aList.Add('-Dd' + fSymStringExpander.expand(baseopt.fJsonFname));
+      list.Add('-Dd' + fSymStringExpander.expand(baseopt.fJsonFname));
   end;
 end;
 
-procedure TDocOpts.assign(aValue: TPersistent);
+procedure TDocOpts.assign(source: TPersistent);
 var
   src: TDocOpts;
 begin
-  if (aValue is TDocOpts) then
+  if (source is TDocOpts) then
   begin
-    src       := TDocOpts(aValue);
+    src       := TDocOpts(source);
     //
     fGenDoc   := src.fGenDoc;
     fGenJson  := src.fGenJson;
@@ -435,7 +435,7 @@ begin
   else inherited;
 end;
 
-procedure TDocOpts.setGenDoc(const aValue: boolean);
+procedure TDocOpts.setGenDoc(const value: boolean);
 begin
   if fDocDir <> '' then
   begin
@@ -443,13 +443,13 @@ begin
     exit;
   end;
   //
-  if fGenDoc = aValue then
+  if fGenDoc = value then
     exit;
-  fGenDoc := aValue;
+  fGenDoc := value;
   doChanged;
 end;
 
-procedure TDocOpts.setGenJSON(const aValue: boolean);
+procedure TDocOpts.setGenJSON(const value: boolean);
 begin
   if fJsonFname <> '' then
   begin
@@ -457,27 +457,27 @@ begin
     exit;
   end;
   //
-  if fGenJson = aValue then
+  if fGenJson = value then
     exit;
-  fGenJson := aValue;
+  fGenJson := value;
   doChanged;
 end;
 
-procedure TDocOpts.setDocDir(const aValue: TCEPathname);
+procedure TDocOpts.setDocDir(const value: TCEPathname);
 begin
-  if fDocDir = aValue then
+  if fDocDir = value then
     exit;
-  fDocDir := patchPlateformPath(aValue);
+  fDocDir := patchPlateformPath(value);
   if fDocDir <> '' then
     setGenDoc(true);
   doChanged;
 end;
 
-procedure TDocOpts.setJSONFile(const aValue: TCEFilename);
+procedure TDocOpts.setJSONFile(const value: TCEFilename);
 begin
-  if fJsonFname = aValue then
+  if fJsonFname = value then
     exit;
-  fJsonFname := patchPlateformPath(aValue);
+  fJsonFname := patchPlateformPath(value);
   if fJsonFname <> '' then
     setGenJSON(true);
   doChanged;
@@ -492,7 +492,7 @@ begin
   fWarnings := true;
 end;
 
-procedure TMsgOpts.getOpts(aList: TStrings; base: TOptsGroup = nil);
+procedure TMsgOpts.getOpts(list: TStrings; base: TOptsGroup = nil);
 var
   dep, depbase: string;
   baseopt: TMsgOpts;
@@ -502,37 +502,37 @@ begin
   if base.isNil then
   begin
     dep := DepStr[fDepHandling];
-    if dep.isNotEmpty then aList.Add(dep);
-    if fVerbose then aList.Add('-v');
-    if fWarnings then aList.Add('-w');
-    if fWarnInfo then aList.Add('-wi');
-    if fVtls then aList.Add('-vtls');
-    if fQuiet then aList.Add('-quiet');
-    if fVgc then aList.Add('-vgc');
-    if fCol then aList.Add('-vcolumns');
+    if dep.isNotEmpty then list.Add(dep);
+    if fVerbose then list.Add('-v');
+    if fWarnings then list.Add('-w');
+    if fWarnInfo then list.Add('-wi');
+    if fVtls then list.Add('-vtls');
+    if fQuiet then list.Add('-quiet');
+    if fVgc then list.Add('-vgc');
+    if fCol then list.Add('-vcolumns');
   end else
   begin
     baseopt := TMsgOpts(base);
     dep := DepStr[fDepHandling];
     depbase := DepStr[baseopt.fDepHandling];
-    if dep <> depbase then aList.Add(dep) else aList.Add(depbase);
-    if baseopt.fVerbose or fVerbose then aList.Add('-v');
-    if baseopt.fWarnings or fWarnings then aList.Add('-w');
-    if baseopt.fWarnInfo or fWarnInfo then aList.Add('-wi');
-    if baseopt.fVtls or fVtls then aList.Add('-vtls');
-    if baseopt.fQuiet or fQuiet then aList.Add('-quiet');
-    if baseopt.fVgc or fVgc then aList.Add('-vgc');
-    if baseopt.fCol or fCol then aList.Add('-vcolumns');
+    if dep <> depbase then list.Add(dep) else list.Add(depbase);
+    if baseopt.fVerbose or fVerbose then list.Add('-v');
+    if baseopt.fWarnings or fWarnings then list.Add('-w');
+    if baseopt.fWarnInfo or fWarnInfo then list.Add('-wi');
+    if baseopt.fVtls or fVtls then list.Add('-vtls');
+    if baseopt.fQuiet or fQuiet then list.Add('-quiet');
+    if baseopt.fVgc or fVgc then list.Add('-vgc');
+    if baseopt.fCol or fCol then list.Add('-vcolumns');
   end;
 end;
 
-procedure TMsgOpts.assign(aValue: TPersistent);
+procedure TMsgOpts.assign(source: TPersistent);
 var
   src: TMsgOpts;
 begin
-  if (aValue is TMsgOpts) then
+  if (source is TMsgOpts) then
   begin
-    src := TMsgOpts(aValue);
+    src := TMsgOpts(source);
     //
     fDepHandling := src.fDepHandling;
     fVerbose  := src.fVerbose;
@@ -546,59 +546,59 @@ begin
   else inherited;
 end;
 
-procedure TMsgOpts.setDepHandling(const aValue: TDepHandling);
+procedure TMsgOpts.setDepHandling(const value: TDepHandling);
 begin
-  if fDepHandling = aValue then exit;
-  fDepHandling := aValue;
+  if fDepHandling = value then exit;
+  fDepHandling := value;
   doChanged;
 end;
 
-procedure TMsgOpts.setVerbose(const aValue: boolean);
+procedure TMsgOpts.setVerbose(const value: boolean);
 begin
-  if fVerbose = aValue then exit;
-  fVerbose := aValue;
+  if fVerbose = value then exit;
+  fVerbose := value;
   doChanged;
 end;
 
-procedure TMsgOpts.setWarnings(const aValue: boolean);
+procedure TMsgOpts.setWarnings(const value: boolean);
 begin
-  if fWarnings = aValue then exit;
-  fWarnings := aValue;
+  if fWarnings = value then exit;
+  fWarnings := value;
   doChanged;
 end;
 
-procedure TMsgOpts.setWarnInfo(const aValue: boolean);
+procedure TMsgOpts.setWarnInfo(const value: boolean);
 begin
-  if fWarnInfo = aValue then exit;
-  fWarnInfo := aValue;
+  if fWarnInfo = value then exit;
+  fWarnInfo := value;
   doChanged;
 end;
 
-procedure TMsgOpts.setVtls(const aValue: boolean);
+procedure TMsgOpts.setVtls(const value: boolean);
 begin
-  if fVtls = aValue then exit;
-  fVtls := aValue;
+  if fVtls = value then exit;
+  fVtls := value;
   doChanged;
 end;
 
-procedure TMsgOpts.setQuiet(const aValue: boolean);
+procedure TMsgOpts.setQuiet(const value: boolean);
 begin
-  if fQuiet = aValue then exit;
-  fQuiet := aValue;
+  if fQuiet = value then exit;
+  fQuiet := value;
   doChanged;
 end;
 
-procedure TMsgOpts.setVgc(const aValue: boolean);
+procedure TMsgOpts.setVgc(const value: boolean);
 begin
-  if fVgc = aValue then exit;
-  fVgc := aValue;
+  if fVgc = value then exit;
+  fVgc := value;
   doChanged;
 end;
 
-procedure TMsgOpts.setCol(const aValue: boolean);
+procedure TMsgOpts.setCol(const value: boolean);
 begin
-  if fCol = aValue then exit;
-  fCol := aValue;
+  if fCol = value then exit;
+  fCol := value;
   doChanged;
 end;
 {$ENDREGION}
@@ -617,7 +617,7 @@ begin
   inherited;
 end;
 
-procedure TOutputOpts.getOpts(aList: TStrings; base: TOptsGroup = nil);
+procedure TOutputOpts.getOpts(list: TStrings; base: TOptsGroup = nil);
 var
   str, strbase: string;
   baseopt: TOutputOpts;
@@ -629,31 +629,31 @@ begin
   if base.isNil then
   begin
     str := binKindStr[fBinKind];
-    if str.isNotEmpty then aList.Add(str);
+    if str.isNotEmpty then list.Add(str);
     {$IFNDEF WINDOWS}
     if fBinKind = sharedlib then
-      aList.Add('-fPIC');
+      list.Add('-fPIC');
     {$ENDIF}
     str := trgKindStr[fTrgKind];
-    if str.isNotEmpty then aList.Add(str);
-    if fUnittest then aList.Add('-unittest');
-    if fInline then aList.Add('-inline');
-    if fOptimz then aList.Add('-O');
-    if fStackStomp then aList.Add('-gx');
-    if fAllInst then aList.Add('-allinst');
-    if fAddMain then aList.Add('-main');
-    if fRelease then aList.Add('-release');
+    if str.isNotEmpty then list.Add(str);
+    if fUnittest then list.Add('-unittest');
+    if fInline then list.Add('-inline');
+    if fOptimz then list.Add('-O');
+    if fStackStomp then list.Add('-gx');
+    if fAllInst then list.Add('-allinst');
+    if fAddMain then list.Add('-main');
+    if fRelease then list.Add('-release');
     for str in fVerIds do
-      if not isStringDisabled(str) then aList.Add('-version=' + str);
+      if not isStringDisabled(str) then list.Add('-version=' + str);
     //
     if fRelease then
       begin
         if fBoundsCheck <> safeOnly then
-          aList.Add('-boundscheck=' + bchKindStr[fBoundsCheck] );
+          list.Add('-boundscheck=' + bchKindStr[fBoundsCheck] );
       end
     else
       if fBoundsCheck <> onAlways then
-        aList.Add('-boundscheck=' + bchKindStr[fBoundsCheck] );
+        list.Add('-boundscheck=' + bchKindStr[fBoundsCheck] );
   end else
   begin
     baseopt := TOutputOpts(base);
@@ -661,49 +661,49 @@ begin
     strbase := binKindStr[baseopt.fBinKind];
     if (str <> strbase) then
     begin
-      aList.Add(str);
+      list.Add(str);
       {$IFNDEF WINDOWS}
       if fBinKind = sharedlib then
-        aList.Add('-fPIC');
+        list.Add('-fPIC');
       {$ENDIF}
     end
     else
     begin
-      aList.Add(strbase);
+      list.Add(strbase);
       {$IFNDEF WINDOWS}
       if baseopt.fBinKind = sharedlib then
-        aList.Add('-fPIC');
+        list.Add('-fPIC');
       {$ENDIF}
     end;
     str := trgKindStr[fTrgKind];
     strbase := trgKindStr[baseopt.fTrgKind];
-    if (str <> strbase) then aList.Add(str) else aList.Add(strbase);
-    if baseopt.fUnittest or fUnittest then aList.Add('-unittest');
-    if baseopt.fInline or fInline then aList.Add('-inline');
-    if baseopt.fOptimz or fOptimz then aList.Add('-O');
-    if baseopt.fStackStomp or fStackStomp then aList.Add('-gx');
-    if baseopt.fAllInst or fAllInst then aList.Add('-allinst');
-    if baseopt.fAddMain or fAddMain then aList.Add('-main');
-    if baseopt.fRelease or fRelease then aList.Add('-release');
+    if (str <> strbase) then list.Add(str) else list.Add(strbase);
+    if baseopt.fUnittest or fUnittest then list.Add('-unittest');
+    if baseopt.fInline or fInline then list.Add('-inline');
+    if baseopt.fOptimz or fOptimz then list.Add('-O');
+    if baseopt.fStackStomp or fStackStomp then list.Add('-gx');
+    if baseopt.fAllInst or fAllInst then list.Add('-allinst');
+    if baseopt.fAddMain or fAddMain then list.Add('-main');
+    if baseopt.fRelease or fRelease then list.Add('-release');
     if (fVerIds.Count = 0) then for str in baseopt.fVerIds do begin
-      if not isStringDisabled(str) then aList.Add('-version=' + str);
+      if not isStringDisabled(str) then list.Add('-version=' + str);
     end else for str in fVerIds do
-      if not isStringDisabled(str) then aList.Add('-version=' + str);
+      if not isStringDisabled(str) then list.Add('-version=' + str);
     // default values are not handled here, TODO
     if fBoundsCheck <> baseopt.fBoundsCheck then
-      aList.Add('-boundscheck=' + bchKindStr[fBoundsCheck] )
+      list.Add('-boundscheck=' + bchKindStr[fBoundsCheck] )
     else
-      aList.Add('-boundscheck=' + bchKindStr[baseopt.fBoundsCheck] );
+      list.Add('-boundscheck=' + bchKindStr[baseopt.fBoundsCheck] );
   end;
 end;
 
-procedure TOutputOpts.assign(aValue: TPersistent);
+procedure TOutputOpts.assign(source: TPersistent);
 var
   src: TOutputOpts;
 begin
-  if (aValue is TOutputOpts) then
+  if (source is TOutputOpts) then
   begin
-    src := TOutputOpts(aValue);
+    src := TOutputOpts(source);
     //
     fVerIds.Assign(src.fVerIds);
     fBinKind    := src.fBinKind;
@@ -722,93 +722,93 @@ begin
   else inherited;
 end;
 
-procedure TOutputOpts.setUnittest(const aValue: boolean);
+procedure TOutputOpts.setUnittest(const value: boolean);
 begin
-  if fUnittest = aValue then exit;
-  fUnittest := aValue;
+  if fUnittest = value then exit;
+  fUnittest := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setAllInst(const aValue: boolean);
+procedure TOutputOpts.setAllInst(const value: boolean);
 begin
-  if fAllinst = aValue then exit;
-  fAllinst := aValue;
+  if fAllinst = value then exit;
+  fAllinst := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setAlwaysLinkLibs(const aValue: boolean);
+procedure TOutputOpts.setAlwaysLinkLibs(const value: boolean);
 begin
-  if fAlwayLinkLibs = aValue then exit;
-  fAlwayLinkLibs := aValue;
+  if fAlwayLinkLibs = value then exit;
+  fAlwayLinkLibs := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setVerIds(const aValue: TStringList);
+procedure TOutputOpts.setVerIds(const value: TStringList);
 begin
-  fVerIds.Assign(aValue);
+  fVerIds.Assign(value);
   doChanged;
 end;
 
-procedure TOutputOpts.setTrgKind(const aValue: TTargetSystem);
+procedure TOutputOpts.setTrgKind(const value: TTargetSystem);
 begin
-  if fTrgKind = aValue then exit;
-  fTrgKind := aValue;
+  if fTrgKind = value then exit;
+  fTrgKind := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setBinKind(const aValue: TProjectBinaryKind);
+procedure TOutputOpts.setBinKind(const value: TProjectBinaryKind);
 begin
-  if fBinKind = aValue then exit;
-  fBinKind := aValue;
+  if fBinKind = value then exit;
+  fBinKind := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setInline(const aValue: boolean);
+procedure TOutputOpts.setInline(const value: boolean);
 begin
-  if fInline = aValue then exit;
-  fInline := aValue;
+  if fInline = value then exit;
+  fInline := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setBoundsCheck(const aValue: TBoundCheckKind);
+procedure TOutputOpts.setBoundsCheck(const value: TBoundCheckKind);
 begin
-  if fBoundsCheck = aValue then exit;
-  fBoundsCheck := aValue;
+  if fBoundsCheck = value then exit;
+  fBoundsCheck := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setOptims(const aValue: boolean);
+procedure TOutputOpts.setOptims(const value: boolean);
 begin
-  if fOptimz = aValue then exit;
-  fOptimz := aValue;
+  if fOptimz = value then exit;
+  fOptimz := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setGenStack(const aValue: boolean);
+procedure TOutputOpts.setGenStack(const value: boolean);
 begin
-  if fGenStack = aValue then exit;
-  fGenStack := aValue;
+  if fGenStack = value then exit;
+  fGenStack := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setAddMain(const aValue: boolean);
+procedure TOutputOpts.setAddMain(const value: boolean);
 begin
-  if fAddMain = aValue then exit;
-  fAddMain := aValue;
+  if fAddMain = value then exit;
+  fAddMain := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setRelease(const aValue: boolean);
+procedure TOutputOpts.setRelease(const value: boolean);
 begin
-  if fRelease = aValue then exit;
-  fRelease := aValue;
+  if fRelease = value then exit;
+  fRelease := value;
   doChanged;
 end;
 
-procedure TOutputOpts.setStackStomp(const aValue: boolean);
+procedure TOutputOpts.setStackStomp(const value: boolean);
 begin
-  if fStackStomp = aValue then exit;
-  fStackStomp := aValue;
+  if fStackStomp = value then exit;
+  fStackStomp := value;
   doChanged;
 end;
 {$ENDREGION}
@@ -826,47 +826,47 @@ begin
   inherited;
 end;
 
-procedure TDebugOpts.getOpts(aList: TStrings; base: TOptsGroup = nil);
+procedure TDebugOpts.getOpts(list: TStrings; base: TOptsGroup = nil);
 var
   idt: string;
   baseopt: TDebugOpts;
 begin
   if base.isNil then
   begin
-    if fDebugConditions then aList.Add('-debug');
+    if fDebugConditions then list.Add('-debug');
     if fDbgLevel <> 0 then
-      aList.Add('-debug=' + intToStr(fDbgLevel));
+      list.Add('-debug=' + intToStr(fDbgLevel));
     for idt in fDbgIdents do
-      aList.Add('-debug=' + idt);
-    if fGenInfos then aList.Add('-g');
-    if fDbgC then aList.Add('-gc');
-    if fGenMap then aList.Add('-map');
-    if fGenFrame and (aList.IndexOf('-gs') = -1) then aList.Add('-gs');
+      list.Add('-debug=' + idt);
+    if fGenInfos then list.Add('-g');
+    if fDbgC then list.Add('-gc');
+    if fGenMap then list.Add('-map');
+    if fGenFrame and (list.IndexOf('-gs') = -1) then list.Add('-gs');
   end else
   begin
     baseopt := TDebugOpts(base);
-    if baseopt.fDebugConditions or fDebugConditions then aList.Add('-debug');
+    if baseopt.fDebugConditions or fDebugConditions then list.Add('-debug');
     if (baseopt.fDbgLevel <> 0) and (fDbgLevel = 0) then
-      aList.Add('-debug=' + intToStr(baseopt.fDbgLevel))
+      list.Add('-debug=' + intToStr(baseopt.fDbgLevel))
     else if fDbgLevel <> 0 then
-      aList.Add('-debug=' + intToStr(fDbgLevel));
+      list.Add('-debug=' + intToStr(fDbgLevel));
     if fDbgIdents.Count = 0 then
-      for idt in baseopt.fDbgIdents do aList.Add('-debug=' + idt)
-    else for idt in fDbgIdents do aList.Add('-debug=' + idt);
-    if baseopt.fGenInfos or fGenInfos then aList.Add('-g');
-    if baseopt.fDbgC or fDbgC then aList.Add('-gc');
-    if baseopt.fGenMap or fGenMap then aList.Add('-map');
-    if (baseopt.fGenFrame or fGenFrame) and (aList.IndexOf('-gs') = -1) then aList.Add('-gs');
+      for idt in baseopt.fDbgIdents do list.Add('-debug=' + idt)
+    else for idt in fDbgIdents do list.Add('-debug=' + idt);
+    if baseopt.fGenInfos or fGenInfos then list.Add('-g');
+    if baseopt.fDbgC or fDbgC then list.Add('-gc');
+    if baseopt.fGenMap or fGenMap then list.Add('-map');
+    if (baseopt.fGenFrame or fGenFrame) and (list.IndexOf('-gs') = -1) then list.Add('-gs');
   end;
 end;
 
-procedure TDebugOpts.assign(aValue: TPersistent);
+procedure TDebugOpts.assign(source: TPersistent);
 var
   src: TDebugOpts;
 begin
-  if (aValue is TDebugOpts) then
+  if (source is TDebugOpts) then
   begin
-    src := TDebugOpts(aValue);
+    src := TDebugOpts(source);
     //
     fDbgIdents.Assign(src.fDbgIdents);
     fDebugConditions    := src.fDebugConditions;
@@ -885,58 +885,58 @@ begin
   if fForceDbgBool then setDebugConditions(true);
 end;
 
-procedure TDebugOpts.setDebugConditions(const aValue: boolean);
+procedure TDebugOpts.setDebugConditions(const value: boolean);
 begin
   if fForceDbgBool then
   begin
     fDebugConditions := true;
     exit;
   end;
-  if fDebugConditions = aValue then exit;
-  fDebugConditions := aValue;
+  if fDebugConditions = value then exit;
+  fDebugConditions := value;
   doChanged;
 end;
 
-procedure TDebugOpts.setGenFrame(const aValue: boolean);
+procedure TDebugOpts.setGenFrame(const value: boolean);
 begin
-  if fGenFrame = aValue then exit;
-  fGenFrame:=aValue;
+  if fGenFrame = value then exit;
+  fGenFrame:=value;
   doChanged;
 end;
 
-procedure TDebugOpts.setGenInfos(const aValue: boolean);
+procedure TDebugOpts.setGenInfos(const value: boolean);
 begin
-  if fGenInfos = aValue then exit;
-  fGenInfos := aValue;
+  if fGenInfos = value then exit;
+  fGenInfos := value;
   doChanged;
 end;
 
-procedure TDebugOpts.setDbgC(const aValue: boolean);
+procedure TDebugOpts.setDbgC(const value: boolean);
 begin
-  if fDbgC = aValue then exit;
-  fDbgC := aValue;
+  if fDbgC = value then exit;
+  fDbgC := value;
   doChanged;
 end;
 
-procedure TDebugOpts.setGenMap(const aValue: boolean);
+procedure TDebugOpts.setGenMap(const value: boolean);
 begin
-  if fGenMap = aValue then exit;
-  fGenMap := aValue;
+  if fGenMap = value then exit;
+  fGenMap := value;
   doChanged;
 end;
 
-procedure TDebugOpts.setDbgLevel(const aValue: Integer);
+procedure TDebugOpts.setDbgLevel(const value: Integer);
 begin
-  if fDbgLevel = aValue then exit;
-  fDbgLevel := aValue;
+  if fDbgLevel = value then exit;
+  fDbgLevel := value;
   if fDbgLevel < 0 then fDbgLevel := 0;
   updateForceDbgBool;
   doChanged;
 end;
 
-procedure TDebugOpts.setDbgIdents(aValue: TStringList);
+procedure TDebugOpts.setDbgIdents(value: TStringList);
 begin
-  fDbgIdents.Assign(aValue);
+  fDbgIdents.Assign(value);
   updateForceDbgBool;
   doChanged;
 end;
@@ -965,7 +965,7 @@ begin
   // EndUpdate is not called to avoid an infinite loop
 end;
 
-procedure TPathsOpts.getOpts(aList: TStrings; base: TOptsGroup = nil);
+procedure TPathsOpts.getOpts(list: TStrings; base: TOptsGroup = nil);
 var
   str, sym: string;
   exts: TStringList;
@@ -982,20 +982,20 @@ begin
         if isStringDisabled(str) then
           continue;
         sym := fSymStringExpander.expand(str);
-        if not listAsteriskPath(sym, aList, exts) then
-          aList.Add(sym);
+        if not listAsteriskPath(sym, list, exts) then
+          list.Add(sym);
       end;
     finally
       exts.Free;
     end;
     for str in fImpMod do if not isStringDisabled(str) then
-      aList.Add('-I'+ fSymStringExpander.expand(str));
+      list.Add('-I'+ fSymStringExpander.expand(str));
     for str in fImpStr do if not isStringDisabled(str) then
-      aList.Add('-J'+ fSymStringExpander.expand(str));
+      list.Add('-J'+ fSymStringExpander.expand(str));
     if fFname <> '' then
-      aList.Add('-of' + fSymStringExpander.expand(fFname));
+      list.Add('-of' + fSymStringExpander.expand(fFname));
     if fObjDir <> '' then
-      aList.Add('-od' + fSymStringExpander.expand(fObjDir));
+      list.Add('-od' + fSymStringExpander.expand(fObjDir));
   end else
   begin
     baseopt := TPathsOpts(base);
@@ -1009,8 +1009,8 @@ begin
         if isStringDisabled(str) then
           continue;
         sym := fSymStringExpander.expand(str);
-        if not listAsteriskPath(sym, aList, exts) then
-          aList.Add(sym);
+        if not listAsteriskPath(sym, list, exts) then
+          list.Add(sym);
       end;
     finally
       exts.Free;
@@ -1019,32 +1019,32 @@ begin
     if fImpMod.Count = 0 then rightList := baseopt.fImpMod
     else rightList := fImpMod;
     for str in rightList do if not isStringDisabled(str) then
-      aList.Add('-I'+ fSymStringExpander.expand(str));
+      list.Add('-I'+ fSymStringExpander.expand(str));
     //
     if fImpStr.Count = 0 then rightList := baseopt.fImpStr
     else rightList := fImpStr;
     for str in rightList do if not isStringDisabled(str) then
-      aList.Add('-J'+ fSymStringExpander.expand(str));
+      list.Add('-J'+ fSymStringExpander.expand(str));
     //
     str := '';
     if fFname <> '' then str := fFname else
       if baseopt.fFname <> '' then str := baseopt.fFname;
-    if str.isNotEmpty then aList.Add('-of' + fSymStringExpander.expand(str));
+    if str.isNotEmpty then list.Add('-of' + fSymStringExpander.expand(str));
     //
     str := '';
     if fObjDir <> '' then str := fObjDir else
       if baseopt.fObjDir <> '' then str := baseopt.fObjDir;
-    if str.isNotEmpty then aList.Add('-od' + fSymStringExpander.expand(str));
+    if str.isNotEmpty then list.Add('-od' + fSymStringExpander.expand(str));
   end;
 end;
 
-procedure TPathsOpts.assign(aValue: TPersistent);
+procedure TPathsOpts.assign(source: TPersistent);
 var
   src: TPathsOpts;
 begin
-  if (aValue is TPathsOpts) then
+  if (source is TPathsOpts) then
   begin
-    src := TPathsOpts(aValue);
+    src := TPathsOpts(source);
     //
     fExtraSrcs.Assign(src.fExtraSrcs);
     fImpMod.Assign(src.fImpMod);
@@ -1066,52 +1066,52 @@ begin
   inherited;
 end;
 
-procedure TPathsOpts.setForceExt(aValue: boolean);
+procedure TPathsOpts.setForceExt(value: boolean);
 begin
-  if fForceExt = aValue then exit;
-  fForceExt:=aValue;
+  if fForceExt = value then exit;
+  fForceExt:=value;
   doChanged;
 end;
 
-procedure TPathsOpts.setFname(const aValue: TCEFilename);
+procedure TPathsOpts.setFname(const value: TCEFilename);
 begin
-  if fFname = aValue then exit;
-  fFname := patchPlateformPath(aValue);
+  if fFname = value then exit;
+  fFname := patchPlateformPath(value);
   fFname := patchPlateformExt(fFname);
   doChanged;
 end;
 
-procedure TPathsOpts.setObjDir(const aValue: TCEPathname);
+procedure TPathsOpts.setObjDir(const value: TCEPathname);
 begin
-  if fObjDir = aValue then exit;
-  fObjDir := patchPlateformPath(aValue);
+  if fObjDir = value then exit;
+  fObjDir := patchPlateformPath(value);
   doChanged;
 end;
 
-procedure TPathsOpts.setSrcs(aValue: TStringList);
+procedure TPathsOpts.setSrcs(value: TStringList);
 begin
-  fExtraSrcs.Assign(aValue);
+  fExtraSrcs.Assign(value);
   patchPlateformPaths(fExtraSrcs);
   doChanged;
 end;
 
-procedure TPathsOpts.setIncl(aValue: TStringList);
+procedure TPathsOpts.setIncl(value: TStringList);
 begin
-  fImpMod.Assign(aValue);
+  fImpMod.Assign(value);
   patchPlateformPaths(fImpMod);
   doChanged;
 end;
 
-procedure TPathsOpts.setImpt(aValue: TStringList);
+procedure TPathsOpts.setImpt(value: TStringList);
 begin
-  fImpStr.Assign(aValue);
+  fImpStr.Assign(value);
   patchPlateformPaths(fImpStr);
   doChanged;
 end;
 
-procedure TPathsOpts.setExcl(aValue: TStringList);
+procedure TPathsOpts.setExcl(value: TStringList);
 begin
-  fExcl.Assign(aValue);
+  fExcl.Assign(value);
   patchPlateformPaths(fExcl);
   doChanged;
 end;
@@ -1124,13 +1124,13 @@ begin
   fCustom := TStringList.Create;
 end;
 
-procedure TOtherOpts.assign(aValue: TPersistent);
+procedure TOtherOpts.assign(source: TPersistent);
 var
   src: TOtherOpts;
 begin
-  if (aValue is TOtherOpts) then
+  if (source is TOtherOpts) then
   begin
-    src := TOtherOpts(aValue);
+    src := TOtherOpts(source);
     fCustom.Assign(src.fCustom);
     fCov := src.fCov;
   end
@@ -1143,14 +1143,14 @@ begin
   inherited;
 end;
 
-procedure TOtherOpts.setCov(const aValue: boolean);
+procedure TOtherOpts.setCov(const value: boolean);
 begin
-  if fCov = aValue then exit;
-  fCov := aValue;
+  if fCov = value then exit;
+  fCov := value;
   doChanged;
 end;
 
-procedure TOtherOpts.getOpts(aList: TStrings; base: TOptsGroup = nil);
+procedure TOtherOpts.getOpts(list: TStrings; base: TOptsGroup = nil);
 var
   str1, str2: string;
   baseopt: TOtherOpts;
@@ -1166,9 +1166,9 @@ begin
         str2 := '-' + str1
       else
         str2 := str1;
-      aList.AddText(fSymStringExpander.expand(str2));
+      list.AddText(fSymStringExpander.expand(str2));
     end;
-    if fCov then aList.Add('-cov');
+    if fCov then list.Add('-cov');
   end else
   begin
     baseopt := TOtherOpts(base);
@@ -1182,15 +1182,15 @@ begin
         str2 := '-' + str1
       else
         str2 := str1;
-      aList.AddText(fSymStringExpander.expand(str2));
+      list.AddText(fSymStringExpander.expand(str2));
     end;
-    if baseopt.fCov or fCov then aList.Add('-cov');
+    if baseopt.fCov or fCov then list.Add('-cov');
   end;
 end;
 
-procedure TOtherOpts.setCustom(aValue: TStringList);
+procedure TOtherOpts.setCustom(value: TStringList);
 begin
-  fCustom.Assign(aValue);
+  fCustom.Assign(value);
   doChanged;
 end;
 {$ENDREGION}
@@ -1226,81 +1226,81 @@ begin
   else inherited;
 end;
 
-procedure TCustomProcOptions.getOpts(aList: TStrings; base: TOptsGroup = nil);
+procedure TCustomProcOptions.getOpts(list: TStrings; base: TOptsGroup = nil);
 begin
 end;
 
-procedure TCustomProcOptions.setProcess(var aProcess: TProcess);
+procedure TCustomProcOptions.setProcess(var process: TProcess);
 begin
   //TODO-cNativeProjects: adapt TCustomProcOptions.setProcess to base/override system
-  aProcess.Parameters.Clear;
-  aProcess.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
-  aProcess.Executable := fExecutable;
-  aProcess.ShowWindow := fShowWin;
-  aProcess.Options    := fOptions;
-  aProcess.CurrentDirectory := fSymStringExpander.expand(fWorkDir);
-  aProcess.StartupOptions := aProcess.StartupOptions + [suoUseShowWindow];
+  process.Parameters.Clear;
+  process.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
+  process.Executable := fExecutable;
+  process.ShowWindow := fShowWin;
+  process.Options    := fOptions;
+  process.CurrentDirectory := fSymStringExpander.expand(fWorkDir);
+  process.StartupOptions := process.StartupOptions + [suoUseShowWindow];
 end;
 
-procedure TCustomProcOptions.setProcess(var aProcess: TAsyncProcess);
+procedure TCustomProcOptions.setProcess(var process: TAsyncProcess);
 begin
-  aProcess.Parameters.Clear;
-  aProcess.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
-  aProcess.Executable := fExecutable;
-  aProcess.ShowWindow := fShowWin;
-  aProcess.Options    := fOptions;
-  aProcess.CurrentDirectory := fSymStringExpander.expand(fWorkDir);
-  aProcess.StartupOptions := aProcess.StartupOptions + [suoUseShowWindow];
+  process.Parameters.Clear;
+  process.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
+  process.Executable := fExecutable;
+  process.ShowWindow := fShowWin;
+  process.Options    := fOptions;
+  process.CurrentDirectory := fSymStringExpander.expand(fWorkDir);
+  process.StartupOptions := process.StartupOptions + [suoUseShowWindow];
 end;
 
-procedure TCustomProcOptions.setProcess(var aProcess: TCEProcess);
+procedure TCustomProcOptions.setProcess(var process: TCEProcess);
 begin
-  aProcess.Parameters.Clear;
-  aProcess.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
-  aProcess.Executable := fExecutable;
-  aProcess.ShowWindow := fShowWin;
-  aProcess.Options    := fOptions;
-  aProcess.CurrentDirectory := fSymStringExpander.expand(fWorkDir);
-  aProcess.StartupOptions := aProcess.StartupOptions + [suoUseShowWindow];
+  process.Parameters.Clear;
+  process.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
+  process.Executable := fExecutable;
+  process.ShowWindow := fShowWin;
+  process.Options    := fOptions;
+  process.CurrentDirectory := fSymStringExpander.expand(fWorkDir);
+  process.StartupOptions := process.StartupOptions + [suoUseShowWindow];
 end;
 
-procedure TCustomProcOptions.setExecutable(const aValue: TCEFilename);
+procedure TCustomProcOptions.setExecutable(const value: TCEFilename);
 begin
-  if fExecutable = aValue then exit;
-  fExecutable := aValue;
+  if fExecutable = value then exit;
+  fExecutable := value;
   doChanged;
 end;
 
-procedure TCustomProcOptions.setWorkDir(const aValue: TCEPathname);
+procedure TCustomProcOptions.setWorkDir(const value: TCEPathname);
 begin
-  if fWorkDir = aValue then exit;
-  fWorkDir := aValue;
+  if fWorkDir = value then exit;
+  fWorkDir := value;
   doChanged;
 end;
 
-procedure TCustomProcOptions.setOptions(const aValue: TProcessOptions);
+procedure TCustomProcOptions.setOptions(const value: TProcessOptions);
 begin
-  if fOptions = aValue then exit;
-  fOptions := aValue;
+  if fOptions = value then exit;
+  fOptions := value;
   doChanged;
 end;
 
-procedure TCustomProcOptions.setParameters(aValue: TStringList);
+procedure TCustomProcOptions.setParameters(value: TStringList);
 begin
-  fParameters.Assign(aValue);
+  fParameters.Assign(value);
   doChanged;
 end;
 
-procedure TCustomProcOptions.setCommands(aValue: TStringList);
+procedure TCustomProcOptions.setCommands(value: TStringList);
 begin
-  fCommands.Assign(aValue);
+  fCommands.Assign(value);
   doChanged;
 end;
 
-procedure TCustomProcOptions.setShowWin(const aValue: TShowWindowOptions);
+procedure TCustomProcOptions.setShowWin(value: TShowWindowOptions);
 begin
-  if fShowWin = aValue then exit;
-  fShowWin := aValue;
+  if fShowWin = value then exit;
+  fShowWin := value;
   doChanged;
 end;
 {$ENDREGION}
@@ -1350,13 +1350,13 @@ begin
   inherited;
 end;
 
-procedure TCompilerConfiguration.assign(aValue: TPersistent);
+procedure TCompilerConfiguration.assign(source: TPersistent);
 var
   src: TCompilerConfiguration;
 begin
-  if (aValue is TCompilerConfiguration) then
+  if (source is TCompilerConfiguration) then
   begin
-    src := TCompilerConfiguration(aValue);
+    src := TCompilerConfiguration(source);
     //
     fDocOpts.assign(src.fDocOpts);
     fDebugOpts.assign(src.fDebugOpts);
@@ -1378,7 +1378,7 @@ begin
   result := format('<configuration %d>', [ID]);
 end;
 
-procedure TCompilerConfiguration.getOpts(aList: TStrings; base: TCompilerConfiguration = nil);
+procedure TCompilerConfiguration.getOpts(list: TStrings; base: TCompilerConfiguration = nil);
 var
   ext, nme: string;
   fe: boolean;
@@ -1386,22 +1386,22 @@ var
 begin
   if (base = nil) or (base = self) then
   begin
-    fDocOpts.getOpts(aList);
-    fDebugOpts.getOpts(aList);
-    fMsgOpts.getOpts(aList);
-    fOutputOpts.getOpts(aList);
-    fPathsOpts.getOpts(aList);
-    fOthers.getOpts(aList);
+    fDocOpts.getOpts(list);
+    fDebugOpts.getOpts(list);
+    fMsgOpts.getOpts(list);
+    fOutputOpts.getOpts(list);
+    fPathsOpts.getOpts(list);
+    fOthers.getOpts(list);
     fe := fPathsOpts.forceExtension;
     nme := fPathsOpts.outputFilename;
   end else
   begin
-    fDocOpts.getOpts(aList, base.fDocOpts);
-    fDebugOpts.getOpts(aList, base.fDebugOpts);
-    fMsgOpts.getOpts(aList, base.fMsgOpts);
-    fOutputOpts.getOpts(aList, base.fOutputOpts);
-    fPathsOpts.getOpts(aList, base.fPathsOpts);
-    fOthers.getOpts(aList, base.fOthers);
+    fDocOpts.getOpts(list, base.fDocOpts);
+    fDebugOpts.getOpts(list, base.fDebugOpts);
+    fMsgOpts.getOpts(list, base.fMsgOpts);
+    fOutputOpts.getOpts(list, base.fOutputOpts);
+    fPathsOpts.getOpts(list, base.fPathsOpts);
+    fOthers.getOpts(list, base.fOthers);
     fe := fPathsOpts.forceExtension or base.fPathsOpts.forceExtension;
     nme := fPathsOpts.outputFilename;
     if base.fPathsOpts.outputFilename <> '' then
@@ -1412,27 +1412,27 @@ begin
     nme := fSymStringExpander.expand(nme);
     ext := nme.extractFileExt;
     nme := '-of' + nme;
-    i := aList.IndexOf(nme);
+    i := list.IndexOf(nme);
     if i <> -1 then case fOutputOpts.binaryKind of
       {$IFDEF WINDOWS}
       executable: if ext <> exeExt then
-        aList[i] := aList[i] + exeExt;
+        list[i] := list[i] + exeExt;
       {$ENDIF}
       obj: if ext <> objExt then
-        aList[i] := aList[i] + objExt;
+        list[i] := list[i] + objExt;
       sharedlib: if ext <> dynExt then
-        aList[i] := aList[i] + dynExt;
+        list[i] := list[i] + dynExt;
       staticlib: if ext <> libExt then
-        aList[i] := aList[i] + libExt;
+        list[i] := list[i] + libExt;
     end;
   end;
 end;
 
-procedure TCompilerConfiguration.setName(const aValue: string);
+procedure TCompilerConfiguration.setName(const value: string);
 begin
-  if fName = aValue then
+  if fName = value then
     exit;
-  fName := aValue;
+  fName := value;
   if fName = '' then
     fName := nameFromID;
   doChanged;
@@ -1448,61 +1448,61 @@ begin
   if assigned(fOnChanged) then fOnChanged(self);
 end;
 
-procedure TCompilerConfiguration.setDocOpts(const aValue: TDocOpts);
+procedure TCompilerConfiguration.setDocOpts(const value: TDocOpts);
 begin
-  fDocOpts.assign(aValue);
+  fDocOpts.assign(value);
 end;
 
-procedure TCompilerConfiguration.setDebugOpts(const aValue: TDebugOpts);
+procedure TCompilerConfiguration.setDebugOpts(const value: TDebugOpts);
 begin
-  fDebugOpts.assign(aValue);
+  fDebugOpts.assign(value);
 end;
 
-procedure TCompilerConfiguration.setMsgOpts(const aValue: TMsgOpts);
+procedure TCompilerConfiguration.setMsgOpts(const value: TMsgOpts);
 begin
-  fMsgOpts.assign(aValue);
+  fMsgOpts.assign(value);
 end;
 
-procedure TCompilerConfiguration.setOutputOpts(const aValue: TOutputOpts);
+procedure TCompilerConfiguration.setOutputOpts(const value: TOutputOpts);
 begin
-  fOutputOpts.assign(aValue);
+  fOutputOpts.assign(value);
 end;
 
-procedure TCompilerConfiguration.setPathsOpts(const aValue: TPathsOpts);
+procedure TCompilerConfiguration.setPathsOpts(const value: TPathsOpts);
 begin
-  fPathsOpts.assign(aValue);
+  fPathsOpts.assign(value);
 end;
 
-procedure TCompilerConfiguration.setOthers(const aValue: TOtherOpts);
+procedure TCompilerConfiguration.setOthers(const value: TOtherOpts);
 begin
-  fOthers.Assign(aValue);
+  fOthers.Assign(value);
 end;
 
-procedure TCompilerConfiguration.setPreProcOpt(const aValue: TCompileProcOptions);
+procedure TCompilerConfiguration.setPreProcOpt(const value: TCompileProcOptions);
 begin
-  fPreProcOpt.assign(aValue);
+  fPreProcOpt.assign(value);
 end;
 
-procedure TCompilerConfiguration.setPostProcOpt(const aValue: TCompileProcOptions);
+procedure TCompilerConfiguration.setPostProcOpt(const value: TCompileProcOptions);
 begin
-  fPostProcOpt.assign(aValue);
+  fPostProcOpt.assign(value);
 end;
 
-procedure TCompilerConfiguration.setRunProjOpt(const aValue: TProjectRunOptions);
+procedure TCompilerConfiguration.setRunProjOpt(const value: TProjectRunOptions);
 begin
-  fRunProjOpt.assign(aValue);
+  fRunProjOpt.assign(value);
 end;
 
-procedure TCompilerConfiguration.setisBaseConfiguration(const aValue: boolean);
+procedure TCompilerConfiguration.setisBaseConfiguration(const value: boolean);
 begin
-  fIsBaseConfiguration := aValue;
+  fIsBaseConfiguration := value;
   doChanged;
 end;
 
-procedure TCompilerConfiguration.setisOverriddenConfiguration(const aValue: boolean);
+procedure TCompilerConfiguration.setisOverriddenConfiguration(const value: boolean);
 begin
   fIsBaseConfiguration := false;
-  fIsOverriddenConfiguration := aValue;
+  fIsOverriddenConfiguration := value;
   doChanged;
 end;
 {$ENDREGION}

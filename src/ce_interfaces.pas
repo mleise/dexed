@@ -40,9 +40,9 @@ type
       // returns the project filename
       function filename: string;
       // loads project from filename
-      procedure loadFromFile(const aFilename: string);
+      procedure loadFromFile(const fname: string);
       // saves project to filename
-      procedure saveToFile(const aFilename: string);
+      procedure saveToFile(const fname: string);
       // indicates of the project is modified (should be saved or not)
       function modified: boolean;
       // returns the base path used to solve relative locations
@@ -115,14 +115,14 @@ type
    *)
   ICEDocumentObserver = interface(ISubjectType)
   ['ICEDocumentObserver']
-    // aDoc has been created (empty, runnable, project source, ...).
-    procedure docNew(aDoc: TCESynMemo);
-    // aDoc is the document being edited.
-    procedure docFocused(aDoc: TCESynMemo);
-    // aDoc content has just been modified (edited, saved).
-    procedure docChanged(aDoc: TCESynMemo);
-    // aDoc is about to be closed.
-    procedure docClosing(aDoc: TCESynMemo);
+    // document has been created (empty, runnable, project source, ...).
+    procedure docNew(document: TCESynMemo);
+    // document is the document being edited.
+    procedure docFocused(document: TCESynMemo);
+    // document content has just been modified (edited, saved).
+    procedure docChanged(document: TCESynMemo);
+    // document is about to be closed.
+    procedure docClosing(document: TCESynMemo);
   end;
   (**
    * An implementer informs the ICEMultiDocObserver about the current file(s)
@@ -142,17 +142,17 @@ type
   ICEProjectObserver = interface(ISubjectType)
   ['ICEProjectObserver']
     // a project has been created/opened
-    procedure projNew(aProject: ICECommonProject);
+    procedure projNew(project: ICECommonProject);
     // a project has been modified: switches, source name, ...
-    procedure projChanged(aProject: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
     // a project is about to be closed.
-    procedure projClosing(aProject: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
     // a project is focused, it can be inGroup or not
-    procedure projFocused(aProject: ICECommonProject);
-    // aProject is about to be compiled, time to lock related actions.
-    procedure projCompiling(aProject: ICECommonProject);
-    // aProject compilation is finsihed, related actions can be unlocked.
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projFocused(project: ICECommonProject);
+    // project is about to be compiled, time to lock related actions.
+    procedure projCompiling(project: ICECommonProject);
+    // project compilation is finsihed, related actions can be unlocked.
+    procedure projCompiled(project: ICECommonProject; success: boolean);
   end;
   (**
    * An implementer informs the ICEProjectObserver about the current project(s)
@@ -232,7 +232,7 @@ type
     oeeCancel,    // the "cancel" button of the option editor is pressed
     oeeAccept,    // the "accept" button of the option editor is pressed
     oeeChange,    // the properties of the container has changed, only happens if the container is oekGeneric.
-    oeeSelectCat  // the container is will be displayed.
+    oeeSelectCat  // the container will be displayed.
   );
   (**
    * An implementer can expose options to be edited in a dedicated widget.
@@ -246,7 +246,7 @@ type
     // the widget wants the custom option editor TCustomForm, TWinControl or the TPersistent containing the options.
     function optionedWantContainer: TPersistent;
     // the option editor informs that something has happened.
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     // the option editor wants to know if an editor allows another category to be displayed (not called for oekGeneric).
     function optionedOptionsModified: boolean;
   end;
@@ -268,7 +268,7 @@ type
     amcMisc,        // used as filter
     amcAutoEdit,    // same as amcEdit but the message data is set automatically by the ICEMessagesDisplay
     amcAutoProj,    // same as amcProj but the message data is set automatically by the ICEMessagesDisplay
-    amcAutoCompile  // same as amcAutoEdit or amcAutoProj, according to what's being compiled.
+    amcAutoCompile  // same as amcAutoEdit or amcAutoProj but set by the ICEMessagesDisplay according to what's being compiled.
   );
 
   (**
@@ -276,7 +276,7 @@ type
    *)
   ICEMessagesDisplay = interface(ICESingleService)
     // displays a message.
-    procedure message(const aValue: string; aData: Pointer; aCtxt: TCEAppMessageCtxt; aKind: TCEAppMessageKind);
+    procedure message(const value: string; aData: Pointer; aCtxt: TCEAppMessageCtxt; aKind: TCEAppMessageKind);
     // clears the messages related to the context aCtxt.
     procedure clearByContext(aCtxt: TCEAppMessageCtxt);
     // clears the messages related to the data aData.
@@ -308,9 +308,9 @@ type
     // returns the nth document.
     function getDocument(index: Integer): TCESynMemo;
     // returns true if the document matching aFilename is already opened.
-    function findDocument(aFilename: string): TCESynMemo;
+    function findDocument(fname: string): TCESynMemo;
     // opens or set the focus on the document matching aFilename.
-    procedure openDocument(aFilename: string);
+    procedure openDocument(fname: string);
     // closes the nth document.
     function closeDocument(index: Integer): boolean;
     // closes a particular document.
@@ -326,12 +326,12 @@ type
    *)
   ICEProjectGroup = interface(ICESingleService)
     // adds a project to the gtoup.
-    procedure addProject(aProject: ICECommonProject);
+    procedure addProject(project: ICECommonProject);
     // opens a group of project.
     procedure openGroup(const fname: string);
     // saves the group to a file.
     procedure saveGroup(const fname: string);
-    // closes a group a initialize a new one.
+    // closes a group and initialize a new one.
     procedure closeGroup;
     // indicates wether one of the project is modified or if the group is changed.
     function groupModified: boolean;
@@ -382,20 +382,20 @@ type
   (**
    * TCEMultiDocSubject primitives.
    *)
-  procedure subjDocNew(aSubject: TCEMultiDocSubject; aDoc: TCESynMemo);      {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjDocClosing(aSubject: TCEMultiDocSubject; aDoc: TCESynMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjDocFocused(aSubject: TCEMultiDocSubject; aDoc: TCESynMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjDocChanged(aSubject: TCEMultiDocSubject; aDoc: TCESynMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjDocNew(aSubject: TCEMultiDocSubject; document: TCESynMemo);      {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjDocClosing(aSubject: TCEMultiDocSubject; document: TCESynMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjDocFocused(aSubject: TCEMultiDocSubject; document: TCESynMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjDocChanged(aSubject: TCEMultiDocSubject; document: TCESynMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
 
   (**
    * TCEProjectSubject primitives.
    *)
-  procedure subjProjNew(aSubject: TCEProjectSubject; aProj: ICECommonProject);     {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjClosing(aSubject: TCEProjectSubject; aProj: ICECommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjFocused(aSubject: TCEProjectSubject; aProj: ICECommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjChanged(aSubject: TCEProjectSubject; aProj: ICECommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjCompiling(aSubject: TCEProjectSubject; aProj: ICECommonProject);{$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjCompiled(aSubject: TCEProjectSubject; aProj: ICECommonProject; success: boolean);{$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjNew(aSubject: TCEProjectSubject; project: ICECommonProject);     {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjClosing(aSubject: TCEProjectSubject; project: ICECommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjFocused(aSubject: TCEProjectSubject; project: ICECommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjChanged(aSubject: TCEProjectSubject; project: ICECommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjCompiling(aSubject: TCEProjectSubject; project: ICECommonProject);{$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjCompiled(aSubject: TCEProjectSubject; project: ICECommonProject; success: boolean);{$IFDEF RELEASE}inline;{$ENDIF}
 
 
 {
@@ -412,86 +412,86 @@ type
 implementation
 
 {$REGION TCEMultiDocSubject ----------------------------------------------------}
-procedure subjDocNew(aSubject: TCEMultiDocSubject; aDoc: TCESynMemo);
+procedure subjDocNew(aSubject: TCEMultiDocSubject; document: TCESynMemo);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEDocumentObserver).docNew(aDoc);
+    (fObservers[i] as ICEDocumentObserver).docNew(document);
 end;
 
-procedure subjDocClosing(aSubject: TCEMultiDocSubject; aDoc: TCESynMemo);
+procedure subjDocClosing(aSubject: TCEMultiDocSubject; document: TCESynMemo);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEDocumentObserver).docClosing(aDoc);
+    (fObservers[i] as ICEDocumentObserver).docClosing(document);
 end;
 
-procedure subjDocFocused(aSubject: TCEMultiDocSubject; aDoc: TCESynMemo);
+procedure subjDocFocused(aSubject: TCEMultiDocSubject; document: TCESynMemo);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEDocumentObserver).docFocused(aDoc);
+    (fObservers[i] as ICEDocumentObserver).docFocused(document);
 end;
 
-procedure subjDocChanged(aSubject: TCEMultiDocSubject; aDoc: TCESynMemo);
+procedure subjDocChanged(aSubject: TCEMultiDocSubject; document: TCESynMemo);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEDocumentObserver).docChanged(aDoc);
+    (fObservers[i] as ICEDocumentObserver).docChanged(document);
 end;
 {$ENDREGION}
 
 {$REGION TCEProjectSubject -----------------------------------------------------}
-procedure subjProjNew(aSubject: TCEProjectSubject; aProj: ICECommonProject);
+procedure subjProjNew(aSubject: TCEProjectSubject; project: ICECommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).ProjNew(aProj);
+    (fObservers[i] as ICEProjectObserver).ProjNew(project);
 end;
 
-procedure subjProjClosing(aSubject: TCEProjectSubject; aProj: ICECommonProject);
+procedure subjProjClosing(aSubject: TCEProjectSubject; project: ICECommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projClosing(aProj);
+    (fObservers[i] as ICEProjectObserver).projClosing(project);
 end;
 
-procedure subjProjFocused(aSubject: TCEProjectSubject; aProj: ICECommonProject);
+procedure subjProjFocused(aSubject: TCEProjectSubject; project: ICECommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projFocused(aProj);
+    (fObservers[i] as ICEProjectObserver).projFocused(project);
 end;
 
-procedure subjProjChanged(aSubject: TCEProjectSubject; aProj: ICECommonProject);
+procedure subjProjChanged(aSubject: TCEProjectSubject; project: ICECommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projChanged(aProj);
+    (fObservers[i] as ICEProjectObserver).projChanged(project);
 end;
 
-procedure subjProjCompiling(aSubject: TCEProjectSubject; aProj: ICECommonProject);
+procedure subjProjCompiling(aSubject: TCEProjectSubject; project: ICECommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projCompiling(aProj);
+    (fObservers[i] as ICEProjectObserver).projCompiling(project);
 end;
 
-procedure subjProjCompiled(aSubject: TCEProjectSubject; aProj: ICECommonProject; success: boolean);
+procedure subjProjCompiled(aSubject: TCEProjectSubject; project: ICECommonProject; success: boolean);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projCompiled(aProj, success);
+    (fObservers[i] as ICEProjectObserver).projCompiled(project, success);
 end;
 
 {$ENDREGION}

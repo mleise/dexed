@@ -23,8 +23,8 @@ type
     fWholeWord: boolean;
     fMrSearches: TStringList;
     fMrReplacements: TStringList;
-    procedure setMrSearches(aValue: TStringList);
-    procedure setMrReplacements(aValue: TStringList);
+    procedure setMrSearches(value: TStringList);
+    procedure setMrReplacements(value: TStringList);
   published
     property prompt: boolean read fPrompt write fPrompt;
     property fromCursor: boolean read fFromCur write fFromCur;
@@ -38,8 +38,8 @@ type
     procedure afterLoad; override;
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
-    procedure Assign(aValue: TPersistent); override;
-    procedure AssignTo(aValue: TPersistent); override;
+    procedure assign(source: TPersistent); override;
+    procedure assignTo(target: TPersistent); override;
   end;
 
   { TCESearchWidget }
@@ -85,17 +85,17 @@ type
     procedure replaceEvent(Sender: TObject; const ASearch, AReplace:
       string; Line, Column: integer; var ReplaceAction: TSynReplaceAction);
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
     //
     procedure findAll(const filename: string; lines: TStrings);
   protected
@@ -130,13 +130,13 @@ begin
   inherited;
 end;
 
-procedure TCESearchOptions.Assign(aValue: TPersistent);
+procedure TCESearchOptions.assign(source: TPersistent);
 var
   widg: TCESearchWidget;
 begin
-  if aValue is TCESearchWidget then
+  if source is TCESearchWidget then
   begin
-    widg := TCESearchWidget(aValue);
+    widg := TCESearchWidget(source);
     fMrSearches.Assign(widg.fSearchMru);
     fMrReplacements.Assign(widg.fReplaceMru);
     fPrompt     := widg.chkPrompt.Checked;
@@ -149,13 +149,13 @@ begin
   else inherited;
 end;
 
-procedure TCESearchOptions.AssignTo(aValue: TPersistent);
+procedure TCESearchOptions.assignTo(target: TPersistent);
 var
   widg: TCESearchWidget;
 begin
-  if aValue is TCESearchWidget then
+  if target is TCESearchWidget then
   begin
-    widg := TCESearchWidget(aValue);
+    widg := TCESearchWidget(target);
     widg.cbToFind.Items.Assign(fMrSearches);
     widg.fSearchMru.Assign(fMrSearches);
     widg.cbReplaceWth.Items.Assign(fMrReplacements);
@@ -170,14 +170,14 @@ begin
   else inherited;
 end;
 
-procedure TCESearchOptions.setMrSearches(aValue: TStringList);
+procedure TCESearchOptions.setMrSearches(value: TStringList);
 begin
-  fMrSearches.Assign(aValue);
+  fMrSearches.Assign(value);
 end;
 
-procedure TCESearchOptions.setMrReplacements(aValue: TStringList);
+procedure TCESearchOptions.setMrReplacements(value: TStringList);
 begin
-  fMrReplacements.Assign(aValue);
+  fMrReplacements.Assign(value);
 end;
 
 procedure TCESearchOptions.afterLoad;
@@ -221,7 +221,7 @@ begin
   if fname.fileExists then with TCESearchOptions.create(nil) do
   try
     loadFromFile(fname);
-    AssignTo(self);
+    assignTo(self);
   finally
     free;
   end;
@@ -240,7 +240,7 @@ destructor TCESearchWidget.Destroy;
 begin
   with TCESearchOptions.create(nil) do
   try
-    Assign(self);
+    assign(self);
     saveToFile(getCoeditDocPath + OptsFname);
   finally
     free;
@@ -456,59 +456,59 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCESearchWidget.projNew(aProject: ICECommonProject);
+procedure TCESearchWidget.projNew(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
   updateImperative;
 end;
 
-procedure TCESearchWidget.projChanged(aProject: ICECommonProject);
+procedure TCESearchWidget.projChanged(project: ICECommonProject);
 begin
 end;
 
-procedure TCESearchWidget.projClosing(aProject: ICECommonProject);
+procedure TCESearchWidget.projClosing(project: ICECommonProject);
 begin
-  if fProj = aProject then
+  if fProj = project then
     fProj := nil;
   updateImperative;
 end;
 
-procedure TCESearchWidget.projFocused(aProject: ICECommonProject);
+procedure TCESearchWidget.projFocused(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
   updateImperative;
 end;
 
-procedure TCESearchWidget.projCompiling(aProject: ICECommonProject);
+procedure TCESearchWidget.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCESearchWidget.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCESearchWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCESearchWidget.docNew(aDoc: TCESynMemo);
+procedure TCESearchWidget.docNew(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
   updateImperative;
 end;
 
-procedure TCESearchWidget.docClosing(aDoc: TCESynMemo);
+procedure TCESearchWidget.docClosing(document: TCESynMemo);
 begin
-  if fDoc = aDoc then fDoc := nil;
+  if fDoc = document then fDoc := nil;
   updateImperative;
 end;
 
-procedure TCESearchWidget.docFocused(aDoc: TCESynMemo);
+procedure TCESearchWidget.docFocused(document: TCESynMemo);
 begin
-  if fDoc = aDoc then exit;
-  fDoc := aDoc;
+  if fDoc = document then exit;
+  fDoc := document;
   updateImperative;
 end;
 
-procedure TCESearchWidget.docChanged(aDoc: TCESynMemo);
+procedure TCESearchWidget.docChanged(document: TCESynMemo);
 begin
 end;
 {$ENDREGION}

@@ -35,14 +35,14 @@ type
   // Encapsulates a symbol to enable structured serialization
   TSymbol = class(TCollectionItem)
   private
-    fline, fCol: nativeUint;
+    fline, fCol: ptrUint;
     fName: string;
     fType: TSymbolType;
     fSubs: TSymbolCollection;
-    procedure setSubs(aValue: TSymbolCollection);
+    procedure setSubs(value: TSymbolCollection);
   published
-    property line: nativeUint read fline write fLine;
-    property col: nativeUint read fCol write fCol;
+    property line: ptrUint read fline write fLine;
+    property col: ptrUint read fCol write fCol;
     property name: string read fName write fName;
     property symType: TSymbolType read fType write fType;
     property subs: TSymbolCollection read fSubs write setSubs;
@@ -64,7 +64,7 @@ type
   TSymbolList = class(TComponent)
   private
     fSymbols: TSymbolCollection;
-    procedure setSymbols(aValue: TSymbolCollection);
+    procedure setSymbols(value: TSymbolCollection);
   published
     property symbols: TSymbolCollection read fSymbols write setSymbols;
   public
@@ -156,15 +156,15 @@ type
     procedure callToolProc;
     procedure toolTerminated(sender: TObject);
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
     //
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
   protected
     procedure updateDelayed; override;
@@ -173,7 +173,7 @@ type
     function contextActionCount: integer; override;
     function contextAction(index: integer): TAction; override;
     //
-    procedure SetVisible(Value: boolean); override;
+    procedure SetVisible(value: boolean); override;
     procedure setToolBarFlat(value: boolean); override;
   published
     property autoRefresh: boolean read fAutoRefresh write fAutoRefresh;
@@ -204,9 +204,9 @@ begin
   inherited;
 end;
 
-procedure TSymbol.setSubs(aValue: TSymbolCollection);
+procedure TSymbol.setSubs(value: TSymbolCollection);
 begin
-  fSubs.Assign(aValue);
+  fSubs.Assign(value);
 end;
 
 constructor TSymbolCollection.create;
@@ -231,9 +231,9 @@ begin
   inherited;
 end;
 
-procedure TSymbolList.setSymbols(aValue: TSymbolCollection);
+procedure TSymbolList.setSymbols(value: TSymbolCollection);
 begin
-  fSymbols.Assign(aValue);
+  fSymbols.Assign(value);
 end;
 
 procedure TSymbolList.LoadFromTool(str: TStream);
@@ -399,12 +399,12 @@ begin
   inherited;
 end;
 
-procedure TCESymbolListWidget.SetVisible(Value: boolean);
+procedure TCESymbolListWidget.SetVisible(value: boolean);
 begin
   inherited;
   checkIfHasToolExe;
   getMessageDisplay(fMsgs);
-  if Value then
+  if value then
     callToolProc;
 end;
 
@@ -487,9 +487,9 @@ begin
   exit(fOptions);
 end;
 
-procedure TCESymbolListWidget.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TCESymbolListWidget.optionedEvent(event: TOptionEditorEvent);
 begin
-  if anEvent <> oeeAccept then exit;
+  if event <> oeeAccept then exit;
   fOptions.AssignTo(self);
   callToolProc;
 end;
@@ -501,33 +501,33 @@ end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCESymbolListWidget.docNew(aDoc: TCESynMemo);
+procedure TCESymbolListWidget.docNew(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
   beginDelayedUpdate;
 end;
 
-procedure TCESymbolListWidget.docClosing(aDoc: TCESynMemo);
+procedure TCESymbolListWidget.docClosing(document: TCESynMemo);
 begin
-  if fDoc <> aDoc then exit;
+  if fDoc <> document then exit;
   fDoc := nil;
   clearTree;
   updateVisibleCat;
 end;
 
-procedure TCESymbolListWidget.docFocused(aDoc: TCESynMemo);
+procedure TCESymbolListWidget.docFocused(document: TCESynMemo);
 begin
-  if fDoc = aDoc then exit;
-  fDoc := aDoc;
+  if fDoc = document then exit;
+  fDoc := document;
   if not Visible then exit;
   //
   if fAutoRefresh then beginDelayedUpdate
   else if fRefreshOnFocus then callToolProc;
 end;
 
-procedure TCESymbolListWidget.docChanged(aDoc: TCESynMemo);
+procedure TCESymbolListWidget.docChanged(document: TCESynMemo);
 begin
-  if fDoc <> aDoc then exit;
+  if fDoc <> document then exit;
   if not Visible then exit;
   //
   if fAutoRefresh then beginDelayedUpdate

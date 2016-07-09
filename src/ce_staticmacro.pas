@@ -20,7 +20,7 @@ type
     fShortCut: TShortCut;
     fMacros: TStringList;
     fSetDef: TCEEditEvent;
-    procedure setMacros(aValue: TStringList);
+    procedure setMacros(value: TStringList);
     procedure setDefEvent(value: TCEEditEvent);
   published
     property autoInsert: boolean read fAutoInsert write fAutoInsert;
@@ -31,7 +31,7 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     procedure Assign(Source: TPersistent); override;
-    procedure AssignTo(Dest: TPersistent); override;
+    procedure AssignTo(target: TPersistent); override;
   end;
 
   (**
@@ -58,17 +58,17 @@ type
     procedure sanitize;
     procedure addDefaults;
     procedure updateCompletor;
-    procedure setMacros(aValue: TStringList);
+    procedure setMacros(value: TStringList);
     // ICEDocumentObserver
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
     // ICEEditableOptions
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     // ICEEditableShortcut
     function scedWantFirst: boolean;
@@ -156,14 +156,14 @@ begin
   else inherited;
 end;
 
-procedure TStaticMacrosOptions.AssignTo(Dest: TPersistent);
+procedure TStaticMacrosOptions.AssignTo(target: TPersistent);
 var
   edmac: TCEStaticEditorMacro;
   opt: TStaticMacrosOptions;
 begin
-	if Dest is TCEStaticEditorMacro then
+	if target is TCEStaticEditorMacro then
   begin
-    edmac := TCEStaticEditorMacro(Dest);
+    edmac := TCEStaticEditorMacro(target);
     //
     edmac.automatic := fAutoInsert;
     // setMacros sanitizes the macros
@@ -172,9 +172,9 @@ begin
     //
     edmac.fCompletor.ShortCut := fShortCut;
   end
-  else if Dest is  TStaticMacrosOptions then
+  else if target is  TStaticMacrosOptions then
   begin
-    opt := TStaticMacrosOptions(Dest);
+    opt := TStaticMacrosOptions(target);
     //
     opt.autoInsert := autoInsert;
     opt.macros.Assign(fMacros);
@@ -183,9 +183,9 @@ begin
   else inherited;
 end;
 
-procedure TStaticMacrosOptions.setMacros(aValue: TStringList);
+procedure TStaticMacrosOptions.setMacros(value: TStringList);
 begin
-  fMacros.Assign(aValue);
+  fMacros.Assign(value);
 end;
 
 procedure TStaticMacrosOptions.setDefEvent(value : TCEEditEvent);
@@ -244,37 +244,37 @@ begin
   inherited;
 end;
 
-procedure TCEStaticEditorMacro.setMacros(aValue: TStringList);
+procedure TCEStaticEditorMacro.setMacros(value: TStringList);
 begin
-  fMacros.Assign(aValue);
+  fMacros.Assign(value);
   sanitize;
   updateCompletor;
 end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEStaticEditorMacro.docNew(aDoc: TCESynMemo);
+procedure TCEStaticEditorMacro.docNew(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
   fCompletor.Editor := fDoc;
 end;
 
-procedure TCEStaticEditorMacro.docFocused(aDoc: TCESynMemo);
+procedure TCEStaticEditorMacro.docFocused(document: TCESynMemo);
 begin
-  if fDoc = aDoc then exit;
-  fDoc := aDoc;
+  if fDoc = document then exit;
+  fDoc := document;
   fCompletor.Editor := fDoc;
 end;
 
-procedure TCEStaticEditorMacro.docChanged(aDoc: TCESynMemo);
+procedure TCEStaticEditorMacro.docChanged(document: TCESynMemo);
 begin
-  if aDoc <> fDoc then
+  if document <> fDoc then
     exit;
 end;
 
-procedure TCEStaticEditorMacro.docClosing(aDoc: TCESynMemo);
+procedure TCEStaticEditorMacro.docClosing(document: TCESynMemo);
 begin
-  if aDoc <> fDoc then
+  if document <> fDoc then
     exit;
   fDoc := nil;
 end;
@@ -298,9 +298,9 @@ begin
   exit(fOptions);
 end;
 
-procedure TCEStaticEditorMacro.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TCEStaticEditorMacro.optionedEvent(event: TOptionEditorEvent);
 begin
-	case anEvent of
+	case event of
     oeeAccept:
     begin
       fOptions.AssignTo(self);

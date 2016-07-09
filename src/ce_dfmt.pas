@@ -75,10 +75,10 @@ type
     fBackup: TStringList;
     fDmtWrapper: TCEDmtWrapper;
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
     //
     procedure doApply(sender: TObject);
     procedure doCancel(sender: TObject);
@@ -217,25 +217,25 @@ end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEDfmtWidget.docNew(aDoc: TCESynMemo);
+procedure TCEDfmtWidget.docNew(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
 end;
 
-procedure TCEDfmtWidget.docFocused(aDoc: TCESynMemo);
+procedure TCEDfmtWidget.docFocused(document: TCESynMemo);
 begin
-  if aDoc = fDoc
+  if document = fDoc
     then exit;
-  fDoc := aDoc;
+  fDoc := document;
 end;
 
-procedure TCEDfmtWidget.docChanged(aDoc: TCESynMemo);
+procedure TCEDfmtWidget.docChanged(document: TCESynMemo);
 begin
 end;
 
-procedure TCEDfmtWidget.docClosing(aDoc: TCESynMemo);
+procedure TCEDfmtWidget.docClosing(document: TCESynMemo);
 begin
-  if fDoc <> aDoc then
+  if fDoc <> document then
     exit;
   fDoc := nil;
 end;

@@ -48,12 +48,12 @@ type
     //
     procedure FPOObservedChanged(ASender : TObject; Operation :
       TFPObservedOperation; Data : Pointer);
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
   protected
     procedure afterLoad; override;
     procedure afterSave; override;
@@ -62,7 +62,7 @@ type
     destructor destroy; override;
     //
     function singleServiceName: string;
-    procedure addProject(aProject: ICECommonProject);
+    procedure addProject(project: ICECommonProject);
     procedure openGroup(const fname: string);
     procedure saveGroup(const fname: string);
     procedure closeGroup;
@@ -110,12 +110,12 @@ type
     fFreeProj: ICECommonProject;
     fProjSubj: TCEProjectSubject;
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
     procedure updateList;
     procedure handleChanged(sender: TObject);
@@ -169,33 +169,33 @@ begin
     fModified := true;
 end;
 
-procedure TProjectGroup.projNew(aProject: ICECommonProject);
+procedure TProjectGroup.projNew(project: ICECommonProject);
 begin
-  if (aProject <> nil) and not aProject.inGroup then
-    fFreeStanding := aProject;
+  if (project <> nil) and not project.inGroup then
+    fFreeStanding := project;
 end;
 
-procedure TProjectGroup.projChanged(aProject: ICECommonProject);
+procedure TProjectGroup.projChanged(project: ICECommonProject);
 begin
 end;
 
-procedure TProjectGroup.projClosing(aProject: ICECommonProject);
+procedure TProjectGroup.projClosing(project: ICECommonProject);
 begin
-  if (aProject <> nil) and (aProject = fFreeStanding) then
+  if (project <> nil) and (project = fFreeStanding) then
     fFreeStanding := nil;
 end;
 
-procedure TProjectGroup.projFocused(aProject: ICECommonProject);
+procedure TProjectGroup.projFocused(project: ICECommonProject);
 begin
-  if (aProject <> nil) and not aProject.inGroup then
-    fFreeStanding := aProject;
+  if (project <> nil) and not project.inGroup then
+    fFreeStanding := project;
 end;
 
-procedure TProjectGroup.projCompiling(aProject: ICECommonProject);
+procedure TProjectGroup.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TProjectGroup.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TProjectGroup.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 
@@ -293,22 +293,22 @@ begin
   fModified:=false;
 end;
 
-procedure TProjectGroup.addProject(aProject: ICECommonProject);
+procedure TProjectGroup.addProject(project: ICECommonProject);
 var
   it: TCollectionItem;
 begin
   fModified := true;
   for it in fItems do
-    if SameFileName(TProjectGroupItem(it).absoluteFilename, aProject.filename) then
+    if SameFileName(TProjectGroupItem(it).absoluteFilename, project.filename) then
       exit;
   it := fItems.Add;
   if fBasePath = '' then
-    TProjectGroupItem(it).fFilename := aProject.filename
+    TProjectGroupItem(it).fFilename := project.filename
   else
-    TProjectGroupItem(it).fFilename := ExtractRelativepath(fBasePath, aProject.filename);
-  TProjectGroupItem(it).fProj := aProject;
+    TProjectGroupItem(it).fFilename := ExtractRelativepath(fBasePath, project.filename);
+  TProjectGroupItem(it).fProj := project;
   TProjectGroupItem(it).fGroup := self;
-  aProject.inGroup(true);
+  project.inGroup(true);
   fProjectIndex := it.Index;
   doChanged;
 end;
@@ -446,48 +446,48 @@ end;
 {$ENDREGION}
 
 {$REGION Widget ICEProjectObserver ---------------------------------------------}
-procedure TCEProjectGroupWidget.projNew(aProject: ICECommonProject);
+procedure TCEProjectGroupWidget.projNew(project: ICECommonProject);
 begin
-  fPrevProj := aProject;
-  if not aProject.inGroup then
-    fFreeProj := aProject;
+  fPrevProj := project;
+  if not project.inGroup then
+    fFreeProj := project;
 end;
 
-procedure TCEProjectGroupWidget.projChanged(aProject: ICECommonProject);
+procedure TCEProjectGroupWidget.projChanged(project: ICECommonProject);
 begin
   updateList;
 end;
 
-procedure TCEProjectGroupWidget.projClosing(aProject: ICECommonProject);
+procedure TCEProjectGroupWidget.projClosing(project: ICECommonProject);
 begin
   fPrevProj := nil;
-  if aProject = fFreeProj then
+  if project = fFreeProj then
   begin
     fFreeProj := nil;
     updateList;
   end;
 end;
 
-procedure TCEProjectGroupWidget.projFocused(aProject: ICECommonProject);
+procedure TCEProjectGroupWidget.projFocused(project: ICECommonProject);
 begin
-  fPrevProj := aProject;
-  if not aProject.inGroup then
+  fPrevProj := project;
+  if not project.inGroup then
   begin
-    fFreeProj := aProject;
+    fFreeProj := project;
     updateList;
   end
-  else if (aProject = fFreeProj) and (aProject.inGroup) then
+  else if (project = fFreeProj) and (project.inGroup) then
   begin
     fFreeProj := nil;
     updateList;
   end;
 end;
 
-procedure TCEProjectGroupWidget.projCompiling(aProject: ICECommonProject);
+procedure TCEProjectGroupWidget.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCEProjectGroupWidget.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCEProjectGroupWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}

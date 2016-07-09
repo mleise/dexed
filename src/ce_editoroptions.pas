@@ -116,7 +116,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     //
-    procedure Assign(src: TPersistent); override;
+    procedure Assign(source: TPersistent); override;
   end;
 
   (**
@@ -131,13 +131,13 @@ type
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
     //
     function scedWantFirst: boolean;
     function scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
@@ -268,13 +268,13 @@ begin
   inherited;
 end;
 
-procedure TCEEditorOptionsBase.Assign(src: TPersistent);
+procedure TCEEditorOptionsBase.Assign(source: TPersistent);
 var
   srcopt: TCEEditorOptionsBase;
 begin
-  if (src is TCEEditorOptionsBase) then
+  if (source is TCEEditorOptionsBase) then
   begin
-    srcopt := TCEEditorOptionsBase(src);
+    srcopt := TCEEditorOptionsBase(source);
     //
     fAlwaysAdvancedFeatures:=srcopt.fAlwaysAdvancedFeatures;
     fResetFontSize:=srcopt.fResetFontSize;
@@ -477,27 +477,27 @@ end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEEditorOptions.docNew(aDoc: TCESynMemo);
+procedure TCEEditorOptions.docNew(document: TCESynMemo);
 begin
   //apply...des not modify font size to preserve current zoom
   // when called after the options are edited
-  applyChangeToEditor(aDoc);
+  applyChangeToEditor(document);
   // must be set manually for a new doc
-  aDoc.Font.Size:=self.font.Size;
+  document.Font.Size:=self.font.Size;
 end;
 
-procedure TCEEditorOptions.docFocused(aDoc: TCESynMemo);
+procedure TCEEditorOptions.docFocused(document: TCESynMemo);
 begin
 end;
 
-procedure TCEEditorOptions.docChanged(aDoc: TCESynMemo);
+procedure TCEEditorOptions.docChanged(document: TCESynMemo);
 begin
 end;
 
-procedure TCEEditorOptions.docClosing(aDoc: TCESynMemo);
+procedure TCEEditorOptions.docClosing(document: TCESynMemo);
 begin
-  fCompletionMenuWidth := aDoc.completionMenu.TheForm.Width;
-  fCompletionMenuLines := aDoc.completionMenu.LinesInWindow;
+  fCompletionMenuWidth := document.completionMenu.TheForm.Width;
+  fCompletionMenuLines := document.completionMenu.LinesInWindow;
 end;
 {$ENDREGION}
 
@@ -575,10 +575,10 @@ begin
   exit(self);
 end;
 
-procedure TCEEditorOptions.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TCEEditorOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   // restores
-  if anEvent = oeeCancel then
+  if event = oeeCancel then
   begin
     self.Assign(fBackup);
     D2Syn.Assign(fBackup.fD2Syn);
@@ -586,10 +586,10 @@ begin
   end;
   // apply, if change/accept event
   // to get a live preview
-  if anEvent <> oeeSelectCat then
+  if event <> oeeSelectCat then
     applyChangesFromSelf;
   // new backup values based on accepted values.
-  if anEvent = oeeAccept then
+  if event = oeeAccept then
   begin
     fBackup.Assign(self);
     fBackup.fD2Syn.Assign(D2Syn);

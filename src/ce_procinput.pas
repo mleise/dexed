@@ -34,8 +34,8 @@ type
     procedure sendInput;
     //
     function singleServiceName: string;
-    procedure addProcess(aProcess: TProcess);
-    procedure removeProcess(aProcess: TProcess);
+    procedure addProcess(process: TProcess);
+    procedure removeProcess(process: TProcess);
     function process(): TProcess;
   public
     constructor create(aOwner: TComponent); override;
@@ -93,7 +93,7 @@ begin
   exit('ICEProcInputHandler');
 end;
 
-procedure TCEProcInputWidget.addProcess(aProcess: TProcess);
+procedure TCEProcInputWidget.addProcess(process: TProcess);
 begin
   Panel1.Enabled:=false;
 
@@ -105,18 +105,18 @@ begin
 
   txtExeName.Caption := 'no process';
   fProc := nil;
-  if aProcess.isNil then
+  if process.isNil then
     exit;
-  if not (poUsePipes in aProcess.Options) then
+  if not (poUsePipes in process.Options) then
     exit;
-  fProc := aProcess;
+  fProc := process;
   if fProc.isNotNil then Panel1.Enabled:=true;
   txtExeName.Caption := shortenPath(fProc.Executable);
 end;
 
-procedure TCEProcInputWidget.removeProcess(aProcess: TProcess);
+procedure TCEProcInputWidget.removeProcess(process: TProcess);
 begin
-  if fProc = aProcess then
+  if fProc = process then
     addProcess(nil);
 end;
 

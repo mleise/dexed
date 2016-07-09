@@ -68,8 +68,8 @@ type
     procedure beforeLoad; override;
     procedure afterSave; override;
     procedure afterLoad; override;
-    procedure customSaveToFile(const aFilename: string); override;
-    procedure customLoadFromFile(const aFilename: string); override;
+    procedure customSaveToFile(const fname: string); override;
+    procedure customLoadFromFile(const fname: string); override;
     procedure readerPropNoFound(Reader: TReader; Instance: TPersistent;
       var PropName: string; IsPath: Boolean; var Handled, Skip: Boolean); override;
   published
@@ -85,9 +85,9 @@ type
     procedure endUpdate(modified: boolean = true);
     procedure reset;
     procedure addDefaults;
-    procedure addSource(const aFilename: string);
+    procedure addSource(const fname: string);
     function addConfiguration: TCompilerConfiguration;
-    procedure getOpts(const aList: TStrings);
+    procedure getOpts(const list: TStrings);
     //
     procedure activate;
     procedure inGroup(value: boolean);
@@ -109,7 +109,7 @@ type
     function sourcesCount: integer;
     function sourceRelative(index: integer): string;
     function sourceAbsolute(index: integer): string;
-    function isSource(const aFilename: string): boolean;
+    function isSource(const fname: string): boolean;
     function importsPathCount: integer;
     function importPath(index: integer): string;
     //
@@ -220,21 +220,21 @@ begin
     Configuration[i].onChanged := @subMemberChanged;
 end;
 
-procedure TCENativeProject.addSource(const aFilename: string);
+procedure TCENativeProject.addSource(const fname: string);
 var
   relSrc, absSrc: string;
   expand: boolean;
 begin
-  if not isDlangCompilable(aFilename.extractFileExt) then
+  if not isDlangCompilable(fname.extractFileExt) then
     exit;
   expand := fBasePath.dirExists;
   for relSrc in fSrcs do
   begin
     if not expand then absSrc := relSrc
     else absSrc := expandFilenameEx(fBasePath, relsrc);
-    if SameFileName(aFilename, absSrc) then exit;
+    if SameFileName(fname, absSrc) then exit;
   end;
-  relSrc := ExtractRelativePath(fBasePath, aFilename);
+  relSrc := ExtractRelativePath(fBasePath, fname);
   fSrcs.Add(relSrc);
 end;
 
@@ -246,22 +246,22 @@ begin
   endUpdate;
 end;
 
-procedure TCENativeProject.customLoadFromFile(const aFilename: string);
+procedure TCENativeProject.customLoadFromFile(const fname: string);
 begin
-  fbasePath := aFilename.extractFilePath;
-  inherited customLoadFromFile(aFilename);
+  fbasePath := fname.extractFilePath;
+  inherited customLoadFromFile(fname);
 end;
 
-procedure TCENativeProject.customSaveToFile(const aFilename: string);
+procedure TCENativeProject.customSaveToFile(const fname: string);
 var
   oldAbs, newRel, oldBase: string;
   i: NativeInt;
 begin
   beginUpdate;
-  if aFilename <> fFilename then
+  if fname <> fFilename then
     inGroup(false);
   oldBase := fBasePath;
-  fBasePath := aFilename.extractFilePath;
+  fBasePath := fname.extractFilePath;
   //
   for i:= 0 to fSrcs.Count-1 do
   begin
@@ -270,7 +270,7 @@ begin
     fSrcs[i] := newRel;
   end;
   endUpdate;
-  inherited customSaveToFile(aFilename);
+  inherited customSaveToFile(fname);
 end;
 
 procedure TCENativeProject.setLibAliases(value: TStringList);
@@ -398,7 +398,7 @@ begin
   fModified := false;
 end;
 
-procedure TCENativeProject.getOpts(const aList: TStrings);
+procedure TCENativeProject.getOpts(const list: TStrings);
 var
   rel: string;
   i: Integer;
@@ -417,7 +417,7 @@ begin
     end;
     // sources
     for rel in fSrcs do if rel <> '' then
-      aList.Add(expandFilenameEx(fBasePath, rel)); // note: process.inc ln 249. double quotes are added if there's a space.
+      list.Add(expandFilenameEx(fBasePath, rel)); // note: process.inc ln 249. double quotes are added if there's a space.
     // exclusions
     if exc.Count > 0 then with TRegExpr.Create do
     try
@@ -426,9 +426,9 @@ begin
         try
           Expression:= globToReg(str);
           Compile;
-          for i := aList.Count-1 downto 0 do
-            if Exec(aList[i]) then
-              aList.Delete(i);
+          for i := list.Count-1 downto 0 do
+            if Exec(list[i]) then
+              list.Delete(i);
         except
           continue;
         end;
@@ -448,26 +448,26 @@ begin
     if (currentConfiguration.outputOptions.binaryKind in [executable, sharedlib]) or
       currentConfiguration.outputOptions.alwaysLinkStaticLibs then
     {$ENDIF}
-    LibMan.getLibFiles(libAliasesPtr, aList);
+    LibMan.getLibFiles(libAliasesPtr, list);
 
     // but always adds -I<path>
-    LibMan.getLibSourcePath(libAliasesPtr, aList);
+    LibMan.getLibSourcePath(libAliasesPtr, list);
     // config
     if currentConfiguration.isOverriddenConfiguration then
-      currentConfiguration.getOpts(aList, fBaseConfig)
+      currentConfiguration.getOpts(list, fBaseConfig)
     else
-      currentConfiguration.getOpts(aList);
+      currentConfiguration.getOpts(list);
   finally
     exc.Free;
   end;
 end;
 
-function TCENativeProject.isSource(const aFilename: string): boolean;
+function TCENativeProject.isSource(const fname: string): boolean;
 var
   i: Integer;
 begin
   for i := 0 to fSrcs.Count-1 do
-    if sourceAbsolute(i) = aFilename then
+    if sourceAbsolute(i) = fname then
       exit(true);
   exit(false);
 end;

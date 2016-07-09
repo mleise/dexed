@@ -33,7 +33,7 @@ type
     fSingleClick: boolean;
     fFont: TFont;
     fMsgColors: array[TCEAppMessageKind] of TColor;
-    procedure setFont(aValue: TFont);
+    procedure setFont(value: TFont);
   published
     property fastDisplay: boolean read fFastDisplay write fFastDisplay;
     property maxMessageCount: integer read fMaxCount write fMaxCount;
@@ -48,11 +48,12 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor destroy; override;
-    procedure assign(Source: TPersistent); override;
-    procedure AssignTo(Dest: TPersistent); override;
+    procedure assign(source: TPersistent); override;
+    procedure AssignTo(target: TPersistent); override;
   end;
 
-  // grants access to some protected fields that should be actually public (scoll position needed for custom draw !)
+  // gives access to protected fields that should be actually public
+  // (scroll position needed for custom draw !)
   TTreeHack = class(TTreeView)
   end;
 
@@ -116,9 +117,9 @@ type
     procedure actSaveMsgExecute(Sender: TObject);
     procedure actCopyMsgExecute(Sender: TObject);
     procedure actSelAllExecute(Sender: TObject);
-    procedure setMaxMessageCount(aValue: Integer);
-    procedure setAutoSelectCategory(aValue: boolean);
-    procedure setSingleMessageClick(aValue: boolean);
+    procedure setMaxMessageCount(value: Integer);
+    procedure setAutoSelectCategory(value: boolean);
+    procedure setSingleMessageClick(value: boolean);
     procedure listDeletion(Sender: TObject; Node: TTreeNode);
     procedure selCtxtClick(Sender: TObject);
     function iconIndex(aKind: TCEAppMessageKind): Integer;
@@ -126,28 +127,28 @@ type
     procedure callDemangler;
     procedure freeDemangler;
     //
-    procedure setColorError(aValue: TColor);
-    procedure setColorInfo(aValue: TColor);
-    procedure setColorHint(aValue: TColor);
-    procedure setColorBuble(aValue: TColor);
-    procedure setColorWarning(aValue: TColor);
+    procedure setColorError(value: TColor);
+    procedure setColorInfo(value: TColor);
+    procedure setColorHint(value: TColor);
+    procedure setColorBuble(value: TColor);
+    procedure setColorWarning(value: TColor);
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
     //
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     //
     function openFileFromDmdMessage(const aMessage: string): boolean;
@@ -155,9 +156,9 @@ type
     function guessMessageKind(const aMessg: string): TCEAppMessageKind;
     //
     function singleServiceName: string;
-    procedure message(const aValue: string; aData: Pointer; aCtxt: TCEAppMessageCtxt; aKind: TCEAppMessageKind);
+    procedure message(const value: string; aData: Pointer; aCtxt: TCEAppMessageCtxt; aKind: TCEAppMessageKind);
     procedure clearbyContext(aCtxt: TCEAppMessageCtxt);
-    procedure clearbyData(aData: Pointer);
+    procedure clearbyData(data: Pointer);
     procedure scrollToBack;
   protected
     procedure setToolBarFlat(value: boolean); override;
@@ -203,19 +204,19 @@ begin
   inherited;
 end;
 
-procedure TCEMessagesOptions.setFont(aValue: TFont);
+procedure TCEMessagesOptions.setFont(value: TFont);
 begin
-  fFont.Assign(aValue);
+  fFont.Assign(value);
 end;
 
-procedure TCEMessagesOptions.assign(Source: TPersistent);
+procedure TCEMessagesOptions.assign(source: TPersistent);
 var
   widg : TCEMessagesWidget;
   opts : TCEMessagesOptions;
 begin
-  if Source is TCEMessagesOptions then
+  if source is TCEMessagesOptions then
   begin
-    opts := TCEMessagesOptions(Source);
+    opts := TCEMessagesOptions(source);
     fFont.BeginUpdate;
     fFont.Assign(opts.font);
     fMaxCount := opts.fMaxCount;
@@ -225,9 +226,9 @@ begin
     fMsgColors := opts.fMsgColors;
     fFont.EndUpdate;
   end
-  else if Source is TCEMessagesWidget then
+  else if source is TCEMessagesWidget then
   begin
-    widg := TCEMessagesWidget(Source);
+    widg := TCEMessagesWidget(source);
     fFont.Assign(widg.List.Font);
     fMaxCount := widg.fMaxMessCnt;
     fAutoSelect := widg.fAutoSelect;
@@ -238,13 +239,13 @@ begin
   else inherited;
 end;
 
-procedure TCEMessagesOptions.AssignTo(Dest: TPersistent);
+procedure TCEMessagesOptions.AssignTo(target: TPersistent);
 var
   widg : TCEMessagesWidget;
 begin
-  if Dest is TCEMessagesWidget then
+  if target is TCEMessagesWidget then
   begin
-    widg := TCEMessagesWidget(Dest);
+    widg := TCEMessagesWidget(target);
     widg.List.Font.Assign(fFont);
     widg.maxMessageCount := fMaxCount;
     widg.autoSelectCategory := fAutoSelect;
@@ -430,25 +431,25 @@ begin
   filterMessages(fCtxt);
 end;
 
-procedure TCEMessagesWidget.setMaxMessageCount(aValue: Integer);
+procedure TCEMessagesWidget.setMaxMessageCount(value: Integer);
 begin
-  if aValue < 5 then
-    aValue := 5;
-  if fMaxMessCnt = aValue then
+  if value < 5 then
+    value := 5;
+  if fMaxMessCnt = value then
     exit;
-  fMaxMessCnt := aValue;
+  fMaxMessCnt := value;
   clearOutOfRangeMessg;
 end;
 
-procedure TCEMessagesWidget.setAutoSelectCategory(aValue: boolean);
+procedure TCEMessagesWidget.setAutoSelectCategory(value: boolean);
 begin
-  fAutoSelect := aValue;
+  fAutoSelect := value;
   fActAutoSel.Checked:= fAutoSelect;
 end;
 
-procedure TCEMessagesWidget.setSingleMessageClick(aValue: boolean);
+procedure TCEMessagesWidget.setSingleMessageClick(value: boolean);
 begin
-  fSingleClick := aValue;
+  fSingleClick := value;
   if fSingleClick then
   begin
     List.OnClick := @handleMessageClick;
@@ -459,33 +460,33 @@ begin
   end;
 end;
 
-procedure TCEMessagesWidget.setColorError(aValue: TColor);
+procedure TCEMessagesWidget.setColorError(value: TColor);
 begin
-  fMsgColors[amkErr] := max(aValue, minColor);
+  fMsgColors[amkErr] := max(value, minColor);
   List.Invalidate;
 end;
 
-procedure TCEMessagesWidget.setColorInfo(aValue: TColor);
+procedure TCEMessagesWidget.setColorInfo(value: TColor);
 begin
-  fMsgColors[amkInf] := max(aValue, minColor);
+  fMsgColors[amkInf] := max(value, minColor);
   List.Invalidate;
 end;
 
-procedure TCEMessagesWidget.setColorHint(aValue: TColor);
+procedure TCEMessagesWidget.setColorHint(value: TColor);
 begin
-  fMsgColors[amkHint] := max(aValue, minColor);
+  fMsgColors[amkHint] := max(value, minColor);
   List.Invalidate;
 end;
 
-procedure TCEMessagesWidget.setColorBuble(aValue: TColor);
+procedure TCEMessagesWidget.setColorBuble(value: TColor);
 begin
-  fMsgColors[amkBub] := max(aValue, minColor);
+  fMsgColors[amkBub] := max(value, minColor);
   List.Invalidate;
 end;
 
-procedure TCEMessagesWidget.setColorWarning(aValue: TColor);
+procedure TCEMessagesWidget.setColorWarning(value: TColor);
 begin
-  fMsgColors[amkWarn] := aValue;
+  fMsgColors[amkWarn] := value;
   List.Invalidate;
 end;
 
@@ -531,9 +532,9 @@ begin
   exit(fOptions);
 end;
 
-procedure TCEMessagesWidget.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TCEMessagesWidget.optionedEvent(event: TOptionEditorEvent);
 begin
-  case anEvent of
+  case event of
     oeeAccept, oeeSelectCat:
       fOptionsBackup.assign(fOptions);
     oeeCancel:
@@ -646,15 +647,15 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEMessagesWidget.projNew(aProject: ICECommonProject);
+procedure TCEMessagesWidget.projNew(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
   filterMessages(fCtxt);
 end;
 
-procedure TCEMessagesWidget.projClosing(aProject: ICECommonProject);
+procedure TCEMessagesWidget.projClosing(project: ICECommonProject);
 begin
-  if fProj <> aProject then
+  if fProj <> project then
     exit;
   //
   clearbyData(fProj);
@@ -662,30 +663,30 @@ begin
   filterMessages(fCtxt);
 end;
 
-procedure TCEMessagesWidget.projFocused(aProject: ICECommonProject);
+procedure TCEMessagesWidget.projFocused(project: ICECommonProject);
 begin
-  if fProj = aProject then exit;
-  fProj := aProject;
+  if fProj = project then exit;
+  fProj := project;
   filterMessages(fCtxt);
 end;
 
-procedure TCEMessagesWidget.projChanged(aProject: ICECommonProject);
+procedure TCEMessagesWidget.projChanged(project: ICECommonProject);
 begin
 end;
 
-procedure TCEMessagesWidget.projCompiling(aProject: ICECommonProject);
+procedure TCEMessagesWidget.projCompiling(project: ICECommonProject);
 begin
   fProjCompile := true;
 end;
 
-procedure TCEMessagesWidget.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCEMessagesWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
   fProjCompile := false;
 end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEMessagesWidget.docNew(aDoc: TCESynMemo);
+procedure TCEMessagesWidget.docNew(document: TCESynMemo);
 begin
 
   if fDoc.isNotNil and fOptions.fAutoSelect and (fCtxt = amcEdit) then
@@ -696,24 +697,24 @@ begin
       fEditorMessagePos[fDoc.fileName] := -1;
   end;
 
-  fDoc := aDoc;
+  fDoc := document;
   filterMessages(fCtxt);
 end;
 
-procedure TCEMessagesWidget.docClosing(aDoc: TCESynMemo);
+procedure TCEMessagesWidget.docClosing(document: TCESynMemo);
 begin
-  if aDoc <> fDoc then exit;
+  if document <> fDoc then exit;
   clearbyData(fDoc);
   fEditorMessagePos.Remove(fDoc.fileName);
   fDoc := nil;
   filterMessages(fCtxt);
 end;
 
-procedure TCEMessagesWidget.docFocused(aDoc: TCESynMemo);
+procedure TCEMessagesWidget.docFocused(document: TCESynMemo);
 var
   i: integer;
 begin
-  if fDoc = aDoc then exit;
+  if fDoc = document then exit;
 
   if fDoc.isNotNil and fOptions.fAutoSelect and (fCtxt = amcEdit) then
   begin
@@ -723,7 +724,7 @@ begin
       fEditorMessagePos[fDoc.fileName] := -1;
   end;
 
-  fDoc := aDoc;
+  fDoc := document;
   filterMessages(fCtxt);
 
   if fOptions.fAutoSelect and (fCtxt = amcEdit) then
@@ -741,9 +742,9 @@ begin
   end;
 end;
 
-procedure TCEMessagesWidget.docChanged(aDoc: TCESynMemo);
+procedure TCEMessagesWidget.docChanged(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
 end;
 {$ENDREGION}
 
@@ -753,7 +754,7 @@ begin
   exit('ICEMessagesDisplay');
 end;
 
-procedure TCEMessagesWidget.message(const aValue: string; aData: Pointer;
+procedure TCEMessagesWidget.message(const value: string; aData: Pointer;
   aCtxt: TCEAppMessageCtxt; aKind: TCEAppMessageKind);
 var
   dt: PMessageData;
@@ -761,7 +762,7 @@ var
   msg: string;
 begin
   showWidget;
-  msg := aValue;
+  msg := value;
   if aKind = amkAuto then
     aKind := guessMessageKind(msg);
   if aCtxt = amcAutoCompile then
@@ -821,20 +822,20 @@ begin
   list.EndUpdate;
 end;
 
-procedure TCEMessagesWidget.clearByData(aData: Pointer);
+procedure TCEMessagesWidget.clearByData(data: Pointer);
 var
   i: Integer;
   msgdt: PMessageData;
 begin
-  if aData.isNil then
+  if data.isNil then
     exit;
-  if (TObject(aData) = fDoc) and (fDoc.isNotNil) then
+  if (TObject(data) = fDoc) and (fDoc.isNotNil) then
     fEditorMessagePos[fDoc.fileName] := -1;
   list.BeginUpdate;
   for i := List.Items.Count-1 downto 0 do
   begin
     msgdt := PMessageData(List.Items[i].Data);
-    if (msgdt^.data = aData) then
+    if (msgdt^.data = data) then
       List.Items.Delete(List.Items[i]);
   end;
   list.EndUpdate;

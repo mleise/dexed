@@ -25,14 +25,14 @@ type
     procedure btnAddFoldClick(Sender: TObject);
     procedure btnRemFileClick(Sender: TObject);
     procedure btnRemFoldClick(Sender: TObject);
-    procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
+    procedure FormDropFiles(Sender: TObject; const fnames: array of String);
     procedure TreeClick(Sender: TObject);
     procedure TreeKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TreeSelectionChanged(Sender: TObject);
   protected
     procedure updateImperative; override;
     procedure updateDelayed; override;
-    procedure SetVisible(Value: boolean); override;
+    procedure SetVisible(value: boolean); override;
     procedure setToolBarFlat(value: boolean); override;
   private
     fActOpenFile: TAction;
@@ -49,12 +49,12 @@ type
     procedure actOpenFileExecute(sender: TObject);
     procedure actBuildExecute(sender: TObject);
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
   protected
     function contextName: string; override;
     function contextActionCount: integer; override;
@@ -104,10 +104,10 @@ begin
   inherited;
 end;
 
-procedure TCEProjectInspectWidget.SetVisible(Value: boolean);
+procedure TCEProjectInspectWidget.SetVisible(value: boolean);
 begin
   inherited;
-  if Value then updateImperative;
+  if value then updateImperative;
 end;
 
 procedure TCEProjectInspectWidget.setToolBarFlat(value: boolean);
@@ -154,23 +154,23 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectMonitor -----------------------------------------------------}
-procedure TCEProjectInspectWidget.projNew(aProject: ICECommonProject);
+procedure TCEProjectInspectWidget.projNew(project: ICECommonProject);
 begin
   fProject := nil;
   enabled := false;
   fLastFileOrFolder := '';
-  if aProject.getFormat <> pfNative then
+  if project.getFormat <> pfNative then
     exit;
   enabled := true;
   //
-  fProject := TCENativeProject(aProject.getProject);
+  fProject := TCENativeProject(project.getProject);
   if Visible then updateImperative;
 end;
 
-procedure TCEProjectInspectWidget.projClosing(aProject: ICECommonProject);
+procedure TCEProjectInspectWidget.projClosing(project: ICECommonProject);
 begin
   if fProject.isNil then exit;
-  if fProject <> aProject.getProject then
+  if fProject <> project.getProject then
     exit;
   fProject := nil;
   fLastFileOrFolder := '';
@@ -178,35 +178,35 @@ begin
   updateImperative;
 end;
 
-procedure TCEProjectInspectWidget.projFocused(aProject: ICECommonProject);
+procedure TCEProjectInspectWidget.projFocused(project: ICECommonProject);
 begin
   fProject := nil;
   enabled := false;
   fLastFileOrFolder := '';
-  if aProject.getFormat <> pfNative then
+  if project.getFormat <> pfNative then
   begin
     updateImperative;
     exit;
   end;
   enabled := true;
   //
-  fProject := TCENativeProject(aProject.getProject);
+  fProject := TCENativeProject(project.getProject);
   if Visible then beginDelayedUpdate;
 end;
 
-procedure TCEProjectInspectWidget.projChanged(aProject: ICECommonProject);
+procedure TCEProjectInspectWidget.projChanged(project: ICECommonProject);
 begin
   if fProject.isNil then exit;
-  if fProject <> aProject.getProject then
+  if fProject <> project.getProject then
     exit;
   if Visible then beginDelayedUpdate;
 end;
 
-procedure TCEProjectInspectWidget.projCompiling(aProject: ICECommonProject);
+procedure TCEProjectInspectWidget.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCEProjectInspectWidget.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCEProjectInspectWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
@@ -388,17 +388,17 @@ begin
   end;
 end;
 
-procedure TCEProjectInspectWidget.FormDropFiles(Sender: TObject; const FileNames: array of String);
-procedure addFile(const aFilename: string);
+procedure TCEProjectInspectWidget.FormDropFiles(Sender: TObject; const fnames: array of String);
+procedure addFile(const value: string);
 var
   ext: string;
 begin
-  ext := aFilename.extractFileExt;
+  ext := value.extractFileExt;
   if not isDlangCompilable(ext) then
     exit;
-  fProject.addSource(aFilename);
+  fProject.addSource(value);
   if isEditable(ext) then
-    getMultiDocHandler.openDocument(aFilename);
+    getMultiDocHandler.openDocument(value);
 end;
 var
   fname, direntry: string;
@@ -407,7 +407,7 @@ begin
   if fProject.isNil then exit;
   lst := TStringList.Create;
   fProject.beginUpdate;
-  try for fname in Filenames do
+  try for fname in fnames do
     if fname.fileExists then
       addFile(fname)
     else if fname.dirExists then

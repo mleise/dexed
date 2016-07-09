@@ -59,7 +59,7 @@ type
     destructor destroy; override;
     procedure assignToOptions;
     procedure assignFromOptions;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(source: TPersistent); override;
   end;
 
   TCED2SynPresets = class(TWritableLfmTextComponent)
@@ -90,7 +90,7 @@ type
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     procedure lstBoxSelChange(Sender: TObject);
     procedure btnAddClick(sender: TObject);
@@ -205,13 +205,13 @@ begin
   selection.Assign(EditorOptions.selection);
 end;
 
-procedure TCED2SynPreset.Assign(Source: TPersistent);
+procedure TCED2SynPreset.Assign(source: TPersistent);
 var
   src: TCED2SynPreset;
 begin
-  if Source is TCED2SynPreset then
+  if source is TCED2SynPreset then
   begin
-    src := TCED2SynPreset(Source);
+    src := TCED2SynPreset(source);
     background:=src.background;
     highlighter.Assign(src.highlighter);
     bracketMatch.Assign(src.bracketMatch);
@@ -569,9 +569,9 @@ begin
   exit(self);
 end;
 
-procedure TCED2SynPresetsLoaderForm.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TCED2SynPresetsLoaderForm.optionedEvent(event: TOptionEditorEvent);
 begin
-  case anEvent of
+  case event of
     oeeAccept:
     begin
       fPresets[fList.ItemIndex].assignToOptions;

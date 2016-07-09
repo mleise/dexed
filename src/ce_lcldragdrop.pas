@@ -15,12 +15,12 @@ type
   private
     fProj: ICECommonProject;
     fFreeProj: ICECommonProject;
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
     function getFilename(src: TObject): string;
   public
@@ -50,36 +50,36 @@ begin
   inherited;
 end;
 
-procedure TDDHandler.projNew(aProject: ICECommonProject);
+procedure TDDHandler.projNew(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
   if not fProj.inGroup then
     fFreeProj := fProj;
 end;
 
-procedure TDDHandler.projChanged(aProject: ICECommonProject);
+procedure TDDHandler.projChanged(project: ICECommonProject);
 begin
 end;
 
-procedure TDDHandler.projClosing(aProject: ICECommonProject);
+procedure TDDHandler.projClosing(project: ICECommonProject);
 begin
   fProj := nil;
-  if aProject = fFreeProj then
+  if project = fFreeProj then
     fFreeProj := nil;
 end;
 
-procedure TDDHandler.projFocused(aProject: ICECommonProject);
+procedure TDDHandler.projFocused(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
   if not fProj.inGroup then
     fFreeProj := fProj;
 end;
 
-procedure TDDHandler.projCompiling(aProject: ICECommonProject);
+procedure TDDHandler.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TDDHandler.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TDDHandler.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 

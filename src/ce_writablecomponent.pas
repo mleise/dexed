@@ -23,16 +23,16 @@ type
     fFilename: string;
     fHasLoaded: boolean;
     fHasSaved: boolean;
-    procedure setFilename(const aValue: string); virtual;
+    procedure setFilename(const value: string); virtual;
     procedure beforeLoad; virtual;
     procedure beforeSave; virtual;
     procedure afterLoad; virtual;
     procedure afterSave; virtual;
-    procedure customLoadFromFile(const aFilename: string); virtual; abstract;
-    procedure customSaveToFile(const aFilename: string); virtual; abstract;
+    procedure customLoadFromFile(const fname: string); virtual; abstract;
+    procedure customSaveToFile(const fname: string); virtual; abstract;
   public
-    procedure saveToFile(const aFilename: string); virtual;
-    procedure loadFromFile(const aFilename: string); virtual;
+    procedure saveToFile(const fname: string); virtual;
+    procedure loadFromFile(const fname: string); virtual;
     //
     property Filename: string read fFilename write setFilename;
     property hasLoaded: boolean read fHasLoaded;
@@ -46,8 +46,8 @@ type
    *)
   TWritableLfmTextComponent = class(TCustomWritableComponent)
   protected
-    procedure customLoadFromFile(const aFilename: string); override;
-    procedure customSaveToFile(const aFilename: string); override;
+    procedure customLoadFromFile(const fname: string); override;
+    procedure customSaveToFile(const fname: string); override;
     procedure readerPropNoFound(Reader: TReader; Instance: TPersistent;
       var PropName: string; IsPath: boolean; var Handled, Skip: Boolean); virtual;
     procedure readerError(Reader: TReader; const Message: string;
@@ -62,11 +62,11 @@ type
   TWritableJsonComponent = class(TCustomWritableComponent)
   protected
     procedure propertyError(Sender : TObject; AObject : TObject; Info : PPropInfo;
-      AValue : TJSONData; Error : Exception; Var doContinue : Boolean); virtual;
+      value : TJSONData; Error : Exception; Var doContinue : Boolean); virtual;
     procedure restoreProperty(Sender : TObject; AObject : TObject; Info : PPropInfo;
-      AValue : TJSONData; Var Handled : Boolean); virtual;
-    procedure customLoadFromFile(const aFilename: string); override;
-    procedure customSaveToFile(const aFilename: string); override;
+      value : TJSONData; Var Handled : Boolean); virtual;
+    procedure customLoadFromFile(const fname: string); override;
+    procedure customSaveToFile(const fname: string); override;
   end;
 
 implementation
@@ -88,31 +88,31 @@ procedure TCustomWritableComponent.afterSave;
 begin
 end;
 
-procedure TCustomWritableComponent.setFilename(const aValue: string);
+procedure TCustomWritableComponent.setFilename(const value: string);
 begin
-  fFilename := aValue;
+  fFilename := value;
 end;
 
-procedure TCustomWritableComponent.saveToFile(const aFilename: string);
+procedure TCustomWritableComponent.saveToFile(const fname: string);
 begin
   fHasSaved := true;
   beforeSave;
   try
-    customSaveToFile(aFilename);
+    customSaveToFile(fname);
   except
     fHasSaved := false;
   end;
-  setFilename(aFilename);
+  setFilename(fname);
   afterSave;
 end;
 
-procedure TCustomWritableComponent.loadFromFile(const aFilename: string);
+procedure TCustomWritableComponent.loadFromFile(const fname: string);
 begin
   fHasLoaded := true;
   beforeLoad;
-  setFilename(aFilename);
+  setFilename(fname);
   try
-    customLoadFromFile(aFilename);
+    customLoadFromFile(fname);
   except
     fHasLoaded := false;
   end;
@@ -121,14 +121,14 @@ end;
 {$ENDREGION}
 
 {$REGION TWritableLfmTextComponent ---------------------------------------------}
-procedure TWritableLfmTextComponent.customSaveToFile(const aFilename: string);
+procedure TWritableLfmTextComponent.customSaveToFile(const fname: string);
 begin
-  saveCompToTxtFile(self, aFilename);
+  saveCompToTxtFile(self, fname);
 end;
 
-procedure TWritableLfmTextComponent.customLoadFromFile(const aFilename: string);
+procedure TWritableLfmTextComponent.customLoadFromFile(const fname: string);
 begin
-  loadCompFromTxtFile(self, aFilename, @readerPropNoFound, @readerError);
+  loadCompFromTxtFile(self, fname, @readerPropNoFound, @readerError);
 end;
 
 procedure TWritableLfmTextComponent.readerPropNoFound(Reader: TReader; Instance: TPersistent;
@@ -148,18 +148,18 @@ end;
 
 {$REGION TWritableJsonComponent ------------------------------------------------}
 procedure TWritableJsonComponent.propertyError(Sender : TObject; AObject : TObject; Info : PPropInfo;
-      AValue : TJSONData; Error : Exception; Var doContinue : Boolean);
+      value : TJSONData; Error : Exception; Var doContinue : Boolean);
 begin
   doContinue := true;
 end;
 
 procedure TWritableJsonComponent.restoreProperty(Sender : TObject; AObject : TObject; Info : PPropInfo;
-      AValue : TJSONData; Var Handled : Boolean);
+      value : TJSONData; Var Handled : Boolean);
 begin
   Handled := true;
 end;
 
-procedure TWritableJsonComponent.customSaveToFile(const aFilename: string);
+procedure TWritableJsonComponent.customSaveToFile(const fname: string);
 var
   file_str: TMemoryStream;
   json_str: TJSONStreamer;
@@ -170,14 +170,14 @@ begin
   try
     json_dat := json_str.ObjectToJSONString(self);
     file_str.Write(json_dat[1], length(json_dat));
-    file_str.SaveToFile(aFilename);
+    file_str.SaveToFile(fname);
   finally
     file_str.Free;
     json_str.Free;
   end;
 end;
 
-procedure TWritableJsonComponent.customLoadFromFile(const aFilename: string);
+procedure TWritableJsonComponent.customLoadFromFile(const fname: string);
 var
   file_str: TMemoryStream;
   json_str: TJSONDeStreamer;
@@ -188,7 +188,7 @@ begin
   try
     json_str.OnPropertyError:= @propertyError;
     json_str.OnRestoreProperty := @restoreProperty;
-    file_str.LoadFromFile(aFilename);
+    file_str.LoadFromFile(fname);
     setLength(json_dat, file_str.Size);
     file_str.Read(json_dat[1], length(json_dat));
     json_str.JSONToObject(json_dat, self);

@@ -36,8 +36,8 @@ type
     fImperativeUpdateCount: Integer;
     fLoopUpdateCount: Integer;
     fOnDockingChanged: TWidgetDockingChangedEvent;
-    procedure setDelayDur(aValue: Integer);
-    procedure setLoopInt(aValue: Integer);
+    procedure setDelayDur(value: Integer);
+    procedure setLoopInt(value: Integer);
     procedure updaterAutoProc(Sender: TObject);
     procedure updaterLatchProc(Sender: TObject);
   protected
@@ -112,7 +112,7 @@ type
   private
     function getWidget(index: integer): TCEWidget;
   public
-    procedure addWidget(aValue: PTCEWidget);
+    procedure addWidget(value: PTCEWidget);
     property widget[index: integer]: TCEWidget read getWidget;
   end;
 
@@ -259,19 +259,19 @@ end;
 {$ENDREGION}
 
 {$REGION Updaters---------------------------------------------------------------}
-procedure TCEWidget.setDelayDur(aValue: Integer);
+procedure TCEWidget.setDelayDur(value: Integer);
 begin
-  if aValue < 100 then aValue := 100;
-  if fDelayDur = aValue then exit;
-  fDelayDur := aValue;
+  if value < 100 then value := 100;
+  if fDelayDur = value then exit;
+  fDelayDur := value;
   fUpdaterDelay.Interval := fDelayDur;
 end;
 
-procedure TCEWidget.setLoopInt(aValue: Integer);
+procedure TCEWidget.setLoopInt(value: Integer);
 begin
-  if aValue < 30 then aValue := 30;
-  if fLoopInter = aValue then exit;
-  fLoopInter := aValue;
+  if value < 30 then value := 30;
+  if fLoopInter = value then exit;
+  fLoopInter := value;
   fUpdaterAuto.Interval := fLoopInter;
 end;
 
@@ -363,9 +363,9 @@ begin
   result := PTCEWidget(Items[index])^;
 end;
 
-procedure TCEWidgetList.addWidget(aValue: PTCEWidget);
+procedure TCEWidgetList.addWidget(value: PTCEWidget);
 begin
-  add(Pointer(aValue));
+  add(Pointer(value));
 end;
 
 function TWidgetEnumerator.getCurrent:TCEWidget;

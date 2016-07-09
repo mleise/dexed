@@ -23,13 +23,13 @@ type
     property data: TShortcut read fData write fData;
   public
     function combination: string;
-    procedure assign(aValue: TPersistent); override;
+    procedure assign(source: TPersistent); override;
   end;
 
   TShortCutCollection = class(TWritableLfmTextComponent)
   private
     fItems: TCollection;
-    procedure setItems(aValue: TCollection);
+    procedure setItems(value: TCollection);
     function getCount: Integer;
     function getItem(index: Integer): TShortcutItem;
   published
@@ -37,7 +37,7 @@ type
   public
     constructor create(AOwner: TComponent); override;
     destructor destroy; override;
-    procedure assign(aValue: TPersistent); override;
+    procedure assign(source: TPersistent); override;
     //
     function findIdentifier(const identifier: string): boolean;
     function findShortcut(aShortcut: Word): TShortcutItem;
@@ -72,7 +72,7 @@ type
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     //
     function findCategory(const aName: string; aData: Pointer): TTreeNode;
@@ -100,13 +100,13 @@ begin
   result := ShortCutToText(fData);
 end;
 
-procedure TShortcutItem.assign(aValue: TPersistent);
+procedure TShortcutItem.assign(source: TPersistent);
 var
   src: TShortcutItem;
 begin
-  if aValue is TShortcutItem then
+  if source is TShortcutItem then
   begin
-    src := TShortcutItem(aValue);
+    src := TShortcutItem(source);
     fData:= src.fData;
     fIdentifier:= src.fIdentifier;
     fDeclarator := src.fDeclarator;
@@ -126,17 +126,17 @@ begin
   inherited;
 end;
 
-procedure TShortCutCollection.assign(aValue: TPersistent);
+procedure TShortCutCollection.assign(source: TPersistent);
 begin
-  if aValue is TShortCutCollection then
-    fItems.Assign(TShortCutCollection(aValue).fItems)
+  if source is TShortCutCollection then
+    fItems.Assign(TShortCutCollection(source).fItems)
   else
     inherited;
 end;
 
-procedure TShortCutCollection.setItems(aValue: TCollection);
+procedure TShortCutCollection.setItems(value: TCollection);
 begin
-  fItems.Assign(aValue);
+  fItems.Assign(value);
 end;
 
 function TShortCutCollection.getCount: Integer;
@@ -213,9 +213,9 @@ begin
   exit(self);
 end;
 
-procedure TCEShortcutEditor.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TCEShortcutEditor.optionedEvent(event: TOptionEditorEvent);
 begin
-  case anEvent of
+  case event of
     oeeSelectCat: receiveShortcuts;
     oeeCancel:
     begin

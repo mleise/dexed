@@ -84,10 +84,10 @@ type
     procedure menuUpdate(item: TMenuItem);
     procedure executeToolFromMenu(sender: TObject);
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
     //
     function scedWantFirst: boolean;
     function scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
@@ -100,8 +100,8 @@ type
     destructor destroy; override;
     //
     function addTool: TCEToolItem;
-    procedure executeTool(aTool: TCEToolItem); overload;
-    procedure executeTool(aToolIndex: Integer); overload;
+    procedure executeTool(tool: TCEToolItem); overload;
+    procedure executeTool(index: Integer); overload;
     property tool[index: integer]: TCEToolItem read getTool; default;
   end;
 
@@ -393,23 +393,23 @@ end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCETools.docNew(aDoc: TCESynMemo);
+procedure TCETools.docNew(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
 end;
 
-procedure TCETools.docFocused(aDoc: TCESynMemo);
+procedure TCETools.docFocused(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
 end;
 
-procedure TCETools.docChanged(aDoc: TCESynMemo);
+procedure TCETools.docChanged(document: TCESynMemo);
 begin
 end;
 
-procedure TCETools.docClosing(aDoc: TCESynMemo);
+procedure TCETools.docClosing(document: TCESynMemo);
 begin
-  if fDoc <> aDoc then exit;
+  if fDoc <> document then exit;
   fDoc := nil;
 end;
 {$ENDREGION}
@@ -430,33 +430,33 @@ begin
   result := TCEToolItem(fTools.Add);
 end;
 
-procedure TCETools.executeTool(aTool: TCEToolItem);
+procedure TCETools.executeTool(tool: TCEToolItem);
 var
   txt: string;
 begin
-  if aTool.isNil then exit;
+  if tool.isNil then exit;
   //
-  aTool.execute(nil);
-  if aTool.editorToInput then aTool.pipeInputKind:= pikEditor;
-  if (aTool.pipeInputKind <> pikNone) and fDoc.isNotNil
-    and (poUsePipes in aTool.options) and aTool.fProcess.Input.isNotNil then
+  tool.execute(nil);
+  if tool.editorToInput then tool.pipeInputKind:= pikEditor;
+  if (tool.pipeInputKind <> pikNone) and fDoc.isNotNil
+    and (poUsePipes in tool.options) and tool.fProcess.Input.isNotNil then
   begin
-    case aTool.pipeInputKind of
+    case tool.pipeInputKind of
       pikEditor:    txt := fDoc.Text;
       pikLine:      txt := fDoc.LineText;
       pikSelection: txt := fDoc.SelText;
     end;
-    aTool.fProcess.Input.Write(txt[1], txt.length);
-    aTool.fProcess.CloseInput;
+    tool.fProcess.Input.Write(txt[1], txt.length);
+    tool.fProcess.CloseInput;
   end;
 end;
 
-procedure TCETools.executeTool(aToolIndex: Integer);
+procedure TCETools.executeTool(index: Integer);
 begin
-  if aToolIndex < 0 then exit;
-  if aToolIndex > fTools.Count-1 then exit;
+  if index < 0 then exit;
+  if index > fTools.Count-1 then exit;
   //
-  executeTool(tool[aToolIndex]);
+  executeTool(tool[index]);
 end;
 {$ENDREGION}
 

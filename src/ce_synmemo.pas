@@ -10,7 +10,7 @@ uses
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
   fpjson, jsonparser,
-  ce_common, ce_observer, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
+  ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange;
 
 type
@@ -113,7 +113,7 @@ type
     fList: TFPList;
     fMemo: TCustomSynEdit;
   public
-    constructor create(aMemo: TCustomSynEdit);
+    constructor create(memo: TCustomSynEdit);
     destructor destroy; override;
     procedure store;
     procedure back;
@@ -173,18 +173,18 @@ type
     procedure saveCache;
     procedure loadCache;
     class procedure cleanCache; static;
-    procedure setDefaultFontSize(aValue: Integer);
+    procedure setDefaultFontSize(value: Integer);
     procedure DDocTimerEvent(sender: TObject);
     procedure AutoDotTimerEvent(sender: TObject);
     procedure InitHintWins;
     function getIfTemp: boolean;
-    procedure setDDocDelay(aValue: Integer);
-    procedure setAutoDotDelay(aValue: Integer);
+    procedure setDDocDelay(value: Integer);
+    procedure setAutoDotDelay(value: Integer);
     procedure completionExecute(sender: TObject);
     procedure getCompletionList;
     function completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
       Selected: boolean; Index: integer): boolean;
-    procedure completionCodeCompletion(var Value: string; SourceValue: string;
+    procedure completionCodeCompletion(var value: string; SourceValue: string;
       var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
     procedure addBreakPoint(line: integer);
@@ -216,8 +216,8 @@ type
     procedure setFocus; override;
     //
     procedure checkFileDate;
-    procedure loadFromFile(const aFilename: string);
-    procedure saveToFile(const aFilename: string);
+    procedure loadFromFile(const fname: string);
+    procedure saveToFile(const fname: string);
     procedure save;
     procedure saveTempFile;
     //
@@ -455,11 +455,11 @@ end;
 {$ENDREGION}
 
 {$REGION TCESynMemoPositions ---------------------------------------------------}
-constructor TCESynMemoPositions.create(aMemo: TCustomSynEdit);
+constructor TCESynMemoPositions.create(memo: TCustomSynEdit);
 begin
   fList := TFPList.Create;
   fMax  := 40;
-  fMemo := aMemo;
+  fMemo := memo;
   fPos  := -1;
 end;
 
@@ -626,13 +626,13 @@ begin
   inherited;
 end;
 
-procedure TCESynMemo.setDefaultFontSize(aValue: Integer);
+procedure TCESynMemo.setDefaultFontSize(value: Integer);
 var
   old: Integer;
 begin
   old := Font.Size;
-  if aValue < 5 then aValue := 5;
-  fDefaultFontSize:= aValue;
+  if value < 5 then value := 5;
+  fDefaultFontSize:= value;
   if Font.Size = old then
     Font.Size := fDefaultFontSize;
 end;
@@ -1531,9 +1531,9 @@ begin
   fDDocWin.Hide;
 end;
 
-procedure TCESynMemo.setDDocDelay(aValue: Integer);
+procedure TCESynMemo.setDDocDelay(value: Integer);
 begin
-  fDDocDelay:=aValue;
+  fDDocDelay:=value;
   fDDocTimer.Interval:=fDDocDelay;
 end;
 
@@ -1567,12 +1567,12 @@ begin
   DcdWrapper.getComplAtCursor(fCompletion.ItemList);
 end;
 
-procedure TCESynMemo.completionCodeCompletion(var Value: string;
+procedure TCESynMemo.completionCodeCompletion(var value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
 begin
   // warning: '20' depends on ce_dcd, case knd of, string literals length
-  Value := Value[1..Value.length-20];
+  value := value[1..value.length-20];
 end;
 
 function TCESynMemo.completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
@@ -1603,9 +1603,9 @@ begin
   fCompletion.Execute('', ClientToScreen(point(CaretXPix, CaretYPix + LineHeight)));
 end;
 
-procedure TCESynMemo.setAutoDotDelay(aValue: Integer);
+procedure TCESynMemo.setAutoDotDelay(value: Integer);
 begin
-  fAutoDotDelay:=aValue;
+  fAutoDotDelay:=value;
   fAutoDotTimer.Interval:=fAutoDotDelay;
 end;
 {$ENDREGION --------------------------------------------------------------------}
@@ -1706,16 +1706,16 @@ begin
   subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
 end;
 
-procedure TCESynMemo.loadFromFile(const aFilename: string);
+procedure TCESynMemo.loadFromFile(const fname: string);
 var
   ext: string;
 begin
-  ext := aFilename.extractFileExt;
+  ext := fname.extractFileExt;
   fIsDsource := hasDlangSyntax(ext);
   if not fIsDsource then
     Highlighter := TxtSyn;
-  Lines.LoadFromFile(aFilename);
-  fFilename := aFilename;
+  Lines.LoadFromFile(fname);
+  fFilename := fname;
   FileAge(fFilename, fFileDate);
   ReadOnly := FileIsReadOnly(fFilename);
   //
@@ -1736,20 +1736,20 @@ begin
   subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
 end;
 
-procedure TCESynMemo.saveToFile(const aFilename: string);
+procedure TCESynMemo.saveToFile(const fname: string);
 var
   ext: string;
 begin
-  ext := aFilename.extractFilePath;
+  ext := fname.extractFilePath;
   if FileIsReadOnly(ext) then
   begin
     getMessageDisplay.message('No write access in: ' + ext, self, amcEdit, amkWarn);
     exit;
   end;
   ReadOnly := false;
-  Lines.SaveToFile(aFilename);
-  fFilename := aFilename;
-  ext := aFilename.extractFileExt;
+  Lines.SaveToFile(fname);
+  fFilename := fname;
+  ext := fname.extractFileExt;
   fIsDsource := hasDlangSyntax(ext);
   if fIsDsource then
     Highlighter := fD2Highlighter

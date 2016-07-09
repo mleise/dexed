@@ -61,15 +61,15 @@ type
     procedure setJsonValueFromEditor;
     procedure addProp(const propName: string; tpe: TJSONtype);
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
   protected
-    procedure SetVisible(Value: boolean); override;
+    procedure SetVisible(value: boolean); override;
   public
     constructor create(aOwner: TComponent); override;
   end;
@@ -153,32 +153,32 @@ begin
   AssignPng(btnRefresh, 'ARROW_UPDATE');
 end;
 
-procedure TCEDubProjectEditorWidget.SetVisible(Value: boolean);
+procedure TCEDubProjectEditorWidget.SetVisible(value: boolean);
 begin
   inherited;
-  if not Value then exit;
+  if not value then exit;
   //
   updateEditor;
 end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEDubProjectEditorWidget.projNew(aProject: ICECommonProject);
+procedure TCEDubProjectEditorWidget.projNew(project: ICECommonProject);
 begin
   fProj := nil;
   enabled := false;
-  if aProject.getFormat <> pfDub then
+  if project.getFormat <> pfDub then
     exit;
   enabled := true;
-  fProj := TCEDubProject(aProject.getProject);
+  fProj := TCEDubProject(project.getProject);
   //
 end;
 
-procedure TCEDubProjectEditorWidget.projChanged(aProject: ICECommonProject);
+procedure TCEDubProjectEditorWidget.projChanged(project: ICECommonProject);
 begin
   if fProj.isNil then
     exit;
-  if aProject.getProject <> fProj then
+  if project.getProject <> fProj then
     exit;
   if not Visible then
     exit;
@@ -187,11 +187,11 @@ begin
   updateInspector;
 end;
 
-procedure TCEDubProjectEditorWidget.projClosing(aProject: ICECommonProject);
+procedure TCEDubProjectEditorWidget.projClosing(project: ICECommonProject);
 begin
   if fProj.isNil then
     exit;
-  if aProject.getProject <> fProj then
+  if project.getProject <> fProj then
     exit;
   fProj := nil;
   //
@@ -200,17 +200,17 @@ begin
   enabled := false;
 end;
 
-procedure TCEDubProjectEditorWidget.projFocused(aProject: ICECommonProject);
+procedure TCEDubProjectEditorWidget.projFocused(project: ICECommonProject);
 begin
   fProj := nil;
   enabled := false;
-  if aProject.getFormat <> pfDub then
+  if project.getFormat <> pfDub then
   begin
     updateEditor;
     updateInspector;
     exit;
   end;
-  fProj := TCEDubProject(aProject.getProject);
+  fProj := TCEDubProject(project.getProject);
   enabled := true;
   if not Visible then
     exit;
@@ -219,11 +219,11 @@ begin
   updateInspector;
 end;
 
-procedure TCEDubProjectEditorWidget.projCompiling(aProject: ICECommonProject);
+procedure TCEDubProjectEditorWidget.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCEDubProjectEditorWidget.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCEDubProjectEditorWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}

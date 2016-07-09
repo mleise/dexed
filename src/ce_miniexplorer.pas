@@ -24,7 +24,7 @@ type
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     procedure apply;
   published
@@ -43,7 +43,7 @@ type
     fLastFolder: string;
     fDblClick: TExplorerDoubleClick;
     fContextExpand: boolean;
-    procedure setFavoriteFolders(aValue: TStringList);
+    procedure setFavoriteFolders(value: TStringList);
   published
     property splitter1Position: integer read fSplitter1Position write fSplitter1Position;
     property splitter2Position: integer read fSplitter2Position write fSplitter2Position;
@@ -54,8 +54,8 @@ type
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
-    procedure assign(aValue: TPersistent); override;
-    procedure assignTo(aValue: TPersistent); override;
+    procedure assign(source: TPersistent); override;
+    procedure assignTo(target: TPersistent); override;
   end;
 
   { TCEMiniExplorerWidget }
@@ -108,17 +108,17 @@ type
     procedure shellOpenSelected;
     procedure lstFilterChange(sender: TObject);
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
     //
     function singleServiceName: string;
     procedure browse(const location: string);
@@ -173,7 +173,7 @@ begin
   exit(self);
 end;
 
-procedure TCEMiniExplorerEditableOptions.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TCEMiniExplorerEditableOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   apply;
 end;
@@ -197,13 +197,13 @@ begin
   inherited;
 end;
 
-procedure TCEMiniExplorerOptions.assign(aValue: TPersistent);
+procedure TCEMiniExplorerOptions.assign(source: TPersistent);
 var
   widg: TCEMiniExplorerWidget;
 begin
-  if aValue is TCEMiniExplorerWidget then
+  if source is TCEMiniExplorerWidget then
   begin
-    widg := TCEMiniExplorerWidget(aValue);
+    widg := TCEMiniExplorerWidget(source);
     fFavoriteFolders.Assign(widg.fFavorites);
     fLastFolder := widg.fLastFold;
     fSplitter1Position := widg.Splitter1.GetSplitterPosition;
@@ -214,13 +214,13 @@ begin
   else inherited;
 end;
 
-procedure TCEMiniExplorerOptions.assignTo(aValue: TPersistent);
+procedure TCEMiniExplorerOptions.assignTo(target: TPersistent);
 var
   widg: TCEMiniExplorerWidget;
 begin
-  if aValue is TCEMiniExplorerWidget then
+  if target is TCEMiniExplorerWidget then
   begin
-    widg := TCEMiniExplorerWidget(aValue);
+    widg := TCEMiniExplorerWidget(target);
     widg.fFavorites.Assign(fFavoriteFolders);
     widg.fLastFold:=fLastFolder;
     widg.Splitter1.SetSplitterPosition(fSplitter1Position);
@@ -236,9 +236,9 @@ begin
   else inherited;
 end;
 
-procedure TCEMiniExplorerOptions.setFavoriteFolders(aValue: TStringList);
+procedure TCEMiniExplorerOptions.setFavoriteFolders(value: TStringList);
 begin
-  fFavoriteFolders.Assign(aValue);
+  fFavoriteFolders.Assign(value);
 end;
 {$ENDREGION}
 
@@ -312,58 +312,58 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEMiniExplorerWidget.projNew(aProject: ICECommonProject);
+procedure TCEMiniExplorerWidget.projNew(project: ICECommonProject);
 begin
-  fProj := aProject;
-  if not aProject.inGroup then
-    fFreeProj := aProject;
+  fProj := project;
+  if not project.inGroup then
+    fFreeProj := project;
 end;
 
-procedure TCEMiniExplorerWidget.projChanged(aProject: ICECommonProject);
+procedure TCEMiniExplorerWidget.projChanged(project: ICECommonProject);
 begin
 end;
 
-procedure TCEMiniExplorerWidget.projClosing(aProject: ICECommonProject);
+procedure TCEMiniExplorerWidget.projClosing(project: ICECommonProject);
 begin
   fProj := nil;
-  if aProject = fFreeProj then
+  if project = fFreeProj then
     fFreeProj := nil;
 end;
 
-procedure TCEMiniExplorerWidget.projFocused(aProject: ICECommonProject);
+procedure TCEMiniExplorerWidget.projFocused(project: ICECommonProject);
 begin
-  fProj := aProject;
-  if not aProject.inGroup then
-      fFreeProj := aProject;
-  if visible and aProject.fileName.fileExists and fContextExpand then
-    expandPath(aProject.fileName.extractFilePath);
+  fProj := project;
+  if not project.inGroup then
+      fFreeProj := project;
+  if visible and project.fileName.fileExists and fContextExpand then
+    expandPath(project.fileName.extractFilePath);
 end;
 
-procedure TCEMiniExplorerWidget.projCompiling(aProject: ICECommonProject);
+procedure TCEMiniExplorerWidget.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCEMiniExplorerWidget.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCEMiniExplorerWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEMiniExplorerWidget.docNew(aDoc: TCESynMemo);
+procedure TCEMiniExplorerWidget.docNew(document: TCESynMemo);
 begin
 end;
 
-procedure TCEMiniExplorerWidget.docFocused(aDoc: TCESynMemo);
+procedure TCEMiniExplorerWidget.docFocused(document: TCESynMemo);
 begin
-  if visible and aDoc.fileName.fileExists and fContextExpand then
-    expandPath(aDoc.fileName.extractFilePath);
+  if visible and document.fileName.fileExists and fContextExpand then
+    expandPath(document.fileName.extractFilePath);
 end;
 
-procedure TCEMiniExplorerWidget.docChanged(aDoc: TCESynMemo);
+procedure TCEMiniExplorerWidget.docChanged(document: TCESynMemo);
 begin
 end;
 
-procedure TCEMiniExplorerWidget.docClosing(aDoc: TCESynMemo);
+procedure TCEMiniExplorerWidget.docClosing(document: TCESynMemo);
 begin
 end;
 {$ENDREGION}

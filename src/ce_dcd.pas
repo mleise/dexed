@@ -42,17 +42,17 @@ type
     procedure writeSourceToInput; inline;
     function checkDcdSocket: boolean;
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
   published
     property port: word read fPortNum write fPortNum default 0;
   public
@@ -60,11 +60,11 @@ type
     destructor destroy; override;
     //
     procedure addImportFolders(const folders: TStrings);
-    procedure addImportFolder(const aFolder: string);
-    procedure getComplAtCursor(aList: TStrings);
+    procedure addImportFolder(const folder: string);
+    procedure getComplAtCursor(list: TStrings);
     procedure getCallTip(out tips: string);
-    procedure getDdocFromCursor(out aComment: string);
-    procedure getDeclFromCursor(out aFilename: string; out aPosition: Integer);
+    procedure getDdocFromCursor(out comment: string);
+    procedure getDeclFromCursor(out fname: string; out position: Integer);
     procedure getLocalSymbolUsageFromCursor(var locs: TIntOpenArray);
     //
     property available: boolean read fAvailable;
@@ -165,18 +165,18 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEDcdWrapper.projNew(aProject: ICECommonProject);
+procedure TCEDcdWrapper.projNew(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
 end;
 
-procedure TCEDcdWrapper.projChanged(aProject: ICECommonProject);
+procedure TCEDcdWrapper.projChanged(project: ICECommonProject);
 var
   i: Integer;
   fold: string;
   folds: TStringList;
 begin
-  if fProj <> aProject then
+  if fProj <> project then
     exit;
   if fProj = nil then
     exit;
@@ -201,46 +201,46 @@ begin
   end;
 end;
 
-procedure TCEDcdWrapper.projClosing(aProject: ICECommonProject);
+procedure TCEDcdWrapper.projClosing(project: ICECommonProject);
 begin
-  if fProj <> aProject then
+  if fProj <> project then
     exit;
   fProj := nil;
 end;
 
-procedure TCEDcdWrapper.projFocused(aProject: ICECommonProject);
+procedure TCEDcdWrapper.projFocused(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
 end;
 
-procedure TCEDcdWrapper.projCompiling(aProject: ICECommonProject);
+procedure TCEDcdWrapper.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCEDcdWrapper.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCEDcdWrapper.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEDcdWrapper.docNew(aDoc: TCESynMemo);
+procedure TCEDcdWrapper.docNew(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
 end;
 
-procedure TCEDcdWrapper.docFocused(aDoc: TCESynMemo);
+procedure TCEDcdWrapper.docFocused(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
 end;
 
-procedure TCEDcdWrapper.docChanged(aDoc: TCESynMemo);
+procedure TCEDcdWrapper.docChanged(document: TCESynMemo);
 begin
-  if fDoc <> aDoc then exit;
+  if fDoc <> document then exit;
 end;
 
-procedure TCEDcdWrapper.docClosing(aDoc: TCESynMemo);
+procedure TCEDcdWrapper.docClosing(document: TCESynMemo);
 begin
-  if fDoc <> aDoc then exit;
+  if fDoc <> document then exit;
   fDoc := nil;
 end;
 {$ENDREGION}
@@ -334,16 +334,16 @@ begin
   fClient.CloseInput;
 end;
 
-procedure TCEDcdWrapper.addImportFolder(const aFolder: string);
+procedure TCEDcdWrapper.addImportFolder(const folder: string);
 begin
   if not fAvailable then exit;
   if not fServerListening then exit;
   //
-  if fImportCache.contains(aFolder) then
+  if fImportCache.contains(folder) then
     exit;
-  fImportCache.insert(aFolder);
+  fImportCache.insert(folder);
   fClient.Parameters.Clear;
-  fClient.Parameters.Add('-I' + aFolder);
+  fClient.Parameters.Add('-I' + folder);
   fClient.Execute;
   waitClient;
 end;
@@ -401,7 +401,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TCEDcdWrapper.getComplAtCursor(aList: TStrings);
+procedure TCEDcdWrapper.getComplAtCursor(list: TStrings);
 var
   i: Integer;
   kind: Char;
@@ -427,7 +427,7 @@ begin
   end;
   if not (fTempLines[0] = 'identifiers') then exit;
   //
-  aList.Clear;
+  list.Clear;
   for i := 1 to fTempLines.Count-1 do
   begin
     item := fTempLines[i];
@@ -455,11 +455,11 @@ begin
       '*', '?': continue; // internal DCD stuff, said not to happen but actually it did
       // https://github.com/Hackerpilot/DCD/issues/261
     end;
-    aList.Add(item);
+    list.Add(item);
   end;
 end;
 
-procedure TCEDcdWrapper.getDdocFromCursor(out aComment: string);
+procedure TCEDcdWrapper.getDdocFromCursor(out comment: string);
 var
   i: Integer;
   str: string;
@@ -480,7 +480,7 @@ begin
   fClient.Execute;
   writeSourceToInput;
   //
-  aComment := '';
+  comment := '';
   fTempLines.LoadFromStream(fClient.Output);
   if fTempLines.Count = 0 then
     updateServerlistening;
@@ -488,28 +488,28 @@ begin
   begin
     with TStringRange.create(str) do while not empty do
     begin
-      aComment += takeUntil('\').yield;
+      comment += takeUntil('\').yield;
       if startsWith('\\') then
       begin
-        aComment += '\';
+        comment += '\';
         popFront; popFront;
       end
       else if startsWith('\n') then
       begin
-        aComment += LineEnding;
+        comment += LineEnding;
         popFront; popFront;
       end
     end;
-    aComment += LineEnding + LineEnding;
+    comment += LineEnding + LineEnding;
   end;
   //
-  aComment := ReplaceText(aComment, 'ditto' + LineEnding + LineEnding, '');
-  aComment := ReplaceText(aComment, 'ditto', '');
-  aComment := TrimLeft(aComment);
-  aComment := TrimRight(aComment);
+  comment := ReplaceText(comment, 'ditto' + LineEnding + LineEnding, '');
+  comment := ReplaceText(comment, 'ditto', '');
+  comment := TrimLeft(comment);
+  comment := TrimRight(comment);
 end;
 
-procedure TCEDcdWrapper.getDeclFromCursor(out aFilename: string; out aPosition: Integer);
+procedure TCEDcdWrapper.getDeclFromCursor(out fname: string; out position: Integer);
 var
    i: Integer;
    str, loc: string;
@@ -538,9 +538,9 @@ begin
     if i = -1 then
       exit;
     loc := str[i+1..str.length];
-    aFilename := str[1..i-1];
+    fname := str[1..i-1];
     loc := ReplaceStr(loc, LineEnding, '');
-    aPosition := strToIntDef(loc, -1);
+    position := strToIntDef(loc, -1);
   end;
 end;
 

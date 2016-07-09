@@ -60,19 +60,19 @@ type
     procedure btnSelRootClick(Sender: TObject);
     procedure btnMoveUpClick(Sender: TObject);
     procedure btnMoveDownClick(Sender: TObject);
-    procedure ListEdited(Sender: TObject; Item: TListItem; var AValue: string);
+    procedure ListEdited(Sender: TObject; Item: TListItem; var value: string);
     procedure ListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean
       );
   private
     fProj: ICECommonProject;
     fFreeProj: ICECommonProject;
     procedure updateButtonsState;
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     function  itemForRow(row: TListItem): TLibraryItem;
     procedure RowToLibrary(row: TListItem);
     //
@@ -112,43 +112,43 @@ begin
     btnEnabled.resourceName := 'BOOK_GREY';
 end;
 
-procedure TCELibManEditorWidget.projNew(aProject: ICECommonProject);
+procedure TCELibManEditorWidget.projNew(project: ICECommonProject);
 begin
-  fProj := aProject;
-  if not aProject.inGroup then
-    fFreeProj := aProject;
+  fProj := project;
+  if not project.inGroup then
+    fFreeProj := project;
 end;
 
-procedure TCELibManEditorWidget.projChanged(aProject: ICECommonProject);
+procedure TCELibManEditorWidget.projChanged(project: ICECommonProject);
 begin
   if fProj = nil then exit;
-  if fProj <> aProject then
+  if fProj <> project then
     exit;
   //
   updateButtonsState;
 end;
 
-procedure TCELibManEditorWidget.projClosing(aProject: ICECommonProject);
+procedure TCELibManEditorWidget.projClosing(project: ICECommonProject);
 begin
   fProj := nil;
-  if aProject = fFreeProj then
+  if project = fFreeProj then
     fFreeProj := nil;
   updateButtonsState;
 end;
 
-procedure TCELibManEditorWidget.projFocused(aProject: ICECommonProject);
+procedure TCELibManEditorWidget.projFocused(project: ICECommonProject);
 begin
-  fProj := aProject;
-  if not aProject.inGroup then
-    fFreeProj := aProject;
+  fProj := project;
+  if not project.inGroup then
+    fFreeProj := project;
   updateButtonsState;
 end;
 
-procedure TCELibManEditorWidget.projCompiling(aProject: ICECommonProject);
+procedure TCELibManEditorWidget.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCELibManEditorWidget.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCELibManEditorWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 
@@ -157,7 +157,7 @@ begin
   result := TLibraryItem(row.Data);
 end;
 
-procedure TCELibManEditorWidget.ListEdited(Sender: TObject; Item: TListItem; var AValue: string);
+procedure TCELibManEditorWidget.ListEdited(Sender: TObject; Item: TListItem; var value: string);
 begin
   if Item.isNotNil then
     RowToLibrary(item);

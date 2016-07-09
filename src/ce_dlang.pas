@@ -26,8 +26,8 @@ type
     fBegOffset: Integer;
     function getColAndLine: TPoint;
   public
-    constructor Create(const aText: PChar; const aColAndLine: TPoint);
-    procedure setReader(const aText: PChar; const aColAndLine: TPoint);
+    constructor Create(const text: PChar; const colAndLine: TPoint);
+    procedure setReader(const text: PChar; const colAndLine: TPoint);
     //
     function Next: PChar;
     function previous: PChar;
@@ -77,7 +77,7 @@ type
   TLexOption = (lxoNoComments, lxoNoWhites);
   TLexOptions = set of TLexOption;
 
-  TLexFoundEvent = procedure(const aToken: PLexToken; out doStop: boolean) of Object;
+  TLexFoundEvent = procedure(const token: PLexToken; out stop: boolean) of Object;
 
   (**
    * List of lexer tokens.
@@ -87,8 +87,8 @@ type
     function getToken(index: integer): PLexToken;
   public
     procedure Clear;
-    procedure addToken(aValue: PLexToken);
-    procedure saveToFile(fname: string);
+    procedure addToken(value: PLexToken);
+    procedure saveToFile(const fname: string);
     property token[index: integer]: PLexToken read getToken; default;
   end;
 
@@ -161,17 +161,17 @@ begin
   exit((lhs.y = rhs.y) and (lhs.x = rhs.x));
 end;
 
-constructor TReaderHead.Create(const aText: PChar; const aColAndLine: TPoint);
+constructor TReaderHead.Create(const text: PChar; const colAndLine: TPoint);
 begin
-  setReader(aText, aColAndLine);
+  setReader(text, colAndLine);
 end;
 
-procedure TReaderHead.setReader(const aText: PChar; const aColAndLine: TPoint);
+procedure TReaderHead.setReader(const text: PChar; const colAndLine: TPoint);
 begin
-  fLineIndex := aColAndLine.y;
-  fColumnIndex := aColAndLine.x;
-  fReaderHead := aText;
-  while (LineAnColumn <> aColAndLine) do
+  fLineIndex := colAndLine.y;
+  fColumnIndex := colAndLine.x;
+  fReaderHead := text;
+  while (LineAnColumn <> colAndLine) do
     Next;
   //
   // editor not 0 based ln index
@@ -235,12 +235,12 @@ begin
   end;
 end;
 
-procedure TLexTokenList.addToken(aValue: PLexToken);
+procedure TLexTokenList.addToken(value: PLexToken);
 begin
-  add(Pointer(aValue));
+  add(Pointer(value));
 end;
 
-procedure TLexTokenList.saveToFile(fname: string);
+procedure TLexTokenList.saveToFile(const fname: string);
 var
   tok: PLexToken;
   i: integer;

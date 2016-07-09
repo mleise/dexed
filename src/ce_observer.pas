@@ -19,6 +19,9 @@ type
     function singleServiceName: string;
   end;
 
+  //TServiceList = class(specialize TStringHashMap<TObject>)
+  //end;
+
   (**
    * Manages the connections between the observers and their subjects in the
    * whole program.
@@ -42,14 +45,14 @@ type
     // entities has ben added in bulk
     procedure endUpdate;
     // add/remove entities, update is automatic
-    procedure addObserver(anObserver: TObject);
-    procedure addSubject(aSubject: TObject);
-    procedure removeObserver(anObserver: TObject);
-    procedure removeSubject(aSubject: TObject);
+    procedure addObserver(observer: TObject);
+    procedure addSubject(subject: TObject);
+    procedure removeObserver(observer: TObject);
+    procedure removeSubject(subject: TObject);
     // allow to register a single service provider.
-    procedure addSingleService(aServiceProvider: TObject);
+    procedure addSingleService(provider: TObject);
     // allow to retrieve a single service provider based on its interface name
-    function getSingleService(const aName: string): TObject;
+    function getSingleService(const serviceName: string): TObject;
     // should be tested before forceUpdate()
     property isUpdating: boolean read getIsUpdating;
   end;
@@ -61,9 +64,9 @@ type
    *)
   ICESubject = interface
     // an observer is proposed. anObserver is not necessarly compatible.
-    procedure addObserver(anObserver: TObject);
+    procedure addObserver(observer: TObject);
     // anObserver must be removed.
-    procedure removeObserver(anObserver: TObject);
+    procedure removeObserver(observer: TObject);
     // optionally implemented to trigger all the methods of the observer interface.
   end;
 
@@ -79,15 +82,15 @@ type
   protected
     fObservers: TObjectList;
     // test for a specific interface when adding an observer.
-    function acceptObserver(aObject: TObject): boolean;
+    function acceptObserver(observer: TObject): boolean;
     function getObserversCount: Integer;
     function getObserver(index: Integer): TObject;
   public
     constructor Create; virtual;
     destructor Destroy; override;
     //
-    procedure addObserver(anObserver: TObject);
-    procedure removeObserver(anObserver: TObject);
+    procedure addObserver(observer: TObject);
+    procedure removeObserver(observer: TObject);
     //
     property observersCount: Integer read getObserversCount;
     property observers[index: Integer]: TObject read getObserver; default;
@@ -124,12 +127,6 @@ end;
 
 procedure TCEEntitiesConnector.tryUpdate;
 begin
-  {$IFDEF DEBUG}
-  if fUpdatesCount > 0 then
-    DebugLn('saved uselless update in TCEEntitiesConnector')
-  else
-    DebugLn('efficient update in TCEEntitiesConnector');
-  {$ENDIF}
   if fUpdatesCount <= 0 then
     updateEntities;
 end;
@@ -167,52 +164,52 @@ begin
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.addObserver(anObserver: TObject);
+procedure TCEEntitiesConnector.addObserver(observer: TObject);
 begin
-  if fObservers.IndexOf(anObserver) <> -1 then
+  if fObservers.IndexOf(observer) <> -1 then
     exit;
-  fObservers.Add(anObserver);
+  fObservers.Add(observer);
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.addSubject(aSubject: TObject);
+procedure TCEEntitiesConnector.addSubject(subject: TObject);
 begin
-  if (aSubject as ICESubject) = nil then
+  if (subject as ICESubject) = nil then
     exit;
-  if fSubjects.IndexOf(aSubject) <> -1 then
+  if fSubjects.IndexOf(subject) <> -1 then
     exit;
-  fSubjects.Add(aSubject);
+  fSubjects.Add(subject);
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.removeObserver(anObserver: TObject);
+procedure TCEEntitiesConnector.removeObserver(observer: TObject);
 var
   i: Integer;
 begin
-  fObservers.Remove(anObserver);
+  fObservers.Remove(observer);
   for i := 0 to fSubjects.Count - 1 do
     if fSubjects[i] <> nil then
-      (fSubjects[i] as ICESubject).removeObserver(anObserver);
+      (fSubjects[i] as ICESubject).removeObserver(observer);
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.removeSubject(aSubject: TObject);
+procedure TCEEntitiesConnector.removeSubject(subject: TObject);
 
 begin
-  fSubjects.Remove(aSubject);
+  fSubjects.Remove(subject);
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.addSingleService(aServiceProvider: TObject);
+procedure TCEEntitiesConnector.addSingleService(provider: TObject);
 begin
-  if fServices.IndexOf(aServiceProvider) <> -1 then
+  if fServices.IndexOf(provider) <> -1 then
     exit;
-  if not (aServiceProvider is ICESingleService) then
+  if not (provider is ICESingleService) then
     exit;
-  fServices.Add(aServiceProvider);
+  fServices.Add(provider);
 end;
 
-function TCEEntitiesConnector.getSingleService(const aName: string): TObject;
+function TCEEntitiesConnector.getSingleService(const serviceName: string): TObject;
 var
   i: Integer;
   serv: ICESingleService;
@@ -221,7 +218,7 @@ begin
   for i := 0 to fServices.Count - 1 do
   begin
     serv := fServices[i] as ICESingleService;
-    if serv.singleServiceName = aName then
+    if serv.singleServiceName = serviceName then
       exit(fServices[i]);
   end;
 end;
@@ -241,9 +238,9 @@ begin
   Inherited;
 end;
 
-function TCECustomSubject.acceptObserver(aObject: TObject): boolean;
+function TCECustomSubject.acceptObserver(observer: TObject): boolean;
 begin
-  exit(aObject is T);
+  exit(observer is T);
 end;
 
 function TCECustomSubject.getObserversCount: Integer;
@@ -256,18 +253,18 @@ begin
   exit(fObservers.Items[index]);
 end;
 
-procedure TCECustomSubject.addObserver(anObserver: TObject);
+procedure TCECustomSubject.addObserver(observer: TObject);
 begin
-  if not acceptObserver(anObserver) then
+  if not acceptObserver(observer) then
     exit;
-  if fObservers.IndexOf(anObserver) <> -1 then
+  if fObservers.IndexOf(observer) <> -1 then
     exit;
-  fObservers.Add(anObserver);
+  fObservers.Add(observer);
 end;
 
-procedure TCECustomSubject.removeObserver(anObserver: TObject);
+procedure TCECustomSubject.removeObserver(observer: TObject);
 begin
-  fObservers.Remove(anObserver);
+  fObservers.Remove(observer);
 end;
 {$ENDREGION}
 

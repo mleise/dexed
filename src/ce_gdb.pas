@@ -211,17 +211,17 @@ type
     procedure infoRegs;
     procedure infoStack;
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -303,56 +303,56 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEGdbWidget.projNew(aProject: ICECommonProject);
+procedure TCEGdbWidget.projNew(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
 end;
 
-procedure TCEGdbWidget.projChanged(aProject: ICECommonProject);
+procedure TCEGdbWidget.projChanged(project: ICECommonProject);
 begin
-  if fProj <> aProject then
+  if fProj <> project then
     exit;
 end;
 
-procedure TCEGdbWidget.projClosing(aProject: ICECommonProject);
+procedure TCEGdbWidget.projClosing(project: ICECommonProject);
 begin
-  if fProj <> aProject then
+  if fProj <> project then
     exit;
   fProj := nil;
 end;
 
-procedure TCEGdbWidget.projFocused(aProject: ICECommonProject);
+procedure TCEGdbWidget.projFocused(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
 end;
 
-procedure TCEGdbWidget.projCompiling(aProject: ICECommonProject);
+procedure TCEGdbWidget.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCEGdbWidget.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCEGdbWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEGdbWidget.docNew(aDoc: TCESynMemo);
+procedure TCEGdbWidget.docNew(document: TCESynMemo);
 begin
-  if aDoc.isDSource then
-    aDoc.onBreakpointModify := @editorModBrk;
+  if document.isDSource then
+    document.onBreakpointModify := @editorModBrk;
 end;
 
-procedure TCEGdbWidget.docFocused(aDoc: TCESynMemo);
+procedure TCEGdbWidget.docFocused(document: TCESynMemo);
 begin
-  if aDoc.isDSource then
-    aDoc.onBreakpointModify := @editorModBrk;
+  if document.isDSource then
+    document.onBreakpointModify := @editorModBrk;
 end;
 
-procedure TCEGdbWidget.docChanged(aDoc: TCESynMemo);
+procedure TCEGdbWidget.docChanged(document: TCESynMemo);
 begin
 end;
 
-procedure TCEGdbWidget.docClosing(aDoc: TCESynMemo);
+procedure TCEGdbWidget.docClosing(document: TCESynMemo);
 begin
 end;
 {$ENDREGION}

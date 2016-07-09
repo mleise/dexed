@@ -45,7 +45,7 @@ type
      function optionedWantCategory(): string;
      function optionedWantEditorKind: TOptionEditorKind;
      function optionedWantContainer: TPersistent;
-     procedure optionedEvent(anEvent: TOptionEditorEvent);
+     procedure optionedEvent(event: TOptionEditorEvent);
      function optionedOptionsModified: boolean;
    public
      constructor create(aOwner: TComponent); override;
@@ -98,8 +98,8 @@ type
     //
     function filename: string;
     function basePath: string;
-    procedure loadFromFile(const aFilename: string);
-    procedure saveToFile(const aFilename: string);
+    procedure loadFromFile(const fname: string);
+    procedure saveToFile(const fname: string);
     //
     procedure activate;
     function inGroup: boolean;
@@ -111,7 +111,7 @@ type
     function getCommandLine: string;
     function outputFilename: string;
     //
-    function isSource(const aFilename: string): boolean;
+    function isSource(const fname: string): boolean;
     function sourcesCount: integer;
     function sourceRelative(index: integer): string;
     function sourceAbsolute(index: integer): string;
@@ -238,9 +238,9 @@ begin
   fBackup.assign(self);
 end;
 
-procedure TCEDubBuildOptions.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TCEDubBuildOptions.optionedEvent(event: TOptionEditorEvent);
 begin
-  case anEvent of
+  case event of
     oeeAccept: fBackup.assign(self);
     oeeCancel: self.assign(fBackup);
     oeeSelectCat:fBackup.assign(self);
@@ -326,7 +326,7 @@ begin
   exit(fBasePath);
 end;
 
-procedure TCEDubProject.loadFromFile(const aFilename: string);
+procedure TCEDubProject.loadFromFile(const fname: string);
 var
   loader: TMemoryStream;
   parser : TJSONParser;
@@ -334,8 +334,8 @@ var
 begin
   loader := TMemoryStream.Create;
   try
-    fBasePath := aFilename.extractFilePath;
-    fFilename := aFilename;
+    fBasePath := fname.extractFilePath;
+    fFilename := fname;
     loader.LoadFromFile(fFilename);
     fSaveAsUtf8 := false;
     // skip BOM, this crashes the parser
@@ -392,16 +392,16 @@ begin
   end;
 end;
 
-procedure TCEDubProject.saveToFile(const aFilename: string);
+procedure TCEDubProject.saveToFile(const fname: string);
 var
   saver: TMemoryStream;
   str: string;
 begin
-  if aFilename <> fFilename then
+  if fname <> fFilename then
     inGroup(false);
   saver := TMemoryStream.Create;
   try
-    fFilename := aFilename;
+    fFilename := fname;
     str := fJSON.FormatJSON;
     if fSaveAsUtf8 then
     begin
@@ -447,14 +447,14 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION ICECommonProject: sources ---------------------------------------------}
-function TCEDubProject.isSource(const aFilename: string): boolean;
+function TCEDubProject.isSource(const fname: string): boolean;
 var
-  fname: string;
+  str: string;
 begin
-  fname := aFilename;
-  if fname.fileExists then
-    fname := ExtractRelativepath(fBasePath, fname);
-  result := fSrcs.IndexOf(fname) <> -1;
+  str := fname;
+  if str.fileExists then
+    str := ExtractRelativepath(fBasePath, str);
+  result := fSrcs.IndexOf(str) <> -1;
 end;
 
 function TCEDubProject.sourcesCount: integer;

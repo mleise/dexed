@@ -20,7 +20,7 @@ type
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     //
     procedure doChanged(Sender: TObject);
@@ -80,10 +80,10 @@ begin
   exit(DockOptionContainer);
 end;
 
-procedure TDockOptionsEditor.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TDockOptionsEditor.optionedEvent(event: TOptionEditorEvent);
 begin
   // restores
-  if anEvent = oeeCancel then
+  if event = oeeCancel then
   begin
     DockMaster.LoadSettingsFromConfig(fBackup);
     LoadFromMaster;
@@ -91,14 +91,14 @@ begin
     DockMaster.SaveSettingsToConfig(fBackup);
   end
   // accept and new backup
-  else if anEvent = oeeAccept then
+  else if event = oeeAccept then
   begin
     SaveToMaster;
     fBackup.Clear;
     DockMaster.SaveSettingsToConfig(fBackup);
   end
   // reload
-  else if anEvent = oeeSelectCat then
+  else if event = oeeSelectCat then
   begin
     fBackup.Clear;
     DockMaster.SaveSettingsToConfig(fBackup);

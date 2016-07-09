@@ -28,7 +28,7 @@ type
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
-    procedure optionedEvent(anEvent: TOptionEditorEvent);
+    procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     //
     function scedWantFirst: boolean;
@@ -43,8 +43,8 @@ type
     property moveLeft: TShortCut read fMoveLeft write fMoveLeft;
     property moveRight: TShortCut read fMoveRight write fMoveRight;
   public
-    procedure Assign(Source: TPersistent); override;
-    procedure AssignTo(Target: TPersistent); override;
+    procedure assign(source: TPersistent); override;
+    procedure assignTo(target: TPersistent); override;
     constructor construct(editorWidg: TCEEditorWidget);
     destructor Destroy; override;
   end;
@@ -123,7 +123,7 @@ type
     procedure updatePageCaption;
     procedure pageBtnAddCLick(Sender: TObject);
     procedure pageCloseBtnClick(Sender: TObject);
-    procedure lexFindToken(const aToken: PLexToken; out doStop: boolean);
+    procedure lexFindToken(const token: PLexToken; out stop: boolean);
     procedure memoKeyPress(Sender: TObject; var Key: char);
     procedure memoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure memoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -134,23 +134,23 @@ type
     procedure focusedEditorChanged;
     procedure memoCmdProcessed(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
     function SingleServiceName: string;
     function documentCount: Integer;
     function getDocument(index: Integer): TCESynMemo;
-    function findDocument(aFilename: string): TCESynMemo;
-    procedure openDocument(aFilename: string);
+    function findDocument(fname: string): TCESynMemo;
+    procedure openDocument(fname: string);
     function closeDocument(index: Integer): boolean;
     function closeDocument(doc: TCESynMemo): boolean;
   public
@@ -182,7 +182,7 @@ begin
     loadFromFile(fname);
     assignTo(fEditorWidget);
   end
-  else Assign(fEditorWidget);
+  else assign(fEditorWidget);
 end;
 
 destructor TCEPagesOptions.Destroy;
@@ -192,9 +192,9 @@ begin
   inherited;
 end;
 
-procedure TCEPagesOptions.Assign(Source: TPersistent);
+procedure TCEPagesOptions.assign(source: TPersistent);
 begin
-  if Source = fEditorWidget then
+  if source = fEditorWidget then
   begin
     fPageButtons := fEditorWidget.pageControl.buttons;
     fPageOptions := fEditorWidget.pageControl.options;
@@ -202,9 +202,9 @@ begin
   else inherited;
 end;
 
-procedure TCEPagesOptions.AssignTo(Target: TPersistent);
+procedure TCEPagesOptions.assignTo(target: TPersistent);
 begin
-  if Target = fEditorWidget then
+  if target = fEditorWidget then
   begin
     fEditorWidget.pageControl.buttons := fPageButtons;
     fEditorWidget.pageControl.options := fPageOptions;
@@ -227,11 +227,11 @@ begin
   exit(self);
 end;
 
-procedure TCEPagesOptions.optionedEvent(anEvent: TOptionEditorEvent);
+procedure TCEPagesOptions.optionedEvent(event: TOptionEditorEvent);
 begin
-  case anEvent of
+  case event of
     oeeAccept: assignTo(fEditorWidget);
-    oeeCancel: Assign(fEditorWidget);
+    oeeCancel: assign(fEditorWidget);
   end;
 end;
 
@@ -351,53 +351,53 @@ end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEEditorWidget.docNew(aDoc: TCESynMemo);
+procedure TCEEditorWidget.docNew(document: TCESynMemo);
 var
   pge: TCEPage;
 begin
   pge := pageControl.addPage;
   //
-  aDoc.Align := alClient;
-  aDoc.Parent := pge;
+  document.Align := alClient;
+  document.Parent := pge;
   //
-  aDoc.OnKeyDown := @memoKeyDown;
-  aDoc.OnKeyUp := @memoKeyUp;
-  aDoc.OnKeyPress := @memoKeyPress;
-  aDoc.OnMouseDown := @memoMouseDown;
-  aDoc.OnMouseMove := @memoMouseMove;
-  aDoc.OnClickLink := @memoCtrlClick;
-  aDoc.OnCommandProcessed:= @memoCmdProcessed;
+  document.OnKeyDown := @memoKeyDown;
+  document.OnKeyUp := @memoKeyUp;
+  document.OnKeyPress := @memoKeyPress;
+  document.OnMouseDown := @memoMouseDown;
+  document.OnMouseMove := @memoMouseMove;
+  document.OnClickLink := @memoCtrlClick;
+  document.OnCommandProcessed:= @memoCmdProcessed;
   //
-  fDoc := aDoc;
+  fDoc := document;
   focusedEditorChanged;
   updateImperative;
 end;
 
-procedure TCEEditorWidget.docClosing(aDoc: TCESynMemo);
+procedure TCEEditorWidget.docClosing(document: TCESynMemo);
 begin
-  if aDoc.isNil then
+  if document.isNil then
     exit;
-  aDoc.Parent := nil;
-  if aDoc = fDoc then
+  document.Parent := nil;
+  if document = fDoc then
     fDoc := nil;
   pageControl.deletePage(pageControl.pageIndex);
   updateImperative;
 end;
 
-procedure TCEEditorWidget.docFocused(aDoc: TCESynMemo);
+procedure TCEEditorWidget.docFocused(document: TCESynMemo);
 begin
   if fDoc.isNotNil and pageControl.currentPage.isNotNil and
     (pageControl.currentPage.Caption = '<new document>') then
       updatePageCaption;
-  if aDoc = fDoc then exit;
-  fDoc := aDoc;
+  if document = fDoc then exit;
+  fDoc := document;
   focusedEditorChanged;
   updateImperative;
 end;
 
-procedure TCEEditorWidget.docChanged(aDoc: TCESynMemo);
+procedure TCEEditorWidget.docChanged(document: TCESynMemo);
 begin
-  if fDoc <> aDoc then
+  if fDoc <> document then
     exit;
   fKeyChanged := true;
   beginDelayedUpdate;
@@ -405,30 +405,30 @@ end;
 {$ENDREGION}
 
 {$REGION ICECommonProject ------------------------------------------------------}
-procedure TCEEditorWidget.projNew(aProject: ICECommonProject);
+procedure TCEEditorWidget.projNew(project: ICECommonProject);
 begin
 end;
 
-procedure TCEEditorWidget.projChanged(aProject: ICECommonProject);
+procedure TCEEditorWidget.projChanged(project: ICECommonProject);
 begin
 end;
 
-procedure TCEEditorWidget.projClosing(aProject: ICECommonProject);
+procedure TCEEditorWidget.projClosing(project: ICECommonProject);
 begin
-  if fProj = aProject then
+  if fProj = project then
     fProj := nil;
 end;
 
-procedure TCEEditorWidget.projFocused(aProject: ICECommonProject);
+procedure TCEEditorWidget.projFocused(project: ICECommonProject);
 begin
-  fProj := aProject;
+  fProj := project;
 end;
 
-procedure TCEEditorWidget.projCompiling(aProject: ICECommonProject);
+procedure TCEEditorWidget.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCEEditorWidget.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCEEditorWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
@@ -449,30 +449,30 @@ begin
   exit(TCESynMemo(pageControl.Pages[index].Controls[0]));
 end;
 
-function TCEEditorWidget.findDocument(aFilename: string): TCESynMemo;
+function TCEEditorWidget.findDocument(fname: string): TCESynMemo;
 var
   i: Integer;
 begin
   for i := 0 to PageControl.PageCount-1 do
   begin
     result := getDocument(i);
-    if result.fileName = aFilename then
+    if result.fileName = fname then
       exit;
   end;
   result := nil;
 end;
 
-procedure TCEEditorWidget.openDocument(aFilename: string);
+procedure TCEEditorWidget.openDocument(fname: string);
 var
   doc: TCESynMemo;
 begin
-  doc := findDocument(aFilename);
+  doc := findDocument(fname);
   if doc.isNotNil then begin
     PageControl.currentPage := TCEPage(doc.Parent);
     exit;
   end;
   doc := TCESynMemo.Create(nil);
-  fDoc.loadFromFile(aFilename);
+  fDoc.loadFromFile(fname);
   if assigned(fProj) and (fProj.filename = fDoc.fileName) then
   begin
     if fProj.getFormat = pfNative then
@@ -749,16 +749,16 @@ begin
     updatePageCaption;
 end;
 
-procedure TCEEditorWidget.lexFindToken(const aToken: PLexToken; out doStop: boolean);
+procedure TCEEditorWidget.lexFindToken(const token: PLexToken; out stop: boolean);
 begin
-  if (aToken^.kind = ltkKeyword) and (aToken^.data = 'module') then
+  if (token^.kind = ltkKeyword) and (token^.data = 'module') then
   begin
     fModStart := true;
     exit;
   end;
-  if fModStart and (aToken^.kind = ltkSymbol) and (aToken^.data = ';') then
+  if fModStart and (token^.kind = ltkSymbol) and (token^.data = ';') then
   begin
-    doStop := true;
+    stop := true;
     fModStart := false;
   end;
 end;

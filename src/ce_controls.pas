@@ -72,7 +72,7 @@ type
     procedure btnAddClick(sender: TObject);
     procedure btnSplitClick(sender: TObject);
 
-    procedure tabsChanging(Sender: TObject; var AllowChange: Boolean);
+    procedure tabsChanging(sender: TObject; var AllowChange: Boolean);
     procedure tabsChanged(sender: TObject);
     procedure hidePage(index: integer);
     procedure showPage(index: integer);

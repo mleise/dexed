@@ -12,9 +12,9 @@ inherited CESearchWidget: TCESearchWidget
     ClientHeight = 309
     ClientWidth = 399
     inherited Content: TPanel
-      Height = 309
+      Height = 273
       Width = 399
-      ClientHeight = 309
+      ClientHeight = 273
       ClientWidth = 399
       object cbToFind: TComboBox[0]
         Left = 4
@@ -34,7 +34,7 @@ inherited CESearchWidget: TCESearchWidget
       object btnFind: TBitBtn[1]
         Left = 4
         Height = 24
-        Top = 197
+        Top = 161
         Width = 391
         Align = alBottom
         BorderSpacing.Around = 4
@@ -80,7 +80,7 @@ inherited CESearchWidget: TCESearchWidget
       object btnReplace: TBitBtn[2]
         Left = 4
         Height = 24
-        Top = 253
+        Top = 217
         Width = 391
         Align = alBottom
         BorderSpacing.Around = 4
@@ -125,13 +125,13 @@ inherited CESearchWidget: TCESearchWidget
       end
       object grpOpts: TGroupBox[3]
         Left = 4
-        Height = 135
+        Height = 99
         Top = 58
         Width = 391
         Align = alClient
         BorderSpacing.Around = 4
         Caption = 'Options'
-        ClientHeight = 105
+        ClientHeight = 69
         ClientWidth = 387
         TabOrder = 4
         object chkWWord: TCheckBox
@@ -192,7 +192,7 @@ inherited CESearchWidget: TCESearchWidget
       object btnReplaceAll: TBitBtn[4]
         Left = 4
         Height = 24
-        Top = 281
+        Top = 245
         Width = 391
         Align = alBottom
         BorderSpacing.Around = 4
@@ -274,7 +274,7 @@ inherited CESearchWidget: TCESearchWidget
       object Panel2: TPanel[6]
         Left = 4
         Height = 24
-        Top = 225
+        Top = 189
         Width = 391
         Align = alBottom
         BorderSpacing.Around = 4
@@ -338,6 +338,9 @@ inherited CESearchWidget: TCESearchWidget
           TabOrder = 1
         end
       end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 391
     end
   end
   inherited contextMenu: TPopupMenu

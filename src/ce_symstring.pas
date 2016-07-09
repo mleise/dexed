@@ -34,17 +34,17 @@ type
     fSymbols: array[TCESymbol] of string;
     procedure updateSymbols;
     //
-    procedure projNew(aProject: ICECommonProject);
-    procedure projClosing(aProject: ICECommonProject);
-    procedure projFocused(aProject: ICECommonProject);
-    procedure projChanged(aProject: ICECommonProject);
-    procedure projCompiling(aProject: ICECommonProject);
-    procedure projCompiled(aProject: ICECommonProject; success: boolean);
+    procedure projNew(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
     //
-    procedure docNew(aDoc: TCESynMemo);
-    procedure docClosing(aDoc: TCESynMemo);
-    procedure docFocused(aDoc: TCESynMemo);
-    procedure docChanged(aDoc: TCESynMemo);
+    procedure docNew(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
     //
     function singleServiceName: string;
     function expand(const value: string): string;
@@ -89,78 +89,78 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCESymbolExpander.projNew(aProject: ICECommonProject);
+procedure TCESymbolExpander.projNew(project: ICECommonProject);
 begin
-  fProjInterface := aProject;
-  case aProject.getFormat of
-    pfNative: fProj := TCENativeProject(aProject.getProject);
+  fProjInterface := project;
+  case project.getFormat of
+    pfNative: fProj := TCENativeProject(project.getProject);
     pfDub: fProj := nil;
   end;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.projClosing(aProject: ICECommonProject);
+procedure TCESymbolExpander.projClosing(project: ICECommonProject);
 begin
   fProjInterface := nil;
-  if fProj <> aProject.getProject then
+  if fProj <> project.getProject then
     exit;
   fProj := nil;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.projFocused(aProject: ICECommonProject);
+procedure TCESymbolExpander.projFocused(project: ICECommonProject);
 begin
-  fProjInterface := aProject;
-  case aProject.getFormat of
-    pfNative: fProj := TCENativeProject(aProject.getProject);
+  fProjInterface := project;
+  case project.getFormat of
+    pfNative: fProj := TCENativeProject(project.getProject);
     pfDub: fProj := nil;
   end;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.projChanged(aProject: ICECommonProject);
+procedure TCESymbolExpander.projChanged(project: ICECommonProject);
 begin
-  fProjInterface := aProject;
-  if fProj <> aProject.getProject then
+  fProjInterface := project;
+  if fProj <> project.getProject then
     exit;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.projCompiling(aProject: ICECommonProject);
+procedure TCESymbolExpander.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TCESymbolExpander.projCompiled(aProject: ICECommonProject; success: boolean);
+procedure TCESymbolExpander.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
 {$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCESymbolExpander.docNew(aDoc: TCESynMemo);
+procedure TCESymbolExpander.docNew(document: TCESynMemo);
 begin
-  fDoc := aDoc;
+  fDoc := document;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.docClosing(aDoc: TCESynMemo);
+procedure TCESymbolExpander.docClosing(document: TCESynMemo);
 begin
-  if aDoc <> fDoc then
+  if document <> fDoc then
     exit;
   fDoc := nil;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.docFocused(aDoc: TCESynMemo);
+procedure TCESymbolExpander.docFocused(document: TCESynMemo);
 begin
-  if (aDoc.isNotNil) and (fDoc = aDoc) then
+  if (document.isNotNil) and (fDoc = document) then
     exit;
-  fDoc := aDoc;
+  fDoc := document;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.docChanged(aDoc: TCESynMemo);
+procedure TCESymbolExpander.docChanged(document: TCESynMemo);
 begin
-  if aDoc <> fDoc then
+  if document <> fDoc then
     exit;
   fNeedUpdate := true;
 end;
