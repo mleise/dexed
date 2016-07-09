@@ -14,9 +14,6 @@ type
 
   TProjectGroup = class;
 
-  //TODO-projectgroups: bug, load a free standing project, load a group that contains a link to the FSP.
-  //=> the FSP should be either closed or the lazy loader should trap the FSP
-
   (**
    * Represents a project in a project group
    *)
@@ -37,19 +34,26 @@ type
   (**
    * Collection that handles several project at once.
    *)
-  TProjectGroup = class(TWritableLfmTextComponent, ICEProjectGroup, IFPObserver)
+  TProjectGroup = class(TWritableLfmTextComponent, ICEProjectGroup, IFPObserver, ICEProjectObserver)
   private
     fProjectIndex: integer;
     fItems: TCollection;
     fModified: boolean;
     fOnChanged: TNotifyEvent;
     fBasePath: string;
+    fFreeStanding: ICECommonProject;
     procedure setItems(value: TCollection);
     function getItem(index: integer): TProjectGroupItem;
     procedure doChanged;
     //
     procedure FPOObservedChanged(ASender : TObject; Operation :
       TFPObservedOperation; Data : Pointer);
+    procedure projNew(aProject: ICECommonProject);
+    procedure projChanged(aProject: ICECommonProject);
+    procedure projClosing(aProject: ICECommonProject);
+    procedure projFocused(aProject: ICECommonProject);
+    procedure projCompiling(aProject: ICECommonProject);
+    procedure projCompiled(aProject: ICECommonProject; success: boolean);
   protected
     procedure afterLoad; override;
     procedure afterSave; override;
@@ -137,10 +141,12 @@ begin
   fItems := TCollection.Create(TProjectGroupItem);
   fItems.FPOAttachObserver(self);
   EntitiesConnector.addSingleService(self);
+  EntitiesConnector.addObserver(self);
 end;
 
 destructor TProjectGroup.destroy;
 begin
+  EntitiesConnector.removeObserver(self);
   fItems.Clear;
   fItems.Free;
   inherited;
@@ -161,6 +167,36 @@ procedure TProjectGroup.FPOObservedChanged(ASender: TObject;
 begin
   if operation = ooChange then
     fModified := true;
+end;
+
+procedure TProjectGroup.projNew(aProject: ICECommonProject);
+begin
+  if (aProject <> nil) and not aProject.inGroup then
+    fFreeStanding := aProject;
+end;
+
+procedure TProjectGroup.projChanged(aProject: ICECommonProject);
+begin
+end;
+
+procedure TProjectGroup.projClosing(aProject: ICECommonProject);
+begin
+  if (aProject <> nil) and (aProject = fFreeStanding) then
+    fFreeStanding := nil;
+end;
+
+procedure TProjectGroup.projFocused(aProject: ICECommonProject);
+begin
+  if (aProject <> nil) and not aProject.inGroup then
+    fFreeStanding := aProject;
+end;
+
+procedure TProjectGroup.projCompiling(aProject: ICECommonProject);
+begin
+end;
+
+procedure TProjectGroup.projCompiled(aProject: ICECommonProject; success: boolean);
+begin
 end;
 
 procedure TProjectGroup.doChanged;
@@ -231,6 +267,13 @@ begin
   begin
     p := item[i];
     p.fGroup := self;
+    if assigned(fFreeStanding) and (p.absoluteFilename = fFreeStanding.filename) then
+    begin
+      p.fProj := fFreeStanding;
+      fFreeStanding.inGroup(true);
+      fFreeStanding := nil;
+      p.fProj.activate;
+    end;
     if not p.absoluteFilename.fileExists then
     begin
       f += LineEnding + '"' + p.absoluteFilename + '"';
