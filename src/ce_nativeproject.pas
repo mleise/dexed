@@ -48,17 +48,17 @@ type
     fCompiled: boolean;
     fSymStringExpander: ICESymStringExpander;
     procedure updateOutFilename;
-    procedure doChanged;
+    procedure doChanged(modified: boolean = true);
     procedure getBaseConfig;
-    procedure setLibAliases(const value: TStringList);
+    procedure setLibAliases(value: TStringList);
     procedure subMemberChanged(sender : TObject);
-    procedure setOptsColl(const value: TCollection);
+    procedure setOptsColl(value: TCollection);
     procedure setRoot(const value: string);
-    procedure setSrcs(const value: TStringList);
+    procedure setSrcs(value: TStringList);
     procedure setConfIx(value: Integer);
-    function getConfig(const ix: integer): TCompilerConfiguration;
+    function getConfig(value: integer): TCompilerConfiguration;
     function getCurrConf: TCompilerConfiguration;
-    function runPrePostProcess(const processInfo: TCompileProcOptions): Boolean;
+    function runPrePostProcess(processInfo: TCompileProcOptions): Boolean;
     // passes pre/post/executed project/ outputs as bubles.
     procedure runProcOutput(sender: TObject);
     // passes compilation message as "to be guessed"
@@ -82,7 +82,7 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     procedure beginUpdate;
-    procedure endUpdate;
+    procedure endUpdate(modified: boolean = true);
     procedure reset;
     procedure addDefaults;
     procedure addSource(const aFilename: string);
@@ -211,7 +211,7 @@ begin
   result.onChanged := @subMemberChanged;
 end;
 
-procedure TCENativeProject.setOptsColl(const value: TCollection);
+procedure TCENativeProject.setOptsColl(value: TCollection);
 var
   i: nativeInt;
 begin
@@ -273,14 +273,14 @@ begin
   inherited customSaveToFile(aFilename);
 end;
 
-procedure TCENativeProject.setLibAliases(const value: TStringList);
+procedure TCENativeProject.setLibAliases(value: TStringList);
 begin
   beginUpdate;
   fLibAliases.Assign(value);
   endUpdate;
 end;
 
-procedure TCENativeProject.setSrcs(const value: TStringList);
+procedure TCENativeProject.setSrcs(value: TStringList);
 begin
   beginUpdate;
   fSrcs.Assign(value);
@@ -291,10 +291,12 @@ end;
 procedure TCENativeProject.setConfIx(value: Integer);
 begin
   beginUpdate;
-  if value < 0 then value := 0;
-  if value > fConfigs.Count-1 then value := fConfigs.Count-1;
+  if value < 0 then
+    value := 0;
+  if value > fConfigs.Count-1 then
+    value := fConfigs.Count-1;
   fConfIx := value;
-  endUpdate;
+  endUpdate(false);
 end;
 
 procedure TCENativeProject.getBaseConfig;
@@ -326,23 +328,18 @@ begin
   Inc(fUpdateCount);
 end;
 
-procedure TCENativeProject.endUpdate;
+procedure TCENativeProject.endUpdate(modified: boolean = true);
 begin
   Dec(fUpdateCount);
   if fUpdateCount > 0 then
-  begin
-    {$IFDEF DEBUG}
-    DebugLn('project update count > 0');
-    {$ENDIF}
     exit;
-  end;
   fUpdateCount := 0;
-  doChanged;
+  doChanged(modified);
 end;
 
-procedure TCENativeProject.doChanged;
+procedure TCENativeProject.doChanged(modified: boolean = true);
 begin
-  fModified := true;
+  fModified := modified;
   updateOutFilename;
   getBaseConfig;
   subjProjChanged(fProjectSubject, self);
@@ -350,9 +347,9 @@ begin
     fOnChange(Self);
 end;
 
-function TCENativeProject.getConfig(const ix: integer): TCompilerConfiguration;
+function TCENativeProject.getConfig(value: integer): TCompilerConfiguration;
 begin
-  result := TCompilerConfiguration(fConfigs.Items[ix]);
+  result := TCompilerConfiguration(fConfigs.Items[value]);
   result.onChanged := @subMemberChanged;
 end;
 
@@ -668,7 +665,7 @@ begin
     fCanBeRun := fOutputFilename.fileExists;
 end;
 
-function TCENativeProject.runPrePostProcess(const processInfo: TCompileProcOptions): Boolean;
+function TCENativeProject.runPrePostProcess(processInfo: TCompileProcOptions): Boolean;
 var
   lst: TStringList;
   com: boolean;
