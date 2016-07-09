@@ -156,7 +156,8 @@ void main(string[] args)
         return;
     }
 
-    if (!uninstall) Formater.justify!'C'(format("Coedit %s - setup", splitVer));
+    if (!uninstall) Formater.justify!'C'(format("Coedit %s - setup",
+        import("version.txt").split('_').join(" ")));
     else Formater.justify!'C'("Coedit uninstaller");
     
     Formater.separate;
@@ -397,13 +398,5 @@ void postUninstall()
     {
         tryRemove(shortCutPath ~ "coedit.desktop");
     }
-}
-
-/// splits the version identifier used in filenames
-string splitVer()
-{
-    import std.regex: matchAll, ctRegex;
-    return matchAll(import("version.txt"), ctRegex!("\\d+|\\D+"))
-        .join.join(" ").stripRight;
 }
 

@@ -5,7 +5,7 @@ unit ce_infos;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, strutils,
   StdCtrls, ExtCtrls, Buttons, Menus,ce_widget, ce_common, ce_sharedres;
 
 type
@@ -170,60 +170,71 @@ end;
 
 constructor TCEInfoWidget.create(aOwner: TComponent);
 var
-  toolItem: TToolInfo;
+  itm: TToolInfo;
+  ver: string = 'enough_space_for_the_version';
+  len: integer;
 begin
   inherited;
   toolbarVisible:=false;
   fIsModal := true;
   fIsDockable := false;
   //
-  toolItem := TToolInfo.Construct(self, tikOptional, 'dscanner',
+  with TResourceStream.Create(HINSTANCE, 'VERSION', RT_RCDATA) do
+  try
+    len := read(ver[1], ver.length);
+    setLength(ver, len);
+    Label1.Caption := 'Coedit - ' + replaceStr(ver, '_', ' ');
+  finally
+    free;
+  end;
+  //
+  itm := TToolInfo.Construct(self, tikOptional, 'dscanner',
     'optional, the D source code analyzer');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikOptional, 'dfmt',
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  itm := TToolInfo.Construct(self, tikOptional, 'dfmt',
     'optional, the D source code formater, needed by the Dfmt commander widget');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
+  itm.Parent := boxTools;
+  itm.ReAlign;
   // TODO-cmaintenance: remove this entry if GDMD is distributed with GDC
-  toolItem := TToolInfo.Construct(self, tikOptional, 'gdmd',
+  itm := TToolInfo.Construct(self, tikOptional, 'gdmd',
     'optional, the GDC wrapper with a DMD command line interface');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikOptional, 'gdc',
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  itm := TToolInfo.Construct(self, tikOptional, 'gdc',
     'optional, the GDC D compiler');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikOptional, 'ldc2',
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  itm := TToolInfo.Construct(self, tikOptional, 'ldc2',
     'optional, the LDC D compiler');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikOptional, 'ddemangle',
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  itm := TToolInfo.Construct(self, tikOptional, 'ddemangle',
     'optional, allows to demangle cryptic symbols in the message widget');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikRunning, 'dcd-server',
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  itm := TToolInfo.Construct(self, tikRunning, 'dcd-server',
     'mandatory, provides IDE-level features such as the completion');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikFindable, 'dcd-client',
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  itm := TToolInfo.Construct(self, tikFindable, 'dcd-client',
     'mandatory, provides IDE-level features such as the completion');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikFindable, 'dastworx',
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  itm := TToolInfo.Construct(self, tikFindable, 'dastworx',
     'background tool that works on the D modules AST to extract informations' +
     LineEnding + 'such as the declarations, the imports, the "TODO" comments, etc.');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikOptional, 'dub',
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  itm := TToolInfo.Construct(self, tikOptional, 'dub',
     'the D package manager, mandatory to compile project in DUB format');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
-  toolItem := TToolInfo.Construct(self, tikFindable, 'dmd',
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  itm := TToolInfo.Construct(self, tikFindable, 'dmd',
     'the reference D compiler, mandatory to compile native projects, '
     + 'to unittest and to launch runnable modules');
-  toolItem.Parent := boxTools;
-  toolItem.ReAlign;
+  itm.Parent := boxTools;
+  itm.ReAlign;
   //
   Realign;
 end;

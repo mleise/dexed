@@ -1430,12 +1430,6 @@ begin
         tgg := dat.FindPath('tag_name');
         if url.isNotNil and tgg.isNotNil then
         begin
-          // TODO: change version.txt format
-          // version.txt has a different format than the git tags
-          // txt: <major><kind><minor>
-          // git: <major>_<kind>_<minor>
-          // when <kind> = 'gold' no minor version is present
-          // => related to regexp on txt, could be changed with #54
           res:= TResourceStream.Create(HINSTANCE, 'VERSION', RT_RCDATA);
           lst := TstringList.Create;
           lst.LoadFromStream(res);
@@ -1445,19 +1439,18 @@ begin
 
           rng.init(str);
           mj0 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
-          kd0 := rng.takeUntil(['0'..'9']).yield;
+          rng.popWhile('_');
+          kd0 := rng.takeWhile(['a'..'z']).yield;
+          rng.popWhile('_');
           mn0 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
 
           str := tgg.AsString;
           rng.init(str);
           mj1 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
-          rng.popFront;
-          kd1 := rng.takeUntil('_').yield;
-          if (kd1 <> 'gold') and not rng.empty then
-          begin
-            rng.popFront;
-            mn1 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
-          end;
+          rng.popWhile('_');
+          kd1 := rng.takeWhile(['a'..'z']).yield;
+          rng.popWhile('_');
+          mn1 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
 
           if mj1 > mj0 then
             can := true
@@ -3203,7 +3196,7 @@ begin
   fMsgs.message('start compiling a project group...', nil, amcAll, amkInf);
   for i:= 0 to fProjectGroup.projectCount-1 do
   begin
-    //TODO-cprojectgroup: verify that compilation is not paralell since the projects use an async proc.
+    //TODO-cprojectgroup: verify that compilation is not parallel since the projects use an async proc.
     fProjectGroup.getProject(i).activate;
     fProject.compile;
   end;
