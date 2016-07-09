@@ -58,7 +58,7 @@ type
 
   { TCEMessagesWidget }
 
-  TCEMessagesWidget = class(TCEWidget, ICEEditableOptions, ICEMultiDocObserver, ICEProjectObserver, ICEMessagesDisplay)
+  TCEMessagesWidget = class(TCEWidget, ICEEditableOptions, ICEDocumentObserver, ICEProjectObserver, ICEMessagesDisplay)
     btnSelAll: TCEToolButton;
     btnSelApp: TCEToolButton;
     btnSelEdit: TCEToolButton;
@@ -684,7 +684,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEMessagesWidget.docNew(aDoc: TCESynMemo);
 begin
 

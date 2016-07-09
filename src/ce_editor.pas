@@ -51,7 +51,7 @@ type
 
   { TCEEditorWidget }
 
-  TCEEditorWidget = class(TCEWidget, ICEMultiDocObserver, ICEMultiDocHandler, ICEProjectObserver)
+  TCEEditorWidget = class(TCEWidget, ICEDocumentObserver, ICEMultiDocHandler, ICEProjectObserver)
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
@@ -350,7 +350,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEEditorWidget.docNew(aDoc: TCESynMemo);
 var
   pge: TCEPage;

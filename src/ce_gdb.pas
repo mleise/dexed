@@ -168,7 +168,7 @@ type
 
 
   { TCEGdbWidget }
-  TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEMultiDocObserver)
+  TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver)
     btnReg: TBitBtn;
     btnStack: TBitBtn;
     btnSendCom: TBitBtn;
@@ -335,7 +335,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEGdbWidget.docNew(aDoc: TCESynMemo);
 begin
   if aDoc.isDSource then

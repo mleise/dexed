@@ -123,7 +123,7 @@ type
    * Manages and exposes all the editor and highligther options to an TCEOptionsEditor.
    * It's also responsible to give the current options to a new editor.
    *)
-  TCEEditorOptions = class(TCEEditorOptionsBase, ICEEditableOptions, ICEMultiDocObserver, ICEEDitableShortcut)
+  TCEEditorOptions = class(TCEEditorOptionsBase, ICEEditableOptions, ICEDocumentObserver, ICEEDitableShortcut)
   private
     fBackup: TCEEditorOptionsBase;
     fShortcutCount: Integer;
@@ -476,7 +476,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEEditorOptions.docNew(aDoc: TCESynMemo);
 begin
   //apply...des not modify font size to preserve current zoom

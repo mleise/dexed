@@ -25,7 +25,7 @@ type
    * TCESymbolExpander is designed to expand Coedit symbolic strings,
    * using the information collected from several observer interfaces.
    *)
-  TCESymbolExpander = class(ICEMultiDocObserver, ICEProjectObserver, ICESymStringExpander)
+  TCESymbolExpander = class(ICEDocumentObserver, ICEProjectObserver, ICESymStringExpander)
   private
     fProj: TCENativeProject;
     fProjInterface: ICECommonProject;
@@ -135,7 +135,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCESymbolExpander.docNew(aDoc: TCESynMemo);
 begin
   fDoc := aDoc;

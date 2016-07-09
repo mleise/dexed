@@ -26,7 +26,7 @@ type
   end;
 
   { TCEMainForm }
-  TCEMainForm = class(TForm, ICEMultiDocObserver, ICEEditableShortCut, ICEProjectObserver)
+  TCEMainForm = class(TForm, ICEDocumentObserver, ICEEditableShortCut, ICEProjectObserver)
     actFileCompAndRun: TAction;
     actFileSaveAll: TAction;
     actFileClose: TAction;
@@ -322,7 +322,7 @@ type
     procedure clearActProviderEntries;
     procedure collectedActProviderEntries;
 
-    // ICEMultiDocObserver
+    // ICEDocumentObserver
     procedure docNew(aDoc: TCESynMemo);
     procedure docClosing(aDoc: TCESynMemo);
     procedure docFocused(aDoc: TCESynMemo);

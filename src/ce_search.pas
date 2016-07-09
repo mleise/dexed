@@ -43,7 +43,7 @@ type
   end;
 
   { TCESearchWidget }
-  TCESearchWidget = class(TCEWidget, ICEMultiDocObserver, ICEProjectObserver)
+  TCESearchWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver)
     btnAllScope: TBitBtn;
     btnFind: TBitBtn;
     btnFindAll: TBitBtn;
@@ -488,7 +488,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCESearchWidget.docNew(aDoc: TCESynMemo);
 begin
   fDoc := aDoc;

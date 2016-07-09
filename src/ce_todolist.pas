@@ -75,7 +75,7 @@ type
 
   { TCETodoListWidget }
 
-  TCETodoListWidget = class(TCEWidget, ICEMultiDocObserver, ICEProjectObserver, ICEEditableOptions)
+  TCETodoListWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver, ICEEditableOptions)
     btnGo: TCEToolButton;
     btnRefresh: TCEToolButton;
     lstItems: TListView;
@@ -93,7 +93,7 @@ type
     fTodos: TTodoItems;
     fMsgs: ICEMessagesDisplay;
     fOptions: TCETodoOptions;
-    // ICEMultiDocObserver
+    // ICEDocumentObserver
     procedure docNew(aDoc: TCESynMemo);
     procedure docFocused(aDoc: TCESynMemo);
     procedure docChanged(aDoc: TCESynMemo);
@@ -314,7 +314,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCETodoListWidget.docNew(aDoc: TCESynMemo);
 begin
 end;

@@ -72,7 +72,7 @@ type
     function findTool(const value: string): TCEToolItem;
   end;
 
-  TCETools = class(TWritableLfmTextComponent, ICEMainMenuProvider, ICEEditableShortcut, ICEMultiDocObserver)
+  TCETools = class(TWritableLfmTextComponent, ICEMainMenuProvider, ICEEditableShortcut, ICEDocumentObserver)
   private
     fTools: TCEToolItems;
     fShctCount: Integer;
@@ -392,7 +392,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultidocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCETools.docNew(aDoc: TCESynMemo);
 begin
   fDoc := aDoc;

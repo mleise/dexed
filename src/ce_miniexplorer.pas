@@ -60,7 +60,7 @@ type
 
   { TCEMiniExplorerWidget }
 
-  TCEMiniExplorerWidget = class(TCEWidget, ICEProjectObserver, ICEMultiDocObserver, ICEExplorer)
+  TCEMiniExplorerWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEExplorer)
     btnAddFav: TCEToolButton;
     btnEdit: TCEToolButton;
     btnRemFav: TCEToolButton;
@@ -348,7 +348,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultidocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEMiniExplorerWidget.docNew(aDoc: TCESynMemo);
 begin
 end;

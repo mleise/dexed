@@ -44,9 +44,9 @@ type
 
   (**
    * MRU list for D/text files.
-   * Insertion is automatic (ICEMultiDocObserver).
+   * Insertion is automatic (ICEDocumentObserver).
    *)
-  TCEMRUDocumentList = class(TCEMRUFileList, ICEMultiDocObserver)
+  TCEMRUDocumentList = class(TCEMRUFileList, ICEDocumentObserver)
   private
     procedure docNew(aDoc: TCESynMemo);
     procedure docFocused(aDoc: TCESynMemo);

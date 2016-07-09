@@ -43,10 +43,10 @@ type
    * Erroneous insertion is avoided because in D '$' is either followed
    * by a symbol: '$-1', '$]' or by a blank '$ ]'
    *
-   * Shift + SPACE works automatically on the right editor (ICEMultiDocObserver)
+   * Shift + SPACE works automatically on the right editor (ICEDocumentObserver)
    * Automatic insertion is handled in TCESynMemo.KeyUp()
    *)
-  TCEStaticEditorMacro = class(TWritableLfmTextComponent, ICEMultiDocObserver, ICEEditableOptions, ICEEditableShortCut)
+  TCEStaticEditorMacro = class(TWritableLfmTextComponent, ICEDocumentObserver, ICEEditableOptions, ICEEditableShortCut)
   private
     fValidator: TRegExpr;
     fCompletor: TSynAutoComplete;
@@ -59,7 +59,7 @@ type
     procedure addDefaults;
     procedure updateCompletor;
     procedure setMacros(aValue: TStringList);
-    // ICEMultiDocObserver
+    // ICEDocumentObserver
     procedure docNew(aDoc: TCESynMemo);
     procedure docFocused(aDoc: TCESynMemo);
     procedure docChanged(aDoc: TCESynMemo);
@@ -252,7 +252,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEStaticEditorMacro.docNew(aDoc: TCESynMemo);
 begin
   fDoc := aDoc;

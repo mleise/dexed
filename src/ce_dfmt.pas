@@ -63,7 +63,7 @@ type
 
   { TCEDfmtWidget }
 
-  TCEDfmtWidget = class(TCEWidget, ICEMultiDocObserver)
+  TCEDfmtWidget = class(TCEWidget, ICEDocumentObserver)
     btnApply: TSpeedButton;
     btnCancel: TSpeedButton;
     pnlFooter: TPanel;
@@ -216,7 +216,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEDfmtWidget.docNew(aDoc: TCESynMemo);
 begin
   fDoc := aDoc;

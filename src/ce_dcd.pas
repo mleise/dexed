@@ -21,9 +21,9 @@ type
    *
    * Projects folders are automatically imported: ICEProjectObserver.
    * Completion, hints and declaration finder automatically work on the current
-   *   document: ICEMultiDocObserver.
+   *   document: ICEDocumentObserver.
    *)
-  TCEDcdWrapper = class(TWritableLfmTextComponent, ICEProjectObserver, ICEMultiDocObserver)
+  TCEDcdWrapper = class(TWritableLfmTextComponent, ICEProjectObserver, ICEDocumentObserver)
   private
     fTempLines: TStringList;
     fInputSource: string;
@@ -222,7 +222,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEDcdWrapper.docNew(aDoc: TCESynMemo);
 begin
   fDoc := aDoc;

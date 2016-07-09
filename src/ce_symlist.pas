@@ -105,7 +105,7 @@ type
 
   { TCESymbolListWidget }
 
-  TCESymbolListWidget = class(TCEWidget, ICEMultiDocObserver, ICEEditableOptions)
+  TCESymbolListWidget = class(TCEWidget, ICEDocumentObserver, ICEEditableOptions)
     btnRefresh: TCEToolButton;
     imgList: TImageList;
     Tree: TTreeView;
@@ -500,7 +500,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocObserver ---------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCESymbolListWidget.docNew(aDoc: TCESynMemo);
 begin
   fDoc := aDoc;
