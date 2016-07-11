@@ -125,6 +125,13 @@ inherited CEEditorWidget: TCEEditorWidget
     object MenuItem7: TMenuItem
       Caption = '-'
     end
+    object mnuedSortLines: TMenuItem
+      Caption = 'Sort lines'
+      OnClick = mnuedSortLinesClick
+    end
+    object MenuItem1: TMenuItem
+      Caption = '-'
+    end
     object mnuedComm: TMenuItem
       Caption = 'Comment selected lines'
       OnClick = mnuedCommClick

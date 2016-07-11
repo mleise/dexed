@@ -9,7 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
-  fpjson, jsonparser, LazUTF8,
+  fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange;
 
@@ -120,6 +120,8 @@ type
     procedure next;
   end;
 
+  TSortDialog = class;
+
   TCESynMemo = class(TSynEdit)
   private
     fFilename: string;
@@ -165,6 +167,7 @@ type
     fAlwaysAdvancedFeatures: boolean;
     fIsProjectDescription: boolean;
     fAutoClosedPairs: TAutoClosePairs;
+    fSortDialog: TSortDialog;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseBytePosition: Integer;
@@ -196,6 +199,7 @@ type
     procedure gotoToChangedArea(next: boolean);
     procedure autoClosePair(value: TAutoClosedPair);
     procedure setSelectionOrWordCase(upper: boolean);
+    procedure sortSelectedLines(descending, caseSensitive: boolean);
   protected
     procedure DoEnter; override;
     procedure DoExit; override;
@@ -234,8 +238,8 @@ type
     procedure ShowPhobosDoc;
     procedure nextChangedArea;
     procedure previousChangedArea;
-    procedure copy;
     function implementMain: THasMain;
+    procedure sortLines;
     //
     function breakPointsCount: integer;
     function breakPointLine(index: integer): integer;
@@ -268,6 +272,20 @@ type
     property autoClosedPairs: TAutoClosePairs read fAutoClosedPairs write fAutoClosedPairs;
   end;
 
+  TSortDialog = class(TForm)
+  private
+    class var fDescending: boolean;
+    class var fCaseSensitive: boolean;
+    fEditor: TCESynMemo;
+    fCanUndo: boolean;
+    procedure btnApplyClick(sender: TObject);
+    procedure btnUndoClick(sender: TObject);
+    procedure chkCaseSensClick(sender: TObject);
+    procedure chkDescClick(sender: TObject);
+  public
+    constructor construct(editor: TCESynMemo);
+  end;
+
   procedure SetDefaultCoeditKeystrokes(ed: TSynEdit);
 
   function CustomStringToCommand(const Ident: string; var Int: Longint): Boolean;
@@ -292,6 +310,7 @@ const
   ecNextChangedArea     = ecUserFirst + 16;
   ecUpperCaseWordOrSel  = ecUserFirst + 17;
   ecLowerCaseWordOrSel  = ecUserFirst + 18;
+  ecSortLines           = ecUserFirst + 19;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -310,6 +329,95 @@ begin
   Font.Size:= FontSize;
   result := inherited CalcHintRect(MaxWidth, AHint, AData);
 end;
+
+{$REGION TSortDialog -----------------------------------------------------------}
+constructor TSortDialog.construct(editor: TCESynMemo);
+var
+  pnl: TPanel;
+begin
+  inherited Create(nil);
+  fEditor := editor;
+
+  width := 150;
+  Height:= 95;
+  FormStyle:= fsStayOnTop;
+  BorderStyle:= bsToolWindow;
+  Position:= poScreenCenter;
+  ShowHint:=true;
+
+  with TCheckBox.Create(self) do
+  begin
+    parent := self;
+    BorderSpacing.Around:=2;
+    OnClick:=@chkCaseSensClick;
+    Caption:='case sensitive';
+    checked := fCaseSensitive;
+    align := alTop;
+  end;
+
+  with TCheckBox.Create(self) do
+  begin
+    parent := self;
+    BorderSpacing.Around:=2;
+    OnClick:=@chkDescClick;
+    Caption:='descending';
+    Checked:= fDescending;
+    align := alTop;
+  end;
+
+  pnl := TPanel.Create(self);
+  pnl.Parent := self;
+  pnl.Align:=alBottom;
+  pnl.Caption:='';
+  pnl.Height:= 32;
+  pnl.BevelOuter:=bvLowered;
+
+  with TSpeedButton.Create(self) do
+  begin
+    parent := pnl;
+    BorderSpacing.Around:=2;
+    OnClick:=@btnUndoClick;
+    align := alRight;
+    width := 28;
+    Hint := 'undo changes';
+    AssignPng(Glyph, 'ARROW_UNDO');
+  end;
+
+  with TSpeedButton.Create(self) do
+  begin
+    parent := pnl;
+    BorderSpacing.Around:=2;
+    OnClick:=@btnApplyClick;
+    align := alRight;
+    width := 28;
+    Hint := 'apply sorting';
+    AssignPng(Glyph, 'ACCEPT');
+  end;
+end;
+
+procedure TSortDialog.btnApplyClick(sender: TObject);
+begin
+  fEditor.sortSelectedLines(fDescending, fCaseSensitive);
+  fCanUndo:= true;
+end;
+
+procedure TSortDialog.btnUndoClick(sender: TObject);
+begin
+  if fCanUndo then
+    fEditor.undo;
+  fCanUndo:= false;
+end;
+
+procedure TSortDialog.chkCaseSensClick(sender: TObject);
+begin
+  fCaseSensitive := TCheckBox(sender).checked;
+end;
+
+procedure TSortDialog.chkDescClick(sender: TObject);
+begin
+  fDescending := TCheckBox(sender).checked;
+end;
+{$ENDREGION}
 
 {$REGION TCESynMemoCache -------------------------------------------------------}
 constructor TCESynMemoCache.create(aComponent: TComponent);
@@ -622,6 +730,7 @@ begin
   fCallTipStrings.Free;
   fLexToks.Clear;
   fLexToks.Free;
+  fSortDialog.Free;
   //
   if fTempFileName.fileExists then
     sysutils.DeleteFile(fTempFileName);
@@ -792,6 +901,7 @@ begin
     AddKey(ecNextChangedArea, VK_DOWN, [ssAlt], 0, []);
     addKey(ecLowerCaseWordOrSel, 0, [], 0, []);
     addKey(ecUpperCaseWordOrSel, 0, [], 0, []);
+    addKey(ecSortLines, 0, [], 0, []);
   end;
 end;
 
@@ -816,6 +926,7 @@ begin
     'ecPreviousChangedArea':begin Int := ecPreviousChangedArea; exit(true); end;
     'ecUpperCaseWordOrSel': begin Int := ecUpperCaseWordOrSel; exit(true); end;
     'ecLowerCaseWordOrSel': begin Int := ecLowerCaseWordOrSel; exit(true); end;
+    'ecSortLines':          begin Int := ecSortLines; exit(true); end;
     else exit(false);
   end;
 end;
@@ -841,6 +952,7 @@ begin
     ecPreviousChangedArea:begin Ident := 'ecPreviousChangedArea'; exit(true); end;
     ecUpperCaseWordOrSel: begin Ident := 'ecUpperCaseWordOrSel'; exit(true); end;
     ecLowerCaseWordOrSel: begin Ident := 'ecLowerCaseWordOrSel'; exit(true); end;
+    ecSortLines:          begin Ident := 'ecSortLines'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -898,6 +1010,8 @@ begin
       setSelectionOrWordCase(true);
     ecLowerCaseWordOrSel:
       setSelectionOrWordCase(false);
+    ecSortLines:
+      sortLines;
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1283,14 +1397,6 @@ begin
   OpenURL(pth);
 end;
 
-procedure TCESynMemo.copy;
-begin
-  {$IFDEF WINDOWS}
-  {$ELSE}
-  // workaround https://github.com/BBasile/Coedit/issues/39
-  {$ENDIF}
-end;
-
 procedure TCESynMemo.nextChangedArea;
 begin
   gotoToChangedArea(true);
@@ -1452,6 +1558,59 @@ begin
       ExecuteCommand(ecChar, txt[i], nil);
     EndUndoBlock;
   end;
+end;
+
+procedure TCESynMemo.sortSelectedLines(descending, caseSensitive: boolean);
+var
+  i,j: integer;
+  lne: string;
+  lst: TStringListUTF8;
+  pt0: TPoint;
+begin
+  if BlockEnd.Y - BlockBegin.Y < 1 then
+    exit;
+  lst := TStringListUTF8.Create;
+  try
+    BeginUndoBlock;
+    for i:= BlockBegin.Y-1 to BlockEnd.Y-1 do
+      lst.Add(lines[i]);
+    pt0 := BlockBegin;
+    pt0.X:=1;
+    ExecuteCommand(ecGotoXY, #0, @pt0);
+    lst.CaseSensitive:=caseSensitive;
+    if not caseSensitive then
+      lst.Sorted:=true;
+    case descending of
+      false: for i:= 0 to lst.Count-1 do
+        begin
+          ExecuteCommand(ecDeleteLine, #0, nil);
+          ExecuteCommand(ecInsertLine, #0, nil);
+          lne := lst[i];
+          for j := 1 to lne.length do
+            ExecuteCommand(ecChar, lne[j], nil);
+          ExecuteCommand(ecDown, #0, nil);
+        end;
+      true: for i:= lst.Count-1 downto 0 do
+        begin
+          ExecuteCommand(ecDeleteLine, #0, nil);
+          ExecuteCommand(ecInsertLine, #0, nil);
+          lne := lst[i];
+          for j := 1 to lne.length do
+            ExecuteCommand(ecChar, lne[j], nil);
+          ExecuteCommand(ecDown, #0, nil);
+        end;
+    end;
+    EndUndoBlock;
+  finally
+    lst.Free;
+  end;
+end;
+
+procedure TCESynMemo.sortLines;
+begin
+  if not assigned(fSortDialog) then
+    fSortDialog := TSortDialog.construct(self);
+  fSortDialog.Show;
 end;
 {$ENDREGION}
 

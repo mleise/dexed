@@ -52,9 +52,11 @@ type
   { TCEEditorWidget }
 
   TCEEditorWidget = class(TCEWidget, ICEDocumentObserver, ICEMultiDocHandler, ICEProjectObserver)
+    MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
+    mnuedSortLines: TMenuItem;
     mnuedNextCarea: TMenuItem;
     mnuedPrevCarea: TMenuItem;
     mnuedLowcase: TMenuItem;
@@ -86,6 +88,7 @@ type
     procedure mnuedNextCareaClick(Sender: TObject);
     procedure mnuedPrevCareaClick(Sender: TObject);
     procedure mnuedLowcaseClick(Sender: TObject);
+    procedure mnuedSortLinesClick(Sender: TObject);
     procedure mnuedUpcaseClick(Sender: TObject);
     procedure MenuItem5Click(Sender: TObject);
     procedure MenuItem6Click(Sender: TObject);
@@ -314,6 +317,7 @@ begin
   AssignPng(mnuedLowcase.Bitmap, 'CASE');
   AssignPng(mnuedNextCarea.Bitmap, 'GO_NEXT');
   AssignPng(mnuedPrevCarea.Bitmap, 'GO_PREVIOUS');
+  AssignPng(mnuedSortLines.Bitmap, 'SORT_AZ');
   //
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
@@ -839,6 +843,12 @@ procedure TCEEditorWidget.mnuedLowcaseClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecLowerCaseWordOrSel, #0, nil);
+end;
+
+procedure TCEEditorWidget.mnuedSortLinesClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.CommandProcessor(ecSortLines, #0, nil);
 end;
 
 procedure TCEEditorWidget.mnuedNextCareaClick(Sender: TObject);
