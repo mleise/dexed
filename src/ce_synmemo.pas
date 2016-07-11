@@ -9,7 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
-  fpjson, jsonparser,
+  fpjson, jsonparser, LazUTF8,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange;
 
@@ -195,6 +195,7 @@ type
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
     procedure gotoToChangedArea(next: boolean);
     procedure autoClosePair(value: TAutoClosedPair);
+    procedure setSelectionOrWordCase(upper: boolean);
   protected
     procedure DoEnter; override;
     procedure DoExit; override;
@@ -289,6 +290,8 @@ const
   ecShowPhobosDoc       = ecUserFirst + 14;
   ecPreviousChangedArea = ecUserFirst + 15;
   ecNextChangedArea     = ecUserFirst + 16;
+  ecUpperCaseWordOrSel  = ecUserFirst + 17;
+  ecLowerCaseWordOrSel  = ecUserFirst + 18;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -787,6 +790,8 @@ begin
     AddKey(ecShowPhobosDoc, VK_F1, [], 0, []);
     AddKey(ecPreviousChangedArea, VK_UP, [ssAlt], 0, []);
     AddKey(ecNextChangedArea, VK_DOWN, [ssAlt], 0, []);
+    addKey(ecLowerCaseWordOrSel, 0, [], 0, []);
+    addKey(ecUpperCaseWordOrSel, 0, [], 0, []);
   end;
 end;
 
@@ -809,6 +814,8 @@ begin
     'ecShowPhobosDoc':      begin Int := ecShowPhobosDoc; exit(true); end;
     'ecNextChangedArea':    begin Int := ecNextChangedArea; exit(true); end;
     'ecPreviousChangedArea':begin Int := ecPreviousChangedArea; exit(true); end;
+    'ecUpperCaseWordOrSel': begin Int := ecUpperCaseWordOrSel; exit(true); end;
+    'ecLowerCaseWordOrSel': begin Int := ecLowerCaseWordOrSel; exit(true); end;
     else exit(false);
   end;
 end;
@@ -832,6 +839,8 @@ begin
     ecShowPhobosDoc:      begin Ident := 'ecShowPhobosDoc'; exit(true); end;
     ecNextChangedArea:    begin Ident := 'ecNextChangedArea'; exit(true); end;
     ecPreviousChangedArea:begin Ident := 'ecPreviousChangedArea'; exit(true); end;
+    ecUpperCaseWordOrSel: begin Ident := 'ecUpperCaseWordOrSel'; exit(true); end;
+    ecLowerCaseWordOrSel: begin Ident := 'ecLowerCaseWordOrSel'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -885,6 +894,10 @@ begin
       gotoToChangedArea(true);
     ecPreviousChangedArea:
       gotoToChangedArea(false);
+    ecUpperCaseWordOrSel:
+      setSelectionOrWordCase(true);
+    ecLowerCaseWordOrSel:
+      setSelectionOrWordCase(false);
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1401,6 +1414,44 @@ begin
   ExecuteCommand(ecChar, autoClosePair2Char[value], nil);
   ExecuteCommand(ecLeft, #0, nil);
   EndUndoBlock;
+end;
+
+procedure TCESynMemo.setSelectionOrWordCase(upper: boolean);
+var
+  i: integer;
+  txt: string;
+begin
+  if SelAvail then
+  begin
+    BeginUndoBlock;
+    case upper of
+      false: txt := UTF8LowerString(SelText);
+      true:  txt := UTF8UpperString(SelText);
+    end;
+    ExecuteCommand(ecBlockDelete, #0, nil);
+    for i:= 1 to txt.length do
+    case txt[i] of
+      #13: continue;
+      #10: ExecuteCommand(ecLineBreak, #0, nil);
+      else ExecuteCommand(ecChar, txt[i], nil);
+    end;
+    EndUndoBlock;
+  end else
+  begin
+    txt := GetWordAtRowCol(LogicalCaretXY);
+    if txt.isBlank then
+      exit;
+    BeginUndoBlock;
+    ExecuteCommand(ecWordLeft, #0, nil);
+    case upper of
+      false: txt := UTF8LowerString(txt);
+      true:  txt := UTF8UpperString(txt);
+    end;
+    ExecuteCommand(ecDeleteWord, #0, nil);
+    for i:= 1 to txt.length do
+      ExecuteCommand(ecChar, txt[i], nil);
+    EndUndoBlock;
+  end;
 end;
 {$ENDREGION}
 

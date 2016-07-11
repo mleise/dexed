@@ -52,9 +52,9 @@ type
   { TCEEditorWidget }
 
   TCEEditorWidget = class(TCEWidget, ICEDocumentObserver, ICEMultiDocHandler, ICEProjectObserver)
-    MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
+    MenuItem12: TMenuItem;
     mnuedNextCarea: TMenuItem;
     mnuedPrevCarea: TMenuItem;
     mnuedLowcase: TMenuItem;
@@ -831,15 +831,14 @@ end;
 
 procedure TCEEditorWidget.mnuedUpcaseClick(Sender: TObject);
 begin
-  //TODO-ceditor: case-related commands are not implemented in synedit
   if fDoc.isNotNil then
-    fDoc.ExecuteCommand(ecLowerCaseBlock, #0, nil);
+    fDoc.CommandProcessor(ecUpperCaseWordOrSel, #0, nil);
 end;
 
 procedure TCEEditorWidget.mnuedLowcaseClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
-    fDoc.ExecuteCommand(ecUpperCaseBlock, #0, nil);
+    fDoc.CommandProcessor(ecLowerCaseWordOrSel, #0, nil);
 end;
 
 procedure TCEEditorWidget.mnuedNextCareaClick(Sender: TObject);

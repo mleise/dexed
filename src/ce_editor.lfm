@@ -115,11 +115,11 @@ inherited CEEditorWidget: TCEEditorWidget
       Caption = '-'
     end
     object mnuedUpcase: TMenuItem
-      Caption = 'Upper case selection'
+      Caption = 'Upper case'
       OnClick = mnuedUpcaseClick
     end
     object mnuedLowcase: TMenuItem
-      Caption = 'Lower case selection'
+      Caption = 'Lower case'
       OnClick = mnuedLowcaseClick
     end
     object MenuItem7: TMenuItem
@@ -137,7 +137,7 @@ inherited CEEditorWidget: TCEEditorWidget
       Caption = 'Invert version all none'
       OnClick = mnuedInvAllNoneClick
     end
-    object MenuItem1: TMenuItem
+    object MenuItem12: TMenuItem
       Caption = '-'
     end
     object mnuedRename: TMenuItem
