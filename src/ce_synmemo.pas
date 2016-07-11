@@ -1484,7 +1484,6 @@ var
   tk0, tk1: PLexToken;
   str: string;
 begin
-  // TODO: editor SelStart doesnt match exactly, see why, also a problem in lexCanCloseBrace().
   if value in [autoCloseBackTick, autoCloseDoubleQuote] then
   begin
     p := selStart;
@@ -1493,11 +1492,14 @@ begin
     begin
       tk0 := fLexToks[i];
       tk1 := fLexToks[i+1];
-      if (tk0^.offset+1 <= p) and (tk1^.offset+1 > p) then
-        if tk0^.kind = TLexTokenKind.ltkString then
-          exit;
+      if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
+        (tk0^.kind in [ltkString, ltkComment]) then exit;
     end;
-  end else if value = autoCloseSingleQuote then
+    tk0 := fLexToks[fLexToks.Count-1];
+    if (tk0^.offset+1 <= p) and (tk0^.kind <> ltkIllegal) then
+      exit;
+  end
+  else if value = autoCloseSingleQuote then
   begin
     p := selStart;
     lex(Lines.Text, fLexToks);
@@ -1505,12 +1507,27 @@ begin
     begin
       tk0 := fLexToks[i];
       tk1 := fLexToks[i+1];
-      if (tk0^.offset+1 <= p) and (tk1^.offset+1 > p) then
-        if tk0^.kind = TLexTokenKind.ltkChar then
-          exit;
+      if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
+        (tk0^.kind in [ltkChar, ltkComment]) then exit;
     end;
-  end else if value = autoCloseSquareBracket then
+    tk0 := fLexToks[fLexToks.Count-1];
+    if (tk0^.offset+1 <= p) and (tk0^.kind <> ltkIllegal) then
+      exit;
+  end
+  else if value = autoCloseSquareBracket then
   begin
+    p := selStart;
+    lex(Lines.Text, fLexToks);
+    for i:=0 to fLexToks.Count-2 do
+    begin
+      tk0 := fLexToks[i];
+      tk1 := fLexToks[i+1];
+      if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
+        (tk0^.kind = ltkComment) then exit;
+    end;
+    tk0 := fLexToks[fLexToks.Count-1];
+    if (tk0^.offset+1 <= p) and (tk0^.kind <> ltkIllegal) then
+      exit;
     str := lineText;
     i := LogicalCaretXY.X;
     if (i <= str.length) and (lineText[i] = ']') then
@@ -1853,7 +1870,7 @@ begin
     if (i <> fLexToks.Count-1) then
     begin
       ton := fLexToks[i+1];
-      bet := (tok^.offset + 1 <= p) and (ton^.offset + 1 > p);
+      bet := (tok^.offset + 1 <= p) and (p < ton^.offset + 2);
     end else
       bet := false;
     if bet and (tok^.kind = ltkComment) then
