@@ -669,62 +669,64 @@ function TCENativeProject.runPrePostProcess(processInfo: TCompileProcOptions): B
 var
   lst: TStringList;
   com: boolean;
-  proc: TProcess;
-  pname: string;
+  prc: TProcess;
+  nme: string;
   i, j: integer;
 begin
   //
   for i := 0 to processInfo.simpleCommands.Count-1 do
   begin
-    pname := fSymStringExpander.expand(processInfo.simpleCommands[i]);
-    proc := TProcess.Create(nil);
+    nme := fSymStringExpander.expand(processInfo.simpleCommands[i]);
+    if nme.isBlank then
+      continue;
+    prc := TProcess.Create(nil);
     lst := TStringList.Create;
     try
-      CommandToList(pname, lst);
-      proc.Executable := lst[0];
-      proc.Options:= [poUsePipes, poStderrToOutPut];
+      CommandToList(nme, lst);
+      prc.Executable := lst[0];
+      prc.Options:= [poUsePipes, poStderrToOutPut];
       lst.Delete(0);
-      proc.Parameters.Assign(lst);
-      proc.Execute;
-      com := proc.ExitCode = 0;
+      prc.Parameters.Assign(lst);
+      prc.Execute;
+      com := prc.ExitCode = 0;
       lst.Clear;
-      ce_common.processOutputToStrings(proc, lst);
+      processOutputToStrings(prc, lst);
       for j := 0 to lst.Count -1 do
         getMessageDisplay.message(lst[j], self as ICECommonProject, amcProj, amkAuto);
     finally
-      proc.Free;
+      prc.Free;
       lst.Free;
     end;
     if not com then
       exit(false);
   end;
   //
-  pname := fSymStringExpander.expand(processInfo.executable);
-  if (not exeInSysPath(pname)) and pname.isNotEmpty then
+  nme := fSymStringExpander.expand(processInfo.executable);
+  if (not exeInSysPath(nme)) and nme.isNotEmpty then
     exit(false)
-  else if pname.isEmpty then
+  else if nme.isEmpty then
     exit(true);
   //
-  proc := TProcess.Create(nil);
+  prc := TProcess.Create(nil);
   try
-    processInfo.setProcess(proc);
-    proc.Executable := exeFullName(pname);
-    j := proc.Parameters.Count-1;
+    processInfo.setProcess(prc);
+    prc.Executable := exeFullName(nme);
+    j := prc.Parameters.Count-1;
     for i:= 0 to j do
-      proc.Parameters.AddText(fSymStringExpander.expand(proc.Parameters[i]));
+      prc.Parameters.AddText(fSymStringExpander.expand(prc.Parameters[i]));
     for i:= 0 to j do
-      proc.Parameters.Delete(0);
-    if proc.CurrentDirectory.isNotEmpty then
-      proc.CurrentDirectory := fSymStringExpander.expand(proc.CurrentDirectory);
+      prc.Parameters.Delete(0);
+    if prc.CurrentDirectory.isNotEmpty then
+      prc.CurrentDirectory := fSymStringExpander.expand(prc.CurrentDirectory);
     // else cwd is set to project dir in compile()
-    ensureNoPipeIfWait(proc);
-    proc.Execute;
-    while proc.Running do
-      if poUsePipes in proc.Options then
-        runProcOutput(proc);
+    ensureNoPipeIfWait(prc);
+    prc.Execute;
+    while prc.Running do
+      if poUsePipes in prc.Options then
+        runProcOutput(prc);
   finally
-    result := proc.ExitStatus = 0;
-    proc.Free;
+    result := prc.ExitStatus = 0;
+    prc.Free;
   end;
 end;
 
