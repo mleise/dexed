@@ -3209,7 +3209,9 @@ begin
         Application.ProcessMessages;
       if not fProject.compiled then
       begin
-        fMsgs.message('asynchronous group compilatio stoped because of a failure', nil, amcAll, amkErr);
+        fMsgs.message('group compilation has stopped because of a failure',
+          nil, amcAll, amkErr);
+        fIsCompilingGroup := false;
         break;
       end;
     end;
