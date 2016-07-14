@@ -234,6 +234,13 @@ begin
     result.fFilename := fname
   else
     result.fFilename := ExtractRelativepath(fBasePath, fname);
+  if assigned(fFreeStanding) and SameFileName(fname, fFreeStanding.filename) then
+  begin
+    result.fProj := fFreeStanding;
+    fFreeStanding.inGroup(true);
+    fFreeStanding := nil;
+    result.fProj.activate;
+  end;
 end;
 
 function TProjectGroup.getProject(ix: Integer): ICECommonProject;
