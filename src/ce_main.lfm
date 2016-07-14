@@ -3830,6 +3830,9 @@ object CEMainForm: TCEMainForm
           CEFFD8D1D2FFB37A06FFB78116FFB9851CC5BB871F00BB871F00
         }
       end
+      object MenuItem98: TMenuItem
+        Action = actProjGroupCompileSync
+      end
       object MenuItem88: TMenuItem
         Action = actProjGroupCompile
         Bitmap.Data = {
@@ -4388,6 +4391,9 @@ object CEMainForm: TCEMainForm
       object MenuItem44: TMenuItem
         Caption = '-'
       end
+      object MenuItem99: TMenuItem
+        Action = actProjGroupCompileSync
+      end
       object MenuItem89: TMenuItem
         Action = actProjGroupCompile
         Bitmap.Data = {
@@ -4942,7 +4948,7 @@ object CEMainForm: TCEMainForm
     end
     object actProjGroupCompile: TAction
       Category = 'Project'
-      Caption = 'Compile project group'
+      Caption = 'Compile project group (parallel)'
       ImageIndex = 21
       OnExecute = actProjGroupCompileExecute
     end
@@ -4965,6 +4971,12 @@ object CEMainForm: TCEMainForm
       Caption = 'New DUB script'
       ImageIndex = 36
       OnExecute = actFileNewDubScriptExecute
+    end
+    object actProjGroupCompileSync: TAction
+      Category = 'Project'
+      Caption = 'Compile project group (sequential)'
+      ImageIndex = 21
+      OnExecute = actProjGroupCompileSyncExecute
     end
   end
   object imgList: TImageList

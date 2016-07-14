@@ -51,6 +51,7 @@ type
     actFileRunDub: TAction;
     actFileRunDubOut: TAction;
     actFileNewDubScript: TAction;
+    actProjGroupCompileSync: TAction;
     actProjGroupCompile: TAction;
     actProjSelUngrouped: TAction;
     actProjAddToGroup: TAction;
@@ -179,6 +180,8 @@ type
     MenuItem95: TMenuItem;
     MenuItem96: TMenuItem;
     MenuItem97: TMenuItem;
+    MenuItem98: TMenuItem;
+    MenuItem99: TMenuItem;
     mnuLayout: TMenuItem;
     mnuItemMruFile: TMenuItem;
     mnuItemMruProj: TMenuItem;
@@ -200,6 +203,7 @@ type
     procedure actNewGroupExecute(Sender: TObject);
     procedure actProjAddToGroupExecute(Sender: TObject);
     procedure actProjGroupCompileExecute(Sender: TObject);
+    procedure actProjGroupCompileSyncExecute(Sender: TObject);
     procedure actProjNewDubJsonExecute(Sender: TObject);
     procedure actProjNewGroupExecute(Sender: TObject);
     procedure actProjNewNativeExecute(Sender: TObject);
@@ -385,6 +389,7 @@ type
     function closeProj: boolean;
     procedure showProjTitle;
     function  checkProjectLock(message: boolean = true): boolean;
+    procedure compileGroup(async: boolean);
 
     // mru
     procedure mruChange(Sender: TObject);
@@ -3183,7 +3188,7 @@ end;
 // TODO-cFileOpenDialog: allow multi selection when possible
 //(open file, add file to project, ...)
 
-procedure TCEMainForm.actProjGroupCompileExecute(Sender: TObject);
+procedure TCEMainForm.compileGroup(async: boolean);
 var
   i: integer;
 begin
@@ -3196,10 +3201,29 @@ begin
   fMsgs.message('start compiling a project group...', nil, amcAll, amkInf);
   for i:= 0 to fProjectGroup.projectCount-1 do
   begin
-    //TODO-cprojectgroup: verify that compilation is not parallel since the projects use an async proc.
     fProjectGroup.getProject(i).activate;
     fProject.compile;
+    if not async then
+    begin
+      while fProjActionsLock do
+        Application.ProcessMessages;
+      if not fProject.compiled then
+      begin
+        fMsgs.message('asynchronous group compilatio stoped because of a failure', nil, amcAll, amkErr);
+        break;
+      end;
+    end;
   end;
+end;
+
+procedure TCEMainForm.actProjGroupCompileExecute(Sender: TObject);
+begin
+  compileGroup(true);
+end;
+
+procedure TCEMainForm.actProjGroupCompileSyncExecute(Sender: TObject);
+begin
+  compileGroup(false);
 end;
 
 procedure TCEMainForm.actProjNewGroupExecute(Sender: TObject);
