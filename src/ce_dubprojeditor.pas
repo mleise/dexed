@@ -10,21 +10,32 @@ uses
   ce_widget, ce_common, ce_interfaces, ce_observer, ce_dubproject, ce_sharedres;
 
 type
- { TCEDubProjectEditorWidget }
+
+  TProposalType = (ptArray, ptObject, ptValue);
+
+  TEditorProposal = record
+    name: string;
+    jtype: TProposalType;
+  end;
+
 
   TDubPropAddEvent = procedure(const propName: string; tpe: TJSONtype) of object;
 
   TCEDubProjectPropAddPanel = class(TForm)
   private
     fSelType: TRadioGroup;
-    fEdName: TEdit;
+    fEdName: TComboBox;
     fEvent: TDubPropAddEvent;
     fBtnValidate: TBitBtn;
+    fJson: TJSONData;
     procedure doValidate(sender: TObject);
+    procedure selTypeChanged(sender: TObject);
+    procedure setSelFromProposal(sender: TObject);
   public
-    constructor construct(event: TDubPropAddEvent);
+    constructor construct(event: TDubPropAddEvent; json: TJSONData);
   end;
 
+   { TCEDubProjectEditorWidget }
   TCEDubProjectEditorWidget = class(TCEWidget, ICEProjectObserver)
     btnAcceptProp: TSpeedButton;
     btnAddProp: TSpeedButton;
@@ -77,12 +88,61 @@ type
 implementation
 {$R *.lfm}
 
+const
+  proposals: array[0..42] of TEditorProposal = (
+    (name: 'authors';             jtype: ptArray),
+    (name: 'buildOptions';        jtype: ptArray),
+    (name: 'buildRequirements';   jtype: ptArray),
+    (name: 'buildTypes';          jtype: ptObject),
+    (name: 'configurations';      jtype: ptArray),
+    (name: 'copyFiles';           jtype: ptArray),
+    (name: 'copyright';           jtype: ptValue),
+    (name: 'cov';                 jtype: ptArray),
+    (name: 'ddoc';                jtype: ptArray),
+    (name: 'ddoxFilterArgs';      jtype: ptArray),
+    (name: 'debug';               jtype: ptArray),
+    (name: 'debugVersions';       jtype: ptArray),
+    (name: 'dependencies';        jtype: ptObject),
+    (name: 'description';         jtype: ptValue),
+    (name: 'dflags';              jtype: ptArray),
+    (name: 'docs';                jtype: ptArray),
+    (name: 'excludedSourceFiles'; jtype: ptArray),
+    (name: 'homepage';            jtype: ptValue),
+    (name: 'lflags';              jtype: ptArray),
+    (name: 'libs';                jtype: ptArray),
+    (name: 'license';             jtype: ptValue),
+    (name: 'mainSourceFile';      jtype: ptValue),
+    (name: 'name';                jtype: ptValue),
+    (name: 'plain';               jtype: ptArray),
+    (name: 'platforms';           jtype: ptArray),
+    (name: 'postBuildCommands';   jtype: ptArray),
+    (name: 'postGenerateCommands';jtype: ptArray),
+    (name: 'preBuildCommands';    jtype: ptArray),
+    (name: 'preGenerateCommands'; jtype: ptArray),
+    (name: 'profile';             jtype: ptArray),
+    (name: 'release';             jtype: ptArray),
+    (name: 'sourceFiles';         jtype: ptArray),
+    (name: 'stringImportPaths';   jtype: ptArray),
+    (name: 'subConfigurations';   jtype: ptObject),
+    (name: 'subPackages';         jtype: ptArray),
+    (name: 'systemDependencies';  jtype: ptValue),
+    (name: 'targetName';          jtype: ptValue),
+    (name: 'targetPath';          jtype: ptValue),
+    (name: 'targetType';          jtype: ptValue),
+    (name: 'unittest';            jtype: ptArray),
+    (name: 'unittest-cov';        jtype: ptArray),
+    (name: 'versions';            jtype: ptArray),
+    (name: 'workingDirectory';    jtype: ptValue)
+  );
+
 {$REGION TCEDubProjectPropAddPanel ---------------------------------------------}
-constructor TCEDubProjectPropAddPanel.construct(event: TDubPropAddEvent);
+constructor TCEDubProjectPropAddPanel.construct(event: TDubPropAddEvent; json: TJSONData);
 var
   layout: TPanel;
+  i: integer;
 begin
   inherited create(nil);
+  fJson := json;
   width := 280;
   height := 130;
   fEvent := event;
@@ -98,19 +158,24 @@ begin
   fSelType.Caption:= 'type';
   fSelType.ItemIndex:=2;
   fSelType.Hint:= 'type of the property to add';
+  fSelType.OnSelectionChanged:= @selTypeChanged;
   //
   layout := TPanel.Create(self);
   layout.Parent := self;
   layout.Align := alBottom;
-  layout.Height := 30;
+  layout.Height := 32;
   layout.BevelOuter:= bvNone;
   //
-  fEdName := TEdit.Create(self);
+  fEdName := TComboBox.Create(self);
   fEdName.Parent := layout;
   fEdName.Align:=alClient;
   fEdName.BorderSpacing.Around:=4;
   fEdName.Width:=80;
   fEdName.Hint:='name of the property to add';
+  for i:= low(proposals) to high(proposals) do
+    fEdName.Items.Add(proposals[i].name);
+  fEdName.AutoComplete := true;
+  fEdName.OnChange := @setSelFromProposal;
   //
   fBtnValidate := TBitBtn.Create(self);
   fBtnValidate.Parent := layout;
@@ -120,6 +185,34 @@ begin
   fBtnValidate.OnClick:=@doValidate;
   fBtnValidate.Hint:='accept and add a property';
   AssignPng(fBtnValidate, 'ACCEPT');
+  //
+  selTypeChanged(nil);
+end;
+
+procedure TCEDubProjectPropAddPanel.selTypeChanged(sender: TObject);
+begin
+  if fJson.isNotNil then
+    fEdName.Enabled := fJson.JSONType <> TJSONtype.jtArray;
+end;
+
+procedure TCEDubProjectPropAddPanel.setSelFromProposal(sender: TObject);
+var
+  i: integer;
+begin
+  fSelType.Enabled:=true;
+  for i:= low(proposals) to high(proposals) do
+  begin
+    if fEdName.Text = proposals[i].name then
+    begin
+      case proposals[i].jtype of
+        ptArray:fSelType.ItemIndex:=0;
+        ptObject:fSelType.ItemIndex:=1;
+        ptValue:fSelType.ItemIndex:=2;
+      end;
+      fSelType.Enabled := false;
+      break;
+    end;
+  end;
 end;
 
 procedure TCEDubProjectPropAddPanel.doValidate(sender: TObject);
@@ -257,7 +350,7 @@ var
 begin
   if fSelectedNode.isNil then exit;
   //
-  pnl := TCEDubProjectPropAddPanel.construct(@addProp);
+  pnl := TCEDubProjectPropAddPanel.construct(@addProp, TJSONData(fSelectedNode.Data));
   pnl.ShowModal;
   pnl.Free;
 end;
