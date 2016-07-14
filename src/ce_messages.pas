@@ -583,6 +583,7 @@ end;
 procedure TCEMessagesWidget.actAutoSelExecute(Sender: TObject);
 begin
   fAutoSelect := fActAutoSel.Checked;
+  fOptions.autoSelect:=fAutoSelect;
 end;
 
 procedure TCEMessagesWidget.actClearAllExecute(Sender: TObject);
