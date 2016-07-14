@@ -21,10 +21,10 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         Height = 380
         Top = 4
         Width = 403
-        ActivePage = TabSheet1
+        ActivePage = TabSheet2
         Align = alClient
         BorderSpacing.Around = 4
-        TabIndex = 0
+        TabIndex = 1
         TabOrder = 0
         object TabSheet1: TTabSheet
           Caption = 'Inspector'
@@ -84,8 +84,9 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
             ReadOnly = True
             ScrollBars = ssAutoBoth
             TabOrder = 1
+            ToolTips = False
             OnDblClick = treeInspectDblClick
-            Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+            Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoThemedDraw]
             Items.Data = {
               F9FFFFFF020002000000000000000000000000000000FFFFFFFF000000000000
               0000000C000000536F757263652066696C6573010000000100000001000000FF
@@ -110,8 +111,9 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
             ReadOnly = True
             ScrollBars = ssAutoBoth
             TabOrder = 0
+            ToolTips = False
             OnSelectionChanged = propTreeSelectionChanged
-            Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+            Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoThemedDraw]
             TreeLinePenStyle = psClear
           end
           object pnlToolBar: TPanel

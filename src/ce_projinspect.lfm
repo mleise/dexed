@@ -36,10 +36,11 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         ScrollBars = ssAutoBoth
         ShowRoot = False
         TabOrder = 0
+        ToolTips = False
         OnClick = TreeClick
         OnKeyDown = TreeKeyDown
         OnSelectionChanged = TreeSelectionChanged
-        Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowLines, tvoToolTips, tvoThemedDraw]
+        Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowLines, tvoThemedDraw]
         Items.Data = {
           F9FFFFFF020005000000000000000000000000000000FFFFFFFF000000000000
           0000000C000000536F757263652066696C6573010000000100000001000000FF
