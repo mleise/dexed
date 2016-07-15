@@ -52,9 +52,6 @@ inherited CEEditorWidget: TCEEditorWidget
   inherited contextMenu: TPopupMenu
     left = 24
     top = 16
-    object MenuItem2: TMenuItem[0]
-      Caption = 'New Item1'
-    end
   end
   object macRecorder: TSynMacroRecorder[2]
     RecordShortCut = 0

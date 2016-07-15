@@ -61,7 +61,6 @@ type
     mnuedPrevCarea: TMenuItem;
     mnuedLowcase: TMenuItem;
     mnuedUpcase: TMenuItem;
-    MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;

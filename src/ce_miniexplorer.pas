@@ -679,8 +679,13 @@ begin
       Tree.Selected := aRoot.Items[i];
       Tree.Selected.Expand(false);
       //
-      if str = aPath then break;
-      if dig(Tree.Selected) then break;
+      if str = aPath then
+        break
+      else if dig(Tree.Selected) then
+      begin
+        Tree.Selected.MakeVisible;
+        break;
+      end;
     end;
   end;
 end;

@@ -35,7 +35,7 @@ type
     constructor construct(event: TDubPropAddEvent; json: TJSONData);
   end;
 
-   { TCEDubProjectEditorWidget }
+  { TCEDubProjectEditorWidget }
   TCEDubProjectEditorWidget = class(TCEWidget, ICEProjectObserver)
     btnAcceptProp: TSpeedButton;
     btnAddProp: TSpeedButton;
