@@ -6,9 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, Forms, Controls, Menus, Graphics,
-  ExtCtrls, LCLProc, ComCtrls, StdCtrls, Buttons, LCLType, PropEdits,
+  ExtCtrls, LCLProc, ComCtrls, StdCtrls, Buttons, LCLType, PropEdits, strutils,
   ce_sharedres, ce_observer, ce_interfaces, ce_common, ce_writableComponent,
-  ce_dialogs;
+  ce_dialogs, EditBtn;
 
 type
 
@@ -59,6 +59,7 @@ type
     tree: TTreeView;
     procedure btnActivateClick(Sender: TObject);
     procedure btnClearClick(Sender: TObject);
+    function fltItemsFilterItem(Item: TObject; out Done: Boolean): Boolean;
     procedure LabeledEdit1KeyDown(Sender: TObject; var Key: Word;Shift: TShiftState);
     procedure shortcutCatcherExit(Sender: TObject);
     procedure shortcutCatcherMouseLeave(Sender: TObject);
@@ -281,6 +282,28 @@ begin
   //
   shortcutCatcher.Enabled := false;
   updateEditCtrls;
+end;
+
+function TCEShortcutEditor.fltItemsFilterItem(Item: TObject; out Done: Boolean): Boolean;
+var
+  shc: TShortcutItem;
+begin
+  if fltItems.Filter.isBlank then
+  begin
+    result := true;
+    done := true;
+  end
+  else
+  begin
+    result := false;
+    done := false;
+    // see TTreeFilterEdit: they pass TObject(TTreeNode.Data) and not a TTreeNode
+    if Pointer(item).isNil then
+      exit;
+    shc := TShortcutItem(item);
+    result := AnsiContainsText(shc.combination, fltItems.Filter);
+    done := true;
+  end;
 end;
 
 procedure TCEShortcutEditor.LabeledEdit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
