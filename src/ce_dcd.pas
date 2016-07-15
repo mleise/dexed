@@ -527,8 +527,8 @@ begin
   fClient.Execute;
   writeSourceToInput;
   //
-  setlength(str, 256);
-  i := fClient.Output.Read(str[1], 256);
+  setlength(str, MAX_PATH);
+  i := fClient.Output.Read(str[1], MAX_PATH);
   if i = 0 then
     updateServerlistening;
   setLength(str, i);
