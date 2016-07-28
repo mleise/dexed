@@ -1,0 +1,1 @@
+isitthere --if=d2kw.txt --ml=512 --hf=0
