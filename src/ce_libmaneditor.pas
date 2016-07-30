@@ -66,6 +66,7 @@ type
   private
     fProj: ICECommonProject;
     fFreeProj: ICECommonProject;
+    fModStart: boolean;
     procedure updateButtonsState;
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -75,6 +76,8 @@ type
     procedure projCompiled(project: ICECommonProject; success: boolean);
     function  itemForRow(row: TListItem): TLibraryItem;
     procedure RowToLibrary(row: TListItem);
+    function sourceRoot(project: ICECommonProject): string;
+    procedure lexFindToken(const token: PLexToken; out stop: boolean);
     //
     procedure dataToGrid;
   protected
@@ -84,7 +87,7 @@ type
   end;
 
   // determine the root of a library, according to the module names
-  function sourceRoot(project: ICECommonProject): string;
+  //function sourceRoot(project: ICECommonProject): string;
 
 implementation
 {$R *.lfm}
@@ -799,10 +802,10 @@ begin
   LibMan.updateCrossDependencies;
 end;
 
-function sourceRoot(project: ICECommonProject): string;
+function TCELibManEditorWidget.sourceRoot(project: ICECommonProject): string;
 var
   i, j: integer;
-  name: string;
+  mnme: string;
   fold: string;
   modn: TStringList;
   modf: TStringList;
@@ -814,8 +817,8 @@ begin
   // 1 source, same folder
   if project.sourcesCount = 1 then
   begin
-    name := project.sourceAbsolute(0);
-    if name.extractFilePath = base then
+    mnme := project.sourceAbsolute(0);
+    if mnme.extractFilePath = base then
       exit(base);
   end;
 
@@ -826,11 +829,12 @@ begin
     // get module name and store the parent.parent.parent... dir
     for i := 0 to project.sourcesCount-1 do
     begin
+      fModStart := false;
       fold := project.sourceAbsolute(i);
       modf.LoadFromFile(fold);
-      lex(modf.Text, toks);
-      name := getModuleName(toks);
-      for j := 0 to WordCount(name, ['.'])-1 do
+      lex(modf.Text, toks, @lexFindToken, [lxoNoComments]);
+      mnme := getModuleName(toks);
+      for j := 0 to WordCount(mnme, ['.'])-1 do
         fold := extractFileDir(fold);
       modn.Add(fold);
       toks.Clear;
@@ -857,6 +861,20 @@ begin
     modf.Free;
     modn.Free;
     toks.Free;
+  end;
+end;
+
+procedure TCELibManEditorWidget.lexFindToken(const token: PLexToken; out stop: boolean);
+begin
+  if (token^.kind = ltkKeyword) and (token^.data = 'module') then
+  begin
+    fModStart := true;
+    exit;
+  end;
+  if fModStart and (token^.kind = ltkSymbol) and (token^.data = ';') then
+  begin
+    stop := true;
+    fModStart := false;
   end;
 end;
 

@@ -722,7 +722,7 @@ begin
   begin
     if fDoc.isDSource then
     begin
-      lex(fDoc.Lines.Text, fTokList, @lexFindToken);
+      lex(fDoc.Lines.Text, fTokList, @lexFindToken, [lxoNoComments]);
       md := getModuleName(fTokList);
       fTokList.Clear;
       if md.isEmpty then

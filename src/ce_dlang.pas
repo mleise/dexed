@@ -363,10 +363,13 @@ begin
           if isOutOfBound then
             exit;
         end;
-        addToken(ltkComment);
+        if not noComment then
+        begin
+          addToken(ltkComment);
+          if callBackDoStop then
+            exit;
+        end;
         reader.Next;
-        if callBackDoStop then
-          exit;
         continue;
       end
       else
@@ -390,10 +393,13 @@ begin
           if isOutOfBound then
             exit;
         end;
-        addToken(ltkComment);
+        if not noComment then
+        begin
+          addToken(ltkComment);
+          if callBackDoStop then
+            exit;
+        end;
         reader.Next;
-        if callBackDoStop then
-          exit;
         continue;
       end
       else
@@ -431,10 +437,13 @@ begin
               exit;
           end;
         until nestedCom = 0;
-        addToken(ltkComment);
+        if not noComment then
+        begin
+          addToken(ltkComment);
+          if callBackDoStop then
+            exit;
+        end;
         reader.Next;
-        if callBackDoStop then
-          exit;
         continue;
       end
       else
