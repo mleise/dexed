@@ -819,12 +819,12 @@ begin
     if isOperator1(reader.head^) then
     begin
       reader.saveBeginning;
-      identifier += reader.head^;
-      while isOperator1(reader.Next^) do
+      while isOperator1(reader.head^) do
       begin
         if isOutOfBound then
           exit;
         identifier += reader.head^;
+        reader.next;
         if length(identifier) = 4 then
           break;
       end;
@@ -839,6 +839,7 @@ begin
         end;
         if isOperator3(identifier[1..3]) then
         begin
+          setLength(identifier, 3);
           reader.previous;
           addToken(ltkOperator);
           if callBackDoStop then
@@ -847,6 +848,7 @@ begin
         end;
         if isOperator2(identifier[1..2]) then
         begin
+          setLength(identifier, 2);
           reader.previous;
           reader.previous;
           addToken(ltkOperator);
@@ -856,6 +858,7 @@ begin
         end;
         if isOperator1(identifier[1]) then
         begin
+          setLength(identifier, 1);
           reader.previous;
           reader.previous;
           reader.previous;
@@ -876,6 +879,7 @@ begin
         end;
         if isOperator2(identifier[1..2]) then
         begin
+          setLength(identifier, 2);
           reader.previous;
           addToken(ltkOperator);
           if callBackDoStop then
@@ -884,6 +888,7 @@ begin
         end;
         if isOperator1(identifier[1]) then
         begin
+          setLength(identifier, 1);
           reader.previous;
           reader.previous;
           addToken(ltkOperator);
@@ -903,6 +908,7 @@ begin
         end;
         if isOperator1(identifier[1]) then
         begin
+          setLength(identifier, 1);
           reader.previous;
           addToken(ltkOperator);
           if callBackDoStop then
