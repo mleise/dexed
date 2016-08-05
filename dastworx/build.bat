@@ -1,8 +1,3 @@
-cd ..
-git submodule update --init
-::git submodule foreach git checkout master
-cd dastworx
-
 ::iz sources
 set iz=
 for /r "../etc/iz/import/" %%F in (*.d) do call set iz=%%iz%% "%%F"

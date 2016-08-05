@@ -1,7 +1,3 @@
-cd ..
-git submodule update --init
-cd dastworx
-
 #iz sources
 cd ../etc/iz/import/
 iz=$(find `pwd` -type f -name \*.d)
