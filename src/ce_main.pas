@@ -263,7 +263,7 @@ type
 
   protected
 
-    procedure DoShow; override;
+    procedure DoFirstShow; override;
 
   private
 
@@ -309,7 +309,6 @@ type
     fRunProjAfterCompile: boolean;
     fIsCompilingGroup: boolean;
     fGroupCompilationCnt: integer;
-    fFirstShown: boolean;
     fProjFromCommandLine: boolean;
     fInitialized: boolean;
     fRunnableSw: string;
@@ -1485,39 +1484,33 @@ begin
   end;
 end;
 
-procedure TCEMainForm.DoShow;
+procedure TCEMainForm.DoFirstShow;
 var
   url: string;
 begin
-  inherited;
-  if (not fFirstShown) then
-  begin
-    // TODO-cbetterfix: clipboard doesn't work first time it's used on a reloaded doc.
-    // see: http://forum.lazarus.freepascal.org/index.php/topic,30616.0.htm
-    if fAppliOpts.reloadLastDocuments then
-      LoadLastDocsAndProj;
-    if fProject = nil then
-      newNativeProj;
+  // TODO-cbetterfix: clipboard doesn't work first time it's used on a reloaded doc.
+  // see: http://forum.lazarus.freepascal.org/index.php/topic,30616.0.htm
+  if fAppliOpts.reloadLastDocuments then
+    LoadLastDocsAndProj;
+  if fProject = nil then
+    newNativeProj;
 
-    DockMaster.ResetSplitters;
-
-    if fFirstTimeCoedit then
-      actFileNewRun.Execute;
-
-    if fAppliOpts.autoCheckUpdates then
-    begin
-      url := checkForUpdate;
-      if url <> '' then
-      begin
-        if dlgYesNo('An new release is available, do you wish to visit the release page ?' +
-          lineEnding + '(' + url +')') = mrYes then
-            openUrl(url);
-      end;
-    end;
-
-    fFirstShown := true;
-  end;
+  DockMaster.ResetSplitters;
   setSplitterWheelEvent;
+
+  if fFirstTimeCoedit then
+    actFileNewRun.Execute;
+
+  if fAppliOpts.autoCheckUpdates then
+  begin
+    url := checkForUpdate;
+    if url <> '' then
+    begin
+      if dlgYesNo('An new release is available, do you wish to visit the release page ?' +
+        lineEnding + '(' + url +')') = mrYes then
+          openUrl(url);
+    end;
+  end;
 end;
 
 procedure TCEMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
