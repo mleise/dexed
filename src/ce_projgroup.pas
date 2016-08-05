@@ -614,10 +614,13 @@ begin
   end;
   if fFreeProj <> nil then
   begin
-    case fFreeProj.getFormat of
-      pfNative: StaticText1.Caption:= 'Free standing: ' + fFreeProj.filename.extractFileName;
-      pfDub: StaticText1.Caption:= 'Free standing: ' + TCEDubProject(fFreeProj.getProject).packageName;
-    end;
+    if fFreeProj.filename.fileExists then
+      case fFreeProj.getFormat of
+        pfNative: StaticText1.Caption:= 'Free standing: ' + fFreeProj.filename.extractFileName;
+        pfDub: StaticText1.Caption:= 'Free standing: ' + TCEDubProject(fFreeProj.getProject).packageName;
+      end
+    else
+      StaticText1.Caption:= 'Free standing: (not yet saved)';
   end
   else
     StaticText1.Caption:= 'No free standing project';
