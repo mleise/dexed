@@ -597,35 +597,10 @@ end;
 
 procedure TCENativeProject.readerPropNoFound(Reader: TReader; Instance: TPersistent;
   var PropName: string; IsPath: Boolean; var Handled, Skip: Boolean);
-//var
-  //idt: string;
-  //curr: TCompilerConfiguration;
 begin
-  // continue loading: this method ensures the project compat. in case of drastic changes.
-
-  {curr := self.configuration[OptionsCollection.Count-1];
-  if PropName = 'debugIdentifier' then
-  begin
-    idt := Reader.ReadUnicodeString; // next prop starts one char too late
-    if curr.debugingOptions.debugIdentifiers.IndexOf(idt) = -1 then
-      curr.debugingOptions.debugIdentifiers.Add(idt);
-    Skip := true;
-    Handled := true;
-  end
-  else if PropName = 'versionIdentifier' then
-  begin
-    idt := Reader.ReadString; // next prop starts one char too late
-    if curr.outputOptions.versionIdentifiers.IndexOf(idt) = -1 then
-      curr.outputOptions.versionIdentifiers.Add(idt);
-    Skip := true;
-    Handled := true;
-    exit;
-  end
-  else}
-  begin
-    Skip := true;
-    Handled := false;
-  end;
+  // errors are avoided by property deprecation, error here means "not a project".
+  Skip := true;
+  Handled := false;
 end;
 
 procedure TCENativeProject.updateOutFilename;
