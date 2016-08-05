@@ -1488,6 +1488,7 @@ procedure TCEMainForm.DoFirstShow;
 var
   url: string;
 begin
+  inherited;
   // TODO-cbetterfix: clipboard doesn't work first time it's used on a reloaded doc.
   // see: http://forum.lazarus.freepascal.org/index.php/topic,30616.0.htm
   if fAppliOpts.reloadLastDocuments then
