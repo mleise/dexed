@@ -50,11 +50,19 @@ q{
     else version(unittest) log();
 };
 
+
 /**
  * Contains all the D version identifiers that are not valid
  * for this operating system.
  */
-immutable string[] badVersions;
+ref const(bool[string]) badVersions()
+{
+    if (!_badVersions.length)
+        fillBadVersions;
+    return _badVersions;
+}
+
+private __gshared bool[string] _badVersions;
 
 private static immutable predefinedVersions = [
 	"AArch64",
@@ -154,12 +162,12 @@ private static immutable predefinedVersions = [
 	"X86_64"
 ];
 
-static this()
+private void fillBadVersions()
 {
     // note: compiler switch -m32/64 can lead to wrong results
     string addVersionidentifier(string ver)()
     {
-        return `version(` ~ ver ~ `){} else badVersions ~= "` ~ ver ~ "\";\n";
+        return `version(` ~ ver ~ `){} else _badVersions["` ~ ver ~ "\"] = true;\n";
     }
 
     string addVerionIdentifiers()
