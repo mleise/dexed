@@ -143,6 +143,7 @@ type
       false, false, false, false, false, false, false, false, false, false, false,
       false, false, false, false
     );
+    // 100017a
     const fCoeffs: array[0..255] of Byte =
     (
       93, 12, 147, 37, 246, 76, 204, 47, 77, 0, 217, 84, 225, 244, 62, 63, 81, 2,

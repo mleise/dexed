@@ -1146,7 +1146,7 @@ begin
   DockMaster.HeaderStyle := adhsPoints;
   DockMaster.HideHeaderCaptionFloatingControl := true;
 
-  // this is a fix copied from Laz.
+  // this is a fix (?) copied from Laz.
   if DockManager is TAnchorDockManager then begin
     aManager:=TAnchorDockManager(DockManager);
     aManager.PreferredSiteSizeAsSiteMinimum:=false;
@@ -1169,14 +1169,30 @@ begin
     // center
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fEditWidg), DockMaster.GetSite(Self), alBottom);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fMesgWidg), DockMaster.GetSite(fEditWidg), alBottom);
+    DockMaster.ManualDock(DockMaster.GetAnchorSite(fLibMWidg), DockMaster.GetSite(fMesgWidg), alClient, fMesgWidg);
+    DockMaster.ManualDock(DockMaster.GetAnchorSite(fTodolWidg), DockMaster.GetSite(fMesgWidg), alClient, fMesgWidg);
+    fMesgWidg.showWidget;
     // left
-    DockMaster.GetAnchorSite(fSymlWidg).Width := 160;
-    DockMaster.GetAnchorSite(fFindWidg).Width := 160;
+    DockMaster.GetAnchorSite(fSymlWidg).Width := 120;
+    DockMaster.GetAnchorSite(fFindWidg).Width := 120;
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fSymlWidg), DockMaster.GetSite(fEditWidg), alLeft);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fFindWidg), DockMaster.GetAnchorSite(fSymlWidg), alBottom, fSymlWidg);
+    DockMaster.ManualDock(DockMaster.GetAnchorSite(fPrInpWidg), DockMaster.GetAnchorSite(fFindWidg), alTop, fFindWidg);
+    DockMaster.ManualDock(DockMaster.GetAnchorSite(fExplWidg), DockMaster.GetSite(fSymlWidg), alClient, fSymlWidg);
+    if GetDockSplitter(DockMaster.GetSite(fFindWidg), akTop, topsplt) then
+    begin
+      topsplt.MoveSplitter(40);
+      topsplt := nil;
+    end;
+    if GetDockSplitter(DockMaster.GetSite(fPrInpWidg), akTop, topsplt) then
+    begin
+      topsplt.MoveSplitter(40);
+      topsplt := nil;
+    end;
+    fSymlWidg.showWidget;
     // right
-    DockMaster.GetAnchorSite(fProjWidg).Width := 260;
-    DockMaster.GetAnchorSite(fPrjCfWidg).Width := 260;
+    DockMaster.GetAnchorSite(fProjWidg).Width := 190;
+    DockMaster.GetAnchorSite(fPrjCfWidg).Width := 190;
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fProjWidg), DockMaster.GetSite(fEditWidg), alRight);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fPrjCfWidg), DockMaster.GetAnchorSite(fProjWidg), alBottom, fProjWidg);
     // close remaining and header to top
@@ -1188,6 +1204,7 @@ begin
       if not DockMaster.GetAnchorSite(widg).HasParent then
         DockMaster.GetAnchorSite(widg).Close;
     end;
+    WindowState:= wsMaximized;
   end;
 
   // lock space between the menu and the widgets

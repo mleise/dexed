@@ -82,19 +82,20 @@ type
     function GetIdentChars: TSynIdentChars; override;
 	published
     property foldKinds:   TFoldKinds read fFoldKinds write setFoldKinds;
-    property whites:      TSynHighlighterAttributes read fWhiteAttrib write setWhiteAttrib;
-    property numbers:     TSynHighlighterAttributes read fNumbrAttrib write setNumbrAttrib;
-    property symbols:     TSynHighlighterAttributes read fSymblAttrib write setSymblAttrib;
-    property identifiers: TSynHighlighterAttributes read fIdentAttrib write setIdentAttrib;
-    property comments:    TSynHighlighterAttributes read fCommtAttrib write setCommtAttrib;
-    property strings:     TSynHighlighterAttributes read fStrngAttrib write setStrngAttrib;
-    property keywords:    TSynHighlighterAttributes read fKeywdAttrib write setKeywdAttrib;
-    property ddoc:        TSynHighlighterAttributes read fDDocsAttrib write setDDocsAttrib;
-    property inlineAsm:   TSynHighlighterAttributes read fAsblrAttrib write setAsblrAttrib;
-    property special:     TSynHighlighterAttributes read fSpeckAttrib write setSpeckAttrib;
-    property errors:      TSynHighlighterAttributes read fErrorAttrib write setErrorAttrib;
-    property attributes:  TSynHighlighterAttributes read fAttriAttrib write setAttriAttrib;
+    property whites:      TSynHighlighterAttributes read fWhiteAttrib write setWhiteAttrib stored true;
+    property numbers:     TSynHighlighterAttributes read fNumbrAttrib write setNumbrAttrib stored true;
+    property symbols:     TSynHighlighterAttributes read fSymblAttrib write setSymblAttrib stored true;
+    property identifiers: TSynHighlighterAttributes read fIdentAttrib write setIdentAttrib stored true;
+    property comments:    TSynHighlighterAttributes read fCommtAttrib write setCommtAttrib stored true;
+    property strings:     TSynHighlighterAttributes read fStrngAttrib write setStrngAttrib stored true;
+    property keywords:    TSynHighlighterAttributes read fKeywdAttrib write setKeywdAttrib stored true;
+    property ddoc:        TSynHighlighterAttributes read fDDocsAttrib write setDDocsAttrib stored true;
+    property inlineAsm:   TSynHighlighterAttributes read fAsblrAttrib write setAsblrAttrib stored true;
+    property special:     TSynHighlighterAttributes read fSpeckAttrib write setSpeckAttrib stored true;
+    property errors:      TSynHighlighterAttributes read fErrorAttrib write setErrorAttrib stored true;
+    property attributes:  TSynHighlighterAttributes read fAttriAttrib write setAttriAttrib stored true;
     property DefaultFilter stored false;
+    property enabled stored false;
 	public
 		constructor create(aOwner: TComponent); override;
     destructor destroy; override;

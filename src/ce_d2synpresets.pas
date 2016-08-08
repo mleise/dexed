@@ -324,7 +324,7 @@ begin
       selection.Background:= 15984598;
       selection.Foreground:= clNone;
       //
-      currentLine.Background:= 15727098;
+      currentLine.Background:= 15789545;
       currentLine.Foreground:= clNone;
     end;
     with fPresets.addPreset do
@@ -422,16 +422,17 @@ begin
       folding.Background := clNone;
       folding.Foreground := clNone;
       folding.FrameColor := clBlack;
-      identifierMatch.Background := 14145500;
+      identifierMatch.Background := clNone;
       identifierMatch.Foreground := clNone;
-      identifierMatch.BackPriority := 2;
+      identifierMatch.FrameColor := clGray;
+      identifierMatch.BackPriority := 10;
       mouseLink.Background := clNone;
       mouseLink.Foreground := clNone;
       mouseLink.FrameColor := 3166415;
       mouseLink.FrameEdges := sfeBottom;
-      selection.Background := 14014190;
+      selection.Background := 12837345;
       selection.Foreground := clNone;
-      selection.BackPriority := 1;
+      selection.BackPriority := 10;
     end;
     with fPresets.addPreset do
     begin
@@ -467,7 +468,6 @@ begin
       selection.Foreground := clNone;
     end;
   end;
-  // TODO-cd2synpresets: add more presets
   //
   fEditor := TSynEdit.Create(self);
   fEditor.Parent:= self;

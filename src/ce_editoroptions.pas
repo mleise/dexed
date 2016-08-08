@@ -201,6 +201,9 @@ begin
   fFoldedColor.Foreground := clDkGray;
   fFoldedColor.FrameColor := clDkGray;
   //
+  fSelAttribs.Background := 13421772;
+  fSelAttribs.Foreground := clNone;
+  //
   fMouseLinkAttribs.Style := [fsUnderline, fsBold];
   fMouseLinkAttribs.StyleMask := [];
   fMouseLinkAttribs.Foreground := clNone;
@@ -227,7 +230,7 @@ begin
   fBackground := clWhite;
   fRightEdgeColor := clSilver;
   //
-  fCurrLineAttribs.Background := fBackground - $080808;
+  fCurrLineAttribs.Background := 15789545;
   fCurrLineAttribs.Foreground := clNone;
   //
   options1 :=
