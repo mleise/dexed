@@ -2,7 +2,7 @@
   <img src="https://github.com/BBasile/Coedit/raw/master/logo/coedit.png?raw=true" width="15%" height="15%" alt="CE"/>
 </p>
 
-Coedit is an IDE for the D programming language [D2](http://dlang.org).
+Coedit is an IDE for the [D programming language](http://dlang.org), its compilers, tools and libraries.
 
 [![](https://github.com/BBasile/CoeditWikiData/raw/master/coedit.win7.33.png)](https://github.com/BBasile/CoeditWikiData/raw/master/coedit.win7.png)
 
@@ -16,14 +16,14 @@ Coedit is an IDE for the D programming language [D2](http://dlang.org).
 - single click to compile and execute an unsaved module (aka a _runnable module_).
 - single click to compile and _unittest_ a module.
 - advanced editor with D2 syntax highlighter, folds, regions, identifier markup, macros, sync-edit, etc.
-- edition helpers: comment blocks, local identifier renaming, brace auto-closing.
+- edition helpers: comment blocks, local identifier renaming, brace auto-closing, etc.
 - list of the symbols in the module being edited.
 - static libraries manager that supports auto-registration from local DUB projects, from online DUB packages or from Coedit custom project format.
 - _todo comments_ parser and dedicated widget.
 - user-defined tools powered by a string interpolation system.
 - full [D Completion Daemon](https://github.com/Hackerpilot/DCD) integration (completion, hints, call tips, jump to symbol declaration).
 - mini file browser, dfmt interface, search & replace, etc.
-- [selection of 3rd party libraries](https://github.com/BBasile/metad) that can be easily build and integrated to Coedit.
+- [selection of 3rd party libraries](https://github.com/BBasile/metad) that can be easily build and integrated in Coedit.
 
 **Project information**
 ---
