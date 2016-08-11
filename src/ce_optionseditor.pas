@@ -255,7 +255,7 @@ begin
     // TODO-cbugfix: filtering does not work on sub components (see editor options, highlighterDlang)
     if (len > 2) and (nme[len - 2 .. len] = 'Tag') then
       aShow := false
-    else if (len > 3) and (nme[len - 3 .. len] = 'Name') then
+    else if nme = 'Name' then
       aShow := false
     else if aEditor.GetPropInfo^.PropType = TypeInfo(TCollection) then
       aShow := false;

@@ -24,6 +24,7 @@ type
     fMoveRight: TShortCut;
     fNextPage: TShortCut;
     fPrevPage: TShortCut;
+    fDetectModuleName: boolean;
     fShCount: integer;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
@@ -42,6 +43,7 @@ type
     property previousPage: TShortCut read fPrevPage write fPrevPage;
     property moveLeft: TShortCut read fMoveLeft write fMoveLeft;
     property moveRight: TShortCut read fMoveRight write fMoveRight;
+    property detectModuleName: boolean read fDetectModuleName write fDetectModuleName default true;
   public
     procedure assign(source: TPersistent); override;
     procedure assignTo(target: TPersistent); override;
@@ -111,6 +113,7 @@ type
     procedure updateImperative; override;
     procedure setToolBarFlat(value: boolean); override;
   private
+    fDetectModuleName: boolean;
     fOptions: TCEPagesOptions;
     pageControl: TCEPageControl;
     fKeyChanged: boolean;
@@ -135,6 +138,7 @@ type
     procedure getSymbolLoc;
     procedure focusedEditorChanged;
     procedure memoCmdProcessed(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+    procedure setDetectModuleName(value: boolean);
     //
     procedure docNew(document: TCESynMemo);
     procedure docClosing(document: TCESynMemo);
@@ -178,6 +182,7 @@ begin
   inherited create(editorWidg);
   EntitiesConnector.addObserver(self);
   //
+  fDetectModuleName := true;
   fname := getCoeditDocPath + optname;
   if fname.fileExists then
   begin
@@ -200,6 +205,7 @@ begin
   begin
     fPageButtons := fEditorWidget.pageControl.buttons;
     fPageOptions := fEditorWidget.pageControl.options;
+    fDetectModuleName:= fEditorWidget.fDetectModuleName;
   end
   else inherited;
 end;
@@ -210,6 +216,7 @@ begin
   begin
     fEditorWidget.pageControl.buttons := fPageButtons;
     fEditorWidget.pageControl.options := fPageOptions;
+    fEditorWidget.setDetectModuleName(fDetectModuleName);
   end
   else inherited;
 end;
@@ -284,6 +291,7 @@ constructor TCEEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
   toolbarVisible:=false;
+  fDetectModuleName:=true;
   //
   pageControl := TCEPageControl.Create(self);
   pageControl.Parent := Content;
@@ -522,6 +530,24 @@ begin
   pageControl.currentPage.Caption:='<new document>';
 end;
 
+procedure TCEEditorWidget.setDetectModuleName(value: boolean);
+var
+  i, j: integer;
+begin
+  if fDetectModuleName = value then
+    exit;
+  fDetectModuleName:=value;
+  j := pageControl.pageIndex;
+  if j = -1 then
+    exit;
+  for i:= 0 to pageControl.pageCount-1 do
+  begin
+    pageControl.pageIndex:= i;
+    updatePageCaption;
+  end;
+  pageControl.pageIndex:= j;
+end;
+
 procedure TCEEditorWidget.focusedEditorChanged;
 begin
   if fDoc.isNil then exit;
@@ -720,16 +746,21 @@ var
 begin
   if fDoc.isNotNil then
   begin
-    if fDoc.isDSource then
+    if fDetectModuleName then
     begin
-      lex(fDoc.Lines.Text, fTokList, @lexFindToken, [lxoNoComments]);
-      md := getModuleName(fTokList);
-      fTokList.Clear;
-      if md.isEmpty then
-        md := fDoc.fileName.extractFileName;
+      if fDoc.isDSource then
+      begin
+        lex(fDoc.Lines.Text, fTokList, @lexFindToken, [lxoNoComments]);
+        md := getModuleName(fTokList);
+        fTokList.Clear;
+        if md.isEmpty then
+          md := fDoc.fileName.extractFileName;
+      end
+      else if fDoc.fileName.fileExists then
+        md := fDoc.fileName.extractFileName
     end
-    else if fDoc.fileName.fileExists then
-      md := fDoc.fileName.extractFileName
+      else if fDoc.fileName.fileExists then
+        md := fDoc.fileName.extractFileName
   end;
   pageControl.currentPage.Caption := md;
 end;
