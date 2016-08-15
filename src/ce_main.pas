@@ -25,6 +25,53 @@ type
     property OnMouseWheel;
   end;
 
+  TRunnableToFolderCondition = (
+    ifInProject,  // runnable src is part of the project
+    ifNotSaved,   // runnable src is an unsaved module (tmp_XXXXX)
+    ifSaved       // runnable src not in project but saved not in temp dir
+  );
+
+  TCERunnableOptions = class(TWritableLfmTextComponent)
+  private
+    fCompiler: TCECompiler;
+    fDetectMain: boolean;
+    fDetectLibraries: boolean;
+    fOutputFolder: TCEPathname;
+    fAlwaysToFolder: boolean;
+    fStaticSwitches: TStringList;
+    procedure setOutputFolder(const value: TCEPathname);
+    procedure setStaticSwitches(value: TStringList);
+    procedure setCompiler(value: TCECompiler);
+  protected
+    procedure afterLoad; override;
+  published
+    property alwaysToFolder: boolean read fAlwaysToFolder write fAlwaysToFolder;
+    property compiler: TCECompiler read fCompiler write setCompiler;
+    property detectMain: boolean read fDetectMain write fDetectMain;
+    property detectLibraries: boolean read fDetectLibraries write fDetectLibraries;
+    property outputFolder: TCEPathname read fOutputFolder write setOutputFolder;
+    property staticSwitches: TStringList read fStaticSwitches write setStaticSwitches;
+  public
+    constructor create(aOwner: TComponent); override;
+    destructor destroy; override;
+    procedure assign(source: TPersistent); override;
+    procedure setDefaultSwitches;
+    procedure sanitizeSwitches;
+  end;
+
+  TCEEditableRunnableOptions = class(TCERunnableOptions, ICEEditableOptions)
+  private
+    fBackup: TCERunnableOptions;
+    function optionedWantCategory(): string;
+    function optionedWantEditorKind: TOptionEditorKind;
+    function optionedWantContainer: TPersistent;
+    procedure optionedEvent(event: TOptionEditorEvent);
+    function optionedOptionsModified: boolean;
+  public
+    constructor create(aOwner: TComponent); override;
+    destructor destroy; override;
+  end;
+
   { TCEMainForm }
   TCEMainForm = class(TForm, ICEDocumentObserver, ICEEditableShortCut, ICEProjectObserver)
     actFileCompAndRun: TAction;
@@ -272,13 +319,12 @@ type
 
   private
 
+    fRunnablesOptions: TCEEditableRunnableOptions;
     fRunnableCompiler: TCECompiler;
-    fRunnableDestination: string;
     fSymStringExpander: ICESymStringExpander;
     fProjectGroup: ICEProjectGroup;
     fCovModUt: boolean;
     fDscanUnittests: boolean;
-    fAlwaysUseDest: boolean;
     fDoc: TCESynMemo;
     fFirstTimeCoedit: boolean;
     fActionHandler: TCEActionProviderSubject;
@@ -316,7 +362,6 @@ type
     fGroupCompilationCnt: integer;
     fProjFromCommandLine: boolean;
     fInitialized: boolean;
-    fRunnableSw: string;
     fRunProc: TCEProcess;
     fMsgs: ICEMessagesDisplay;
     fMainMenuSubj: TCEMainMenuSubject;
@@ -504,21 +549,22 @@ type
     property maxRecentDocuments: integer read fMaxRecentDocs write fMaxRecentDocs;
     property dubCompiler: TCECompiler read getDubCompiler write setDubCompiler;
     property nativeProjectCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
-    property runnableCompiler: TCECompiler read getRunnableCompiler write setRunnableCompiler;
-    property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination;
-    property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest;
     property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
     property autoSaveProjectFiles: boolean read fAutoSaveProjectFiles write fAutoSaveProjectFiles default false;
     property flatLook: boolean read fFlatLook write fFlatLook;
-    property detectMain: boolean read fDetectMain write fDetectMain;
-    property detectRunnableImports: boolean read fDetectRunnableImports write fDetectRunnableImports;
     property splitterScrollSpeed: byte read fSplitterScrollSpeed write setSplitterScsrollSpeed;
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
 
+    // TODO-cmaintenance: remove this property from version 3 gold
+    property detectRunnableImports: boolean read fDetectRunnableImports write fDetectRunnableImports stored false; deprecated;
+    property runnableCompiler: TCECompiler read getRunnableCompiler write setRunnableCompiler stored false; deprecated;
+    property detectMain: boolean read fDetectMain write fDetectMain stored false; deprecated;
     // TODO-cmaintenance: remove this property from version 3 update 1
-    property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler stored false;
+    property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler stored false; deprecated;
+    property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination stored false; deprecated;
+    property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest stored false; deprecated;
   end;
 
   TCEApplicationOptions = class(TCEApplicationOptionsBase, ICEEditableOptions)
@@ -546,7 +592,162 @@ implementation
 uses
   SynMacroRecorder, ce_dcd;
 
-{$REGION TCEApplicationOptions ------------------------------------------------------}
+{$REGION TCERunnableOptions ----------------------------------------------------}
+constructor TCERunnableOptions.create(aOwner: TComponent);
+begin
+  inherited;
+  fStaticSwitches := TStringList.create;
+  fStaticSwitches.Duplicates := TDuplicates.dupIgnore;
+end;
+
+
+destructor TCERunnableOptions.destroy;
+begin
+  fStaticSwitches.free;
+  inherited;
+end;
+
+procedure TCERunnableOptions.assign(source: TPersistent);
+var
+  src: TCERunnableOptions;
+begin
+  if source is TCERunnableOptions then
+  begin
+    src := TCERunnableOptions(source);
+    fCompiler:= src.fCompiler;
+    fDetectMain:= src.fDetectMain;
+    fDetectLibraries:= src.fDetectLibraries;
+    fOutputFolder:= src.fOutputFolder;
+    fAlwaysToFolder:= src.alwaysToFolder;
+    fStaticSwitches.assign(src.fStaticSwitches);
+  end
+  else inherited;
+end;
+
+procedure TCERunnableOptions.setStaticSwitches(value: TStringList);
+begin
+  fStaticSwitches.Assign(value);
+  sanitizeSwitches;
+end;
+
+procedure TCERunnableOptions.afterLoad;
+begin
+  inherited;
+  if fStaticSwitches.Count = 0 then
+    setDefaultSwitches
+  else
+    sanitizeSwitches;
+end;
+
+procedure TCERunnableOptions.setDefaultSwitches;
+begin
+  fStaticSwitches.Clear;
+  fStaticSwitches.AddStrings(['-vcolumns', '-w', '-wi']);
+end;
+
+procedure TCERunnableOptions.sanitizeSwitches;
+var
+  i: integer;
+  sw: string;
+  lst: TStringList;
+begin
+  lst := TStringList.Create;
+  try
+    for i:= 0 to fStaticSwitches.Count-1 do
+    begin
+      sw := fStaticSwitches[i];
+      RemovePadChars(sw, [#0..#32]);
+      // not a switch
+      if sw.length < 2 then
+        continue
+      else if sw[1] <> '-' then
+        continue
+      // set according to the context
+      else if sw = '-unittest' then
+        continue
+      else if sw = '-main' then
+        continue
+      // would break location detection
+      else if (sw.length > 2) and (sw[1..3] = '-of') then
+        continue
+      else
+        lst.Add(sw);
+    end;
+    fStaticSwitches.Assign(lst);
+  finally
+    lst.free;
+  end;
+end;
+
+procedure TCERunnableOptions.setOutputFolder(const value: TCEPathname);
+begin
+  fOutputFolder := value;
+  if (length(fOutputFolder) > 0)
+    and (fOutputFolder[length(fOutputFolder)] <> DirectorySeparator) then
+      fOutputFolder += DirectorySeparator;
+end;
+
+procedure TCERunnableOptions.setCompiler(value: TCECompiler);
+begin
+  case value of
+    ldc: if not exeInSysPath('ldmd2' + exeExt) then
+      value := dmd;
+    gdc: if not exeInSysPath('gdmd' + exeExt) then
+      value := dmd;
+  end;
+  fCompiler :=value;
+end;
+
+constructor TCEEditableRunnableOptions.create(aOwner: TComponent);
+begin
+  inherited;
+  fBackup := TCERunnableOptions.create(nil);
+  EntitiesConnector.addObserver(self);
+end;
+
+destructor TCEEditableRunnableOptions.destroy;
+begin
+  fBackup.free;
+  EntitiesConnector.removeObserver(self);
+  inherited;
+end;
+
+function TCEEditableRunnableOptions.optionedWantCategory(): string;
+begin
+  exit('Runnable modules');
+end;
+
+function TCEEditableRunnableOptions.optionedWantEditorKind: TOptionEditorKind;
+begin
+  exit(oekGeneric);
+end;
+
+function TCEEditableRunnableOptions.optionedWantContainer: TPersistent;
+begin
+  exit(self);
+  fBackup.assign(self);
+end;
+
+procedure TCEEditableRunnableOptions.optionedEvent(event: TOptionEditorEvent);
+begin
+  case event of
+    oeeAccept:
+      begin
+        fBackup.assign(self);
+        sanitizeSwitches;
+      end;
+    oeeCancel: assign(fBackup);
+    oeeSelectCat: fBackup.assign(self);
+  end;
+end;
+
+function TCEEditableRunnableOptions.optionedOptionsModified: boolean;
+begin
+  exit(false);
+end;
+{$ENDREGION --------------------------------------------------------------------}
+
+{$REGION TCEApplicationOptions -------------------------------------------------}
 constructor TCEApplicationOptions.Create(AOwner: TComponent);
 begin
   inherited;
@@ -651,8 +852,6 @@ begin
     fMaxRecentDocs:= CEMainForm.fFileMru.maxCount;
     fDcdPort := DcdWrapper.port;
     fCovModUt:= CEMainForm.fCovModUt;
-    fRunnableDest := CEMainForm.fRunnableDestination;
-    fAlwaysUseDest := CEMainForm.fAlwaysUseDest;
     fDscanUnittests := CEMainForm.fDscanUnittests;
   end else if source = fBackup then
   begin
@@ -663,8 +862,6 @@ begin
     fReloadLastDocuments:=fBackup.fReloadLastDocuments;
     fFloatingWidgetOnTop := fBackup.fFloatingWidgetOnTop;
     fFlatLook:=fBackup.fFlatLook;
-    CEMainForm.fRunnableDestination := fBackup.fRunnableDest;
-    CEmainForm.fAlwaysUseDest := fBackup.fAlwaysUseDest;
     CEMainForm.fDscanUnittests := fDscanUnittests;
   end
   else inherited;
@@ -680,8 +877,6 @@ begin
     CEMainForm.fProjMru.maxCount := fMaxRecentProjs;
     CEMainForm.fFileMru.maxCount := fMaxRecentDocs;
     CEMainForm.updateFloatingWidgetOnTop(fFloatingWidgetOnTop);
-    CEMainForm.fRunnableDestination := fRunnableDest;
-    CEMainForm.fAlwaysUseDest := fAlwaysUseDest;
     CEMainForm.fDscanUnittests := fDscanUnittests;
     DcdWrapper.port:=fDcdPort;
     for i := 0 to CEMainForm.fWidgList.Count-1 do
@@ -694,8 +889,6 @@ begin
     fBackup.fFloatingWidgetOnTop:=fFloatingWidgetOnTop;
     fBackup.fDcdPort:=fDcdPort;
     fBackup.fCovModUt:=fCovModUt;
-    fBackup.fRunnableDest:= fRunnableDest;
-    fBackup.fAlwaysUseDest := fAlwaysUseDest;
     fBackup.fDscanUnittests:= fDscanUnittests;
     fBackup.fFlatLook:= fFlatLook;
   end
@@ -1250,6 +1443,11 @@ begin
   finally
     Free;
   end;
+  // runnables opts
+  fRunnablesOptions := TCEEditableRunnableOptions.create(self);
+  fname := getCoeditDocPath + 'runnables.txt';
+  if fname.fileExists then
+    fRunnablesOptions.loadFromFile(fname);
   // globals opts
   fAppliOpts := TCEApplicationOptions.Create(self);
   fname := getCoeditDocPath + 'application.txt';
@@ -1284,6 +1482,8 @@ begin
   // globals opts
   fAppliOpts.assign(self);
   fAppliOpts.saveToFile(getCoeditDocPath + 'application.txt');
+  // runnables opts
+  fRunnablesOptions.saveToFile(getCoeditDocPath + 'runnables.txt');
 end;
 
 procedure TCEMainForm.SaveDocking;
@@ -2220,6 +2420,8 @@ end;
 
 {$REGION run -------------------------------------------------------------------}
 function TCEMainForm.runnableExename: string;
+var
+  ofr: string;
 begin
   result := '';
   if fDoc.isNil then
@@ -2228,19 +2430,20 @@ begin
   result := stripFileExt(fDoc.fileName) + exeExt;
   if fDoc.isTemporary then
     exit;
-  if fRunnableDestination.isNotEmpty then
+  ofr := fRunnablesOptions.outputFolder;
+  if ofr.isNotEmpty then
   begin
-    if not fAlwaysUseDest and assigned(fProject)
+    if not fRunnablesOptions.alwaysToFolder and assigned(fProject)
       and not fProject.isSource(fDoc.fileName) then
         exit;
-    if FilenameIsAbsolute(fRunnableDestination) then
+    if FilenameIsAbsolute(ofr) then
     begin
-      if fRunnableDestination.dirExists then
-        result := fRunnableDestination + stripFileExt(fDoc.fileName.extractFileName)
+      if ofr.dirExists then
+        result := ofr + stripFileExt(fDoc.fileName.extractFileName)
           + exeExt;
     end else
     begin
-      result := fDoc.fileName.extractFilePath + fRunnableDestination
+      result := fDoc.fileName.extractFilePath + ofr
         + stripFileExt(fDoc.fileName.extractFileName) + exeExt;
     end;
   end;
@@ -2289,45 +2492,19 @@ var
   i, j: integer;
   cur: string;
 begin
-  if fRunnableSw = '' then
-    fRunnableSw := '-vcolumns'#13'-w'#13'-wi';
+  if fRunnablesOptions.fStaticSwitches.Count = 0 then
+    fRunnablesOptions.setDefaultSwitches;
   form := TForm.Create(nil);
   form.BorderIcons:= [biSystemMenu];
   memo := TMemo.Create(form);
   memo.Align := alClient;
   memo.BorderSpacing.Around:=4;
-  memo.Text := fRunnableSw;
+  memo.Lines.Assign(fRunnablesOptions.staticSwitches);
   memo.Parent := form;
   form.ShowModal;
   //
-  fRunnableSw := '';
-  for i := memo.Lines.Count-1 downto 0 do
-  begin
-    cur := memo.Lines[i];
-    // duplicated item
-    j := memo.Lines.IndexOf(cur);
-    if (j > -1) and (j < i) then
-      continue;
-    // not a switch
-    if cur.length < 2 then
-      continue;
-    if cur[1] <> '-' then
-      continue;
-    // added dynamically when needed
-    if cur = '-unittest' then
-      continue;
-    if cur = '-main' then
-      continue;
-    // would break some internal stuff
-    if (cur.length > 2) and (cur[1..3] = '-of') then
-      continue;
-    RemoveTrailingChars(cur, [#0..#30]);
-    fRunnableSw += (cur + #13);
-  end;
-  if fRunnableSw.isNotEmpty and (fRunnableSw[fRunnableSw.length] = #13) then
-    fRunnableSw := fRunnableSw[1..fRunnableSw.length-1];
-  if fRunnableSw.isEmpty then
-    fRunnableSw := '-vcolumns'#13'-w'#13'-wi';
+  fRunnablesOptions.staticSwitches.Assign(memo.Lines);
+  fRunnablesOptions.sanitizeSwitches;
   //
   form.Free;
 end;
@@ -2387,8 +2564,8 @@ begin
       fDoc.saveTempFile;
     fname := stripFileExt(runnableExename);
 
-    if fRunnableSw.isEmpty then
-      fRunnableSw := '-vcolumns'#13'-w'#13'-wi';
+    if fRunnablesOptions.staticSwitches.Count = 0 then
+      fRunnablesOptions.setDefaultSwitches;
     {$IFDEF RELEASE}
     dmdProc.ShowWindow := swoHIDE;
     {$ENDIF}
@@ -2406,10 +2583,10 @@ begin
     else
       dmdproc.Parameters.Add('-of' + fname + objExt);
     dmdproc.Parameters.Add('-J' + fDoc.fileName.extractFilePath);
-    dmdproc.Parameters.AddText(fRunnableSw);
+    dmdproc.Parameters.AddStrings(fRunnablesOptions.staticSwitches);
     if lst.isNotNil and (lst.Count <> 0) then
       dmdproc.Parameters.AddStrings(lst);
-    if fAppliOpts.detectMain then
+    if fRunnablesOptions.detectMain then
     begin
       hasMain := fDoc.implementMain;
       case hasMain of
@@ -2422,7 +2599,7 @@ begin
     end;
     if unittest then
     begin
-      if not fAppliOpts.detectMain then
+      if not fRunnablesOptions.detectMain then
         dmdproc.Parameters.Add('-main');
       dmdproc.Parameters.Add('-unittest');
       if fCovModUt then
@@ -2430,7 +2607,7 @@ begin
     end
     else dmdproc.Parameters.Add('-version=runnable_module');
 
-    if fAppliOpts.detectRunnableImports then
+    if fRunnablesOptions.detectLibraries then
       LibMan.getLibsForSource(fDoc.Lines, dmdproc.Parameters, dmdproc.Parameters)
     else
     begin
@@ -2674,7 +2851,7 @@ begin
     fRunProc.Options := fRunProc.Options + [poNewConsole];
     {$ENDIF}
   end;
-  case fAppliOpts.runnableCompiler of
+  case fRunnablesOptions.compiler of
     gdc: fRunProc.Parameters.add('--compiler=gdc');
     ldc: fRunProc.Parameters.add('--compiler=ldc2');
   end;
