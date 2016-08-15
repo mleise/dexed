@@ -3197,6 +3197,8 @@ begin
     exit;
   if fFreeProj.inGroup then
     exit;
+  if not fFreeProj.filename.fileExists then
+    exit;
   fProjectGroup.addProject(fFreeProj);
   fFreeProj := nil;
 end;

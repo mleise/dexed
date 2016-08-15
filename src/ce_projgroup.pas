@@ -534,6 +534,8 @@ procedure TCEProjectGroupWidget.btnAddUnfocusedClick(Sender: TObject);
 begin
   if fFreeProj = nil then
     exit;
+  if not fFreeProj.filename.fileExists then
+    exit;
   projectGroup.addProject(fFreeProj);
   fFreeProj := nil;
   updateList;
