@@ -3632,9 +3632,9 @@ object CEMainForm: TCEMainForm
           0000000000000000000000000000000000000000000000000000
         }
       end
-      object MenuItem81: TMenuItem
-        Caption = '-'
-      end
+    end
+    object MenuItem100: TMenuItem
+      Caption = 'Projects group'
       object MenuItem87: TMenuItem
         Action = actProjSelUngrouped
         Bitmap.Data = {
@@ -3673,6 +3673,9 @@ object CEMainForm: TCEMainForm
           D3EF4498D2FF4197D1FF3F95D1FF3D94D0FF3B93D0FF3A92D0FF3A92D0FF3A93
           D0FF3C94D1FF3E97D3EE000000000000000000000000FFFFFF00
         }
+      end
+      object MenuItem101: TMenuItem
+        Caption = '-'
       end
       object MenuItem82: TMenuItem
         Action = actProjNewGroup
@@ -3752,6 +3755,12 @@ object CEMainForm: TCEMainForm
           D0FF3C94D1FF3E97D3EE000000000000000000000000FFFFFF00
         }
       end
+      object MenuItem103: TMenuItem
+        Action = actProjGroupClose
+      end
+      object MenuItem81: TMenuItem
+        Caption = '-'
+      end
       object MenuItem84: TMenuItem
         Action = actProjSaveGroup
         Bitmap.Data = {
@@ -3830,8 +3839,11 @@ object CEMainForm: TCEMainForm
           CEFFD8D1D2FFB37A06FFB78116FFB9851CC5BB871F00BB871F00
         }
       end
-      object MenuItem98: TMenuItem
-        Action = actProjGroupCompileSync
+      object MenuItem102: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem88: TMenuItem
+        Action = actProjGroupCompile
         Bitmap.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           2000000000000004000064000000640000000000000000000000000000000000
@@ -3869,8 +3881,8 @@ object CEMainForm: TCEMainForm
           0000000000000000000000000000000000000000000000000000
         }
       end
-      object MenuItem88: TMenuItem
-        Action = actProjGroupCompile
+      object MenuItem98: TMenuItem
+        Action = actProjGroupCompileSync
         Bitmap.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           2000000000000004000064000000640000000000000000000000000000000000
@@ -4635,7 +4647,6 @@ object CEMainForm: TCEMainForm
     Images = imgList
     OnUpdate = ActionsUpdate
     left = 32
-    top = 1
     object actEdCopy: TAction
       Category = 'Edit'
       Caption = 'Copy'
@@ -4981,59 +4992,59 @@ object CEMainForm: TCEMainForm
       OnUpdate = updateDocumentBasedAction
     end
     object actProjOpenGroup: TAction
-      Category = 'Project'
-      Caption = 'Open project group...'
+      Category = 'ProjectsGroup'
+      Caption = 'Open projects group...'
       ImageIndex = 9
       OnExecute = actProjOpenGroupExecute
     end
     object actProjSaveGroup: TAction
-      Category = 'Project'
-      Caption = 'Save project group'
+      Category = 'ProjectsGroup'
+      Caption = 'Save projects group'
       ImageIndex = 3
       OnExecute = actProjSaveGroupExecute
     end
     object actProjSaveGroupAs: TAction
-      Category = 'Project'
-      Caption = 'Save project group as...'
+      Category = 'ProjectsGroup'
+      Caption = 'Save projects group as...'
       ImageIndex = 2
       OnExecute = actProjSaveGroupAsExecute
     end
     object actProjNewGroup: TAction
-      Category = 'Project'
-      Caption = 'New project group'
+      Category = 'ProjectsGroup'
+      Caption = 'New projects group'
       ImageIndex = 8
       OnExecute = actProjNewGroupExecute
     end
     object actProjAddToGroup: TAction
-      Category = 'Project'
+      Category = 'ProjectsGroup'
       Caption = 'Add current project to group'
       ImageIndex = 7
       OnExecute = actProjAddToGroupExecute
       OnUpdate = updateProjectBasedAction
     end
     object actProjSelUngrouped: TAction
-      Category = 'Project'
-      Caption = 'Select ungrouped project'
+      Category = 'ProjectsGroup'
+      Caption = 'Activate free the standing project'
       ImageIndex = 9
       OnExecute = actProjSelUngroupedExecute
       OnUpdate = updateProjectBasedAction
     end
     object actProjGroupCompile: TAction
-      Category = 'Project'
-      Caption = 'Compile project group (parallel)'
+      Category = 'ProjectsGroup'
+      Caption = 'Compile projects group (parallel)'
       ImageIndex = 21
       OnExecute = actProjGroupCompileExecute
     end
     object actFileRunDub: TAction
       Category = 'File'
-      Caption = 'DUB single file package'
+      Caption = 'Run DUB single file package'
       ImageIndex = 36
       OnExecute = actFileRunDubExecute
       OnUpdate = updateDocumentBasedAction
     end
     object actFileRunDubOut: TAction
       Category = 'File'
-      Caption = 'DUB single file package outside'
+      Caption = 'Run DUB single file package outside'
       ImageIndex = 36
       OnExecute = actFileRunDubOutExecute
       OnUpdate = updateDocumentBasedAction
@@ -5045,10 +5056,16 @@ object CEMainForm: TCEMainForm
       OnExecute = actFileNewDubScriptExecute
     end
     object actProjGroupCompileSync: TAction
-      Category = 'Project'
-      Caption = 'Compile project group (sequential)'
+      Category = 'ProjectsGroup'
+      Caption = 'Compile projects group (sequential)'
       ImageIndex = 21
       OnExecute = actProjGroupCompileSyncExecute
+    end
+    object actProjGroupClose: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'Close projects group'
+      ImageIndex = 27
+      OnExecute = actProjNewGroupExecute
     end
   end
   object imgList: TImageList

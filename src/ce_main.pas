@@ -51,6 +51,7 @@ type
     actFileRunDub: TAction;
     actFileRunDubOut: TAction;
     actFileNewDubScript: TAction;
+    actProjGroupClose: TAction;
     actProjGroupCompileSync: TAction;
     actProjGroupCompile: TAction;
     actProjSelUngrouped: TAction;
@@ -91,6 +92,10 @@ type
     mainMenu: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
+    MenuItem100: TMenuItem;
+    MenuItem101: TMenuItem;
+    MenuItem102: TMenuItem;
+    MenuItem103: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
     MenuItem13: TMenuItem;
