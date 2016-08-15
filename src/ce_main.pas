@@ -724,8 +724,8 @@ end;
 
 function TCEEditableRunnableOptions.optionedWantContainer: TPersistent;
 begin
-  exit(self);
   fBackup.assign(self);
+  exit(self);
 end;
 
 procedure TCEEditableRunnableOptions.optionedEvent(event: TOptionEditorEvent);
