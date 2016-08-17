@@ -1156,19 +1156,58 @@ end;
 procedure TCESynMemo.commentIdentifier;
 var
   str: string;
-  comment: boolean = true;
-  tkType, st: Integer;
+  x, x0, x1: integer;
+  comBeg: boolean = false;
+  comEnd: boolean = false;
+  comment:boolean = true;
   attrib: TSynHighlighterAttributes;
 begin
-  if not GetHighlighterAttriAtRowColEx(CaretXY, str, tkType, st, attrib) then
+  if not GetHighlighterAttriAtRowColEx(CaretXY, str, x0, x, attrib) then
     exit;
   if str.isEmpty then
     exit;
 
-  if (str.length > 1) and ((str[1..2] = '/*') or
-    (str[str.length-1..str.length] = '*/')) then
-      comment := false;
+  str := LineText;
+  x := LogicalCaretXY.X;
 
+  ExecuteCommand(ecWordEndRight, #0, nil);
+  x1 := LogicalCaretXY.X;
+  while true do
+  begin
+    if (str[x1] in ['*', '+']) and (x1 < str.length) and (str[x1+1] = '/') then
+    begin
+      comEnd:=true;
+      break;
+    end;
+    if not isBlank(str[x1]) then
+      break;
+    ExecuteCommand(ecRight, #0, nil);
+    x1 += 1;
+    if x1 = str.length then
+      break;
+  end;
+
+  LogicalCaretXY := point(x, LogicalCaretXY.Y);
+  ExecuteCommand(ecWordLeft, #0, nil);
+  x0 := LogicalCaretXY.X - 1;
+  if (x0 > 1) then while true do
+  begin
+    if (x0 > 1) and (str[x0] in ['*', '+']) and (str[x0-1] = '/') then
+    begin
+      x0 -= 1;
+      comBeg:=true;
+      break;
+    end;
+    if not isBlank(str[x0]) then
+      break;
+    ExecuteCommand(ecLeft, #0, nil);
+    x0 -= 1;
+    if x0 = 1 then
+      break;
+  end;
+
+  comment := not comBeg and not comEnd;
+  LogicalCaretXY := point(x, LogicalCaretXY.Y);
   if comment then
   begin
     BeginUndoBlock;
@@ -1180,23 +1219,14 @@ begin
     ExecuteCommand(ecChar, '/', nil);
     EndUndoBlock;
   end else
-  //TODO-ceditor: handle spaces between ident and comment beg end.
   begin
     BeginUndoBlock;
-    if str[1..2] = '/*' then
-    begin
-      ExecuteCommand(ecWordLeft, '', nil);
-      ExecuteCommand(ecLeft, '', nil);
-      ExecuteCommand(ecLeft, '', nil);
-      ExecuteCommand(ecDeleteChar, '', nil);
-      ExecuteCommand(ecDeleteChar, '', nil);
-    end;
-    if str[str.length-1..str.length] = '*/' then
-    begin
-      ExecuteCommand(ecWordEndRight, '', nil);
-      ExecuteCommand(ecDeleteChar, '', nil);
-      ExecuteCommand(ecDeleteChar, '', nil);
-    end;
+    LogicalCaretXY := point(x1, LogicalCaretXY.Y);
+    ExecuteCommand(ecDeleteChar, '', nil);
+    ExecuteCommand(ecDeleteChar, '', nil);
+    LogicalCaretXY := point(x0, LogicalCaretXY.Y);
+    ExecuteCommand(ecDeleteChar, '', nil);
+    ExecuteCommand(ecDeleteChar, '', nil);
     EndUndoBlock;
   end;
 end;
