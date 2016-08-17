@@ -2489,8 +2489,6 @@ procedure TCEMainForm.actSetRunnableSwExecute(Sender: TObject);
 var
   form: TForm;
   memo: TMemo;
-  i, j: integer;
-  cur: string;
 begin
   if fRunnablesOptions.fStaticSwitches.Count = 0 then
     fRunnablesOptions.setDefaultSwitches;
