@@ -2570,10 +2570,10 @@ begin
   	dmdproc.OnReadData := @asyncprocOutput;
   	dmdproc.OnTerminate:= @asyncprocTerminate;
     dmdproc.Options := [poUsePipes, poStderrToOutPut];
-    case fRunnableCompiler of
-      dmd: dmdProc.Executable:='dmd' + exeExt;
-      ldc: dmdProc.Executable:='ldmd2' + exeExt;
-      gdc: dmdProc.Executable:='gdmd' + exeExt;
+    case fRunnablesOptions.compiler of
+      dmd: dmdProc.Executable :='dmd'   + exeExt;
+      ldc: dmdProc.Executable :='ldmd2' + exeExt;
+      gdc: dmdProc.Executable :='gdmd'  + exeExt;
     end;
     dmdproc.Parameters.Add(fDoc.fileName);
     if not asObj then
