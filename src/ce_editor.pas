@@ -380,6 +380,7 @@ begin
   document.OnCommandProcessed:= @memoCmdProcessed;
   //
   fDoc := document;
+  fDoc.setFocus;
   focusedEditorChanged;
   updateImperative;
 end;
