@@ -35,6 +35,8 @@ const
 
 type
 
+  TPageControlButtonClick = procedure(sender: TObject; button: TCEPageControlButton) of object;
+
   (**
    * Minimalist page-control dedicated to Coedit
    *
@@ -65,12 +67,14 @@ type
     fOptions: TCEPageControlOptions;
     fOnDragDrop: TDragDropEvent;
     fOnDragOver: TDragOverEvent;
+    fPageControlButtonClick: TPageControlButtonClick;
 
     procedure btnCloseClick(sender: TObject);
     procedure btnMoveLeftClick(sender: TObject);
     procedure btnMoveRightClick(sender: TObject);
     procedure btnAddClick(sender: TObject);
     procedure btnSplitClick(sender: TObject);
+    procedure btnClickEvent(button: TCEPageControlButton); inline;
 
     procedure tabsChanging(sender: TObject; var AllowChange: Boolean);
     procedure tabsChanged(sender: TObject);
@@ -114,6 +118,7 @@ type
     property moveRightButton: TSpeedButton read fMoveRightBtn;
     property addButton: TSpeedButton read fAddBtn;
     property splitButton: TSpeedButton read fSplitBtn;
+    property onButtonClick: TPageControlButtonClick read fPageControlButtonClick write fPageControlButtonClick;
 
     property onChanged: TNotifyEvent read fOnChanged write fOnChanged;
     property onChanging: TTabChangingEvent read fOnChanging write fOnChanging;
@@ -146,7 +151,10 @@ begin
   inherited;
   ctrl :=  TCEPageControl(owner);
   i := ctrl.getPageIndex(self);
-  if i <> -1 then ctrl.fTabs.Tabs[i] := caption;
+  ctrl.fTabs.BeginUpdate;
+  if i <> -1 then
+    ctrl.fTabs.Tabs[i] := value;
+  ctrl.fTabs.EndUpdate;
 end;
 
 constructor TCEPageControl.Create(aowner: TComponent);
@@ -525,24 +533,34 @@ begin
   setPageIndex(fPageIndex-1);
 end;
 
+procedure TCEPageControl.btnClickEvent(button: TCEPageControlButton);
+begin
+  if assigned(fPageControlButtonClick) then
+    fPageControlButtonClick(self, button);
+end;
+
 procedure TCEPageControl.btnCloseClick(sender: TObject);
 begin
+  btnClickEvent(pbClose);
   deletePage(fPageIndex);
 end;
 
 procedure TCEPageControl.btnMoveLeftClick(sender: TObject);
 begin
   movePageLeft;
+  btnClickEvent(pbMoveLeft);
 end;
 
 procedure TCEPageControl.btnMoveRightClick(sender: TObject);
 begin
   movePageRight;
+  btnClickEvent(pbMoveRight);
 end;
 
 procedure TCEPageControl.btnAddClick(sender: TObject);
 begin
   addPage;
+  btnClickEvent(pbAdd);
 end;
 
 procedure TCEPageControl.btnSplitClick(sender: TObject);
@@ -556,6 +574,7 @@ begin
     fSplittedPageIndex:= fPageIndex;
   end;
   setPageIndex(fPageIndex);
+  btnClickEvent(pbSplit);
 end;
 
 procedure TCEPageControl.setButtons(value: TCEPageControlButtons);
