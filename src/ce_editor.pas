@@ -120,15 +120,14 @@ type
     fDoc: TCESynMemo;
     fProj: ICECommonProject;
     fTokList: TLexTokenList;
-    fModStart: boolean;
     fLastCommand: TSynEditorCommand;
+    procedure PageControlButtonClick(sender: TObject; button: TCEPageControlButton);
     procedure PageControlChanged(Sender: TObject);
     procedure PageControlChanging(Sender: TObject; var AllowChange: Boolean);
     procedure updateStatusBar;
-    procedure updatePageCaption;
+    procedure updatePageCaption(page: TCEPage);
     procedure pageBtnAddCLick(Sender: TObject);
     procedure pageCloseBtnClick(Sender: TObject);
-    procedure lexFindToken(const token: PLexToken; out stop: boolean);
     procedure memoKeyPress(Sender: TObject; var Key: char);
     procedure memoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure memoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -302,6 +301,7 @@ begin
   pageControl.addButton.OnClick:=@pageBtnAddCLick;
   pageControl.OnDragDrop:= @ddHandler.DragDrop;
   pageControl.OnDragOver:= @ddHandler.DragOver;
+  pageControl.onButtonClick:= @PageControlButtonClick;
   AssignPng(pageControl.moveLeftButton, 'GO_PREVIOUS');
   AssignPng(pageControl.moveRightButton, 'GO_NEXT');
   AssignPng(pageControl.addButton, 'DOCUMENT_ADD');
@@ -361,6 +361,8 @@ begin
 end;
 {$ENDREGION}
 
+// todo-cpagecontrol: display the two mole names when split mode is activated
+
 {$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEEditorWidget.docNew(document: TCESynMemo);
 var
@@ -400,7 +402,7 @@ procedure TCEEditorWidget.docFocused(document: TCESynMemo);
 begin
   if fDoc.isNotNil and pageControl.currentPage.isNotNil and
     (pageControl.currentPage.Caption = '<new document>') then
-      updatePageCaption;
+      updatePageCaption(pageControl.currentPage);
   if document = fDoc then exit;
   fDoc := document;
   focusedEditorChanged;
@@ -523,6 +525,7 @@ end;
 procedure TCEEditorWidget.pageCloseBtnClick(Sender: TObject);
 begin
   closeDocument(PageControl.PageIndex);
+  PageControlButtonClick(pageControl, pbClose);
 end;
 
 procedure TCEEditorWidget.pageBtnAddCLick(Sender: TObject);
@@ -533,20 +536,13 @@ end;
 
 procedure TCEEditorWidget.setDetectModuleName(value: boolean);
 var
-  i, j: integer;
+  i: integer;
 begin
   if fDetectModuleName = value then
     exit;
   fDetectModuleName:=value;
-  j := pageControl.pageIndex;
-  if j = -1 then
-    exit;
   for i:= 0 to pageControl.pageCount-1 do
-  begin
-    pageControl.pageIndex:= i;
-    updatePageCaption;
-  end;
-  pageControl.pageIndex:= j;
+    updatePageCaption(pageControl.pages[i]);
 end;
 
 procedure TCEEditorWidget.focusedEditorChanged;
@@ -741,36 +737,44 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.updatePageCaption;
+procedure TCEEditorWidget.updatePageCaption(page: TCEPage);
 var
-  md: string = '<new document>';
+  txt: string = '<new document>';
+  dc1: TCESynMemo = nil;
+  dc2: TCESynMemo = nil;
 begin
-  if fDoc.isNotNil then
+  if pageControl.splitPage.isNotNil and
+    (page <> pageControl.splitPage) then
   begin
-    if fDetectModuleName then
-    begin
-      if fDoc.isDSource then
-      begin
-        lex(fDoc.Lines.Text, fTokList, @lexFindToken, [lxoNoComments]);
-        md := getModuleName(fTokList);
-        fTokList.Clear;
-        if md.isEmpty then
-          md := fDoc.fileName.extractFileName;
-      end
-      else if fDoc.fileName.fileExists then
-        md := fDoc.fileName.extractFileName
-    end
-      else if fDoc.fileName.fileExists then
-        md := fDoc.fileName.extractFileName
+    txt := '';
+    dc1 := TCESynMemo(page.Controls[0]);
+    dc2 := TCESynMemo(pageControl.splitPage.Controls[0]);
+    if dc1.isNotNil and dc2.isNotNil then
+      txt := dc1.pageCaption(fDetectModuleName) + ' - ' +
+        dc2.pageCaption(fDetectModuleName);
+  end
+  else
+    txt := TCESynMemo(page.Controls[0]).pageCaption(fDetectModuleName);
+  page.Caption := txt;
+end;
+
+procedure TCEEditorWidget.PageControlButtonClick(sender: TObject; button: TCEPageControlButton);
+var
+  i: integer;
+begin
+  if ((button = pbClose) and (pageControl.currentPage = pageControl.splitPage))
+    or (button = pbSplit) then
+  begin
+    for i:= 0 to pageControl.pageCount-1 do
+      updatePageCaption(pageControl.pages[i]);
   end;
-  pageControl.currentPage.Caption := md;
 end;
 
 procedure TCEEditorWidget.updateImperative;
 begin
   updateStatusBar;
   if fDoc.isNotNil then
-    updatePageCaption;
+    updatePageCaption(pageControl.currentPage);
 end;
 
 procedure TCEEditorWidget.updateDelayed;
@@ -780,22 +784,8 @@ begin
   updateStatusBar;
   if not fKeyChanged then
     exit;
-  if fDoc.isNotNil then
-    updatePageCaption;
-end;
-
-procedure TCEEditorWidget.lexFindToken(const token: PLexToken; out stop: boolean);
-begin
-  if (token^.kind = ltkKeyword) and (token^.data = 'module') then
-  begin
-    fModStart := true;
-    exit;
-  end;
-  if fModStart and (token^.kind = ltkSymbol) and (token^.data = ';') then
-  begin
-    stop := true;
-    fModStart := false;
-  end;
+  if pageControl.currentPage.isNotNil then
+    updatePageCaption(pageControl.currentPage);
 end;
 {$ENDREGION}
 

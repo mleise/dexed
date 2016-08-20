@@ -168,6 +168,8 @@ type
     fIsProjectDescription: boolean;
     fAutoClosedPairs: TAutoClosePairs;
     fSortDialog: TSortDialog;
+    fModuleTokFound: boolean;
+    fHasModuleDeclaration: boolean;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseBytePosition: Integer;
@@ -200,6 +202,7 @@ type
     procedure autoClosePair(value: TAutoClosedPair);
     procedure setSelectionOrWordCase(upper: boolean);
     procedure sortSelectedLines(descending, caseSensitive: boolean);
+    procedure tokFoundForCaption(const token: PLexToken; out stop: boolean);
   protected
     procedure DoEnter; override;
     procedure DoExit; override;
@@ -220,6 +223,7 @@ type
     destructor destroy; override;
     procedure setFocus; override;
     //
+    function pageCaption(checkModule: boolean): string;
     procedure checkFileDate;
     procedure loadFromFile(const fname: string);
     procedure saveToFile(const fname: string);
@@ -1881,6 +1885,44 @@ begin
       else
         TSynBEautifier(Beautifier).IndentType := sbitSpace;
     end
+  end;
+end;
+
+function TCESynMemo.pageCaption(checkModule: boolean): string;
+begin
+  result := '';
+  fHasModuleDeclaration := false;
+  if checkModule and isDSource then
+  begin
+    lex(Lines.Text, fLexToks, @tokFoundForCaption, [lxoNoComments]);
+    if fHasModuleDeclaration then
+      result := getModuleName(fLexToks);
+    fLexToks.Clear;
+  end;
+  if result.length = 0 then
+  begin
+    if fFilename.length > 0 then
+      result := fFilename.extractFileName
+    else
+      result := '<new document>';
+  end;
+end;
+
+procedure TCESynMemo.tokFoundForCaption(const token: PLexToken; out stop: boolean);
+begin
+  if token^.kind = ltkKeyword then
+  begin
+    if token^.data = 'module' then
+      fModuleTokFound := true
+    else
+      stop := true;
+    exit;
+  end;
+  if fModuleTokFound and (token^.kind = ltkSymbol) and (token^.data = ';') then
+  begin
+    stop := true;
+    fModuleTokFound := false;
+    fHasModuleDeclaration := true;
   end;
 end;
 
