@@ -355,9 +355,15 @@ procedure TCEEditorWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolBarFlat(value);
   if value then
+  begin
+    fOptions.pageOptions:= fOptions.pageOptions + [poFlatButtons];
     pageControl.options := pageControl.options + [poFlatButtons]
+  end
   else
+  begin
+    fOptions.pageOptions:= fOptions.pageOptions - [poFlatButtons];
     pageControl.options := pageControl.options - [poFlatButtons];
+  end;
 end;
 {$ENDREGION}
 
