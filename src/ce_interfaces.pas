@@ -347,6 +347,8 @@ type
     function findProject(const fname: string): ICECommonProject;
     // selects the nth project of the group.
     procedure setProjectIndex(index: Integer);
+    // indicates wether a project is marked for async compilation
+    function projectIsAsync(index: integer): boolean;
   end;
 
 

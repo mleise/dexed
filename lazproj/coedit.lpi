@@ -13,7 +13,7 @@
         <DpiAware Value="True"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="87">
+      <Resources Count="89">
         <Resource_0 FileName="../icons/window/layout_add.png" Type="RCDATA" ResourceName="LAYOUT_ADD"/>
         <Resource_1 FileName="../icons/window/layout.png" Type="RCDATA" ResourceName="LAYOUT"/>
         <Resource_2 FileName="../icons/window/application_go.png" Type="RCDATA" ResourceName="APPLICATION_GO"/>
@@ -101,6 +101,8 @@
         <Resource_84 FileName="../icons/other/tag_purple.png" Type="RCDATA" ResourceName="TAG_PURPLE"/>
         <Resource_85 FileName="../cesetup/version.txt" Type="RCDATA" ResourceName="VERSION"/>
         <Resource_86 FileName="../icons/other/sort_az.png" Type="RCDATA" ResourceName="SORT_AZ"/>
+        <Resource_87 FileName="../icons/arrow/arrow_divide.png" Type="RCDATA" ResourceName="ARROW_DIVIDE"/>
+        <Resource_88 FileName="../icons/arrow/arrow_join.png" Type="RCDATA" ResourceName="ARROW_JOIN"/>
       </Resources>
     </General>
     <i18n>

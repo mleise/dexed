@@ -25,6 +25,8 @@ type
     property OnMouseWheel;
   end;
 
+  TAsynWait = (awNo, awYes, awCustom);
+
   TRunnableToFolderCondition = (
     ifInProject,  // runnable src is part of the project
     ifNotSaved,   // runnable src is an unsaved module (tmp_XXXXX)
@@ -98,6 +100,7 @@ type
     actFileRunDub: TAction;
     actFileRunDubOut: TAction;
     actFileNewDubScript: TAction;
+    actProjGroupCompileCustomSync: TAction;
     actProjGroupClose: TAction;
     actProjGroupCompileSync: TAction;
     actProjGroupCompile: TAction;
@@ -143,6 +146,8 @@ type
     MenuItem101: TMenuItem;
     MenuItem102: TMenuItem;
     MenuItem103: TMenuItem;
+    MenuItem104: TMenuItem;
+    MenuItem105: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
     MenuItem13: TMenuItem;
@@ -254,6 +259,7 @@ type
     procedure actFileSaveCopyAsExecute(Sender: TObject);
     procedure actNewGroupExecute(Sender: TObject);
     procedure actProjAddToGroupExecute(Sender: TObject);
+    procedure actProjGroupCompileCustomSyncExecute(Sender: TObject);
     procedure actProjGroupCompileExecute(Sender: TObject);
     procedure actProjGroupCompileSyncExecute(Sender: TObject);
     procedure actProjNewDubJsonExecute(Sender: TObject);
@@ -438,7 +444,7 @@ type
     function closeProj: boolean;
     procedure showProjTitle;
     function  checkProjectLock(message: boolean = true): boolean;
-    procedure compileGroup(async: boolean);
+    procedure compileGroup(async: TAsynWait);
 
     // mru
     procedure mruChange(Sender: TObject);
@@ -3381,9 +3387,11 @@ end;
 // TODO-cFileOpenDialog: allow multi selection when possible
 //(open file, add file to project, ...)
 
-procedure TCEMainForm.compileGroup(async: boolean);
+// TODO-cprojectsgroup: add a "out of mem" protection in async mode.
+
+procedure TCEMainForm.compileGroup(async: TAsynWait);
 var
-  i: integer;
+  i, j: integer;
 begin
   if checkProjectLock then
     exit;
@@ -3395,8 +3403,23 @@ begin
   for i:= 0 to fProjectGroup.projectCount-1 do
   begin
     fProjectGroup.getProject(i).activate;
+    // customized async mode: wait
+    if not fProjectGroup.projectIsAsync(i) and (async = awCustom) then
+    begin
+      while fGroupCompilationCnt <> i do
+        Application.ProcessMessages;
+      for j:= 0 to i-1 do
+        if not fProjectGroup.getProject(j).compiled then
+      begin
+        fMsgs.message('group compilation has stopped because of a failure',
+          nil, amcAll, amkErr);
+        fIsCompilingGroup := false;
+        break;
+      end;
+    end;
     fProject.compile;
-    if not async then
+    // sequential
+    if (async = awNo) then
     begin
       while fProjActionsLock do
         Application.ProcessMessages;
@@ -3407,18 +3430,23 @@ begin
         fIsCompilingGroup := false;
         break;
       end;
-    end;
+    end
   end;
 end;
 
 procedure TCEMainForm.actProjGroupCompileExecute(Sender: TObject);
 begin
-  compileGroup(true);
+  compileGroup(awYes);
 end;
 
 procedure TCEMainForm.actProjGroupCompileSyncExecute(Sender: TObject);
 begin
-  compileGroup(false);
+  compileGroup(awNo);
+end;
+
+procedure TCEMainForm.actProjGroupCompileCustomSyncExecute(Sender: TObject);
+begin
+  compileGroup(awCustom);
 end;
 
 procedure TCEMainForm.actProjNewGroupExecute(Sender: TObject);

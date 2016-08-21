@@ -14,6 +14,13 @@ type
 
   TProjectGroup = class;
 
+  TCEProjectAsyncMode = (amSequential, amParallel);
+
+const
+  asyncStr: array[TCEProjectAsyncMode] of string = ('wait', 'async');
+
+type
+
   (**
    * Represents a project in a project group
    *)
@@ -22,8 +29,10 @@ type
     fFilename: string;
     fProj: ICECommonProject;
     fGroup: TProjectGroup;
+    fAsyncMode: TCEProjectAsyncMode;
   published
     property filename: string read fFilename write fFilename;
+    property asyncMode: TCEProjectAsyncMode read fAsyncMode write fAsyncMode;
   public
     property project: ICECommonProject read fProj;
     procedure lazyLoad;
@@ -73,6 +82,7 @@ type
     function getProject(ix: Integer): ICECommonProject;
     function findProject(const fname: string): ICECommonProject;
     procedure setProjectIndex(value: Integer);
+    function projectIsAsync(index: integer): boolean;
     //
     function addItem(const fname: string): TProjectGroupItem;
     property item[ix: integer]: TProjectGroupItem read getItem; default;
@@ -91,6 +101,7 @@ type
   TCEProjectGroupWidget = class(TCEWidget, ICEProjectObserver)
     BtnAddProj: TCEToolButton;
     btnAddUnfocused: TSpeedButton;
+    btnAsync: TCEToolButton;
     btnFreeFocus: TSpeedButton;
     btnMoveDown: TCEToolButton;
     btnMoveUp: TCEToolButton;
@@ -99,12 +110,15 @@ type
     Panel2: TPanel;
     StaticText1: TStaticText;
     procedure btnAddUnfocusedClick(Sender: TObject);
+    procedure btnAsyncClick(Sender: TObject);
     procedure btnFreeFocusClick(Sender: TObject);
     procedure BtnAddProjClick(Sender: TObject);
     procedure btnMoveDownClick(Sender: TObject);
     procedure btnMoveUpClick(Sender: TObject);
     procedure btnRemProjClick(Sender: TObject);
     procedure lstProjDblClick(Sender: TObject);
+    procedure slstProjSelectItem(Sender: TObject; Item: TListItem;
+      Selected: Boolean);
   private
     fPrevProj: ICECommonProject;
     fFreeProj: ICECommonProject;
@@ -117,6 +131,7 @@ type
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
     //
+    procedure updateButtons;
     procedure updateList;
     procedure handleChanged(sender: TObject);
   protected
@@ -216,6 +231,11 @@ begin
     fProjectIndex := value;
     fModified := true;
   end;
+end;
+
+function TProjectGroup.projectIsAsync(index: integer): boolean;
+begin
+  exit(item[index].asyncMode = amParallel);
 end;
 
 function TProjectGroup.addItem(const fname: string): TProjectGroupItem;
@@ -541,6 +561,20 @@ begin
   updateList;
 end;
 
+procedure TCEProjectGroupWidget.btnAsyncClick(Sender: TObject);
+var
+  prj: TProjectGroupItem;
+begin
+  if lstProj.ItemIndex = -1 then exit;
+  //
+  prj := projectGroup.item[lstProj.ItemIndex];
+  case prj.asyncMode of
+    amSequential: prj.asyncMode := amParallel;
+    amParallel: prj.asyncMode := amSequential;
+  end;
+  updateButtons;
+end;
+
 procedure TCEProjectGroupWidget.btnMoveDownClick(Sender: TObject);
 begin
   if lstProj.ItemIndex = -1 then exit;
@@ -580,6 +614,12 @@ begin
     projectGroup.setProjectIndex(lstProj.ItemIndex);
 end;
 
+procedure TCEProjectGroupWidget.slstProjSelectItem(Sender: TObject;
+  Item: TListItem; Selected: Boolean);
+begin
+  updateButtons
+end;
+
 procedure TCEProjectGroupWidget.handleChanged(sender: TObject);
 begin
   updateList;
@@ -590,10 +630,47 @@ begin
   end;
 end;
 
+procedure TCEProjectGroupWidget.updateButtons;
+var
+  idx: integer;
+  asc: TCEProjectAsyncMode;
+begin
+  idx := lstProj.ItemIndex;
+  if idx = -1 then
+  begin
+    btnMoveDown.Enabled:= false;
+    btnMoveUp.Enabled:= false;
+    btnRemProj.Enabled:= false;
+    btnAsync.Enabled:= false;
+  end
+  else
+  begin
+    btnMoveDown.Enabled:= idx <> projectGroup.projectCount-1;
+    btnMoveUp.Enabled:= idx <> 0;
+    btnRemProj.Enabled:= true;
+    btnAsync.Enabled:= true;
+    asc := projectGroup.item[idx].asyncMode;
+    case asc of
+      amSequential:
+      begin
+        btnAsync.resourceName:= 'ARROW_JOIN';
+        btnAsync.hint := 'do no wait for the previous projects';
+      end;
+      amParallel:
+      begin
+        btnAsync.resourceName:= 'ARROW_DIVIDE';
+        btnAsync.hint := 'wait for the previous projects';
+      end;
+    end;
+    lstProj.Items.Item[idx].SubItems[1] := asyncStr[asc];
+  end;
+end;
+
 procedure TCEProjectGroupWidget.updateList;
 var
   i: integer;
-  p: TProjectGroupItem;
+  prj: TProjectGroupItem;
+  fmt: TCEProjectFormat;
 const
   typeStr: array[TCEProjectFormat] of string = ('CE','DUB');
 begin
@@ -602,16 +679,18 @@ begin
   begin
     with lstProj.Items.Add do
     begin
-      p := projectGroup.item[i];
-      p.fGroup := projectGroup;
-      p.lazyLoad;
-      Data:= p;
-      case p.project.getFormat of
-        pfNative: Caption := p.fFilename.extractFileName;
-        pfDub: Caption := TCEDubProject(p.project.getProject).packageName;
+      prj := projectGroup.item[i];
+      prj.fGroup := projectGroup;
+      prj.lazyLoad;
+      Data:= prj;
+      fmt := prj.project.getFormat;
+      case fmt of
+        pfNative: Caption := prj.fFilename.extractFileName;
+        pfDub: Caption := TCEDubProject(prj.project.getProject).packageName;
       end;
-      SubItems.Add(typeStr[p.fProj.getFormat]);
-      SubItems.Add(p.fProj.configurationName(p.fProj.getActiveConfigurationIndex));
+      SubItems.Add(typeStr[fmt]);
+      SubItems.Add(asyncStr[prj.fAsyncMode]);
+      SubItems.Add(prj.fProj.configurationName(prj.fProj.getActiveConfigurationIndex));
     end;
   end;
   if fFreeProj <> nil then
@@ -626,6 +705,7 @@ begin
   end
   else
     StaticText1.Caption:= 'No free standing project';
+  updateButtons;
 end;
 {$ENDREGION}
 

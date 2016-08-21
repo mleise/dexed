@@ -37,8 +37,13 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
           end        
           item
             AutoSize = True
+            Caption = 'Async'
+            Width = 48
+          end        
+          item
+            AutoSize = True
             Caption = 'Configuration'
-            Width = 230
+            Width = 182
           end>
         GridLines = True
         ReadOnly = True
@@ -46,6 +51,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         TabOrder = 0
         ViewStyle = vsReport
         OnDblClick = lstProjDblClick
+        OnSelectItem = slstProjSelectItem
       end
       object Panel2: TPanel[1]
         Left = 4
@@ -128,6 +134,23 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         Caption = 'btnMoveUp'
         OnClick = btnMoveUpClick
         resourceName = 'ARROW_UP'
+        scaledSeparator = False
+      end
+      object btnAsync: TCEToolButton[4]
+        Left = 129
+        Hint = 'async compilation mode'
+        Top = 0
+        Caption = 'btnAsync'
+        OnClick = btnAsyncClick
+        scaledSeparator = False
+      end
+      object button0: TCEToolButton[5]
+        Left = 113
+        Height = 28
+        Top = 0
+        Width = 16
+        Caption = 'button0'
+        Style = tbsDivider
         scaledSeparator = False
       end
     end
