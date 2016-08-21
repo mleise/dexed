@@ -2840,7 +2840,6 @@ begin
     fDoc.saveTempFile;
   fRunProc.Executable:= exeFullName('dub' + exeExt);
   fRunProc.Parameters.Add(fDoc.fileName);
-  fRunProc.Execute;
   if not outside then
   begin
 	  fRunProc.Options := [poStderrToOutPut, poUsePipes];
