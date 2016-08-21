@@ -367,8 +367,6 @@ begin
 end;
 {$ENDREGION}
 
-// todo-cpagecontrol: display the two mole names when split mode is activated
-
 {$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEEditorWidget.docNew(document: TCESynMemo);
 var

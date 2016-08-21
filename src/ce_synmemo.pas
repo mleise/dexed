@@ -1915,10 +1915,10 @@ begin
     if token^.data = 'module' then
       fModuleTokFound := true
     else
+      // "module" is always the first KW
       stop := true;
-    exit;
-  end;
-  if fModuleTokFound and (token^.kind = ltkSymbol) and (token^.data = ';') then
+  end
+  else if fModuleTokFound and (token^.kind = ltkSymbol) and (token^.data = ';') then
   begin
     stop := true;
     fModuleTokFound := false;

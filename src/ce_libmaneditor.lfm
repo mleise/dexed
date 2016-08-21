@@ -63,7 +63,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
     inherited toolbar: TCEToolBar
       Width = 633
       object btnSelProj: TCEToolButton[0]
-        Left = 356
+        Left = 353
         Hint = 'set the project that compiles the selected entry'
         Top = 0
         Caption = 'button3'
@@ -72,7 +72,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         scaledSeparator = False
       end
       object btnSelRoot: TCEToolButton[1]
-        Left = 328
+        Left = 325
         Hint = 'set the root of the library sources'
         Top = 0
         Caption = 'button4'
@@ -81,7 +81,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         scaledSeparator = False
       end
       object btnSelfoldOfFiles: TCEToolButton[2]
-        Left = 300
+        Left = 297
         Hint = 'select a folder containing several d sources (optional trick)'
         Top = 0
         Caption = 'button5'
@@ -90,7 +90,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         scaledSeparator = False
       end
       object btnSelFile: TCEToolButton[3]
-        Left = 272
+        Left = 269
         Hint = 'selected the static library file'
         Top = 0
         Caption = 'button6'
@@ -99,7 +99,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         scaledSeparator = False
       end
       object btnEditAlias: TCEToolButton[4]
-        Left = 244
+        Left = 241
         Hint = 'set the entry alias'
         Top = 0
         Caption = 'button7'
@@ -111,7 +111,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 225
         Height = 28
         Top = 0
-        Width = 19
+        Width = 16
         Caption = 'button8'
         Style = tbsDivider
         scaledSeparator = False
