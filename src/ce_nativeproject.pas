@@ -568,11 +568,11 @@ var
   {$ENDIF}
 //
 begin
-  if not fHasLoaded then
-  begin
-    dlgOkError('"' + shortenPath(fFilename) + '"' + 'does not seem to be a valid CE project');
-    fFilename:= '';
-  end;
+  //if not fHasLoaded then
+  //begin
+  //  dlgOkError('"' + shortenPath(fFilename) + '"' + 'does not seem to be a valid CE project');
+  //  fFilename:= '';
+  //end;
   patchPlateformPaths(fSrcs);
   fModified := false;
   hasPatched := false;
