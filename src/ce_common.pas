@@ -795,7 +795,7 @@ begin
         if not GetVolumeInformation(PChar(ltr), PChar(nme), 255, nil, nil, nil, nil, 0) then
           continue;
         case GetDriveType(PChar(ltr)) of
-           DRIVE_REMOVABLE, DRIVE_FIXED, DRIVE_REMOTE: aList.Add(ltr);
+           DRIVE_REMOVABLE, DRIVE_FIXED, DRIVE_REMOTE: list.Add(ltr);
         end;
       except
         // SEM_FAILCRITICALERRORS: exception is sent to application.
@@ -812,7 +812,7 @@ end;
 function shellOpen(const fname: string): boolean;
 begin
   {$IFDEF WINDOWS}
-  result := ShellExecute(0, 'OPEN', PChar(aFilename), nil, nil, SW_SHOW) > 32;
+  result := ShellExecute(0, 'OPEN', PChar(fname), nil, nil, SW_SHOW) > 32;
   {$ENDIF}
   {$IFDEF LINUX}
   with TProcess.Create(nil) do

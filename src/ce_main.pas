@@ -8,6 +8,7 @@ uses
   Classes, SysUtils, LazFileUtils, SynEditKeyCmds, SynHighlighterLFM, Forms,
   StdCtrls, AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls,
   Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
+  {$IFDEF WINDOWS}Windows, {$ENDIF}
   XMLPropStorage, SynExportHTML, fphttpclient, xfpjson, xjsonparser, xjsonscanner,
   ce_common, ce_dmdwrap, ce_nativeproject, ce_synmemo, ce_writableComponent,
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,
@@ -1302,9 +1303,9 @@ begin
   splt := TAnchorDockSplitter(sender);
   splt.MoveSplitter(offs);
   if splt.ResizeAnchor in [akLeft, akRight] then
-    Mouse.CursorPos:= Point(Mouse.CursorPos.X + offs, Mouse.CursorPos.Y)
+    Mouse.CursorPos:= classes.Point(Mouse.CursorPos.X + offs, Mouse.CursorPos.Y)
   else
-    Mouse.CursorPos:= Point(Mouse.CursorPos.X, Mouse.CursorPos.Y + offs);
+    Mouse.CursorPos:= classes.Point(Mouse.CursorPos.X, Mouse.CursorPos.Y + offs);
   Handled := true;
 end;
 

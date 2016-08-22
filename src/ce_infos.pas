@@ -6,6 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, strutils,
+  {$IFDEF WINDOWS}Windows,{$ENDIF}
   StdCtrls, ExtCtrls, Buttons, Menus,ce_widget, ce_common, ce_sharedres;
 
 type
