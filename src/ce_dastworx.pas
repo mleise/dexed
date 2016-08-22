@@ -71,7 +71,7 @@ begin
     prc.Executable := str;
     prc.Parameters.Add(files);
     prc.Parameters.Add('-i');
-    prc.Options := [poUsePipes, poStderrToOutPut{$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
+    prc.Options := [poUsePipes {$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
     prc.ShowWindow := swoHIDE;
     prc.Execute;
     prc.CloseInput;

@@ -311,7 +311,7 @@ class function TStringHash.hash(const key: string; maxBucketsPow2: longword): lo
 var
   i: integer;
 begin
-  {$PUSH}{$R-}
+  {$PUSH}{$R-} {$Q-}
   result := 2166136261;
   for i:= 1 to key.length do
   begin
@@ -327,7 +327,7 @@ var
   ptr: PByte;
   i: integer;
 begin
-  {$PUSH}{$R-}
+  {$PUSH}{$R-} {$Q-}
   ptr := PByte(key);
   result := 2166136261;
   {$IFDEF CPU32}

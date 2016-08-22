@@ -19,6 +19,6 @@ dmd %dast% %dparse% %iz% ^
 -of"..\bin\dastworx"
 
 ::cleanup
-del ..\bin\dastworx.o
+del ..\bin\dastworx.obj
 
 echo ...done
