@@ -142,6 +142,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         Top = 0
         Caption = 'btnAsync'
         OnClick = btnAsyncClick
+        resourceName = 'ARROW_DIVIDE'
         scaledSeparator = False
       end
       object button0: TCEToolButton[5]
