@@ -117,6 +117,7 @@ type
     function compiled: Boolean;
     procedure compile;
     function targetUpToDate: boolean;
+    procedure checkMissingFiles;
     //
     property configuration[ix: integer]: TCompilerConfiguration read getConfig;
     property currentConfiguration: TCompilerConfiguration read getCurrConf;
@@ -484,10 +485,9 @@ begin
   Inherited;
 end;
 
-procedure TCENativeProject.afterLoad;
+procedure TCENativeProject.checkMissingFiles;
 var
   hasPatched: Boolean;
-  {$IFNDEF CEBUILD}
   // either all the source files have moved or only the project file
   procedure checkMissingAllSources;
   var
@@ -565,8 +565,22 @@ var
       end;
     end;
   end;
-  {$ENDIF}
-//
+begin
+  beginUpdate;
+  checkMissingAllSources;
+  checkMissingSingleSource;
+  endUpdate;
+  if hasPatched then
+  begin
+    fModified:= true;
+    dlgOkInfo('some source file paths has been patched, some others invalid ' +
+    'paths or file may still exist (-of, -od, extraSources, etc)' +
+    'but cannot be automatically handled. Note that the modifications have not been saved.');
+  end
+  else fModified:= false;
+end;
+
+procedure TCENativeProject.afterLoad;
 begin
   //if not fHasLoaded then
   //begin
@@ -574,25 +588,9 @@ begin
   //  fFilename:= '';
   //end;
   patchPlateformPaths(fSrcs);
-  fModified := false;
-  hasPatched := false;
-  {$IFNDEF CEBUILD}
-  //
-  // TODO-cfeature: a modal form with the file list, green checkers and red crosses to indicate the state
-  // and some actions to apply to a particular selection: patch root, remove from project, replace, etc...
-  checkMissingAllSources;
-  checkMissingSingleSource;
-  if hasPatched then
-  begin
-    dlgOkInfo('some source file paths has been patched, some others invalid ' +
-    'paths or file may still exist (-of, -od, extraSources, etc)' +
-    'but cannot be automatically handled. Note that the modifications have not been saved.');
-  end;
-  {$ENDIF}
-  //
   updateOutFilename;
   endUpdate;
-  if not hasPatched then fModified := false;
+  fModified := false;
 end;
 
 procedure TCENativeProject.readerPropNoFound(Reader: TReader; Instance: TPersistent;
