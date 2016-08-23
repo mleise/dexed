@@ -24,7 +24,6 @@ void listSymbols(const(Module) mod, AstErrors errors, bool ddeep = true)
     SL sl = construct!(SL);
     sl.visit(mod);
     sl.serialize.writeln;
-    stdout.flush;
 }
 
 private:

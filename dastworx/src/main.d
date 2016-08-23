@@ -66,6 +66,7 @@ void main(string[] args)
         "s", &handleSymListOption,
         "t", &handleTodosOption,
     );
+    stdout.flush;
 }
 
 /// Handles the "-s" option: create the symbol list in the output

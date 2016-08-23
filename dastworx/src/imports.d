@@ -57,7 +57,6 @@ void listFilesImports(string[] files)
         writeln('"', mod.moduleDeclaration.moduleName.identifiers
             .map!(a => a.text).join("."), '"');
         il.visit(mod);
-        stdout.flush;
     }
 }
 
