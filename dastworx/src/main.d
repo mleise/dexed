@@ -35,6 +35,8 @@ void main(string[] args)
     version(devel)
     {
         mixin(logCall);
+        config = LexerConfig("", StringBehavior.source, WhitespaceBehavior.skip);
+        cache = construct!(StringCache)(StringCache.defaultBucketCount);
         File f = File(__FILE__, "r");
         foreach(ref buffer; f.byChunk(4096))
             source.put(buffer);
@@ -42,23 +44,29 @@ void main(string[] args)
     }
     else
     {
+        // get the source to process.
+        // even when files are passed, the std input has to be closed by the IDE
         foreach(ref buffer; stdin.byChunk(4096))
             source.put(buffer);
+        if (!source.data.length)
+        {
+            files = args[1].splitter(pathSeparator).array;
+            version(devel) writeln(files);
+        }
+        // when files are passed, the global cache & config cant be used
+        else
+        {
+            config = LexerConfig("", StringBehavior.source, WhitespaceBehavior.skip);
+            cache = construct!(StringCache)(StringCache.defaultBucketCount);
+        }
     }
 
-    if (args.length > 2)
-    {
-        files = args[1].splitter(pathSeparator).array;
-        version(devel) writeln(files);
-    }
-
-    config = LexerConfig("", StringBehavior.source, WhitespaceBehavior.skip);
-    cache = construct!(StringCache)(StringCache.defaultBucketCount);
-
+    // options for the worxs
     getopt(args, std.getopt.config.passThrough,
         "d", &deepSymList
     );
 
+    // launch a worx directly
     getopt(args, std.getopt.config.passThrough,
         "i", &handleImportsOption,
         "m", &handleMainfunOption,

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, ce_common, ce_writableComponent, LazFileUtils,
-  ghashmap, ghashset, process,
+  ghashmap, ghashset,
   ce_dcd, ce_dialogs, ce_projutils, ce_interfaces, ce_dlang, ce_dastworx;
 
 type

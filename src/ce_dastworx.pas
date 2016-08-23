@@ -50,8 +50,6 @@ begin
     str := source.Text;
     prc.Input.Write(str[1], str.length);
     prc.CloseInput;
-    while prc.Running do
-      sleep(1);
     processOutputToStrings(prc, imports);
   finally
     prc.free;
@@ -75,8 +73,6 @@ begin
     prc.ShowWindow := swoHIDE;
     prc.Execute;
     prc.CloseInput;
-    while prc.Running do
-      sleep(1);
     processOutputToStrings(prc, results);
   finally
     prc.free;
