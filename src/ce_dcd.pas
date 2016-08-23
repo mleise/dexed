@@ -345,7 +345,6 @@ begin
   fClient.Parameters.Clear;
   fClient.Parameters.Add('-I' + folder);
   fClient.Execute;
-  waitClient;
 end;
 
 procedure TCEDcdWrapper.addImportFolders(const folders: TStrings);
@@ -366,7 +365,6 @@ begin
   if fClient.Parameters.Count <> 0 then
   begin
     fClient.Execute;
-    waitClient;
   end;
 end;
 
