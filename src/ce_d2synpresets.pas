@@ -326,6 +326,11 @@ begin
       //
       currentLine.Background:= 15789545;
       currentLine.Foreground:= clNone;
+      //
+      getHl.phobosStyleType:=false;
+      getHl.types.Background:=clNone;
+      getHl.types.Foreground:=clBlack;
+      getHl.types.Style:=[fsBold];
     end;
     with fPresets.addPreset do
     begin
@@ -353,6 +358,10 @@ begin
       getHl.errors.Foreground := 14807024;
       getHl.attributes.Foreground := 9684887;
       getHl.attributes.FrameEdges := sfeNone;
+      getHl.phobosStyleType:=false;
+      getHl.types.Background:=clNone;
+      getHl.types.Foreground:=14807024;
+      getHl.types.Style:=[fsBold];
       background := 4210752;
       bracketMatch.Background := clNone;
       bracketMatch.Foreground := clFuchsia;
@@ -391,6 +400,9 @@ begin
       getHl.errors.Foreground := 1975089;
       getHl.attributes.Foreground := 3226202;
       getHl.attributes.FrameEdges := sfeNone;
+      getHl.types.Background:=clNone;
+      getHl.types.Foreground:=1975089;
+      getHl.types.Style:=[fsBold];
       background := 9818842;
       currentLine.Background := 9030871;
       currentLine.Foreground := clNone;
@@ -407,6 +419,8 @@ begin
     with fPresets.addPreset do
     begin
       name := 'Mars bright';
+      getHl.identifiers.Foreground := clBlack;
+      getHl.identifiers.FrameEdges := sfeNone;
       getHl.numbers.Foreground := 7763655;
       getHl.comments.Foreground := clMedGray;
       getHl.strings.Foreground := 3750276;
@@ -414,6 +428,9 @@ begin
       getHl.ddoc.Foreground := 7105644;
       getHl.special.Foreground := 2631874;
       getHl.attributes.Foreground := 2631874;
+      getHl.types.Background:=clNone;
+      getHl.types.Foreground:=clBlack;
+      getHl.types.Style:=[fsBold];
       background := 16579836;
       bracketMatch.Background := 12698077;
       bracketMatch.Foreground := clNone;
@@ -449,6 +466,9 @@ begin
       getHl.special.Foreground := 2631874;
       getHl.errors.Foreground := clCream;
       getHl.attributes.Foreground := 2631874;
+      getHl.types.Background:=clNone;
+      getHl.types.Foreground:=clCream;
+      getHl.types.Style:=[fsBold];
       background := 5263440;
       bracketMatch.Background := 9276865;
       bracketMatch.Foreground := clNone;

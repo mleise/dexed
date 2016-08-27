@@ -12,7 +12,7 @@ uses
 type
 
   TTokenKind = (tkCommt, tkIdent, tkKeywd, tkStrng, tkBlank, tkSymbl, tkNumbr,
-    tkDDocs, tkSpecK, tkError, tkAsmbl, tkAttri, tkLost);
+    tkDDocs, tkSpecK, tkError, tkAsmbl, tkAttri, tkLost,  tkTypes);
 
   TRangeKind = (rkString1, rkString2, rkTokString, rkBlockCom1, rkBlockCom2,
     rkBlockDoc1, rkBlockDoc2, rkAsm);
@@ -56,12 +56,14 @@ type
     fErrorAttrib: TSynHighlighterAttributes;
     fAttriAttrib: TSynHighlighterAttributes;
     fLost_Attrib: TSynHighlighterAttributes;
+    fTypesAttrib: TSynHighlighterAttributes;
     fLineBuf: string;
     fTokStart, fTokStop: Integer;
     fTokKind: TTokenKind;
     fCurrRange: TSynD2SynRange;
     fFoldKinds: TFoldKinds;
     fAttribLut: array[TTokenKind] of TSynHighlighterAttributes;
+    fPhobosStyleType: boolean;
     procedure setFoldKinds(value: TFoldKinds);
     procedure setWhiteAttrib(value: TSynHighlighterAttributes);
     procedure setNumbrAttrib(value: TSynHighlighterAttributes);
@@ -75,13 +77,15 @@ type
     procedure setSpeckAttrib(value: TSynHighlighterAttributes);
     procedure setErrorAttrib(value: TSynHighlighterAttributes);
     procedure setAttriAttrib(value: TSynHighlighterAttributes);
+    procedure setTypesAttrib(value: TSynHighlighterAttributes);
     procedure doAttribChange(sender: TObject);
     procedure doChanged;
   protected
     function GetRangeClass: TSynCustomHighlighterRangeClass; override;
     function GetIdentChars: TSynIdentChars; override;
 	published
-    property foldKinds:   TFoldKinds read fFoldKinds write setFoldKinds;
+    property phobosStyleType: boolean read fPhobosStyleType write fPhobosStyleType stored true;
+    property foldKinds:   TFoldKinds read fFoldKinds write setFoldKinds stored true;
     property whites:      TSynHighlighterAttributes read fWhiteAttrib write setWhiteAttrib stored true;
     property numbers:     TSynHighlighterAttributes read fNumbrAttrib write setNumbrAttrib stored true;
     property symbols:     TSynHighlighterAttributes read fSymblAttrib write setSymblAttrib stored true;
@@ -94,6 +98,7 @@ type
     property special:     TSynHighlighterAttributes read fSpeckAttrib write setSpeckAttrib stored true;
     property errors:      TSynHighlighterAttributes read fErrorAttrib write setErrorAttrib stored true;
     property attributes:  TSynHighlighterAttributes read fAttriAttrib write setAttriAttrib stored true;
+    property types:       TSynHighlighterAttributes read fTypesAttrib write setTypesAttrib stored true;
     property DefaultFilter stored false;
     property enabled stored false;
 	public
@@ -197,6 +202,7 @@ begin
   fSpeckAttrib := TSynHighlighterAttributes.Create('Speck','Speck');
   fErrorAttrib := TSynHighlighterAttributes.Create('Error','Error');
   fAttriAttrib := TSynHighlighterAttributes.Create('Attri','Attri');
+  fTypesAttrib := TSynHighlighterAttributes.Create('Types','Types');
   fLost_Attrib := TSynHighlighterAttributes.Create('Lost','Lost');
 
   fNumbrAttrib.Foreground := $000079F2;
@@ -210,6 +216,7 @@ begin
   fAttriAttrib.Foreground := clNavy;
   fLost_Attrib.Foreground := clLime;
   fDDocsAttrib.Foreground := clTeal;
+  fTypesAttrib.Foreground := clBlack;
 
   fLost_Attrib.Background := clBlack;
 
@@ -219,6 +226,7 @@ begin
   fSpeckAttrib.Style := [fsBold];
   fAttriAttrib.Style := [fsBold];
   fLost_Attrib.Style := [fsBold];
+  fTypesAttrib.Style := [fsBold];
 
   fErrorAttrib.Foreground:= fIdentAttrib.Foreground;
   fErrorAttrib.FrameStyle:= slsWaved;
@@ -237,6 +245,7 @@ begin
   AddAttribute(fSpeckAttrib);
   AddAttribute(fErrorAttrib);
   AddAttribute(fAttriAttrib);
+  AddAttribute(fTypesAttrib);
 
   fAttribLut[TTokenKind.tkident] := fIdentAttrib;
   fAttribLut[TTokenKind.tkBlank] := fWhiteAttrib;
@@ -250,6 +259,7 @@ begin
   fAttribLut[TTokenKind.tkError] := fErrorAttrib;
   fAttribLut[TTokenKind.tkAsmbl] := fAsblrAttrib;
   fAttribLut[TTokenKind.tkAttri] := fAttriAttrib;
+  fAttribLut[TTokenKind.tkTypes] := fTypesAttrib;
   fAttribLut[TTokenKind.tkLost]  := fLost_Attrib;
 
   SetAttributesOnChange(@doAttribChange);
@@ -273,6 +283,7 @@ begin
   begin
     srcsyn := TSynD2Syn(Source);
     foldKinds := srcsyn.foldKinds;
+    fPhobosStyleType:=srcsyn.fPhobosStyleType;
   end;
 end;
 
@@ -363,6 +374,11 @@ end;
 procedure TSynD2Syn.setAttriAttrib(value: TSynHighlighterAttributes);
 begin
   fAttriAttrib.Assign(value);
+end;
+
+procedure TSynD2Syn.setTypesAttrib(value: TSynHighlighterAttributes);
+begin
+  fTypesAttrib.Assign(value);
 end;
 
 procedure TSynD2Syn.setLine(const NewValue: string; LineNumber: Integer);
@@ -940,6 +956,8 @@ begin
     end
     else if specialKeywordsMap.match(fLineBuf[FTokStart..fTokStop-1]) then
       fTokKind := tkSpecK
+    else if fPhobosStyleType and ('A' <= fLineBuf[FTokStart]) and (fLineBuf[FTokStart] <= 'Z') then
+      fTokKind:= tkTypes
     else if rkAsm in fCurrRange.rangeKinds then
       fTokKind:=tkAsmbl;
     exit;
