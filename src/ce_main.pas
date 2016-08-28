@@ -2523,6 +2523,7 @@ var
   firstLineFlags: string = '';
   asObj: boolean = false;
   hasMain: THasMain;
+  rng: TStringRange = (ptr:nil; pos:0; len: 0);
 begin
 
   result := false;
@@ -2532,10 +2533,16 @@ begin
   if fDoc.Lines.Count = 0 then exit;
 
   firstlineFlags := fDoc.Lines[0];
-  i := firstlineFlags.length;
-  if (i > 18) and (firstlineFlags.upperCase[1..17] = '#!RUNNABLE-FLAGS:') then
+  rng.init(firstLineFlags);
+  if rng.startsWith('#!') then
   begin
-    firstlineFlags := fSymStringExpander.expand(firstlineFlags[18..i]);
+    rng.popFront;
+    rng.popFront;
+    rng.popWhile([' ', #9]);
+    rng.popUntil([' ', #9, ':']);
+    rng.popWhile([' ', #9, ':']);
+    firstlineFlags := rng.takeUntil(#0).yield;
+    firstlineFlags := fSymStringExpander.expand(firstlineFlags);
     lst := TStringList.Create;
     CommandToList(firstlineFlags, lst);
     for i:= lst.Count-1 downto 0 do
