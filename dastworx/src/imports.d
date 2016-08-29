@@ -53,7 +53,7 @@ void listFilesImports(string[] files)
     {
         ubyte[] source = cast(ubyte[]) std.file.read(fname);
         Module mod = parseModule(getTokensForParser(source, config, &cache),
-            fname, &allocator, &handleErrors);
+            fname, &allocator, &ignoreErrors);
         writeln('"', mod.moduleDeclaration.moduleName.identifiers
             .map!(a => a.text).join("."), '"');
         il.visit(mod);

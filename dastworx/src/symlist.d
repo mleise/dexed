@@ -15,10 +15,10 @@ private __gshared bool deep = void;
 /**
  * Serializes the symbols in the standard output
  */
-void listSymbols(const(Module) mod, AstErrors errors, bool ddeep = true)
+void listSymbols(const(Module) mod, AstErrors errors, bool deep = true)
 {
     mixin(logCall);
-    symlist.deep = ddeep;
+    symlist.deep = deep;
     alias SL = SymbolListBuilder!(ListFmt.Pas);
     SL.addAstErrors(errors);
     SL sl = construct!(SL);

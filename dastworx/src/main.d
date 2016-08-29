@@ -9,19 +9,13 @@ import
 import
     dparse.lexer, dparse.parser, dparse.ast, dparse.rollback_allocator;
 import
-    common, todos, symlist, imports, mainfun, runnableflags;
+    common, todos, symlist, imports, mainfun;
 
 
-private __gshared bool storeAstErrors = void, deepSymList;
-private __gshared const(Token)[] tokens;
-private __gshared Module module_ = void;
+private __gshared bool deepSymList;
 private __gshared static Appender!(ubyte[]) source;
-private __gshared RollbackAllocator allocator;
-private __gshared LexerConfig config;
-private __gshared StringCache* cache;
 private __gshared static Appender!(AstErrors) errors;
 private __gshared string[] files;
-
 
 static this()
 {
@@ -35,8 +29,6 @@ void main(string[] args)
     version(devel)
     {
         mixin(logCall);
-        config = LexerConfig("", StringBehavior.source, WhitespaceBehavior.skip);
-        cache = construct!(StringCache)(StringCache.defaultBucketCount);
         File f = File(__FILE__, "r");
         foreach(ref buffer; f.byChunk(4096))
             source.put(buffer);
@@ -53,24 +45,17 @@ void main(string[] args)
             files = args[1].splitter(pathSeparator).array;
             version(devel) writeln(files);
         }
-        // when files are passed, the global cache & config cant be used
-        else
-        {
-            config = LexerConfig("", StringBehavior.source, WhitespaceBehavior.skip);
-            cache = construct!(StringCache)(StringCache.defaultBucketCount);
-        }
     }
 
-    // options for the worxs
+    // options for the work
     getopt(args, std.getopt.config.passThrough,
         "d", &deepSymList
     );
 
-    // launch a worx directly
+    // launch directly a work
     getopt(args, std.getopt.config.passThrough,
         "i", &handleImportsOption,
         "m", &handleMainfunOption,
-        "r", &handleRunnableFlags,
         "s", &handleSymListOption,
         "t", &handleTodosOption,
     );
@@ -81,10 +66,15 @@ void main(string[] args)
 void handleSymListOption()
 {
     mixin(logCall);
-    storeAstErrors = true;
-    lex!false;
-    parseTokens;
-    listSymbols(module_, errors.data, deepSymList);
+
+    RollbackAllocator alloc;
+    StringCache cache = StringCache(StringCache.defaultBucketCount);
+    LexerConfig config = LexerConfig("", StringBehavior.source);
+
+    source.data
+        .getTokensForParser(config, &cache)
+        .parseModule("", &alloc, &handleErrors)
+        .listSymbols(errors.data, deepSymList);
 }
 
 /// Handles the "-t" option: create the list of todo comments in the output
@@ -92,14 +82,6 @@ void handleTodosOption()
 {
     mixin(logCall);
     getTodos(files);
-}
-
-/// Handles the "-r" option:
-void handleRunnableFlags()
-{
-    mixin(logCall);
-    lex!true;
-    getRunnableFlags(tokens);
 }
 
 /// Handles the "-i" option: create the import list in the output
@@ -112,10 +94,14 @@ void handleImportsOption()
     }
     else
     {
-        storeAstErrors = false;
-        lex!false;
-        parseTokens;
-        listImports(module_);
+        RollbackAllocator alloc;
+        StringCache cache = StringCache(StringCache.defaultBucketCount);
+        LexerConfig config = LexerConfig("", StringBehavior.source);
+
+        source.data
+            .getTokensForParser(config, &cache)
+            .parseModule("", &alloc, &ignoreErrors)
+            .listImports();
     }
 }
 
@@ -123,31 +109,21 @@ void handleImportsOption()
 void handleMainfunOption()
 {
     mixin(logCall);
-    storeAstErrors = false;
-    lex!false;
-    parseTokens;
-    detectMainFun(module_);
+
+    RollbackAllocator alloc;
+    StringCache cache = StringCache(StringCache.defaultBucketCount);
+    LexerConfig config = LexerConfig("", StringBehavior.source);
+
+    source.data
+        .getTokensForParser(config, &cache)
+        .parseModule("", &alloc, &ignoreErrors)
+        .detectMainFun();
 }
 
-private void handleErrors(string fname, size_t line, size_t col, string message, bool err)
+private void handleErrors(string fname, size_t line, size_t col, string message,
+    bool err)
 {
-    if (storeAstErrors)
-        errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
-}
-
-private void lex(bool keepComments = false)()
-{
-    static if (keepComments)
-        tokens = DLexer(source.data, config, cache).array;
-    else
-        tokens = getTokensForParser(source.data, config, cache);
-}
-
-private void parseTokens()
-{
-    mixin(logCall);
-    if (!module_)
-        module_ = parseModule(tokens, "", &allocator, &handleErrors);
+    errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
 }
 
 version(devel)

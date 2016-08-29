@@ -41,7 +41,6 @@ object CurrentProject: TCENativeProject
     'src/imports.d'
     'src/mainfun.d'
     'src/common.d'
-    'src/runnableflags.d'
   )
   ConfigurationIndex = 1
 end
