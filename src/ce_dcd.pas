@@ -345,6 +345,7 @@ begin
   fClient.Parameters.Clear;
   fClient.Parameters.Add('-I' + folder);
   fClient.Execute;
+  while fClient.Running do ;
 end;
 
 procedure TCEDcdWrapper.addImportFolders(const folders: TStrings);
@@ -366,6 +367,7 @@ begin
   begin
     fClient.Execute;
   end;
+  while fClient.Running do ;
 end;
 
 procedure TCEDcdWrapper.getCallTip(out tips: string);
@@ -383,6 +385,7 @@ begin
   writeSourceToInput;
   //
   fTempLines.LoadFromStream(fClient.Output);
+  while fClient.Running do ;
   if fTempLines.Count = 0 then
   begin
     updateServerlistening;
@@ -418,6 +421,7 @@ begin
   writeSourceToInput;
   //
   fTempLines.LoadFromStream(fClient.Output);
+  while fClient.Running do ;
   if fTempLines.Count = 0 then
   begin
     updateServerlistening;
@@ -480,6 +484,7 @@ begin
   //
   comment := '';
   fTempLines.LoadFromStream(fClient.Output);
+  while fClient.Running do ;
   if fTempLines.Count = 0 then
     updateServerlistening;
   for str in fTempLines do
@@ -490,12 +495,12 @@ begin
       if startsWith('\\') then
       begin
         comment += '\';
-        popFront; popFront;
+        popFrontN(2);
       end
       else if startsWith('\n') then
       begin
         comment += LineEnding;
-        popFront; popFront;
+        popFrontN(2);
       end
     end;
     comment += LineEnding + LineEnding;
@@ -503,8 +508,7 @@ begin
   //
   comment := ReplaceText(comment, 'ditto' + LineEnding + LineEnding, '');
   comment := ReplaceText(comment, 'ditto', '');
-  comment := TrimLeft(comment);
-  comment := TrimRight(comment);
+  comment := Trim(comment);
 end;
 
 procedure TCEDcdWrapper.getDeclFromCursor(out fname: string; out position: Integer);
@@ -525,21 +529,23 @@ begin
   fClient.Execute;
   writeSourceToInput;
   //
-  setlength(str, MAX_PATH);
-  i := fClient.Output.Read(str[1], MAX_PATH);
-  if i = 0 then
-    updateServerlistening;
-  setLength(str, i);
-  if str.isNotEmpty then
+  fTempLines.LoadFromStream(fClient.Output);
+  while fClient.Running do ;
+  if fTempLines.Count > 0 then
   begin
-    i := Pos(#9, str);
-    if i = -1 then
-      exit;
-    loc := str[i+1..str.length];
-    fname := str[1..i-1];
-    loc := ReplaceStr(loc, LineEnding, '');
-    position := strToIntDef(loc, -1);
-  end;
+    str := fTempLines[0];
+    if str.isNotEmpty then
+    begin
+      i := Pos(#9, str);
+      if i = -1 then
+        exit;
+      loc := str[i+1..str.length];
+      fname := str[1..i-1];
+      loc := ReplaceStr(loc, LineEnding, '');
+      position := strToIntDef(loc, -1);
+    end;
+  end
+  else updateServerlistening;
 end;
 
 procedure TCEDcdWrapper.getLocalSymbolUsageFromCursor(var locs: TIntOpenArray);
@@ -562,6 +568,7 @@ begin
   //
   setLength(locs, 0);
   fTempLines.LoadFromStream(fClient.Output);
+  while fClient.Running do ;
   if fTempLines.Count < 2 then
     exit;
   str := fTempLines[0];

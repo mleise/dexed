@@ -51,6 +51,7 @@ begin
     prc.Input.Write(str[1], str.length);
     prc.CloseInput;
     processOutputToStrings(prc, imports);
+    while prc.Running do ;
   finally
     prc.free;
   end;
@@ -74,6 +75,7 @@ begin
     prc.Execute;
     prc.CloseInput;
     processOutputToStrings(prc, results);
+    while prc.Running do ;
   finally
     prc.free;
   end;
