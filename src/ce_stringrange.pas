@@ -43,7 +43,9 @@ type
     function init(const pchr: PChar; length: integer): PStringRange; {$IFNDEF DEBUG}inline;{$ENDIF}
 
     // advances.
-    procedure popFront; {$IFNDEF DEBUG}inline;{$ENDIF}
+    function popFront: PStringRange; {$IFNDEF DEBUG}inline;{$ENDIF}
+    // advances N times
+    function popFrontN(n: integer): PStringRange; {$IFNDEF DEBUG}inline;{$ENDIF}
     // returns the current element.
     function front: char; {$IFNDEF DEBUG}inline;{$ENDIF}
     // indicates wether the range is consumed.
@@ -125,9 +127,16 @@ begin
   Result := @self;
 end;
 
-procedure TStringRange.popFront;
+function TStringRange.popFront: PStringRange;
 begin
   pos += 1;
+  Result := @self;
+end;
+
+function TStringRange.popFrontN(n: integer): PStringRange;
+begin
+  pos += n;
+  Result := @self;
 end;
 
 function TStringRange.front: char;

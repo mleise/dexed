@@ -294,9 +294,7 @@ begin
   end;
   with TStringRange.create(pge) do while not empty do
   begin
-    popUntil('"');
-    popFront;
-    fList.Add(takeUntil('"').yield);
+    fList.Add(popUntil('"')^.popFront^.takeUntil('"').yield);
     popFront;
   end;
   cbb.Items.clear;

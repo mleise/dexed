@@ -269,8 +269,8 @@ begin
     Result += rng.takeUntil('<').yield;
     if not rng.empty and (rng.front = '<') then
     begin
-      rng.popFront;
-      sym := rng.takeUntil('>').yield;
+      ;
+      sym := rng.popFront^.takeUntil('>').yield;
       if not rng.empty and (rng.front = '>') then
       begin
         rng.popFront;

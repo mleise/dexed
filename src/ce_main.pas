@@ -2536,11 +2536,10 @@ begin
   rng.init(firstLineFlags);
   if rng.startsWith('#!') then
   begin
-    rng.popFront;
-    rng.popFront;
-    rng.popWhile([' ', #9]);
-    rng.popUntil([' ', #9, ':']);
-    rng.popWhile([' ', #9, ':']);
+    rng.popFrontN(2)^
+      .popWhile([' ', #9])^
+      .popUntil([' ', #9, ':'])^
+      .popWhile([' ', #9, ':']);
     firstlineFlags := rng.takeUntil(#0).yield;
     firstlineFlags := fSymStringExpander.expand(firstlineFlags);
     lst := TStringList.Create;
