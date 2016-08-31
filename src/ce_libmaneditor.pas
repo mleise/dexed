@@ -24,6 +24,7 @@ type
     procedure getList(sender: TObject);
     procedure fillList;
     procedure btnTagCLick(sender: TObject);
+    procedure updateHint(sender: TObject);
   public
     class function showAndWait(out pName, pVersion: string): TModalResult; static;
     class destructor classDtor;
@@ -214,6 +215,9 @@ begin
   cbb.Align := alClient;
   cbb.BorderSpacing.Around := 6;
   cbb.Sorted:= true;
+  cbb.ShowHint:=true;
+  cbb.OnSelect:= @updateHint;
+  cbb.OnCloseUp:=@updateHint;;
 
   bsv := TSpeedButton.Create(self);
   bsv.Parent := self;
@@ -335,6 +339,19 @@ begin
     jsn := TJSONData(cbb.Items.Objects[cbb.ItemIndex]);
     jsn := jsn.FindPath('version');
     result := jsn.AsString;
+  except
+  end;
+end;
+
+procedure TDubPackageQueryForm.updateHint(sender: TObject);
+var
+  jsn: TJSONData;
+begin
+  if (cbb.ItemIndex <> -1) and cbb.Items.Objects[cbb.ItemIndex].isNotNil then
+  try
+    jsn := TJSONData(cbb.Items.Objects[cbb.ItemIndex]);
+    jsn := jsn.FindPath('description');
+    cbb.Hint:= jsn.AsString;
   except
   end;
 end;
