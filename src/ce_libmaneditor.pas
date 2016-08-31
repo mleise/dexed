@@ -6,25 +6,26 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Menus, ComCtrls, Buttons, LazFileUtils, strutils, fphttpclient, StdCtrls, xfpjson,
+  Menus, ComCtrls, Buttons, LazFileUtils, strutils, fphttpclient, StdCtrls,
+  xfpjson, xjsonparser,
   ce_widget, ce_interfaces, ce_nativeproject, ce_dmdwrap, ce_common, ce_dialogs,
-  ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_stringrange,
-  ce_libman, ce_projutils, ce_dsgncontrols;
+  ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_libman,
+  ce_projutils, ce_dsgncontrols;
 
 type
 
   TDubPackageQueryForm = class(TForm)
   private
-    class var fList: TStringList;
+    class var fList: TJSONData;
     cbb: TComboBox;
     fGetLatestTag: boolean;
     function getPackageName: string;
     function getPackageVersion: string;
     procedure getList(sender: TObject);
+    procedure fillList;
     procedure btnTagCLick(sender: TObject);
   public
     class function showAndWait(out pName, pVersion: string): TModalResult; static;
-    class constructor classCtor;
     class destructor classDtor;
     constructor Create(TheOwner: TComponent); override;
     property packageName: string read getPackageName;
@@ -187,11 +188,6 @@ begin
   itm.Selected := True;
 end;
 
-class constructor TDubPackageQueryForm.classCtor;
-begin
-  fList := TStringList.Create;
-end;
-
 class destructor TDubPackageQueryForm.classDtor;
 begin
   fList.Free;
@@ -217,7 +213,6 @@ begin
   cbb.AutoComplete := true;
   cbb.Align := alClient;
   cbb.BorderSpacing.Around := 6;
-  cbb.Items.AddStrings(fList);
   cbb.Sorted:= true;
 
   bsv := TSpeedButton.Create(self);
@@ -269,6 +264,8 @@ begin
   bno.Layout:= blGlyphTop;
   bno.Spacing:= 2;
   AssignPng(bno, 'CANCEL');
+
+  fillList;
 end;
 
 procedure TDubPackageQueryForm.btnTagCLick(sender: TObject);
@@ -280,25 +277,46 @@ procedure TDubPackageQueryForm.getList(sender: TObject);
 var
   pge: string;
   cli: TFPHTTPClient;
+  prs: TJSONParser;
 begin
-  fList.Clear;
+  if assigned(fList) then
+    fList.free;
   cli := TFPHTTPClient.Create(nil);
   try
     try
-      pge := cli.Get('https://code.dlang.org/packages/index.json');
+      pge := cli.Get('https://code.dlang.org/api/packages/search');
     except
-      pge := '';
+      pge := '[]';
     end;
   finally
     cli.Free;
   end;
-  with TStringRange.create(pge) do while not empty do
-  begin
-    fList.Add(popUntil('"')^.popFront^.takeUntil('"').yield);
-    popFront;
+  prs := TJSONParser.Create(pge, []);
+  try
+    fList := prs.Parse;
+  finally
+    prs.Free;
   end;
-  cbb.Items.clear;
-  cbb.Items.AddStrings(fList);
+  fillList;
+end;
+
+procedure TDubPackageQueryForm.fillList;
+var
+  itm: TJSONData;
+  i: integer;
+begin
+  cbb.Clear;
+  if fList.isNotNil and (fList.JSONType = jtArray) then
+    for i := 0 to fList.Count -1 do
+  begin
+    itm := fList.Items[i].FindPath('version');
+    if itm.isNil then
+      continue;
+    itm := fList.Items[i].FindPath('name');
+    if itm.isNil then
+      continue;
+    cbb.Items.AddObject(itm.AsString, fList.Items[i]);
+  end;
 end;
 
 function TDubPackageQueryForm.getPackageName: string;
@@ -307,25 +325,18 @@ begin
 end;
 
 function TDubPackageQueryForm.getPackageVersion: string;
+var
+  jsn: TJSONData;
 begin
-  if fGetLatestTag then
-  begin
-    with TFPHTTPClient.Create(nil) do
-    try
-      try
-        result := Get('https://code.dlang.org/api/packages/' + packageName + '/latest');
-      except
-        result := 'master';
-      end;
-    finally
-      Free;
-    end;
-    if (result.length >= 7) and (result[2] in ['0'..'9']) then
-      result := result[2..result.length-1]
-    else
-      result := 'master';
-  end
-  else result := 'master';
+  result := 'master';
+  if fGetLatestTag and (cbb.ItemIndex <> -1) and
+    cbb.Items.Objects[cbb.ItemIndex].isNotNil then
+  try
+    jsn := TJSONData(cbb.Items.Objects[cbb.ItemIndex]);
+    jsn := jsn.FindPath('version');
+    result := jsn.AsString;
+  except
+  end;
 end;
 
 class function TDubPackageQueryForm.showAndWait(out pName, pVersion: string): TModalResult;
