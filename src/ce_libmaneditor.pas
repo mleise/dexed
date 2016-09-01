@@ -17,8 +17,8 @@ type
   TDubPackageQueryForm = class(TForm)
   private
     class var fList: TJSONData;
+    class var fGetLatestTag: boolean;
     cbb: TComboBox;
-    fGetLatestTag: boolean;
     function getPackageName: string;
     function getPackageVersion: string;
     procedure getList(sender: TObject);
@@ -231,6 +231,7 @@ begin
   bsv.GroupIndex := 1;
   bsv.Layout:= blGlyphTop;
   bsv.Spacing:= 2;
+  bsv.Down:=fGetLatestTag;
   AssignPng(bsv, 'TAG_PURPLE');
 
   bww := TBitBtn.Create(self);
@@ -333,13 +334,32 @@ var
   jsn: TJSONData;
 begin
   result := 'master';
-  if fGetLatestTag and (cbb.ItemIndex <> -1) and
-    cbb.Items.Objects[cbb.ItemIndex].isNotNil then
-  try
-    jsn := TJSONData(cbb.Items.Objects[cbb.ItemIndex]);
-    jsn := jsn.FindPath('version');
-    result := jsn.AsString;
-  except
+  if fGetLatestTag then
+  begin
+    // list is updated
+    if fList.isNotNil and (cbb.ItemIndex <> -1) and
+      cbb.Items.Objects[cbb.ItemIndex].isNotNil then
+    begin
+      jsn := TJSONData(cbb.Items.Objects[cbb.ItemIndex]);
+      jsn := jsn.FindPath('version');
+      result := jsn.AsString;
+    end
+    else
+    // use API
+    begin
+      with TFPHTTPClient.Create(nil) do
+      try
+        try
+          result := Get('https://code.dlang.org/api/packages/' + packageName + '/latest');
+        except
+          result := 'master';
+        end;
+      finally
+        Free;
+      end;
+      if (result.length >= 7) and (result[2] in ['0'..'9']) then
+        result := result[2..result.length-1]
+    end;
   end;
 end;
 
@@ -351,7 +371,8 @@ begin
   try
     jsn := TJSONData(cbb.Items.Objects[cbb.ItemIndex]);
     jsn := jsn.FindPath('description');
-    cbb.Hint:= jsn.AsString;
+    if jsn.isNotNil then
+      cbb.Hint:= jsn.AsString;
   except
   end;
 end;
@@ -420,7 +441,9 @@ begin
     dub.Parameters.Add('fetch');
     dub.Parameters.Add(nme);
     if ver = 'master' then
-      dub.Parameters.Add('--version=~master');
+      dub.Parameters.Add('--version=~master')
+    else
+      dub.Parameters.Add('--version=' + ver);
     dub.Execute;
     while dub.Running do sleep(10);
     err := dub.ExitStatus;
@@ -832,60 +855,61 @@ function TCELibManEditorWidget.sourceRoot(project: ICECommonProject): string;
 var
   i, j: integer;
   mnme: string;
-  fold: string;
-  modn: TStringList;
-  modf: TStringList;
-  toks: TLexTokenList;
+  path: string;
   base: string;
+  lst: TStringList;
+  srcc: TStringList;
+  toks: TLexTokenList;
 begin
-  base := project.basePath;
 
   // 1 source, same folder
   if project.sourcesCount = 1 then
   begin
-    mnme := project.sourceAbsolute(0);
-    if mnme.extractFilePath = base then
+    base := project.basePath;
+    path := project.sourceAbsolute(0);
+    if path.extractFilePath = base then
       exit(base);
   end;
 
-  modn := TStringList.Create;
-  modf := TStringList.Create;
+  lst := TStringList.Create;
+  srcc := TStringList.Create;
   toks := TLexTokenList.Create;
+  lst.Duplicates:= dupIgnore;
   try
     // get module name and store the parent.parent.parent... dir
     for i := 0 to project.sourcesCount-1 do
     begin
+      path := project.sourceAbsolute(i);
+      if not hasDlangSyntax(path.extractFileExt) then
+        continue;
       fModStart := false;
-      fold := project.sourceAbsolute(i);
-      modf.LoadFromFile(fold);
-      lex(modf.Text, toks, @lexFindToken, [lxoNoComments]);
+      srcc.LoadFromFile(path);
+      lex(srcc.Text, toks, @lexFindToken, [lxoNoComments]);
       mnme := getModuleName(toks);
-      for j := 0 to WordCount(mnme, ['.'])-1 do
-        fold := extractFileDir(fold);
-      modn.Add(fold);
       toks.Clear;
+      for j := 0 to WordCount(mnme, ['.'])-1 do
+        path := path.extractFileDir;
+      lst.Add(path);
     end;
-    result := modn[0];
-    // no error possible if 1 module
-    if project.sourcesCount > 1 then
+    if project.sourcesCount = 0 then
+      result := ''
+    else
+      result := lst[0];
+    if (project.sourcesCount > 1) and (lst.Count > 1) then
     begin
-      for i := 1 to modn.Count-1 do
+      lst.Clear;
+      for j := 0 to project.sourcesCount-1 do
       begin
-        // expect same folder
-        if modn[i] = modn[i-1] then
-          continue;
-        // if not use common directory.
-        modf.Clear;
-        for j := 0 to project.sourcesCount-1 do
-          modf.Add(project.sourceAbsolute(j));
-        result := commonFolder(modf);
-        result := result.extractFileDir;
-        break;
+        path := project.sourceAbsolute(j);
+        if hasDlangSyntax(path.extractFileExt) then
+          lst.Add(path);
       end;
+      result := commonFolder(lst);
+      result := result.extractFileDir;
     end;
   finally
-    modf.Free;
-    modn.Free;
+    srcc.Free;
+    lst.Free;
     toks.Free;
   end;
 end;
