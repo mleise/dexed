@@ -103,7 +103,8 @@ function isOperator2(const s: string): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 begin
   result := false;
   case s[1] of
-    '.': result := (s[2] = '.');
+    '.': result := s[2] = '.';
+    '*': result := s[2] = '=';
 
     '>': result := s[2] in ['>', '='];
     '<': result := s[2] in ['<', '=', '>'];
@@ -113,7 +114,6 @@ begin
     '+': result := s[2] in ['+', '='];
     '-': result := s[2] in ['-', '='];
     '/': result := s[2] in ['='];
-    '*': result := s[2] in ['=', '*']; // **: pointers
     '%': result := s[2] in ['='];
     '~': result := s[2] in ['='];
 
@@ -134,13 +134,12 @@ begin
                   or (s[2] = '>') and (s[3] = '=');
     '!': result := ((s[2] = '<')  and (s[3] in ['>', '=']))
                   or ((s[2] = '>')and (s[3] = '='));
-    '*': result := (s[2] = '*')   and (s[3] = '*'); // ***: pointers
   end;
 end;
 
 function isOperator4(const s: string): boolean; {$IFNDEF DEBUG} inline; {$ENDIF}
 begin
-  result := (s = '>>>=') or (s = '!<>=') or (s = '****');
+  result := (s = '>>>=') or (s = '!<>=');
 end;
 
 function isStringPostfix(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
