@@ -13,14 +13,19 @@ enum ErrorType: ubyte
     error
 }
 
+/// Stores a dparse AST error
 @NoInit @NoGc struct AstError
 {
+    ///
     ErrorType type;
+    ///
     @NoGc string message;
+    ///
     size_t line, column;
 
     @disable this();
 
+    ///
     this(ErrorType type, string message, size_t line, size_t column) @nogc @safe
     {
         this.type = type;
@@ -43,6 +48,7 @@ alias AstErrors = AstError*[];
     destruct(err);
 }
 
+/// Write function call when compiled with version "devel"
 enum logCall =
 q{
     import std.experimental.logger: log;
@@ -162,13 +168,12 @@ private static immutable predefinedVersions = [
 	"X86_64"
 ];
 
-private void fillBadVersions()
+private void fillBadVrsions()
 {
     // note: compiler switch -m32/64 can lead to wrong results
-    string addVersionidentifier(string ver)()
-    {
-        return `version(` ~ ver ~ `){} else _badVersions["` ~ ver ~ "\"] = true;\n";
-    }
+
+    alias addVerId = (ver) => `version(` ~ ver ~ `){}
+        else _badVersions["` ~ ver ~ "\"] = true;\n";
 
     string addVerionIdentifiers()
     {
@@ -177,7 +182,7 @@ private void fillBadVersions()
         string result;
         foreach(i; aliasSeqOf!(iota(0, predefinedVersions.length)))
         {
-            result ~= addVersionidentifier!(predefinedVersions[i]);
+            result ~= addVerId(predefinedVersions[i]);
         }
         return result;
     }
@@ -358,8 +363,7 @@ T parseAndVisit(T : ASTVisitor)(const(char)[] source)
  * By default libdparse outputs errors and warnings to the standard streams.
  * This function prevents that.
  */
-void ignoreErrors(string fname, size_t line, size_t col, string message,
-    bool err)
+void ignoreErrors(string, size_t, size_t, string, bool)
 {
     // dont pollute output
 }

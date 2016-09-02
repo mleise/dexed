@@ -54,6 +54,7 @@ type
 
   TCEDubProject = class(TComponent, ICECommonProject)
   private
+    fIsSdl: boolean;
     fInGroup: boolean;
     fDubProc: TCEProcess;
     fPreCompilePath: string;
@@ -130,6 +131,7 @@ type
     //
     property json: TJSONObject read fJSON;
     property packageName: string read fPackageName;
+    property isSDL: boolean read fIsSdl;
   end;
 
   // these 9 built types always exist
@@ -138,12 +140,18 @@ type
   // returns true if filename is a valid dub project. Only json format is supported.
   function isValidDubProject(const filename: string): boolean;
 
+  // converts a sdl description to json, returns the json
+  function sdl2json(const filename: string): TJSONObject;
+
   function getDubCompiler: TCECompiler;
   procedure setDubCompiler(value: TCECompiler);
 
 var
   DubCompiler: TCECompiler = dmd;
   DubCompilerFilename: string = 'dmd';
+
+const
+  DubSdlWarning = 'this feature is not available for a DUB project with the SDL format';
 
 implementation
 
@@ -330,66 +338,83 @@ procedure TCEDubProject.loadFromFile(const fname: string);
 var
   loader: TMemoryStream;
   parser : TJSONParser;
+  ext: string;
   bom: dword = 0;
 begin
-  loader := TMemoryStream.Create;
-  try
-    fBasePath := fname.extractFilePath;
-    fFilename := fname;
-    loader.LoadFromFile(fFilename);
-    fSaveAsUtf8 := false;
-    // skip BOM, this crashes the parser
-    loader.Read(bom, 4);
-    if (bom and $BFBBEF) = $BFBBEF then
-    begin
-      loader.Position:= 3;
-      fSaveAsUtf8 := true;
-    end
-    else if (bom = $FFFE0000) or (bom = $FEFF) then
-    begin
-      // UCS-4 LE/BE not handled by DUB
-      loader.clear;
-      loader.WriteByte(byte('{'));
-      loader.WriteByte(byte('}'));
-      loader.Position:= 0;
-      fFilename := '';
-    end
-    else if ((bom and $FEFF) = $FEFF) or ((bom and $FFFE) = $FFFE) then
-    begin
-      // UCS-2 LE/BE not handled by DUB
-      loader.clear;
-      loader.WriteByte(byte('{'));
-      loader.WriteByte(byte('}'));
-      loader.Position:= 0;
-      fFilename := '';
-    end
-    else
-      loader.Position:= 0;
-    //
-    FreeAndNil(fJSON);
-    parser := TJSONParser.Create(loader, [joIgnoreTrailingComma, joUTF8]);
-    //TODO-cfcl-json: remove etc/fcl-json the day they'll merge and rlz the version with 'Options'
-    //TODO-cfcl-json: track possible changes and fixes at http://svn.freepascal.org/cgi-bin/viewvc.cgi/trunk/packages/fcl-json/
-    //latest in etc = rev 34196.
+  ext := fname.extractFileExt.upperCase;
+  fBasePath := fname.extractFilePath;
+  fFilename := fname;
+  fSaveAsUtf8 := false;
+  fIsSdl := false;
+  if ext = '.JSON' then
+  begin
+    loader := TMemoryStream.Create;
     try
-      try
-        fJSON := parser.Parse as TJSONObject;
-      except
-        if assigned(fJSON) then
-          FreeAndNil(fJSON);
+      loader.LoadFromFile(fFilename);
+      // skip BOMs, they crash the parser
+      loader.Read(bom, 4);
+      if (bom and $BFBBEF) = $BFBBEF then
+      begin
+        loader.Position:= 3;
+        fSaveAsUtf8 := true;
+      end
+      else if (bom = $FFFE0000) or (bom = $FEFF) then
+      begin
+        // UCS-4 LE/BE not handled by DUB
+        loader.clear;
+        loader.WriteByte(byte('{'));
+        loader.WriteByte(byte('}'));
+        loader.Position:= 0;
         fFilename := '';
+      end
+      else if ((bom and $FEFF) = $FEFF) or ((bom and $FFFE) = $FFFE) then
+      begin
+        // UCS-2 LE/BE not handled by DUB
+        loader.clear;
+        loader.WriteByte(byte('{'));
+        loader.WriteByte(byte('}'));
+        loader.Position:= 0;
+        fFilename := '';
+      end
+      else
+        loader.Position:= 0;
+      //
+      FreeAndNil(fJSON);
+      parser := TJSONParser.Create(loader, [joIgnoreTrailingComma, joUTF8]);
+      //TODO-cfcl-json: remove etc/fcl-json the day they'll merge and rlz the version with 'Options'
+      //TODO-cfcl-json: track possible changes and fixes at http://svn.freepascal.org/cgi-bin/viewvc.cgi/trunk/packages/fcl-json/
+      //latest in etc = rev 34196.
+      try
+        try
+          fJSON := parser.Parse as TJSONObject;
+        except
+          if assigned(fJSON) then
+            FreeAndNil(fJSON);
+          fFilename := '';
+        end;
+      finally
+        parser.Free;
       end;
     finally
-      parser.Free;
+      loader.Free;
     end;
-  finally
-    loader.Free;
-    if not assigned(fJSON) then
-      fJson := TJSONObject.Create(['name','invalid json']);
-    updateFields;
-    subjProjChanged(fProjectSubject, self);
-    fModified := false;
+  end
+  else if ext = '.SDL' then
+  begin
+    FreeAndNil(fJSON);
+    fJSON := sdl2json(fFilename);
+    if fJSON.isNil then
+      fFilename := ''
+    else
+      fIsSdl := true;
   end;
+
+  if not assigned(fJSON) then
+    fJson := TJSONObject.Create(['name','invalid json']);
+
+  updateFields;
+  subjProjChanged(fProjectSubject, self);
+  fModified := false;
 end;
 
 procedure TCEDubProject.saveToFile(const fname: string);
@@ -1073,11 +1098,58 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION Miscellaneous DUB free functions --------------------------------------}
+function sdl2json(const filename: string): TJSONObject;
+var
+  dub: TProcess;
+  str: TStringList;
+  jsn: TJSONData;
+  prs: TJSONParser;
+  old: string;
+begin
+  result := nil;
+  dub := TProcess.Create(nil);
+  str := TStringList.Create;
+  old := GetCurrentDirUTF8;
+  try
+    SetCurrentDirUTF8(filename.extractFilePath);
+    dub.Executable := 'dub' + exeExt;
+    dub.Options := [poUsePipes{$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
+    dub.ShowWindow := swoHIDE;
+    dub.CurrentDirectory:= filename.extractFilePath;
+    dub.Parameters.Add('describe');
+    dub.Execute;
+    processOutputToStrings(dub, str);
+    while dub.Running do;
+    prs := TJSONParser.Create(str.Text, [joIgnoreTrailingComma, joUTF8]);
+    try
+      jsn := prs.Parse;
+      try
+        if jsn.isNotNil and (jsn.JSONType = jtObject)
+        and TJSONObject(jsn).Find('packages').isNotNil
+        and (TJSONObject(jsn).Find('packages').JSONType = jtArray)
+        and (TJSONArray(TJSONObject(jsn).Find('packages')).Count > 0)
+        and (TJSONArray(TJSONObject(jsn).Find('packages')).Items[0].JSONType = jtObject) then
+          result := TJSONObject(TJSONArray(TJSONObject(jsn).Find('packages')).Items[0].Clone);
+      finally
+        jsn.free;
+      end;
+    finally
+      prs.Free
+    end;
+  finally
+    SetCurrentDirUTF8(old);
+    dub.free;
+    str.Free;
+  end;
+end;
+
 function isValidDubProject(const filename: string): boolean;
 var
   maybe: TCEDubProject;
+  ext: string;
 begin
-  if (filename.extractFileExt.upperCase <> '.JSON') then
+  ext := filename.extractFileExt.upperCase;
+  if (ext <> '.JSON') and (ext <> '.SDL') then
     exit(false);
   result := true;
   // avoid the project to notify the observers, current project is not replaced

@@ -36,17 +36,23 @@ procedure saveModifiedProjectFiles(project: ICECommonProject);
 implementation
 
 function isProject(const filename: string): boolean;
+var
+  ext: string;
 begin
-  if filename.extractFileExt = '.json' then
+  ext := filename.extractFileExt.upperCase;
+  if (ext = '.JSON') or (ext = '.SDL') then
     result := isValidDubProject(filename)
   else
     result := isValidNativeProject(filename);
 end;
 
 function projectFormat(const filename: string): TCEProjectFileFormat;
+var
+  ext: string;
 begin
   result := pffNone;
-  if filename.extractFileExt = '.json' then
+  ext := filename.extractFileExt.upperCase;
+  if (ext = '.JSON') or (ext = '.SDL') then
   begin
     if isValidDubProject(filename) then
       result := pffDub;

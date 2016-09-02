@@ -287,7 +287,7 @@ begin
   if project.getProject <> fProj then
     exit;
   fProj := nil;
-  //
+
   updateEditor;
   updateInspector;
   enabled := false;
@@ -307,6 +307,12 @@ begin
   enabled := true;
   if not Visible then
     exit;
+
+  if fProj.isSDL then
+  begin
+    edProp.Enabled:= false;
+    btnAcceptProp.Enabled:=false;
+  end;
 
   updateEditor;
   updateInspector;

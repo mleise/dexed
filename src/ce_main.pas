@@ -3227,10 +3227,13 @@ begin
 end;
 
 procedure TCEMainForm.openProj(const fname: string);
+var
+  ext: string;
 begin
   if not closeProj then
     exit;
-  if fname.extractFileExt.upperCase = '.JSON' then
+  ext := fname.extractFileExt.upperCase;
+  if (ext = '.JSON') or (ext = '.SDL') then
     newDubProj
   else
     newNativeProj;
@@ -3260,6 +3263,11 @@ procedure TCEMainForm.actProjSaveAsExecute(Sender: TObject);
 begin
   if checkProjectLock then
     exit;
+  if (fProject.getFormat = pfDub) and TCEDubProject(fProject.getProject).isSDL then
+  begin
+    fMsgs.message(DubSdlWarning, fProject, amcProj, amkWarn);
+    exit;
+  end;
   with TSaveDialog.Create(nil) do
   try
     if execute then saveProjAs(filename);
@@ -3271,6 +3279,11 @@ end;
 procedure TCEMainForm.actProjSaveExecute(Sender: TObject);
 begin
   if fProject = nil then exit;
+  if (fProject.getFormat = pfDub) and TCEDubProject(fProject.getProject).isSDL then
+  begin
+    fMsgs.message(DubSdlWarning, fProject, amcProj, amkWarn);
+    exit;
+  end;
   if checkProjectLock then
     exit;
   if fProject.filename.isNotEmpty then saveProj
@@ -3311,6 +3324,11 @@ procedure TCEMainForm.actProjSourceExecute(Sender: TObject);
 begin
   if fProject = nil then exit;
   if not fProject.filename.fileExists then exit;
+  if (fProject.getFormat = pfDub) and TCEDubProject(fProject.getProject).isSDL then
+  begin
+    fMsgs.message(DubSdlWarning, fProject, amcProj, amkWarn);
+    exit;
+  end;
   //
   openFile(fProject.filename);
   fDoc.isProjectDescription := true;
