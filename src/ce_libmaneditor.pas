@@ -217,7 +217,7 @@ begin
   cbb.Sorted:= true;
   cbb.ShowHint:=true;
   cbb.OnSelect:= @updateHint;
-  cbb.OnCloseUp:=@updateHint;;
+  cbb.OnCloseUp:=@updateHint;
 
   bsv := TSpeedButton.Create(self);
   bsv.Parent := self;
@@ -445,11 +445,11 @@ begin
     else
       dub.Parameters.Add('--version=' + ver);
     dub.Execute;
-    while dub.Running do sleep(10);
-    err := dub.ExitStatus;
     str := TStringList.Create;
     try
       processOutputToStrings(dub, str);
+      while dub.Running do;
+      err := dub.ExitCode;
       for msg in str do
         itf.message(msg, nil, amcMisc, amkAuto);
     finally
@@ -460,7 +460,7 @@ begin
   end;
   if err <> 0 then
   begin
-    itf.message('error, failed to fetch or upgrade the repository', nil, amcMisc, amkErr);
+    itf.message('error, failed to fetch the package', nil, amcMisc, amkErr);
     exit;
   end;
 
@@ -478,7 +478,7 @@ begin
 
   if not dfn.fileExists or dfn.isEmpty then
   begin
-    itf.message('error, the DUB description is not found or it has not the JSON format',
+    itf.message('error, the DUB description cannot be located or it has not the JSON format',
       nil, amcMisc, amkErr);
     exit;
   end;
@@ -496,11 +496,11 @@ begin
     dub.Parameters.Add('--compiler=' + DubCompilerFilename);
     dub.CurrentDirectory:= pth;
     dub.Execute;
-    while dub.Running do sleep(10);
-    err := dub.ExitStatus;
     str := TStringList.Create;
     try
       processOutputToStrings(dub, str);
+      while dub.Running do ;
+      err := dub.ExitCode;
       for msg in str do
         itf.message(msg, nil, amcMisc, amkAuto);
     finally
@@ -543,6 +543,7 @@ begin
       prj.Free;
       EntitiesConnector.endUpdate;
     end;
+    showWidget;
     exit;
   end;
 
@@ -567,6 +568,7 @@ begin
       row.SubItems.Add(enableStr[true]);
       row.Selected:=true;
       RowToLibrary(row);
+      showWidget;
     end else
       itf.message('warning, the package json description can not be found or the target is not a static library',
         nil, amcMisc, amkWarn);
