@@ -567,7 +567,7 @@ begin
   dubProcOutput(proc);
   msgs := getMessageDisplay;
   prjname := shortenPath(filename);
-  fCompiled := fDubProc.ExitStatus = 0;
+  fCompiled := fDubProc.ExitCode = 0;
   if fCompiled then
     msgs.message(prjname + ' has been successfully compiled',
       self as ICECommonProject, amcProj, amkInf)

@@ -1500,9 +1500,9 @@ begin
     prc.Execute;
     prc.Input.Write(src[1], src.length);
     prc.CloseInput;
+    prc.Output.Read(res, 1);
     while prc.Running do
       sleep(1);
-    prc.Output.Read(res, 1);
   finally
     prc.Free;
   end;

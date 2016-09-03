@@ -666,9 +666,11 @@ begin
       lst.Delete(0);
       prc.Parameters.Assign(lst);
       prc.Execute;
-      com := prc.ExitCode = 0;
       lst.Clear;
       processOutputToStrings(prc, lst);
+      while prc.Running do
+        sleep(1);
+      com := prc.ExitCode = 0;
       for j := 0 to lst.Count -1 do
         getMessageDisplay.message(lst[j], self as ICECommonProject, amcProj, amkAuto);
     finally
@@ -703,7 +705,7 @@ begin
       if poUsePipes in prc.Options then
         runProcOutput(prc);
   finally
-    result := prc.ExitStatus = 0;
+    result := prc.ExitCode = 0;
     prc.Free;
   end;
 end;
@@ -847,9 +849,9 @@ begin
     getprocInputHandler.removeProcess(TProcess(sender));
     SetCurrentDirUTF8(fRunnerOldCwd);
     //
-    if (proc.ExitStatus <> 0) then
+    if (proc.ExitCode <> 0) then
       msgs.message(format('error: the process (%s) has returned the signal %d',
-        [proc.Executable, proc.ExitStatus]), self as ICECommonProject, amcProj, amkErr);
+        [proc.Executable, proc.ExitCode]), self as ICECommonProject, amcProj, amkErr);
   end;
 end;
 
@@ -878,7 +880,7 @@ begin
   compProcOutput(proc);
   msgs := getMessageDisplay;
   prjname := shortenPath(filename);
-  fCompiled := fCompilProc.ExitStatus = 0;
+  fCompiled := fCompilProc.ExitCode = 0;
   updateOutFilename;
   if fCompiled then
     msgs.message(prjname + ' has been successfully compiled',

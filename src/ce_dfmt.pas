@@ -302,8 +302,6 @@ begin
     inp := fDoc.Lines.Text;
     prc.Input.Write(inp[1], inp.length);
     prc.CloseInput;
-    while prc.Running do
-      sleep(1);
     try
       str := TStringList.Create;
       processOutputToStrings(prc,str);
@@ -314,6 +312,8 @@ begin
     except
       fDoc.Lines.Assign(fBackup);
     end;
+    while prc.Running do
+      sleep(1);
   finally
     prc.free;
     str.free;
