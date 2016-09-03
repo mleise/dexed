@@ -449,7 +449,7 @@ begin
     try
       processOutputToStrings(dub, str);
       while dub.Running do;
-      err := dub.ExitCode;
+      err := dub.ExitStatus;
       for msg in str do
         itf.message(msg, nil, amcMisc, amkAuto);
     finally
@@ -500,7 +500,7 @@ begin
     try
       processOutputToStrings(dub, str);
       while dub.Running do ;
-      err := dub.ExitCode;
+      err := dub.ExitStatus;
       for msg in str do
         itf.message(msg, nil, amcMisc, amkAuto);
     finally

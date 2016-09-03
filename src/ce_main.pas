@@ -2487,9 +2487,9 @@ begin
   inph := EntitiesConnector.getSingleService('ICEProcInputHandler');
   if (inph <> nil) then
     (inph as ICEProcInputHandler).removeProcess(proc);
-  if (proc.ExitCode <> 0) then
+  if (proc.ExitStatus <> 0) then
     fMsgs.message(format('error: the process (%s) has returned the signal %d',
-      [proc.Executable, proc.ExitCode]), fDoc, amcEdit, amkErr);
+      [proc.Executable, proc.ExitStatus]), fDoc, amcEdit, amkErr);
 end;
 
 procedure TCEMainForm.actSetRunnableSwExecute(Sender: TObject);
@@ -2632,7 +2632,7 @@ begin
       application.ProcessMessages;
     if not asObj then
       sysutils.DeleteFile(fname + objExt);
-    if (dmdProc.ExitCode = 0) then
+    if (dmdProc.ExitStatus = 0) then
     begin
       result := true;
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' successfully compiled',
@@ -2640,7 +2640,7 @@ begin
     end
     else begin
       fMsgs.message(format('error: the process (%s) has returned the signal %d',
-        [dmdproc.Executable, dmdproc.ExitCode]), fDoc, amcEdit, amkErr);
+        [dmdproc.Executable, dmdproc.ExitStatus]), fDoc, amcEdit, amkErr);
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' has not been compiled',
         fDoc, amcEdit, amkErr);
     end;
