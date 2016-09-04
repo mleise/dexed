@@ -145,7 +145,9 @@ procedure TCELibManEditorWidget.projFocused(project: ICECommonProject);
 begin
   fProj := project;
   if not project.inGroup then
-    fFreeProj := project;
+    fFreeProj := project
+  else if project = fFreeProj then
+    fFreeProj := nil;
   updateButtonsState;
 end;
 

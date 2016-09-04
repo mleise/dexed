@@ -1987,7 +1987,7 @@ begin
   end;
   if not fProject.inGroup then
     fFreeProj := project
-  else if (fProject = fFreeProj) and (fProject.inGroup) then
+  else if project = fFreeProj then
     fFreeProj := nil;
 
   showProjTitle;

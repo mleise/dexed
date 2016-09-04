@@ -503,7 +503,7 @@ begin
     fFreeProj := project;
     updateList;
   end
-  else if (project = fFreeProj) and (project.inGroup) then
+  else if project = fFreeProj then
   begin
     fFreeProj := nil;
     updateList;
@@ -674,7 +674,7 @@ var
 const
   typeStr: array[TCEProjectFormat] of string = ('CE','DUB');
 begin
-  lstProj.Clear;
+  lstProj.Items.Clear;
   for i := 0 to projectGroup.projectCount-1 do
   begin
     with lstProj.Items.Add do

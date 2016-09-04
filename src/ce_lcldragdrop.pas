@@ -72,7 +72,9 @@ procedure TDDHandler.projFocused(project: ICECommonProject);
 begin
   fProj := project;
   if not fProj.inGroup then
-    fFreeProj := fProj;
+    fFreeProj := fProj
+  else if fFreeProj = project then
+    fFreeProj := nil;
 end;
 
 procedure TDDHandler.projCompiling(project: ICECommonProject);

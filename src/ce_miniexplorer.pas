@@ -334,7 +334,9 @@ procedure TCEMiniExplorerWidget.projFocused(project: ICECommonProject);
 begin
   fProj := project;
   if not project.inGroup then
-      fFreeProj := project;
+    fFreeProj := project
+  else if fFreeProj = project then
+    fFreeProj := nil;
   if visible and project.fileName.fileExists and fContextExpand then
     expandPath(project.fileName.extractFilePath);
 end;
