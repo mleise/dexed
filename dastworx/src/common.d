@@ -168,7 +168,7 @@ private static immutable predefinedVersions = [
 	"X86_64"
 ];
 
-private void fillBadVrsions()
+private void fillBadVersions()
 {
     // note: compiler switch -m32/64 can lead to wrong results
 
