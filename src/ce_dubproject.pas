@@ -76,6 +76,7 @@ type
     fOutputFileName: string;
     fSaveAsUtf8: boolean;
     fCompiled: boolean;
+    fMsgs: ICEMessagesDisplay;
     //
     procedure doModified;
     procedure updateFields;
@@ -268,6 +269,7 @@ begin
   fSaveAsUtf8 := true;
   fJSON := TJSONObject.Create();
   fProjectSubject := TCEProjectSubject.Create;
+  fMsgs:= getMessageDisplay;
   fBuildTypes := TStringList.Create;
   fConfigs := TStringList.Create;
   fSrcs := TStringList.Create;
@@ -546,14 +548,12 @@ procedure TCEDubProject.dubProcOutput(proc: TObject);
 var
   lst: TStringList;
   str: string;
-  msgs: ICEMessagesDisplay;
 begin
   lst := TStringList.Create;
-  msgs := getMessageDisplay;
   try
     fDubProc.getFullLines(lst);
     for str in lst do
-      msgs.message(str, self as ICECommonProject, amcProj, amkAuto);
+      fMsgs.message(str, self as ICECommonProject, amcProj, amkAuto);
   finally
     lst.Free;
   end;
@@ -561,18 +561,16 @@ end;
 
 procedure TCEDubProject.dubProcTerminated(proc: TObject);
 var
-  msgs: ICEMessagesDisplay;
   prjname: string;
 begin
   dubProcOutput(proc);
-  msgs := getMessageDisplay;
   prjname := shortenPath(filename);
   fCompiled := fDubProc.ExitStatus = 0;
   if fCompiled then
-    msgs.message(prjname + ' has been successfully compiled',
+    fMsgs.message(prjname + ' has been successfully compiled',
       self as ICECommonProject, amcProj, amkInf)
   else
-    msgs.message(prjname + ' has not been compiled',
+    fMsgs.message(prjname + ' has not been compiled',
       self as ICECommonProject, amcProj, amkWarn);
   subjProjCompiled(fProjectSubject, self as ICECommonProject, fCompiled);
   SetCurrentDirUTF8(fPreCompilePath);
@@ -582,12 +580,10 @@ procedure TCEDubProject.compileOrRun(run: boolean; const runArgs: string = '');
 var
   olddir: string;
   prjname: string;
-  msgs: ICEMessagesDisplay;
 begin
-  msgs := getMessageDisplay;
   if fDubProc.isNotNil and fDubProc.Active then
   begin
-    msgs.message('the project is already being compiled',
+    fMsgs.message('the project is already being compiled',
       self as ICECommonProject, amcProj, amkWarn);
     exit;
   end;
@@ -598,7 +594,7 @@ begin
     dlgOkInfo('The DUB project must be saved before being compiled or run !');
     exit;
   end;
-  msgs.clearByData(Self as ICECommonProject);
+  fMsgs.clearByData(Self as ICECommonProject);
   prjname := shortenPath(fFilename);
   fDubProc:= TCEProcess.Create(nil);
   olddir  := GetCurrentDir;
@@ -606,7 +602,7 @@ begin
     if not run then
     begin
       subjProjCompiling(fProjectSubject, self as ICECommonProject);
-      msgs.message('compiling ' + prjname, self as ICECommonProject, amcProj, amkInf);
+      fMsgs.message('compiling ' + prjname, self as ICECommonProject, amcProj, amkInf);
       if modified then saveToFile(fFilename);
     end;
     chDir(fFilename.extractFilePath);
