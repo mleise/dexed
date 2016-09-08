@@ -532,8 +532,6 @@ type
     fDscanUnittests: boolean;
     fAutoSaveProjectFiles: boolean;
     fFlatLook: boolean;
-    fDetectMain: boolean;
-    fDetectRunnableImports: boolean;
     fSplitterScrollSpeed: byte;
     fAutoCheckUpdates: boolean;
     function getAdditionalPATH: string;
@@ -564,10 +562,6 @@ type
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
 
-    // TODO-cmaintenance: remove this property from version 3 gold
-    property detectRunnableImports: boolean read fDetectRunnableImports write fDetectRunnableImports stored false; deprecated;
-    property runnableCompiler: TCECompiler read getRunnableCompiler write setRunnableCompiler stored false; deprecated;
-    property detectMain: boolean read fDetectMain write fDetectMain stored false; deprecated;
     // TODO-cmaintenance: remove this property from version 3 update 1
     property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler stored false; deprecated;
     property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination stored false; deprecated;
