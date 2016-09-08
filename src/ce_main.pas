@@ -2187,7 +2187,7 @@ begin
   try
     if fDoc.isNotNil and not fDoc.isTemporary then
       initialDir := fDoc.fileName.extractFileDir;
-    options := [ofAllowMultiSelect, ofEnableSizing];
+    options := options + [ofAllowMultiSelect];
     filter := DdiagFilter;
     if execute then
       for fname in files do
@@ -3402,9 +3402,6 @@ begin
   fProjectGroup.addProject(fFreeProj);
   fFreeProj := nil;
 end;
-
-// TODO-cFileOpenDialog: allow multi selection when possible
-//(open file, add file to project, ...)
 
 // TODO-cprojectsgroup: add a "out of mem" protection in async mode.
 

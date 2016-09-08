@@ -527,7 +527,7 @@ var
 begin
   with TOpenDialog.Create(nil) do
   try
-    Options:= [ofAllowMultiSelect, ofEnableSizing];
+    Options:= Options + [ofAllowMultiSelect];
     if not execute then
       exit;
     for fname in Files do

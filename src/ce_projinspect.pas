@@ -288,11 +288,14 @@ begin
 end;
 
 procedure TCEProjectInspectWidget.btnAddFileClick(Sender: TObject);
+var
+  fname: string;
 begin
   if fProject.isNil then exit;
   //
   with TOpenDialog.Create(nil) do
   try
+    options := options + [ofAllowMultiSelect];
     if fLastFileOrFolder.fileExists then
       InitialDir := fLastFileOrFolder.extractFilePath
     else if fLastFileOrFolder.dirExists then
@@ -301,7 +304,8 @@ begin
     if execute then
     begin
       fProject.beginUpdate;
-      fProject.addSource(filename);
+      for fname in Files do
+        fProject.addSource(fname);
       fProject.endUpdate;
     end;
   finally
