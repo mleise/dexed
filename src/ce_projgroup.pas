@@ -674,6 +674,7 @@ var
 const
   typeStr: array[TCEProjectFormat] of string = ('CE','DUB');
 begin
+  lstProj.BeginUpdate;
   lstProj.Items.Clear;
   for i := 0 to projectGroup.projectCount-1 do
   begin
@@ -693,6 +694,14 @@ begin
       SubItems.Add(prj.fProj.configurationName(prj.fProj.getActiveConfigurationIndex));
     end;
   end;
+  if projectGroup.projectCount > 0 then
+  begin
+    i := projectGroup.getProjectIndex;
+    if i > projectGroup.projectCount then
+      i := projectGroup.projectCount-1;
+    lstProj.ItemIndex:= i;
+  end;
+  lstProj.EndUpdate;
   if fFreeProj <> nil then
   begin
     if fFreeProj.filename.fileExists then
