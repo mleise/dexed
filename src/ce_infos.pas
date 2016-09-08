@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, strutils,
   {$IFDEF WINDOWS}Windows,{$ENDIF}
-  StdCtrls, ExtCtrls, Buttons, Menus,ce_widget, ce_common, ce_sharedres;
+  StdCtrls, ExtCtrls, Buttons, Menus,ce_widget, ce_common, ce_sharedres,
+  ce_interfaces;
 
 type
 
@@ -20,6 +21,7 @@ type
     fKind: TToolInfoKind;
     fToolName: string;
     fIco: TSpeedButton;
+    fPresent: boolean;
     procedure buttonClick(sender: TObject);
   protected
     procedure SetVisible(Value: Boolean); override;
@@ -28,6 +30,7 @@ type
       const toolName, description: string);
     procedure refreshStatus;
     procedure Update; override;
+    property present: boolean read fPresent;
   end;
 
 
@@ -115,6 +118,7 @@ var
 begin
   if fLabel.isNil or fStatus.isNil then exit;
   //
+  fPresent := false;
   fLabel.Caption:= fToolName;
   case fKind of
     tikFindable:
@@ -129,6 +133,7 @@ begin
       begin
         fStatus.Caption:= ' the tool is available';
         AssignPng(fIco, 'BULLET_GREEN');
+        fPresent := true;
       end;
     end;
     tikOptional:
@@ -143,6 +148,7 @@ begin
       begin
         fStatus.Caption:= ' the tool is available';
         AssignPng(fIco, 'BULLET_GREEN');
+        fPresent := true;
       end;
     end;
     tikRunning:
@@ -157,11 +163,13 @@ begin
       begin
         fStatus.Caption:= ' the tool is available and running';
         AssignPng(fIco, 'BULLET_GREEN');
+        fPresent := true;
       end
       else
       begin
         fStatus.Caption:= ' the tool is available but is not running';
         AssignPng(fIco, 'BULLET_YELLOW');
+        fPresent := true;
       end;
     end;
   end;
@@ -211,19 +219,19 @@ begin
   itm.Parent := boxTools;
   itm.ReAlign;
   itm := TToolInfo.Construct(self, tikOptional, 'ddemangle',
-    'optional, allows to demangle cryptic symbols in the message widget');
+    'optional, allows to demangle the symbols in the message widget');
   itm.Parent := boxTools;
   itm.ReAlign;
   itm := TToolInfo.Construct(self, tikRunning, 'dcd-server',
-    'mandatory, provides IDE-level features such as the completion');
+    'mandatory, provides IDE-grade features such as the completion');
   itm.Parent := boxTools;
   itm.ReAlign;
   itm := TToolInfo.Construct(self, tikFindable, 'dcd-client',
-    'mandatory, provides IDE-level features such as the completion');
+    'mandatory, provides IDE-grade features such as the completion');
   itm.Parent := boxTools;
   itm.ReAlign;
   itm := TToolInfo.Construct(self, tikFindable, 'dastworx',
-    'background tool that works on the D modules AST to extract informations' +
+    'background tool that processes the D modules to extract informations' +
     LineEnding + 'such as the declarations, the imports, the "TODO" comments, etc.');
   itm.Parent := boxTools;
   itm.ReAlign;
@@ -232,8 +240,7 @@ begin
   itm.Parent := boxTools;
   itm.ReAlign;
   itm := TToolInfo.Construct(self, tikFindable, 'dmd',
-    'the reference D compiler, mandatory to compile native projects, '
-    + 'to unittest and to launch runnable modules');
+    'mandatory, the reference D compiler');
   itm.Parent := boxTools;
   itm.ReAlign;
   //
@@ -243,13 +250,20 @@ end;
 procedure TCEInfoWidget.RefreshAllStatus;
 var
   i: integer;
+  s: string = '';
+  t: TToolInfo;
 begin
   for i := 0 to boxTools.ControlCount -1 do
   begin
     if not (boxTools.Controls[i] is TToolInfo) then
       continue;
-    TToolInfo(boxTools.Controls[i]).refreshStatus;
+    t := TToolInfo(boxTools.Controls[i]);
+    t.refreshStatus;
+    if (t.fKind in [tikFindable, tikRunning]) and not t.present then
+      s += ' ' + t.fToolName;
   end;
+  if s.isNotEmpty then
+    getMessageDisplay.message('Some tools cannot be found:' + s, nil, amcApp, amkWarn);
 end;
 
 procedure TCEInfoWidget.SetVisible(Value: Boolean);
