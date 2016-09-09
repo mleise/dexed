@@ -697,7 +697,7 @@ begin
   if projectGroup.projectCount > 0 then
   begin
     i := projectGroup.getProjectIndex;
-    if i > projectGroup.projectCount then
+    if i > projectGroup.projectCount - 1 then
       i := projectGroup.projectCount-1;
     lstProj.ItemIndex:= i;
   end;
