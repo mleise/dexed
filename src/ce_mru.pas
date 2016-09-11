@@ -74,6 +74,13 @@ type
     destructor destroy; override;
   end;
 
+  (**
+   * MRU list for the ceodit projects group.
+   * Managed manually since only 1 group exists.
+   *)
+  TCEMRUProjectsGroupList = class(TCEMRUFileList)
+  end;
+
 implementation
 
 constructor TCEMruList.Create;

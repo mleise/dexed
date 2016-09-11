@@ -149,6 +149,7 @@ type
     MenuItem103: TMenuItem;
     MenuItem104: TMenuItem;
     MenuItem105: TMenuItem;
+    mnuItemMruGroup: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
     MenuItem13: TMenuItem;
@@ -344,6 +345,7 @@ type
     fNativeProject: TCENativeProject;
     fProjMru: TCEMRUProjectList;
     fFileMru: TCEMRUDocumentList;
+    fPrjGrpMru: TCEMRUProjectsGroupList;
     fWidgList: TCEWidgetList;
     fMesgWidg: TCEMessagesWidget;
     fEditWidg: TCEEditorWidget;
@@ -451,6 +453,7 @@ type
     procedure mruChange(Sender: TObject);
     procedure mruFileItemClick(Sender: TObject);
     procedure mruProjItemClick(Sender: TObject);
+    procedure mruProjGroupItemClick(Sender: TObject);
     procedure mruClearClick(Sender: TObject);
 
     // layout
@@ -484,15 +487,18 @@ type
 
   TCEPersistentMainMrus = class(TWritableLfmTextComponent)
   private
-    fProjMruPt: TCEMRUFileList;
     fFileMruPt: TCEMRUFileList;
+    fProjMruPt: TCEMRUFileList;
+    fPrjGrpMruPt: TCEMRUFileList;
     procedure setProjMru(value: TCEMRUFileList);
     procedure setFileMru(value: TCEMRUFileList);
+    procedure setProjectsGroupMru(value: TCEMRUFileList);
   published
     property mostRecentFiles: TCEMRUFileList read fFileMruPt write setFileMru;
     property mostRecentprojects: TCEMRUFileList read fProjMruPt write setProjMru;
+    property mostRecentProjectsGroups: TCEMRUFileList read fPrjGrpMruPt write setProjectsGroupMru;
   public
-    procedure setTargets(projs: TCEMRUFileList; files: TCEMRUFileList);
+    procedure setTargets(projs: TCEMRUFileList; files: TCEMRUFileList; group: TCEMRUFileList);
   end;
 
   TCELastDocsAndProjs = class(TWritableLfmTextComponent)
@@ -526,6 +532,7 @@ type
     fCovModUt: boolean;
     fMaxRecentProjs: integer;
     fMaxRecentDocs: integer;
+    fMaxRecentGroups: integer;
     fDcdPort: word;
     fRunnableDest: TCEPathname;
     fAlwaysUseDest: boolean;
@@ -552,6 +559,7 @@ type
     property reloadLastDocuments: boolean read fReloadLastDocuments write fReloadLastDocuments;
     property maxRecentProjects: integer read fMaxRecentProjs write fMaxRecentProjs;
     property maxRecentDocuments: integer read fMaxRecentDocs write fMaxRecentDocs;
+    property maxRecentProjectsGroups: integer read fMaxRecentGroups write fMaxRecentGroups;
     property dubCompiler: TCECompiler read getDubCompiler write setDubCompiler;
     property nativeProjectCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
     property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
@@ -757,7 +765,8 @@ begin
   fDscanUnittests := true;
   fSplitterScrollSpeed := 2;
   fMaxRecentProjs := 10;
-  fMaxRecentDocs :=10;
+  fMaxRecentDocs := 10;
+  fMaxRecentGroups:= 10;
   fFlatLook:=true;
 end;
 
@@ -851,6 +860,7 @@ begin
   begin
     fMaxRecentProjs:= CEMainForm.fProjMru.maxCount;
     fMaxRecentDocs:= CEMainForm.fFileMru.maxCount;
+    fMaxRecentGroups:= CEMainForm.fPrjGrpMru.maxCount;
     fDcdPort := DcdWrapper.port;
     fCovModUt:= CEMainForm.fCovModUt;
     fDscanUnittests := CEMainForm.fDscanUnittests;
@@ -860,6 +870,7 @@ begin
     fDcdPort:=fBackup.fDcdPort;
     fMaxRecentDocs:= fBackup.fMaxRecentDocs;
     fMaxRecentProjs:= fBackup.fMaxRecentProjs;
+    fMaxRecentGroups := fBackup.fMaxRecentGroups;
     fReloadLastDocuments:=fBackup.fReloadLastDocuments;
     fFloatingWidgetOnTop := fBackup.fFloatingWidgetOnTop;
     fFlatLook:=fBackup.fFlatLook;
@@ -877,6 +888,7 @@ begin
     CEMainForm.fCovModUt:= fCovModUt;
     CEMainForm.fProjMru.maxCount := fMaxRecentProjs;
     CEMainForm.fFileMru.maxCount := fMaxRecentDocs;
+    CEMainForm.fPrjGrpMru.maxCount:= fMaxRecentGroups;
     CEMainForm.updateFloatingWidgetOnTop(fFloatingWidgetOnTop);
     CEMainForm.fDscanUnittests := fDscanUnittests;
     DcdWrapper.port:=fDcdPort;
@@ -886,6 +898,7 @@ begin
   begin
     fBackup.fMaxRecentDocs:= fMaxRecentDocs;
     fBackup.fMaxRecentProjs:= fMaxRecentProjs;
+    fBackup.fMaxRecentGroups:= fMaxRecentGroups;
     fBackup.fReloadLastDocuments:=fReloadLastDocuments;
     fBackup.fFloatingWidgetOnTop:=fFloatingWidgetOnTop;
     fBackup.fDcdPort:=fDcdPort;
@@ -1119,10 +1132,17 @@ begin
   fFileMruPt.assign(value);
 end;
 
-procedure TCEPersistentMainMrus.setTargets(projs: TCEMRUFileList; files: TCEMRUFileList);
+procedure TCEPersistentMainMrus.setProjectsGroupMru(value: TCEMRUFileList);
+begin
+  fPrjGrpMruPt.assign(value);
+end;
+
+procedure TCEPersistentMainMrus.setTargets(projs: TCEMRUFileList; files: TCEMRUFileList;
+  group: TCEMRUFileList);
 begin
   fFileMruPt := files;
   fProjMruPt := projs;
+  fPrjGrpMruPt := group;
 end;
 {$ENDREGION}
 
@@ -1210,10 +1230,13 @@ procedure TCEMainForm.InitMRUs;
 begin
   fProjMru := TCEMRUProjectList.Create;
   fFileMru := TCEMRUDocumentList.Create;
+  fPrjGrpMru:= TCEMRUProjectsGroupList.create;
   fProjMru.objectTag := mnuItemMruProj;
   fFileMru.objectTag := mnuItemMruFile;
+  fPrjGrpMru.objectTag := mnuItemMruGroup;
   fProjMru.OnChange := @mruChange;
   fFileMru.OnChange := @mruChange;
+  fPrjGrpMru.OnChange := @mruChange;
 end;
 
 procedure TCEMainForm.InitWidgets;
@@ -1430,7 +1453,7 @@ begin
   fname := getCoeditDocPath + 'mostrecent.txt';
   if fname.fileExists then with TCEPersistentMainMrus.create(nil) do
   try
-    setTargets(fFileMru, fProjMru);
+    setTargets(fFileMru, fProjMru, fPrjGrpMru);
     loadFromFile(fname);
   finally
     Free;
@@ -1467,7 +1490,7 @@ begin
   // project and files MRU
   with TCEPersistentMainMrus.create(nil) do
   try
-    setTargets(fFileMru, fProjMru);
+    setTargets(fFileMru, fProjMru, fPrjGrpMru);
     saveToFile(getCoeditDocPath + 'mostrecent.txt');
   finally
     Free;
@@ -1756,6 +1779,7 @@ begin
   fWidgList.Free;
   fProjMru.Free;
   fFileMru.Free;
+  fPrjGrpMru.Free;
   FreeRunnableProc;
   //
   fMainMenuSubj.Free;
@@ -1883,7 +1907,9 @@ begin
     if srcLst = fFileMru then
       clickTrg := @mruFileItemClick
     else if srcLst = fProjMru then
-      clickTrg := @mruProjItemClick;
+      clickTrg := @mruProjItemClick
+    else if srcLst = fPrjGrpMru then
+      clickTrg:= @mruProjGroupItemClick;
 
     trgMnu.Clear;
 
@@ -3241,10 +3267,21 @@ procedure TCEMainForm.mruProjItemClick(Sender: TObject);
 begin
   if checkProjectLock then
     exit;
-  if (fProject <> nil) and not fProject.inGroup and
-      fProject.modified and
-        (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then exit;
+  if (fProject <> nil) and not fProject.inGroup and fProject.modified and
+    (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then
+      exit;
   openProj(TMenuItem(Sender).Hint);
+end;
+
+procedure TCEMainForm.mruProjGroupItemClick(Sender: TObject);
+begin
+  if checkProjectLock then
+    exit;
+  if fProjectGroup.groupModified and (dlgFileChangeClose(
+    fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel) then
+      exit;
+  fProjectGroup.closeGroup;
+  fProjectGroup.openGroup(TMenuItem(Sender).Hint);
 end;
 
 procedure TCEMainForm.actProjCloseExecute(Sender: TObject);
@@ -3346,11 +3383,13 @@ begin
     if dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel then
       exit;
   end;
-  fProjectGroup.closeGroup;
   with TOpenDialog.Create(nil) do
   try
     if execute then
+    begin
       fProjectGroup.openGroup(filename);
+      fPrjGrpMru.Insert(0, filename);
+    end;
   finally
     free;
   end;
