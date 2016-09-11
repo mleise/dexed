@@ -537,6 +537,7 @@ begin
         row.SubItems.Add(enableStr[true]);
         row.Selected:=true;
         RowToLibrary(row);
+        row.MakeVisible(false);
         itf.message('The package to register is a source library.' +
           'It is not pre-compiled but its sources are registered', nil, amcMisc, amkInf);
       end else
@@ -570,6 +571,7 @@ begin
       row.SubItems.Add(enableStr[true]);
       row.Selected:=true;
       RowToLibrary(row);
+      row.MakeVisible(false);
       showWidget;
     end else
       itf.message('warning, the package json description can not be found or the target is not a static library',
@@ -690,6 +692,7 @@ begin
     if not row.SubItems[0].fileExists then
       dlgOkInfo('the library file does not exist, maybe the project not been already compiled ?');
     row.Selected:= true;
+    row.MakeVisible(false);
     SetFocus;
     RowToLibrary(row);
   finally
