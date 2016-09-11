@@ -3387,6 +3387,7 @@ begin
   try
     if execute then
     begin
+      fProjectGroup.closeGroup;
       fProjectGroup.openGroup(filename);
       fPrjGrpMru.Insert(0, filename);
     end;
