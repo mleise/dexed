@@ -1832,8 +1832,11 @@ procedure TCESynMemo.completionCodeCompletion(var value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
 begin
-  // warning: '20' depends on ce_dcd, case knd of, string literals length
-  value := value[1..value.length-20];
+  if KeyChar = '.' then
+    value := '.'
+  else
+    // warning: '20' depends on ce_dcd, case knd of, string literals length
+    value := value[1..value.length-20];
 end;
 
 function TCESynMemo.completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
