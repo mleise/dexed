@@ -30,7 +30,7 @@ Coedit is an IDE for the [D programming language](http://dlang.org), its compile
 **Project information**
 ---
 - latest release: version 2, update 6, Fri May 27 2016.
-- licensed under the term of the MIT license.
+- licensed under the terms of the Boost license.
 
 **Download the latest build**
 ---
