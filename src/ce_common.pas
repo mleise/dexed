@@ -266,11 +266,6 @@ type
   function isStringDisabled(const str: string): boolean;
 
   (**
-   * Deletes the duplicates in a TStrings instance.
-   *)
-  procedure deleteDups(str: TStrings);
-
-  (**
    * Indicates wether str is only made of blank characters
    *)
   function isBlank(const str: string): boolean;
@@ -1174,19 +1169,6 @@ begin
     result := true;
   if (str.length > 1) and (str[1..2] = '//') then
     result := true;
-end;
-
-procedure deleteDups(str: TStrings);
-var
-  i: integer;
-begin
-  {$PUSH}{$HINTS OFF}
-  if str = nil then exit;
-  for i:= str.Count-1 downto 0 do
-    // if less than 0 -> not found -> unsigned -> greater than current index.
-    if cardinal(str.IndexOf(str[i])) <  i then
-      str.Delete(i);
-  {$POP}
 end;
 
 function isBlank(const str: string): boolean;

@@ -2608,6 +2608,7 @@ begin
       ldc: dmdProc.Executable :='ldmd2' + exeExt;
       gdc: dmdProc.Executable :='gdmd'  + exeExt;
     end;
+    TStringList(dmdproc.Parameters).Duplicates:=TDuplicates.dupIgnore;
     dmdproc.Parameters.Add(fDoc.fileName);
     if not asObj then
       dmdproc.Parameters.Add('-of' + fname + exeExt)
@@ -2645,8 +2646,6 @@ begin
       LibMan.getLibFiles(nil, dmdproc.Parameters);
       LibMan.getLibSourcePath(nil, dmdproc.Parameters);
     end;
-
-    deleteDups(dmdproc.Parameters);
     dmdproc.Execute;
     while dmdproc.Running do
       application.ProcessMessages;

@@ -274,6 +274,10 @@ begin
   fConfigs := TStringList.Create;
   fSrcs := TStringList.Create;
   fImportPaths := TStringList.Create;
+  fSrcs.Duplicates:=TDuplicates.dupIgnore;
+  fImportPaths.Duplicates:=TDuplicates.dupIgnore;
+  fConfigs.Duplicates:=TDuplicates.dupIgnore;
+  fBuildTypes.Duplicates:=TDuplicates.dupIgnore;
   //
   subjProjNew(fProjectSubject, self);
   subjProjChanged(fProjectSubject, self);
@@ -844,7 +848,6 @@ begin
           tryAddRelOrAbsFile(arr.Strings[i]);
       end;
     end;
-    deleteDups(fSrcs);
     // exclusions
     lst.Clear;
     getExclusion(fJSON);

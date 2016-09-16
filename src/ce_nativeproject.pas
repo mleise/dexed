@@ -37,7 +37,7 @@ type
     fRunnerOldCwd: string;
     fLibAliases: TStringList;
     fConfigs: TCollection;
-    fSrcs, fSrcsCop: TStringList;
+    fSrcs: TStringList;
     fConfIx: Integer;
     fUpdateCount: NativeInt;
     fProjectSubject: TCEProjectSubject;
@@ -151,9 +151,10 @@ begin
   fProjectSubject := TCEProjectSubject.create;
   //
   fLibAliases := TStringList.Create;
+  fLibAliases.Duplicates:=TDuplicates.dupIgnore;
   fSrcs := TStringList.Create;
+  fSrcs.Duplicates:=TDuplicates.dupIgnore;
   fSrcs.OnChange := @subMemberChanged;
-  fSrcsCop := TStringList.Create;
   fConfigs := TCollection.create(TCompilerConfiguration);
   //
   reset;
@@ -177,7 +178,6 @@ begin
   fOnChange := nil;
   fLibAliases.Free;
   fSrcs.free;
-  fSrcsCop.Free;
   fConfigs.free;
   killProcess(fRunner);
   inherited;
