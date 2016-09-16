@@ -26,13 +26,16 @@ type
    *)
   TProjectGroupItem = class(TCollectionItem)
   private
+    fConfigIndex: integer;
     fFilename: string;
     fProj: ICECommonProject;
     fGroup: TProjectGroup;
     fAsyncMode: TCEProjectAsyncMode;
+    function storeConfigIndex: boolean;
   published
     property filename: string read fFilename write fFilename;
     property asyncMode: TCEProjectAsyncMode read fAsyncMode write fAsyncMode;
+    property configurationIndex: integer read fConfigIndex write fConfigIndex stored storeConfigIndex;
   public
     property project: ICECommonProject read fProj;
     procedure lazyLoad;
@@ -191,7 +194,15 @@ begin
 end;
 
 procedure TProjectGroup.projChanged(project: ICECommonProject);
+var
+  itm: TProjectGroupItem;
 begin
+  if assigned(project) and project.inGroup and (project.getFormat = pfDub) then
+  begin
+    itm := Self.addItem(project.filename);
+    if assigned(itm) then
+      itm.configurationIndex:=project.getActiveConfigurationIndex;
+  end;
 end;
 
 procedure TProjectGroup.projClosing(project: ICECommonProject);
@@ -261,12 +272,15 @@ begin
     fFreeStanding := nil;
     result.fProj.activate;
   end;
+  result.configurationIndex:=result.fProj.getActiveConfigurationIndex;
 end;
 
 function TProjectGroup.getProject(ix: Integer): ICECommonProject;
 begin
   item[ix].lazyLoad;
-  exit(item[ix].fProj);
+  result := item[ix].project;
+  if result.getFormat = pfDub then
+    result.setActiveConfigurationIndex(item[ix].configurationIndex);
 end;
 
 function TProjectGroup.findProject(const fname: string): ICECommonProject;
@@ -349,6 +363,7 @@ begin
   for i:= 0 to fItems.Count-1 do
     getItem(i).fGroup := self;
   doChanged;
+  fModified := false;
 end;
 
 procedure TProjectGroup.saveGroup(const fname: string);
@@ -370,6 +385,7 @@ begin
     getItem(i).fFilename := ExtractRelativepath(n, getItem(i).fFilename);
   fBasePath := n;
   saveToFile(fname);
+  fModified := false;
 end;
 
 procedure TProjectGroup.closeGroup;
@@ -422,6 +438,8 @@ begin
   begin
     fProj := loadProject(absoluteFilename, true);
     fProj.inGroup(true);
+    if fProj.getFormat = pfDub then
+      fProj.setActiveConfigurationIndex(fConfigIndex);
   end;
 end;
 
@@ -431,6 +449,11 @@ begin
     fProj.getProject.free;
   fProj := nil;
   inherited;
+end;
+
+function TProjectGroupItem.storeConfigIndex: boolean;
+begin
+  exit(fProj.getFormat = pfDub);
 end;
 
 function TProjectGroupItem.absoluteFilename: string;
