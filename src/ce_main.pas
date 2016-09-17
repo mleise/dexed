@@ -364,6 +364,7 @@ type
     fPrjGrpWidg: TCEProjectGroupWidget;
     //fGdbWidg: TCEGdbWidget;
     fDfmtWidg:  TCEDfmtWidget;
+    fCompStart: TDateTime;
 
     fRunProjAfterCompArg: boolean;
     fRunProjAfterCompile: boolean;
@@ -541,6 +542,7 @@ type
     fFlatLook: boolean;
     fSplitterScrollSpeed: byte;
     fAutoCheckUpdates: boolean;
+    fShowBuildDuration: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getDubCompiler: TCECompiler;
@@ -566,6 +568,7 @@ type
     property autoSaveProjectFiles: boolean read fAutoSaveProjectFiles write fAutoSaveProjectFiles default false;
     property flatLook: boolean read fFlatLook write fFlatLook;
     property splitterScrollSpeed: byte read fSplitterScrollSpeed write setSplitterScsrollSpeed;
+    property showBuildDuration: boolean read fShowBuildDuration write fShowBuildDuration default false;
 
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
@@ -873,8 +876,14 @@ begin
     fMaxRecentGroups := fBackup.fMaxRecentGroups;
     fReloadLastDocuments:=fBackup.fReloadLastDocuments;
     fFloatingWidgetOnTop := fBackup.fFloatingWidgetOnTop;
+    fShowBuildDuration:= fBackup.fShowBuildDuration;
+    fAutoSaveProjectFiles:= fBackup.fAutoSaveProjectFiles;
+    fdscanUnittests:= fBackup.dscanUnittests;
     fFlatLook:=fBackup.fFlatLook;
+    fAutoCheckUpdates:= fBackup.fAutoCheckUpdates;
     CEMainForm.fDscanUnittests := fDscanUnittests;
+    dubCompiler:= fBackup.dubCompiler;
+    nativeProjectCompiler:= fBackup.nativeProjectCompiler;
   end
   else inherited;
 end;
@@ -903,8 +912,13 @@ begin
     fBackup.fFloatingWidgetOnTop:=fFloatingWidgetOnTop;
     fBackup.fDcdPort:=fDcdPort;
     fBackup.fCovModUt:=fCovModUt;
+    fBackup.fAutoSaveProjectFiles:= fAutoSaveProjectFiles;
     fBackup.fDscanUnittests:= fDscanUnittests;
     fBackup.fFlatLook:= fFlatLook;
+    fBackup.fAutoCheckUpdates:= fAutoCheckUpdates;
+    fBackup.fShowBuildDuration:= fShowBuildDuration;
+    fBackup.dubCompiler:= dubCompiler;
+    fBackup.nativeProjectCompiler:= nativeProjectCompiler;
   end
   else inherited;
 end;
@@ -2027,6 +2041,11 @@ begin
   fProjActionsLock := false;
   if not fIsCompilingGroup then
   begin
+    if fAppliOpts.showBuildDuration then
+    begin
+      fCompStart := Time - fCompStart;
+      fMsgs.message('Build duration: ' + TimeToStr(fCompStart), project, amcProj, amkInf);
+    end;
     if fRunProjAfterCompile and assigned(fProject) then
     begin
       if not success then
@@ -2053,6 +2072,11 @@ begin
           exit;
         end;
       fMsgs.message('the project group is successfully compiled', nil, amcAll, amkInf);
+      if fAppliOpts.showBuildDuration then
+      begin
+        fCompStart := Time - fCompStart;
+        fMsgs.message('Group build duration: ' + TimeToStr(fCompStart), nil, amcAll, amkInf);
+      end;
     end;
   end;
 end;
@@ -2940,6 +2964,8 @@ procedure TCEMainForm.actProjCompileExecute(Sender: TObject);
 begin
   if fAppliOpts.autoSaveProjectFiles then
     saveModifiedProjectFiles(fProject);
+  if fAppliOpts.showBuildDuration then
+    fCompStart := Time;
   fProject.compile;
 end;
 
@@ -2948,6 +2974,7 @@ begin
   fRunProjAfterCompile := true;
   if fAppliOpts.autoSaveProjectFiles then
     saveModifiedProjectFiles(fProject);
+  fCompStart := Time;
   fProject.compile;
 end;
 
@@ -2957,6 +2984,7 @@ begin
   fRunProjAfterCompArg := true;
   if fAppliOpts.autoSaveProjectFiles then
     saveModifiedProjectFiles(fProject);
+  fCompStart := Time;
   fProject.compile;
 end;
 
@@ -2972,6 +3000,7 @@ begin
     begin
       if fAppliOpts.autoSaveProjectFiles then
         saveModifiedProjectFiles(fProject);
+      fCompStart := Time;
       fProject.compile;
     end;
   if fProject.outputFilename.fileExists
@@ -3455,6 +3484,7 @@ begin
   fGroupCompilationCnt := 0;
   fIsCompilingGroup := true;
   fMsgs.message('start compiling a project group...', nil, amcAll, amkInf);
+  fCompStart := Time;
   for i:= 0 to fProjectGroup.projectCount-1 do
   begin
     fProjectGroup.getProject(i).activate;
