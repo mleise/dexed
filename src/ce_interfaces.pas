@@ -373,6 +373,27 @@ type
   end;
 
 
+  TDCDCompletionKind = (
+    dckClass,
+    dckInterface,
+    dckStruct,
+    dckUnion,
+    dckVariable,
+    dckMember,
+    dckReserved,
+    dckFunction,
+    dckEnum,
+    dckEnum_member,
+    dckPackage,
+    dckModule,
+    dckArray,
+    dckAA,
+    dckAlias,
+    dckTemplate,
+    dckMixin
+  );
+
+
 
 {
   subject primitives:

@@ -407,6 +407,7 @@ var
   i: Integer;
   kind: Char;
   item: string;
+  kindObj: TObject;
 begin
   if not fAvailable then exit;
   if not fServerListening then exit;
@@ -436,28 +437,28 @@ begin
     kind := item[item.length];
     setLength(item, item.length-2);
     case kind of
-      'c': item += ' (class)            ';
-      'i': item += ' (interface)        ';
-      's': item += ' (struct)           ';
-      'u': item += ' (union)            ';
-      'v': item += ' (variable)         ';
-      'm': item += ' (member)           ';
-      'k': item += ' (reserved word)    ';
-      'f': item += ' (function)         ';
-      'g': item += ' (enum)             ';
-      'e': item += ' (enum member)      ';
-      'P': item += ' (package)          ';
-      'M': item += ' (module)           ';
-      'a': item += ' (array)            ';
-      'A': item += ' (associative array)';
-      'l': item += ' (alias)            ';
-      't': item += ' (template)         ';
-      'T': item += ' (mixin)            ';
+      'c': kindObj := TObject(PtrUint(dckClass));
+      'i': kindObj := TObject(PtrUint(dckInterface));
+      's': kindObj := TObject(PtrUint(dckStruct));
+      'u': kindObj := TObject(PtrUint(dckUnion));
+      'v': kindObj := TObject(PtrUint(dckVariable));
+      'm': kindObj := TObject(PtrUint(dckMember));
+      'k': kindObj := TObject(PtrUint(dckReserved));
+      'f': kindObj := TObject(PtrUint(dckFunction));
+      'g': kindObj := TObject(PtrUint(dckEnum));
+      'e': kindObj := TObject(PtrUint(dckEnum_member));
+      'P': kindObj := TObject(PtrUint(dckPackage));
+      'M': kindObj := TObject(PtrUint(dckModule));
+      'a': kindObj := TObject(PtrUint(dckArray));
+      'A': kindObj := TObject(PtrUint(dckAA));
+      'l': kindObj := TObject(PtrUint(dckAlias));
+      't': kindObj := TObject(PtrUint(dckTemplate));
+      'T': kindObj := TObject(PtrUint(dckMixin));
       // see https://github.com/Hackerpilot/dsymbol/blob/master/src/dsymbol/symbol.d#L47
-      '*', '?': continue; // internal DCD stuff, said not to happen but actually it did
-      // https://github.com/Hackerpilot/DCD/issues/261
+      // internal DCD stuff, Should not to happen...report bug if it does.
+      '*', '?': continue;
     end;
-    list.Add(item);
+    list.AddObject(item, kindObj);
   end;
 end;
 

@@ -170,6 +170,7 @@ type
     fSortDialog: TSortDialog;
     fModuleTokFound: boolean;
     fHasModuleDeclaration: boolean;
+    fLastCompletion: string;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseBytePosition: Integer;
@@ -326,7 +327,28 @@ var
 implementation
 
 uses
-  ce_interfaces, ce_staticmacro, ce_dcd, SynEditHighlighterFoldBase, ce_lcldragdrop;
+  ce_interfaces, ce_dcd, ce_staticmacro, SynEditHighlighterFoldBase, ce_lcldragdrop;
+
+const
+  DcdCompletionKindStrings: array[TDCDCompletionKind] of string = (
+    ' (class)            ',
+    ' (interface)        ',
+    ' (struct)           ',
+    ' (union)            ',
+    ' (variable)         ',
+    ' (member)           ',
+    ' (reserved word)    ',
+    ' (function)         ',
+    ' (enum)             ',
+    ' (enum member)      ',
+    ' (package)          ',
+    ' (module)           ',
+    ' (array)            ',
+    ' (associative array)',
+    ' (alias)            ',
+    ' (template)         ',
+    ' (mixin)            '
+  );
 
 function TCEEditorHintWindow.CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect;
 begin
@@ -1820,12 +1842,26 @@ begin
 end;
 
 procedure TCESynMemo.getCompletionList;
+var
+  i: integer;
+  o: TObject;
 begin
   if not DcdWrapper.available then exit;
   //
   fCompletion.Position := 0;
   fCompletion.ItemList.Clear;
   DcdWrapper.getComplAtCursor(fCompletion.ItemList);
+  if fLastCompletion.isNotEmpty then
+  begin
+    i := fCompletion.ItemList.IndexOf(fLastCompletion);
+    if i <> -1 then
+    begin
+      o := fCompletion.ItemList.Objects[i];
+      fCompletion.ItemList.Delete(i);
+      fCompletion.ItemList.InsertObject(0, fLastCompletion, o);
+    end
+    else fLastCompletion:= '';
+  end;
 end;
 
 procedure TCESynMemo.completionCodeCompletion(var value: string;
@@ -1835,28 +1871,28 @@ begin
   if KeyChar = '.' then
     value := '.'
   else
-    // warning: '20' depends on ce_dcd, case knd of, string literals length
-    value := value[1..value.length-20];
+    fLastCompletion := value;
 end;
 
 function TCESynMemo.completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
   Selected: boolean; Index: integer): boolean;
 var
-  lft, rgt: string;
+  knd: string;
   len: Integer;
 begin
-  // empty items can be produced if completion list is too long
-  if aKey.isEmpty then exit(true);
-  // otherwise always at least 20 chars but...
-  // ... '20' depends on ce_dcd, case knd of, string literals length
   result := true;
-  lft := AKey[1 .. AKey.length-20];
-  rgt := AKey[AKey.length-19 .. AKey.length];
+  // empty items can be produced if completion list is too long
+  if aKey.isEmpty then
+    exit;
+  {$PUSH} {$Warnings OFF} {$Hints OFF}
+  knd := DcdCompletionKindStrings[TDCDCompletionKind(
+    PtrUInt(fCompletion.ItemList.Objects[index]))];
+  {$POP}
   ACanvas.Font.Style := [fsBold];
-  len := ACanvas.TextExtent(lft).cx;
-  ACanvas.TextOut(2 + X , Y, lft);
+  len := ACanvas.TextExtent(aKey).cx;
+  ACanvas.TextOut(2 + X , Y, aKey);
   ACanvas.Font.Style := [fsItalic];
-  ACanvas.TextOut(2 + X + len + 2, Y, rgt);
+  ACanvas.TextOut(2 + X + len + 2, Y, knd);
 end;
 
 procedure TCESynMemo.AutoDotTimerEvent(sender: TObject);
