@@ -1549,7 +1549,8 @@ begin
       tk0 := fLexToks[i];
       tk1 := fLexToks[i+1];
       if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
-        (tk0^.kind in [ltkString, ltkComment]) then exit;
+        (tk0^.kind in [ltkString, ltkComment]) then
+          exit;
     end;
     tk0 := fLexToks[fLexToks.Count-1];
     if (tk0^.offset+1 <= p) and (tk0^.kind <> ltkIllegal) then
@@ -1564,7 +1565,8 @@ begin
       tk0 := fLexToks[i];
       tk1 := fLexToks[i+1];
       if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
-        (tk0^.kind in [ltkChar, ltkComment]) then exit;
+        (tk0^.kind in [ltkChar, ltkComment]) then
+          exit;
     end;
     tk0 := fLexToks[fLexToks.Count-1];
     if (tk0^.offset+1 <= p) and (tk0^.kind <> ltkIllegal) then
@@ -1579,7 +1581,8 @@ begin
       tk0 := fLexToks[i];
       tk1 := fLexToks[i+1];
       if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
-        (tk0^.kind = ltkComment) then exit;
+        (tk0^.kind = ltkComment) then
+          exit;
     end;
     tk0 := fLexToks[fLexToks.Count-1];
     if (tk0^.offset+1 <= p) and (tk0^.kind <> ltkIllegal) then
@@ -1706,7 +1709,7 @@ end;
 
 procedure TCESynMemo.showCallTips(findOpenParen: boolean = true);
 var
-  str: string;
+  str, lne: string;
   i, x: integer;
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
@@ -1731,10 +1734,9 @@ begin
       i -= 1;
   end;
   DcdWrapper.getCallTip(str);
-  if str.isNotEmpty then
   begin
     i := fCallTipStrings.Count;
-    if fCallTipStrings.Count <> 0 then
+    if (fCallTipStrings.Count <> 0) and str.isNotEmpty then
       fCallTipStrings.Insert(0, '---');
     fCallTipStrings.Insert(0, str);
     i := fCallTipStrings.Count - i;
@@ -1742,7 +1744,11 @@ begin
     {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
     fCallTipStrings.Objects[0] := TObject(pointer(i));
     {$POP}
-    str := fCallTipStrings.Text;
+    str := '';
+    for lne in fCallTipStrings do
+      if lne.isNotEmpty then
+        str += lne + LineEnding;
+    str := str[1..str.length - length(LineEnding)];
     {$IFDEF WINDOWS}
     str := str[1..str.length-2];
     {$ELSE}
