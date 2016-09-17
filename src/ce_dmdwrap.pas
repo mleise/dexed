@@ -239,16 +239,26 @@ type
   private
     fCov: boolean;
     fCustom: TStringList;
+    fDmdOthers: TstringList;
+    fLdcOthers: TStringList;
+    fGdcOthers: TStringList;
     procedure setCov(const value: boolean);
     procedure setCustom(value: TStringList);
+    procedure setDmdOtherOptions(value: TStringList);
+    procedure setLdcOtherOptions(value: TStringList);
+    procedure setGdcOtherOptions(value: TStringList);
   published
     property coverage: boolean read fCov write setCov default false;
     property customOptions: TStringList read fCustom write setCustom;
+    property dmdOtherOptions: TStringList read fDmdOthers write setDmdOtherOptions;
+    property ldcOtherOptions: TStringList read fLdcOthers write setLdcOtherOptions;
+    property gdcOtherOptions: TStringList read fGdcOthers write setGdcOtherOptions;
   public
     constructor create; override;
     destructor destroy; override;
     procedure assign(source: TPersistent); override;
     procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
+    procedure getCompilerSpecificOpts(list: TStrings; base: TOptsGroup = nil; compiler: TCECompiler = dmd);
   end;
 
   (*****************************************************************************
@@ -1122,6 +1132,9 @@ constructor TOtherOpts.create;
 begin
   inherited;
   fCustom := TStringList.Create;
+  fDmdOthers := TStringList.Create;
+  fLdcOthers := TStringList.Create;
+  fGdcOthers := TStringList.Create;
 end;
 
 procedure TOtherOpts.assign(source: TPersistent);
@@ -1131,8 +1144,11 @@ begin
   if (source is TOtherOpts) then
   begin
     src := TOtherOpts(source);
-    fCustom.Assign(src.fCustom);
     fCov := src.fCov;
+    fCustom.Assign(src.fCustom);
+    fDmdOthers.Assign(src.fDmdOthers);
+    fLdcOthers.Assign(src.fLdcOthers);
+    fGdcOthers.Assign(src.fGdcOthers);
   end
   else inherited;
 end;
@@ -1140,6 +1156,9 @@ end;
 destructor TOtherOpts.destroy;
 begin
   fCustom.Free;
+  fDmdOthers.Free;
+  fLdcOthers.Free;
+  fGdcOthers.Free;
   inherited;
 end;
 
@@ -1152,45 +1171,120 @@ end;
 
 procedure TOtherOpts.getOpts(list: TStrings; base: TOptsGroup = nil);
 var
-  str1, str2: string;
+  i: integer;
+  str: string;
   baseopt: TOtherOpts;
   rightList: TStringList;
 begin
   if base.isNil then
+  begin
+    for i := 0 to fCustom.Count-1 do
     begin
-    for str1 in fCustom do if str1 <> '' then
-    begin
-      if isStringDisabled(str1) then
+      str := fCustom[i];
+      if str.isEmpty or isStringDisabled(str) then
         continue;
-      if str1[1] <> '-' then
-        str2 := '-' + str1
-      else
-        str2 := str1;
-      list.AddText(fSymStringExpander.expand(str2));
+      if str[1] <> '-' then
+        str := '-' + str;
+      list.AddText(fSymStringExpander.expand(str));
     end;
     if fCov then list.Add('-cov');
   end else
   begin
     baseopt := TOtherOpts(base);
-    if fCustom.Count = 0 then rightList := baseopt.fCustom
-    else rightList := fCustom;
-    for str1 in rightList do if str1 <> '' then
+    if fCustom.Count = 0 then
+      rightList := baseopt.fCustom
+    else
+      rightList := fCustom;
+    for i := 0 to rightList.Count-1 do
     begin
-      if isStringDisabled(str1) then
+      str := rightList[i];
+      if str.isEmpty or isStringDisabled(str) then
         continue;
-      if str1[1] <> '-' then
-        str2 := '-' + str1
-      else
-        str2 := str1;
-      list.AddText(fSymStringExpander.expand(str2));
+      if str[1] <> '-' then
+        str := '-' + str;
+      list.AddText(fSymStringExpander.expand(str));
     end;
     if baseopt.fCov or fCov then list.Add('-cov');
+  end;
+end;
+
+procedure TOtherOpts.getCompilerSpecificOpts(list: TStrings; base:
+    TOptsGroup = nil; compiler: TCECompiler = dmd);
+var
+  i: integer;
+  str: string;
+  baseopt: TOtherOpts;
+  lst: TStringList;
+begin
+  if base.isNil then
+  begin
+    case compiler of
+      TCECompiler.dmd: lst := fDmdOthers;
+      TCECompiler.ldc: lst := fLdcOthers;
+      TCECompiler.gdc: lst := fGdcOthers;
+    end;
+    for i := 0 to lst.Count-1 do
+    begin
+      str := lst[i];
+      if str.isEmpty or isStringDisabled(str) then
+        continue;
+      if str[1] <> '-' then
+        str := '-' + str;
+      list.AddText(fSymStringExpander.expand(str));
+    end;
+  end else
+  begin
+    baseopt := TOtherOpts(base);
+    case compiler of
+      TCECompiler.dmd:
+        if fDmdOthers.Count = 0 then
+          lst := baseopt.fDmdOthers
+        else
+          lst := fDmdOthers;
+      TCECompiler.ldc:
+        if fLdcOthers.Count = 0 then
+          lst := baseopt.fLdcOthers
+        else
+          lst := fLdcOthers;
+      TCECompiler.gdc:
+        if fGdcOthers.Count = 0 then
+          lst := baseopt.fGdcOthers
+        else
+          lst := fGdcOthers;
+    end;
+    for i := 0 to lst.Count-1 do
+    begin
+      str := lst[i];
+      if str.isEmpty or isStringDisabled(str) then
+        continue;
+      if str[1] <> '-' then
+        str := '-' + str;
+      list.AddText(fSymStringExpander.expand(str));
+    end;
   end;
 end;
 
 procedure TOtherOpts.setCustom(value: TStringList);
 begin
   fCustom.Assign(value);
+  doChanged;
+end;
+
+procedure TOtherOpts.setDmdOtherOptions(value: TStringList);
+begin
+  fDmdOthers.Assign(value);
+  doChanged;
+end;
+
+procedure TOtherOpts.setLdcOtherOptions(value: TStringList);
+begin
+  fLdcOthers.Assign(value);
+  doChanged;
+end;
+
+procedure TOtherOpts.setGdcOtherOptions(value: TStringList);
+begin
+  fGdcOthers.Assign(value);
   doChanged;
 end;
 {$ENDREGION}
@@ -1368,7 +1462,7 @@ begin
     fPostProcOpt.assign(src.fPostProcOpt);
     fRunProjOpt.assign(src.fRunProjOpt);
     //
-    // isBase / isOverriden not copied by purpose.
+    // isBase / isOverriden not copied on purpose.
   end
   else inherited;
 end;

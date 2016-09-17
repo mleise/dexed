@@ -65,6 +65,8 @@ type
     // passes compilation message as "to be guessed"
     procedure compProcOutput(proc: TObject);
     procedure compProcTerminated(proc: TObject);
+    function getObjectsDirectory: string; inline;
+    procedure getUpToDateObjects(str: TStrings);
   protected
     procedure beforeLoad; override;
     procedure afterSave; override;
@@ -407,15 +409,17 @@ var
   i: Integer;
   exc: TStringList;
   libAliasesPtr: TStringList;
+  conf: TCompilerConfiguration;
   str: string;
 begin
   if fConfIx = -1 then exit;
   exc := TStringList.Create;
   try
+    conf := currentConfiguration;
     // prepares the exclusions
-    for i := 0 to currentConfiguration.pathsOptions.exclusions.Count-1 do
+    for i := 0 to conf.pathsOptions.exclusions.Count-1 do
     begin
-      str := fSymStringExpander.expand(currentConfiguration.pathsOptions.exclusions[i]);
+      str := fSymStringExpander.expand(conf.pathsOptions.exclusions[i]);
       exc.Add(str)
     end;
     // sources
@@ -448,18 +452,25 @@ begin
     {$IFDEF WINDOWS}
     // only link lib file if executable/shared lib
     // OS switch: read more @ http://forum.dlang.org/post/ooekdkwrefposmchekrp@forum.dlang.org
-    if (currentConfiguration.outputOptions.binaryKind in [executable, sharedlib]) or
-      currentConfiguration.outputOptions.alwaysLinkStaticLibs then
+    if (conf.outputOptions.binaryKind in [executable, sharedlib]) or
+      conf.outputOptions.alwaysLinkStaticLibs then
     {$ENDIF}
     LibMan.getLibFiles(libAliasesPtr, list);
 
     // but always adds -I<path>
     LibMan.getLibSourcePath(libAliasesPtr, list);
     // config
-    if currentConfiguration.isOverriddenConfiguration then
-      currentConfiguration.getOpts(list, fBaseConfig)
+    if conf.isOverriddenConfiguration then
+    begin
+      conf.getOpts(list, fBaseConfig);
+      conf.otherOptions.getCompilerSpecificOpts(list, fBaseConfig.otherOptions,
+        NativeProjectCompiler);
+    end
     else
-      currentConfiguration.getOpts(list);
+    begin
+      conf.getOpts(list);
+      conf.otherOptions.getCompilerSpecificOpts(list, nil, NativeProjectCompiler);
+    end;
   finally
     exc.Free;
   end;
@@ -771,6 +782,7 @@ begin
   fCompilProc.OnReadData:= @compProcOutput;
   fCompilProc.OnTerminate:= @compProcTerminated;
   getOpts(fCompilProc.Parameters);
+  //getUpToDateObjects(fCompilProc.Parameters);
   if NativeProjectCompiler = gdc then
     fCompilProc.Parameters.Add('-gdc=gdc');
   fCompilProc.Execute;
@@ -902,6 +914,46 @@ begin
   for i := 0 to fSrcs.Count-1 do
     if fileAge(sourceAbsolute(i)) > dt then exit;
   result := true;
+end;
+
+function TCENativeProject.getObjectsDirectory: string; inline;
+var
+  cfg: TCompilerConfiguration;
+begin
+  result := '';
+  cfg := currentConfiguration;
+  if (cfg.pathsOptions.objectDirectory <> '') and
+    DirectoryExistsUTF8(cfg.pathsOptions.objectDirectory) then
+      result := cfg.pathsOptions.objectDirectory;
+end;
+
+procedure TCENativeProject.getUpToDateObjects(str: TStrings);
+var
+  odr: string;
+  src: string;
+  obj: string;
+  i: integer;
+begin
+  odr := getObjectsDirectory;
+  if odr.isEmpty then
+  begin
+    for i := 0 to fSrcs.Count-1 do
+    begin
+      src := sourceAbsolute(i);
+      obj := stripFileExt(src) + objExt;
+      if obj.fileExists and src.fileExists then
+      begin
+        if FileAgeUTF8(src) > FileAgeUTF8(obj) then
+          DeleteFile(obj)
+        else
+          str.Add(obj);
+      end;
+    end;
+  end
+  else
+  begin
+
+  end;
 end;
 
 function TCENativeProject.outputFilename: string;
