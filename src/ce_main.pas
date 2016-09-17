@@ -2974,7 +2974,8 @@ begin
   fRunProjAfterCompile := true;
   if fAppliOpts.autoSaveProjectFiles then
     saveModifiedProjectFiles(fProject);
-  fCompStart := Time;
+  if fAppliOpts.showBuildDuration then
+    fCompStart := Time;
   fProject.compile;
 end;
 
@@ -2984,7 +2985,8 @@ begin
   fRunProjAfterCompArg := true;
   if fAppliOpts.autoSaveProjectFiles then
     saveModifiedProjectFiles(fProject);
-  fCompStart := Time;
+  if fAppliOpts.showBuildDuration then
+    fCompStart := Time;
   fProject.compile;
 end;
 
@@ -3000,12 +3002,12 @@ begin
     begin
       if fAppliOpts.autoSaveProjectFiles then
         saveModifiedProjectFiles(fProject);
-      fCompStart := Time;
+      if fAppliOpts.showBuildDuration then
+        fCompStart := Time;
       fProject.compile;
     end;
-  if fProject.outputFilename.fileExists
-      or (fProject.getFormat = pfDub) then
-        fProject.run;
+  if fProject.outputFilename.fileExists or (fProject.getFormat = pfDub) then
+    fProject.run;
 end;
 
 procedure TCEMainForm.actProjRunWithArgsExecute(Sender: TObject);
@@ -3028,7 +3030,6 @@ begin
   if act.Tag = 0 then exit;
   //
   widg := TCEWidget(act.Tag);
-
   if widg.isDockable then
   begin
     if DockMaster.GetAnchorSite(widg).GetTopParent = DockMaster.GetAnchorSite(widg) then
@@ -3484,7 +3485,8 @@ begin
   fGroupCompilationCnt := 0;
   fIsCompilingGroup := true;
   fMsgs.message('start compiling a project group...', nil, amcAll, amkInf);
-  fCompStart := Time;
+  if fAppliOpts.showBuildDuration then
+    fCompStart := Time;
   for i:= 0 to fProjectGroup.projectCount-1 do
   begin
     fProjectGroup.getProject(i).activate;
