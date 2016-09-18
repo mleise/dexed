@@ -1748,7 +1748,8 @@ begin
     for lne in fCallTipStrings do
       if lne.isNotEmpty then
         str += lne + LineEnding;
-    str := str[1..str.length - length(LineEnding)];
+    if str.isEmpty then
+      exit;
     {$IFDEF WINDOWS}
     str := str[1..str.length-2];
     {$ELSE}
