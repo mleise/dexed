@@ -11,7 +11,7 @@ uses
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
   fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
-  ce_sharedres, ce_dlang, ce_stringrange;
+  ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer;
 
 type
 
@@ -48,12 +48,6 @@ const
 type
 
   TIdentifierMatchOptions = set of TIdentifierMatchOption;
-
-  TBreakPointModification = (bpAdded, bpRemoved);
-
-  // breakpoint added or removed
-  TBreakPointModifyEvent = procedure(sender: TCESynMemo; line: integer;
-    modification: TBreakPointModification) of object;
 
   // Simple THintWindow descendant allowing the font size to be in sync with the editor.
   TCEEditorHintWindow = class(THintWindow)
@@ -122,7 +116,7 @@ type
 
   TSortDialog = class;
 
-  TCESynMemo = class(TSynEdit)
+  TCESynMemo = class(TSynEdit, ICEDebugObserver)
   private
     fFilename: string;
     fDastWorxExename: string;
@@ -153,7 +147,6 @@ type
     fTxtHighlighter: TSynTxtSyn;
     fImages: TImageList;
     fBreakPoints: TFPList;
-    fBreakpointEvent: TBreakPointModifyEvent;
     fMatchSelectionOpts: TSynSearchOptions;
     fMatchIdentOpts: TSynSearchOptions;
     fMatchOpts: TIdentifierMatchOptions;
@@ -171,6 +164,7 @@ type
     fModuleTokFound: boolean;
     fHasModuleDeclaration: boolean;
     fLastCompletion: string;
+    fDebugger: ICEDebugger;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseBytePosition: Integer;
@@ -195,6 +189,7 @@ type
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
     procedure addBreakPoint(line: integer);
     procedure removeBreakPoint(line: integer);
+    procedure removeDebugTimeMarks;
     function  findBreakPoint(line: integer): boolean;
     procedure showCallTips(const tips: string);
     function lexCanCloseBrace: boolean;
@@ -204,6 +199,14 @@ type
     procedure setSelectionOrWordCase(upper: boolean);
     procedure sortSelectedLines(descending, caseSensitive: boolean);
     procedure tokFoundForCaption(const token: PLexToken; out stop: boolean);
+    //
+    procedure debugStart(debugger: ICEDebugger);
+    procedure debugStop;
+    function debugQueryBpCount: integer;
+    procedure debugQueryBreakPoint(const index: integer; out fname: string; out line: integer; out kind: TBreakPointKind);
+    procedure debugBreak(const fname: string; line: integer; reason: TCEDebugBreakReason);
+    function breakPointsCount: integer;
+    function breakPointLine(index: integer): integer;
   protected
     procedure DoEnter; override;
     procedure DoExit; override;
@@ -223,6 +226,7 @@ type
     constructor Create(aOwner: TComponent); override;
     destructor destroy; override;
     procedure setFocus; override;
+    procedure showPage;
     //
     function pageCaption(checkModule: boolean): string;
     procedure checkFileDate;
@@ -243,12 +247,8 @@ type
     procedure ShowPhobosDoc;
     procedure nextChangedArea;
     procedure previousChangedArea;
-    function implementMain: THasMain;
     procedure sortLines;
-    //
-    function breakPointsCount: integer;
-    function breakPointLine(index: integer): integer;
-    property onBreakpointModify: TBreakPointModifyEvent read fBreakpointEvent write fBreakpointEvent;
+    function implementMain: THasMain;
     //
     property IdentifierMatchOptions: TIdentifierMatchOptions read fMatchOpts write setMatchOpts;
     property Identifier: string read fIdentifier;
@@ -723,6 +723,9 @@ begin
   fImages := TImageList.Create(self);
   fImages.AddResourceName(HINSTANCE, 'BULLET_RED');
   fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN');
+  fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK');
+  fImages.AddResourceName(HINSTANCE, 'BREAKS');
+  fImages.AddResourceName(HINSTANCE, 'STEP');
   fBreakPoints := TFPList.Create;
   //
   fPositions := TCESynMemoPositions.create(self);
@@ -742,12 +745,14 @@ begin
   fDastWorxExename:= exeFullName('dastworx' + exeExt);
   //
   subjDocNew(TCEMultiDocSubject(fMultiDocSubject), self);
+  EntitiesConnector.addObserver(self);
 end;
 
 destructor TCESynMemo.destroy;
 begin
   saveCache;
   //
+  EntitiesConnector.removeObserver(self);
   subjDocClosing(TCEMultiDocSubject(fMultiDocSubject), self);
   fMultiDocSubject.Free;
   fPositions.Free;
@@ -781,6 +786,11 @@ begin
   checkFileDate;
   highlightCurrentIdentifier;
   subjDocFocused(TCEMultiDocSubject(fMultiDocSubject), self);
+end;
+
+procedure TCESynMemo.showPage;
+begin
+  getMultiDocHandler.openDocument(fileName);
 end;
 
 procedure TCESynMemo.DoEnter;
@@ -2404,7 +2414,7 @@ begin
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION breakpoints -----------------------------------------------------------}
+{$REGION debugging/breakpoints -----------------------------------------------------------}
 function TCESynMemo.breakPointsCount: integer;
 begin
   exit(fBreakPoints.Count);
@@ -2434,8 +2444,8 @@ begin
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   fBreakPoints.Add(pointer(line));
   {$POP}
-  if assigned(fBreakpointEvent) then
-    fBreakpointEvent(self, line, bpAdded);
+  if assigned(fDebugger) then
+    fDebugger.addBreakPoint(fFilename, line, bpkBreak);
 end;
 
 procedure TCESynMemo.removeBreakPoint(line: integer);
@@ -2447,8 +2457,13 @@ begin
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   fBreakPoints.Remove(pointer(line));
   {$POP}
-  if assigned(fBreakpointEvent) then
-    fBreakpointEvent(self, line, bpRemoved);
+  if assigned(fDebugger) then
+    fDebugger.removeBreakPoint(fFilename, line);
+end;
+
+procedure TCESynMemo.removeDebugTimeMarks;
+begin
+  //TODO-cGDB: clean gutter marks generated during the session
 end;
 
 function TCESynMemo.findBreakPoint(line: integer): boolean;
@@ -2464,6 +2479,44 @@ begin
     removeBreakPoint(line)
   else
     addBreakPoint(line);
+end;
+
+procedure TCESynMemo.debugStart(debugger: ICEDebugger);
+begin
+  fDebugger := debugger;
+end;
+
+procedure TCESynMemo.debugStop;
+begin
+  fDebugger := nil;
+  removeDebugTimeMarks;
+end;
+
+function TCESynMemo.debugQueryBpCount: integer;
+begin
+  exit(fBreakPoints.Count);
+end;
+
+procedure TCESynMemo.debugQueryBreakPoint(const index: integer; out fname: string;
+  out line: integer; out kind: TBreakPointKind);
+begin
+  fname:= fFilename;
+  line := breakPointLine(index);
+  kind := bpkBreak;
+end;
+
+procedure TCESynMemo.debugBreak(const fname: string; line: integer;
+  reason: TCEDebugBreakReason);
+begin
+  if fname <> fFilename then
+    exit;
+  showPage;
+  caretY := line;
+  // TODO-cDBG: add markup according to break reason
+  case reason of
+    dbBreakPoint:;
+    dbSignal:;
+  end;
 end;
 {$ENDREGION --------------------------------------------------------------------}
 

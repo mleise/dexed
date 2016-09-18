@@ -142,7 +142,7 @@ inherited CEGdbWidget: TCEGdbWidget
         Top = 0
         Caption = 'btnStop'
         OnClick = btnStopClick
-        resourceName = 'CANCEL'
+        resourceName = 'STOP'
         scaledSeparator = False
       end
       object btnContinue: TCEToolButton[7]

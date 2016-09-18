@@ -5,11 +5,11 @@ unit ce_gdb;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, ListFilterEdit, Forms, Controls, Graphics,
-  RegExpr, ComCtrls, PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls,
-  Menus, strutils, Buttons, StdCtrls, process, fpjson,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, RegExpr, ComCtrls,
+  PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
+  StdCtrls, process, fpjson,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
-  ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs;
+  ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf;
 
 type
 
@@ -211,7 +211,7 @@ type
   end;
 
   { TCEGdbWidget }
-  TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver)
+  TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger)
     btnContinue: TCEToolButton;
     btnPause: TCEToolButton;
     btnReg: TCEToolButton;
@@ -237,6 +237,7 @@ type
   protected
     procedure setToolBarFlat(value: boolean); override;
   private
+    fSubj: TCEDebugObserverSubject;
     fDoc: TCESynMemo;
     fProj: ICECommonProject;
     fJson: TJsonObject;
@@ -251,8 +252,7 @@ type
     //
     procedure startDebugging;
     procedure killGdb;
-    procedure updateFileLineBrks;
-    procedure editorModBrk(sender: TCESynMemo; line: integer; modification: TBreakPointModification);
+    procedure storeObserversBreakpoints;
     // GDB output processors
     procedure gdboutQuiet(sender: TObject);
     procedure gdboutJsonize(sender: TObject);
@@ -273,6 +273,9 @@ type
     procedure docFocused(document: TCESynMemo);
     procedure docChanged(document: TCESynMemo);
     procedure docClosing(document: TCESynMemo);
+    //
+    procedure addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind);
+    procedure removeBreakPoint(const fname: string; line: integer);
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -413,6 +416,7 @@ begin
   stateViewer.TIObject := fInspState;
   fJson := TJsonObject.Create;
   fStackItems := TStackItems.create;
+  fSubj:= TCEDebugObserverSubject.Create;
   fShowCLI := true;
   //
   AssignPng(btnSendCom, 'ACCEPT');
@@ -427,6 +431,7 @@ begin
   fJson.Free;
   fStackItems.Free;
   EntitiesConnector.removeObserver(self);
+  fSubj.free;
   inherited;
 end;
 
@@ -473,14 +478,10 @@ end;
 {$REGION ICEDocumentObserver ---------------------------------------------------}
 procedure TCEGdbWidget.docNew(document: TCESynMemo);
 begin
-  if document.isDSource then
-    document.onBreakpointModify := @editorModBrk;
 end;
 
 procedure TCEGdbWidget.docFocused(document: TCESynMemo);
 begin
-  if document.isDSource then
-    document.onBreakpointModify := @editorModBrk;
   fDoc := document;
 end;
 
@@ -505,49 +506,41 @@ begin
   FreeAndNil(fGdb);
 end;
 
-procedure TCEGdbWidget.updateFileLineBrks;
+procedure TCEGdbWidget.storeObserversBreakpoints;
 var
   i,j: integer;
-  doc: TCESynMemo;
+  obs: ICEDebugObserver;
   nme: string;
+  lne: integer;
+  knd: TBreakPointKind;
 begin
   fFileLineBrks.Clear;
-  if fDocHandler = nil then exit;
-  //
-  for i:= 0 to fDocHandler.documentCount-1 do
+  for i:= 0 to fSubj.observersCount-1 do
   begin
-    doc := fDocHandler.document[i];
-    if not doc.isDSource then
-      continue;
-    nme := doc.fileName;
-    if not nme.fileExists then
-      continue;
-    {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
-    for j := 0 to doc.breakPointsCount-1 do
-      fFileLineBrks.AddObject(nme, TObject(pointer(doc.BreakPointLine(j))));
-    {$POP}
+    obs := fSubj.observers[i] as ICEDebugObserver;
+    for j := 0 to obs.debugQueryBpCount-1 do
+    begin
+      obs.debugQueryBreakPoint(j, nme, lne, knd);
+      {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
+      fFileLineBrks.AddObject(nme, TObject(pointer(lne)));
+      {$POP}
+    end;
   end;
 end;
 
-procedure TCEGdbWidget.editorModBrk(sender: TCESynMemo; line: integer; modification: TBreakPointModification);
-var
-  str: string;
-  nme: string;
-const
-  cmd: array[TBreakPointModification] of string = ('break ', 'clear ');
+procedure TCEGdbWidget.addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind);
 begin
-  // set only breakpoint in live, while debugging
-  // note: only works if execution is paused (breakpoint)
-  // and not inside a loop (for ex. with sleep).
-  if fGdb = nil then exit;
-  if not fGdb.Running then exit;
-  nme := sender.fileName;
-  if not nme.fileExists then exit;
-  //
-  str := cmd[modification] + nme + ':' + intToStr(line);
-  fGdb.Suspend;
-  gdbCommand(str);
-  fGdb.Resume;
+  if fGdb.isNil or not fGdb.Running then
+    exit;
+  //TODO-cGDB: handle trace points
+  gdbCommand('break ' + fname + ':' + intToStr(line));
+end;
+
+procedure TCEGdbWidget.removeBreakPoint(const fname: string; line: integer);
+begin
+  if fGdb.isNil or not fGdb.Running then
+    exit;
+  gdbCommand('clear ' + fname + ':' + intToStr(line));
 end;
 
 procedure TCEGdbWidget.startDebugging;
@@ -556,10 +549,15 @@ var
   i: integer;
 begin
   // protect
-  if fProj = nil then exit;
-  if fProj.binaryKind <> executable then exit;
+  if fProj = nil then
+    exit;
+  if fProj.binaryKind <> executable then
+    exit;
   str := fProj.outputFilename;
-  if not str.fileExists then exit;
+  if not str.fileExists then
+    exit;
+  // TODO-cDBG: detect finish event and notifiy the observers.
+  subjDebugStart(fSubj, self as ICEDebugger);
   // gdb process
   killGdb;
   fGdb := TCEProcess.create(nil);
@@ -571,14 +569,13 @@ begin
   fGdb.OnTerminate:= @gdboutQuiet;
   fgdb.execute;
   // file:line breakpoints
-  updateFileLineBrks;
+  storeObserversBreakpoints;
   for i:= 0 to fFileLineBrks.Count-1 do
   begin
     str := 'break ' + fFileLineBrks.Strings[i] + ':' + intToStr(PtrUInt(fFileLineBrks.Objects[i])) + #10;
     fGdb.Input.Write(str[1], str.length);
   end;
   // break on druntime exceptions + any throw'
-  fGdb.OnReadData := @gdboutQuiet;
   gdbCommand('break onAssertError');
   gdbCommand('break onAssertErrorMsg');
   gdbCommand('break onUnittestErrorMsg');
@@ -804,11 +801,7 @@ begin
         if val.isNotNil then
           line := strToInt(val.AsString);
         if (line <> -1) and fullname.fileExists then
-        begin
-          getMultiDocHandler.openDocument(fullname);
-          fDoc.setFocus;
-          fDoc.CaretY:= line;
-        end;
+          subjDebugBreak(fSubj, fullname, line, dbBreakPoint);
       end;
     end
 
@@ -837,15 +830,8 @@ begin
         + LineEnding + 'Do you wish to pause execution ?', [signame, sigmean, line, fullname]),
         'Unexpected signal received') = mrNo then
         gdbCommand('continue', @gdboutJsonize)
-      else
-      begin
-        if (line <> -1) and fullname.fileExists then
-        begin
-          getMultiDocHandler.openDocument(fullname);
-          fDoc.setFocus;
-          fDoc.CaretY:= line;
-        end;
-      end;
+      else if (line <> -1) and fullname.fileExists then
+        subjDebugBreak(fSubj, fullname, line, dbSignal);
     end;
 
   end;
@@ -992,7 +978,7 @@ end;
 
 procedure TCEGdbWidget.btnStopClick(Sender: TObject);
 begin
-  gdbCommand('kill', @gdboutQuiet);
+  gdbCommand('kill', @gdboutJsonize);
   killGdb;
 end;
 

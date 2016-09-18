@@ -57,8 +57,6 @@ type
     property isUpdating: boolean read getIsUpdating;
   end;
 
-
-
   (**
    * Interface for a Coedit subject. Basically designed to hold a list of observer
    *)
@@ -70,15 +68,18 @@ type
     // optionally implemented to trigger all the methods of the observer interface.
   end;
 
-  // Base type for an interface that contains the methods of a subject.
-  ISubjectType = interface
+  (**
+   * Base type used as constraint for an interface that contains
+   * the methods called by a ICESubject.
+   *)
+  IObserverType = interface
   end;
 
   (**
    * Standard implementation of an ICESubject.
-   * Any descendant adds itself to the global EntitiesConnector.
+   * Any descendant automatically adds itself to the EntitiesConnector.
    *)
-  generic TCECustomSubject<T:ISubjectType> = class(ICESubject)
+  generic TCECustomSubject<T:IObserverType> = class(ICESubject)
   protected
     fObservers: TObjectList;
     // test for a specific interface when adding an observer.

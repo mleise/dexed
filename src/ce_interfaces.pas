@@ -22,7 +22,7 @@ type
    * Each project format has its own dedicated editors.
    * A few common properties allow some generic operations whatever is the format.
    *)
-  ICECommonProject = interface(ISubjectType)
+  ICECommonProject = interface
   ['ICECommonProject']
 
     // general properties ------------------------------------------------------
@@ -98,7 +98,7 @@ type
   (**
    * An implementer declares some actions on demand.
    *)
-  ICEContextualActions = interface(ISubjectType)
+  ICEContextualActions = interface(IObserverType)
   ['ICEContextualActions']
     // declares a context name for the actions
     function contextName: string;
@@ -113,7 +113,7 @@ type
   (**
    * An implementer is informed about the current file(s).
    *)
-  ICEDocumentObserver = interface(ISubjectType)
+  ICEDocumentObserver = interface(IObserverType)
   ['ICEDocumentObserver']
     // document has been created (empty, runnable, project source, ...).
     procedure docNew(document: TCESynMemo);
@@ -139,7 +139,7 @@ type
    * - the current project, the one that's active) which can be either the FSP
    * or one of the project in the group.
    *)
-  ICEProjectObserver = interface(ISubjectType)
+  ICEProjectObserver = interface(IObserverType)
   ['ICEProjectObserver']
     // a project has been created/opened
     procedure projNew(project: ICECommonProject);
@@ -164,7 +164,7 @@ type
   (**
    * An implementer can add a main menu entry.
    *)
-  ICEMainMenuProvider = interface(ISubjectType)
+  ICEMainMenuProvider = interface(IObserverType)
   ['ICEMainMenuProvider']
     // item is a new mainMenu entry. item must be filled with the sub-items to be added.
     procedure menuDeclare(item: TMenuItem);
@@ -182,7 +182,7 @@ type
    * An implementer declares some actions which have their own main menu entry and
    * whose shortcuts are automatically handled
    *)
-  ICEActionProvider = interface(ISubjectType)
+  ICEActionProvider = interface(IObserverType)
   ['ICEActionProvider']
     // the action handler will clear the references to the actions collected previously and start collecting if result.
     function actHandlerWantRecollect: boolean;
@@ -203,7 +203,7 @@ type
   (**
    * An implementer can expose customizable shortcuts to be edited in a dedicated widget.
    *)
-  ICEEditableShortCut = interface(ISubjectType)
+  ICEEditableShortCut = interface(IObserverType)
   ['ICEEditableShortCut']
     // a TCEEditableShortCutSubject will start to collect shortcuts if result.
     function scedWantFirst: boolean;
@@ -237,7 +237,7 @@ type
   (**
    * An implementer can expose options to be edited in a dedicated widget.
    *)
-  ICEEditableOptions = interface(ISubjectType)
+  ICEEditableOptions = interface(IObserverType)
   ['ICEEditableOptions']
     // the widget wants the category.
     function optionedWantCategory(): string;
