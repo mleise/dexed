@@ -1,128 +1,37 @@
 inherited CEGdbWidget: TCEGdbWidget
   Left = 640
-  Height = 521
+  Height = 625
   Top = 213
   Width = 517
   ActiveControl = Back
   Caption = 'GDB commander'
-  ClientHeight = 521
+  ClientHeight = 625
   ClientWidth = 517
   inherited Back: TPanel
-    Height = 521
+    Height = 625
     Width = 517
-    ClientHeight = 521
+    ClientHeight = 625
     ClientWidth = 517
     inherited Content: TPanel
-      Height = 485
+      Height = 589
       Width = 517
-      ClientHeight = 485
+      ClientHeight = 589
       ClientWidth = 517
-      object Panel1: TPanel[0]
-        Left = 2
-        Height = 30
-        Top = 2
-        Width = 513
-        Align = alTop
-        BorderSpacing.Around = 2
-        BevelOuter = bvNone
-        ClientHeight = 30
-        ClientWidth = 513
-        PopupMenu = contextMenu
-        TabOrder = 0
-        object btnStart: TBitBtn
-          Left = 2
-          Height = 26
-          Hint = 'start debugging'
-          Top = 2
-          Width = 28
-          Align = alLeft
-          BorderSpacing.Around = 2
-          Layout = blGlyphBottom
-          OnClick = btnStartClick
-          Spacing = 0
-          TabOrder = 0
-        end
-        object lstfilter: TListFilterEdit
-          Left = 152
-          Height = 26
-          Top = 2
-          Width = 359
-          ButtonWidth = 28
-          NumGlyphs = 1
-          Align = alClient
-          Anchors = [akTop, akLeft, akRight]
-          BorderSpacing.Around = 2
-          MaxLength = 0
-          TabOrder = 1
-        end
-        object btnStop: TBitBtn
-          Left = 32
-          Height = 26
-          Hint = 'stop debuging'
-          Top = 2
-          Width = 28
-          Align = alLeft
-          BorderSpacing.Around = 2
-          Layout = blGlyphBottom
-          OnClick = btnStopClick
-          Spacing = 0
-          TabOrder = 2
-        end
-        object btnCont: TBitBtn
-          Left = 62
-          Height = 26
-          Hint = 'continue debugging'
-          Top = 2
-          Width = 28
-          Align = alLeft
-          BorderSpacing.Around = 2
-          Layout = blGlyphBottom
-          OnClick = btnContClick
-          Spacing = 0
-          TabOrder = 3
-        end
-        object btnReg: TBitBtn
-          Left = 92
-          Height = 26
-          Hint = 'view registers'
-          Top = 2
-          Width = 28
-          Align = alLeft
-          BorderSpacing.Around = 2
-          Layout = blGlyphBottom
-          OnClick = btnRegClick
-          Spacing = 0
-          TabOrder = 4
-        end
-        object btnStack: TBitBtn
-          Left = 122
-          Height = 26
-          Hint = 'view call stack'
-          Top = 2
-          Width = 28
-          Align = alLeft
-          BorderSpacing.Around = 2
-          Layout = blGlyphBottom
-          OnClick = btnStackClick
-          Spacing = 0
-          TabOrder = 5
-        end
-      end
-      object Panel2: TPanel[1]
+      object Panel2: TPanel[0]
         Left = 0
-        Height = 451
-        Top = 34
+        Height = 589
+        Top = 0
         Width = 517
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel2'
-        ClientHeight = 451
+        ClientHeight = 589
         ClientWidth = 517
-        TabOrder = 1
+        TabOrder = 0
         object Panel3: TPanel
           Left = 4
           Height = 28
-          Top = 419
+          Top = 557
           Width = 509
           Align = alBottom
           BorderSpacing.Around = 4
@@ -135,28 +44,27 @@ inherited CEGdbWidget: TCEGdbWidget
             Height = 24
             Hint = 'custom GDB command'
             Top = 2
-            Width = 481
+            Width = 477
             Align = alClient
             BorderSpacing.Top = 2
             BorderSpacing.Bottom = 2
             OnKeyUp = Edit1KeyUp
             TabOrder = 0
           end
-          object btnSendCom: TBitBtn
-            Left = 481
-            Height = 28
-            Top = 0
+          object btnSendCom: TSpeedButton
+            Left = 479
+            Height = 24
+            Top = 2
             Width = 28
             Align = alRight
-            Layout = blGlyphBottom
+            BorderSpacing.Around = 2
             OnClick = btnSendComClick
-            TabOrder = 1
           end
         end
         object stateViewer: TTIPropertyGrid
           Left = 0
-          Height = 415
-          Top = 0
+          Height = 313
+          Top = 240
           Width = 517
           Align = alClient
           CheckboxForBoolean = True
@@ -168,10 +76,93 @@ inherited CEGdbWidget: TCEGdbWidget
           SplitterX = 200
           ValueFont.Color = clMaroon
         end
+        object lstCallStack: TListView
+          Left = 0
+          Height = 240
+          Top = 0
+          Width = 517
+          Align = alTop
+          Columns = <>
+          TabOrder = 2
+        end
       end
     end
     inherited toolbar: TCEToolBar
       Width = 509
+      object button0: TCEToolButton[0]
+        Left = 213
+        Top = 0
+        Caption = 'button0'
+        scaledSeparator = False
+      end
+      object button1: TCEToolButton[1]
+        Left = 185
+        Top = 0
+        Caption = 'button1'
+        scaledSeparator = False
+      end
+      object btnStack: TCEToolButton[2]
+        Left = 157
+        Hint = 'view call stack'
+        Top = 0
+        Caption = 'btnStack'
+        OnClick = btnStackClick
+        resourceName = 'LIST'
+        scaledSeparator = False
+      end
+      object btnReg: TCEToolButton[3]
+        Left = 129
+        Hint = 'view CPU registers'
+        Top = 0
+        Caption = 'btnReg'
+        OnClick = btnRegClick
+        resourceName = 'PROCESSOR'
+        scaledSeparator = False
+      end
+      object button4: TCEToolButton[4]
+        Left = 113
+        Height = 28
+        Top = 0
+        Width = 16
+        Caption = 'button4'
+        Style = tbsDivider
+        scaledSeparator = False
+      end
+      object btnPause: TCEToolButton[5]
+        Left = 85
+        Hint = 'pause debugging'
+        Top = 0
+        Caption = 'btnPause'
+        resourceName = 'PAUSE'
+        scaledSeparator = False
+      end
+      object btnStop: TCEToolButton[6]
+        Left = 29
+        Hint = 'stop debugging'
+        Top = 0
+        Caption = 'btnStop'
+        OnClick = btnStopClick
+        resourceName = 'CANCEL'
+        scaledSeparator = False
+      end
+      object btnContinue: TCEToolButton[7]
+        Left = 57
+        Hint = 'continue debugging'
+        Top = 0
+        Caption = 'btnContinue'
+        OnClick = btnContClick
+        resourceName = 'PLAY'
+        scaledSeparator = False
+      end
+      object btnStart: TCEToolButton[8]
+        Left = 1
+        Hint = 'start debugging'
+        Top = 0
+        Caption = 'btnStart'
+        OnClick = btnStartClick
+        resourceName = 'POWER'
+        scaledSeparator = False
+      end
     end
   end
   inherited contextMenu: TPopupMenu

@@ -13,7 +13,7 @@
         <DpiAware Value="True"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="89">
+      <Resources Count="94">
         <Resource_0 FileName="../icons/window/layout_add.png" Type="RCDATA" ResourceName="LAYOUT_ADD"/>
         <Resource_1 FileName="../icons/window/layout.png" Type="RCDATA" ResourceName="LAYOUT"/>
         <Resource_2 FileName="../icons/window/application_go.png" Type="RCDATA" ResourceName="APPLICATION_GO"/>
@@ -103,6 +103,11 @@
         <Resource_86 FileName="../icons/other/sort_az.png" Type="RCDATA" ResourceName="SORT_AZ"/>
         <Resource_87 FileName="../icons/arrow/arrow_divide.png" Type="RCDATA" ResourceName="ARROW_DIVIDE"/>
         <Resource_88 FileName="../icons/arrow/arrow_join.png" Type="RCDATA" ResourceName="ARROW_JOIN"/>
+        <Resource_89 FileName="../icons/other/processor.png" Type="RCDATA" ResourceName="PROCESSOR"/>
+        <Resource_90 FileName="../icons/other/list.png" Type="RCDATA" ResourceName="LIST"/>
+        <Resource_91 FileName="../icons/other/pause.png" Type="RCDATA" ResourceName="PAUSE"/>
+        <Resource_92 FileName="../icons/other/play.png" Type="RCDATA" ResourceName="PLAY"/>
+        <Resource_93 FileName="../icons/other/power.png" Type="RCDATA" ResourceName="POWER"/>
       </Resources>
     </General>
     <i18n>
