@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, FileUtil, ListFilterEdit, Forms, Controls, Graphics, RegExpr,
   ComCtrls, PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, strutils,
   Buttons, StdCtrls, process ,ce_common, ce_interfaces, ce_widget, ce_processes,
-  ce_observer, ce_synmemo, ce_sharedres, ce_stringrange;
+  ce_observer, ce_synmemo, ce_sharedres, ce_stringrange, fpjson;
 
 type
 
@@ -31,6 +31,42 @@ type
 
   // aliased to get hex display in object inspector.
   TCpuRegValue = type PtrInt;
+
+  // Interprets a GDBMI message as a JSON
+  TGdbMessage = class
+  private
+    fCli: string;
+    fOut: string;
+    fComponents: TJSONObject;
+  public
+    constructor create;
+    destructor destroy; override;
+    // called by the widget when the process receives
+    procedure parse(str: string);
+    // after parse, contains the standard CLI messages
+    property cli: string read fCli;
+    // after parse, contains the debuggee output
+    property stdout: string read fOut;
+    // after parse, contains the message components
+    property components: TJSONObject read fComponents;
+  end;
+
+  // Makes a category for the GP registers in a project inspector
+  TInspectableGPR = class(TPersistent)
+  end;
+
+  // Makes a category for the FP registers in a project inspector
+  TInspectableFPR = class(TPersistent)
+  end;
+
+  // Makes a category for the SSE registers in a project inspector
+  TInspectableSSER = class(TPersistent)
+  end;
+
+  // Makes a category for the call stack in a project inspector
+  TInspectableStack = class(Tpersistent)
+  end;
+
 
   // Stores the stack and the registers content, to be displayable in
   // an object inspector.
@@ -94,10 +130,6 @@ type
   public
     constructor create;
     destructor destroy; override;
-    // called on the result of "info stack"
-    procedure parseCallStack(stream: TStream);
-    // called on the result of "info register"
-    procedure parseRegisters(stream: TStream);
   end;
 
   TCpuRegValueEditor = class(TIntegerProperty)
@@ -122,7 +154,7 @@ type
     ~"\nBreakpoint "
     ~"2, D main (args=...) at /home/basile/Dev/dproj/Resource.d/src/resource.d:39\n"
     ~"39\t    getopt(args, config.passThrough, \"h|help\", &wantHelp);\n"
-    *stopped,reason="breakpoint-hit",disp="keep",bkptno="2",frame={addr="0x000000000049dc7a",func="D main",args=[{name="args",value="..."}],file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="39"},thread-id="1",stopped-threads="all",core="3"
+    *stopped,reason="breakpoint-hit",disp="keep",bkptno="2",frame={addr="0x000000000049dc7a", func="D main",args=[{name="args",value="..."}],file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="39"},thread-id="1",stopped-threads="all",core="3"
     (gdb)
 
     . line starting with = is to parse as TGDBMI_Breakpoint, thorically its [opt token]=, no token for breakpoint reached since it's not a result
@@ -189,6 +221,7 @@ type
     procedure btnStopClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
+    fDoc: TCESynMemo;
     fProj: ICECommonProject;
     fLog: TStringList;
     fFileLineBrks: TStringList;
@@ -196,18 +229,18 @@ type
     fMsg: ICEMessagesDisplay;
     fGdb: TCEAutoBufferedProcess;
     fInspState: TInspectableState;
+    fGdbMessage: TGdbMessage;
     //
     procedure startDebugging;
     procedure killGdb;
     procedure updateFileLineBrks;
     procedure editorModBrk(sender: TCESynMemo; line: integer; modification: TBreakPointModification);
     // GDB output processors
-    procedure processInfoRegs(sender: TObject);
-    procedure processInfoStack(sender: TObject);
-    procedure processSilently(sender: TObject);
-    procedure gdbOutput(sender: TObject);
+    procedure gdboutQuiet(sender: TObject);
+    procedure gdboutJsonize(sender: TObject);
+    procedure interpretJson;
     // GDB commands & actions
-    procedure gdbCommand(aCommand: string; outputCatcher: TNotifyEvent = nil);
+    procedure gdbCommand(aCommand: string; gdboutProcessor: TNotifyEvent = nil);
     procedure infoRegs;
     procedure infoStack;
     //
@@ -231,13 +264,132 @@ type
 implementation
 {$R *.lfm}
 
+
+
+{$REGION TGdbMessage -----------------------------------------------------------}
+constructor TGdbMessage.create;
+begin
+  fComponents := TJSONObject.Create;
+end;
+
+destructor TGdbMessage.destroy;
+begin
+  fComponents.Free;
+  inherited;
+end;
+
+procedure TGdbMessage.parse(str: string);
+
+  procedure parseProperty(node: TJSONObject; r: PStringRange); forward;
+  procedure parseProperty(node: TJSONArray; r: PStringRange); forward;
+
+  procedure parseProperty(node: TJSONArray; r: PStringRange);
+  var
+    c: char;
+  begin
+    while true do
+    begin
+      if r^.empty then
+        exit;
+      c := r^.front;
+      case c of
+        '{':
+        begin
+          r^.popFront;
+          node.Objects[node.Count] := TJSONObject.Create;
+          parseProperty(node.Objects[node.Count-1], r);
+        end;
+        ']':
+        begin
+          r^.popFront;
+          exit;
+        end;
+        ',': r^.popFront;
+      end;
+    end;
+  end;
+
+  procedure parseProperty(node: TJSONObject; r: PStringRange);
+  var
+    idt: string;
+    c: char;
+  begin
+    while true do
+    begin
+      if r^.empty then
+        exit;
+      c := r^.front;
+      case c of
+        ',':
+        begin
+          r^.popFront;
+        end;
+        'a'..'z':
+        begin
+          idt := r^.takeUntil('=').yield;
+          r^.popFront;
+        end;
+        '"':
+        begin
+          node.Strings[idt] := r^.popFront^.takeUntil('"').yield;
+          r^.popFront;
+        end;
+        '{':
+        begin
+          r^.popFront;
+          node.Objects[idt] := TJSONObject.Create;
+          parseProperty(node.Objects[idt], r);
+        end;
+        '[':
+        begin
+          r^.popFront;
+          node.Arrays[idt] := TJSONArray.Create;
+          parseProperty(node.Arrays[idt], r);
+        end;
+        '}', ']':
+        begin
+          r^.popFront;
+          exit;
+        end;
+        ' ', #9:
+          r^.popFront;
+        #10:
+        begin
+          r^.popFront;
+          exit;
+        end;
+      end;
+    end;
+  end;
+
+var
+  rng: TStringRange = (ptr: nil; pos: 0; len: 0);
+begin
+  fComponents.Clear;
+  if str.length = 0 then
+    exit;
+  rng.init(str);
+  while true do
+  begin
+    if rng.empty then
+      exit;
+    if rng.front = '*' then
+      parseProperty(fComponents, rng.popUntil(',')^.popFront);
+    rng.popUntil(#10);
+    if not rng.empty then
+      rng.popFront;
+  end;
+end;
+{$ENDREGION}
+
+
 {$REGION TInspectableState -----------------------------------------------------}
 function TCpuRegValueEditor.GetValue: ansistring;
 begin
   {$IFDEF CPU64}
   result := '0x' + IntToHex(GetInt64Value, 16);
   {$ELSE}
-  result := '0x' + IntToHex(GetInt64Value, 8);
+  result := '0x' + IntToHex(GetOrdValue, 8);
   {$ENDIF}
 end;
 
@@ -254,26 +406,6 @@ begin
   fWordSpliter.Free;
   inherited;
 end;
-
-procedure TInspectableState.parseCallStack(stream: TStream);
-var
-  rng: TStringRange = (ptr: nil; pos: 0; len: 0);
-  str: string;
-  i,j: integer;
-begin
-
-
-end;
-
-procedure TInspectableState.parseRegisters(stream: TStream);
-var
-  reg: string;
-  val: string;
-  rng: TStringRange = (ptr: nil; pos: 0; len: 0);
-begin
-
-
-end;
 {$ENDREGION}
 
 {$REGION Common/standard comp --------------------------------------------------}
@@ -287,6 +419,7 @@ begin
   fLog := TStringList.Create;
   fInspState := TInspectableState.Create;
   stateViewer.TIObject := fInspState;
+  fGdbMessage:= TGdbMessage.create;
   //
   AssignPng(btnSendCom, 'ACCEPT');
 end;
@@ -297,6 +430,7 @@ begin
   fLog.Free;
   killGdb;
   fInspState.Free;
+  fGdbMessage.Free;
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
@@ -346,6 +480,7 @@ procedure TCEGdbWidget.docFocused(document: TCESynMemo);
 begin
   if document.isDSource then
     document.onBreakpointModify := @editorModBrk;
+  fDoc := document;
 end;
 
 procedure TCEGdbWidget.docChanged(document: TCESynMemo);
@@ -354,6 +489,8 @@ end;
 
 procedure TCEGdbWidget.docClosing(document: TCESynMemo);
 begin
+  if fDoc = document then
+    fDoc := nil;
 end;
 {$ENDREGION}
 
@@ -429,8 +566,8 @@ begin
   fgdb.Options:= [poUsePipes, poStderrToOutPut];
   fgdb.Parameters.Add(str);
   fgdb.Parameters.Add('--interpreter=mi');
-  fGdb.OnReadData:= @gdbOutput;
-  fGdb.OnTerminate:= @gdbOutput;
+  fGdb.OnReadData:= @gdboutJsonize;
+  fGdb.OnTerminate:= @gdboutJsonize;
   fgdb.execute;
   // file:line breakpoints
   updateFileLineBrks;
@@ -440,7 +577,7 @@ begin
     fGdb.Input.Write(str[1], str.length);
   end;
   // break on druntime exceptions heper + throw'
-  fGdb.OnReadData := @processSilently;
+  fGdb.OnReadData := @gdboutQuiet;
   gdbCommand('break onAssertError');
   gdbCommand('break onAssertErrorMsg');
   gdbCommand('break onUnittestErrorMsg');
@@ -452,74 +589,104 @@ begin
   gdbCommand('break onSwitchError');
   gdbCommand('break onUnicodeError');
   gdbCommand('break _d_throwc');
-  fGdb.OnReadData := @gdbOutput;
+  fGdb.OnReadData := @gdboutJsonize;
   // launch
   gdbCommand('run');
 end;
 {$ENDREGION}
 
 {$REGIOn GDB output processors -------------------------------------------------}
-procedure TCEGdbWidget.gdbOutput(sender: TObject);
+procedure TCEGdbWidget.interpretJson;
+var
+  jsn: TJSONObject;
+  val: TJSONData;
+  obj: TJSONObject;
+  // brkp data
+  fne: string = '';
+  lne: integer = -1;
+  doc: TCESynMemo;
+begin
+  jsn := fGdbMessage.components;
+  val := jsn.Find('reason');
+  if val.isNotNil and (val.AsString = 'breakpoint-hit') then
+  begin
+    obj := TJSONObject(jsn.Find('frame'));
+    if obj.isNotNil and (obj.JSONType = jtObject) then
+    begin
+      val := obj.Find('fullname');
+      if val.isNotNil then
+        fne := val.AsString;
+      val := obj.Find('line');
+      if val.isNotNil then
+        lne := strToInt(val.AsString);
+      if (lne <> -1) and fne.fileExists then
+      begin
+        getMultiDocHandler.openDocument(fne);
+        fDoc.setFocus;
+        fDoc.CaretY:= lne;
+      end;
+    end;
+  end;
+end;
+
+procedure TCEGdbWidget.gdboutJsonize(sender: TObject);
 var
   str: string;
+  lst: TStringList;
 begin
   if fMsg = nil then
     exit;
   fLog.Clear;
   fGdb.getFullLines(fLog);
+  //fGdb.OutputStack.Clear;
   for str in fLog do
     fMsg.message(str, nil, amcMisc, amkAuto);
+
+  if flog.Text.isEmpty then
+    exit;
+
+  fGdbMessage.parse(fLog.Text);
+  interpretJson;
+
+  lst := TStringList.Create;
+  try
+    str := fGdbMessage.components.FormatJSON(DefaultFormat,2);
+    lst.Text:= str;
+    lst.SaveToFile('/home/basile/gdbmessage.json');
+  finally
+    lst.Free;
+  end;
 end;
 
-procedure TCEGdbWidget.processSilently(sender: TObject);
+procedure TCEGdbWidget.gdboutQuiet(sender: TObject);
 begin
   fGdb.OutputStack.Clear;
-  fGdb.OnReadData:=@gdbOutput;
-end;
-
-procedure TCEGdbWidget.processInfoRegs(sender: TObject);
-begin
-  try
-    fInspState.parseRegisters(fgdb.OutputStack);
-    fgdb.OutputStack.Clear;
-  finally
-    fGdb.OnReadData:=@gdbOutput;
-  end;
-end;
-
-procedure TCEGdbWidget.processInfoStack(sender: TObject);
-begin
-  try
-    fInspState.parseCallStack(fgdb.OutputStack);
-    fgdb.OutputStack.Clear;
-  finally
-    fGdb.OnReadData:=@gdbOutput;
-  end;
+  fGdb.OnReadData:=@gdboutJsonize;
 end;
 {$ENDREGION}
 
 {$REGIOn GDB commands & actions ------------------------------------------------}
-procedure TCEGdbWidget.gdbCommand(aCommand: string; outputCatcher: TNotifyEvent = nil);
+procedure TCEGdbWidget.gdbCommand(aCommand: string; gdboutProcessor: TNotifyEvent = nil);
 begin
   if fGdb = nil then exit;
   if not fGdb.Running then exit;
   //
   aCommand += #10;
-  if assigned(outputCatcher) then
-    fGdb.OnReadData := outputCatcher;
+  if assigned(gdboutProcessor) then
+    fGdb.OnReadData := gdboutProcessor;
   fGdb.Input.Write(aCommand[1], aCommand.length);
 end;
 
 procedure TCEGdbWidget.infoRegs;
 begin
   // GDBMI output format, "info registers" is for CLI output
-  gdbCommand('-data-list-register-values d', @processInfoRegs);
+  gdbCommand('-data-list-register-values d', @gdboutJsonize);
 end;
 
 procedure TCEGdbWidget.infoStack;
 begin
   // GDBMI output format, "info frame" is for CLI output
-  gdbCommand('-stack-info-frame', @processInfoStack);
+  gdbCommand('-stack-info-frame', @gdboutJsonize);
 end;
 
 procedure TCEGdbWidget.btnStartClick(Sender: TObject);
@@ -529,7 +696,7 @@ end;
 
 procedure TCEGdbWidget.btnContClick(Sender: TObject);
 begin
-  gdbCommand('continue');
+  gdbCommand('continue', @gdboutJsonize);
 end;
 
 procedure TCEGdbWidget.btnRegClick(Sender: TObject);
@@ -539,13 +706,13 @@ end;
 
 procedure TCEGdbWidget.btnStopClick(Sender: TObject);
 begin
-  gdbCommand('kill');
+  gdbCommand('kill', @gdboutQuiet);
   killGdb;
 end;
 
 procedure TCEGdbWidget.btnSendComClick(Sender: TObject);
 begin
-  gdbCommand(edit1.Text);
+  gdbCommand(edit1.Text, @gdboutJsonize);
   edit1.Text := '';
 end;
 
@@ -557,7 +724,7 @@ end;
 procedure TCEGdbWidget.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key <> byte(#13) then exit;
-  gdbCommand(edit1.Text);
+  gdbCommand(edit1.Text, @gdboutJsonize);
   edit1.Text := '';
 end;
 {$ENDREGION}

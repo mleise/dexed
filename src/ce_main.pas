@@ -14,7 +14,7 @@ uses
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
-  ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor, (*ce_gdb,*) ce_dfmt,
+  ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor, ce_gdb, ce_dfmt,
   ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange;
 
 type
@@ -362,7 +362,7 @@ type
     fInfoWidg: TCEInfoWidget;
     fDubProjWidg: TCEDubProjectEditorWidget;
     fPrjGrpWidg: TCEProjectGroupWidget;
-    //fGdbWidg: TCEGdbWidget;
+    fGdbWidg: TCEGdbWidget;
     fDfmtWidg:  TCEDfmtWidget;
     fCompStart: TDateTime;
 
@@ -1277,7 +1277,7 @@ begin
   fDfmtWidg   := TCEDfmtWidget.create(self);
   fPrjGrpWidg := TCEProjectGroupWidget.create(self);
 
-  //fGdbWidg    := TCEGdbWidget.create(self);
+  fGdbWidg    := TCEGdbWidget.create(self);
 
   getMessageDisplay(fMsgs);
 
@@ -1298,7 +1298,7 @@ begin
   fWidgList.addWidget(@fDfmtWidg);
   fWidgList.addWidget(@fPrjGrpWidg);
 
-  //fWidgList.addWidget(@fGdbWidg);
+  fWidgList.addWidget(@fGdbWidg);
 
   fWidgList.sort(@CompareWidgCaption);
 
