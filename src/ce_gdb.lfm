@@ -13,9 +13,9 @@ inherited CEGdbWidget: TCEGdbWidget
     ClientHeight = 521
     ClientWidth = 517
     inherited Content: TPanel
-      Height = 521
+      Height = 485
       Width = 517
-      ClientHeight = 521
+      ClientHeight = 485
       ClientWidth = 517
       object Panel1: TPanel[0]
         Left = 2
@@ -110,19 +110,19 @@ inherited CEGdbWidget: TCEGdbWidget
       end
       object Panel2: TPanel[1]
         Left = 0
-        Height = 487
+        Height = 451
         Top = 34
         Width = 517
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel2'
-        ClientHeight = 487
+        ClientHeight = 451
         ClientWidth = 517
         TabOrder = 1
         object Panel3: TPanel
           Left = 4
           Height = 28
-          Top = 455
+          Top = 419
           Width = 509
           Align = alBottom
           BorderSpacing.Around = 4
@@ -155,7 +155,7 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object stateViewer: TTIPropertyGrid
           Left = 0
-          Height = 451
+          Height = 415
           Top = 0
           Width = 517
           Align = alClient
@@ -169,6 +169,9 @@ inherited CEGdbWidget: TCEGdbWidget
           ValueFont.Color = clMaroon
         end
       end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 509
     end
   end
   inherited contextMenu: TPopupMenu

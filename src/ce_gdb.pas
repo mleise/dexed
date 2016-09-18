@@ -32,25 +32,6 @@ type
   // aliased to get hex display in object inspector.
   TCpuRegValue = type PtrInt;
 
-  // Interprets a GDBMI message as a JSON
-  TGdbMessage = class
-  private
-    fCli: string;
-    fOut: string;
-    fComponents: TJSONObject;
-  public
-    constructor create;
-    destructor destroy; override;
-    // called by the widget when the process receives
-    procedure parse(str: string);
-    // after parse, contains the standard CLI messages
-    property cli: string read fCli;
-    // after parse, contains the debuggee output
-    property stdout: string read fOut;
-    // after parse, contains the message components
-    property components: TJSONObject read fComponents;
-  end;
-
   // Makes a category for the GP registers in a project inspector
   TInspectableGPR = class(TPersistent)
   end;
@@ -198,7 +179,6 @@ type
     core: integer;
   end;
 
-
   { TCEGdbWidget }
   TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver)
     btnReg: TBitBtn;
@@ -223,13 +203,14 @@ type
   private
     fDoc: TCESynMemo;
     fProj: ICECommonProject;
+    fJson: TJsonObject;
     fLog: TStringList;
     fFileLineBrks: TStringList;
     fDocHandler: ICEMultiDocHandler;
     fMsg: ICEMessagesDisplay;
-    fGdb: TCEAutoBufferedProcess;
+    fGdb: TCEProcess;
     fInspState: TInspectableState;
-    fGdbMessage: TGdbMessage;
+    fShowCLI: boolean;
     //
     procedure startDebugging;
     procedure killGdb;
@@ -263,125 +244,6 @@ type
 
 implementation
 {$R *.lfm}
-
-
-
-{$REGION TGdbMessage -----------------------------------------------------------}
-constructor TGdbMessage.create;
-begin
-  fComponents := TJSONObject.Create;
-end;
-
-destructor TGdbMessage.destroy;
-begin
-  fComponents.Free;
-  inherited;
-end;
-
-procedure TGdbMessage.parse(str: string);
-
-  procedure parseProperty(node: TJSONObject; r: PStringRange); forward;
-  procedure parseProperty(node: TJSONArray; r: PStringRange); forward;
-
-  procedure parseProperty(node: TJSONArray; r: PStringRange);
-  var
-    c: char;
-  begin
-    while true do
-    begin
-      if r^.empty then
-        exit;
-      c := r^.front;
-      case c of
-        '{':
-        begin
-          r^.popFront;
-          node.Objects[node.Count] := TJSONObject.Create;
-          parseProperty(node.Objects[node.Count-1], r);
-        end;
-        ']':
-        begin
-          r^.popFront;
-          exit;
-        end;
-        ',': r^.popFront;
-      end;
-    end;
-  end;
-
-  procedure parseProperty(node: TJSONObject; r: PStringRange);
-  var
-    idt: string;
-    c: char;
-  begin
-    while true do
-    begin
-      if r^.empty then
-        exit;
-      c := r^.front;
-      case c of
-        ',':
-        begin
-          r^.popFront;
-        end;
-        'a'..'z':
-        begin
-          idt := r^.takeUntil('=').yield;
-          r^.popFront;
-        end;
-        '"':
-        begin
-          node.Strings[idt] := r^.popFront^.takeUntil('"').yield;
-          r^.popFront;
-        end;
-        '{':
-        begin
-          r^.popFront;
-          node.Objects[idt] := TJSONObject.Create;
-          parseProperty(node.Objects[idt], r);
-        end;
-        '[':
-        begin
-          r^.popFront;
-          node.Arrays[idt] := TJSONArray.Create;
-          parseProperty(node.Arrays[idt], r);
-        end;
-        '}', ']':
-        begin
-          r^.popFront;
-          exit;
-        end;
-        ' ', #9:
-          r^.popFront;
-        #10:
-        begin
-          r^.popFront;
-          exit;
-        end;
-      end;
-    end;
-  end;
-
-var
-  rng: TStringRange = (ptr: nil; pos: 0; len: 0);
-begin
-  fComponents.Clear;
-  if str.length = 0 then
-    exit;
-  rng.init(str);
-  while true do
-  begin
-    if rng.empty then
-      exit;
-    if rng.front = '*' then
-      parseProperty(fComponents, rng.popUntil(',')^.popFront);
-    rng.popUntil(#10);
-    if not rng.empty then
-      rng.popFront;
-  end;
-end;
-{$ENDREGION}
-
 
 {$REGION TInspectableState -----------------------------------------------------}
 function TCpuRegValueEditor.GetValue: ansistring;
@@ -419,7 +281,8 @@ begin
   fLog := TStringList.Create;
   fInspState := TInspectableState.Create;
   stateViewer.TIObject := fInspState;
-  fGdbMessage:= TGdbMessage.create;
+  fJson := TJsonObject.Create;
+  fShowCLI := true;
   //
   AssignPng(btnSendCom, 'ACCEPT');
 end;
@@ -430,7 +293,7 @@ begin
   fLog.Free;
   killGdb;
   fInspState.Free;
-  fGdbMessage.Free;
+  fJson.Free;
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
@@ -561,13 +424,13 @@ begin
   if not str.fileExists then exit;
   // gdb process
   killGdb;
-  fGdb := TCEAutoBufferedProcess.create(nil);
+  fGdb := TCEProcess.create(nil);
   fGdb.Executable:= 'gdb' + exeExt;
   fgdb.Options:= [poUsePipes, poStderrToOutPut];
   fgdb.Parameters.Add(str);
   fgdb.Parameters.Add('--interpreter=mi');
-  fGdb.OnReadData:= @gdboutJsonize;
-  fGdb.OnTerminate:= @gdboutJsonize;
+  fGdb.OnReadData:= @gdboutQuiet;
+  fGdb.OnTerminate:= @gdboutQuiet;
   fgdb.execute;
   // file:line breakpoints
   updateFileLineBrks;
@@ -596,21 +459,175 @@ end;
 {$ENDREGION}
 
 {$REGIOn GDB output processors -------------------------------------------------}
+procedure parseGdbout(const str: string; var json: TJSONObject);
+
+  procedure parseProperty(node: TJSONObject; r: PStringRange); forward;
+  procedure parseProperty(node: TJSONArray; r: PStringRange); forward;
+
+  procedure parseCLI(node: TJSONObject; r: PStringRange);
+  var
+    lne: TStringRange;
+    msg: string = '';
+  begin
+    if r^.front = '"' then
+      r^.popFront;
+    while true do
+    begin
+      lne := r^.takeUntil(['\', '"']);
+      if (r^.empty) then
+        break
+      else if r^.front = '\' then
+      begin
+        r^.popFront;
+        if r^.front = 'n' then
+        begin
+          r^.popFront;
+          node.Arrays['CLI'].Add(msg + lne.yield);
+          msg := '';
+        end else
+          msg += lne.yield;
+      end
+      else if r^.front = '"' then
+      begin
+        r^.popFront;
+        if r^.front = #10 then
+          break;
+      end;
+    end;
+  end;
+
+  procedure parseProperty(node: TJSONArray; r: PStringRange);
+  var
+    c: char;
+  begin
+    while true do
+    begin
+      if r^.empty then
+        exit;
+      c := r^.front;
+      case c of
+        '{':
+        begin
+          r^.popFront;
+          node.Objects[node.Count] := TJSONObject.Create;
+          parseProperty(node.Objects[node.Count-1], r);
+        end;
+        ']':
+        begin
+          r^.popFront;
+          exit;
+        end;
+        ',': r^.popFront;
+      end;
+    end;
+  end;
+
+  procedure parseProperty(node: TJSONObject; r: PStringRange);
+  var
+    idt: string;
+    c: char;
+  begin
+    while true do
+    begin
+      if r^.empty then
+        exit;
+      c := r^.front;
+      case c of
+        ',':
+        begin
+          r^.popFront;
+        end;
+        'a'..'z':
+        begin
+          idt := r^.takeUntil('=').yield;
+          r^.popFront;
+        end;
+        '"':
+        begin
+          node.Strings[idt] := r^.popFront^.takeUntil('"').yield;
+          r^.popFront;
+        end;
+        '{':
+        begin
+          r^.popFront;
+          node.Objects[idt] := TJSONObject.Create;
+          parseProperty(node.Objects[idt], r);
+        end;
+        '[':
+        begin
+          r^.popFront;
+          node.Arrays[idt] := TJSONArray.Create;
+          parseProperty(node.Arrays[idt], r);
+        end;
+        '}', ']':
+        begin
+          r^.popFront;
+          exit;
+        end;
+        ' ', #9:
+          r^.popFront;
+        #10:
+        begin
+          r^.popFront;
+          exit;
+        end;
+      end;
+    end;
+  end;
+
+var
+  rng: TStringRange = (ptr: nil; pos: 0; len: 0);
+begin
+  json.Clear;
+  if str.length = 0 then
+    exit;
+  json.Arrays['CLI'] := TJSONArray.Create;
+  rng.init(str);
+  while true do
+  begin
+    if rng.empty then
+      exit;
+    case rng.front of
+      // event
+      '*':
+      begin
+        parseProperty(json, rng.popUntil(',')^.popFront);
+      end;
+      // command answer (can be a simple '^done')
+      '^':
+      begin
+        parseProperty(json, rng.popUntil([',', #10]));
+      end;
+      // what would be output in a console by gdb
+      '~':
+      begin
+        parseCLI(json, rng.popFront);
+      end;
+      // what would be output in a console by the debugee
+      // ...
+    end;
+    // line is not interesting
+    rng.popUntil(#10);
+    if not rng.empty then
+      rng.popFront;
+  end;
+end;
+
 procedure TCEGdbWidget.interpretJson;
 var
-  jsn: TJSONObject;
   val: TJSONData;
   obj: TJSONObject;
+  arr: TJSONArray;
+  idx: integer;
   // brkp data
   fne: string = '';
   lne: integer = -1;
-  doc: TCESynMemo;
 begin
-  jsn := fGdbMessage.components;
-  val := jsn.Find('reason');
+
+  val := fJson.Find('reason');
   if val.isNotNil and (val.AsString = 'breakpoint-hit') then
   begin
-    obj := TJSONObject(jsn.Find('frame'));
+    obj := TJSONObject(fJson.Find('frame'));
     if obj.isNotNil and (obj.JSONType = jtObject) then
     begin
       val := obj.Find('fullname');
@@ -627,6 +644,15 @@ begin
       end;
     end;
   end;
+
+  if fShowCLI then
+  begin
+    arr := TJSONArray(fJson.Find('CLI'));
+    if arr.isNotNil then
+      for idx := 0 to arr.Count-1 do
+        fMsg.message(arr.Strings[idx], nil, amcMisc, amkBub);
+  end;
+
 end;
 
 procedure TCEGdbWidget.gdboutJsonize(sender: TObject);
@@ -636,26 +662,27 @@ var
 begin
   if fMsg = nil then
     exit;
+
   fLog.Clear;
   fGdb.getFullLines(fLog);
-  //fGdb.OutputStack.Clear;
-  for str in fLog do
-    fMsg.message(str, nil, amcMisc, amkAuto);
+  //for str in fLog do
+  //  fMsg.message(str, nil, amcMisc, amkAuto);
 
   if flog.Text.isEmpty then
     exit;
 
-  fGdbMessage.parse(fLog.Text);
+  parseGdbout(fLog.Text, fJson);
   interpretJson;
 
-  lst := TStringList.Create;
-  try
-    str := fGdbMessage.components.FormatJSON(DefaultFormat,2);
-    lst.Text:= str;
-    lst.SaveToFile('/home/basile/gdbmessage.json');
-  finally
-    lst.Free;
-  end;
+  //lst := TStringList.Create;
+  //try
+  //  str := fGdbMessage.json.FormatJSON(DefaultFormat,2);
+  //  lst.Text:= str;
+  //  lst.SaveToFile('/home/basile/gdbmessage.json');
+  //finally
+  //  lst.Free;
+  //end;
+
 end;
 
 procedure TCEGdbWidget.gdboutQuiet(sender: TObject);
