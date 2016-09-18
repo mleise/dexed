@@ -7,9 +7,9 @@ interface
 uses
   Classes, SysUtils, FileUtil, ListFilterEdit, Forms, Controls, Graphics,
   RegExpr, ComCtrls, PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls,
-  Menus, strutils, Buttons, StdCtrls, process, ce_common, ce_interfaces,
-  ce_widget, ce_processes, ce_observer, ce_synmemo, ce_sharedres,
-  ce_stringrange, ce_dsgncontrols, fpjson;
+  Menus, strutils, Buttons, StdCtrls, process, fpjson,
+  ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
+  ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs;
 
 type
 
@@ -577,7 +577,7 @@ begin
     str := 'break ' + fFileLineBrks.Strings[i] + ':' + intToStr(PtrUInt(fFileLineBrks.Objects[i])) + #10;
     fGdb.Input.Write(str[1], str.length);
   end;
-  // break on druntime exceptions heper + throw'
+  // break on druntime exceptions + any throw'
   fGdb.OnReadData := @gdboutQuiet;
   gdbCommand('break onAssertError');
   gdbCommand('break onAssertErrorMsg');
@@ -590,6 +590,13 @@ begin
   gdbCommand('break onSwitchError');
   gdbCommand('break onUnicodeError');
   gdbCommand('break _d_throwc');
+  gdbCommand('break _d_throwdwarf');
+  gdbCommand('break _d_assertm');
+  gdbCommand('break _d_assert');
+  gdbCommand('break _d_assert_msg');
+  gdbCommand('break _d_array_bounds');
+  gdbCommand('break _d_arraybounds');
+  gdbCommand('break _d_switch_error');
   fGdb.OnReadData := @gdboutJsonize;
   // launch
   gdbCommand('run');
@@ -760,60 +767,103 @@ end;
 
 // ^done,stack=[frame={level="0",addr="0x00000000004a4e04",func="_D3std6getopt38__T6getoptTE3std6getopt6configTAyaTPbZ6getoptFKAAyaE3std6getopt6configAyaPbZS3std6getopt12GetoptResult",file="/usr/include/dmd/phobos/std/getopt.d",fullname="/usr/include/dmd/phobos/std/getopt.d",line="438"},frame={level="1",addr="0x000000000049fb82",func="D main",file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="39"}]
 
-
+// *stopped,reason="signal-received",signal-name="SIGSEGV",signal-meaning="Segmentation fault",frame={addr="0x000000000049fb89",func="D main",args=[{name="args",value="..."}],file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="25"},thread-id="1",stopped-threads="all",core="3"
 
 procedure TCEGdbWidget.interpretJson;
 var
+  i: integer;
   val: TJSONData;
   obj: TJSONObject;
   arr: TJSONArray;
-  idx: integer;
-  // brkp data
-  fne: string = '';
-  lne: integer = -1;
+  // common data
+  addr: PtrUint = 0;
+  fullname: string = '';
+  func:string = '';
+  line: integer = -1;
   // registers data
-  rnm: integer = 0;
-  rvl: PtrUInt = 0;
-  // call stack data
-  nme: string;
-  adr: PtrUInt;
+  number: integer = 0;
+  gprval: PtrUInt = 0;
+  // signal data
+  sigmean: string;
+  signame: string;
 begin
 
   val := fJson.Find('reason');
-  if val.isNotNil and (val.AsString = 'breakpoint-hit') then
+  if val.isNotNil then
   begin
-    obj := TJSONObject(fJson.Find('frame'));
-    if obj.isNotNil and (obj.JSONType = jtObject) then
+
+    if val.AsString = 'breakpoint-hit' then
     begin
-      val := obj.Find('fullname');
-      if val.isNotNil then
-        fne := val.AsString;
-      val := obj.Find('line');
-      if val.isNotNil then
-        lne := strToInt(val.AsString);
-      if (lne <> -1) and fne.fileExists then
+      obj := TJSONObject(fJson.Find('frame'));
+      if obj.isNotNil and (obj.JSONType = jtObject) then
       begin
-        getMultiDocHandler.openDocument(fne);
-        fDoc.setFocus;
-        fDoc.CaretY:= lne;
+        val := obj.Find('fullname');
+        if val.isNotNil then
+          fullname := val.AsString;
+        val := obj.Find('line');
+        if val.isNotNil then
+          line := strToInt(val.AsString);
+        if (line <> -1) and fullname.fileExists then
+        begin
+          getMultiDocHandler.openDocument(fullname);
+          fDoc.setFocus;
+          fDoc.CaretY:= line;
+        end;
+      end;
+    end
+
+    //TODO-cGDB: in the settings, option to automatically ignore particular signals.
+    else if val.AsString = 'signal-received' then
+    begin
+      signame := 'unknown signal';
+      sigmean := 'unknown meaning';
+      val := fJson.Find('signal-name');
+      if val.isNotNil then
+        signame := val.AsString;
+      val := fJson.Find('signal-meaning');
+      if val.isNotNil then
+        sigmean += val.AsString;
+      obj := TJSONObject(fJson.Find('frame'));
+      if obj.isNotNil and (obj.JSONType = jtObject) then
+      begin
+        val := obj.Find('fullname');
+        if val.isNotNil then
+          fullname := val.AsString;
+        val := obj.Find('line');
+        if val.isNotNil then
+          line := strToInt(val.AsString);
+      end;
+      if dlgYesNo(format('The signal %s (%s) was received on line %d of file %s .'
+        + LineEnding + 'Do you wish to pause execution ?', [signame, sigmean, line, fullname]),
+        'Unexpected signal received') = mrNo then
+        gdbCommand('continue', @gdboutJsonize)
+      else
+      begin
+        if (line <> -1) and fullname.fileExists then
+        begin
+          getMultiDocHandler.openDocument(fullname);
+          fDoc.setFocus;
+          fDoc.CaretY:= line;
+        end;
       end;
     end;
+
   end;
 
   val := fJson.Find('register-values');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
     arr := TJSONArray(val);
-    for idx := 0 to arr.Count-1 do
+    for i := 0 to arr.Count-1 do
     begin
-      obj := TJSONObject(arr.Objects[idx]);
+      obj := TJSONObject(arr.Objects[i]);
       if obj.isNil then
         break
       else
       begin
         val := obj.Find('number');
         if val.isNotNil then
-          rnm := strToInt(val.AsString);
+          number := strToInt(val.AsString);
         val := obj.Find('value');
         //if val.isNotNil and (val.JSONType = jtString) then
         //  rvl := StrToInt64(val.AsString)
@@ -831,25 +881,25 @@ begin
     fStackItems.clear;
     lstCallStack.Clear;
     arr := TJSONArray(val);
-    for idx := 0 to arr.Count-1 do
+    for i := 0 to arr.Count-1 do
     begin
-      obj := arr.Objects[idx];
+      obj := arr.Objects[i];
       if obj.isNil then
         break;
       val := obj.Find('fullname');
       if val.isNotNil then
-        fne:= val.AsString;
+        fullname:= val.AsString;
       // TODO-cGDB: demangle function name.
       val := obj.Find('func');
       if val.isNotNil then
-        nme:= val.AsString;
+        func:= val.AsString;
       val := obj.Find('addr');
       if val.isNotNil then
-        adr := val.AsInt64;
+        addr := val.AsInt64;
       val := obj.Find('line');
       if val.isNotNil then
-        lne := val.AsInteger;
-      fStackItems.addItem(adr, fne, nme, lne);
+        line := val.AsInteger;
+      fStackItems.addItem(addr, fullname, func, line);
     end;
     fStackItems.assignToList(lstCallStack);
   end;
@@ -858,8 +908,8 @@ begin
   begin
     arr := TJSONArray(fJson.Find('CLI'));
     if arr.isNotNil then
-      for idx := 0 to arr.Count-1 do
-        fMsg.message(arr.Strings[idx], nil, amcMisc, amkBub);
+      for i := 0 to arr.Count-1 do
+        fMsg.message(arr.Strings[i], nil, amcMisc, amkBub);
   end;
 
 end;
@@ -874,8 +924,8 @@ begin
 
   fLog.Clear;
   fGdb.getFullLines(fLog);
-  for str in fLog do
-    fMsg.message(str, nil, amcMisc, amkAuto);
+  //for str in fLog do
+  //  fMsg.message(str, nil, amcMisc, amkAuto);
 
   if flog.Text.isEmpty then
     exit;
