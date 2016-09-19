@@ -158,6 +158,17 @@ type
     from: string;
   end;
 
+  {{}
+  TGDBMI_Frame = record
+    level: integer;
+    func: string;
+    adrress: ptruint;
+    fname: string;  // named "file"
+    line: integer;
+    from: string;
+  end;
+  }
+
   {
     breakpoint:
 
@@ -213,13 +224,13 @@ type
   { TCEGdbWidget }
   TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger)
     btnContinue: TCEToolButton;
+    btnNext: TCEToolButton;
+    btnOver: TCEToolButton;
     btnPause: TCEToolButton;
     btnReg: TCEToolButton;
     btnStack: TCEToolButton;
     btnStart: TCEToolButton;
     btnStop: TCEToolButton;
-    button0: TCEToolButton;
-    button1: TCEToolButton;
     button4: TCEToolButton;
     Edit1: TEdit;
     lstCallStack: TListView;
@@ -228,6 +239,9 @@ type
     btnSendCom: TSpeedButton;
     stateViewer: TTIPropertyGrid;
     procedure btnContClick(Sender: TObject);
+    procedure btnNextClick(Sender: TObject);
+    procedure btnOverClick(Sender: TObject);
+    procedure btnPauseClick(Sender: TObject);
     procedure btnRegClick(Sender: TObject);
     procedure btnSendComClick(Sender: TObject);
     procedure btnStackClick(Sender: TObject);
@@ -249,8 +263,10 @@ type
     fInspState: TInspectableState;
     fShowCLI: boolean;
     fStackItems: TStackItems;
+    fCatchPause: boolean;
     //
     procedure startDebugging;
+    procedure pauseDebugee;
     procedure killGdb;
     procedure storeObserversBreakpoints;
     // GDB output processors
@@ -595,8 +611,29 @@ begin
   gdbCommand('break _d_arraybounds');
   gdbCommand('break _d_switch_error');
   fGdb.OnReadData := @gdboutJsonize;
+  gdbCommand('-gdb-set mi-async on');
   // launch
   gdbCommand('run');
+end;
+
+procedure TCEGdbWidget.pauseDebugee;
+var
+  proc: TProcess;
+begin
+  // TODO-cGDB: pause using the PID is safer
+  proc := TProcess.Create(nil);
+  try
+    fCatchPause := true;
+    proc.Executable:= 'kill';
+    proc.ShowWindow:= swoHIDE;
+    proc.Parameters.Add('-s');
+    proc.Parameters.Add('USR1');
+    proc.Parameters.Add(fProj.outputFilename.extractFileName);
+    proc.Execute;
+    while proc.Running do;
+  finally
+    proc.Free;
+  end;
 end;
 {$ENDREGION}
 
@@ -773,6 +810,7 @@ var
   obj: TJSONObject;
   arr: TJSONArray;
   // common data
+  reason: string;
   addr: PtrUint = 0;
   fullname: string = '';
   func:string = '';
@@ -783,14 +821,20 @@ var
   // signal data
   sigmean: string;
   signame: string;
+  brkreason: TCEDebugBreakReason;
 begin
 
   val := fJson.Find('reason');
   if val.isNotNil then
   begin
+    reason := val.AsString;
 
-    if val.AsString = 'breakpoint-hit' then
+    if (reason = 'breakpoint-hit') or (reason = 'end-stepping-range') then
     begin
+      case reason of
+        'breakpoint-hit': brkreason := dbBreakPoint;
+        'end-stepping-range': brkreason := dbStep;
+      end;
       obj := TJSONObject(fJson.Find('frame'));
       if obj.isNotNil and (obj.JSONType = jtObject) then
       begin
@@ -800,13 +844,14 @@ begin
         val := obj.Find('line');
         if val.isNotNil then
           line := strToInt(val.AsString);
-        if (line <> -1) and fullname.fileExists then
-          subjDebugBreak(fSubj, fullname, line, dbBreakPoint);
+        if fDocHandler.findDocument(fullname).isNil then
+          fDocHandler.openDocument(fullname);
+        subjDebugBreak(fSubj, fullname, line, brkreason);
       end;
     end
 
     //TODO-cGDB: in the settings, option to automatically ignore particular signals.
-    else if val.AsString = 'signal-received' then
+    else if reason = 'signal-received' then
     begin
       signame := 'unknown signal';
       sigmean := 'unknown meaning';
@@ -815,7 +860,7 @@ begin
         signame := val.AsString;
       val := fJson.Find('signal-meaning');
       if val.isNotNil then
-        sigmean += val.AsString;
+        sigmean := val.AsString;
       obj := TJSONObject(fJson.Find('frame'));
       if obj.isNotNil and (obj.JSONType = jtObject) then
       begin
@@ -826,12 +871,26 @@ begin
         if val.isNotNil then
           line := strToInt(val.AsString);
       end;
-      if dlgYesNo(format('The signal %s (%s) was received on line %d of file %s .'
+      if fCatchPause then
+      begin
+        fCatchPause := false;
+        if fDocHandler.findDocument(fullname).isNil then
+          fDocHandler.openDocument(fullname);
+        subjDebugBreak(fSubj, fullname, line, dbSignal);
+      end
+      else
+      begin
+        if dlgYesNo(format('The signal %s (%s) was received on line %d of file %s .'
         + LineEnding + 'Do you wish to pause execution ?', [signame, sigmean, line, fullname]),
         'Unexpected signal received') = mrNo then
-        gdbCommand('continue', @gdboutJsonize)
-      else if (line <> -1) and fullname.fileExists then
-        subjDebugBreak(fSubj, fullname, line, dbSignal);
+          gdbCommand('continue', @gdboutJsonize)
+        else
+        begin
+          if not fDocHandler.findDocument(fullname).isNil then
+            fDocHandler.openDocument(fullname);
+          subjDebugBreak(fSubj, fullname, line, dbSignal);
+        end;
+      end;
     end;
 
   end;
@@ -971,6 +1030,21 @@ begin
   gdbCommand('continue', @gdboutJsonize);
 end;
 
+procedure TCEGdbWidget.btnNextClick(Sender: TObject);
+begin
+  gdbCommand('step', @gdboutJsonize);
+end;
+
+procedure TCEGdbWidget.btnOverClick(Sender: TObject);
+begin
+  gdbCommand('next', @gdboutJsonize);
+end;
+
+procedure TCEGdbWidget.btnPauseClick(Sender: TObject);
+begin
+  pauseDebugee;
+end;
+
 procedure TCEGdbWidget.btnRegClick(Sender: TObject);
 begin
   infoRegs;
@@ -978,8 +1052,8 @@ end;
 
 procedure TCEGdbWidget.btnStopClick(Sender: TObject);
 begin
+  pauseDebugee;
   gdbCommand('kill', @gdboutJsonize);
-  killGdb;
 end;
 
 procedure TCEGdbWidget.btnSendComClick(Sender: TObject);

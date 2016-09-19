@@ -116,6 +116,15 @@ type
 
   TSortDialog = class;
 
+  TGutterIcon = (
+    giBulletRed   = 0,          // breakpoint
+    giBulletGreen = 1,
+    giBulletBlack = 2,
+    giBreak       = 3,          // break point reached
+    giStep        = 4,          // step / signal / pause
+    giNone        = high(byte)  // remove
+  );
+
   TCESynMemo = class(TSynEdit, ICEDebugObserver)
   private
     fFilename: string;
@@ -186,11 +195,6 @@ type
       Selected: boolean; Index: integer): boolean;
     procedure completionCodeCompletion(var value: string; SourceValue: string;
       var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
-    procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
-    procedure addBreakPoint(line: integer);
-    procedure removeBreakPoint(line: integer);
-    procedure removeDebugTimeMarks;
-    function  findBreakPoint(line: integer): boolean;
     procedure showCallTips(const tips: string);
     function lexCanCloseBrace: boolean;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
@@ -199,7 +203,13 @@ type
     procedure setSelectionOrWordCase(upper: boolean);
     procedure sortSelectedLines(descending, caseSensitive: boolean);
     procedure tokFoundForCaption(const token: PLexToken; out stop: boolean);
+    procedure setGutterIcon(line: integer; value: TGutterIcon);
     //
+    procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
+    procedure addBreakPoint(line: integer);
+    procedure removeBreakPoint(line: integer);
+    procedure removeDebugTimeMarks;
+    function  findBreakPoint(line: integer): boolean;
     procedure debugStart(debugger: ICEDebugger);
     procedure debugStop;
     function debugQueryBpCount: integer;
@@ -2430,17 +2440,10 @@ begin
 end;
 
 procedure TCESynMemo.addBreakPoint(line: integer);
-var
-  m: TSynEditMark;
 begin
   if findBreakPoint(line) then
     exit;
-  m:= TSynEditMark.Create(self);
-  m.Line := line;
-  m.ImageList := fImages;
-  m.ImageIndex := 0;
-  m.Visible := true;
-  Marks.Add(m);
+  setGutterIcon(line, giBulletRed);
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   fBreakPoints.Add(pointer(line));
   {$POP}
@@ -2452,8 +2455,7 @@ procedure TCESynMemo.removeBreakPoint(line: integer);
 begin
   if not findBreakPoint(line) then
     exit;
-  if marks.Line[line].isNotNil and (marks.Line[line].Count > 0) then
-    marks.Line[line].Clear(true);
+  setGutterIcon(line, giNone);
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   fBreakPoints.Remove(pointer(line));
   {$POP}
@@ -2462,8 +2464,15 @@ begin
 end;
 
 procedure TCESynMemo.removeDebugTimeMarks;
+var
+  i: integer;
 begin
-  //TODO-cGDB: clean gutter marks generated during the session
+  for i:= 0 to Lines.Count-1 do
+  begin
+    Marks.ClearLine(i);
+    if findBreakPoint(i) then
+      setGutterIcon(i, giBulletRed);
+  end;
 end;
 
 function TCESynMemo.findBreakPoint(line: integer): boolean;
@@ -2479,6 +2488,22 @@ begin
     removeBreakPoint(line)
   else
     addBreakPoint(line);
+end;
+
+procedure TCESynMemo.setGutterIcon(line: integer; value: TGutterIcon);
+var
+  m: TSynEditMark;
+begin
+  Marks.ClearLine(line);
+  if value <> giNone then
+  begin
+    m:= TSynEditMark.Create(self);
+    m.Line := line;
+    m.ImageList := fImages;
+    m.ImageIndex := longint(value);
+    m.Visible := true;
+    Marks.Add(m);
+  end;
 end;
 
 procedure TCESynMemo.debugStart(debugger: ICEDebugger);
@@ -2512,10 +2537,10 @@ begin
     exit;
   showPage;
   caretY := line;
-  // TODO-cDBG: add markup according to break reason
+  removeDebugTimeMarks;
   case reason of
-    dbBreakPoint:;
-    dbSignal:;
+    dbBreakPoint: setGutterIcon(line, giBreak);
+    dbStep, dbSignal: setGutterIcon(line, giStep);
   end;
 end;
 {$ENDREGION --------------------------------------------------------------------}

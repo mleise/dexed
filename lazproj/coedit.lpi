@@ -13,7 +13,7 @@
         <DpiAware Value="True"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="97">
+      <Resources Count="99">
         <Resource_0 FileName="../icons/window/layout_add.png" Type="RCDATA" ResourceName="LAYOUT_ADD"/>
         <Resource_1 FileName="../icons/window/layout.png" Type="RCDATA" ResourceName="LAYOUT"/>
         <Resource_2 FileName="../icons/window/application_go.png" Type="RCDATA" ResourceName="APPLICATION_GO"/>
@@ -111,6 +111,8 @@
         <Resource_94 FileName="../icons/other/stop.png" Type="RCDATA" ResourceName="STOP"/>
         <Resource_95 FileName="../icons/other/breaks.png" Type="RCDATA" ResourceName="BREAKS"/>
         <Resource_96 FileName="../icons/other/step.png" Type="RCDATA" ResourceName="STEP"/>
+        <Resource_97 FileName="../icons/arrow/go_down.png" Type="RCDATA" ResourceName="GO_DOWN"/>
+        <Resource_98 FileName="../icons/arrow/go_jump.png" Type="RCDATA" ResourceName="GO_JUMP"/>
       </Resources>
     </General>
     <i18n>
