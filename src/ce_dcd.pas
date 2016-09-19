@@ -465,6 +465,7 @@ end;
 procedure TCEDcdWrapper.getDdocFromCursor(out comment: string);
 var
   i: Integer;
+  len: Integer;
   str: string;
 begin
   if not fAvailable then exit;
@@ -486,10 +487,12 @@ begin
   comment := '';
   fTempLines.LoadFromStream(fClient.Output);
   while fClient.Running do ;
-  if fTempLines.Count = 0 then
+  len := fTempLines.Count-1;
+  if len = -1 then
     updateServerlistening;
-  for str in fTempLines do
+  for i := 0 to len do
   begin
+    str := fTempLines[i];
     with TStringRange.create(str) do while not empty do
     begin
       comment += takeUntil('\').yield;
@@ -504,12 +507,9 @@ begin
         popFrontN(2);
       end
     end;
-    comment += LineEnding + LineEnding;
+    if i <> len then
+      comment += LineEnding + LineEnding;
   end;
-  //
-  comment := ReplaceText(comment, 'ditto' + LineEnding + LineEnding, '');
-  comment := ReplaceText(comment, 'ditto', '');
-  comment := Trim(comment);
 end;
 
 procedure TCEDcdWrapper.getDeclFromCursor(out fname: string; out position: Integer);
