@@ -22,6 +22,8 @@ type
   TCpuRegister = (eax, ebx, ecx, edx, esi, edi, ebp, esp, eip);
   {$ENDIF}
 
+  TFpuRegister = (st0, st1, st2, st3, st4, st5, st6, st7);
+
   TFLAG = (CS, PF, AF, ZF, SF, TF, IF_, DF, OF_, NT, RF, VM,
     AC, VIF, VIP, ID);
   TEFLAG = set of TFLAG;
@@ -29,27 +31,96 @@ type
   TSegmentRegister = (S_CS, S_SS, S_DS, S_ES, S_FS, S_GS);
 
   // aliased to get hex display in object inspector.
-  TCpuRegValue = type PtrInt;
+  TCpuRegValue = type PtrUInt;
 
-  // Makes a category for the GP registers in a project inspector
-  TInspectableGPR = class(TPersistent)
+  // displays a TCpuRegValue in hex
+  TCpuRegValueEditor = class(TIntegerProperty)
+  public
+    function GetValue: ansistring; override;
   end;
 
-  // Makes a category for the FP registers in a project inspector
+  // Makes a category for the general purpose registers in a project inspector
+  TInspectableGPR = class(TPersistent)
+  private
+    fRegisters: array[TCpuRegister] of TCpuRegValue;
+  published
+    {$IFDEF CPU64}
+    property RAX: TCpuRegValue read fRegisters[TCpuRegister.rax];
+    property RBX: TCpuRegValue read fRegisters[TCpuRegister.rbx];
+    property RCX: TCpuRegValue read fRegisters[TCpuRegister.rcx];
+    property RDX: TCpuRegValue read fRegisters[TCpuRegister.rdx];
+    property RSI: TCpuRegValue read fRegisters[TCpuRegister.rsi];
+    property RDI: TCpuRegValue read fRegisters[TCpuRegister.rdi];
+    property RBP: TCpuRegValue read fRegisters[TCpuRegister.rbp];
+    property RSP: TCpuRegValue read fRegisters[TCpuRegister.rsp];
+    property R8:  TCpuRegValue read fRegisters[TCpuRegister.r8];
+    property R9:  TCpuRegValue read fRegisters[TCpuRegister.r9];
+    property R10: TCpuRegValue read fRegisters[TCpuRegister.r10];
+    property R11: TCpuRegValue read fRegisters[TCpuRegister.r11];
+    property R12: TCpuRegValue read fRegisters[TCpuRegister.r12];
+    property R13: TCpuRegValue read fRegisters[TCpuRegister.r13];
+    property R14: TCpuRegValue read fRegisters[TCpuRegister.r14];
+    property R15: TCpuRegValue read fRegisters[TCpuRegister.r15];
+    property RIP: TCpuRegValue read fRegisters[TCpuRegister.rip];
+    {$ELSE}
+    property EAX: TCpuRegValue read fRegisters[TCpuRegister.eax];
+    property EBX: TCpuRegValue read fRegisters[TCpuRegister.ebx];
+    property ECX: TCpuRegValue read fRegisters[TCpuRegister.ecx];
+    property EDX: TCpuRegValue read fRegisters[TCpuRegister.edx];
+    property ESI: TCpuRegValue read fRegisters[TCpuRegister.esi];
+    property EDI: TCpuRegValue read fRegisters[TCpuRegister.edi];
+    property EBP: TCpuRegValue read fRegisters[TCpuRegister.ebp];
+    property ESP: TCpuRegValue read fRegisters[TCpuRegister.esp];
+    property EIP: TCpuRegValue read fRegisters[TCpuRegister.eip];
+    {$ENDIF}
+  public
+    procedure setRegister(index: TCpuRegister; value: PtrUInt);
+  end;
+
+  // Makes a category for the floating point coprocessor registers in a project inspector
   TInspectableFPR = class(TPersistent)
+  private
+    fRegisters: array[TFpuRegister] of double;
+  published
+    property ST0: double read fRegisters[TFpuRegister.st0];
+    property ST1: double read fRegisters[TFpuRegister.st1];
+    property ST2: double read fRegisters[TFpuRegister.st2];
+    property ST3: double read fRegisters[TFpuRegister.st3];
+    property ST4: double read fRegisters[TFpuRegister.st4];
+    property ST5: double read fRegisters[TFpuRegister.st5];
+    property ST6: double read fRegisters[TFpuRegister.st6];
+    property ST7: double read fRegisters[TFpuRegister.st7];
+  public
+    procedure setRegister(index: TFpuRegister; value: double);
   end;
 
   // Makes a category for the SSE registers in a project inspector
   TInspectableSSER = class(TPersistent)
+    // interpretation is a problem:
+    // 4 int ? 2 double ? 4 single ? ...
   end;
 
-  // Makes a category for the call stack in a project inspector
-  TInspectableStack = class(Tpersistent)
-  end;
-
-  TCEDebugWidgetOptions = class
-    fDemangle: boolean;
-    fShowCLI: boolean;
+  // Stores the registers content, to be displayable in an object inspector.
+  TInspectableState = class(TPersistent)
+  private
+    fFlags: TEFLAG;
+    fSegment: array[TSegmentRegister] of byte;
+    fGpr: TInspectableGPR;
+    fFpr: TInspectableFPR;
+  published
+    property CPU: TInspectableGPR read fGpr;
+    //
+    property EFLAGS: TEFLAG read fFlags;
+    //
+    property CS: byte read fSegment[TSegmentRegister.S_CS];
+    property DS: byte read fSegment[TSegmentRegister.S_DS];
+    property ES: byte read fSegment[TSegmentRegister.S_ES];
+    property FS: byte read fSegment[TSegmentRegister.S_FS];
+    property GS: byte read fSegment[TSegmentRegister.S_GS];
+    property SS: byte read fSegment[TSegmentRegister.S_SS];
+  public
+    constructor create;
+    destructor destroy; override;
   end;
 
   // Represents an item in the call stack
@@ -79,146 +150,13 @@ type
     procedure clear;
   end;
 
-
-  // Stores the stack and the registers content, to be displayable in
-  // an object inspector.
-  TInspectableState = class(TPersistent)
-  private
-    fWordSpliter: TRegExpr;
-    fFlags: TEFLAG;
-    fSegment: array[TSegmentRegister] of byte;
-    fLastCalls: array[0..9] of string;
-    fCallStack: TStringList;
-    fRegisters: array[TCpuRegister] of TCpuRegValue;
-  published
-    property EFLAGS: TEFLAG read fFlags;
-  {$IFDEF CPU64}
-    property RAX: TCpuRegValue read fRegisters[TCpuRegister.rax];
-    property RBX: TCpuRegValue read fRegisters[TCpuRegister.rbx];
-    property RCX: TCpuRegValue read fRegisters[TCpuRegister.rcx];
-    property RDX: TCpuRegValue read fRegisters[TCpuRegister.rdx];
-    property RSI: TCpuRegValue read fRegisters[TCpuRegister.rsi];
-    property RDI: TCpuRegValue read fRegisters[TCpuRegister.rdi];
-    property RBP: TCpuRegValue read fRegisters[TCpuRegister.rbp];
-    property RSP: TCpuRegValue read fRegisters[TCpuRegister.rsp];
-    property R8:  TCpuRegValue read fRegisters[TCpuRegister.r8];
-    property R9:  TCpuRegValue read fRegisters[TCpuRegister.r9];
-    property R10: TCpuRegValue read fRegisters[TCpuRegister.r10];
-    property R11: TCpuRegValue read fRegisters[TCpuRegister.r11];
-    property R12: TCpuRegValue read fRegisters[TCpuRegister.r12];
-    property R13: TCpuRegValue read fRegisters[TCpuRegister.r13];
-    property R14: TCpuRegValue read fRegisters[TCpuRegister.r14];
-    property R15: TCpuRegValue read fRegisters[TCpuRegister.r15];
-    property RIP: TCpuRegValue read fRegisters[TCpuRegister.rip];
-  {$ELSE}
-    property EAX: TCpuRegValue read fRegisters[TCpuRegister.eax];
-    property EBX: TCpuRegValue read fRegisters[TCpuRegister.ebx];
-    property ECX: TCpuRegValue read fRegisters[TCpuRegister.ecx];
-    property EDX: TCpuRegValue read fRegisters[TCpuRegister.edx];
-    property ESI: TCpuRegValue read fRegisters[TCpuRegister.esi];
-    property EDI: TCpuRegValue read fRegisters[TCpuRegister.edi];
-    property EBP: TCpuRegValue read fRegisters[TCpuRegister.ebp];
-    property ESP: TCpuRegValue read fRegisters[TCpuRegister.esp];
-    property EIP: TCpuRegValue read fRegisters[TCpuRegister.eip];
-  {$ENDIF}
-    property CallStack_M0: string read fLastCalls[0];
-    property CallStack_M1: string read fLastCalls[1];
-    property CallStack_M2: string read fLastCalls[2];
-    property CallStack_M3: string read fLastCalls[3];
-    property CallStack_M4: string read fLastCalls[4];
-    property CallStack_M5: string read fLastCalls[5];
-    property CallStack_M6: string read fLastCalls[6];
-    property CallStack_M7: string read fLastCalls[7];
-    property CallStack_M8: string read fLastCalls[8];
-    property CallStack_M9: string read fLastCalls[9];
-    property CallStack: TStringList read fCallStack;
-    //
-    property CS: byte read fSegment[TSegmentRegister.S_CS];
-    property DS: byte read fSegment[TSegmentRegister.S_DS];
-    property ES: byte read fSegment[TSegmentRegister.S_ES];
-    property FS: byte read fSegment[TSegmentRegister.S_FS];
-    property GS: byte read fSegment[TSegmentRegister.S_GS];
-    property SS: byte read fSegment[TSegmentRegister.S_SS];
-  public
-    constructor create;
-    destructor destroy; override;
-  end;
-
-  TCpuRegValueEditor = class(TIntegerProperty)
-  public
-    function GetValue: ansistring; override;
-  end;
-
-  TGDBMI_Frame = record
-    level: integer;
-    func: string;
-    adrress: ptruint;
-    fname: string;  // named "file"
-    line: integer;
-    from: string;
-  end;
-
-  {{}
-  TGDBMI_Frame = record
-    level: integer;
-    func: string;
-    adrress: ptruint;
-    fname: string;  // named "file"
-    line: integer;
-    from: string;
-  end;
-  }
-
-  {
-    breakpoint:
-
-    (gdb)
-    =breakpoint-modified,bkpt={number="2",type="breakpoint",disp="keep",enabled="y",addr="0x000000000049dc7a",func="D main",file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="39",thread-groups=["i1"],times="1",original-location="/home/basile/Dev/dproj/Resource.d/src/resource.d:39"}
-    ~"\nBreakpoint "
-    ~"2, D main (args=...) at /home/basile/Dev/dproj/Resource.d/src/resource.d:39\n"
-    ~"39\t    getopt(args, config.passThrough, \"h|help\", &wantHelp);\n"
-    *stopped,reason="breakpoint-hit",disp="keep",bkptno="2",frame={addr="0x000000000049dc7a", func="D main",args=[{name="args",value="..."}],file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="39"},thread-id="1",stopped-threads="all",core="3"
-    (gdb)
-
-    . line starting with = is to parse as TGDBMI_Breakpoint, thorically its [opt token]=, no token for breakpoint reached since it's not a result
-    . lines starting with "~" can be ignored, they represent the output stream displayed in the CLI
-
-  }
-  TGDBMI_Breakpoint = record
-    number: integer;
-    tpe: string;        // named "type"
-    catchtype: string;  // named "catch-type"
-    disp: string;       // "del" | "keep"
-    enabled: boolean;   // "y" | "n"
-    addr: ptrUint;      // hex | <PENDING> | <MULTIPLE>
-    func: string;
-    filename: string;
-    fullname: string;
-    line: integer;
-    at: string;
-    pending: string;    // value is the command passed to set the BP
-    evaluateby: string; // named "evaluate-by" , host | target
-    thread: ptrUint;
-    task: string;
-    cond: string;
-    ignore: integer;
-    enable: integer;
-    traceframeusage: string;// named "traceframe-usage"
-    statictraceid: string;  // named "static-tracepoint-marker-string-id"
-    mask: string;
-    pass: integer;
-    originloc: string; // named "original-location"
-    times: integer;
-    installed: boolean; // "y" | "n" , only for trace points
-    what: string;
-  end;
-
-  TGDBMI_Thread = record
-    id: ptrUint;
-    targetid: string; // named "target-id"
-    details: string;
-    state: string;    // running | stopped
-    core: integer;
+  TCEDebugWidgetOptions = class
+    fDemangle: boolean;
+    fShowCLI: boolean;
+    fIgnoredSignals: TStringList;
+    fAutoDumpStack: boolean;
+    fAutoDumpRegisters: boolean;
+    fAutoDumpLocals: boolean;
   end;
 
   { TCEGdbWidget }
@@ -404,17 +342,24 @@ begin
   {$ENDIF}
 end;
 
+procedure TInspectableGPR.setRegister(index: TCpuRegister; value: PtrUInt);
+begin
+  fRegisters[index] := value;
+end;
+
+procedure TInspectableFPR.setRegister(index: TFpuRegister; value: double);
+begin
+  fRegisters[index] := value;
+end;
+
 constructor TInspectableState.create;
 begin
-  fCallStack := TStringList.Create;
-  fWordSpliter := TRegExpr.Create('[A-Za-z0-9_#]+');
-  fWordSpliter.Compile;
+  fGpr := TInspectableGPR.Create;
 end;
 
 destructor TInspectableState.destroy;
 begin
-  fCallStack.free;
-  fWordSpliter.Free;
+  fGpr.Free;
   inherited;
 end;
 {$ENDREGION}
@@ -690,6 +635,12 @@ procedure parseGdbout(const str: string; var json: TJSONObject);
           r^.takeUntil('=').yield;
           r^.popFront;
         end;
+        '"':
+        begin
+          r^.popFront;
+          node.Strings[node.Count] := r^.takeUntil('"').yield;
+          r^.popFront;
+        end;
         '{':
         begin
           r^.popFront;
@@ -843,7 +794,7 @@ begin
           fullname := val.AsString;
         val := obj.Find('line');
         if val.isNotNil then
-          line := strToInt(val.AsString);
+          line := val.AsInteger;
         if fDocHandler.findDocument(fullname).isNil then
           fDocHandler.openDocument(fullname);
         subjDebugBreak(fSubj, fullname, line, brkreason);
@@ -869,12 +820,12 @@ begin
           fullname := val.AsString;
         val := obj.Find('line');
         if val.isNotNil then
-          line := strToInt(val.AsString);
+          line := val.AsInteger;
       end;
       if fCatchPause then
       begin
         fCatchPause := false;
-        if fDocHandler.findDocument(fullname).isNil then
+        if  fDocHandler.findDocument(fullname).isNil then
           fDocHandler.openDocument(fullname);
         subjDebugBreak(fSubj, fullname, line, dbSignal);
       end
@@ -908,10 +859,21 @@ begin
       begin
         val := obj.Find('number');
         if val.isNotNil then
-          number := strToInt(val.AsString);
+          number := val.AsInteger;
         val := obj.Find('value');
-        //if val.isNotNil and (val.JSONType = jtString) then
-        //  rvl := StrToInt64(val.AsString)
+        if val.isNotNil then
+        begin
+          {$IFDEF CPU64}
+          if (0 <= number) and (TCpuRegister(number) <= high(TCpuRegister)) then
+            fInspState.CPU.setRegister(TCpuRegister(number), val.AsInt64);
+          {$ENDIF}
+          {$IFDEF CPU32}
+          if (0 <= number) and (number <= high(TCpuRegister)) then
+            fInspState.GPR.setRegister(TCpuRegister(number), val.AsInteger);
+          {$ENDIF}
+        end;
+
+
         //else
           // TODO-cGDB: FPU and SSE regs are in a sub object
         //  break;
@@ -969,8 +931,8 @@ begin
 
   fLog.Clear;
   fGdb.getFullLines(fLog);
-  //for str in fLog do
-  //  fMsg.message(str, nil, amcMisc, amkAuto);
+  for str in fLog do
+    fMsg.message(str, nil, amcMisc, amkAuto);
 
   if flog.Text.isEmpty then
     exit;
