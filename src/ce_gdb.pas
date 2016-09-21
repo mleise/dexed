@@ -10,7 +10,7 @@ uses
   StdCtrls, process, fpjson,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
-  ce_ddemangle;
+  ce_ddemangle, ce_writableComponent;
 
 type
 
@@ -151,13 +151,40 @@ type
     procedure clear;
   end;
 
-  TCEDebugWidgetOptions = class
-    fDemangle: boolean;
-    fShowCLI: boolean;
+  // TODO-cGDB: shortcuts
+  TCEDebugOptionsBase = class(TWritableLfmTextComponent)
+  private
+    fAutoDemangle: boolean;
+    fAutoGetCallStack: boolean;
+    fAutoGetRegisters: boolean;
+    fAutoGetVariables: boolean;
     fIgnoredSignals: TStringList;
-    fAutoDumpStack: boolean;
-    fAutoDumpRegisters: boolean;
-    fAutoDumpLocals: boolean;
+    fShowOutput: boolean;
+    procedure setIgnoredSignals(value: TStringList);
+  published
+    property autoDemangle: boolean read fAutoDemangle write fAutoDemangle;
+    property autoGetCallStack: boolean read fAutoGetCallStack write fAutoGetCallStack;
+    property autoGetRegisters: boolean read fAutoGetRegisters write fAutoGetRegisters;
+    property autoGetVariables: boolean read fAutoGetVariables write fAutoGetVariables;
+    property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
+    property showOutput: boolean read fShowOutput write fShowOutput;
+  public
+    constructor create(aOwner: TComponent); override;
+    destructor destroy; override;
+    procedure assign(source: TPersistent); override;
+  end;
+
+  TCEDebugOptions = class(TCEDebugOptionsBase, ICEEditableOptions)
+  private
+    fBackup: TCEDebugOptionsBase;
+    function optionedWantCategory(): string;
+    function optionedWantEditorKind: TOptionEditorKind;
+    function optionedWantContainer: TPersistent;
+    procedure optionedEvent(event: TOptionEditorEvent);
+    function optionedOptionsModified: boolean;
+  public
+    constructor create(aOwner: TComponent); override;
+    destructor destroy; override;
   end;
 
   { TCEGdbWidget }
@@ -200,9 +227,9 @@ type
     fMsg: ICEMessagesDisplay;
     fGdb: TCEProcess;
     fInspState: TInspectableState;
-    fShowCLI: boolean;
     fStackItems: TStackItems;
     fCatchPause: boolean;
+    fOptions: TCEDebugOptions;
     //
     procedure startDebugging;
     procedure pauseDebugee;
@@ -241,6 +268,97 @@ type
 
 implementation
 {$R *.lfm}
+
+{$REGION TCEDebugOption --------------------------------------------------------}
+const optFname = 'gdbcommander.txt';
+
+constructor TCEDebugOptionsBase.create(aOwner: TComponent);
+begin
+  inherited;
+  fAutoDemangle := true;
+  fAutoGetCallStack:= true;
+  fAutoGetRegisters:= true;
+  fAutoGetVariables:= true;
+  fShowOutput:=true;
+  fIgnoredSignals := TStringList.Create;
+end;
+
+destructor TCEDebugOptionsBase.destroy;
+begin
+  fIgnoredSignals.Free;
+  inherited;
+end;
+
+procedure TCEDebugOptionsBase.setIgnoredSignals(value: TStringList);
+begin
+  fIgnoredSignals.Assign(value);
+end;
+
+procedure TCEDebugOptionsBase.assign(source: TPersistent);
+var
+  src: TCEDebugOptionsBase;
+begin
+  if source is TCEDebugOptionsBase then
+  begin
+    src := TCEDebugOptionsBase(source);
+    fAutoDemangle:=src.fAutoDemangle;
+    fAutoGetCallStack:=src.fAutoGetCallStack;
+    fAutoGetRegisters:=src.fAutoGetRegisters;
+    fAutoGetVariables:=src.autoGetVariables;
+    fShowOutput:=src.fShowOutput;
+    fIgnoredSignals.Assign(src.fIgnoredSignals);
+  end
+  else inherited;
+end;
+
+constructor TCEDebugOptions.create(aOwner: TComponent);
+var
+  fname: string;
+begin
+  inherited;
+  fBackup := TCEDebugOptionsBase.create(self);
+  fname := getCoeditDocPath + optFname;
+  if fname.fileExists then
+    loadFromFile(fname);
+  EntitiesConnector.addObserver(self);
+end;
+
+destructor TCEDebugOptions.destroy;
+begin
+  saveToFile(getCoeditDocPath + optFname);
+  EntitiesConnector.removeObserver(self);
+  inherited;
+end;
+
+function TCEDebugOptions.optionedWantCategory(): string;
+begin
+  exit('Debugger');
+end;
+
+function TCEDebugOptions.optionedWantEditorKind: TOptionEditorKind;
+begin
+  exit(oekGeneric);
+end;
+
+function TCEDebugOptions.optionedWantContainer: TPersistent;
+begin
+  exit(self);
+end;
+
+procedure TCEDebugOptions.optionedEvent(event: TOptionEditorEvent);
+begin
+  case event of
+    oeeSelectCat: fBackup.assign(self);
+    oeeCancel: assign(fBackup);
+    oeeAccept: fBackup.assign(self);
+  end;
+end;
+
+function TCEDebugOptions.optionedOptionsModified: boolean;
+begin
+  exit(false);
+end;
+{$ENDREGION}
 
 {$REGION TStackItem/TStackItems ------------------------------------------------}
 procedure TStackItem.setProperties(addr: PtrUint; fname, nme: string; lne: integer);
@@ -382,8 +500,9 @@ begin
   fJson := TJsonObject.Create;
   fStackItems := TStackItems.create;
   fSubj:= TCEDebugObserverSubject.Create;
-  fShowCLI := true;
+  fOptions:= TCEDebugOptions.create(self);
   //
+  // TODO-cGDB: add command history
   AssignPng(btnSendCom, 'ACCEPT');
 end;
 
@@ -534,7 +653,6 @@ begin
   str := fProj.outputFilename;
   if not str.fileExists then
     exit;
-  // TODO-cGDB: detect finish event and notifiy the observers.
   subjDebugStart(fSubj, self as ICEDebugger);
   // gdb process
   killGdb;
@@ -814,11 +932,14 @@ begin
           line := val.AsInteger;
         if fDocHandler.findDocument(fullname).isNil then
           fDocHandler.openDocument(fullname);
+        if fOptions.autoGetCallStack then
+          infoStack;
+        if fOptions.autoGetRegisters then
+          infoRegs;
         subjDebugBreak(fSubj, fullname, line, brkreason);
       end;
     end
 
-    //TODO-cGDB: in the settings, option to automatically ignore particular signals.
     else if reason = 'signal-received' then
     begin
       signame := 'unknown signal';
@@ -826,6 +947,9 @@ begin
       val := fJson.Find('signal-name');
       if val.isNotNil then
         signame := val.AsString;
+      if (fOptions.ignoredSignals.Count <> 0) and
+        (fOptions.ignoredSignals.IndexOf(signame) <> -1) then
+          exit;
       val := fJson.Find('signal-meaning');
       if val.isNotNil then
         sigmean := val.AsString;
@@ -844,6 +968,10 @@ begin
         fCatchPause := false;
         if  fDocHandler.findDocument(fullname).isNil then
           fDocHandler.openDocument(fullname);
+        if fOptions.autoGetCallStack then
+          infoStack;
+        if fOptions.autoGetRegisters then
+          infoRegs;
         subjDebugBreak(fSubj, fullname, line, dbSignal);
       end
       else
@@ -856,10 +984,17 @@ begin
         begin
           if not fDocHandler.findDocument(fullname).isNil then
             fDocHandler.openDocument(fullname);
+          if fOptions.autoGetCallStack then
+            infoStack;
+          if fOptions.autoGetRegisters then
+            infoRegs;
           subjDebugBreak(fSubj, fullname, line, dbSignal);
         end;
       end;
-    end;
+    end
+
+    else if (reason = 'exited-normally') or (reason = 'exited-signalled') then
+      subjDebugStop(fSubj);
 
   end;
 
@@ -880,14 +1015,9 @@ begin
         val := obj.Find('value');
         if val.isNotNil then
         begin
-          {$IFDEF CPU64}
           if (0 <= number) and (TCpuRegister(number) <= high(TCpuRegister)) then
-            fInspState.CPU.setRegister(TCpuRegister(number), val.AsInt64);
-          {$ENDIF}
-          {$IFDEF CPU32}
-          if (0 <= number) and (number <= high(TCpuRegister)) then
-            fInspState.GPR.setRegister(TCpuRegister(number), val.AsInteger);
-          {$ENDIF}
+            fInspState.CPU.setRegister(TCpuRegister(number),
+            {$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
         end;
 
 
@@ -913,10 +1043,14 @@ begin
       val := obj.Find('fullname');
       if val.isNotNil then
         fullname:= val.AsString;
-      // TODO-cGDB: demangle function name.
       val := obj.Find('func');
       if val.isNotNil then
-        func:= demangle(val.AsString);
+      begin
+        if fOptions.autoDemangle then
+          func:= demangle(val.AsString)
+        else
+          func := val.AsString;
+      end;
       val := obj.Find('addr');
       if val.isNotNil then
         addr := val.AsInt64;
@@ -928,7 +1062,7 @@ begin
     fStackItems.assignToList(lstCallStack);
   end;
 
-  if fShowCLI then
+  if fOptions.showOutput then
   begin
     arr := TJSONArray(fJson.Find('CLI'));
     if arr.isNotNil then
@@ -959,7 +1093,7 @@ begin
 
   //lst := TStringList.Create;
   //try
-  //  str := fGdbMessage.json.FormatJSON(DefaultFormat,2);
+  //  str := fJson.FormatJSON(DefaultFormat,2);
   //  lst.Text:= str;
   //  lst.SaveToFile('/home/basile/gdbmessage.json');
   //finally
@@ -1033,6 +1167,7 @@ procedure TCEGdbWidget.btnStopClick(Sender: TObject);
 begin
   pauseDebugee;
   gdbCommand('kill', @gdboutJsonize);
+  subjDebugStop(fSubj);
 end;
 
 procedure TCEGdbWidget.btnSendComClick(Sender: TObject);
