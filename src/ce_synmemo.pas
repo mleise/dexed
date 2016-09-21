@@ -754,6 +754,8 @@ begin
   //
   fDastWorxExename:= exeFullName('dastworx' + exeExt);
   //
+  fDebugger := EntitiesConnector.getSingleService('ICEDebugger') as ICEDebugger;
+  //
   subjDocNew(TCEMultiDocSubject(fMultiDocSubject), self);
   EntitiesConnector.addObserver(self);
 end;

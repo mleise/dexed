@@ -17,7 +17,8 @@ type
   (**
    * ICEEDebugObserver can call any of the method during debugging
    *)
-  ICEDebugger = interface
+  ICEDebugger = interface(ICESingleService)
+    function running: boolean;
     procedure addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind);
     procedure removeBreakPoint(const fname: string; line: integer);
   end;

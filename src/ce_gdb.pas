@@ -228,6 +228,8 @@ type
     procedure docChanged(document: TCESynMemo);
     procedure docClosing(document: TCESynMemo);
     //
+    function running: boolean;
+    function singleServiceName: string;
     procedure addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind);
     procedure removeBreakPoint(const fname: string; line: integer);
   public
@@ -369,6 +371,7 @@ constructor TCEGdbWidget.create(aOwner: TComponent);
 begin
   inherited;
   EntitiesConnector.addObserver(self);
+  EntitiesConnector.addSingleService(self);
   fDocHandler:= getMultiDocHandler;
   fMsg:= getMessageDisplay;
   fFileLineBrks:= TStringList.Create;
@@ -458,6 +461,19 @@ end;
 {$ENDREGION}
 
 {$REGION Unsorted Debugging things ---------------------------------------------}
+function TCEGdbWidget.running: boolean;
+begin
+  if assigned(fGdb) then
+    exit(fGdb.Running)
+  else
+    exit(false);
+end;
+
+function TCEGdbWidget.singleServiceName: string;
+begin
+  exit('ICEDebugger');
+end;
+
 procedure TCEGdbWidget.killGdb;
 begin
   if not assigned(fGdb) then
