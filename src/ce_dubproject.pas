@@ -1115,25 +1115,30 @@ begin
     dub.Options := [poUsePipes{$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
     dub.ShowWindow := swoHIDE;
     dub.CurrentDirectory:= filename.extractFilePath;
-    dub.Parameters.Add('describe');
+    dub.Parameters.Add('convert');
+    dub.Parameters.Add('-s');
+    dub.Parameters.Add('-f');
+    dub.Parameters.Add('json');
     dub.Execute;
     processOutputToStrings(dub, str);
     while dub.Running do;
     prs := TJSONParser.Create(str.Text, [joIgnoreTrailingComma, joUTF8]);
     try
-      jsn := prs.Parse;
       try
-        if jsn.isNotNil and (jsn.JSONType = jtObject)
-        and TJSONObject(jsn).Find('packages').isNotNil
-        and (TJSONObject(jsn).Find('packages').JSONType = jtArray)
-        and (TJSONArray(TJSONObject(jsn).Find('packages')).Count > 0)
-        and (TJSONArray(TJSONObject(jsn).Find('packages')).Items[0].JSONType = jtObject) then
-          result := TJSONObject(TJSONArray(TJSONObject(jsn).Find('packages')).Items[0].Clone);
+        jsn := prs.Parse;
+        try
+          if jsn.isNotNil then
+            result := TJSONObject(jsn.Clone)
+          else
+            result := nil;
+        finally
+          jsn.free;
+        end;
       finally
-        jsn.free;
+        prs.Free
       end;
-    finally
-      prs.Free
+    except
+      result := nil;
     end;
   finally
     SetCurrentDirUTF8(old);
