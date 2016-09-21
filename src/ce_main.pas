@@ -8,14 +8,14 @@ uses
   Classes, SysUtils, LazFileUtils, SynEditKeyCmds, SynHighlighterLFM, Forms,
   StdCtrls, AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls,
   Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
-  {$IFDEF WINDOWS}Windows, {$ENDIF}
-  XMLPropStorage, SynExportHTML, fphttpclient, xfpjson, xjsonparser, xjsonscanner,
+  {$IFDEF WINDOWS}Windows, {$ENDIF} XMLPropStorage, SynExportHTML, fphttpclient,
+  xfpjson, xjsonparser, xjsonscanner,
   ce_common, ce_dmdwrap, ce_nativeproject, ce_synmemo, ce_writableComponent,
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
-  ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor, ce_gdb, ce_dfmt,
-  ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange;
+  ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor,{$IFDEF UNIX} ce_gdb,{$ENDIF}
+  ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange;
 
 type
 
@@ -362,7 +362,9 @@ type
     fInfoWidg: TCEInfoWidget;
     fDubProjWidg: TCEDubProjectEditorWidget;
     fPrjGrpWidg: TCEProjectGroupWidget;
+    {$IFDEF UNIX}
     fGdbWidg: TCEGdbWidget;
+    {$ENDIF}
     fDfmtWidg:  TCEDfmtWidget;
     fCompStart: TDateTime;
 
@@ -1276,8 +1278,9 @@ begin
   fDubProjWidg:= TCEDubProjectEditorWidget.create(self);
   fDfmtWidg   := TCEDfmtWidget.create(self);
   fPrjGrpWidg := TCEProjectGroupWidget.create(self);
-
+  {$IFDEF UNIX}
   fGdbWidg    := TCEGdbWidget.create(self);
+  {$ENDIF}
 
   getMessageDisplay(fMsgs);
 
@@ -1297,8 +1300,9 @@ begin
   fWidgList.addWidget(@fDubProjWidg);
   fWidgList.addWidget(@fDfmtWidg);
   fWidgList.addWidget(@fPrjGrpWidg);
-
+  {$IFDEF UNIX}
   fWidgList.addWidget(@fGdbWidg);
+  {$ENDIF}
 
   fWidgList.sort(@CompareWidgCaption);
 
