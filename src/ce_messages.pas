@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
   EditBtn, lcltype, ce_widget, ActnList, Menus, clipbrd, AnchorDocking, math,
-  TreeFilterEdit, Buttons, process, GraphType, fgl,
+  TreeFilterEdit, Buttons, process, GraphType, fgl,ce_ddemangle,
   ce_writableComponent, ce_common, ce_synmemo, ce_interfaces, ce_observer,
   ce_processes, ce_sharedres, ce_stringrange, ce_dsgncontrols;
 
@@ -22,7 +22,6 @@ type
   TMessageData = record
     ctxt: TCEAppMessageCtxt;
     data: Pointer;
-    demangled: boolean;
   end;
 
   TCEMessagesOptions = class(TWritableLfmTextComponent)
@@ -82,7 +81,6 @@ type
     procedure TreeFilterEdit1ButtonClick(Sender: TObject);
   private
     fEditorMessagePos: TCEEditorMessagePos;
-    fDemanglerAvailable: boolean;
     fMsgColors: array[TCEAppMessageKind] of TColor;
     fProjCompile: boolean;
     fActAutoSel: TAction;
@@ -99,15 +97,11 @@ type
     fAutoSelect: boolean;
     fSingleClick: boolean;
     fastDisplay: boolean;
-    fDemangler: TCEProcess;
     fOptions: TCEMessagesOptions;
     fOptionsBackup: TCEMessagesOptions;
     fBtns: array[TCEAppMessageCtxt] of TToolButton;
-    fToDemangle: TStringList;
-    fToDemangleObjs: TFPList;
     fFiltering: boolean;
     function itemShouldBeVisible(item: TTreeNode; aCtxt: TCEAppMessageCtxt): boolean;
-    procedure demanglerOutput(sender: TObject);
     procedure filterMessages(aCtxt: TCEAppMessageCtxt);
     procedure clearOutOfRangeMessg;
     procedure actDemangleExecute(Sender: TObject);
@@ -124,8 +118,6 @@ type
     procedure selCtxtClick(Sender: TObject);
     function iconIndex(aKind: TCEAppMessageKind): Integer;
     procedure handleMessageClick(Sender: TObject);
-    procedure callDemangler;
-    procedure freeDemangler;
     //
     procedure setColorError(value: TColor);
     procedure setColorInfo(value: TColor);
@@ -332,9 +324,6 @@ begin
     fOptions.AssignTo(self);
   end;
   //
-  fToDemangle := TStringList.Create;
-  fToDemangleObjs:= TFPList.Create;
-  //
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
 end;
@@ -342,9 +331,6 @@ end;
 destructor TCEMessagesWidget.destroy;
 begin
   fEditorMessagePos.Free;
-  fToDemangle.Free;
-  FreeAndNil(fToDemangleObjs);
-  freeDemangler;
   fOptions.saveToFile(getCoeditDocPath + optname);
   EntitiesConnector.removeObserver(self);
   inherited;
@@ -363,12 +349,6 @@ var
 begin
   if node.data.isNotNil then
     Dispose(PMessageData(Node.Data));
-  if fToDemangleObjs.isNotNil then
-  begin
-    i := fToDemangleObjs.IndexOf(node);
-    if i <> -1 then if i < fToDemangleObjs.Count then
-      fToDemangleObjs.Items[i] := nil;
-  end;
 end;
 
 procedure TCEMessagesWidget.ListKeyDown(Sender: TObject; var Key: Word;
@@ -576,8 +556,11 @@ begin
 end;
 
 procedure TCEMessagesWidget.actDemangleExecute(Sender: TObject);
+var
+  i: integer;
 begin
-  callDemangler;
+  for i:= 0 to List.SelectionCount-1 do
+    list.Selections[i].Text := demangle(list.Selections[i].Text);
 end;
 
 procedure TCEMessagesWidget.actAutoSelExecute(Sender: TObject);
@@ -786,7 +769,6 @@ begin
   dt := new(PMessageData);
   dt^.data := aData;
   dt^.ctxt := aCtxt;
-  dt^.demangled:=false;
   if fAutoSelect then if fCtxt <> aCtxt then
     fBtns[aCtxt].Click;
   if fastDisplay then
@@ -844,73 +826,6 @@ end;
 {$ENDREGION}
 
 {$REGION Messages --------------------------------------------------------------}
-procedure TCEMessagesWidget.callDemangler;
-var
-  dat: PMessageData;
-  i: integer;
-  str: string;
-const
-  toolname = 'ddemangle' + exeExt;
-begin
-  fDemanglerAvailable:= exeInSysPath(toolname);
-  if not fDemanglerAvailable then
-    exit;
-  //
-  fDemangler := TCEProcess.Create(nil);
-  fDemangler.Executable := exeFullName(toolname);
-  fDemangler.OnTerminate:= @demanglerOutput;
-  fDemangler.Options:= [poUsePipes];
-  fDemangler.ShowWindow:= swoHIDE;
-  fToDemangle.Clear;
-  fToDemangleObjs.Clear;
-  for i := 0 to list.Items.Count-1 do
-  begin
-    if not list.Items.Item[i].Selected then continue;
-    dat := PMessageData(list.Items.Item[i].Data);
-    if dat^.demangled then continue;
-    dat^.demangled := true;
-    str := list.Items.Item[i].Text;
-    if str.isEmpty then continue;
-    fToDemangleObjs.add(list.Items.Item[i]);
-    fToDemangle.Add(str);
-  end;
-  if fToDemangle.Count > 0 then
-  begin
-    fDemangler.Execute;
-    for i := 0 to fToDemangle.Count-1 do
-    begin
-      str := fToDemangle[i] + LineEnding;
-      fDemangler.Input.Write(str[1], str.length);
-    end;
-    fDemangler.CloseInput;
-  end;
-end;
-
-procedure TCEMessagesWidget.demanglerOutput(sender: TObject);
-var
-  itm: TTreeNode;
-  i: integer;
-begin
-  fToDemangle.LoadFromStream(fDemangler.OutputStack);
-  for i := 0 to fToDemangleObjs.Count -1 do
-  begin
-    itm := TTreeNode(fToDemangleObjs.Items[i]);
-    if itm.isNil then continue;
-    itm.Text := fToDemangle[i];
-  end;
-  freeDemangler;
-end;
-
-procedure TCEMessagesWidget.freeDemangler;
-begin
-  if fDemangler.isNil then
-    exit;
-  //
-  if fDemangler.Active then
-    fDemangler.Terminate(0);
-  FreeAndNil(fDemangler);
-end;
-
 procedure TCEMessagesWidget.updateLoop;
 begin
   if fastDisplay then

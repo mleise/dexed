@@ -1094,8 +1094,6 @@ begin
 end;
 {$ENDREGION}
 
-{$ENDREGION --------------------------------------------------------------------}
-
 {$REGION Miscellaneous DUB free functions --------------------------------------}
 function sdl2json(const filename: string): TJSONObject;
 var

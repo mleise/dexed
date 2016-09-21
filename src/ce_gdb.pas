@@ -9,7 +9,8 @@ uses
   PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
   StdCtrls, process, fpjson,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
-  ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf;
+  ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
+  ce_ddemangle;
 
 type
 
@@ -533,7 +534,7 @@ begin
   str := fProj.outputFilename;
   if not str.fileExists then
     exit;
-  // TODO-cDBG: detect finish event and notifiy the observers.
+  // TODO-cGDB: detect finish event and notifiy the observers.
   subjDebugStart(fSubj, self as ICEDebugger);
   // gdb process
   killGdb;
@@ -543,7 +544,7 @@ begin
   fgdb.Parameters.Add(str);
   fgdb.Parameters.Add('--interpreter=mi');
   fGdb.OnReadData:= @gdboutQuiet;
-  fGdb.OnTerminate:= @gdboutQuiet;
+  fGdb.OnTerminate:= @gdboutJsonize;
   fgdb.execute;
   // file:line breakpoints
   storeObserversBreakpoints;
@@ -571,8 +572,8 @@ begin
   gdbCommand('break _d_array_bounds');
   gdbCommand('break _d_arraybounds');
   gdbCommand('break _d_switch_error');
-  fGdb.OnReadData := @gdboutJsonize;
   gdbCommand('-gdb-set mi-async on');
+  fGdb.OnReadData := @gdboutJsonize;
   // launch
   gdbCommand('run');
 end;
@@ -915,7 +916,7 @@ begin
       // TODO-cGDB: demangle function name.
       val := obj.Find('func');
       if val.isNotNil then
-        func:= val.AsString;
+        func:= demangle(val.AsString);
       val := obj.Find('addr');
       if val.isNotNil then
         addr := val.AsInt64;

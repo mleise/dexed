@@ -12,7 +12,7 @@ uses
   ce_dockoptions, ce_shortcutseditor, ce_mru, ce_processes, ce_dubproject,
   ce_dialogs, ce_dubprojeditor, ce_controls, ce_dfmt, ce_lcldragdrop,
   ce_stringrange, ce_dlangmaps, ce_projgroup, ce_projutils, ce_d2synpresets,
-  ce_dastworx, ce_dbgitf;
+  ce_dastworx, ce_dbgitf, ce_ddemangle;
 
 {$R *.res}
 
