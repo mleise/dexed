@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, RegExpr, ComCtrls,
   PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
-  StdCtrls, process, fpjson,
+  StdCtrls, process, fpjson, typinfo,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
   ce_ddemangle, ce_writableComponent;
@@ -25,8 +25,7 @@ type
 
   TFpuRegister = (st0, st1, st2, st3, st4, st5, st6, st7);
 
-  TFLAG = (CS, PF, AF, ZF, SF, TF, IF_, DF, OF_, NT, RF, VM,
-    AC, VIF, VIP, ID);
+  TFLAG = (CS, PF, AF, ZF, SF, TF, IF_, DF, OF_, NT, RF, VM, AC, VIF, VIP, ID);
   TEFLAG = set of TFLAG;
 
   TSegmentRegister = (S_CS, S_SS, S_DS, S_ES, S_FS, S_GS);
@@ -38,44 +37,50 @@ type
   TCpuRegValueEditor = class(TIntegerProperty)
   public
     function GetValue: ansistring; override;
+    procedure SetValue(const NewValue: ansistring); override;
   end;
+
+  TSetGprEvent = procedure(reg: TCpuRegister; val: TCpuRegValue) of object;
 
   // Makes a category for the general purpose registers in a project inspector
   TInspectableGPR = class(TPersistent)
   private
     fRegisters: array[TCpuRegister] of TCpuRegValue;
+    fSetGprEvent: TSetGprEvent;
+    procedure setRegister(index: TCpuRegister; value: TCpuRegValue);
   published
     {$IFDEF CPU64}
-    property RAX: TCpuRegValue read fRegisters[TCpuRegister.rax];
-    property RBX: TCpuRegValue read fRegisters[TCpuRegister.rbx];
-    property RCX: TCpuRegValue read fRegisters[TCpuRegister.rcx];
-    property RDX: TCpuRegValue read fRegisters[TCpuRegister.rdx];
-    property RSI: TCpuRegValue read fRegisters[TCpuRegister.rsi];
-    property RDI: TCpuRegValue read fRegisters[TCpuRegister.rdi];
-    property RBP: TCpuRegValue read fRegisters[TCpuRegister.rbp];
-    property RSP: TCpuRegValue read fRegisters[TCpuRegister.rsp];
-    property R8:  TCpuRegValue read fRegisters[TCpuRegister.r8];
-    property R9:  TCpuRegValue read fRegisters[TCpuRegister.r9];
-    property R10: TCpuRegValue read fRegisters[TCpuRegister.r10];
-    property R11: TCpuRegValue read fRegisters[TCpuRegister.r11];
-    property R12: TCpuRegValue read fRegisters[TCpuRegister.r12];
-    property R13: TCpuRegValue read fRegisters[TCpuRegister.r13];
-    property R14: TCpuRegValue read fRegisters[TCpuRegister.r14];
-    property R15: TCpuRegValue read fRegisters[TCpuRegister.r15];
-    property RIP: TCpuRegValue read fRegisters[TCpuRegister.rip];
+    property RAX: TCpuRegValue index TCpuRegister.rax read fRegisters[TCpuRegister.rax] write setRegister;
+    property RBX: TCpuRegValue index TCpuRegister.rbx read fRegisters[TCpuRegister.rbx] write setRegister;
+    property RCX: TCpuRegValue index TCpuRegister.rcx read fRegisters[TCpuRegister.rcx] write setRegister;
+    property RDX: TCpuRegValue index TCpuRegister.rdx read fRegisters[TCpuRegister.rdx] write setRegister;
+    property RSI: TCpuRegValue index TCpuRegister.rsi read fRegisters[TCpuRegister.rsi] write setRegister;
+    property RDI: TCpuRegValue index TCpuRegister.rdi read fRegisters[TCpuRegister.rdi] write setRegister;
+    property RBP: TCpuRegValue index TCpuRegister.rbp read fRegisters[TCpuRegister.rbp] write setRegister;
+    property RSP: TCpuRegValue index TCpuRegister.rsp read fRegisters[TCpuRegister.rsp] write setRegister;
+    property R8:  TCpuRegValue index TCpuRegister.r8  read fRegisters[TCpuRegister.r8] write setRegister;
+    property R9:  TCpuRegValue index TCpuRegister.r9  read fRegisters[TCpuRegister.r9] write setRegister;
+    property R10: TCpuRegValue index TCpuRegister.r10 read fRegisters[TCpuRegister.r10] write setRegister;
+    property R11: TCpuRegValue index TCpuRegister.r11 read fRegisters[TCpuRegister.r11] write setRegister;
+    property R12: TCpuRegValue index TCpuRegister.r12 read fRegisters[TCpuRegister.r12] write setRegister;
+    property R13: TCpuRegValue index TCpuRegister.r13 read fRegisters[TCpuRegister.r13] write setRegister;
+    property R14: TCpuRegValue index TCpuRegister.r14 read fRegisters[TCpuRegister.r14] write setRegister;
+    property R15: TCpuRegValue index TCpuRegister.r15 read fRegisters[TCpuRegister.r15] write setRegister;
+    property RIP: TCpuRegValue index TCpuRegister.rip read fRegisters[TCpuRegister.rip] write setRegister;
     {$ELSE}
-    property EAX: TCpuRegValue read fRegisters[TCpuRegister.eax];
-    property EBX: TCpuRegValue read fRegisters[TCpuRegister.ebx];
-    property ECX: TCpuRegValue read fRegisters[TCpuRegister.ecx];
-    property EDX: TCpuRegValue read fRegisters[TCpuRegister.edx];
-    property ESI: TCpuRegValue read fRegisters[TCpuRegister.esi];
-    property EDI: TCpuRegValue read fRegisters[TCpuRegister.edi];
-    property EBP: TCpuRegValue read fRegisters[TCpuRegister.ebp];
-    property ESP: TCpuRegValue read fRegisters[TCpuRegister.esp];
-    property EIP: TCpuRegValue read fRegisters[TCpuRegister.eip];
+    property EAX: TCpuRegValue index TCpuRegister.eax read fRegisters[TCpuRegister.eax] write setRegister;
+    property EBX: TCpuRegValue index TCpuRegister.ebx read fRegisters[TCpuRegister.ebx] write setRegister;
+    property ECX: TCpuRegValue index TCpuRegister.ecx read fRegisters[TCpuRegister.ecx] write setRegister;
+    property EDX: TCpuRegValue index TCpuRegister.edx read fRegisters[TCpuRegister.edx] write setRegister;
+    property ESI: TCpuRegValue index TCpuRegister.esi read fRegisters[TCpuRegister.esi] write setRegister;
+    property EDI: TCpuRegValue index TCpuRegister.edi read fRegisters[TCpuRegister.edi] write setRegister;
+    property EBP: TCpuRegValue index TCpuRegister.ebp read fRegisters[TCpuRegister.ebp] write setRegister;
+    property ESP: TCpuRegValue index TCpuRegister.esp read fRegisters[TCpuRegister.esp] write setRegister;
+    property EIP: TCpuRegValue index TCpuRegister.eip read fRegisters[TCpuRegister.eip] write setRegister;
     {$ENDIF}
   public
-    procedure setRegister(index: TCpuRegister; value: PtrUInt);
+    constructor create(event: TSetGprEvent);
+    procedure setInspectableRegister(index: TCpuRegister; value: PtrUInt);
   end;
 
   // Makes a category for the floating point coprocessor registers in a project inspector
@@ -92,7 +97,7 @@ type
     property ST6: double read fRegisters[TFpuRegister.st6];
     property ST7: double read fRegisters[TFpuRegister.st7];
   public
-    procedure setRegister(index: TFpuRegister; value: double);
+    procedure setInspectableRegister(index: TFpuRegister; value: double);
   end;
 
   // Makes a category for the SSE registers in a project inspector
@@ -120,7 +125,7 @@ type
     property GS: byte read fSegment[TSegmentRegister.S_GS];
     property SS: byte read fSegment[TSegmentRegister.S_SS];
   public
-    constructor create;
+    constructor create(setGprEvent: TSetGprEvent);
     destructor destroy; override;
   end;
 
@@ -251,6 +256,7 @@ type
     procedure infoRegs;
     procedure infoStack;
     procedure sendCustomCommand;
+    procedure setGpr(reg: TCpuRegister; val: TCpuRegValue);
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -479,19 +485,42 @@ begin
   {$ENDIF}
 end;
 
-procedure TInspectableGPR.setRegister(index: TCpuRegister; value: PtrUInt);
+procedure TCpuRegValueEditor.SetValue(const NewValue: ansistring);
+begin
+  try
+    {$IFDEF CPU64}
+    SetInt64Value(StrToQWord(NewValue));
+    {$ELSE}
+    SetOrdValue(StrToInt(NewValue));
+    {$ENDIF}
+  except
+  end;
+end;
+
+constructor TInspectableGPR.create(event: TSetGprEvent);
+begin
+  fSetGprEvent:=event;
+end;
+
+procedure TInspectableGPR.setInspectableRegister(index: TCpuRegister; value: PtrUInt);
 begin
   fRegisters[index] := value;
 end;
 
-procedure TInspectableFPR.setRegister(index: TFpuRegister; value: double);
+procedure TInspectableGPR.setRegister(index: TCpuRegister; value: TCpuRegValue);
+begin
+  fSetGprEvent(index, value);
+  fRegisters[index] := value;
+end;
+
+procedure TInspectableFPR.setInspectableRegister(index: TFpuRegister; value: double);
 begin
   fRegisters[index] := value;
 end;
 
-constructor TInspectableState.create;
+constructor TInspectableState.create(setGprEvent: TSetGprEvent);
 begin
-  fGpr := TInspectableGPR.Create;
+  fGpr := TInspectableGPR.Create(setGprEvent);
 end;
 
 destructor TInspectableState.destroy;
@@ -511,7 +540,7 @@ begin
   fMsg:= getMessageDisplay;
   fFileLineBrks:= TStringList.Create;
   fLog := TStringList.Create;
-  fInspState := TInspectableState.Create;
+  fInspState := TInspectableState.Create(@setGpr);
   stateViewer.TIObject := fInspState;
   fJson := TJsonObject.Create;
   fStackItems := TStackItems.create;
@@ -1032,7 +1061,7 @@ begin
         if val.isNotNil then
         begin
           if (0 <= number) and (TCpuRegister(number) <= high(TCpuRegister)) then
-            fInspState.CPU.setRegister(TCpuRegister(number),
+            fInspState.CPU.setInspectableRegister(TCpuRegister(number),
             {$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
         end;
 
@@ -1212,6 +1241,17 @@ begin
     edit1.Items.Add(cmd);
   edit1.Text := '';
 end;
+
+procedure TCEGdbWidget.setGpr(reg: TCpuRegister; val: TCpuRegValue);
+const
+  spec = 'set $%s = 0x%X';
+var
+  cmd : string;
+begin
+  cmd := format(spec, [GetEnumName(typeinfo(TCpuRegister),integer(reg)), val]);
+  gdbCommand(cmd);
+end;
+
 {$ENDREGION}
 
 initialization
