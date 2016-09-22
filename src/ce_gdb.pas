@@ -169,6 +169,7 @@ type
     fAutoGetVariables: boolean;
     fCommandsHistory: TStringList;
     fIgnoredSignals: TStringList;
+    fShowGdbOutput: boolean;
     fShowOutput: boolean;
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
@@ -179,6 +180,7 @@ type
     property autoGetVariables: boolean read fAutoGetVariables write fAutoGetVariables;
     property commandsHistory: TStringList read fCommandsHistory write setCommandsHistory;
     property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
+    property showGdbOutput: boolean read fShowGdbOutput write fShowGdbOutput;
     property showOutput: boolean read fShowOutput write fShowOutput;
   public
     constructor create(aOwner: TComponent); override;
@@ -252,7 +254,7 @@ type
     procedure gdboutJsonize(sender: TObject);
     procedure interpretJson;
     // GDB commands & actions
-    procedure gdbCommand(aCommand: string; gdboutProcessor: TNotifyEvent = nil);
+    procedure gdbCommand(aCommand: string; gdbOutProcessor: TNotifyEvent = nil);
     procedure infoRegs;
     procedure infoStack;
     procedure sendCustomCommand;
@@ -293,7 +295,7 @@ begin
   fAutoGetCallStack:= true;
   fAutoGetRegisters:= true;
   fAutoGetVariables:= true;
-  fShowOutput:=true;
+  fShowGdbOutput:=true;
   fIgnoredSignals := TStringList.Create;
   fCommandsHistory := TStringList.Create;
 end;
@@ -326,6 +328,7 @@ begin
     fAutoGetCallStack:=src.fAutoGetCallStack;
     fAutoGetRegisters:=src.fAutoGetRegisters;
     fAutoGetVariables:=src.autoGetVariables;
+    fShowGdbOutput:=src.fShowGdbOutput;
     fShowOutput:=src.fShowOutput;
     fIgnoredSignals.Assign(src.fIgnoredSignals);
     fCommandsHistory.Assign(src.fCommandsHistory);
@@ -690,6 +693,7 @@ end;
 procedure TCEGdbWidget.startDebugging;
 var
   str: string;
+  gdb: string;
   i: integer;
 begin
   // protect
@@ -700,13 +704,21 @@ begin
   str := fProj.outputFilename;
   if not str.fileExists then
     exit;
+  gdb := exeFullName('gdb');
+  if not gdb.fileExists then
+    exit;
   subjDebugStart(fSubj, self as ICEDebugger);
   // gdb process
   killGdb;
   fGdb := TCEProcess.create(nil);
-  fGdb.Executable:= 'gdb' + exeExt;
+  fGdb.Executable:= gdb;
   fgdb.Options:= [poUsePipes, poStderrToOutPut];
   fgdb.Parameters.Add(str);
+
+  //TODO-cGDB: debugee environment
+  //TODO-cGDB: debugee command line
+  //TODO-cGDB: pass input to debugee
+
   fgdb.Parameters.Add('--interpreter=mi');
   fGdb.OnReadData:= @gdboutQuiet;
   fGdb.OnTerminate:= @gdboutJsonize;
@@ -797,8 +809,24 @@ procedure parseGdbout(const str: string; var json: TJSONObject);
       begin
         r^.popFront;
         if r^.front = #10 then
+        begin
+          r^.popFront;
           break;
+        end;
       end;
+    end;
+  end;
+
+  procedure parseInferior(node: TJSONObject; r: PStringRange);
+  begin
+    while true do
+    begin
+      // TODO-cGDB: detect invalid command after GDB prefix, maybe inferior output
+      if r^.empty or (r^.front in ['~','^','*','=','&',(*'+',*)'@']) then
+        break;
+      node.Arrays['OUT'].Add(r^.takeUntil(#10).yield);
+      if not r^.empty then
+        r^.popFront;
     end;
   end;
 
@@ -835,6 +863,11 @@ procedure parseGdbout(const str: string; var json: TJSONObject);
           exit;
         end;
         ',': r^.popFront;
+        #10:
+        begin
+          r^.popFront;
+          exit;
+        end;
       end;
     end;
   end;
@@ -898,8 +931,9 @@ begin
   json.Clear;
   if str.length = 0 then
     exit;
-  json.Arrays['CLI'] := TJSONArray.Create;
   rng.init(str);
+  json.Arrays['OUT'] := TJSONArray.Create;
+  json.Arrays['CLI'] := TJSONArray.Create;
   while true do
   begin
     if rng.empty then
@@ -920,11 +954,29 @@ begin
       begin
         parseCLI(json, rng.popFront);
       end;
+      // internal gdb messages
+      '&':
+      begin
+        rng.popUntil(#10);
+        if not rng.empty then
+          rng.popFront;
+      end;
+      // async notify / status / out stream when remote (@)
+      '=', (*'+',*)'@':
+      begin
+        rng.popUntil(#10);
+        if not rng.empty then
+          rng.popFront;
+      end
+      else
+      begin
+        if rng.startsWith('(gdb)') then
+          rng.popFrontN(7)
+        // empty line, inferior output
+        else
+          parseInferior(json, @rng);
+      end;
     end;
-    // else line is not interesting
-    rng.popUntil(#10);
-    if not rng.empty then
-      rng.popFront;
   end;
 end;
 
@@ -948,7 +1000,6 @@ var
   line: integer = -1;
   // registers data
   number: integer = 0;
-  gprval: PtrUInt = 0;
   // signal data
   sigmean: string;
   signame: string;
@@ -983,6 +1034,7 @@ begin
           infoRegs;
         subjDebugBreak(fSubj, fullname, line, brkreason);
       end;
+
     end
 
     else if reason = 'signal-received' then
@@ -1041,6 +1093,12 @@ begin
     else if (reason = 'exited-normally') or (reason = 'exited-signalled') then
       subjDebugStop(fSubj);
 
+  end;
+
+  val := fJson.Find('msg');
+  if val.isNotNil then
+  begin
+    fMsg.message(val.AsString, nil, amcMisc, amkAuto);
   end;
 
   val := fJson.Find('register-values');
@@ -1107,9 +1165,17 @@ begin
     fStackItems.assignToList(lstCallStack);
   end;
 
-  if fOptions.showOutput then
+  if fOptions.showGdbOutput then
   begin
     arr := TJSONArray(fJson.Find('CLI'));
+    if arr.isNotNil then
+      for i := 0 to arr.Count-1 do
+        fMsg.message(arr.Strings[i], nil, amcMisc, amkBub);
+  end;
+
+  if fOptions.showOutput then
+  begin
+    arr := TJSONArray(fJson.Find('OUT'));
     if arr.isNotNil then
       for i := 0 to arr.Count-1 do
         fMsg.message(arr.Strings[i], nil, amcMisc, amkBub);
@@ -1127,8 +1193,8 @@ begin
 
   fLog.Clear;
   fGdb.getFullLines(fLog);
-  for str in fLog do
-    fMsg.message(str, nil, amcMisc, amkAuto);
+  //for str in fLog do
+  //  fMsg.message(str, nil, amcMisc, amkAuto);
 
   if flog.Text.isEmpty then
     exit;
@@ -1155,14 +1221,13 @@ end;
 {$ENDREGION}
 
 {$REGIOn GDB commands & actions ------------------------------------------------}
-procedure TCEGdbWidget.gdbCommand(aCommand: string; gdboutProcessor: TNotifyEvent = nil);
+procedure TCEGdbWidget.gdbCommand(aCommand: string; gdbOutProcessor: TNotifyEvent = nil);
 begin
-  if fGdb = nil then exit;
-  if not fGdb.Running then exit;
-  //
+  if fGdb.isNil or not fGdb.Running then
+    exit;
   aCommand += #10;
-  if assigned(gdboutProcessor) then
-    fGdb.OnReadData := gdboutProcessor;
+  if assigned(gdbOutProcessor) then
+    fGdb.OnReadData := gdbOutProcessor;
   fGdb.Input.Write(aCommand[1], aCommand.length);
 end;
 
