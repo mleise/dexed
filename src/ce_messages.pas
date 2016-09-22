@@ -7,9 +7,9 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
   EditBtn, lcltype, ce_widget, ActnList, Menus, clipbrd, AnchorDocking, math,
-  TreeFilterEdit, Buttons, process, GraphType, fgl,ce_ddemangle,
-  ce_writableComponent, ce_common, ce_synmemo, ce_interfaces, ce_observer,
-  ce_processes, ce_sharedres, ce_stringrange, ce_dsgncontrols;
+  TreeFilterEdit, Buttons, process, GraphType, fgl,
+  ce_ddemangle, ce_writableComponent, ce_common, ce_synmemo, ce_interfaces,
+  ce_observer, ce_sharedres, ce_stringrange, ce_dsgncontrols;
 
 type
 
@@ -344,8 +344,6 @@ begin
 end;
 
 procedure TCEMessagesWidget.listDeletion(Sender: TObject; Node: TTreeNode);
-var
-  i: integer;
 begin
   if node.data.isNotNil then
     Dispose(PMessageData(Node.Data));
