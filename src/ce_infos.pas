@@ -197,6 +197,12 @@ begin
     free;
   end;
   //
+  {$IFDEF UNIX}
+  itm := TToolInfo.Construct(self, tikOptional, 'gdb',
+      'optional, the GNU debugger');
+  itm.Parent := boxTools;
+  itm.ReAlign;
+  {$ENDIF}
   itm := TToolInfo.Construct(self, tikOptional, 'dscanner',
     'optional, the D source code analyzer');
   itm.Parent := boxTools;
@@ -244,6 +250,7 @@ begin
   itm.Parent := boxTools;
   itm.ReAlign;
   //
+  Height := boxTools.ControlCount * 30 + 150;
   Realign;
 end;
 
