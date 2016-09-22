@@ -373,6 +373,17 @@ type
   end;
 
 
+  // TODO-cOptions: widgets that expose options can use ICEOptionsEditor in their ctxt menu
+
+  (**
+   * Single service provided by the options editor.
+   *)
+  ICEOptionsEditor = interface(ICESingleService)
+    // Shows the editor. When observer is not nil, its category is selected.
+    procedure showOptionEditor(observer: ICEEditableOptions = nil);
+  end;
+
+
   TDCDCompletionKind = (
     dckClass,
     dckInterface,
@@ -431,6 +442,7 @@ type
   function getSymStringExpander: ICESymStringExpander;
   function getProjectGroup: ICEProjectGroup;
   function getExplorer: ICEExplorer;
+  function getOptionsEditor: ICEOptionsEditor;
 
 implementation
 
@@ -571,6 +583,10 @@ begin
   exit(EntitiesConnector.getSingleService('ICEExplorer') as ICEExplorer);
 end;
 
+function getOptionsEditor: ICEOptionsEditor;
+begin
+  exit(EntitiesConnector.getSingleService('ICEOptionsEditor') as ICEOptionsEditor);
+end;
 {$ENDREGION}
 
 end.

@@ -14,24 +14,24 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
     ClientHeight = 493
     ClientWidth = 559
     inherited Content: TPanel
-      Height = 493
+      Height = 457
       Width = 559
-      ClientHeight = 493
+      ClientHeight = 457
       ClientWidth = 559
       object pnlBody: TPanel[0]
         Left = 4
-        Height = 451
+        Height = 415
         Top = 4
         Width = 551
         Align = alClient
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 451
+        ClientHeight = 415
         ClientWidth = 551
         TabOrder = 0
         object selCat: TTreeView
           Left = 0
-          Height = 451
+          Height = 415
           Top = 0
           Width = 150
           Align = alLeft
@@ -49,17 +49,17 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
         end
         object pnlEd: TPanel
           Left = 156
-          Height = 451
+          Height = 415
           Top = 0
           Width = 395
           Align = alClient
           BevelOuter = bvNone
-          ClientHeight = 451
+          ClientHeight = 415
           ClientWidth = 395
           TabOrder = 1
           object inspector: TTIPropertyGrid
             Left = 0
-            Height = 451
+            Height = 415
             Top = 0
             Width = 395
             Align = alClient
@@ -77,7 +77,7 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
         end
         object Splitter1: TSplitter
           Left = 150
-          Height = 451
+          Height = 415
           Top = 0
           Width = 6
         end
@@ -85,7 +85,7 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
       object pnlFooter: TPanel[1]
         Left = 4
         Height = 30
-        Top = 459
+        Top = 423
         Width = 551
         Align = alBottom
         BorderSpacing.Around = 4
@@ -116,6 +116,9 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
           OnClick = btnAcceptClick
         end
       end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 551
     end
   end
   inherited contextMenu: TPopupMenu

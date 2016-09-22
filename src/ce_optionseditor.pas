@@ -22,7 +22,7 @@ type
 
   { TCEOptionEditorWidget }
 
-  TCEOptionEditorWidget = class(TCEWidget)
+  TCEOptionEditorWidget = class(TCEWidget, ICEOptionsEditor)
     btnCancel: TSpeedButton;
     btnAccept: TSpeedButton;
     pnlEd: TPanel;
@@ -50,6 +50,8 @@ type
     procedure updateCategories;
     function allowCategoryChange: boolean;
     function sortCategories(Cat1, Cat2: TTreeNode): integer;
+    procedure showOptionEditor(observer: ICEEditableOptions = nil);
+    function singleServiceName: string;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -74,6 +76,8 @@ begin
   //
   AssignPng(btnCancel, 'CANCEL');
   AssignPng(btnAccept, 'ACCEPT');
+  //
+  EntitiesConnector.addSingleService(self);
 end;
 
 destructor TCEOptionEditorWidget.destroy;
@@ -91,6 +95,26 @@ end;
 {$ENDREGION}
 
 {$REGION Option editor things --------------------------------------------------}
+procedure TCEOptionEditorWidget.showOptionEditor(observer: ICEEditableOptions = nil);
+var
+  n: TTreeNode;
+begin
+  if assigned(observer) then
+  begin
+    if selCat.Items.Count = 0 then
+      updateCategories;
+    n := selCat.Items.FindNodeWithText(observer.optionedWantCategory());
+    if n.isNotNil then
+      selCat.Selected := n;
+  end;
+  showWidget;
+end;
+
+function TCEOptionEditorWidget.singleServiceName: string;
+begin
+  exit('ICEOptionsEditor');
+end;
+
 procedure TCEOptionEditorWidget.updateCategories;
 var
   i: Integer;
