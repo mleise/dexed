@@ -139,6 +139,7 @@ type
     property name: string read fFname;
   end;
 
+  // The call stack
   TStackItems = class
   strict private
     fItems: TCollection;
@@ -152,20 +153,26 @@ type
   end;
 
   // TODO-cGDB: shortcuts
+  // TODO-cGDB: assembly view
+  // TODO-cGDB: show locals
+
   TCEDebugOptionsBase = class(TWritableLfmTextComponent)
   private
     fAutoDemangle: boolean;
     fAutoGetCallStack: boolean;
     fAutoGetRegisters: boolean;
     fAutoGetVariables: boolean;
+    fCommandsHistory: TStringList;
     fIgnoredSignals: TStringList;
     fShowOutput: boolean;
     procedure setIgnoredSignals(value: TStringList);
+    procedure setCommandsHistory(value: TStringList);
   published
     property autoDemangle: boolean read fAutoDemangle write fAutoDemangle;
     property autoGetCallStack: boolean read fAutoGetCallStack write fAutoGetCallStack;
     property autoGetRegisters: boolean read fAutoGetRegisters write fAutoGetRegisters;
     property autoGetVariables: boolean read fAutoGetVariables write fAutoGetVariables;
+    property commandsHistory: TStringList read fCommandsHistory write setCommandsHistory;
     property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
     property showOutput: boolean read fShowOutput write fShowOutput;
   public
@@ -198,7 +205,7 @@ type
     btnStart: TCEToolButton;
     btnStop: TCEToolButton;
     button4: TCEToolButton;
-    Edit1: TEdit;
+    Edit1: TComboBox;
     lstCallStack: TListView;
     Panel2: TPanel;
     Panel3: TPanel;
@@ -243,6 +250,7 @@ type
     procedure gdbCommand(aCommand: string; gdboutProcessor: TNotifyEvent = nil);
     procedure infoRegs;
     procedure infoStack;
+    procedure sendCustomCommand;
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -281,17 +289,24 @@ begin
   fAutoGetVariables:= true;
   fShowOutput:=true;
   fIgnoredSignals := TStringList.Create;
+  fCommandsHistory := TStringList.Create;
 end;
 
 destructor TCEDebugOptionsBase.destroy;
 begin
   fIgnoredSignals.Free;
+  fCommandsHistory.Free;
   inherited;
 end;
 
 procedure TCEDebugOptionsBase.setIgnoredSignals(value: TStringList);
 begin
   fIgnoredSignals.Assign(value);
+end;
+
+procedure TCEDebugOptionsBase.setCommandsHistory(value: TStringList);
+begin
+  fCommandsHistory.Assign(value);
 end;
 
 procedure TCEDebugOptionsBase.assign(source: TPersistent);
@@ -307,6 +322,7 @@ begin
     fAutoGetVariables:=src.autoGetVariables;
     fShowOutput:=src.fShowOutput;
     fIgnoredSignals.Assign(src.fIgnoredSignals);
+    fCommandsHistory.Assign(src.fCommandsHistory);
   end
   else inherited;
 end;
@@ -501,13 +517,15 @@ begin
   fStackItems := TStackItems.create;
   fSubj:= TCEDebugObserverSubject.Create;
   fOptions:= TCEDebugOptions.create(self);
+  Edit1.Items.Assign(fOptions.commandsHistory);
   //
-  // TODO-cGDB: add command history
   AssignPng(btnSendCom, 'ACCEPT');
 end;
 
 destructor TCEGdbWidget.destroy;
 begin
+  fOptions.commandsHistory.Assign(edit1.Items);
+  fOptions.Free;
   fFileLineBrks.Free;
   fLog.Free;
   killGdb;
@@ -717,7 +735,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGIOn GDB output processors -------------------------------------------------}
+{$REGION GDB output processors -------------------------------------------------}
 procedure parseGdbout(const str: string; var json: TJSONObject);
 
   procedure parseProperty(node: TJSONObject; r: PStringRange); forward;
@@ -873,10 +891,8 @@ begin
       begin
         parseCLI(json, rng.popFront);
       end;
-      // what would be output in a console by the debugee
-      // ...
     end;
-    // line is not interesting
+    // else line is not interesting
     rng.popUntil(#10);
     if not rng.empty then
       rng.popFront;
@@ -1123,13 +1139,11 @@ end;
 
 procedure TCEGdbWidget.infoRegs;
 begin
-  // GDBMI output format, "info registers" is for CLI output
   gdbCommand('-data-list-register-values d', @gdboutJsonize);
 end;
 
 procedure TCEGdbWidget.infoStack;
 begin
-  // GDBMI output format, "info frame" is for CLI output
   gdbCommand('-stack-list-frames', @gdboutJsonize);
 end;
 
@@ -1163,6 +1177,11 @@ begin
   infoRegs;
 end;
 
+procedure TCEGdbWidget.btnStackClick(Sender: TObject);
+begin
+  infoStack;
+end;
+
 procedure TCEGdbWidget.btnStopClick(Sender: TObject);
 begin
   pauseDebugee;
@@ -1172,22 +1191,29 @@ end;
 
 procedure TCEGdbWidget.btnSendComClick(Sender: TObject);
 begin
-  gdbCommand(edit1.Text, @gdboutJsonize);
-  edit1.Text := '';
-end;
-
-procedure TCEGdbWidget.btnStackClick(Sender: TObject);
-begin
-  infoStack;
+  sendCustomCommand;
 end;
 
 procedure TCEGdbWidget.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Key <> byte(#13) then exit;
-  gdbCommand(edit1.Text, @gdboutJsonize);
+  if Key = byte(#13) then
+    sendCustomCommand;
+end;
+
+procedure TCEGdbWidget.sendCustomCommand;
+var
+  cmd: string;
+begin
+  cmd := edit1.Text;
+  if cmd.isBlank or cmd.isEmpty then
+    exit;
+  gdbCommand(cmd, @gdboutJsonize);
+  if edit1.Items.IndexOf(cmd) = -1 then
+    edit1.Items.Add(cmd);
   edit1.Text := '';
 end;
 {$ENDREGION}
+
 initialization
   RegisterPropertyEditor(TypeInfo(TCpuRegValue), nil, '', TCpuRegValueEditor);
 end.

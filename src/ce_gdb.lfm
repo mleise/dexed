@@ -39,18 +39,6 @@ inherited CEGdbWidget: TCEGdbWidget
           ClientHeight = 28
           ClientWidth = 509
           TabOrder = 0
-          object Edit1: TEdit
-            Left = 0
-            Height = 24
-            Hint = 'custom GDB command'
-            Top = 2
-            Width = 477
-            Align = alClient
-            BorderSpacing.Top = 2
-            BorderSpacing.Bottom = 2
-            OnKeyUp = Edit1KeyUp
-            TabOrder = 0
-          end
           object btnSendCom: TSpeedButton
             Left = 479
             Height = 24
@@ -59,6 +47,20 @@ inherited CEGdbWidget: TCEGdbWidget
             Align = alRight
             BorderSpacing.Around = 2
             OnClick = btnSendComClick
+          end
+          object Edit1: TComboBox
+            Left = 0
+            Height = 28
+            Hint = 'Custom GDB command'
+            Top = 0
+            Width = 477
+            Align = alClient
+            AutoComplete = True
+            AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            ItemHeight = 0
+            MaxLength = 64
+            OnKeyUp = Edit1KeyUp
+            TabOrder = 0
           end
         end
         object stateViewer: TTIPropertyGrid
