@@ -106,6 +106,25 @@ type
     // 4 int ? 2 double ? 4 single ? ...
   end;
 
+
+  // Makes a category for the local variables in an object inspector
+  TInspectableLocals= class(TPersistent)
+  private
+    fLocals: TStringList;
+    fPropIndex: integer;
+    procedure readProp(Reader: TReader);
+    procedure writeProp(Writer: TWriter);
+  protected
+    procedure DefineProperties(Filer: TFiler); override;
+  published
+    property raw: TStringList read fLocals;
+  public
+    constructor create;
+    destructor destroy; override;
+    procedure clear;
+    procedure add(const name,value: string);
+  end;
+
   // Stores the registers content, to be displayable in an object inspector.
   TInspectableState = class(TPersistent)
   private
@@ -113,7 +132,9 @@ type
     fSegment: array[TSegmentRegister] of byte;
     fGpr: TInspectableGPR;
     fFpr: TInspectableFPR;
+    fLocals: TInspectableLocals;
   published
+    property Locals: TInspectableLocals read fLocals;
     property CPU: TInspectableGPR read fGpr;
     //
     property EFLAGS: TEFLAG read fFlags;
@@ -159,7 +180,6 @@ type
 
   // TODO-cGDB: shortcuts
   // TODO-cGDB: assembly view
-  // TODO-cGDB: show locals
 
   TCEDebugOptionsBase = class(TWritableLfmTextComponent)
   private
@@ -204,6 +224,7 @@ type
   { TCEGdbWidget }
   TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger)
     btnContinue: TCEToolButton;
+    btnLocals: TCEToolButton;
     btnNext: TCEToolButton;
     btnOver: TCEToolButton;
     btnPause: TCEToolButton;
@@ -219,6 +240,7 @@ type
     btnSendCom: TSpeedButton;
     stateViewer: TTIPropertyGrid;
     procedure btnContClick(Sender: TObject);
+    procedure btnLocalsClick(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
     procedure btnOverClick(Sender: TObject);
     procedure btnPauseClick(Sender: TObject);
@@ -257,6 +279,7 @@ type
     procedure gdbCommand(aCommand: string; gdbOutProcessor: TNotifyEvent = nil);
     procedure infoRegs;
     procedure infoStack;
+    procedure infoLocals;
     procedure sendCustomCommand;
     procedure setGpr(reg: TCpuRegister; val: TCpuRegValue);
     //
@@ -521,14 +544,63 @@ begin
   fRegisters[index] := value;
 end;
 
+constructor TInspectableLocals.create;
+begin
+  fLocals := TStringList.Create;
+end;
+
+destructor TInspectableLocals.destroy;
+begin
+  fLocals.Free;
+  inherited;
+end;
+
+procedure TInspectableLocals.DefineProperties(Filer: TFiler);
+var
+  i: integer;
+begin
+  //TODO-cGDB: The object inspector doesn't use DefineProperties to discover custom properties
+  inherited;
+  for i := 0 to fLocals.Count-1 do
+  begin
+    fPropIndex := i;
+    filer.DefineProperty(fLocals.Names[i], @readProp, @writeProp, true);
+  end;
+end;
+
+procedure TInspectableLocals.readProp(Reader: TReader);
+begin
+end;
+
+procedure TInspectableLocals.writeProp(Writer: TWriter);
+begin
+  try
+    writer.WriteString(fLocals.ValueFromIndex[fPropIndex]);
+  except
+    writer.WriteString('<N/A>');
+  end;
+end;
+
+procedure TInspectableLocals.clear;
+begin
+  fLocals.Clear;
+end;
+
+procedure TInspectableLocals.add(const name,value: string);
+begin
+  fLocals.Values[name] := value;
+end;
+
 constructor TInspectableState.create(setGprEvent: TSetGprEvent);
 begin
   fGpr := TInspectableGPR.Create(setGprEvent);
+  fLocals := TInspectableLocals.create;
 end;
 
 destructor TInspectableState.destroy;
 begin
   fGpr.Free;
+  fLocals.Free;
   inherited;
 end;
 {$ENDREGION}
@@ -874,7 +946,7 @@ procedure parseGdbout(const str: string; var json: TJSONObject);
 
   procedure parseProperty(node: TJSONObject; r: PStringRange);
   var
-    idt: string;
+    idt,v: string;
     c: char;
   begin
     while true do
@@ -1003,6 +1075,8 @@ end;
 
 // *stopped,reason="signal-received",signal-name="SIGSEGV",signal-meaning="Segmentation fault",frame={addr="0x000000000049fb89",func="D main",args=[{name="args",value="..."}],file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="25"},thread-id="1",stopped-threads="all",core="3"
 
+// ^done,locals=[{name="resItems",value="0x0"},{name="wantHelp",value="false"},{name="addMain",value="false"},{name="verbose",value="false"},{name="outputFname",value="0x0"},{name="moduleName",value="0x0"},{name="scriptFile",value="0x0"},{name="opt",value="0x0"},{name="fraws",value="0x0"},{name="fb16s",value="0x0"},{name="fb64s",value="0x0"},{name="fz85s",value="0x0"},{name="fe7Fs",value="0x0"},{name="p",value="2"},{name="scriptData",value="0x7ffff7fcb000 \"\""},{name="tempItems",value="0x7ffff7de4b8c <check_match+300>"},{name="__r2961",value="<error reading variable>"},{name="__key2962",value="6"},{name="itm",value="0x8"},{name="enc",value="<incomplete type>"},{name="__aggr2968",value="{impl = {_refCounted = {_store = 0x7ffff7de54fe <do_lookup_x+2334>}}}"},{name="fname",value="{_name = 0x7ffff7de4b8c <check_match+300> \"\\205\\300t\\212\\351r\\377\\377\\377<\\006\\017\\204\\345\\376\\377\\377\\061\\300\\220\\353\\320I\\213|$\\020H\\205\\377\\017\\204j\\377\\377\\377\\350[m\", _statBuf = {st_dev = 140737336278312, st_ino = 2111285930, st_nlink = 1, st_mode = 8, st_uid = 0, st_gid = 4160534048, __pad0 = 32767, st_rdev = 140737351931134, st_size = 0, st_blksize = 140737488345600, st_blocks = 140737349680912, st_atime = 140737349688136, st_atimensec = 140737488345872, st_mtime = 32988842, st_mtimensec = 140737488345856, st_ctime = 3773176208, st_ctimensec = 0, __unused = {140737353922192, 140737354102360, 4381215}}, _lstatMode = 4156300944, _dType = 255 '\\377', _didLStat = 127, _didStat = false, _dTypeSet = false}"},{name="__flag",value="0"},{name="__EAX",value="0x7ffff72962a0 <_IO_2_1_stdout_>"},{name="__exception_object",value="0xcff14ec8"},{name="__r2969",value="0xbac24e6a"},{name="__key2970",value="6"},{name="itm",value="0x7ffff7de54fe <do_lookup_x+2334> \"H\\205\\300L\\213L$\\bL\\213D$(L\\213\\\\$0\\017\\205|\\370\\377\\377H\\213T$\\030H\\213t$\\020\\213\\n\\351y\\377\\377\\377H\\215\\r\\b\\016\\001\""},{name="elems",value="0x7fffffffdb90"},{name="i",value="0"},{name="r",value="0x749200 <gc.gc.GC.gcLock> \"\""},{name="__r2973",value="0x4f67ed <core.internal.spinlock.SpinLock.lock+29>"},{name="__key2974",value="140737488346392"},{name="fname",value="0x749200 <gc.gc.GC.gcLock> \"\""},{name="__r2975",value="<error reading variable>"},{name="__key2976",value="8013895"},{name="fname",value="\" \\267P\\000\\000\\000\\000\\000\\020\\271P\\000\\000\\000\\000\\000p\\271P\\000\\000\\000\\000\\000\320\271P\\000\\000\\000\\000\\000p\\272P\\000\\000\\000\\000\\000p\\273P\\000\\000\\000\\000\\000\\020\\301P\\000\\000\\000\\000\""},{name="__r2977",value="{<error reading variable>}"},{name="__key2978",value="140737488346304"},{name="fname",value="0x4c586c <rt.minfo.moduleinfos_apply(scope int(immutable(object.ModuleInfo*)) delegate)+32> \"\\203\\370\\002t\\002\\353\\b\\213E\\350H\\213\\345]\\303\\061\311\211M\\350H\\211\\310H\\213\\345]\\303\\017\\037@\""},{name="__r2979",value="0x4bfb9c <object.ModuleInfo.opApply(scope int(object.ModuleInfo*) delegate)+32>"},{name="__key2980",value="140737488346848"},{name="fname",value="0x4d9fc2 <runModuleUnitTests+234> \"\\203\", <incomplete sequence \\370>"},{name="__r2981",value="0xffffffffffffffff"},{name="__key2982",value="18446744073709551615"},{name="fname",value="0xffffffffffffffff <error: Cannot access memory at address 0xffffffffffffffff>"},{name="__key2983",value="18446744073709551615"},{name="__limit2984",value="18446744073709551615"},{name="i",value="18446744073709551615"},{name="__dollar",value="2147483652"},{name="__key3011",value="0"},{name="__limit3012",value="3175046533389221921"},{name="i",value="0"},{name="__dollar",value="0"},{name="__key3013",value="0"},{name="__limit3014",value="7639552"},{name="i",value="140737488346272"},{name="__dollar",value="5203949"},{name="__key3015",value="140737488346392"},{name="__limit3016",value="5232156"},{name="i",value="0"},{name="__dollar",value="7639552"},{name="__key3061",value="140737488346368"},{name="__limit3062",value="5119403"},{name="i",value="7697680"},{name="__dollar",value="5307488"},{name="__key3063",value="5232156"},{name="__limit3064",value="1"},{name="i",value="8013895"},{name="__dollar",value="0"},{name="__flag",value="0"},{name="__EAX",value="0x7ffff72962a0 <_IO_2_1_stdout_>"},{name="__exception_object",value="0x0"},{name="__key2693",value="7639552"},{name="__limit2694",value="140737488346272"},{name="i",value="5203949"}]
+
 procedure TCEGdbWidget.interpretJson;
 var
   i: integer;
@@ -1010,6 +1084,7 @@ var
   obj: TJSONObject;
   arr: TJSONArray;
   // common data
+  nme: string;
   reason: string;
   addr: PtrUint = 0;
   fullname: string = '';
@@ -1182,6 +1257,30 @@ begin
     fStackItems.assignToList(lstCallStack);
   end;
 
+  val := fJson.Find('locals');
+  if val.isNotNil and (val.JSONType = jtArray) then
+  begin
+    fInspState.Locals.clear;
+    arr := TJSONArray(val);
+    for i := 0 to arr.Count-1 do
+    begin
+      val := arr.Items[i];
+      if val.JSONType <> jtObject then
+        continue;
+      obj := TJSONObject(val);
+      val := obj.Find('name');
+      if val.isNil then
+        continue;
+      nme := val.AsString;
+      val := obj.Find('value');
+      if val.isNil then
+        continue;
+      fInspState.Locals.add(nme, val.AsString);
+    end;
+    stateViewer.RefreshPropertyValues;
+    stateViewer.BuildPropertyList;
+  end;
+
   if fOptions.showGdbOutput then
   begin
     arr := TJSONArray(fJson.Find('CLI'));
@@ -1210,8 +1309,8 @@ begin
 
   fLog.Clear;
   fGdb.getFullLines(fLog);
-  //for str in fLog do
-  //  fMsg.message(str, nil, amcMisc, amkAuto);
+  for str in fLog do
+    fMsg.message(str, nil, amcMisc, amkAuto);
 
   if flog.Text.isEmpty then
     exit;
@@ -1258,6 +1357,11 @@ begin
   gdbCommand('-stack-list-frames', @gdboutJsonize);
 end;
 
+procedure TCEGdbWidget.infoLocals;
+begin
+  gdbCommand('-stack-list-locals 1');
+end;
+
 procedure TCEGdbWidget.btnStartClick(Sender: TObject);
 begin
   startDebugging;
@@ -1266,6 +1370,11 @@ end;
 procedure TCEGdbWidget.btnContClick(Sender: TObject);
 begin
   gdbCommand('continue', @gdboutJsonize);
+end;
+
+procedure TCEGdbWidget.btnLocalsClick(Sender: TObject);
+begin
+  infoLocals;
 end;
 
 procedure TCEGdbWidget.btnNextClick(Sender: TObject);

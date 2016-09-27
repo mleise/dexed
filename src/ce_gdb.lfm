@@ -71,7 +71,7 @@ inherited CEGdbWidget: TCEGdbWidget
           Align = alClient
           CheckboxForBoolean = True
           DefaultValueFont.Color = clWindowText
-          Filter = [tkInteger, tkChar, tkEnumeration, tkFloat, tkSet, tkMethod, tkSString, tkLString, tkAString, tkWString, tkVariant, tkArray, tkRecord, tkInterface, tkClass, tkObject, tkWChar, tkBool, tkInt64, tkQWord, tkDynArray, tkInterfaceRaw, tkProcVar, tkUString, tkUChar, tkHelper, tkFile, tkClassRef, tkPointer]
+          Filter = [tkUnknown, tkInteger, tkChar, tkEnumeration, tkFloat, tkSet, tkMethod, tkSString, tkLString, tkAString, tkWString, tkVariant, tkArray, tkRecord, tkInterface, tkClass, tkObject, tkWChar, tkBool, tkInt64, tkQWord, tkDynArray, tkInterfaceRaw, tkProcVar, tkUString, tkUChar, tkHelper, tkFile, tkClassRef, tkPointer]
           Indent = 10
           NameFont.Color = clWindowText
           PreferredSplitterX = 200
@@ -170,6 +170,14 @@ inherited CEGdbWidget: TCEGdbWidget
         Caption = 'btnOver'
         OnClick = btnOverClick
         resourceName = 'GO_JUMP'
+        scaledSeparator = False
+      end
+      object btnLocals: TCEToolButton[9]
+        Left = 241
+        Top = 0
+        Caption = 'btnLocals'
+        OnClick = btnLocalsClick
+        resourceName = 'WATCH_WINDOW'
         scaledSeparator = False
       end
     end
