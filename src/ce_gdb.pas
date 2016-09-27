@@ -42,7 +42,7 @@ type
 
   TSetGprEvent = procedure(reg: TCpuRegister; val: TCpuRegValue) of object;
 
-  // Makes a category for the general purpose registers in a project inspector
+  // Makes a category for the general purpose registers in a object inspector
   TInspectableGPR = class(TPersistent)
   private
     fRegisters: array[TCpuRegister] of TCpuRegValue;
@@ -83,7 +83,7 @@ type
     procedure setInspectableRegister(index: TCpuRegister; value: PtrUInt);
   end;
 
-  // Makes a category for the floating point coprocessor registers in a project inspector
+  // Makes a category for the floating point coprocessor registers in a object inspector
   TInspectableFPR = class(TPersistent)
   private
     fRegisters: array[TFpuRegister] of double;
@@ -100,7 +100,7 @@ type
     procedure setInspectableRegister(index: TFpuRegister; value: double);
   end;
 
-  // Makes a category for the SSE registers in a project inspector
+  // Makes a category for the SSE registers in a object inspector
   TInspectableSSER = class(TPersistent)
     // interpretation is a problem:
     // 4 int ? 2 double ? 4 single ? ...
@@ -894,7 +894,24 @@ procedure parseGdbout(const str: string; var json: TJSONObject);
         end;
         '"':
         begin
-          node.Strings[idt] := r^.popFront^.takeUntil('"').yield;
+          v := '';
+          r^.popFront;
+          while true do
+          begin
+            v += r^.takeUntil(['"','\']).yield;
+            if r^.front = '\' then
+            begin
+              v += '\';
+              r^.popFront;
+              if r^.front = '"' then
+              begin
+                r^.popFront;
+                v += '"';
+              end;
+            end else
+              break;
+          end;
+          node.Strings[idt] := v;
           r^.popFront;
         end;
         '{':
