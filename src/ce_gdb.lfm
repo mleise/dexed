@@ -51,7 +51,7 @@ inherited CEGdbWidget: TCEGdbWidget
           object Edit1: TComboBox
             Left = 0
             Height = 28
-            Hint = 'Custom GDB command'
+            Hint = 'custom GDB command'
             Top = 0
             Width = 477
             Align = alClient
@@ -65,8 +65,8 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object stateViewer: TTIPropertyGrid
           Left = 0
-          Height = 313
-          Top = 240
+          Height = 207
+          Top = 346
           Width = 517
           Align = alClient
           CheckboxForBoolean = True
@@ -80,12 +80,44 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object lstCallStack: TListView
           Left = 0
-          Height = 240
+          Height = 184
+          Hint = 'call stack'
           Top = 0
           Width = 517
           Align = alTop
           Columns = <>
           TabOrder = 2
+        end
+        object ValueListEditor1: TValueListEditor
+          Left = 2
+          Height = 158
+          Hint = 'variables'
+          Top = 186
+          Width = 513
+          Align = alTop
+          AutoAdvance = aaDown
+          BorderSpacing.Around = 2
+          BorderStyle = bsNone
+          Color = clDefault
+          DefaultColWidth = 128
+          DefaultRowHeight = 24
+          FixedCols = 0
+          Flat = True
+          GridLineWidth = 0
+          RowCount = 2
+          TabOrder = 3
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goAlwaysShowEditor, goThumbTracking]
+          Strings.Strings = (
+            ''
+          )
+          TitleCaptions.Strings = (
+            'name'
+            'value'
+          )
+          ColWidths = (
+            128
+            385
+          )
         end
       end
     end
@@ -102,7 +134,7 @@ inherited CEGdbWidget: TCEGdbWidget
       end
       object btnReg: TCEToolButton[1]
         Left = 185
-        Hint = 'view CPU registers'
+        Hint = 'update CPU registers values'
         Top = 0
         Caption = 'btnReg'
         OnClick = btnRegClick
@@ -172,11 +204,12 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'GO_JUMP'
         scaledSeparator = False
       end
-      object btnLocals: TCEToolButton[9]
+      object btnVariables: TCEToolButton[9]
         Left = 241
+        Hint = 'update variables list'
         Top = 0
-        Caption = 'btnLocals'
-        OnClick = btnLocalsClick
+        Caption = 'btnVariables'
+        OnClick = btnVariablesClick
         resourceName = 'WATCH_WINDOW'
         scaledSeparator = False
       end

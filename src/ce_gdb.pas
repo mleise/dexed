@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, RegExpr, ComCtrls,
   PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
-  StdCtrls, process, fpjson, typinfo,
+  StdCtrls, ValEdit, process, fpjson, typinfo,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
   ce_ddemangle, ce_writableComponent;
@@ -224,7 +224,7 @@ type
   { TCEGdbWidget }
   TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger)
     btnContinue: TCEToolButton;
-    btnLocals: TCEToolButton;
+    btnVariables: TCEToolButton;
     btnNext: TCEToolButton;
     btnOver: TCEToolButton;
     btnPause: TCEToolButton;
@@ -239,8 +239,9 @@ type
     Panel3: TPanel;
     btnSendCom: TSpeedButton;
     stateViewer: TTIPropertyGrid;
+    ValueListEditor1: TValueListEditor;
     procedure btnContClick(Sender: TObject);
-    procedure btnLocalsClick(Sender: TObject);
+    procedure btnVariablesClick(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
     procedure btnOverClick(Sender: TObject);
     procedure btnPauseClick(Sender: TObject);
@@ -279,7 +280,7 @@ type
     procedure gdbCommand(aCommand: string; gdbOutProcessor: TNotifyEvent = nil);
     procedure infoRegs;
     procedure infoStack;
-    procedure infoLocals;
+    procedure infoVariables;
     procedure sendCustomCommand;
     procedure setGpr(reg: TCpuRegister; val: TCpuRegValue);
     //
@@ -320,7 +321,9 @@ begin
   fAutoGetVariables:= true;
   fShowGdbOutput:=true;
   fIgnoredSignals := TStringList.Create;
+  fIgnoredSignals.Duplicates:= dupIgnore;
   fCommandsHistory := TStringList.Create;
+  fCommandsHistory.Duplicates:= dupIgnore;
 end;
 
 destructor TCEDebugOptionsBase.destroy;
@@ -445,7 +448,6 @@ begin
     list.Columns.Add;
     list.Columns.Add;
   end;
-  list.Column[0].MaxWidth:= 250;
   list.Column[0].Caption:= 'function';
   list.Column[1].Caption:= 'address';
   list.Column[2].Caption:= 'filename';
@@ -1075,9 +1077,20 @@ end;
 
 // *stopped,reason="signal-received",signal-name="SIGSEGV",signal-meaning="Segmentation fault",frame={addr="0x000000000049fb89",func="D main",args=[{name="args",value="..."}],file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="25"},thread-id="1",stopped-threads="all",core="3"
 
-// ^done,locals=[{name="resItems",value="0x0"},{name="wantHelp",value="false"},{name="addMain",value="false"},{name="verbose",value="false"},{name="outputFname",value="0x0"},{name="moduleName",value="0x0"},{name="scriptFile",value="0x0"},{name="opt",value="0x0"},{name="fraws",value="0x0"},{name="fb16s",value="0x0"},{name="fb64s",value="0x0"},{name="fz85s",value="0x0"},{name="fe7Fs",value="0x0"},{name="p",value="2"},{name="scriptData",value="0x7ffff7fcb000 \"\""},{name="tempItems",value="0x7ffff7de4b8c <check_match+300>"},{name="__r2961",value="<error reading variable>"},{name="__key2962",value="6"},{name="itm",value="0x8"},{name="enc",value="<incomplete type>"},{name="__aggr2968",value="{impl = {_refCounted = {_store = 0x7ffff7de54fe <do_lookup_x+2334>}}}"},{name="fname",value="{_name = 0x7ffff7de4b8c <check_match+300> \"\\205\\300t\\212\\351r\\377\\377\\377<\\006\\017\\204\\345\\376\\377\\377\\061\\300\\220\\353\\320I\\213|$\\020H\\205\\377\\017\\204j\\377\\377\\377\\350[m\", _statBuf = {st_dev = 140737336278312, st_ino = 2111285930, st_nlink = 1, st_mode = 8, st_uid = 0, st_gid = 4160534048, __pad0 = 32767, st_rdev = 140737351931134, st_size = 0, st_blksize = 140737488345600, st_blocks = 140737349680912, st_atime = 140737349688136, st_atimensec = 140737488345872, st_mtime = 32988842, st_mtimensec = 140737488345856, st_ctime = 3773176208, st_ctimensec = 0, __unused = {140737353922192, 140737354102360, 4381215}}, _lstatMode = 4156300944, _dType = 255 '\\377', _didLStat = 127, _didStat = false, _dTypeSet = false}"},{name="__flag",value="0"},{name="__EAX",value="0x7ffff72962a0 <_IO_2_1_stdout_>"},{name="__exception_object",value="0xcff14ec8"},{name="__r2969",value="0xbac24e6a"},{name="__key2970",value="6"},{name="itm",value="0x7ffff7de54fe <do_lookup_x+2334> \"H\\205\\300L\\213L$\\bL\\213D$(L\\213\\\\$0\\017\\205|\\370\\377\\377H\\213T$\\030H\\213t$\\020\\213\\n\\351y\\377\\377\\377H\\215\\r\\b\\016\\001\""},{name="elems",value="0x7fffffffdb90"},{name="i",value="0"},{name="r",value="0x749200 <gc.gc.GC.gcLock> \"\""},{name="__r2973",value="0x4f67ed <core.internal.spinlock.SpinLock.lock+29>"},{name="__key2974",value="140737488346392"},{name="fname",value="0x749200 <gc.gc.GC.gcLock> \"\""},{name="__r2975",value="<error reading variable>"},{name="__key2976",value="8013895"},{name="fname",value="\" \\267P\\000\\000\\000\\000\\000\\020\\271P\\000\\000\\000\\000\\000p\\271P\\000\\000\\000\\000\\000\320\271P\\000\\000\\000\\000\\000p\\272P\\000\\000\\000\\000\\000p\\273P\\000\\000\\000\\000\\000\\020\\301P\\000\\000\\000\\000\""},{name="__r2977",value="{<error reading variable>}"},{name="__key2978",value="140737488346304"},{name="fname",value="0x4c586c <rt.minfo.moduleinfos_apply(scope int(immutable(object.ModuleInfo*)) delegate)+32> \"\\203\\370\\002t\\002\\353\\b\\213E\\350H\\213\\345]\\303\\061\311\211M\\350H\\211\\310H\\213\\345]\\303\\017\\037@\""},{name="__r2979",value="0x4bfb9c <object.ModuleInfo.opApply(scope int(object.ModuleInfo*) delegate)+32>"},{name="__key2980",value="140737488346848"},{name="fname",value="0x4d9fc2 <runModuleUnitTests+234> \"\\203\", <incomplete sequence \\370>"},{name="__r2981",value="0xffffffffffffffff"},{name="__key2982",value="18446744073709551615"},{name="fname",value="0xffffffffffffffff <error: Cannot access memory at address 0xffffffffffffffff>"},{name="__key2983",value="18446744073709551615"},{name="__limit2984",value="18446744073709551615"},{name="i",value="18446744073709551615"},{name="__dollar",value="2147483652"},{name="__key3011",value="0"},{name="__limit3012",value="3175046533389221921"},{name="i",value="0"},{name="__dollar",value="0"},{name="__key3013",value="0"},{name="__limit3014",value="7639552"},{name="i",value="140737488346272"},{name="__dollar",value="5203949"},{name="__key3015",value="140737488346392"},{name="__limit3016",value="5232156"},{name="i",value="0"},{name="__dollar",value="7639552"},{name="__key3061",value="140737488346368"},{name="__limit3062",value="5119403"},{name="i",value="7697680"},{name="__dollar",value="5307488"},{name="__key3063",value="5232156"},{name="__limit3064",value="1"},{name="i",value="8013895"},{name="__dollar",value="0"},{name="__flag",value="0"},{name="__EAX",value="0x7ffff72962a0 <_IO_2_1_stdout_>"},{name="__exception_object",value="0x0"},{name="__key2693",value="7639552"},{name="__limit2694",value="140737488346272"},{name="i",value="5203949"}]
+// ^done,locals=[{name="resItems",value="0x0"},{name="wantHelp",value="false"}],
 
 procedure TCEGdbWidget.interpretJson;
+
+  procedure autoGetStuff;
+  begin
+    if fOptions.autoGetCallStack then
+      infoStack;
+    if fOptions.autoGetRegisters then
+      infoRegs;
+    if fOptions.autoGetVariables then
+      infoVariables;
+  end;
+
 var
   i: integer;
   val: TJSONData;
@@ -1118,12 +1131,9 @@ begin
         val := obj.Find('line');
         if val.isNotNil then
           line := val.AsInteger;
-        if fDocHandler.findDocument(fullname).isNil then
+        if fDocHandler.findDocument(fullname).isNil and fullname.fileExists then
           fDocHandler.openDocument(fullname);
-        if fOptions.autoGetCallStack then
-          infoStack;
-        if fOptions.autoGetRegisters then
-          infoRegs;
+        autoGetStuff;
         subjDebugBreak(fSubj, fullname, line, brkreason);
       end;
 
@@ -1155,12 +1165,9 @@ begin
       if fCatchPause then
       begin
         fCatchPause := false;
-        if  fDocHandler.findDocument(fullname).isNil then
+        if  fDocHandler.findDocument(fullname).isNil and fullname.fileExists then
           fDocHandler.openDocument(fullname);
-        if fOptions.autoGetCallStack then
-          infoStack;
-        if fOptions.autoGetRegisters then
-          infoRegs;
+        autoGetStuff;
         subjDebugBreak(fSubj, fullname, line, dbSignal);
       end
       else
@@ -1171,12 +1178,9 @@ begin
           gdbCommand('continue', @gdboutJsonize)
         else
         begin
-          if not fDocHandler.findDocument(fullname).isNil then
+          if not fDocHandler.findDocument(fullname).isNil and fullname.fileExists then
             fDocHandler.openDocument(fullname);
-          if fOptions.autoGetCallStack then
-            infoStack;
-          if fOptions.autoGetRegisters then
-            infoRegs;
+          autoGetStuff;
           subjDebugBreak(fSubj, fullname, line, dbSignal);
         end;
       end;
@@ -1257,7 +1261,7 @@ begin
     fStackItems.assignToList(lstCallStack);
   end;
 
-  val := fJson.Find('locals');
+  val := fJson.Find('variables');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
     fInspState.Locals.clear;
@@ -1277,8 +1281,9 @@ begin
         continue;
       fInspState.Locals.add(nme, val.AsString);
     end;
-    stateViewer.RefreshPropertyValues;
-    stateViewer.BuildPropertyList;
+    ValueListEditor1.Strings.Assign(fInspState.Locals.fLocals);
+    //stateViewer.RefreshPropertyValues;
+    //stateViewer.BuildPropertyList;
   end;
 
   if fOptions.showGdbOutput then
@@ -1357,9 +1362,9 @@ begin
   gdbCommand('-stack-list-frames', @gdboutJsonize);
 end;
 
-procedure TCEGdbWidget.infoLocals;
+procedure TCEGdbWidget.infoVariables;
 begin
-  gdbCommand('-stack-list-locals 1');
+  gdbCommand('-stack-list-variables 1');
 end;
 
 procedure TCEGdbWidget.btnStartClick(Sender: TObject);
@@ -1372,9 +1377,9 @@ begin
   gdbCommand('continue', @gdboutJsonize);
 end;
 
-procedure TCEGdbWidget.btnLocalsClick(Sender: TObject);
+procedure TCEGdbWidget.btnVariablesClick(Sender: TObject);
 begin
-  infoLocals;
+  infoVariables;
 end;
 
 procedure TCEGdbWidget.btnNextClick(Sender: TObject);
