@@ -17,13 +17,22 @@ type
   {$IFDEF CPU64}
   TCpuRegister = (rax, rbx, rcx, rdx, rsi, rdi, rbp, rsp, r8, r9, r10, r11, r12, r13,
     r14, r15, rip);
+
+  const stOffset = 24;
+type
+  TFpuRegister = (st0, st1, st2, st3, st4, st5, st6, st7);
   {$ENDIF}
 
   {$IFDEF CPU32}
   TCpuRegister = (eax, ebx, ecx, edx, esi, edi, ebp, esp, eip);
+
+  const stOffset = 16;
+type
+  TFpuRegister = (st0, st1, st2, st3, st4, st5, st6, st7);
   {$ENDIF}
 
-  TFpuRegister = (st0, st1, st2, st3, st4, st5, st6, st7);
+
+
 
   TFLAG = (CS, PF, AF, ZF, SF, TF, IF_, DF, OF_, NT, RF, VM, AC, VIF, VIP, ID);
   TEFLAG = set of TFLAG;
@@ -79,25 +88,30 @@ type
     property EIP: TCpuRegValue index TCpuRegister.eip read fRegisters[TCpuRegister.eip] write setRegister;
     {$ENDIF}
   public
-    constructor create(event: TSetGprEvent);
+    constructor create(eventGPR: TSetGprEvent);
     procedure setInspectableRegister(index: TCpuRegister; value: PtrUInt);
   end;
 
-  // Makes a category for the floating point coprocessor registers in a object inspector
+  TSetFprEvent = procedure(reg: TFpuRegister; val: extended) of object;
+
+  // Makes a category for the floating point unit registers in a object inspector
   TInspectableFPR = class(TPersistent)
   private
-    fRegisters: array[TFpuRegister] of double;
+    fRegisters: array[TFpuRegister] of extended;
+    fSetFprEvent: TSetFprEvent;
+    procedure setRegister(index: TFpuRegister; value: extended);
   published
-    property ST0: double read fRegisters[TFpuRegister.st0];
-    property ST1: double read fRegisters[TFpuRegister.st1];
-    property ST2: double read fRegisters[TFpuRegister.st2];
-    property ST3: double read fRegisters[TFpuRegister.st3];
-    property ST4: double read fRegisters[TFpuRegister.st4];
-    property ST5: double read fRegisters[TFpuRegister.st5];
-    property ST6: double read fRegisters[TFpuRegister.st6];
-    property ST7: double read fRegisters[TFpuRegister.st7];
+    property ST0: extended index TFpuRegister.st0 read fRegisters[TFpuRegister.st0] write setRegister;
+    property ST1: extended index TFpuRegister.st1 read fRegisters[TFpuRegister.st1] write setRegister;
+    property ST2: extended index TFpuRegister.st2 read fRegisters[TFpuRegister.st2] write setRegister;
+    property ST3: extended index TFpuRegister.st3 read fRegisters[TFpuRegister.st3] write setRegister;
+    property ST4: extended index TFpuRegister.st4 read fRegisters[TFpuRegister.st4] write setRegister;
+    property ST5: extended index TFpuRegister.st5 read fRegisters[TFpuRegister.st5] write setRegister;
+    property ST6: extended index TFpuRegister.st6 read fRegisters[TFpuRegister.st6] write setRegister;
+    property ST7: extended index TFpuRegister.st7 read fRegisters[TFpuRegister.st7] write setRegister;
   public
-    procedure setInspectableRegister(index: TFpuRegister; value: double);
+    constructor create(event: TSetFprEvent);
+    procedure setInspectableRegister(index: TFpuRegister; value: extended);
   end;
 
   // Makes a category for the SSE registers in a object inspector
@@ -105,7 +119,6 @@ type
     // interpretation is a problem:
     // 4 int ? 2 double ? 4 single ? ...
   end;
-
 
   // Makes a category for the local variables in an object inspector
   TInspectableLocals= class(TPersistent)
@@ -136,17 +149,18 @@ type
   published
     property Locals: TInspectableLocals read fLocals;
     property CPU: TInspectableGPR read fGpr;
+    property FPU: TInspectableFPR read fFpr;
     //
     property EFLAGS: TEFLAG read fFlags;
     //
-    property CS: byte read fSegment[TSegmentRegister.S_CS];
+    (*property CS: byte read fSegment[TSegmentRegister.S_CS];
     property DS: byte read fSegment[TSegmentRegister.S_DS];
     property ES: byte read fSegment[TSegmentRegister.S_ES];
     property FS: byte read fSegment[TSegmentRegister.S_FS];
     property GS: byte read fSegment[TSegmentRegister.S_GS];
-    property SS: byte read fSegment[TSegmentRegister.S_SS];
+    property SS: byte read fSegment[TSegmentRegister.S_SS];*)
   public
-    constructor create(setGprEvent: TSetGprEvent);
+    constructor create(setGprEvent: TSetGprEvent; setFprEvent: TSetFprEvent);
     destructor destroy; override;
   end;
 
@@ -299,6 +313,7 @@ type
     procedure menuDeclare(item: TMenuItem);
     procedure menuUpdate(item: TMenuItem);
     //
+    procedure disableEditor;
     procedure setState(value: TGdbState);
     procedure updateButtonsState;
     procedure startDebugging;
@@ -315,6 +330,7 @@ type
     procedure infoVariables;
     procedure sendCustomCommand;
     procedure setGpr(reg: TCpuRegister; val: TCpuRegValue);
+    procedure setFpr(reg: TFpuRegister; val: extended);
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -592,9 +608,9 @@ begin
   end;
 end;
 
-constructor TInspectableGPR.create(event: TSetGprEvent);
+constructor TInspectableGPR.create(eventGPR: TSetGprEvent);
 begin
-  fSetGprEvent:=event;
+  fSetGprEvent:=eventGPR;
 end;
 
 procedure TInspectableGPR.setInspectableRegister(index: TCpuRegister; value: PtrUInt);
@@ -608,8 +624,19 @@ begin
   fRegisters[index] := value;
 end;
 
-procedure TInspectableFPR.setInspectableRegister(index: TFpuRegister; value: double);
+constructor TInspectableFPR.create(event: TSetFprEvent);
 begin
+  fSetFprEvent:=event;
+end;
+
+procedure TInspectableFPR.setInspectableRegister(index: TFpuRegister; value: extended);
+begin
+  fRegisters[index] := value;
+end;
+
+procedure TInspectableFPR.setRegister(index: TFpuRegister; value: extended);
+begin
+  fSetFprEvent(index, value);
   fRegisters[index] := value;
 end;
 
@@ -660,15 +687,17 @@ begin
   fLocals.Values[name] := value;
 end;
 
-constructor TInspectableState.create(setGprEvent: TSetGprEvent);
+constructor TInspectableState.create(setGprEvent: TSetGprEvent; setFprEvent: TSetFprEvent);
 begin
-  fGpr := TInspectableGPR.Create(setGprEvent);
+  fGpr := TInspectableGPR.create(setGprEvent);
+  fFpr := TInspectableFPR.create(setFprEvent);
   fLocals := TInspectableLocals.create;
 end;
 
 destructor TInspectableState.destroy;
 begin
   fGpr.Free;
+  fFPr.Free;
   fLocals.Free;
   inherited;
 end;
@@ -684,14 +713,14 @@ begin
   fMsg:= getMessageDisplay;
   fFileLineBrks:= TStringList.Create;
   fLog := TStringList.Create;
-  fInspState := TInspectableState.Create(@setGpr);
+  fInspState := TInspectableState.Create(@setGpr, @setFpr);
   stateViewer.TIObject := fInspState;
   fJson := TJsonObject.Create;
   fStackItems := TStackItems.create;
   fSubj:= TCEDebugObserverSubject.Create;
   fOptions:= TCEDebugOptions.create(self);
-  Edit1.Items.Assign(fOptions.commandsHistory);
   fOptions.onChangesApplied:=@optionsChangesApplied;
+  Edit1.Items.Assign(fOptions.commandsHistory);
   //
   AssignPng(btnSendCom, 'ACCEPT');
   setState(gsNone);
@@ -1046,6 +1075,11 @@ begin
   end;
 end;
 
+procedure TCEGdbWidget.disableEditor;
+begin
+  stateViewer.ItemIndex:=-1;
+end;
+
 procedure TCEGdbWidget.startDebugging;
 var
   str: string;
@@ -1366,6 +1400,9 @@ var
   sigmean: string;
   signame: string;
   brkreason: TCEDebugBreakReason;
+  // FPU
+  fFpuExtended: extended;
+  fFpuRaw: array[0..9] of Byte absolute fFpuExtended;
 begin
 
   val := fJson.Find('reason');
@@ -1478,19 +1515,34 @@ begin
         if val.isNotNil then
           number := val.AsInteger;
         val := obj.Find('value');
-        if val.isNotNil then
-        begin
-          if (0 <= number) and (TCpuRegister(number) <= high(TCpuRegister)) then
-            fInspState.CPU.setInspectableRegister(TCpuRegister(number),
-            {$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
+        if val.isNotNil then case number of
+            0..integer(high(TCpuRegister)):
+            begin
+              fInspState.CPU.setInspectableRegister
+                (TCpuRegister(number), {$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
+            end;
+            stOffset..stOffset+7:
+            begin
+              fFpuRaw[9] := StrToInt('$' + val.AsString[3..4]);
+              fFpuRaw[8] := StrToInt('$' + val.AsString[5..6]);
+              fFpuRaw[7] := StrToInt('$' + val.AsString[7..8]);
+              fFpuRaw[6] := StrToInt('$' + val.AsString[9..10]);
+              fFpuRaw[5] := StrToInt('$' + val.AsString[11..12]);
+              fFpuRaw[4] := StrToInt('$' + val.AsString[13..14]);
+              fFpuRaw[3] := StrToInt('$' + val.AsString[15..16]);
+              fFpuRaw[2] := StrToInt('$' + val.AsString[17..18]);
+              fFpuRaw[1] := StrToInt('$' + val.AsString[19..20]);
+              fFpuRaw[0] := StrToInt('$' + val.AsString[21..22]);
+              fInspState.FPU.setInspectableRegister
+                (TFpuRegister(number - stOffset), fFpuExtended);
+            end;
         end;
-
-
-        //else
-          // TODO-cGDB: FPU and SSE regs are in a sub object
-        //  break;
+        // TODO-cGDB: get SSE registers
+        // TODO-cGDB: get Segment registers
+        // TODO-cGDB: get EFLAGS
       end;
     end;
+    stateViewer.RefreshPropertyValues;
   end;
 
   val := fJson.Find('stack');
@@ -1619,7 +1671,8 @@ end;
 
 procedure TCEGdbWidget.infoRegs;
 begin
-  gdbCommand('-data-list-register-values d', @gdboutJsonize);
+  disableEditor;
+  gdbCommand('-data-list-register-values r', @gdboutJsonize);
 end;
 
 procedure TCEGdbWidget.infoStack;
@@ -1721,6 +1774,15 @@ begin
   gdbCommand(cmd);
 end;
 
+procedure TCEGdbWidget.setFpr(reg: TFpuRegister; val: extended);
+const
+  spec = 'set $%s = %.18g';
+var
+  cmd : string;
+begin
+  cmd := format(spec, [GetEnumName(typeinfo(TFpuRegister),integer(reg)), val]);
+  gdbCommand(cmd);
+end;
 {$ENDREGION}
 
 initialization
