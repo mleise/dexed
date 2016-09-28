@@ -1883,6 +1883,7 @@ var
   itm: TMenuItem;
   doneUpdate: boolean = false;
 begin
+  if mainMenu.Images = nil then exit;
   for j := 0 to fMainMenuSubj.observersCount-1 do
   begin
     // try to update existing entry.
@@ -1897,10 +1898,11 @@ begin
       continue;
     // otherwise propose to create a new entry
     itm := TMenuItem.Create(Self);
+    mainMenu.Items.Add(itm);
     (fMainMenuSubj.observers[j] as ICEMainMenuProvider).menuDeclare(itm);
     itm.Tag:= PtrInt(fMainMenuSubj.observers[j]);
     case itm.Count > 0 of
-      true: mainMenu.Items.Add(itm);
+      true: ;
       false: itm.Free;
     end;
   end;

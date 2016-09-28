@@ -231,6 +231,7 @@ type
 
   TCEDebugOptions = class(TCEDebugOptionsBase, ICEEditableOptions)
   private
+    FonChangesApplied: TNotifyEvent;
     fBackup: TCEDebugOptionsBase;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
@@ -240,6 +241,7 @@ type
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
+    property onChangesApplied: TNotifyEvent read FonChangesApplied write FonChangesApplied;
   end;
 
   TGdbState = (gsNone, gsRunning, gsPaused);
@@ -277,6 +279,7 @@ type
   protected
     procedure setToolBarFlat(value: boolean); override;
   private
+    fUpdateMenu: boolean;
     fGdbState: TGdbState;
     fSubj: TCEDebugObserverSubject;
     fDoc: TCESynMemo;
@@ -292,6 +295,7 @@ type
     fCatchPause: boolean;
     fOptions: TCEDebugOptions;
     //
+    procedure optionsChangesApplied(sender: TObject);
     procedure menuDeclare(item: TMenuItem);
     procedure menuUpdate(item: TMenuItem);
     //
@@ -381,6 +385,7 @@ destructor TCEDebugOptionsBase.destroy;
 begin
   fIgnoredSignals.Free;
   fCommandsHistory.Free;
+  fShortcuts.Free;
   inherited;
 end;
 
@@ -458,7 +463,12 @@ begin
   case event of
     oeeSelectCat: fBackup.assign(self);
     oeeCancel: assign(fBackup);
-    oeeAccept: fBackup.assign(self);
+    oeeAccept:
+    begin
+      fBackup.assign(self);
+      if assigned(FonChangesApplied) then
+        FonChangesApplied(self);
+    end;
   end;
 end;
 
@@ -681,6 +691,7 @@ begin
   fSubj:= TCEDebugObserverSubject.Create;
   fOptions:= TCEDebugOptions.create(self);
   Edit1.Items.Assign(fOptions.commandsHistory);
+  fOptions.onChangesApplied:=@optionsChangesApplied;
   //
   AssignPng(btnSendCom, 'ACCEPT');
   setState(gsNone);
@@ -710,57 +721,79 @@ end;
 procedure TCEGdbWidget.menuDeclare(item: TMenuItem);
 var
   itm: TMenuItem;
+  bmp: TBitmap;
+  i: integer;
 begin
   item.Caption:='Debugger';
   item.Clear;
+
+  bmp := TBitmap.Create;
 
   itm := TMenuItem.Create(item);
   itm.ShortCut:=fOptions.shortcuts.start;
   itm.Caption:='Start';
   itm.OnClick:= @executeFromShortcut;
   itm.Tag:=0;
-  AssignPng(itm.Bitmap, btnStart.resourceName);
   item.Add(itm);
+  btnStart.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  i := item.GetImageList.Add(bmp, nil);
+  itm.ImageIndex:= i;
 
   itm := TMenuItem.Create(item);
   itm.ShortCut:=fOptions.shortcuts.stop;
   itm.Caption:='Stop';
   itm.OnClick:= @executeFromShortcut;
   itm.Tag:=1;
-  AssignPng(itm.Bitmap, btnStop.resourceName);
   item.Add(itm);
+  btnStop.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  i := item.GetImageList.Add(bmp, nil);
+  itm.ImageIndex:= i;
 
   itm := TMenuItem.Create(item);
   itm.ShortCut:=fOptions.shortcuts.pause;
   itm.Caption:='Pause';
   itm.OnClick:= @executeFromShortcut;
   itm.Tag:=2;
-  AssignPng(itm.Bitmap, btnPause.resourceName);
   item.Add(itm);
+  btnPause.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  i := item.GetImageList.Add(bmp, nil);
+  itm.ImageIndex:= i;
 
   itm := TMenuItem.Create(item);
   itm.ShortCut:=fOptions.shortcuts.continue;
   itm.Caption:='Continue';
   itm.OnClick:= @executeFromShortcut;
   itm.Tag:=3;
-  AssignPng(itm.Bitmap, btnContinue.resourceName);
   item.Add(itm);
+  btnContinue.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  i := item.GetImageList.Add(bmp, nil);
+  itm.ImageIndex:= i;
 
   itm := TMenuItem.Create(item);
   itm.ShortCut:=fOptions.shortcuts.step;
   itm.Caption:='Step';
   itm.OnClick:= @executeFromShortcut;
   itm.Tag:=4;
-  AssignPng(itm.Bitmap, btnNext.resourceName);
   item.Add(itm);
+  btnNext.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  i := item.GetImageList.Add(bmp, nil);
+  itm.ImageIndex:= i;
 
   itm := TMenuItem.Create(item);
   itm.ShortCut:=fOptions.shortcuts.stepOver;
   itm.Caption:='Step over';
   itm.OnClick:= @executeFromShortcut;
   itm.Tag:=5;
-  AssignPng(itm.Bitmap, btnOver.resourceName);
   item.Add(itm);
+  btnOver.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  i := item.GetImageList.Add(bmp, nil);
+  itm.ImageIndex:= i;
 
   itm := TMenuItem.Create(item);
   itm.Caption:= '-';
@@ -772,24 +805,35 @@ begin
   itm.Caption:='Update registers';
   itm.OnClick:= @executeFromShortcut;
   itm.Tag:=6;
-  AssignPng(itm.Bitmap, btnReg.resourceName);
   item.Add(itm);
+  btnReg.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  i := item.GetImageList.Add(bmp, nil);
+  itm.ImageIndex:= i;
 
   itm := TMenuItem.Create(item);
   itm.ShortCut:=fOptions.shortcuts.updateStack;
   itm.Caption:='Update call stack';
   itm.OnClick:= @executeFromShortcut;
   itm.Tag:=7;
-  AssignPng(itm.Bitmap, btnStack.resourceName);
   item.Add(itm);
+  btnStack.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  i := item.GetImageList.Add(bmp, nil);
+  itm.ImageIndex:= i;
 
   itm := TMenuItem.Create(item);
   itm.ShortCut:=fOptions.shortcuts.updateVariables;
   itm.Caption:='Update the variables';
   itm.OnClick:= @executeFromShortcut;
   itm.Tag:=8;
-  AssignPng(itm.Bitmap, btnVariables.resourceName);
   item.Add(itm);
+  btnVariables.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  i := item.GetImageList.Add(bmp, nil);
+  itm.ImageIndex:= i;
+
+  bmp.Free;
 end;
 
 procedure TCEGdbWidget.menuUpdate(item: TMenuItem);
@@ -797,21 +841,29 @@ var
   i: integer;
   itm: TMenuItem;
 begin
-  if item.isNil then
+  if item.isNil or not fUpdateMenu then
     exit;
+  fUpdateMenu := false;
   for i:= 0 to item.Count-1 do
   begin
     itm := item.Items[i];
     case itm.Tag of
-    0:
-      begin
-        itm.ShortCut:=fOptions.shortcuts.start;
-        // TODO-cGDB: image assigned from toolbar button not displayed in menu
-        //if itm.Bitmap.Empty then
-        //  AssignPng(itm.Bitmap, btnStart.resourceName);
-      end;
+      0: itm.ShortCut:=fOptions.shortcuts.start;
+      1: itm.ShortCut:=fOptions.shortcuts.stop;
+      2: itm.ShortCut:=fOptions.shortcuts.pause;
+      3: itm.ShortCut:=fOptions.shortcuts.continue;
+      4: itm.ShortCut:=fOptions.shortcuts.step;
+      5: itm.ShortCut:=fOptions.shortcuts.stepOver;
+      6: itm.ShortCut:=fOptions.shortcuts.updateRegisters;
+      7: itm.ShortCut:=fOptions.shortcuts.updateStack;
+      8: itm.ShortCut:=fOptions.shortcuts.updateVariables;
     end;
   end;
+end;
+
+procedure TCEGdbWidget.optionsChangesApplied(sender: TObject);
+begin
+  fUpdateMenu:=true;
 end;
 
 procedure TCEGdbWidget.executeFromShortcut(sender: TObject);

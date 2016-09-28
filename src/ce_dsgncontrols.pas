@@ -30,6 +30,7 @@ type
   public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
+    procedure toBitmap(value: TBitmap);
   end;
 
   (**
@@ -132,6 +133,11 @@ begin
   inherited;
   if (old <> Enabled) and assigned(fToolBar) then
     FToolBar.Repaint;
+end;
+
+procedure TCEToolButton.toBitmap(value: TBitmap);
+begin
+  value.Assign(fPng);
 end;
 
 procedure TCEToolButton.Paint;
