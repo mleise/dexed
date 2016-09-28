@@ -30,6 +30,7 @@ type
     fMaxCount: Integer;
     fAutoSelect: boolean;
     fSingleClick: boolean;
+    fAutoDemangle: boolean;
     fFont: TFont;
     fMsgColors: array[TCEAppMessageKind] of TColor;
     procedure setFont(value: TFont);
@@ -37,6 +38,7 @@ type
     property fastDisplay: boolean read fFastDisplay write fFastDisplay;
     property maxMessageCount: integer read fMaxCount write fMaxCount;
     property autoSelect: boolean read fAutoSelect write fAutoSelect;
+    property autoDemangle: boolean read fAutoDemangle write fAutoDemangle;
     property singleMessageClick: boolean read fSingleClick write fSingleClick;
     property font: TFont read fFont write setFont;
     property colorBuble: TColor read fMsgColors[amkBub] write fMsgColors[amkBub];
@@ -95,6 +97,7 @@ type
     fDoc: TCESynMemo;
     fCtxt: TCEAppMessageCtxt;
     fAutoSelect: boolean;
+    fAutoDemangle: boolean;
     fSingleClick: boolean;
     fastDisplay: boolean;
     fOptions: TCEMessagesOptions;
@@ -162,6 +165,7 @@ type
     //
     property maxMessageCount: Integer     read fMaxMessCnt  write setMaxMessageCount;
     property autoSelectCategory: boolean  read fAutoSelect  write setAutoSelectCategory;
+    property autoDEmangle: boolean        read fAutoDemangle write fAutoDemangle;
     property singleMessageClick: boolean  read fSingleClick write setSingleMessageClick;
     //
     property colorBuble: TColor   read fMsgColors[amkBub]   write setColorBuble;
@@ -213,6 +217,7 @@ begin
     fFont.Assign(opts.font);
     fMaxCount := opts.fMaxCount;
     fAutoSelect := opts.fAutoSelect;
+    fAutoDemangle:= opts.fAutoDemangle;
     fSingleClick := opts.fSingleClick;
     fFastDisplay := opts.fFastDisplay;
     fMsgColors := opts.fMsgColors;
@@ -227,6 +232,7 @@ begin
     fSingleClick := widg.fSingleClick;
     fFastDisplay := widg.fastDisplay;
     fMsgColors := widg.fMsgColors;
+    fAutoDemangle:= widg.fAutoDemangle;
   end
   else inherited;
 end;
@@ -244,6 +250,7 @@ begin
     widg.singleMessageClick := fSingleClick;
     widg.fastDisplay:= fFastDisplay;
     widg.fMsgColors := fMsgColors;
+    widg.fAutoDemangle:=fAutoDemangle;
   end
   else inherited;
 end;
@@ -744,7 +751,10 @@ var
   msg: string;
 begin
   showWidget;
-  msg := value;
+  case fAutoDemangle of
+    false: msg := value;
+    true: msg := demangle(value);
+  end;
   if aKind = amkAuto then
     aKind := guessMessageKind(msg);
   if aCtxt = amcAutoCompile then
