@@ -178,8 +178,26 @@ type
     procedure clear;
   end;
 
-  // TODO-cGDB: shortcuts
   // TODO-cGDB: assembly view
+
+  // Makes a category for shortcuts in the option editor.
+  TCEDebugShortcuts = class(TPersistent)
+  private
+    fStart, fStop, fPause, fContinue, fStep, fStepOver, fStack, fRegs,
+      fVariables: TShortCut;
+  published
+    property start: TShortCut read fStart write fStart;
+    property stop: TShortCut read fStop write fStop;
+    property pause: TShortCut read fPause write fPause;
+    property continue: TShortcut read fContinue write fContinue;
+    property step: TShortCut read fStep write fStep;
+    property stepOver: TShortCut read fStepOver write fStepOver;
+    property updateStack: TShortCut read fStack write fStack;
+    property updateRegisters: TShortCut read fRegs write fRegs;
+    property updateVariables: TShortCut read fVariables write fVariables;
+  public
+    procedure assign(source: TPersistent); override;
+  end;
 
   TCEDebugOptionsBase = class(TWritableLfmTextComponent)
   private
@@ -191,8 +209,10 @@ type
     fIgnoredSignals: TStringList;
     fShowGdbOutput: boolean;
     fShowOutput: boolean;
+    fShortcuts: TCEDebugShortcuts;
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
+    procedure setShortcuts(value: TCEDebugShortcuts);
   published
     property autoDemangle: boolean read fAutoDemangle write fAutoDemangle;
     property autoGetCallStack: boolean read fAutoGetCallStack write fAutoGetCallStack;
@@ -200,6 +220,7 @@ type
     property autoGetVariables: boolean read fAutoGetVariables write fAutoGetVariables;
     property commandsHistory: TStringList read fCommandsHistory write setCommandsHistory;
     property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
+    property shortcuts: TCEDebugShortcuts read fShortcuts write setShortcuts;
     property showGdbOutput: boolean read fShowGdbOutput write fShowGdbOutput;
     property showOutput: boolean read fShowOutput write fShowOutput;
   public
@@ -224,7 +245,7 @@ type
   TGdbState = (gsNone, gsRunning, gsPaused);
 
   { TCEGdbWidget }
-  TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger)
+  TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger, ICEMainMenuProvider)
     btnContinue: TCEToolButton;
     btnVariables: TCEToolButton;
     btnNext: TCEToolButton;
@@ -271,6 +292,9 @@ type
     fCatchPause: boolean;
     fOptions: TCEDebugOptions;
     //
+    procedure menuDeclare(item: TMenuItem);
+    procedure menuUpdate(item: TMenuItem);
+    //
     procedure setState(value: TGdbState);
     procedure updateButtonsState;
     procedure startDebugging;
@@ -304,6 +328,7 @@ type
     function singleServiceName: string;
     procedure addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind);
     procedure removeBreakPoint(const fname: string; line: integer);
+    procedure executeFromShortcut(sender: TObject);
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -315,6 +340,27 @@ implementation
 
 {$REGION TCEDebugOption --------------------------------------------------------}
 const optFname = 'gdbcommander.txt';
+
+
+procedure TCEDebugShortcuts.assign(source: TPersistent);
+var
+  src: TCEDebugShortcuts;
+begin
+  if source is TCEDebugShortcuts then
+  begin
+    src := TCEDebugShortcuts(source);
+    fStart    := src.fStart;
+    fStop     := src.fStop;
+    fPause    := src.fPause;
+    fContinue := src.fContinue;
+    fStep     := src.fStep;
+    fStepOver := src.fStepOver;
+    fStack    := src.fStack;
+    fRegs     := src.fRegs;
+    fVariables:= src.fVariables;
+  end
+  else inherited;
+end;
 
 constructor TCEDebugOptionsBase.create(aOwner: TComponent);
 begin
@@ -328,6 +374,7 @@ begin
   fIgnoredSignals.Duplicates:= dupIgnore;
   fCommandsHistory := TStringList.Create;
   fCommandsHistory.Duplicates:= dupIgnore;
+  fShortcuts := TCEDebugShortcuts.Create;
 end;
 
 destructor TCEDebugOptionsBase.destroy;
@@ -347,6 +394,11 @@ begin
   fCommandsHistory.Assign(value);
 end;
 
+procedure TCEDebugOptionsBase.setShortcuts(value: TCEDebugShortcuts);
+begin
+  fShortcuts.assign(value);
+end;
+
 procedure TCEDebugOptionsBase.assign(source: TPersistent);
 var
   src: TCEDebugOptionsBase;
@@ -362,6 +414,7 @@ begin
     fShowOutput:=src.fShowOutput;
     fIgnoredSignals.Assign(src.fIgnoredSignals);
     fCommandsHistory.Assign(src.fCommandsHistory);
+    fShortcuts.assign(src.fShortcuts);
   end
   else inherited;
 end;
@@ -652,6 +705,128 @@ procedure TCEGdbWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolBarFLat(value);
   btnSendCom.Flat:=value;
+end;
+
+procedure TCEGdbWidget.menuDeclare(item: TMenuItem);
+var
+  itm: TMenuItem;
+begin
+  item.Caption:='Debugger';
+  item.Clear;
+
+  itm := TMenuItem.Create(item);
+  itm.ShortCut:=fOptions.shortcuts.start;
+  itm.Caption:='Start';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=0;
+  AssignPng(itm.Bitmap, btnStart.resourceName);
+  item.Add(itm);
+
+  itm := TMenuItem.Create(item);
+  itm.ShortCut:=fOptions.shortcuts.stop;
+  itm.Caption:='Stop';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=1;
+  AssignPng(itm.Bitmap, btnStop.resourceName);
+  item.Add(itm);
+
+  itm := TMenuItem.Create(item);
+  itm.ShortCut:=fOptions.shortcuts.pause;
+  itm.Caption:='Pause';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=2;
+  AssignPng(itm.Bitmap, btnPause.resourceName);
+  item.Add(itm);
+
+  itm := TMenuItem.Create(item);
+  itm.ShortCut:=fOptions.shortcuts.continue;
+  itm.Caption:='Continue';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=3;
+  AssignPng(itm.Bitmap, btnContinue.resourceName);
+  item.Add(itm);
+
+  itm := TMenuItem.Create(item);
+  itm.ShortCut:=fOptions.shortcuts.step;
+  itm.Caption:='Step';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=4;
+  AssignPng(itm.Bitmap, btnNext.resourceName);
+  item.Add(itm);
+
+  itm := TMenuItem.Create(item);
+  itm.ShortCut:=fOptions.shortcuts.stepOver;
+  itm.Caption:='Step over';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=5;
+  AssignPng(itm.Bitmap, btnOver.resourceName);
+  item.Add(itm);
+
+  itm := TMenuItem.Create(item);
+  itm.Caption:= '-';
+  itm.Tag:=-1;
+  item.Add(itm);
+
+  itm := TMenuItem.Create(item);
+  itm.ShortCut:=fOptions.shortcuts.updateRegisters;
+  itm.Caption:='Update registers';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=6;
+  AssignPng(itm.Bitmap, btnReg.resourceName);
+  item.Add(itm);
+
+  itm := TMenuItem.Create(item);
+  itm.ShortCut:=fOptions.shortcuts.updateStack;
+  itm.Caption:='Update call stack';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=7;
+  AssignPng(itm.Bitmap, btnStack.resourceName);
+  item.Add(itm);
+
+  itm := TMenuItem.Create(item);
+  itm.ShortCut:=fOptions.shortcuts.updateVariables;
+  itm.Caption:='Update the variables';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=8;
+  AssignPng(itm.Bitmap, btnVariables.resourceName);
+  item.Add(itm);
+end;
+
+procedure TCEGdbWidget.menuUpdate(item: TMenuItem);
+var
+  i: integer;
+  itm: TMenuItem;
+begin
+  if item.isNil then
+    exit;
+  for i:= 0 to item.Count-1 do
+  begin
+    itm := item.Items[i];
+    case itm.Tag of
+    0:
+      begin
+        itm.ShortCut:=fOptions.shortcuts.start;
+        // TODO-cGDB: image assigned from toolbar button not displayed in menu
+        //if itm.Bitmap.Empty then
+        //  AssignPng(itm.Bitmap, btnStart.resourceName);
+      end;
+    end;
+  end;
+end;
+
+procedure TCEGdbWidget.executeFromShortcut(sender: TObject);
+begin
+  case TMenuItem(sender).Tag of
+    0: btnStart.Click;
+    1: btnStop.Click;
+    2: btnPause.Click;
+    3: btnContinue.Click;
+    4: btnNext.Click;
+    5: btnOver.Click;
+    6: btnReg.Click;
+    7: btnStack.Click;
+    8: btnVariables.Click;
+  end;
 end;
 {$ENDREGION}
 
@@ -1379,7 +1554,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGIOn GDB commands & actions ------------------------------------------------}
+{$REGION GDB commands & actions ------------------------------------------------}
 procedure TCEGdbWidget.gdbCommand(aCommand: string; gdbOutProcessor: TNotifyEvent = nil);
 begin
   if fGdb.isNil or not fGdb.Running then
