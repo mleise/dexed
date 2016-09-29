@@ -32,14 +32,21 @@ type
   {$ENDIF}
 
 
-  TFLAG = (CF, PF, AF, ZF, SF, TF, IF_, DF, OF_, NT, RF, VM, AC, VIF, VIP, ID);
-  TEFLAG = set of TFLAG;
+  TFLAG = (CF, PF, AF, ZF, SF, TF, IF_, DF, OF_);
+
+  const FlagValues: array[TFlag] of word = (1, 4, 16, 64, 128, 256, 512, 1024, 2048);
+
+type
+
+  TFLAGS = set of TFLAG;
 
   TSegRegister = (CS, SS, DS, ES, FS, GS);
   {$IFDEF CPU64}
   const segOffset = 18;
+  const flagOffset = 17;
   {$ELSE}
   const segOffset = 10;
+  const segOffset = 9;
   {$ENDIF}
 
 type
@@ -127,6 +134,8 @@ type
     procedure setInspectableRegister(index: TSegRegister; value: TCPUSegValue);
   end;
 
+  TSetFlagEvent = procedure(reg: TFlag; val: boolean) of object;
+
   TSetFprEvent = procedure(reg: TFpuRegister; val: extended) of object;
 
   // Makes a category for the floating point unit registers in a object inspector
@@ -176,20 +185,22 @@ type
   // Stores the registers content, to be displayable in an object inspector.
   TInspectableCPU = class(TPersistent)
   private
-    fFlags: TEFLAG;
+    fFlags: TFlags;
+    fSetFlagEvent: TSetFlagEvent;
     fGpr: TInspectableGPR;
     fFpr: TInspectableFPR;
     fSsr: TInspectableSSR;
+    procedure setFlag(value: TFlags);
   published
     property CPU: TInspectableGPR read fGpr;
     property FPU: TInspectableFPR read fFpr;
     property SSR: TInspectableSSR read fSsr;
-    //
-    property EFLAGS: TEFLAG read fFlags;
+    property FLAGS: TFlags read fFlags write setFlag;
   public
     constructor create(setGprEvent: TSetGprEvent; setSsrEvent: TSetSsrEvent;
-      setFprEvent: TSetFprEvent);
+      setFlagEvent: TSetFlagEvent; setFprEvent: TSetFprEvent);
     destructor destroy; override;
+    procedure setInspectableFlags(value: word);
   end;
 
   // Represents an item in the call stack
@@ -360,6 +371,7 @@ type
     procedure setGpr(reg: TCpuRegister; val: TCpuGprValue);
     procedure setFpr(reg: TFpuRegister; val: extended);
     procedure setSsr(reg: TSegRegister; val: TCPUSegValue);
+    procedure setFlag(reg: TFLAG; val: boolean);
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -746,8 +758,9 @@ begin
 end;
 
 constructor TInspectableCPU.create(setGprEvent: TSetGprEvent; setSsrEvent: TSetSsrEvent;
-  setFprEvent: TSetFprEvent);
+  setFlagEvent: TSetFlagEvent; setFprEvent: TSetFprEvent);
 begin
+  fSetFlagEvent:=setFlagEvent;
   fGpr := TInspectableGPR.create(setGprEvent);
   fSsr := TInspectableSSR.create(setSsrEvent);
   fFpr := TInspectableFPR.create(setFprEvent);
@@ -759,6 +772,30 @@ begin
   fFPr.Free;
   fSSr.Free;
   inherited;
+end;
+
+procedure TInspectableCPU.setInspectableFlags(value: word);
+var
+  flg: TFlag;
+begin
+  fFlags:= [];
+  for flg in TFlag do
+    if (value and FlagValues[flg]) >= FlagValues[flg] then
+      fFlags += [flg];
+end;
+
+procedure TInspectableCPU.setFlag(value: TFlags);
+var
+  flg: TFlag;
+begin
+  if fFlags = value then
+    exit;
+  for flg in TFlag do
+  begin
+    if (flg in value) <> (flg in fFlags) then
+      fSetFlagEvent(flg, flg in value);
+  end;
+  fFlags := value;
 end;
 {$ENDREGION}
 
@@ -772,7 +809,7 @@ begin
   fMsg:= getMessageDisplay;
   fFileLineBrks:= TStringList.Create;
   fLog := TStringList.Create;
-  fInspState := TInspectableCPU.Create(@setGpr, @setSsr, @setFpr);
+  fInspState := TInspectableCPU.Create(@setGpr, @setSsr, @setFlag, @setFpr);
   stateViewer.TIObject := fInspState;
   fJson := TJsonObject.Create;
   fStackItems := TStackItems.create;
@@ -1578,6 +1615,10 @@ begin
               fInspState.CPU.setInspectableRegister
                 (TCpuRegister(number), {$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
             end;
+            flagOffset:
+            begin
+              fInspState.setInspectableFlags(word(val.AsInteger));
+            end;
             segOffset..segOffset+5:
             begin
               fInspState.SSR.setInspectableRegister
@@ -1657,7 +1698,7 @@ begin
       val := obj.Find('value');
       if val.isNil then
         continue;
-      ValueListEditor1.InsertRow(nme, val.AsString, true);
+      ValueListEditor1.InsertRow(nme, val.AsString, false);
     end;
   end;
 
@@ -1839,6 +1880,20 @@ var
   cmd : string;
 begin
   cmd := format(spec, [GetEnumName(typeinfo(TSegRegister),integer(reg)), val]);
+  gdbCommand(cmd);
+end;
+
+procedure TCEGdbWidget.setFlag(reg: TFLAG; val: boolean);
+const
+  // TODO-cGDB: set eflags from expr fails with "invalid cast"
+  spec: array[boolean] of string = (
+    'set $eflags &= ~0x%X',
+    'set $eflags |= 0x%X'
+  );
+var
+  cmd: string;
+begin
+  cmd := format(spec[val], [FlagValues[reg]]);
   gdbCommand(cmd);
 end;
 
