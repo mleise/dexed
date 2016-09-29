@@ -32,15 +32,23 @@ type
   {$ENDIF}
 
 
-
-
-  TFLAG = (CS, PF, AF, ZF, SF, TF, IF_, DF, OF_, NT, RF, VM, AC, VIF, VIP, ID);
+  TFLAG = (CF, PF, AF, ZF, SF, TF, IF_, DF, OF_, NT, RF, VM, AC, VIF, VIP, ID);
   TEFLAG = set of TFLAG;
 
-  TSegmentRegister = (S_CS, S_SS, S_DS, S_ES, S_FS, S_GS);
+  TSegRegister = (CS, SS, DS, ES, FS, GS);
+  {$IFDEF CPU64}
+  const segOffset = 18;
+  {$ELSE}
+  const segOffset = 10;
+  {$ENDIF}
+
+type
 
   // aliased to get hex display in object inspector.
-  TCpuRegValue = type PtrUInt;
+  TCpuGprValue = type PtrUInt;
+
+  // aliased to get hex display in object inspector.
+  TCPUSegValue = type word;
 
   // displays a TCpuRegValue in hex
   TCpuRegValueEditor = class(TIntegerProperty)
@@ -49,33 +57,40 @@ type
     procedure SetValue(const NewValue: ansistring); override;
   end;
 
-  TSetGprEvent = procedure(reg: TCpuRegister; val: TCpuRegValue) of object;
+  // displays a TCPUSegValue in hex
+  TCpuSegValueEditor = class(TIntegerProperty)
+  public
+    function GetValue: ansistring; override;
+    procedure SetValue(const NewValue: ansistring); override;
+  end;
+
+  TSetGprEvent = procedure(reg: TCpuRegister; val: TCpuGprValue) of object;
 
   // Makes a category for the general purpose registers in a object inspector
   TInspectableGPR = class(TPersistent)
   private
-    fRegisters: array[TCpuRegister] of TCpuRegValue;
+    fRegisters: array[TCpuRegister] of TCpuGprValue;
     fSetGprEvent: TSetGprEvent;
-    procedure setRegister(index: TCpuRegister; value: TCpuRegValue);
+    procedure setRegister(index: TCpuRegister; value: TCpuGprValue);
   published
     {$IFDEF CPU64}
-    property RAX: TCpuRegValue index TCpuRegister.rax read fRegisters[TCpuRegister.rax] write setRegister;
-    property RBX: TCpuRegValue index TCpuRegister.rbx read fRegisters[TCpuRegister.rbx] write setRegister;
-    property RCX: TCpuRegValue index TCpuRegister.rcx read fRegisters[TCpuRegister.rcx] write setRegister;
-    property RDX: TCpuRegValue index TCpuRegister.rdx read fRegisters[TCpuRegister.rdx] write setRegister;
-    property RSI: TCpuRegValue index TCpuRegister.rsi read fRegisters[TCpuRegister.rsi] write setRegister;
-    property RDI: TCpuRegValue index TCpuRegister.rdi read fRegisters[TCpuRegister.rdi] write setRegister;
-    property RBP: TCpuRegValue index TCpuRegister.rbp read fRegisters[TCpuRegister.rbp] write setRegister;
-    property RSP: TCpuRegValue index TCpuRegister.rsp read fRegisters[TCpuRegister.rsp] write setRegister;
-    property R8:  TCpuRegValue index TCpuRegister.r8  read fRegisters[TCpuRegister.r8] write setRegister;
-    property R9:  TCpuRegValue index TCpuRegister.r9  read fRegisters[TCpuRegister.r9] write setRegister;
-    property R10: TCpuRegValue index TCpuRegister.r10 read fRegisters[TCpuRegister.r10] write setRegister;
-    property R11: TCpuRegValue index TCpuRegister.r11 read fRegisters[TCpuRegister.r11] write setRegister;
-    property R12: TCpuRegValue index TCpuRegister.r12 read fRegisters[TCpuRegister.r12] write setRegister;
-    property R13: TCpuRegValue index TCpuRegister.r13 read fRegisters[TCpuRegister.r13] write setRegister;
-    property R14: TCpuRegValue index TCpuRegister.r14 read fRegisters[TCpuRegister.r14] write setRegister;
-    property R15: TCpuRegValue index TCpuRegister.r15 read fRegisters[TCpuRegister.r15] write setRegister;
-    property RIP: TCpuRegValue index TCpuRegister.rip read fRegisters[TCpuRegister.rip] write setRegister;
+    property RAX: TCpuGprValue index TCpuRegister.rax read fRegisters[TCpuRegister.rax] write setRegister;
+    property RBX: TCpuGprValue index TCpuRegister.rbx read fRegisters[TCpuRegister.rbx] write setRegister;
+    property RCX: TCpuGprValue index TCpuRegister.rcx read fRegisters[TCpuRegister.rcx] write setRegister;
+    property RDX: TCpuGprValue index TCpuRegister.rdx read fRegisters[TCpuRegister.rdx] write setRegister;
+    property RSI: TCpuGprValue index TCpuRegister.rsi read fRegisters[TCpuRegister.rsi] write setRegister;
+    property RDI: TCpuGprValue index TCpuRegister.rdi read fRegisters[TCpuRegister.rdi] write setRegister;
+    property RBP: TCpuGprValue index TCpuRegister.rbp read fRegisters[TCpuRegister.rbp] write setRegister;
+    property RSP: TCpuGprValue index TCpuRegister.rsp read fRegisters[TCpuRegister.rsp] write setRegister;
+    property R8:  TCpuGprValue index TCpuRegister.r8  read fRegisters[TCpuRegister.r8] write setRegister;
+    property R9:  TCpuGprValue index TCpuRegister.r9  read fRegisters[TCpuRegister.r9] write setRegister;
+    property R10: TCpuGprValue index TCpuRegister.r10 read fRegisters[TCpuRegister.r10] write setRegister;
+    property R11: TCpuGprValue index TCpuRegister.r11 read fRegisters[TCpuRegister.r11] write setRegister;
+    property R12: TCpuGprValue index TCpuRegister.r12 read fRegisters[TCpuRegister.r12] write setRegister;
+    property R13: TCpuGprValue index TCpuRegister.r13 read fRegisters[TCpuRegister.r13] write setRegister;
+    property R14: TCpuGprValue index TCpuRegister.r14 read fRegisters[TCpuRegister.r14] write setRegister;
+    property R15: TCpuGprValue index TCpuRegister.r15 read fRegisters[TCpuRegister.r15] write setRegister;
+    property RIP: TCpuGprValue index TCpuRegister.rip read fRegisters[TCpuRegister.rip] write setRegister;
     {$ELSE}
     property EAX: TCpuRegValue index TCpuRegister.eax read fRegisters[TCpuRegister.eax] write setRegister;
     property EBX: TCpuRegValue index TCpuRegister.ebx read fRegisters[TCpuRegister.ebx] write setRegister;
@@ -90,6 +105,26 @@ type
   public
     constructor create(eventGPR: TSetGprEvent);
     procedure setInspectableRegister(index: TCpuRegister; value: PtrUInt);
+  end;
+
+  TSetSsrEvent = procedure(reg: TSegRegister; val: TCPUSegValue) of object;
+
+  // Makes a category for the segment registers in a object inspector
+  TInspectableSSR = class(TPersistent)
+  private
+    fRegisters: array[TSegRegister] of TCPUSegValue;
+    fSetSsrEvent: TSetSsrEvent;
+    procedure setRegister(index: TSegRegister; value: TCPUSegValue);
+  published
+    property CS: TCPUSegValue index TSegRegister.CS read fRegisters[TSegRegister.CS] write setRegister;
+    property SS: TCPUSegValue index TSegRegister.SS read fRegisters[TSegRegister.SS] write setRegister;
+    property DS: TCPUSegValue index TSegRegister.DS read fRegisters[TSegRegister.DS] write setRegister;
+    property ES: TCPUSegValue index TSegRegister.ES read fRegisters[TSegRegister.ES] write setRegister;
+    property FS: TCPUSegValue index TSegRegister.FS read fRegisters[TSegRegister.FS] write setRegister;
+    property GS: TCPUSegValue index TSegRegister.GS read fRegisters[TSegRegister.GS] write setRegister;
+  public
+    constructor create(eventSSR: TSetSsrEvent);
+    procedure setInspectableRegister(index: TSegRegister; value: TCPUSegValue);
   end;
 
   TSetFprEvent = procedure(reg: TFpuRegister; val: extended) of object;
@@ -115,7 +150,7 @@ type
   end;
 
   // Makes a category for the SSE registers in a object inspector
-  TInspectableSSER = class(TPersistent)
+  TInspectableSSE = class(TPersistent)
     // interpretation is a problem:
     // 4 int ? 2 double ? 4 single ? ...
   end;
@@ -139,28 +174,21 @@ type
   end;
 
   // Stores the registers content, to be displayable in an object inspector.
-  TInspectableState = class(TPersistent)
+  TInspectableCPU = class(TPersistent)
   private
     fFlags: TEFLAG;
-    fSegment: array[TSegmentRegister] of byte;
     fGpr: TInspectableGPR;
     fFpr: TInspectableFPR;
-    fLocals: TInspectableLocals;
+    fSsr: TInspectableSSR;
   published
-    property Locals: TInspectableLocals read fLocals;
     property CPU: TInspectableGPR read fGpr;
     property FPU: TInspectableFPR read fFpr;
+    property SSR: TInspectableSSR read fSsr;
     //
     property EFLAGS: TEFLAG read fFlags;
-    //
-    (*property CS: byte read fSegment[TSegmentRegister.S_CS];
-    property DS: byte read fSegment[TSegmentRegister.S_DS];
-    property ES: byte read fSegment[TSegmentRegister.S_ES];
-    property FS: byte read fSegment[TSegmentRegister.S_FS];
-    property GS: byte read fSegment[TSegmentRegister.S_GS];
-    property SS: byte read fSegment[TSegmentRegister.S_SS];*)
   public
-    constructor create(setGprEvent: TSetGprEvent; setFprEvent: TSetFprEvent);
+    constructor create(setGprEvent: TSetGprEvent; setSsrEvent: TSetSsrEvent;
+      setFprEvent: TSetFprEvent);
     destructor destroy; override;
   end;
 
@@ -304,7 +332,7 @@ type
     fDocHandler: ICEMultiDocHandler;
     fMsg: ICEMessagesDisplay;
     fGdb: TCEProcess;
-    fInspState: TInspectableState;
+    fInspState: TInspectableCPU;
     fStackItems: TStackItems;
     fCatchPause: boolean;
     fOptions: TCEDebugOptions;
@@ -329,8 +357,9 @@ type
     procedure infoStack;
     procedure infoVariables;
     procedure sendCustomCommand;
-    procedure setGpr(reg: TCpuRegister; val: TCpuRegValue);
+    procedure setGpr(reg: TCpuRegister; val: TCpuGprValue);
     procedure setFpr(reg: TFpuRegister; val: extended);
+    procedure setSsr(reg: TSegRegister; val: TCPUSegValue);
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -586,7 +615,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TInspectableState -----------------------------------------------------}
+{$REGION TInspectableCPU -------------------------------------------------------}
 function TCpuRegValueEditor.GetValue: ansistring;
 begin
   {$IFDEF CPU64}
@@ -608,6 +637,19 @@ begin
   end;
 end;
 
+function TCpuSegValueEditor.GetValue: ansistring;
+begin
+  result := '0x' + IntToHex(GetOrdValue, 4);
+end;
+
+procedure TCpuSegValueEditor.SetValue(const NewValue: ansistring);
+begin
+  try
+    SetOrdValue(StrToInt(NewValue));
+  except
+  end;
+end;
+
 constructor TInspectableGPR.create(eventGPR: TSetGprEvent);
 begin
   fSetGprEvent:=eventGPR;
@@ -618,9 +660,25 @@ begin
   fRegisters[index] := value;
 end;
 
-procedure TInspectableGPR.setRegister(index: TCpuRegister; value: TCpuRegValue);
+procedure TInspectableGPR.setRegister(index: TCpuRegister; value: TCpuGprValue);
 begin
   fSetGprEvent(index, value);
+  fRegisters[index] := value;
+end;
+
+constructor TInspectableSSR.create(eventSSR: TSetSsrEvent);
+begin
+  fSetSsrEvent:=eventSSR;
+end;
+
+procedure TInspectableSSR.setInspectableRegister(index: TSegRegister; value: TCPUSegValue);
+begin
+  fRegisters[index] := value;
+end;
+
+procedure TInspectableSSR.setRegister(index: TSegRegister; value: TCPUSegValue);
+begin
+  fSetSsrEvent(index, value);
   fRegisters[index] := value;
 end;
 
@@ -687,18 +745,19 @@ begin
   fLocals.Values[name] := value;
 end;
 
-constructor TInspectableState.create(setGprEvent: TSetGprEvent; setFprEvent: TSetFprEvent);
+constructor TInspectableCPU.create(setGprEvent: TSetGprEvent; setSsrEvent: TSetSsrEvent;
+  setFprEvent: TSetFprEvent);
 begin
   fGpr := TInspectableGPR.create(setGprEvent);
+  fSsr := TInspectableSSR.create(setSsrEvent);
   fFpr := TInspectableFPR.create(setFprEvent);
-  fLocals := TInspectableLocals.create;
 end;
 
-destructor TInspectableState.destroy;
+destructor TInspectableCPU.destroy;
 begin
   fGpr.Free;
   fFPr.Free;
-  fLocals.Free;
+  fSSr.Free;
   inherited;
 end;
 {$ENDREGION}
@@ -713,7 +772,7 @@ begin
   fMsg:= getMessageDisplay;
   fFileLineBrks:= TStringList.Create;
   fLog := TStringList.Create;
-  fInspState := TInspectableState.Create(@setGpr, @setFpr);
+  fInspState := TInspectableCPU.Create(@setGpr, @setSsr, @setFpr);
   stateViewer.TIObject := fInspState;
   fJson := TJsonObject.Create;
   fStackItems := TStackItems.create;
@@ -1368,8 +1427,6 @@ begin
   end;
 end;
 
-// ^done,register-values=[{number="0",value="0"},{number="1",value="140737488347232"},{number="2",value="140737349740925"},{number="3",value="140737488346960"},{number="4",value="140737488346960"},{number="5",value="1"},{number="6",value="140737488346752"},{number="7",value="140737488343952"},{number="8",value="0"},{number="9",value="140737488346176"},{number="10",value="8"},{number="11",value="518"},{number="12",value="140737488347040"},{number="13",value="140737488347024"},{number="14",value="1"},{number="15",value="140737488346960"},{number="16",value="4848450"},{number="17",value="582"},{number="18",value="51"},{number="19",value="43"},{number="20",value="0"},{number="21",value="0"},{number="22",value="0"},{number="23",value="0"},{number="24",value="0"},{number="25",value="0"},{number="26",value="0"},{number="27",value="0"},{number="28",value="0"},{number="29",value="0"},{number="30",value="0"},{number="31",value="0"},{number="32",value="895"},{number="33",value="0"},{number="34",value="65535"},{number="35",value="0"},{number="36",value="0"},{number="37",value="0"},{number="38",value="0"},{number="39",value="0"},{number="40",value="{v4_float = {0, 0, -9223372036854775808, 0}, v2_double = {0, 0}, v16_int8 = {0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0}, v8_int16 = {-256, 0, 0, 0, 0, -256, 0, 0}, v4_int32 = {65280, 0, -16777216, 0}, v2_int64 = {65280, 4278190080}, uint128 = 00078918677504442992524819234560}"},{number="41",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="42",value="{v4_float = {-9223372036854775808, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0, 0, 0, -1, 0 <repeats 12 times>}, v8_int16 = {0, -256, 0, 0, 0, 0, 0, 0}, v4_int32 = {-16777216, 0, 0, 0}, v2_int64 = {4278190080, 0}, uint128 = 00000000000000000000004278190080}"},{number="43",value="{v4_float = {0, 0, -9223372036854775808, -9223372036854775808}, v2_double = {0, -9223372036854775808}, v16_int8 = {0, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1}, v8_int16 = {-256, 0, 0, 0, 0, -1, -1, -1}, v4_int32 = {65280, 0, -65536, -1}, v2_int64 = {65280, -65536}, uint128 = 340282366920937254537554992802593570560}"},{number="44",value="{v4_float = {-9223372036854775808, -9223372036854775808, -9223372036854775808, -9223372036854775808}, v2_double = {-9223372036854775808, -9223372036854775808}, v16_int8 = {-1 <repeats 16 times>}, v8_int16 = {-1, -1, -1, -1, -1, -1, -1, -1}, v4_int32 = {-1, -1, -1, -1}, v2_int64 = {-1, -1}, uint128 = 340282366920938463463374607431768211455}"},{number="45",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="46",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="47",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="48",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0, 0, 0, 0, 0, 0, 0, 0, -56, 117, 117, 0, 0, 0, 0, 0}, v8_int16 = {0, 0, 0, 0, 30152, 117, 0, 0}, v4_int32 = {0, 0, 7697864, 0}, v2_int64 = {0, 7697864}, uint128 = 00000142000527122222103840948224}"},{number="49",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="50",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="51",value="{v4_float = {-9223372036854775808, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0}, v8_int16 = {0, -256, 0, 0, 0, 0, 0, 255}, v4_int32 = {-16777216, 0, 0, 16711680}, v2_int64 = {4278190080, 71776119061217280}, uint128 = 1324035698926381045275276568229314560}"},{number="52",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="53",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="54",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="55",value="{v4_float = {0, 0, 0, 0}, v2_double = {0, 0}, v16_int8 = {0 <repeats 16 times>}, v8_int16 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int32 = {0, 0, 0, 0}, v2_int64 = {0, 0}, uint128 = 00000000000000000000000000000000}"},{number="56",value="8064"},{number="57",value="00000000000000000000000000000000"},{number="58",value="00000000000000000000000000000000"},{number="59",value="00000000000000000000000000000000"},{number="60",value="00000000000000000000000000000000"},{number="61",value="00000000000000000000000000000000"},{number="62",value="00000000000000000000000000000000"},{number="63",value="00000000000000000000000000000000"},{number="64",value="00000000000000000000000000000000"},{number="65",value="00000000000000000000000000000000"},{number="66",value="00000000000000000000000000000000"},{number="67",value="00000000000000000000000000000000"},{number="68",value="00000000000000000000000000000000"},{number="69",value="00000000000000000000000000000000"},{number="70",value="00000000000000000000000000000000"},{number="71",value="00000000000000000000000000000000"},{number="72",value="00000000000000000000000000000000"},{number="151",value="-1"},{number="152",value="0"},{number="153",value="96"},{number="154",value="125"},{number="155",value="80"},{number="156",value="80"},{number="157",value="1"},{number="158",value="-128"},{number="159",value="-112"},{number="160",value="0"},{number="161",value="64"},{number="162",value="8"},{number="163",value="6"},{number="164",value="-96"},{number="165",value="-112"},{number="166",value="1"},{number="167",value="80"},{number="168",value="0"},{number="169",value="-32"},{number="170",value="-23"},{number="171",value="-33"},{number="172",value="0"},{number="173",value="-8096"},{number="174",value="-5763"},{number="175",value="-8368"},{number="176",value="-8368"},{number="177",value="1"},{number="178",value="-8576"},{number="180",value="0"},{number="181",value="-9152"},{number="182",value="8"},{number="183",value="518"},{number="184",value="-8288"},{number="185",value="-8304"},{number="186",value="1"},{number="187",value="-8368"},{number="188",value="0"},{number="189",value="-8096"},{number="190",value="-138614403"},{number="191",value="-8368"},{number="192",value="-8368"},{number="193",value="1"},{number="194",value="-8576"},{number="195",value="-11376"},{number="196",value="0"},{number="197",value="-9152"},{number="198",value="8"},{number="199",value="518"},{number="200",value="-8288"},{number="201",value="-8304"},{number="202",value="1"},{number="203",value="-8368"},{number="204",value="{v8_float = {0, 0, -9223372036854775808, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0 <repeats 20 times>}, v16_int16 = {-256, 0, 0, 0, 0, -256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, v8_int32 = {65280, 0, -16777216, 0, 0, 0, 0, 0}, v4_int64 = {65280, 4278190080, 0, 0}, v2_int128 = {00078918677504442992524819234560, 00000000000000000000000000000000}}"},{number="205",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"},{number="206",value="{v8_float = {-9223372036854775808, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0, 0, 0, -1, 0 <repeats 28 times>}, v16_int16 = {0, -256, 0 <repeats 14 times>}, v8_int32 = {-16777216, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {4278190080, 0, 0, 0}, v2_int128 = {00000000000000000000004278190080, 00000000000000000000000000000000}}"},{number="207",value="{v8_float = {0, 0, -9223372036854775808, -9223372036854775808, 0, 0, 0, 0}, v4_double = {0, -9223372036854775808, 0, 0}, v32_int8 = {0, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, 0 <repeats 16 times>}, v16_int16 = {-256, 0, 0, 0, 0, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0}, v8_int32 = {65280, 0, -65536, -1, 0, 0, 0, 0}, v4_int64 = {65280, -65536, 0, 0}, v2_int128 = {340282366920937254537554992802593570560, 00000000000000000000000000000000}}"},{number="208",value="{v8_float = {-9223372036854775808, -9223372036854775808, -9223372036854775808, -9223372036854775808, 0, 0, 0, 0}, v4_double = {-9223372036854775808, -9223372036854775808, 0, 0}, v32_int8 = {-1 <repeats 16 times>, 0 <repeats 16 times>}, v16_int16 = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0}, v8_int32 = {-1, -1, -1, -1, 0, 0, 0, 0}, v4_int64 = {-1, -1, 0, 0}, v2_int128 = {340282366920938463463374607431768211455, 00000000000000000000000000000000}}"},{number="209",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"},{number="210",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"},{number="211",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"},{number="212",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0, 0, 0, 0, 0, 0, 0, 0, -56, 117, 117, 0 <repeats 21 times>}, v16_int16 = {0, 0, 0, 0, 30152, 117, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, v8_int32 = {0, 0, 7697864, 0, 0, 0, 0, 0}, v4_int64 = {0, 7697864, 0, 0}, v2_int128 = {00000142000527122222103840948224, 00000000000000000000000000000000}}"},{number="213",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"},{number="214",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"},{number="215",value="{v8_float = {-9223372036854775808, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0 <repeats 17 times>}, v16_int16 = {0, -256, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0}, v8_int32 = {-16777216, 0, 0, 16711680, 0, 0, 0, 0}, v4_int64 = {4278190080, 71776119061217280, 0, 0}, v2_int128 = {1324035698926381045275276568229314560, 00000000000000000000000000000000}}"},{number="216",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"},{number="217",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"},{number="218",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"},{number="219",value="{v8_float = {0, 0, 0, 0, 0, 0, 0, 0}, v4_double = {0, 0, 0, 0}, v32_int8 = {0 <repeats 32 times>}, v16_int16 = {0 <repeats 16 times>}, v8_int32 = {0, 0, 0, 0, 0, 0, 0, 0}, v4_int64 = {0, 0, 0, 0}, v2_int128 = {00000000000000000000000000000000, 00000000000000000000000000000000}}"}]
-
 procedure TCEGdbWidget.interpretJson;
 
   procedure autoGetStuff;
@@ -1521,6 +1578,11 @@ begin
               fInspState.CPU.setInspectableRegister
                 (TCpuRegister(number), {$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
             end;
+            segOffset..segOffset+5:
+            begin
+              fInspState.SSR.setInspectableRegister
+                (TSegRegister(number - segOffset), val.AsInteger);
+            end;
             stOffset..stOffset+7:
             begin
               fFpuRaw[9] := StrToInt('$' + val.AsString[3..4]);
@@ -1538,7 +1600,6 @@ begin
             end;
         end;
         // TODO-cGDB: get SSE registers
-        // TODO-cGDB: get Segment registers
         // TODO-cGDB: get EFLAGS
       end;
     end;
@@ -1581,7 +1642,7 @@ begin
   val := fJson.Find('variables');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
-    fInspState.Locals.clear;
+    ValueListEditor1.Clear;
     arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
     begin
@@ -1596,11 +1657,8 @@ begin
       val := obj.Find('value');
       if val.isNil then
         continue;
-      fInspState.Locals.add(nme, val.AsString);
+      ValueListEditor1.InsertRow(nme, val.AsString, true);
     end;
-    ValueListEditor1.Strings.Assign(fInspState.Locals.fLocals);
-    //stateViewer.RefreshPropertyValues;
-    //stateViewer.BuildPropertyList;
   end;
 
   if fOptions.showGdbOutput then
@@ -1764,13 +1822,23 @@ begin
   edit1.Text := '';
 end;
 
-procedure TCEGdbWidget.setGpr(reg: TCpuRegister; val: TCpuRegValue);
+procedure TCEGdbWidget.setGpr(reg: TCpuRegister; val: TCpuGprValue);
 const
   spec = 'set $%s = 0x%X';
 var
   cmd : string;
 begin
   cmd := format(spec, [GetEnumName(typeinfo(TCpuRegister),integer(reg)), val]);
+  gdbCommand(cmd);
+end;
+
+procedure TCEGdbWidget.setSsr(reg: TSegRegister; val: TCPUSegValue);
+const
+  spec = 'set $%s = 0x%X';
+var
+  cmd : string;
+begin
+  cmd := format(spec, [GetEnumName(typeinfo(TSegRegister),integer(reg)), val]);
   gdbCommand(cmd);
 end;
 
@@ -1786,6 +1854,7 @@ end;
 {$ENDREGION}
 
 initialization
-  RegisterPropertyEditor(TypeInfo(TCpuRegValue), nil, '', TCpuRegValueEditor);
+  RegisterPropertyEditor(TypeInfo(TCpuGprValue), nil, '', TCpuRegValueEditor);
+  RegisterPropertyEditor(TypeInfo(TCpuSegValue), nil, '', TCpuSegValueEditor);
 end.
 
