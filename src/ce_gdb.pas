@@ -134,7 +134,7 @@ type
     procedure setInspectableRegister(index: TSegRegister; value: TCPUSegValue);
   end;
 
-  TSetFlagEvent = procedure(reg: TFlag; val: boolean) of object;
+  TSetFlagEvent = procedure(val: PtrUint) of object;
 
   TSetFprEvent = procedure(reg: TFpuRegister; val: extended) of object;
 
@@ -165,7 +165,7 @@ type
   end;
 
   // Makes a category for the local variables in an object inspector
-  TInspectableLocals= class(TPersistent)
+  TInspectableLocals = class(TPersistent)
   private
     fLocals: TStringList;
     fPropIndex: integer;
@@ -185,6 +185,7 @@ type
   // Stores the registers content, to be displayable in an object inspector.
   TInspectableCPU = class(TPersistent)
   private
+    fFullFlags: PtrUint;
     fFlags: TFlags;
     fSetFlagEvent: TSetFlagEvent;
     fGpr: TInspectableGPR;
@@ -200,7 +201,7 @@ type
     constructor create(setGprEvent: TSetGprEvent; setSsrEvent: TSetSsrEvent;
       setFlagEvent: TSetFlagEvent; setFprEvent: TSetFprEvent);
     destructor destroy; override;
-    procedure setInspectableFlags(value: word);
+    procedure setInspectableFlags(value: PtrUint);
   end;
 
   // Represents an item in the call stack
@@ -371,7 +372,7 @@ type
     procedure setGpr(reg: TCpuRegister; val: TCpuGprValue);
     procedure setFpr(reg: TFpuRegister; val: extended);
     procedure setSsr(reg: TSegRegister; val: TCPUSegValue);
-    procedure setFlag(reg: TFLAG; val: boolean);
+    procedure setFlag(val: PtrUint);
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -774,10 +775,13 @@ begin
   inherited;
 end;
 
-procedure TInspectableCPU.setInspectableFlags(value: word);
+procedure TInspectableCPU.setInspectableFlags(value: PtrUint);
 var
   flg: TFlag;
 begin
+  if fFullFlags = value then
+    exit;
+  fFullFlags:=value;
   fFlags:= [];
   for flg in TFlag do
     if (value and FlagValues[flg]) >= FlagValues[flg] then
@@ -791,11 +795,10 @@ begin
   if fFlags = value then
     exit;
   for flg in TFlag do
-  begin
     if (flg in value) <> (flg in fFlags) then
-      fSetFlagEvent(flg, flg in value);
-  end;
+      fFullFlags:= fFullFlags xor FlagValues[flg];
   fFlags := value;
+  fSetFlagEvent(fFullFlags);
 end;
 {$ENDREGION}
 
@@ -1617,7 +1620,7 @@ begin
             end;
             flagOffset:
             begin
-              fInspState.setInspectableFlags(word(val.AsInteger));
+              fInspState.setInspectableFlags({$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
             end;
             segOffset..segOffset+5:
             begin
@@ -1641,7 +1644,6 @@ begin
             end;
         end;
         // TODO-cGDB: get SSE registers
-        // TODO-cGDB: get EFLAGS
       end;
     end;
     stateViewer.RefreshPropertyValues;
@@ -1883,17 +1885,13 @@ begin
   gdbCommand(cmd);
 end;
 
-procedure TCEGdbWidget.setFlag(reg: TFLAG; val: boolean);
+procedure TCEGdbWidget.setFlag(val: PtrUint);
 const
-  // TODO-cGDB: set eflags from expr fails with "invalid cast"
-  spec: array[boolean] of string = (
-    'set $eflags &= ~0x%X',
-    'set $eflags |= 0x%X'
-  );
+  spec = 'set $eflags = 0x%X';
 var
   cmd: string;
 begin
-  cmd := format(spec[val], [FlagValues[reg]]);
+  cmd := format(spec, [val]);
   gdbCommand(cmd);
 end;
 
