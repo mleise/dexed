@@ -313,11 +313,17 @@ type
     btnStop: TCEToolButton;
     button4: TCEToolButton;
     Edit1: TComboBox;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    GroupBox3: TGroupBox;
     lstCallStack: TListView;
-    Panel2: TPanel;
+    Panel1: TPanel;
     Panel3: TPanel;
     btnSendCom: TSpeedButton;
-    stateViewer: TTIPropertyGrid;
+    cpuVIewer: TTIPropertyGrid;
+    Splitter2: TSplitter;
+    Splitter3: TSplitter;
+    Splitter4: TSplitter;
     ValueListEditor1: TValueListEditor;
     procedure btnContClick(Sender: TObject);
     procedure btnVariablesClick(Sender: TObject);
@@ -813,7 +819,7 @@ begin
   fFileLineBrks:= TStringList.Create;
   fLog := TStringList.Create;
   fInspState := TInspectableCPU.Create(@setGpr, @setSsr, @setFlag, @setFpr);
-  stateViewer.TIObject := fInspState;
+  cpuVIewer.TIObject := fInspState;
   fJson := TJsonObject.Create;
   fStackItems := TStackItems.create;
   fSubj:= TCEDebugObserverSubject.Create;
@@ -1176,7 +1182,7 @@ end;
 
 procedure TCEGdbWidget.disableEditor;
 begin
-  stateViewer.ItemIndex:=-1;
+  cpuVIewer.ItemIndex:=-1;
 end;
 
 procedure TCEGdbWidget.startDebugging;
@@ -1646,7 +1652,7 @@ begin
         // TODO-cGDB: get SSE registers
       end;
     end;
-    stateViewer.RefreshPropertyValues;
+    cpuVIewer.RefreshPropertyValues;
   end;
 
   val := fJson.Find('stack');
