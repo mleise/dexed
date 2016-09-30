@@ -126,6 +126,7 @@ type
     fPrevProj: ICECommonProject;
     fFreeProj: ICECommonProject;
     fProjSubj: TCEProjectSubject;
+    fUpdating: boolean;
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -697,6 +698,9 @@ var
 const
   typeStr: array[TCEProjectFormat] of string = ('CE','DUB');
 begin
+  if fUpdating then
+    exit;
+  fUpdating := true;
   lstProj.BeginUpdate;
   lstProj.Items.Clear;
   for i := 0 to projectGroup.projectCount-1 do
@@ -738,6 +742,7 @@ begin
   else
     StaticText1.Caption:= 'No free standing project';
   updateButtons;
+  fUpdating := false;
 end;
 {$ENDREGION}
 
