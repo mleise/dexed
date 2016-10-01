@@ -46,7 +46,7 @@ type
   const flagOffset = 17;
   {$ELSE}
   const segOffset = 10;
-  const segOffset = 9;
+  const flagOffset = 9;
   {$ENDIF}
 
 type
@@ -99,15 +99,15 @@ type
     property R15: TCpuGprValue index TCpuRegister.r15 read fRegisters[TCpuRegister.r15] write setRegister;
     property RIP: TCpuGprValue index TCpuRegister.rip read fRegisters[TCpuRegister.rip] write setRegister;
     {$ELSE}
-    property EAX: TCpuRegValue index TCpuRegister.eax read fRegisters[TCpuRegister.eax] write setRegister;
-    property EBX: TCpuRegValue index TCpuRegister.ebx read fRegisters[TCpuRegister.ebx] write setRegister;
-    property ECX: TCpuRegValue index TCpuRegister.ecx read fRegisters[TCpuRegister.ecx] write setRegister;
-    property EDX: TCpuRegValue index TCpuRegister.edx read fRegisters[TCpuRegister.edx] write setRegister;
-    property ESI: TCpuRegValue index TCpuRegister.esi read fRegisters[TCpuRegister.esi] write setRegister;
-    property EDI: TCpuRegValue index TCpuRegister.edi read fRegisters[TCpuRegister.edi] write setRegister;
-    property EBP: TCpuRegValue index TCpuRegister.ebp read fRegisters[TCpuRegister.ebp] write setRegister;
-    property ESP: TCpuRegValue index TCpuRegister.esp read fRegisters[TCpuRegister.esp] write setRegister;
-    property EIP: TCpuRegValue index TCpuRegister.eip read fRegisters[TCpuRegister.eip] write setRegister;
+    property EAX: TCpuGprValue index TCpuRegister.eax read fRegisters[TCpuRegister.eax] write setRegister;
+    property EBX: TCpuGprValue index TCpuRegister.ebx read fRegisters[TCpuRegister.ebx] write setRegister;
+    property ECX: TCpuGprValue index TCpuRegister.ecx read fRegisters[TCpuRegister.ecx] write setRegister;
+    property EDX: TCpuGprValue index TCpuRegister.edx read fRegisters[TCpuRegister.edx] write setRegister;
+    property ESI: TCpuGprValue index TCpuRegister.esi read fRegisters[TCpuRegister.esi] write setRegister;
+    property EDI: TCpuGprValue index TCpuRegister.edi read fRegisters[TCpuRegister.edi] write setRegister;
+    property EBP: TCpuGprValue index TCpuRegister.ebp read fRegisters[TCpuRegister.ebp] write setRegister;
+    property ESP: TCpuGprValue index TCpuRegister.esp read fRegisters[TCpuRegister.esp] write setRegister;
+    property EIP: TCpuGprValue index TCpuRegister.eip read fRegisters[TCpuRegister.eip] write setRegister;
     {$ENDIF}
   public
     constructor create(eventGPR: TSetGprEvent);
