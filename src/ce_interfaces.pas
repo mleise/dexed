@@ -43,6 +43,8 @@ type
       procedure loadFromFile(const fname: string);
       // saves project to filename
       procedure saveToFile(const fname: string);
+      // reloads from filename
+      procedure reload;
       // indicates of the project is modified (should be saved or not)
       function modified: boolean;
       // returns the base path used to solve relative locations

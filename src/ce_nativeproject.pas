@@ -103,6 +103,7 @@ type
     function binaryKind: TProjectBinaryKind;
     function getCommandLine: string;
     function modified: boolean;
+    procedure reload;
     //
     function configurationCount: integer;
     procedure setActiveConfigurationIndex(index: integer);
@@ -249,6 +250,12 @@ begin
   beginUpdate;
   fRootFolder := value;
   endUpdate;
+end;
+
+procedure TCENativeProject.reload;
+begin
+  if fFilename.fileExists then
+    loadFromFile(fFilename);
 end;
 
 procedure TCENativeProject.customLoadFromFile(const fname: string);

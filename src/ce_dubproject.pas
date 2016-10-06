@@ -116,6 +116,7 @@ type
     function binaryKind: TProjectBinaryKind;
     function getCommandLine: string;
     function outputFilename: string;
+    procedure reload;
     //
     function isSource(const fname: string): boolean;
     function sourcesCount: integer;
@@ -347,6 +348,12 @@ end;
 function TCEDubProject.basePath: string;
 begin
   exit(fBasePath);
+end;
+
+procedure TCEDubProject.reload;
+begin
+  if fFilename.fileExists then
+    loadFromFile(fFilename);
 end;
 
 procedure TCEDubProject.loadFromFile(const fname: string);

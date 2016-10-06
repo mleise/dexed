@@ -1430,6 +1430,7 @@ begin
       topsplt := nil;
     end;
     fSymlWidg.showWidget;
+    // TODO-cdocking: Put the new unified project editors and inspectors to the right once done
     // right
     DockMaster.GetAnchorSite(fProjWidg).Width := 190;
     DockMaster.GetAnchorSite(fPrjCfWidg).Width := 190;
@@ -3209,9 +3210,8 @@ begin
   if checkProjectLock then exit;
   //
   fname := fProject.filename;
-  fProject.getProject.Free;
   document.saveToFile(fname);
-  openProj(fname);
+  fProject.reload;
 end;
 
 function TCEMainForm.closeProj: boolean;
