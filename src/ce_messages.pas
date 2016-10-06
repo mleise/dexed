@@ -192,6 +192,11 @@ begin
   fFont := TFont.Create;
   fAutoSelect:=true;
   fMaxCount := 1000;
+  fMsgColors[amkBub] := $FCE7D2;
+  fMsgColors[amkWarn]:= $B3FFFF;
+  fMsgColors[amkErr] := $BDBDFF;
+  fMsgColors[amkInf] := $FFD0A8;
+  fMsgColors[amkHint]:= $C2FFC2;
 end;
 
 destructor TCEMessagesOptions.destroy;
@@ -290,11 +295,11 @@ begin
   //
   inherited;
   //
-  fMsgColors[amkBub]  := clDefault;
-  fMsgColors[amkHint] := clDefault;
-  fMsgColors[amkInf]  := clDefault;
-  fMsgColors[amkErr]  := clDefault;
-  fMsgColors[amkWarn] := clDefault;
+  fMsgColors[amkBub]  := $FCE7D2;
+  fMsgColors[amkWarn] := $B3FFFF;
+  fMsgColors[amkErr]  := $BDBDFF;
+  fMsgColors[amkInf]  := $FFD0A8;
+  fMsgColors[amkHint] := $C2FFC2;
   //
   updaterByLoopInterval := 12;
   fOptions := TCEMessagesOptions.Create(Self);
