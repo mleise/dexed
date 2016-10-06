@@ -14,6 +14,8 @@ type
 
   TDubLinkMode = (dlmSeparate, dlmAllAtOnce, dlmSingleFile);
 
+  TDubDependencyCheck = (dcStandard, dcOffline, dcNo);
+
   (**
    * Stores the build options, always applied when a project is build
    *)
@@ -23,6 +25,7 @@ type
     fForceRebuild: boolean;
     fLinkMode: TDubLinkMode;
     fCombined: boolean;
+    fDepCheck: TDubDependencyCheck;
     fOther: string;
     procedure setLinkMode(value: TDubLinkMode);
   published
@@ -31,6 +34,7 @@ type
     property linkMode: TDubLinkMode read fLinkMode write setLinkMode;
     property combined: boolean read fCombined write fCombined;
     property other: string read fOther write fOther;
+    property dependenciesCheck: TDubDependencyCheck read fDepCheck write fDepCheck;
   public
     procedure assign(source: TPersistent); override;
     procedure getOpts(options: TStrings);
@@ -39,18 +43,18 @@ type
   (**
    * Make the build options editable
    *)
-   TCEDubBuildOptions = class(TCEDubBuildOptionsBase, ICEEditableOptions)
-   strict private
-     fBackup: TCEDubBuildOptionsBase;
-     function optionedWantCategory(): string;
-     function optionedWantEditorKind: TOptionEditorKind;
-     function optionedWantContainer: TPersistent;
-     procedure optionedEvent(event: TOptionEditorEvent);
-     function optionedOptionsModified: boolean;
-   public
-     constructor create(aOwner: TComponent); override;
-     destructor destroy; override;
-   end;
+  TCEDubBuildOptions = class(TCEDubBuildOptionsBase, ICEEditableOptions)
+  strict private
+    fBackup: TCEDubBuildOptionsBase;
+    function optionedWantCategory(): string;
+    function optionedWantEditorKind: TOptionEditorKind;
+    function optionedWantContainer: TPersistent;
+    procedure optionedEvent(event: TOptionEditorEvent);
+    function optionedOptionsModified: boolean;
+  public
+    constructor create(aOwner: TComponent); override;
+    destructor destroy; override;
+  end;
 
   TCEDubProject = class(TComponent, ICECommonProject)
   private
@@ -152,7 +156,7 @@ var
   DubCompilerFilename: string = 'dmd';
 
 const
-  DubSdlWarning = 'this feature is not available for a DUB project with the SDL format';
+  DubSdlWarning = 'this feature is deactivated in DUB projects with the SDL format';
 
 implementation
 
@@ -191,6 +195,7 @@ begin
     combined:=opts.combined;
     linkMode:=opts.linkMode;
     other:=opts.other;
+    dependenciesCheck:=opts.dependenciesCheck;
   end
   else inherited;
 end;
@@ -206,6 +211,10 @@ begin
   case linkMode of
     dlmAllAtOnce: options.Add('--build-mode=allAtOnce');
     dlmSingleFile: options.Add('--build-mode=singleFile');
+  end;
+  case dependenciesCheck of
+    dcNo: options.Add('--skip-registry=all');
+    dcOffline: options.Add('--skip-registry=standard');
   end;
   if other.isNotEmpty then
     CommandToList(other, options);
