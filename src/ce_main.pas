@@ -1760,7 +1760,7 @@ begin
   if fAppliOpts.reloadLastDocuments then
     LoadLastDocsAndProj;
   if fProject = nil then
-    newNativeProj;
+    newDubProj;
 
   DockMaster.ResetSplitters;
   setSplitterWheelEvent;
