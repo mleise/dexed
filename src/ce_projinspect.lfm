@@ -5,7 +5,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
   Width = 341
   ActiveControl = Tree
   AllowDropFiles = True
-  Caption = 'Native project inspector'
+  Caption = 'Project inspector'
   ClientHeight = 258
   ClientWidth = 341
   OnDropFiles = FormDropFiles
@@ -38,18 +38,14 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         TabOrder = 0
         ToolTips = False
         OnClick = TreeClick
+        OnDeletion = TreeDeletion
         OnKeyDown = TreeKeyDown
         OnSelectionChanged = TreeSelectionChanged
         Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowLines, tvoThemedDraw]
         Items.Data = {
-          F9FFFFFF020005000000000000000000000000000000FFFFFFFF000000000000
+          F9FFFFFF020002000000000000000000000000000000FFFFFFFF000000000000
           0000000C000000536F757263652066696C6573010000000100000001000000FF
-          FFFFFF0000000000000000000E000000436F6E66696775726174696F6E730400
-          00000400000004000000FFFFFFFF00000000000000000013000000496D706F72
-          7420737472696E67207061746873060000000600000006000000FFFFFFFF0000
-          0000000000000013000000496D706F7274206D6F64756C652070617468730000
-          00000000000000000000FFFFFFFF0000000000000000000D0000004578747261
-          20736F7572636573
+          FFFFFF0000000000000000000E000000436F6E66696775726174696F6E73
         }
       end
     end

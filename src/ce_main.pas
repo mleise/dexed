@@ -1430,12 +1430,13 @@ begin
       topsplt := nil;
     end;
     fSymlWidg.showWidget;
-    // TODO-cdocking: Put the new unified project editors and inspectors to the right once done
     // right
     DockMaster.GetAnchorSite(fProjWidg).Width := 190;
-    DockMaster.GetAnchorSite(fPrjCfWidg).Width := 190;
+    DockMaster.GetAnchorSite(fDubProjWidg).Width := 190;
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fProjWidg), DockMaster.GetSite(fEditWidg), alRight);
-    DockMaster.ManualDock(DockMaster.GetAnchorSite(fPrjCfWidg), DockMaster.GetAnchorSite(fProjWidg), alBottom, fProjWidg);
+    DockMaster.ManualDock(DockMaster.GetAnchorSite(fPrjGrpWidg), DockMaster.GetSite(fProjWidg), alBottom, fProjWidg);
+    DockMaster.ManualDock(DockMaster.GetAnchorSite(fDubProjWidg), DockMaster.GetAnchorSite(fProjWidg), alClient, fProjWidg);
+    fProjWidg.showWidget;
     // close remaining and header to top
     for i := 0 to fWidgList.Count-1 do
     begin

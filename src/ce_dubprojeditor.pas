@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, Forms, Controls, Graphics,
   Dialogs, ExtCtrls, Menus, StdCtrls, Buttons, ComCtrls, xjsonparser, xfpjson,
-  ce_widget, ce_common, ce_interfaces, ce_observer, ce_dubproject, ce_sharedres;
+  ce_widget, ce_common, ce_interfaces, ce_observer, ce_dubproject, ce_sharedres,
+  ce_dsgncontrols;
 
 type
 
@@ -38,36 +39,25 @@ type
   { TCEDubProjectEditorWidget }
   TCEDubProjectEditorWidget = class(TCEWidget, ICEProjectObserver)
     btnAcceptProp: TSpeedButton;
-    btnAddProp: TSpeedButton;
-    btnDelProp: TSpeedButton;
-    btnRefresh: TBitBtn;
+    btnAddProp: TCEToolButton;
+    btnDelProp: TCEToolButton;
+    btnUpdate: TCEToolButton;
     edProp: TEdit;
     fltEdit: TTreeFilterEdit;
     imgList: TImageList;
     MenuItem1: TMenuItem;
-    PageControl1: TPageControl;
     Panel1: TPanel;
-    pnlToolBar: TPanel;
-    pnlToolBar1: TPanel;
     propTree: TTreeView;
-    fltInspect: TTreeFilterEdit;
-    treeInspect: TTreeView;
-    TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
     procedure btnAcceptPropClick(Sender: TObject);
     procedure btnAddPropClick(Sender: TObject);
     procedure btnDelPropClick(Sender: TObject);
     procedure btnRefreshClick(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure propTreeSelectionChanged(Sender: TObject);
-    procedure treeInspectDblClick(Sender: TObject);
   private
     fSelectedNode: TTreeNode;
     fProj: TCEDubProject;
-    fNodeSources: TTreeNode;
-    fNodeConfig: TTreeNode;
     procedure updateEditor;
-    procedure updateInspector;
     procedure updateValueEditor;
     procedure setJsonValueFromEditor;
     procedure addProp(const propName: string; tpe: TJSONtype);
@@ -81,6 +71,7 @@ type
     //
   protected
     procedure SetVisible(value: boolean); override;
+    procedure setToolBarFlat(value: boolean); override;
   public
     constructor create(aOwner: TComponent); override;
   end;
@@ -236,22 +227,22 @@ end;
 constructor TCEDubProjectEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
-  toolbarVisible:=false;
-  fNodeSources := treeInspect.Items[0];
-  fNodeConfig := treeInspect.Items[1];
-  //
-  AssignPng(btnAddProp, 'TEXTFIELD_ADD');
-  AssignPng(btnDelProp, 'TEXTFIELD_DELETE');
+  setToolBarVisible(true);
   AssignPng(btnAcceptProp, 'ACCEPT');
-  AssignPng(btnRefresh, 'ARROW_UPDATE');
 end;
 
 procedure TCEDubProjectEditorWidget.SetVisible(value: boolean);
 begin
   inherited;
-  if not value then exit;
-  //
+  if not value then
+    exit;
   updateEditor;
+end;
+
+procedure TCEDubProjectEditorWidget.setToolBarFlat(value: boolean);
+begin
+  inherited;
+  btnAcceptProp.Flat:=value;
 end;
 {$ENDREGION}
 
@@ -264,7 +255,6 @@ begin
     exit;
   enabled := true;
   fProj := TCEDubProject(project.getProject);
-  //
 end;
 
 procedure TCEDubProjectEditorWidget.projChanged(project: ICECommonProject);
@@ -277,7 +267,6 @@ begin
     exit;
 
   updateEditor;
-  updateInspector;
 end;
 
 procedure TCEDubProjectEditorWidget.projClosing(project: ICECommonProject);
@@ -289,7 +278,6 @@ begin
   fProj := nil;
 
   updateEditor;
-  updateInspector;
   enabled := false;
 end;
 
@@ -300,7 +288,6 @@ begin
   if project.getFormat <> pfDub then
   begin
     updateEditor;
-    updateInspector;
     exit;
   end;
   fProj := TCEDubProject(project.getProject);
@@ -315,7 +302,6 @@ begin
   end;
 
   updateEditor;
-  updateInspector;
 end;
 
 procedure TCEDubProjectEditorWidget.projCompiling(project: ICECommonProject);
@@ -333,8 +319,9 @@ begin
   fSelectedNode := nil;
   btnDelProp.Enabled := false;
   btnAddProp.Enabled := false;
-  if propTree.Selected.isNil then exit;
-  //
+  if propTree.Selected.isNil then
+    exit;
+
   fSelectedNode := propTree.Selected;
   btnDelProp.Enabled := (fSelectedNode.Level > 0) and (fSelectedNode.Text <> 'name')
     and fSelectedNode.data.isNotNil;
@@ -344,8 +331,8 @@ end;
 
 procedure TCEDubProjectEditorWidget.btnAcceptPropClick(Sender: TObject);
 begin
-  if fSelectedNode.isNil then exit;
-  //
+  if fSelectedNode.isNil then
+    exit;
   setJsonValueFromEditor;
   propTree.FullExpand;
 end;
@@ -354,8 +341,8 @@ procedure TCEDubProjectEditorWidget.btnAddPropClick(Sender: TObject);
 var
   pnl: TCEDubProjectPropAddPanel;
 begin
-  if fSelectedNode.isNil then exit;
-  //
+  if fSelectedNode.isNil then
+    exit;
   pnl := TCEDubProjectPropAddPanel.construct(@addProp, TJSONData(fSelectedNode.Data));
   pnl.ShowModal;
   pnl.Free;
@@ -368,8 +355,8 @@ var
   obj: TJSONObject;
   nod: TTreeNode;
 begin
-  if fSelectedNode.isNil then exit;
-  //
+  if fSelectedNode.isNil then
+    exit;
   fProj.beginModification;
   if TJSONData(fSelectedNode.Data).JSONType = jtArray then
   begin
@@ -410,7 +397,7 @@ begin
   if fSelectedNode.Text = 'name' then exit;
   if fSelectedNode.Data.isNil then exit;
   if fSelectedNode.Parent.Data.isNil then exit;
-  //
+
   fProj.beginModification;
   prt := TJSONData(fSelectedNode.Parent.Data);
   if prt.JSONType = jtObject then
@@ -418,7 +405,7 @@ begin
   else if prt.JSONType = jtArray then
     TJSONArray(prt).Delete(fSelectedNode.Index);
   fProj.endModification;
-  //
+
   updateValueEditor;
 end;
 
@@ -444,10 +431,9 @@ var
   vInt64: int64;
   vBool: boolean;
 begin
-  if fSelectedNode.isNil then exit;
-  if fSelectedNode.Data.isNil then exit;
-  if fProj.isNil then exit;
-  //
+  if fSelectedNode.isNil or fSelectedNode.Data.isNil or fProj.isNil then
+    exit;
+
   fProj.beginModification;
   dat := TJSONData(fSelectedNode.Data);
   case dat.JSONType of
@@ -479,7 +465,7 @@ begin
   edProp.Clear;
   if fSelectedNode.isNil then exit;
   if fSelectedNode.Data.isNil then exit;
-  //
+
   dat := TJSONData(fSelectedNode.Data);
   case dat.JSONType of
     jtNumber:
@@ -546,82 +532,10 @@ begin
   edProp.Clear;
   if fProj.isNil or fProj.json.isNil then
     exit;
-  //
+
   propTree.BeginUpdate;
   addPropsFrom(propTree.Items.Add(nil, 'project'), fProj.json);
   propTree.EndUpdate;
-end;
-{$ENDREGION}
-
-{$REGION Inspector -------------------------------------------------------------}
-procedure TCEDubProjectEditorWidget.updateInspector;
-var
-  i: integer;
-  j: integer;
-  node : TTreeNode;
-begin
-  if fNodeConfig.isNil or fNodeSources.isNil then
-    exit;
-  //
-  fNodeConfig.DeleteChildren;
-  fNodeSources.DeleteChildren;
-  //
-  if fProj.isNil then
-    exit;
-  //
-  j := fProj.getActiveConfigurationIndex;
-  treeInspect.BeginUpdate;
-  for i:= 0 to fProj.configurationCount-1 do
-  begin
-    if i <> j then
-    begin
-      node := treeInspect.Items.AddChild(fNodeConfig, fProj.configurationName(i));
-      node.ImageIndex := 3;
-      node.SelectedIndex := 3;
-      node.StateIndex := 3;
-    end
-    else
-    begin
-      node := treeInspect.Items.AddChild(fNodeConfig, fProj.configurationName(i) +' (active)');
-      node.ImageIndex := 10;
-      node.SelectedIndex := 10;
-      node.StateIndex := 10;
-    end;
-  end;
-  for i := 0 to fProj.sourcesCount-1 do
-  begin
-    node := treeInspect.Items.AddChild(fNodeSources, fProj.sourceRelative(i));
-    node.ImageIndex := 2;
-    node.SelectedIndex := 2;
-    node.StateIndex := 2;
-  end;
-  // first update or update cause by editor
-  if (not fNodeConfig.Expanded) and (not fNodeSources.Expanded) then
-    treeInspect.FullExpand;
-  treeInspect.EndUpdate;
-end;
-
-procedure TCEDubProjectEditorWidget.treeInspectDblClick(Sender: TObject);
-var
-  node: TTreeNode;
-  fname: string;
-begin
-  if treeInspect.Selected.isNil then exit;
-  if fProj.isNil then exit;
-  node := treeInspect.Selected;
-  // open file
-  if node.Parent = fNodeSources then
-  begin
-    fname := fProj.sourceAbsolute(node.Index);
-    if isEditable(fname.extractFileExt) then
-      getMultiDocHandler.openDocument(fname);
-  end
-  // select active config
-  else if node.Parent = fNodeConfig then
-  begin
-    fProj.setActiveConfigurationIndex(node.Index);
-    fNodeConfig.Expand(true);
-  end;
 end;
 {$ENDREGION}
 

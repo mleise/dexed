@@ -27,6 +27,7 @@ type
     procedure btnRemFoldClick(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const fnames: array of String);
     procedure TreeClick(Sender: TObject);
+    procedure TreeDeletion(Sender: TObject; Node: TTreeNode);
     procedure TreeKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TreeSelectionChanged(Sender: TObject);
   protected
@@ -38,10 +39,8 @@ type
     fActOpenFile: TAction;
     fActSelConf: TAction;
     fActBuildConf: TAction;
-    fProject: TCENativeProject;
+    fProject: ICECommonProject;
     fFileNode, fConfNode: TTreeNode;
-    fImpsNode, fInclNode: TTreeNode;
-    fXtraNode: TTreeNode;
     fLastFileOrFolder: string;
     fSymStringExpander: ICESymStringExpander;
     procedure actUpdate(sender: TObject);
@@ -55,6 +54,7 @@ type
     procedure projChanged(project: ICECommonProject);
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure updateButtons;
   protected
     function contextName: string; override;
     function contextActionCount: integer; override;
@@ -89,9 +89,6 @@ begin
   Tree.OnDblClick := @TreeDblClick;
   fFileNode := Tree.Items[0];
   fConfNode := Tree.Items[1];
-  fImpsNode := Tree.Items[2];
-  fInclNode := Tree.Items[3];
-  fXtraNode := Tree.Items[4];
   //
   Tree.PopupMenu := contextMenu;
   //
@@ -133,7 +130,6 @@ begin
   case index of
     0: exit(fActOpenFile);
     1: exit(fActSelConf);
-    2: exit(fActBuildConf);
     else exit(nil);
   end;
 end;
@@ -145,7 +141,7 @@ end;
 
 procedure TCEProjectInspectWidget.actBuildExecute(sender: TObject);
 begin
-  if fProject.isNotNil then
+  if fProject <> nil then
   begin
     actOpenFileExecute(sender);
     fProject.compile;
@@ -156,50 +152,41 @@ end;
 {$REGION ICEProjectMonitor -----------------------------------------------------}
 procedure TCEProjectInspectWidget.projNew(project: ICECommonProject);
 begin
-  fProject := nil;
-  enabled := false;
   fLastFileOrFolder := '';
-  if project.getFormat <> pfNative then
-    exit;
-  enabled := true;
-  //
-  fProject := TCENativeProject(project.getProject);
-  if Visible then updateImperative;
+  fProject := project;
+  if Visible then
+    updateImperative;
+  updateButtons;
 end;
 
 procedure TCEProjectInspectWidget.projClosing(project: ICECommonProject);
 begin
-  if fProject.isNil then exit;
-  if fProject <> project.getProject then
+  if not assigned(fProject)  then
+    exit;
+  if project <> fProject then
     exit;
   fProject := nil;
   fLastFileOrFolder := '';
-  enabled := false;
   updateImperative;
 end;
 
 procedure TCEProjectInspectWidget.projFocused(project: ICECommonProject);
 begin
-  fProject := nil;
-  enabled := false;
   fLastFileOrFolder := '';
-  if project.getFormat <> pfNative then
-  begin
-    updateImperative;
-    exit;
-  end;
-  enabled := true;
-  //
-  fProject := TCENativeProject(project.getProject);
-  if Visible then beginDelayedUpdate;
+  fProject := project;
+  updateButtons;
+  if Visible then
+    beginDelayedUpdate;
 end;
 
 procedure TCEProjectInspectWidget.projChanged(project: ICECommonProject);
 begin
-  if fProject.isNil then exit;
-  if fProject <> project.getProject then
+  if not assigned(fProject)  then
     exit;
-  if Visible then beginDelayedUpdate;
+  if fProject <> project then
+    exit;
+  if Visible then
+    beginDelayedUpdate;
 end;
 
 procedure TCEProjectInspectWidget.projCompiling(project: ICECommonProject);
@@ -209,6 +196,18 @@ end;
 procedure TCEProjectInspectWidget.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
+
+procedure TCEProjectInspectWidget.updateButtons;
+var
+  ce: boolean;
+begin
+  ce := fProject.getFormat = pfNative;
+  btnRemFile.Enabled:= ce;
+  btnRemFold.Enabled:= ce;
+  btnAddFile.Enabled:= ce;
+  btnAddFold.Enabled:= ce;
+end;
+
 {$ENDREGION}
 
 {$REGION Inspector things -------------------------------------------------------}
@@ -237,10 +236,17 @@ begin
   end;
 end;
 
+procedure TCEProjectInspectWidget.TreeDeletion(Sender: TObject; Node: TTreeNode
+  );
+begin
+  if Node.isNotNil and Node.Data.isNotNil then
+    dispose(PString(Node.Data));
+end;
+
 procedure TCEProjectInspectWidget.TreeSelectionChanged(Sender: TObject);
 begin
   actUpdate(sender);
-  if fProject.isNil or Tree.Selected.isNil then
+  if not assigned(fProject) or Tree.Selected.isNil then
     exit;
   if (Tree.Selected.Parent = fFileNode) then
     fLastFileOrFolder := expandFilenameEx(fProject.basePath,tree.Selected.Text)
@@ -251,19 +257,16 @@ end;
 procedure TCEProjectInspectWidget.TreeDblClick(sender: TObject);
 var
   fname: string;
-  i, j: integer;
+  i: integer;
 begin
-  if fProject.isNil or Tree.Selected.isNil then
+  if not assigned(fProject) or Tree.Selected.isNil then
     exit;
-  //
-  if (Tree.Selected.Parent = fFileNode) or (Tree.Selected.Parent = fXtraNode) then
+
+  if Tree.Selected.Parent = fFileNode then
   begin
-    for j:= 0 to Tree.SelectionCount-1 do
+    if Tree.Selected.Data.isNotNil then
     begin
-      fname := Tree.Selections[j].Text;
-      i := fProject.Sources.IndexOf(fname);
-      if i > -1 then
-        fname := fProject.sourceAbsolute(i);
+      fname := PString(Tree.Selected.Data)^;
       if isEditable(fname.extractFileExt) and fname.fileExists then
         getMultiDocHandler.openDocument(fname);
     end;
@@ -271,7 +274,7 @@ begin
   else if Tree.Selected.Parent = fConfNode then
   begin
     i := Tree.Selected.Index;
-    fProject.ConfigurationIndex := i;
+    fProject.setActiveConfigurationIndex(i);
     beginDelayedUpdate;
   end;
 end;
@@ -281,7 +284,8 @@ begin
   fActSelConf.Enabled := false;
   fActOpenFile.Enabled := false;
   fActBuildConf.Enabled:= false;
-  if Tree.Selected.isNil then exit;
+  if Tree.Selected.isNil then
+    exit;
   fActSelConf.Enabled := Tree.Selected.Parent = fConfNode;
   fActBuildConf.Enabled := Tree.Selected.Parent = fConfNode;
   fActOpenFile.Enabled := Tree.Selected.Parent = fFileNode;
@@ -290,9 +294,12 @@ end;
 procedure TCEProjectInspectWidget.btnAddFileClick(Sender: TObject);
 var
   fname: string;
+  proj: TCENativeProject;
 begin
-  if fProject.isNil then exit;
-  //
+  if not assigned(fProject) or (fProject.getFormat = pfDub) then
+    exit;
+
+  proj := TCENativeProject(fProject.getProject);
   with TOpenDialog.Create(nil) do
   try
     options := options + [ofAllowMultiSelect];
@@ -303,10 +310,10 @@ begin
     filter := DdiagFilter;
     if execute then
     begin
-      fProject.beginUpdate;
+      proj.beginUpdate;
       for fname in Files do
-        fProject.addSource(fname);
-      fProject.endUpdate;
+        proj.addSource(fname);
+      proj.endUpdate;
     end;
   finally
     free;
@@ -317,11 +324,14 @@ procedure TCEProjectInspectWidget.btnAddFoldClick(Sender: TObject);
 var
   dir, fname: string;
   lst: TStringList;
-  i: NativeInt;
+  proj: TCENativeProject;
+  i: integer;
 begin
-  if fProject.isNil then exit;
-  //
+  if not assigned(fProject) or (fProject.getFormat = pfDub) then
+    exit;
+
   dir := '';
+  proj := TCENativeProject(fProject.getProject);
   if fLastFileOrFolder.fileExists then
     dir := fLastFileOrFolder.extractFilePath
   else if fLastFileOrFolder.dirExists then
@@ -330,7 +340,7 @@ begin
     dir := fProject.fileName.extractFilePath;
   if selectDirectory('sources', dir, dir, true, 0) then
   begin
-    fProject.beginUpdate;
+    proj.beginUpdate;
     lst := TStringList.Create;
     try
       listFiles(lst, dir, true);
@@ -338,11 +348,11 @@ begin
       begin
         fname := lst[i];
         if isDlangCompilable(fname.extractFileExt) then
-          fProject.addSource(fname);
+          proj.addSource(fname);
       end;
     finally
       lst.Free;
-      fProject.endUpdate;
+      proj.endUpdate;
     end;
   end;
 end;
@@ -350,49 +360,57 @@ end;
 procedure TCEProjectInspectWidget.btnRemFoldClick(Sender: TObject);
 var
   dir, fname: string;
+  proj: TCENativeProject;
   i: Integer;
 begin
-  if fProject.isNil or Tree.Selected.isNil then
+  if not assigned(fProject) or (fProject.getFormat = pfDub)
+  or Tree.Selected.isNil or (Tree.Selected.Parent <> fFileNode) then
     exit;
-  if Tree.Selected.Parent <> fFileNode then exit;
-  //
+
+  proj := TCENativeProject(fProject.getProject);
   fname := Tree.Selected.Text;
-  i := fProject.Sources.IndexOf(fname);
-  if i = -1 then exit;
+  i := proj.Sources.IndexOf(fname);
+  if i = -1 then
+    exit;
   fname := fProject.sourceAbsolute(i);
   dir := fname.extractFilePath;
-  if not dir.dirExists then exit;
-  //
-  fProject.beginUpdate;
-  for i:= fProject.Sources.Count-1 downto 0 do
-    if fProject.sourceAbsolute(i).extractFilePath = dir then
-      fProject.Sources.Delete(i);
-  fProject.endUpdate;
+  if not dir.dirExists then
+    exit;
+
+  proj.beginUpdate;
+  for i:= proj.Sources.Count-1 downto 0 do
+    if proj.sourceAbsolute(i).extractFilePath = dir then
+      proj.Sources.Delete(i);
+  proj.endUpdate;
 end;
 
 procedure TCEProjectInspectWidget.btnRemFileClick(Sender: TObject);
 var
   fname: string;
+  proj: TCENativeProject;
   i, j: integer;
 begin
-  if fProject.isNil or Tree.Selected.isNil then
+  if not assigned(fProject) or (fProject.getFormat = pfDub)
+  or Tree.Selected.isNil or (Tree.Selected.Parent = fFileNode) then
     exit;
-  //
-  if Tree.Selected.Parent = fFileNode then
+
+  proj := TCENativeProject(fProject.getProject);
+  proj.beginUpdate;
+  for j:= 0 to Tree.SelectionCount-1 do
   begin
-    fProject.beginUpdate;
-    for j:= 0 to Tree.SelectionCount-1 do
-    begin
-      fname := Tree.Selections[j].Text;
-      i := fProject.Sources.IndexOf(fname);
-      if i <> -1 then
-        fProject.Sources.Delete(i);
-    end;
-    fProject.endUpdate;
+    fname := Tree.Selections[j].Text;
+    i := proj.Sources.IndexOf(fname);
+    if i <> -1 then
+      proj.Sources.Delete(i);
   end;
+  proj.endUpdate;
 end;
 
 procedure TCEProjectInspectWidget.FormDropFiles(Sender: TObject; const fnames: array of String);
+var
+  fname, direntry: string;
+  lst: TStringList;
+  proj: TCENativeProject;
 procedure addFile(const value: string);
 var
   ext: string;
@@ -400,17 +418,17 @@ begin
   ext := value.extractFileExt;
   if not isDlangCompilable(ext) then
     exit;
-  fProject.addSource(value);
+  proj.addSource(value);
   if isEditable(ext) then
     getMultiDocHandler.openDocument(value);
 end;
-var
-  fname, direntry: string;
-  lst: TStringList;
 begin
-  if fProject.isNil then exit;
+  if not assigned(fProject) or (fProject.getFormat = pfDub) then
+    exit;
+
+  proj := TCENativeProject(fProject.getProject);
   lst := TStringList.Create;
-  fProject.beginUpdate;
+  proj.beginUpdate;
   try for fname in fnames do
     if fname.fileExists then
       addFile(fname)
@@ -422,7 +440,7 @@ begin
         addFile(dirEntry);
     end;
   finally
-    fProject.endUpdate;
+    proj.endUpdate;
     lst.Free;
   end;
 end;
@@ -434,35 +452,32 @@ end;
 
 procedure TCEProjectInspectWidget.updateImperative;
 var
-  src, fold, conf, str: string;
-  lst: TStringList;
+  src, conf: string;
   itm: TTreeNode;
-  i: NativeInt;
+  i,j: integer;
 begin
   fConfNode.DeleteChildren;
   fFileNode.DeleteChildren;
-  fImpsNode.DeleteChildren;
-  fInclNode.DeleteChildren;
-  fXtraNode.DeleteChildren;
-  //
-  if fProject.isNil then
+
+  if not assigned(fProject) then
     exit;
-  //
+
   Tree.BeginUpdate;
-  // display main sources
-  for src in fProject.Sources do
+  for i := 0 to fProject.sourcesCount-1 do
   begin
-    itm := Tree.Items.AddChild(fFileNode, src);
+    itm := Tree.Items.AddChild(fFileNode, fProject.sourceRelative(i));
+    itm.Data:= NewStr(fProject.sourceAbsolute(i));
     itm.ImageIndex := 2;
     itm.SelectedIndex := 2;
   end;
-  // display configurations
-  for i := 0 to fProject.OptionsCollection.Count-1 do
+  j := fProject.getActiveConfigurationIndex;
+  for i := 0 to fProject.configurationCount-1 do
   begin
-    conf := fProject.configuration[i].name;
-    if i = fProject.ConfigurationIndex then conf += ' (active)';
+    conf := fProject.configurationName(i);
+    if i = j then
+      conf += ' (active)';
     itm := Tree.Items.AddChild(fConfNode, conf);
-    if i = fProject.ConfigurationIndex then
+    if i = j then
     begin
       itm.ImageIndex := 7;
       itm.SelectedIndex:= 7;
@@ -473,55 +488,6 @@ begin
       itm.SelectedIndex:= 3;
     end;
   end;
-  // display Imports (-J)
-  for str in FProject.currentConfiguration.pathsOptions.importStringPaths do
-  begin
-    if str.isEmpty then
-      continue;
-    fold := expandFilenameEx(fProject.basePath, str);
-    fold := fSymStringExpander.expand(fold);
-    itm := Tree.Items.AddChild(fImpsNode, fold);
-    itm.ImageIndex := 5;
-    itm.SelectedIndex := 5;
-  end;
-  fImpsNode.Collapse(false);
-  // display Includes (-I)
-  for str in FProject.currentConfiguration.pathsOptions.importModulePaths do
-  begin
-    if str.isEmpty then
-      continue;
-    fold := expandFilenameEx(fProject.basePath, str);
-    fold := fSymStringExpander.expand(fold);
-    itm := Tree.Items.AddChild(fInclNode, fold);
-    itm.ImageIndex := 5;
-    itm.SelectedIndex := 5;
-  end;
-  fInclNode.Collapse(false);
-  // display extra sources (external .lib, *.a, *.d)
-  for str in FProject.currentConfiguration.pathsOptions.extraSources do
-  begin
-    if str.isEmpty then
-      continue;
-    src := expandFilenameEx(fProject.basePath, str);
-    src := fSymStringExpander.expand(src);
-    lst := TStringList.Create;
-    try
-      if listAsteriskPath(src, lst) then for src in lst do
-      begin
-        itm := Tree.Items.AddChild(fXtraNode, src);
-        itm.ImageIndex := 2;
-        itm.SelectedIndex := 2;
-      end else
-      begin
-        itm := Tree.Items.AddChild(fXtraNode, src);
-        itm.ImageIndex := 2;
-        itm.SelectedIndex := 2;
-      end;
-    finally
-      lst.Free;
-    end;
-  end;
-  fXtraNode.Collapse(false);
   Tree.EndUpdate;
 end;
 {$ENDREGION --------------------------------------------------------------------}
