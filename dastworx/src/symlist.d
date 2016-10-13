@@ -232,13 +232,10 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
         decl.accept(this);
     }
 
-    final override void visit(const AutoDeclaration decl)
+    final override void visit(const AutoDeclarationPart decl)
     {
-        if (decl.identifiers.length)
-        {
-            otherVisitorImpl(decl, SymbolType._variable, decl.identifiers[0].text,
-                decl.identifiers[0].line, decl.identifiers[0].column);
-        }
+        otherVisitorImpl(decl, SymbolType._variable, decl.identifier.text,
+            decl.identifier.line, decl.identifier.column);
     }
 
     final override void visit(const ClassDeclaration decl)
