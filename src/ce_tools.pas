@@ -37,9 +37,6 @@ type
     procedure setParameters(value: TStringList);
     procedure processOutput(sender: TObject);
     procedure setToolAlias(value: string);
-    //
-    procedure setChainBefore(value: TStringList);
-    procedure setChainAfter(value: TStringList);
   published
     property toolAlias: string read fToolAlias write setToolAlias;
     property options: TProcessOptions read fOpts write fOpts;
@@ -53,9 +50,6 @@ type
     property nextToolAlias: string read fNextToolAlias write fNextToolAlias;
     property outputToNext: boolean read fOutputToNext write fOutputToNext;
     property pipeInputKind: TPipeInputKind read fPipeInputKind write fPipeInputKind;
-    //
-    property chainBefore: TStringList write setChainBefore stored false; deprecated;
-    property chainAfter: TStringList write setChainAfter stored false; deprecated;
     // TODO-cmaintenance: remove this property from version 3 update 1
     property editorToInput: boolean read fEditorToInput write fEditorToInput stored false;
   public
@@ -145,16 +139,6 @@ begin
   fParameters.Free;
   ce_processes.killProcess(fProcess);
   inherited;
-end;
-
-procedure TCEToolItem.setChainBefore(value: TStringList);
-begin
-  // kept to reload old setting files. 'chainBefore' is not saved anymore.
-end;
-
-procedure TCEToolItem.setChainAfter(value: TStringList);
-begin
-  // kept to reload old setting files. 'chainAfter' is not saved anymore.
 end;
 
 procedure TCEToolItem.assign(Source: TPersistent);
