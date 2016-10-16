@@ -1,4 +1,4 @@
-unit ce_projconf;
+unit ce_ceprojeditor;
 
 {$I ce_defines.inc}
 
@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, RTTIGrids, RTTICtrls, Forms, Controls, Graphics,
   Dialogs, ExtCtrls, ComCtrls, StdCtrls, Menus, Buttons, rttiutils, typinfo,
-  PropEdits, ObjectInspector, ce_dmdwrap, ce_nativeproject, ce_widget,
+  PropEdits, ObjectInspector, ce_dmdwrap, ce_ceproject, ce_widget,
   ce_interfaces, ce_observer, ce_sharedres, ce_common, ce_dsgncontrols;
 
 type
@@ -96,7 +96,7 @@ procedure TCEProjectConfigurationWidget.projNew(project: ICECommonProject);
 begin
   fProj := nil;
   enabled := false;
-  if project.getFormat <> pfNative then
+  if project.getFormat <> pfCE then
     exit;
   enabled := true;
   //
@@ -130,7 +130,7 @@ procedure TCEProjectConfigurationWidget.projFocused(project: ICECommonProject);
 begin
   fProj := nil;
   enabled := false;
-  if project.getFormat <> pfNative then
+  if project.getFormat <> pfCE then
     exit;
   enabled := true;
   //

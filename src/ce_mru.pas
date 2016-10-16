@@ -5,8 +5,8 @@ unit ce_mru;
 interface
 
 uses
-  Classes, SysUtils, ce_interfaces, ce_observer,
-  ce_nativeproject, ce_synmemo, ce_common;
+  Classes, SysUtils,
+  ce_interfaces, ce_observer, ce_synmemo, ce_common;
 
 type
 

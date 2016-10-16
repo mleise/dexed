@@ -5,7 +5,7 @@ unit ce_symstring;
 interface
 
 uses
-  ce_observer, ce_interfaces, ce_nativeproject, ce_synmemo, ce_common,
+  ce_observer, ce_interfaces, ce_ceproject, ce_synmemo, ce_common,
   ce_stringrange;
 
 type
@@ -93,8 +93,8 @@ procedure TCESymbolExpander.projNew(project: ICECommonProject);
 begin
   fProjInterface := project;
   case project.getFormat of
-    pfNative: fProj := TCENativeProject(project.getProject);
-    pfDub: fProj := nil;
+    pfCE: fProj := TCENativeProject(project.getProject);
+    pfDUB: fProj := nil;
   end;
   fNeedUpdate := true;
 end;
@@ -112,8 +112,8 @@ procedure TCESymbolExpander.projFocused(project: ICECommonProject);
 begin
   fProjInterface := project;
   case project.getFormat of
-    pfNative: fProj := TCENativeProject(project.getProject);
-    pfDub: fProj := nil;
+    pfCE: fProj := TCENativeProject(project.getProject);
+    pfDUB: fProj := nil;
   end;
   fNeedUpdate := true;
 end;

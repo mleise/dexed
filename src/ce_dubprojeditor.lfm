@@ -3,7 +3,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
   Height = 424
   Top = 245
   Width = 402
-  Caption = 'Dub project editor'
+  Caption = 'DUB project editor'
   ClientHeight = 424
   ClientWidth = 402
   inherited Back: TPanel

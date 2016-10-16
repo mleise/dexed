@@ -1,4 +1,4 @@
-unit ce_nativeproject;
+unit ce_ceproject;
 
 {$I ce_defines.inc}
 
@@ -132,8 +132,8 @@ type
   // native project have no ext constraint, this function tells if filename is project
   function isValidNativeProject(const filename: string): boolean;
 
-  function getNativeProjectCompiler: TCECompiler;
-  procedure setNativeProjectCompiler(value: TCECompiler);
+  function getCEProjectCompiler: TCECompiler;
+  procedure setCEProjectCompiler(value: TCECompiler);
 
 implementation
 
@@ -141,8 +141,8 @@ uses
   controls, dialogs, ce_libman, ce_dcd;
 
 var
-  NativeProjectCompilerFilename: string = 'dmd';
-  NativeProjectCompiler: TCECompiler;
+  CEProjectCompilerFilename: string = 'dmd';
+  CEProjectCompiler: TCECompiler;
 
 constructor TCENativeProject.create(aOwner: TComponent);
 begin
@@ -203,7 +203,7 @@ end;
 
 function TCENativeProject.getFormat: TCEProjectFormat;
 begin
-  exit(pfNative);
+  exit(pfCE);
 end;
 
 function TCENativeProject.getProject: TObject;
@@ -471,12 +471,12 @@ begin
     begin
       conf.getOpts(list, fBaseConfig);
       conf.otherOptions.getCompilerSpecificOpts(list, fBaseConfig.otherOptions,
-        NativeProjectCompiler);
+        CEProjectCompiler);
     end
     else
     begin
       conf.getOpts(list);
-      conf.otherOptions.getCompilerSpecificOpts(list, nil, NativeProjectCompiler);
+      conf.otherOptions.getCompilerSpecificOpts(list, nil, CEProjectCompiler);
     end;
   finally
     exc.Free;
@@ -783,14 +783,14 @@ begin
   // this doesn't work under linux, so the previous ChDir.
   if prjpath.dirExists then
     fCompilProc.CurrentDirectory := prjpath;
-  fCompilProc.Executable := NativeProjectCompilerFilename;
+  fCompilProc.Executable := CEProjectCompilerFilename;
   fCompilProc.Options := fCompilProc.Options + [poStderrToOutPut, poUsePipes];
   fCompilProc.ShowWindow := swoHIDE;
   fCompilProc.OnReadData:= @compProcOutput;
   fCompilProc.OnTerminate:= @compProcTerminated;
   getOpts(fCompilProc.Parameters);
   //getUpToDateObjects(fCompilProc.Parameters);
-  if NativeProjectCompiler = gdc then
+  if CEProjectCompiler = gdc then
     fCompilProc.Parameters.Add('-gdc=gdc');
   fCompilProc.Execute;
 end;
@@ -1016,7 +1016,7 @@ var
 begin
   str := TStringList.Create;
   try
-    str.Add(NativeProjectCompilerFilename.extractFileName);
+    str.Add(CEProjectCompilerFilename.extractFileName);
     getOpts(str);
     result := str.Text;
   finally
@@ -1076,28 +1076,28 @@ begin
   end;
 end;
 
-function getNativeProjectCompiler: TCECompiler;
+function getCEProjectCompiler: TCECompiler;
 begin
-  exit(NativeProjectCompiler);
+  exit(CEProjectCompiler);
 end;
 
-procedure setNativeProjectCompiler(value: TCECompiler);
+procedure setCEProjectCompiler(value: TCECompiler);
 begin
   case value of
-    dmd: NativeProjectCompilerFilename := exeFullName('dmd' + exeExt);
-    gdc: NativeProjectCompilerFilename := exeFullName('gdmd' + exeExt);
-    ldc: NativeProjectCompilerFilename := exeFullName('ldmd2' + exeExt);
+    dmd: CEProjectCompilerFilename := exeFullName('dmd' + exeExt);
+    gdc: CEProjectCompilerFilename := exeFullName('gdmd' + exeExt);
+    ldc: CEProjectCompilerFilename := exeFullName('ldmd2' + exeExt);
   end;
-  if (not NativeProjectCompilerFilename.fileExists)
-    or NativeProjectCompilerFilename.isEmpty then
+  if (not CEProjectCompilerFilename.fileExists)
+    or CEProjectCompilerFilename.isEmpty then
   begin
     value := dmd;
-    NativeProjectCompilerFilename:= 'dmd' + exeExt;
+    CEProjectCompilerFilename:= 'dmd' + exeExt;
   end;
-  NativeProjectCompiler := value;
+  CEProjectCompiler := value;
 end;
 
 initialization
-  setNativeProjectCompiler(dmd);
+  setCEProjectCompiler(dmd);
   RegisterClasses([TCENativeProject]);
 end.

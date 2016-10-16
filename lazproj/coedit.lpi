@@ -349,14 +349,14 @@
         <ResourceBaseClass Value="Form"/>
       </Unit20>
       <Unit21>
-        <Filename Value="..\src\ce_projconf.pas"/>
+        <Filename Value="..\src\ce_ceprojeditor.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="CEProjectConfigurationWidget"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit21>
       <Unit22>
-        <Filename Value="..\src\ce_nativeproject.pas"/>
+        <Filename Value="..\src\ce_ceproject.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit22>
       <Unit23>

@@ -5,7 +5,7 @@ interface
 
 uses
   Classes, SysUtils,
-  ce_nativeproject, ce_dubproject, ce_interfaces, ce_common, ce_observer, ce_synmemo;
+  ce_ceproject, ce_dubproject, ce_interfaces, ce_common, ce_observer, ce_synmemo;
 
 type
   TCEProjectFileFormat = (pffNone, pffCe, pffDub);

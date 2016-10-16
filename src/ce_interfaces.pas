@@ -11,7 +11,7 @@ uses
 type
 
   // describes the project kind. Used as a hint to cast ICECommonProject.getProject()
-  TCEProjectFormat = (pfNative, pfDub);
+  TCEProjectFormat = (pfCE, pfDUB);
 
   // describes the binary kind produces when compiling a project
   TProjectBinaryKind = (executable, staticlib, sharedlib, obj);

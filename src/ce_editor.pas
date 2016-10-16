@@ -493,7 +493,7 @@ begin
   fDoc.loadFromFile(fname);
   if assigned(fProj) and (fProj.filename = fDoc.fileName) then
   begin
-    if fProj.getFormat = pfNative then
+    if fProj.getFormat = pfCE then
       fDoc.Highlighter := LfmSyn
     else
       fDoc.Highlighter := JsSyn;

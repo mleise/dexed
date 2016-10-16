@@ -251,7 +251,7 @@ procedure TCEDubProjectEditorWidget.projNew(project: ICECommonProject);
 begin
   fProj := nil;
   enabled := false;
-  if project.getFormat <> pfDub then
+  if project.getFormat <> pfDUB then
     exit;
   enabled := true;
   fProj := TCEDubProject(project.getProject);
@@ -285,7 +285,7 @@ procedure TCEDubProjectEditorWidget.projFocused(project: ICECommonProject);
 begin
   fProj := nil;
   enabled := false;
-  if project.getFormat <> pfDub then
+  if project.getFormat <> pfDUB then
   begin
     updateEditor;
     exit;

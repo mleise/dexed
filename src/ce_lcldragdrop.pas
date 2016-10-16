@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, ComCtrls,
-  ce_common, ce_nativeproject, ce_dubproject, ce_interfaces,
+  ce_common, ce_ceproject, ce_dubproject, ce_interfaces,
   ce_dialogs, ce_projutils;
 
 type

@@ -3,7 +3,7 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
   Height = 273
   Top = 349
   Width = 445
-  Caption = 'Native project configuration'
+  Caption = ' CE project editor'
   ClientHeight = 273
   ClientWidth = 445
   inherited Back: TPanel

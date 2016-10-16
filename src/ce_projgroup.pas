@@ -7,7 +7,7 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, ExtCtrls, Menus,
   Buttons, dialogs, ComCtrls, StdCtrls,
   ce_widget, ce_common, ce_interfaces, ce_writableComponent, ce_observer,
-  ce_nativeproject, ce_dubproject, ce_projutils, ce_sharedres, ce_dsgncontrols,
+  ce_ceproject, ce_dubproject, ce_projutils, ce_sharedres, ce_dsgncontrols,
   ce_dialogs;
 
 type
@@ -198,7 +198,7 @@ procedure TProjectGroup.projChanged(project: ICECommonProject);
 var
   itm: TProjectGroupItem;
 begin
-  if assigned(project) and project.inGroup and (project.getFormat = pfDub) then
+  if assigned(project) and project.inGroup and (project.getFormat = pfDUB) then
   begin
     itm := Self.addItem(project.filename);
     if assigned(itm) then
@@ -280,7 +280,7 @@ function TProjectGroup.getProject(ix: Integer): ICECommonProject;
 begin
   item[ix].lazyLoad;
   result := item[ix].project;
-  if result.getFormat = pfDub then
+  if result.getFormat = pfDUB then
     result.setActiveConfigurationIndex(item[ix].configurationIndex);
 end;
 
@@ -439,7 +439,7 @@ begin
   begin
     fProj := loadProject(absoluteFilename, true);
     fProj.inGroup(true);
-    if fProj.getFormat = pfDub then
+    if fProj.getFormat = pfDUB then
       fProj.setActiveConfigurationIndex(fConfigIndex);
   end;
 end;
@@ -454,7 +454,7 @@ end;
 
 function TProjectGroupItem.storeConfigIndex: boolean;
 begin
-  exit(fProj.getFormat = pfDub);
+  exit(fProj.getFormat = pfDUB);
 end;
 
 function TProjectGroupItem.absoluteFilename: string;
@@ -713,8 +713,8 @@ begin
       Data:= prj;
       fmt := prj.project.getFormat;
       case fmt of
-        pfNative: Caption := prj.fFilename.extractFileName;
-        pfDub: Caption := TCEDubProject(prj.project.getProject).packageName;
+        pfCE: Caption := prj.fFilename.extractFileName;
+        pfDUB: Caption := TCEDubProject(prj.project.getProject).packageName;
       end;
       SubItems.Add(typeStr[fmt]);
       SubItems.Add(asyncStr[prj.fAsyncMode]);
@@ -733,8 +733,8 @@ begin
   begin
     if fFreeProj.filename.fileExists then
       case fFreeProj.getFormat of
-        pfNative: StaticText1.Caption:= 'Free standing: ' + fFreeProj.filename.extractFileName;
-        pfDub: StaticText1.Caption:= 'Free standing: ' + TCEDubProject(fFreeProj.getProject).packageName;
+        pfCE: StaticText1.Caption:= 'Free standing: ' + fFreeProj.filename.extractFileName;
+        pfDUB: StaticText1.Caption:= 'Free standing: ' + TCEDubProject(fFreeProj.getProject).packageName;
       end
     else
       StaticText1.Caption:= 'Free standing: (not yet saved)';

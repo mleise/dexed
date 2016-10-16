@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, TreeFilterEdit, Forms, Controls, Graphics, actnlist,
-  Dialogs, ExtCtrls, ComCtrls, Menus, Buttons, lcltype, ce_nativeproject, ce_interfaces,
+  Dialogs, ExtCtrls, ComCtrls, Menus, Buttons, lcltype, ce_ceproject, ce_interfaces,
   ce_common, ce_widget, ce_observer, ce_dialogs, ce_sharedres, ce_dsgncontrols;
 
 type
@@ -201,7 +201,7 @@ procedure TCEProjectInspectWidget.updateButtons;
 var
   ce: boolean;
 begin
-  ce := fProject.getFormat = pfNative;
+  ce := fProject.getFormat = pfCE;
   btnRemFile.Enabled:= ce;
   btnRemFold.Enabled:= ce;
   btnAddFile.Enabled:= ce;
@@ -296,7 +296,7 @@ var
   fname: string;
   proj: TCENativeProject;
 begin
-  if not assigned(fProject) or (fProject.getFormat = pfDub) then
+  if not assigned(fProject) or (fProject.getFormat = pfDUB) then
     exit;
 
   proj := TCENativeProject(fProject.getProject);
@@ -327,7 +327,7 @@ var
   proj: TCENativeProject;
   i: integer;
 begin
-  if not assigned(fProject) or (fProject.getFormat = pfDub) then
+  if not assigned(fProject) or (fProject.getFormat = pfDUB) then
     exit;
 
   dir := '';
@@ -363,7 +363,7 @@ var
   proj: TCENativeProject;
   i: Integer;
 begin
-  if not assigned(fProject) or (fProject.getFormat = pfDub)
+  if not assigned(fProject) or (fProject.getFormat = pfDUB)
   or Tree.Selected.isNil or (Tree.Selected.Parent <> fFileNode) then
     exit;
 
@@ -390,7 +390,7 @@ var
   proj: TCENativeProject;
   i, j: integer;
 begin
-  if not assigned(fProject) or (fProject.getFormat = pfDub)
+  if not assigned(fProject) or (fProject.getFormat = pfDUB)
   or Tree.Selected.isNil or (Tree.Selected.Parent = fFileNode) then
     exit;
 
@@ -423,7 +423,7 @@ begin
     getMultiDocHandler.openDocument(value);
 end;
 begin
-  if not assigned(fProject) or (fProject.getFormat = pfDub) then
+  if not assigned(fProject) or (fProject.getFormat = pfDUB) then
     exit;
 
   proj := TCENativeProject(fProject.getProject);
@@ -452,7 +452,7 @@ end;
 
 procedure TCEProjectInspectWidget.updateImperative;
 var
-  src, conf: string;
+  conf: string;
   itm: TTreeNode;
   i,j: integer;
 begin

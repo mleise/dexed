@@ -10,8 +10,8 @@ uses
   Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
   {$IFDEF WINDOWS}Windows, {$ENDIF} XMLPropStorage, SynExportHTML, fphttpclient,
   xfpjson, xjsonparser, xjsonscanner,
-  ce_common, ce_dmdwrap, ce_nativeproject, ce_synmemo, ce_writableComponent,
-  ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_projconf,
+  ce_common, ce_dmdwrap, ce_ceproject, ce_synmemo, ce_writableComponent,
+  ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_ceprojeditor,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor,{$IFDEF UNIX} ce_gdb,{$ENDIF}
@@ -328,7 +328,6 @@ type
   private
 
     fRunnablesOptions: TCEEditableRunnableOptions;
-    fRunnableCompiler: TCECompiler;
     fSymStringExpander: ICESymStringExpander;
     fProjectGroup: ICEProjectGroup;
     fCovModUt: boolean;
@@ -537,8 +536,6 @@ type
     fMaxRecentDocs: integer;
     fMaxRecentGroups: integer;
     fDcdPort: word;
-    fRunnableDest: TCEPathname;
-    fAlwaysUseDest: boolean;
     fDscanUnittests: boolean;
     fAutoSaveProjectFiles: boolean;
     fFlatLook: boolean;
@@ -547,13 +544,8 @@ type
     fShowBuildDuration: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
-    function getDubCompiler: TCECompiler;
-    procedure setDubCompiler(value: TCECompiler);
-    function getRunnableCompiler: TCECompiler;
-    procedure setRunnableCompiler(value: TCECompiler);
     function getNativeProjecCompiler: TCECompiler;
     procedure setNativeProjecCompiler(value: TCECompiler);
-    procedure setRunnableDestination(const value: TCEPathname);
     procedure setSplitterScsrollSpeed(value: byte);
   published
     property additionalPATH: string read getAdditionalPATH write setAdditionalPath;
@@ -564,21 +556,14 @@ type
     property maxRecentProjects: integer read fMaxRecentProjs write fMaxRecentProjs;
     property maxRecentDocuments: integer read fMaxRecentDocs write fMaxRecentDocs;
     property maxRecentProjectsGroups: integer read fMaxRecentGroups write fMaxRecentGroups;
-    property dubCompiler: TCECompiler read getDubCompiler write setDubCompiler;
     property nativeProjectCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
     property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
     property autoSaveProjectFiles: boolean read fAutoSaveProjectFiles write fAutoSaveProjectFiles default false;
     property flatLook: boolean read fFlatLook write fFlatLook;
     property splitterScrollSpeed: byte read fSplitterScrollSpeed write setSplitterScsrollSpeed;
     property showBuildDuration: boolean read fShowBuildDuration write fShowBuildDuration default false;
-
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
-
-    // TODO-cmaintenance: remove this property from version 3 update 1
-    property nativeProjecCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler stored false; deprecated;
-    property runnableDestination: TCEPathname read fRunnableDest write setRunnableDestination stored false; deprecated;
-    property runnableDestinationAlways: boolean read fAlwaysUseDest write fAlwaysUseDest stored false; deprecated;
   end;
 
   TCEApplicationOptions = class(TCEApplicationOptionsBase, ICEEditableOptions)
@@ -775,48 +760,14 @@ begin
   fFlatLook:=true;
 end;
 
-function TCEApplicationOptionsBase.getDubCompiler: TCECompiler;
-begin
-  exit(ce_dubproject.getDubCompiler);
-end;
-
 function TCEApplicationOptionsBase.getNativeProjecCompiler: TCECompiler;
 begin
-  exit(ce_nativeproject.getNativeProjectCompiler);
-end;
-
-procedure TCEApplicationOptionsBase.setDubCompiler(value: TCECompiler);
-begin
-  ce_dubproject.setDubCompiler(value);
+  exit(ce_ceproject.getCEProjectCompiler);
 end;
 
 procedure TCEApplicationOptionsBase.setNativeProjecCompiler(value: TCECompiler);
 begin
-  ce_nativeproject.setNativeProjectCompiler(value);
-end;
-
-function TCEApplicationOptionsBase.getRunnableCompiler: TCECompiler;
-begin
-  exit(CEMainForm.fRunnableCompiler);
-end;
-
-procedure TCEApplicationOptionsBase.setRunnableCompiler(value: TCECompiler);
-begin
-  case value of
-    ldc: if not exeInSysPath('ldmd2' + exeExt) then
-      value := dmd;
-    gdc: if not exeInSysPath('gdmd' + exeExt) then
-      value := dmd;
-  end;
-  CEMainForm.fRunnableCompiler:=value;
-end;
-
-procedure TCEApplicationOptionsBase.setRunnableDestination(const value: TCEPathname);
-begin
-  fRunnableDest := value;
-  if (length(fRunnableDest) > 0)
-    and (fRunnableDest[length(fRunnableDest)] <> DirectorySeparator) then
-      fRunnableDest += DirectorySeparator;
+  ce_ceproject.setCEProjectCompiler(value);
 end;
 
 procedure TCEApplicationOptionsBase.setSplitterScsrollSpeed(value: byte);
@@ -884,7 +835,6 @@ begin
     fFlatLook:=fBackup.fFlatLook;
     fAutoCheckUpdates:= fBackup.fAutoCheckUpdates;
     CEMainForm.fDscanUnittests := fDscanUnittests;
-    dubCompiler:= fBackup.dubCompiler;
     nativeProjectCompiler:= fBackup.nativeProjectCompiler;
   end
   else inherited;
@@ -919,7 +869,6 @@ begin
     fBackup.fFlatLook:= fFlatLook;
     fBackup.fAutoCheckUpdates:= fAutoCheckUpdates;
     fBackup.fShowBuildDuration:= fShowBuildDuration;
-    fBackup.dubCompiler:= dubCompiler;
     fBackup.nativeProjectCompiler:= nativeProjectCompiler;
   end
   else inherited;
@@ -1010,7 +959,7 @@ begin
       if assigned(hdl) then
       mem := hdl.findDocument(dst.fProject.filename);
       if mem.isNotNil then
-        if dst.fProject.getFormat = pfNative then
+        if dst.fProject.getFormat = pfCE then
           mem.Highlighter := LfmSyn
         else
           mem.Highlighter := JsSyn;
@@ -1996,8 +1945,8 @@ procedure TCEMainForm.projNew(project: ICECommonProject);
 begin
   fProject := project;
   case fProject.getFormat of
-    pfNative: fNativeProject := TCENativeProject(fProject.getProject);
-    pfDub: fDubProject := TCEDubProject(fProject.getProject);
+    pfCE: fNativeProject := TCENativeProject(fProject.getProject);
+    pfDUB: fDubProject := TCEDubProject(fProject.getProject);
   end;
   if not fProject.inGroup then
     fFreeProj := project;
@@ -2024,8 +1973,8 @@ procedure TCEMainForm.projFocused(project: ICECommonProject);
 begin
   fProject := project;
   case fProject.getFormat of
-    pfNative: fNativeProject := TCENativeProject(fProject.getProject);
-    pfDub: fDubProject := TCEDubProject(fProject.getProject);
+    pfCE: fNativeProject := TCENativeProject(fProject.getProject);
+    pfDUB: fDubProject := TCEDubProject(fProject.getProject);
   end;
   if not fProject.inGroup then
     fFreeProj := project
@@ -2326,7 +2275,7 @@ begin
   if fProject = nil then exit;
   if fProject.filename = fDoc.fileName then exit;
   //
-  if fProject.getFormat = pfNative then
+  if fProject.getFormat = pfCE then
   begin
     if fDoc.fileName.fileExists and not fDoc.isTemporary then
       fNativeProject.addSource(fDoc.fileName)
@@ -3014,7 +2963,7 @@ begin
         fCompStart := Time;
       fProject.compile;
     end;
-  if fProject.outputFilename.fileExists or (fProject.getFormat = pfDub) then
+  if fProject.outputFilename.fileExists or (fProject.getFormat = pfDUB) then
     fProject.run;
 end;
 
@@ -3265,9 +3214,6 @@ end;
 procedure TCEMainForm.newDubProj;
 begin
   fDubProject := TCEDubProject.create(nil);
-  fDubProject.json.Add('name', '');
-  fDubProject.beginModification;
-  fDubProject.endModification;
   fProject := fDubProject as ICECommonProject;
   showProjTitle;
 end;
@@ -3331,7 +3277,7 @@ procedure TCEMainForm.actProjSaveAsExecute(Sender: TObject);
 begin
   if checkProjectLock then
     exit;
-  if (fProject.getFormat = pfDub) and TCEDubProject(fProject.getProject).isSDL then
+  if (fProject.getFormat = pfDUB) and TCEDubProject(fProject.getProject).isSDL then
   begin
     fMsgs.message(DubSdlWarning, fProject, amcProj, amkWarn);
     exit;
@@ -3347,7 +3293,7 @@ end;
 procedure TCEMainForm.actProjSaveExecute(Sender: TObject);
 begin
   if fProject = nil then exit;
-  if (fProject.getFormat = pfDub) and TCEDubProject(fProject.getProject).isSDL then
+  if (fProject.getFormat = pfDUB) and TCEDubProject(fProject.getProject).isSDL then
   begin
     fMsgs.message(DubSdlWarning, fProject, amcProj, amkWarn);
     exit;
@@ -3377,8 +3323,8 @@ var
   win: TControl = nil;
 begin
   if assigned(fProject) then case fProject.getFormat of
-    pfDub: win := DockMaster.GetAnchorSite(fDubProjWidg);
-    pfNative: win := DockMaster.GetAnchorSite(fPrjCfWidg);
+    pfDUB: win := DockMaster.GetAnchorSite(fDubProjWidg);
+    pfCE: win := DockMaster.GetAnchorSite(fPrjCfWidg);
   end
   else win := DockMaster.GetAnchorSite(fPrjCfWidg);
   if win.isNotNil then
@@ -3392,7 +3338,7 @@ procedure TCEMainForm.actProjSourceExecute(Sender: TObject);
 begin
   if fProject = nil then exit;
   if not fProject.filename.fileExists then exit;
-  if (fProject.getFormat = pfDub) and TCEDubProject(fProject.getProject).isSDL then
+  if (fProject.getFormat = pfDUB) and TCEDubProject(fProject.getProject).isSDL then
   begin
     fMsgs.message(DubSdlWarning, fProject, amcProj, amkWarn);
     exit;
@@ -3400,7 +3346,7 @@ begin
   //
   openFile(fProject.filename);
   fDoc.isProjectDescription := true;
-  if fProject.getFormat = pfNative then
+  if fProject.getFormat = pfCE then
     fDoc.Highlighter := LfmSyn
   else
     fDoc.Highlighter := JsSyn;

@@ -27,8 +27,12 @@ type
     fCombined: boolean;
     fDepCheck: TDubDependencyCheck;
     fOther: string;
+    fCompiler: TCECompiler;
     procedure setLinkMode(value: TDubLinkMode);
+    procedure setCompiler(value: TCECompiler);
+    function getCompiler: TCECompiler;
   published
+    property compiler: TCECOmpiler read getCompiler write setCompiler;
     property parallel: boolean read fParallel write fParallel;
     property forceRebuild: boolean read fForceRebuild write fForceRebuild;
     property linkMode: TDubLinkMode read fLinkMode write setLinkMode;
@@ -184,6 +188,17 @@ begin
   fLinkMode:=value;
 end;
 
+procedure TCEDubBuildOptionsBase.setCompiler(value: TCECompiler);
+begin
+  fCompiler := value;
+  setDubCompiler(fCompiler);
+end;
+
+function TCEDubBuildOptionsBase.getCompiler: TCECompiler;
+begin
+  result := fCompiler;
+end;
+
 procedure TCEDubBuildOptionsBase.assign(source: TPersistent);
 var
   opts: TCEDubBuildOptionsBase;
@@ -197,6 +212,7 @@ begin
     linkMode:=opts.linkMode;
     other:=opts.other;
     dependenciesCheck:=opts.dependenciesCheck;
+    compiler:=opts.compiler;
   end
   else inherited;
 end;
@@ -289,8 +305,11 @@ begin
   fConfigs.Duplicates:=TDuplicates.dupIgnore;
   fBuildTypes.Duplicates:=TDuplicates.dupIgnore;
   //
+  json.Add('name', '');
+  endModification;
   subjProjNew(fProjectSubject, self);
-  subjProjChanged(fProjectSubject, self);
+  doModified;
+  fModified:=false;
 end;
 
 destructor TCEDubProject.destroy;
@@ -327,7 +346,7 @@ end;
 
 function TCEDubProject.getFormat: TCEProjectFormat;
 begin
-  exit(pfDub);
+  exit(pfDUB);
 end;
 
 function TCEDubProject.getProject: TObject;
