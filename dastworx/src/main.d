@@ -42,7 +42,8 @@ void main(string[] args)
             source.put(buffer);
         if (!source.data.length)
         {
-            files = args[1].splitter(pathSeparator).array;
+            import std.file: exists;
+            files = args[1].splitter(pathSeparator).filter!exists.array;
             version(devel) writeln(files);
         }
     }

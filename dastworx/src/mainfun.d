@@ -16,8 +16,8 @@ import
  * if the main is injected by a mixin template or by a string it is not detected,
  * if the main is deactivated by a static condition neither.
  *
- * The result is used by to detect if the "-main" switch has to be passed to
- * the compiler.
+ * The result is used to determine if the "-main" switch has to be passed to
+ * the compiler when a runnable module is executed or a module tested.
  */
 void detectMainFun(const(Module) mod)
 {
