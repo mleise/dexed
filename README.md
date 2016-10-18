@@ -49,7 +49,8 @@ Download the zipped binaries or the zipped setup program for you platform:
 **Build**
 ---
 
-The procedure is described in the [**first section of the wiki**](https://github.com/BBasile/Coedit/wiki#detailed-setup-procedure)
+- 2 update 6: The procedure is described in the [**first section of the wiki**](https://github.com/BBasile/Coedit/wiki#detailed-setup-procedure)
+- 3 alpha (master): Confers with this [**temporary document**](https://github.com/BBasile/Coedit/wiki/Building-and-using-the-developpement-version)
 
 **GUI preview**
 ---
