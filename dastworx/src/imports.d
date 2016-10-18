@@ -28,9 +28,13 @@ in
 body
 {
     mixin(logCall);
-    writeln('"', mod.moduleDeclaration.moduleName.identifiers
-        .map!(a => a.text).join("."), '"');
-    construct!(ImportLister).visit(mod);
+    auto rng = mod.moduleDeclaration.moduleName.identifiers
+        .map!(a => a.text).join(".");
+    if (!rng.empty)
+    {
+        writeln('"', rng, '"');
+        construct!(ImportLister).visit(mod);
+    }
 }
 
 /**
@@ -54,10 +58,14 @@ void listFilesImports(string[] files)
         ubyte[] source = cast(ubyte[]) std.file.read(fname);
         Module mod = parseModule(getTokensForParser(source, config, &cache),
             fname, &allocator, &ignoreErrors);
-        writeln('"', mod.moduleDeclaration.moduleName.identifiers
-            .map!(a => a.text).join("."), '"');
-        il.visit(mod);
-        stdout.flush;
+        auto rng = mod.moduleDeclaration.moduleName.identifiers
+            .map!(a => a.text).join(".");
+        if (!rng.empty)
+        {
+            writeln('"', rng, '"');
+            il.visit(mod);
+            stdout.flush;
+        }
     }
 }
 
