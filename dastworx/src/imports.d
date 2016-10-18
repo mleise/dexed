@@ -64,7 +64,6 @@ void listFilesImports(string[] files)
         else
             writeln('"', fname, '"');
         il.visit(mod);
-        stdout.flush;
     }
 }
 
