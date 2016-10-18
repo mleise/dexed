@@ -12,7 +12,7 @@ import
 /**
  * Lists the modules imported by a module
  *
- * On the first line writes the module name between double quotes then
+ * On the first line writes the module name or # between double quotes then
  * each import is written in a new line. Import detection is not accurate,
  * the imports injected by a mixin template or by a string variable are not detected,
  * the imports deactivated by a static condition neither.
@@ -28,20 +28,20 @@ in
 body
 {
     mixin(logCall);
-    auto rng = mod.moduleDeclaration.moduleName.identifiers
-        .map!(a => a.text).join(".");
-    if (!rng.empty)
-    {
-        writeln('"', rng, '"');
-        construct!(ImportLister).visit(mod);
-    }
+    if (mod.moduleDeclaration)
+        writeln('"', mod.moduleDeclaration.moduleName.identifiers
+            .map!(a => a.text).join("."), '"');
+    else
+        writeln("\"#\"");
+    construct!(ImportLister).visit(mod);
 }
 
 /**
  * Lists the modules imported by several modules
  *
  * The output consists of several consecutive lists, as formated for
- * listImports.
+ * listImports. When no moduleDeclaration is available, the first line of
+ * a list matches the filename.
  *
  * The results are used by to detect which are the static libraries used by a
  * runnable module.
@@ -58,14 +58,13 @@ void listFilesImports(string[] files)
         ubyte[] source = cast(ubyte[]) std.file.read(fname);
         Module mod = parseModule(getTokensForParser(source, config, &cache),
             fname, &allocator, &ignoreErrors);
-        auto rng = mod.moduleDeclaration.moduleName.identifiers
-            .map!(a => a.text).join(".");
-        if (!rng.empty)
-        {
-            writeln('"', rng, '"');
-            il.visit(mod);
-            stdout.flush;
-        }
+        if (mod.moduleDeclaration)
+            writeln('"', mod.moduleDeclaration.moduleName.identifiers
+                .map!(a => a.text).join("."), '"');
+        else
+            writeln('"', fname, '"');
+        il.visit(mod);
+        stdout.flush;
     }
 }
 
