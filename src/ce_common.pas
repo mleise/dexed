@@ -292,6 +292,8 @@ type
    *)
   function openUrl(const value: string): boolean;
 
+  procedure tryRaiseFromStdErr(proc: TProcess);
+
 var
   // supplementatl directories to find background tools
   additionalPath: string;
@@ -1308,6 +1310,20 @@ begin
     end;
   end;
   {$ENDIF}
+end;
+
+procedure tryRaiseFromStdErr(proc: TProcess);
+begin
+  if (proc.ExitStatus <> 0) and (poUsePipes in proc.Options) then
+    with TStringList.Create do
+  try
+    LoadFromStream(proc.Stderr);
+    Insert(0, format('tool crashed with code: %d (%s)',
+      [proc.ExitStatus, shortenPath(proc.Executable)]));
+    raise Exception.Create(Text);
+  finally
+    free;
+  end;
 end;
 
 initialization

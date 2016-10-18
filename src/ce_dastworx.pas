@@ -34,6 +34,7 @@ end;
 
 procedure getModuleImports(source, imports: TStrings);
 var
+  err: TStringList;
   str: string;
   prc: TProcess;
 begin
@@ -51,6 +52,8 @@ begin
     prc.Input.Write(str[1], str.length);
     prc.CloseInput;
     processOutputToStrings(prc, imports);
+    // TODO-cmaintenance: remove this from version 3 gold
+    tryRaiseFromStdErr(prc);
     while prc.Running do ;
   finally
     prc.free;
@@ -75,6 +78,8 @@ begin
     prc.Execute;
     prc.CloseInput;
     processOutputToStrings(prc, results);
+    // TODO-cmaintenance: remove this from version 3 gold
+    tryRaiseFromStdErr(prc);
     while prc.Running do ;
   finally
     prc.free;
