@@ -58,6 +58,9 @@ type
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
+    mnuedPrevProtGrp: TMenuItem;
+    mnuedNextProtGrp: TMenuItem;
+    MenuItem2: TMenuItem;
     mnuedSortLines: TMenuItem;
     mnuedNextCarea: TMenuItem;
     mnuedPrevCarea: TMenuItem;
@@ -86,6 +89,8 @@ type
     macRecorder: TSynMacroRecorder;
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
+    procedure mnuedPrevProtGrpClick(Sender: TObject);
+    procedure mnuedNextProtGrpClick(Sender: TObject);
     procedure mnuedNextCareaClick(Sender: TObject);
     procedure mnuedPrevCareaClick(Sender: TObject);
     procedure mnuedLowcaseClick(Sender: TObject);
@@ -325,6 +330,8 @@ begin
   AssignPng(mnuedNextCarea.Bitmap, 'GO_NEXT');
   AssignPng(mnuedPrevCarea.Bitmap, 'GO_PREVIOUS');
   AssignPng(mnuedSortLines.Bitmap, 'SORT_AZ');
+  AssignPng(mnuedNextProtGrp.Bitmap, 'GO_NEXT');
+  AssignPng(mnuedPrevProtGrp.Bitmap, 'GO_PREVIOUS');
   //
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
@@ -880,6 +887,18 @@ procedure TCEEditorWidget.mnuedNextCareaClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.nextChangedArea;
+end;
+
+procedure TCEEditorWidget.mnuedPrevProtGrpClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.previousProtectionGroup;
+end;
+
+procedure TCEEditorWidget.mnuedNextProtGrpClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.nextProtectionGroup;
 end;
 
 procedure TCEEditorWidget.mnuedPrevCareaClick(Sender: TObject);

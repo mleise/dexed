@@ -199,6 +199,7 @@ type
     function lexCanCloseBrace: boolean;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
     procedure gotoToChangedArea(next: boolean);
+    procedure gotoToProtectionGroup(next: boolean);
     procedure autoClosePair(value: TAutoClosedPair);
     procedure setSelectionOrWordCase(upper: boolean);
     procedure sortSelectedLines(descending, caseSensitive: boolean);
@@ -255,8 +256,10 @@ type
     procedure showDDocs;
     procedure hideDDocs;
     procedure ShowPhobosDoc;
-    procedure nextChangedArea;
     procedure previousChangedArea;
+    procedure nextChangedArea;
+    procedure previousProtectionGroup;
+    procedure nextProtectionGroup;
     procedure sortLines;
     function implementMain: THasMain;
     //
@@ -326,6 +329,8 @@ const
   ecUpperCaseWordOrSel  = ecUserFirst + 17;
   ecLowerCaseWordOrSel  = ecUserFirst + 18;
   ecSortLines           = ecUserFirst + 19;
+  ecPrevProtGrp         = ecUserFirst + 20;
+  ecNextProtGrp         = ecUserFirst + 21;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -947,9 +952,11 @@ begin
     AddKey(ecShowPhobosDoc, VK_F1, [], 0, []);
     AddKey(ecPreviousChangedArea, VK_UP, [ssAlt], 0, []);
     AddKey(ecNextChangedArea, VK_DOWN, [ssAlt], 0, []);
-    addKey(ecLowerCaseWordOrSel, 0, [], 0, []);
-    addKey(ecUpperCaseWordOrSel, 0, [], 0, []);
-    addKey(ecSortLines, 0, [], 0, []);
+    AddKey(ecLowerCaseWordOrSel, 0, [], 0, []);
+    AddKey(ecUpperCaseWordOrSel, 0, [], 0, []);
+    AddKey(ecSortLines, 0, [], 0, []);
+    AddKey(ecPrevProtGrp, 0, [], 0, []);
+    AddKey(ecNextProtGrp, 0, [], 0, []);
   end;
 end;
 
@@ -975,6 +982,8 @@ begin
     'ecUpperCaseWordOrSel': begin Int := ecUpperCaseWordOrSel; exit(true); end;
     'ecLowerCaseWordOrSel': begin Int := ecLowerCaseWordOrSel; exit(true); end;
     'ecSortLines':          begin Int := ecSortLines; exit(true); end;
+    'ecNextProtGrp':        begin Int := ecNextProtGrp; exit(true); end;
+    'ecPrevProtGrp':        begin Int := ecPrevProtGrp; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1001,6 +1010,8 @@ begin
     ecUpperCaseWordOrSel: begin Ident := 'ecUpperCaseWordOrSel'; exit(true); end;
     ecLowerCaseWordOrSel: begin Ident := 'ecLowerCaseWordOrSel'; exit(true); end;
     ecSortLines:          begin Ident := 'ecSortLines'; exit(true); end;
+    ecNextProtGrp:        begin Ident := 'ecNextProtGrp'; exit(true); end;
+    ecPrevProtGrp:        begin Ident := 'ecPrevProtGrp'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1060,6 +1071,10 @@ begin
       setSelectionOrWordCase(false);
     ecSortLines:
       sortLines;
+    ecPrevProtGrp:
+      previousProtectionGroup;
+    ecNextProtGrp:
+      nextProtectionGroup;
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1526,6 +1541,50 @@ begin
   end;
 end;
 
+procedure TCESynMemo.gotoToProtectionGroup(next: boolean);
+var
+  i: integer;
+  tk0, tk1: PLexToken;
+  tk: PLexToken = nil;
+begin
+  fLexToks.Clear;
+  lex(Lines.Text, fLexToks, nil, [lxoNoComments, lxoNoWhites]);
+  for i:=0 to fLexToks.Count-2 do
+  begin
+    tk0 := fLexToks[i];
+    tk1 := fLexToks[i+1];
+    if not next then
+    begin
+      if tk0^.position.Y >= caretY then
+        break;
+    end
+    else if tk0^.position.Y <= caretY then
+      continue;
+    if tk0^.kind = ltkKeyword then
+    case tk0^.Data of
+      'public','private','protected','package','export':
+        if (tk1^.kind = ltkSymbol) and (tk1^.Data[1] in ['{',':']) then
+        begin
+          tk := tk0;
+          if next then
+            break;
+        end;
+    end;
+  end;
+  if assigned(tk) then
+    ExecuteCommand(ecGotoXY, #0, @tk^.position);
+end;
+
+procedure TCESynMemo.previousProtectionGroup;
+begin
+  gotoToProtectionGroup(false);
+end;
+
+procedure TCESynMemo.nextProtectionGroup;
+begin
+  gotoToProtectionGroup(true);
+end;
+
 function TCESynMemo.implementMain: THasMain;
 var
   res: char = '0';
@@ -1562,6 +1621,7 @@ var
   tk0, tk1: PLexToken;
   str: string;
 begin
+  fLexToks.Clear;
   if value in [autoCloseBackTick, autoCloseDoubleQuote] then
   begin
     p := selStart;
@@ -1962,10 +2022,10 @@ begin
   fHasModuleDeclaration := false;
   if checkModule and isDSource then
   begin
+    fLexToks.Clear;
     lex(Lines.Text, fLexToks, @tokFoundForCaption, [lxoNoComments]);
     if fHasModuleDeclaration then
       result := getModuleName(fLexToks);
-    fLexToks.Clear;
   end;
   if result.length = 0 then
   begin

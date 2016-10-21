@@ -111,6 +111,17 @@ inherited CEEditorWidget: TCEEditorWidget
     object MenuItem9: TMenuItem
       Caption = '-'
     end
+    object mnuedPrevProtGrp: TMenuItem
+      Caption = 'Previous protection attribute'
+      OnClick = mnuedPrevProtGrpClick
+    end
+    object mnuedNextProtGrp: TMenuItem
+      Caption = 'Next protection attribute'
+      OnClick = mnuedNextProtGrpClick
+    end
+    object MenuItem2: TMenuItem
+      Caption = '-'
+    end
     object mnuedUpcase: TMenuItem
       Caption = 'Upper case'
       OnClick = mnuedUpcaseClick
