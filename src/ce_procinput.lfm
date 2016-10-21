@@ -1,26 +1,26 @@
 inherited CEProcInputWidget: TCEProcInputWidget
   Left = 863
-  Height = 63
+  Height = 107
   Top = 397
-  Width = 620
+  Width = 558
   Caption = 'Process input'
-  ClientHeight = 63
-  ClientWidth = 620
+  ClientHeight = 107
+  ClientWidth = 558
   inherited Back: TPanel
-    Height = 63
-    Width = 620
-    ClientHeight = 63
-    ClientWidth = 620
+    Height = 107
+    Width = 558
+    ClientHeight = 107
+    ClientWidth = 558
     inherited Content: TPanel
-      Height = 63
-      Width = 620
-      ClientHeight = 63
-      ClientWidth = 620
+      Height = 71
+      Width = 558
+      ClientHeight = 71
+      ClientWidth = 558
       object txtExeName: TStaticText[0]
         Left = 4
-        Height = 22
+        Height = 24
         Top = 4
-        Width = 612
+        Width = 550
         Align = alTop
         BorderSpacing.Around = 4
         BorderStyle = sbsSunken
@@ -30,67 +30,61 @@ inherited CEProcInputWidget: TCEProcInputWidget
       end
       object Panel1: TPanel[1]
         Left = 4
-        Height = 30
-        Top = 30
-        Width = 612
+        Height = 32
+        Top = 32
+        Width = 550
         Align = alTop
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 30
-        ClientWidth = 612
+        ClientHeight = 32
+        ClientWidth = 550
         Enabled = False
         TabOrder = 1
         object txtInp: TEdit
           Left = 0
           Height = 26
-          Top = 2
-          Width = 520
+          Top = 3
+          Width = 449
           Align = alClient
-          BorderSpacing.Top = 2
-          BorderSpacing.Bottom = 2
+          BorderSpacing.Top = 3
+          BorderSpacing.Bottom = 3
           OnKeyDown = txtInpKeyDown
           TabOrder = 0
         end
-        object btnClose: TBitBtn
-          Left = 552
-          Height = 26
-          Hint = 'close the process input stream'
+        object btnClose: TSpeedButton
+          Left = 484
+          Height = 28
+          Hint = 'close standard input'
           Top = 2
-          Width = 28
+          Width = 31
           Align = alRight
           BorderSpacing.Around = 2
-          Layout = blGlyphBottom
           OnClick = btnCloseClick
-          Spacing = 0
-          TabOrder = 1
         end
-        object btnSend: TBitBtn
-          Left = 522
-          Height = 26
-          Hint = 'send the text to hte process'
+        object btnKill: TSpeedButton
+          Left = 517
+          Height = 28
+          Hint = 'kill process'
           Top = 2
-          Width = 28
+          Width = 31
           Align = alRight
           BorderSpacing.Around = 2
-          Layout = blGlyphBottom
-          OnClick = btnSendClick
-          Spacing = 0
-          TabOrder = 2
-        end
-        object btnKill: TBitBtn
-          Left = 582
-          Height = 26
-          Hint = 'kill the process'
-          Top = 2
-          Width = 28
-          Align = alRight
-          BorderSpacing.Around = 2
-          Layout = blGlyphBottom
           OnClick = btnKillClick
-          Spacing = 0
-          TabOrder = 3
+        end
+        object btnSend: TSpeedButton
+          Left = 451
+          Height = 28
+          Hint = 'write content to standard input'
+          Top = 2
+          Width = 31
+          Align = alRight
+          BorderSpacing.Around = 2
+          OnClick = btnSendClick
         end
       end
+    end
+    inherited toolbar: TCEToolBar
+      Width = 550
     end
   end
   inherited contextMenu: TPopupMenu

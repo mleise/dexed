@@ -7,17 +7,17 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Menus, StdCtrls, Buttons, ce_widget, process, ce_common, ce_interfaces,
-  ce_observer, ce_mru, ce_sharedres;
+  ce_observer, ce_mru, ce_sharedres, ce_dsgncontrols;
 
 type
 
   { TCEProcInputWidget }
 
   TCEProcInputWidget = class(TCEWidget, ICEProcInputHandler)
-    btnClose: TBitBtn;
-    btnKill: TBitBtn;
-    btnSend: TBitBtn;
     Panel1: TPanel;
+    btnClose: TSpeedButton;
+    btnKill: TSpeedButton;
+    btnSend: TSpeedButton;
     txtInp: TEdit;
     txtExeName: TStaticText;
     procedure btnCloseClick(Sender: TObject);
@@ -83,7 +83,9 @@ end;
 procedure TCEProcInputWidget.setToolBarFlat(value: boolean);
 begin
   inherited;
-  //btnClose.flat = fToolbarFlat;
+  btnClose.flat := fToolbarFlat;
+  btnKill.flat := fToolbarFlat;
+  btnSend.flat := fToolbarFlat;
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
