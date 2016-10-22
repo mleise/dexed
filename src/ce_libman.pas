@@ -45,6 +45,7 @@ type
     fLibProject: string;
     fEnabled: boolean;
     fDependencies: TStringList;
+    fClients: TStringList;
     fModules: TCollection;
     fModulesByName: TModulesByName;
     fHasValidSourcePath: boolean;
@@ -74,6 +75,7 @@ type
     property hasValidLibProject: boolean read fHasValidLibProject;
     property hasValidLibSourcePath: boolean read fHasValidSourcePath;
     property dependencies: TStringList read fDependencies;
+    property clients: TStringList read fClients;
     property modules: TCollection read fModules;
     property moduleByIndex[value: integer]: TModuleInfo read getModule;
   end;
@@ -96,7 +98,7 @@ type
     procedure setCollection(value: TCollection);
     procedure updateItemsByAlias;
     function getLibrariesCount: integer;
-    procedure FPOObservedChanged(ASender : TObject; Operation : TFPObservedOperation; Data : Pointer);
+    procedure FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation; Data : Pointer);
   published
     property libraries: TCollection read fCollection write setCollection;
   public
@@ -163,6 +165,9 @@ begin
   fModules := TCollection.Create(TModuleInfo);
   fModulesByName := TModulesByName.create;
   fDependencies := TStringList.Create;
+  fClients := TStringList.Create;
+  fDependencies.Duplicates := dupIgnore;
+  fClients.Duplicates := dupIgnore;
   fEnabled:=true;
 end;
 
@@ -171,6 +176,7 @@ begin
   fModulesByName.Free;
   fDependencies.Free;
   fModules.Free;
+  fClients.Free;
   inherited;
 end;
 
@@ -316,7 +322,7 @@ var
   i: integer;
 begin
   inherited;
-  fItemsByAlias:= TItemsByAlias.create;
+  fItemsByAlias := TItemsByAlias.create;
   fCollection := TCollection.Create(TLibraryItem);
   fCollection.FPOAttachObserver(self);
   fname := getCoeditDocPath + libFname;
@@ -430,12 +436,34 @@ end;
 
 procedure TLibraryManager.FPOObservedChanged(ASender: TObject; Operation:
   TFPObservedOperation; Data: Pointer);
+var
+  i,j: integer;
+  lib: TLibraryItem;
+  cli: TLibraryItem;
 begin
-  if (Operation = ooDeleteItem) and data.isNotNil and
-    fItemsByAlias.contains(TLibraryItem(data).libAlias) then
-  begin
-    fItemsByAlias.delete(TLibraryItem(data).libAlias);
-    updateCrossDependencies;
+  if data.isNil then
+    exit;
+  lib := TLibraryItem(data);
+  case operation of
+    ooDeleteItem: if fItemsByAlias.contains(lib.libAlias) then
+    begin
+      fItemsByAlias.delete(lib.libAlias);
+      for i:= 0 to lib.clients.Count-1 do
+      begin
+        cli := libraryByAlias[lib.clients[i]];
+        if assigned(cli) then
+        begin
+          j := cli.dependencies.IndexOf(lib.libAlias);
+          if j <> -1 then
+            cli.dependencies.Delete(j);
+        end;
+      end;
+    end;
+    ooAddItem:
+    begin
+      fItemsByAlias.insert(lib.libAlias, lib);
+      updateCrossDependencies;
+    end;
   end;
 end;
 
@@ -648,6 +676,11 @@ begin
   for i := 0 to fCollection.Count-1 do
   begin
     lib := libraryByIndex[i];
+    lib.clients.Clear;
+  end;
+  for i := 0 to fCollection.Count-1 do
+  begin
+    lib := libraryByIndex[i];
     if (lib.libAlias = 'phobos') or (lib.libAlias = 'druntime') then
       continue;
     lib.dependencies.Clear;
@@ -669,6 +702,7 @@ begin
       if lib.dependencies.IndexOf(dep.libAlias) > -1 then
         continue;
       lib.dependencies.Add(dep.libAlias);
+      dep.clients.Add(lib.libAlias);
     end;
   end;
 end;
