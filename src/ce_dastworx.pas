@@ -34,7 +34,6 @@ end;
 
 procedure getModuleImports(source, imports: TStrings);
 var
-  err: TStringList;
   str: string;
   prc: TProcess;
 begin

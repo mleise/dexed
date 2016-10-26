@@ -2703,7 +2703,7 @@ var
   i: integer;
 begin
   asyncprocTerminate(sender);
-  if fCovModUt then
+  if fCovModUt and assigned(fRunProc) and (fRunProc.ExitStatus = 0) then
   begin
     fname   := stripFileExt(fDoc.fileName);
     fullcov := true;
