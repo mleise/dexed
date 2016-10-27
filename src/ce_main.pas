@@ -669,6 +669,9 @@ begin
       // would break location detection
       else if (sw.length > 2) and (sw[1..3] = '-of') then
         continue
+      // useless
+      else if sw = '-run' then
+        continue
       else
         lst.Add(sw);
     end;
@@ -2563,7 +2566,9 @@ begin
           fMsgs.message('the option "-c" is not be handled when a module is tested',
             fDoc, amcEdit, amkWarn);
         end;
-      end;
+      end
+      else if lst[i] = '-run' then
+        lst.Delete(i);
     end;
   end;
 
