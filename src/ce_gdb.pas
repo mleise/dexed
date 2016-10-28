@@ -338,7 +338,10 @@ type
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   protected
     procedure setToolBarFlat(value: boolean); override;
+    procedure updateLoop; override;
   private
+    fExe: string;
+    fOutputName: string;
     fUpdateMenu: boolean;
     fGdbState: TGdbState;
     fSubj: TCEDebugObserverSubject;
@@ -350,6 +353,7 @@ type
     fDocHandler: ICEMultiDocHandler;
     fMsg: ICEMessagesDisplay;
     fGdb: TCEProcess;
+    fOutput: TFileStream;
     fInspState: TInspectableCPU;
     fStackItems: TStackItems;
     fCatchPause: boolean;
@@ -379,6 +383,7 @@ type
     procedure setFpr(reg: TFpuRegister; val: extended);
     procedure setSsr(reg: TSegRegister; val: TCPUSegValue);
     procedure setFlag(val: PtrUint);
+    procedure readOutput;
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -498,6 +503,12 @@ begin
   if fname.fileExists then
     loadFromFile(fname);
   EntitiesConnector.addObserver(self);
+  fShowGdbOutput:=false;
+  fShowOutput:= true;
+  fAutoDemangle:= true;
+  fAutoGetCallStack:= true;
+  fAutoGetRegisters:= true;
+  fAutoGetVariables:= true;
 end;
 
 destructor TCEDebugOptions.destroy;
@@ -833,6 +844,7 @@ end;
 
 destructor TCEGdbWidget.destroy;
 begin
+  fOutput.Free;
   fOptions.commandsHistory.Assign(edit1.Items);
   fOptions.Free;
   fFileLineBrks.Free;
@@ -1033,6 +1045,8 @@ begin
   if fProj <> project then
     exit;
   fProj := nil;
+  if fOutputName.fileExists then
+    deleteFile(fOutputName);
 end;
 
 procedure TCEGdbWidget.projFocused(project: ICECommonProject);
@@ -1196,8 +1210,9 @@ begin
     exit;
   if fProj.binaryKind <> executable then
     exit;
-  str := fProj.outputFilename;
-  if not str.fileExists then
+  fExe := fProj.outputFilename;
+  fOutputName := fExe + '.gdbout';
+  if not fExe.fileExists then
     exit;
   gdb := exeFullName('gdb');
   if not gdb.fileExists then
@@ -1208,7 +1223,7 @@ begin
   fGdb := TCEProcess.create(nil);
   fGdb.Executable:= gdb;
   fgdb.Options:= [poUsePipes, poStderrToOutPut];
-  fgdb.Parameters.Add(str);
+  fgdb.Parameters.Add(fExe);
 
   //TODO-cGDB: debugee environment
   //TODO-cGDB: debugee command line
@@ -1247,7 +1262,10 @@ begin
   gdbCommand('-gdb-set mi-async on');
   fGdb.OnReadData := @gdboutJsonize;
   // launch
-  gdbCommand('run');
+  gdbCommand('run >' + fExe + '.gdbout');
+  FreeAndNil(fOutput);
+  if fOutputName.fileExists then
+    fOutput := TFileStream.Create(fOutputName, 0);
   setState(gsRunning);
 end;
 {$ENDREGION}
@@ -1290,19 +1308,6 @@ procedure parseGdbout(const str: string; var json: TJSONObject);
           break;
         end;
       end;
-    end;
-  end;
-
-  procedure parseInferior(node: TJSONObject; r: PStringRange);
-  begin
-    while true do
-    begin
-      // TODO-cGDB: detect invalid command after GDB prefix, maybe inferior output
-      if r^.empty or (r^.front in ['~','^','*','=','&',(*'+',*)'@']) then
-        break;
-      node.Arrays['OUT'].Add(r^.takeUntil(#10).yield);
-      if not r^.empty then
-        r^.popFront;
     end;
   end;
 
@@ -1455,7 +1460,7 @@ begin
           rng.popFront;
       end;
       // async notify / status / out stream when remote (@)
-      '=', (*'+',*)'@':
+      '=', '+','@':
       begin
         rng.popUntil(#10);
         if not rng.empty then
@@ -1463,11 +1468,9 @@ begin
       end
       else
       begin
-        if rng.startsWith('(gdb)') then
-          rng.popFrontN(7)
-        // empty line, inferior output
-        else
-          parseInferior(json, @rng);
+        rng.popUntil(#10);
+        if not rng.empty then
+          rng.popFront;
       end;
     end;
   end;
@@ -1532,6 +1535,7 @@ begin
           fDocHandler.openDocument(fullname);
         setState(gsPaused);
         autoGetStuff;
+        readOutput;
         subjDebugBreak(fSubj, fullname, line, brkreason);
       end;
 
@@ -1567,6 +1571,7 @@ begin
           fDocHandler.openDocument(fullname);
         autoGetStuff;
         setState(gsPaused);
+        readOutput;
         subjDebugBreak(fSubj, fullname, line, dbSignal);
       end
       else
@@ -1584,6 +1589,7 @@ begin
             fDocHandler.openDocument(fullname);
           autoGetStuff;
           setState(gsPaused);
+          readOutput;
           subjDebugBreak(fSubj, fullname, line, dbSignal);
         end;
       end;
@@ -1591,6 +1597,9 @@ begin
 
     else if (reason = 'exited-normally') or (reason = 'exited-signalled') then
     begin
+      readOutput;
+      if not fOptions.showGdbOutput then
+        fMsg.message('debugging terminated: ' + reason, nil, amcMisc, amkInf);
       setState(gsNone);
       subjDebugStop(fSubj);
     end;
@@ -1718,14 +1727,6 @@ begin
         fMsg.message(arr.Strings[i], nil, amcMisc, amkBub);
   end;
 
-  if fOptions.showOutput then
-  begin
-    arr := TJSONArray(fJson.Find('OUT'));
-    if arr.isNotNil then
-      for i := 0 to arr.Count-1 do
-        fMsg.message(arr.Strings[i], nil, amcMisc, amkBub);
-  end;
-
 end;
 
 procedure TCEGdbWidget.gdboutJsonize(sender: TObject);
@@ -1738,8 +1739,8 @@ begin
 
   fLog.Clear;
   fGdb.getFullLines(fLog);
-  for str in fLog do
-    fMsg.message(str, nil, amcMisc, amkAuto);
+  //for str in fLog do
+   // fMsg.message(str, nil, amcMisc, amkAuto);
 
   if flog.Text.isEmpty then
     exit;
@@ -1756,6 +1757,35 @@ begin
   //  lst.Free;
   //end;
 
+end;
+
+procedure TCEGdbWidget.updateLoop;
+begin
+  if fGdbState <> gsNone then
+    readOutput;
+end;
+
+procedure TCEGdbWidget.readOutput;
+var
+  str: TMemoryStream;
+  lst: TStringList;
+  lne: string;
+begin
+  if (fGdbState = gsNone) or not fOptions.showOutput or fOutput.isNil then
+    exit;
+
+  str := TMemoryStream.Create;
+  lst := TStringList.Create;
+  try
+    str.size := fOutput.Size - fOutput.Position;
+    fOutput.Read(str.Memory^, str.Size);
+    lst.LoadFromStream(str);
+    for lne in lst do
+      fMsg.message(lne, nil, amcMisc, amkBub);
+  finally
+    lst.Free;
+    str.Free;
+  end;
 end;
 
 procedure TCEGdbWidget.gdboutQuiet(sender: TObject);
