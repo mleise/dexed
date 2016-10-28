@@ -1568,13 +1568,15 @@ begin
   begin
     reason := val.AsString;
 
-    if (reason = 'breakpoint-hit') or (reason = 'end-stepping-range') or
-      (reason = 'watchpoint-trigger') then
+    if (reason = 'breakpoint-hit') or (reason = 'end-stepping-range')
+    or (reason = 'watchpoint-trigger') or (reason = 'access-watchpoint-trigger')
+    or (reason = 'read-watchpoint-trigger') then
     begin
       case reason of
         'breakpoint-hit': brkreason := dbBreakPoint;
         'end-stepping-range': brkreason := dbStep;
-        'watchpoint-trigger': brkreason:= dbWatch;
+        'watchpoint-trigger', 'access-watchpoint-trigger', 'read-watchpoint-trigger':
+          brkreason:= dbWatch;
       end;
       if brkreason = dbWatch then
       begin
