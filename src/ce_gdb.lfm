@@ -258,12 +258,24 @@ inherited CEGdbWidget: TCEGdbWidget
       end
       object btnStart: TCEToolButton[9]
         Left = 1
+        Hint = 'start debugging'
         Top = 0
         Caption = 'btnStart'
         DropdownMenu = mnuProjRunnable
         OnClick = btnStartClick
         Style = tbsDropDown
         resourceName = 'POWER'
+        scaledSeparator = False
+      end
+      object btnWatch: TCEToolButton[10]
+        Left = 281
+        Hint = 'add a watchpoint for the variable selected in the list'
+        Top = 0
+        Caption = 'btnWatch'
+        DropdownMenu = mnuWatch
+        OnClick = btnWatchClick
+        Style = tbsDropDown
+        resourceName = 'CAMERA_ADD'
         scaledSeparator = False
       end
     end
@@ -294,6 +306,26 @@ inherited CEGdbWidget: TCEGdbWidget
       AutoCheck = True
       Caption = 'Debug runnable'
       OnClick = mnuSelRunnableClick
+    end
+  end
+  object mnuWatch: TPopupMenu[4]
+    left = 144
+    top = 128
+    object mnuReadW: TMenuItem
+      AutoCheck = True
+      Caption = 'On read'
+      OnClick = mnuReadWClick
+    end
+    object mnuWriteW: TMenuItem
+      AutoCheck = True
+      Caption = 'On write'
+      Checked = True
+      OnClick = mnuWriteWClick
+    end
+    object mnuReadWriteW: TMenuItem
+      AutoCheck = True
+      Caption = 'On read/write'
+      OnClick = mnuReadWriteWClick
     end
   end
 end

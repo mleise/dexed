@@ -9,6 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
+  //SynEditMarkupFoldColoring,
   fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer;
@@ -122,11 +123,15 @@ type
     giBulletBlack = 2,
     giBreak       = 3,          // break point reached
     giStep        = 4,          // step / signal / pause
+    giWatch       = 5,          // watch point reached
     giNone        = high(byte)  // remove
   );
 
+  //TODO-cGDB: add a system allowing to define watch points
+
   TCESynMemo = class(TSynEdit, ICEDebugObserver)
   private
+    //fIndentGuideMarkup: TSynEditMarkupFoldColors;
     fFilename: string;
     fDastWorxExename: string;
     fModified: boolean;
@@ -741,6 +746,7 @@ begin
   fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK');
   fImages.AddResourceName(HINSTANCE, 'BREAKS');
   fImages.AddResourceName(HINSTANCE, 'STEP');
+  fImages.AddResourceName(HINSTANCE, 'CAMERA_GO');
   fBreakPoints := TFPList.Create;
   //
   fPositions := TCESynMemoPositions.create(self);
@@ -753,6 +759,9 @@ begin
   //
   LineHighlightColor.Background := color - $080808;
   LineHighlightColor.Foreground := clNone;
+  //
+  //fIndentGuideMarkup:= TSynEditMarkupFoldColors.Create(self);
+  //MarkupManager.AddMarkUp(fIndentGuideMarkup);
   //
   fAutoCloseCurlyBrace:= autoCloseOnNewLineLexically;
   fAutoClosedPairs:= [autoCloseSquareBracket];
@@ -769,6 +778,7 @@ destructor TCESynMemo.destroy;
 begin
   saveCache;
   //
+  //fIndentGuideMarkup.Free;
   EntitiesConnector.removeObserver(self);
   subjDocClosing(TCEMultiDocSubject(fMultiDocSubject), self);
   fMultiDocSubject.Free;
@@ -2603,6 +2613,7 @@ begin
   case reason of
     dbBreakPoint: setGutterIcon(line, giBreak);
     dbStep, dbSignal: setGutterIcon(line, giStep);
+    dbWatch: setGutterIcon(line, giWatch);
   end;
 end;
 {$ENDREGION --------------------------------------------------------------------}

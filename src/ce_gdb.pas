@@ -300,6 +300,8 @@ type
 
   TGdbState = (gsNone, gsRunning, gsPaused);
 
+  TAddWatchPointKind = (wpkRead, wpkWrite, wpkReadWrite);
+
   { TCEGdbWidget }
   TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger, ICEMainMenuProvider)
     btnContinue: TCEToolButton;
@@ -311,12 +313,16 @@ type
     btnStack: TCEToolButton;
     btnStop: TCEToolButton;
     btnStart: TCEToolButton;
+    btnWatch: TCEToolButton;
     button4: TCEToolButton;
     Edit1: TComboBox;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
     lstCallStack: TListView;
+    mnuReadW: TMenuItem;
+    mnuWriteW: TMenuItem;
+    mnuReadWriteW: TMenuItem;
     mnuSelProj: TMenuItem;
     mnuSelRunnable: TMenuItem;
     Panel1: TPanel;
@@ -324,6 +330,7 @@ type
     btnSendCom: TSpeedButton;
     cpuVIewer: TTIPropertyGrid;
     mnuProjRunnable: TPopupMenu;
+    mnuWatch: TPopupMenu;
     Splitter2: TSplitter;
     Splitter3: TSplitter;
     Splitter4: TSplitter;
@@ -338,15 +345,20 @@ type
     procedure btnStackClick(Sender: TObject);
     procedure btnStartClick(Sender: TObject);
     procedure btnStopClick(Sender: TObject);
+    procedure btnWatchClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure mnuReadWClick(Sender: TObject);
+    procedure mnuReadWriteWClick(Sender: TObject);
     procedure mnuSelProjClick(Sender: TObject);
     procedure mnuSelRunnableClick(Sender: TObject);
+    procedure mnuWriteWClick(Sender: TObject);
   protected
     procedure setToolBarFlat(value: boolean); override;
     procedure updateLoop; override;
   private
     fExe: string;
     fOutputName: string;
+    fShowFromCustomCommand: boolean;
     fUpdateMenu: boolean;
     fGdbState: TGdbState;
     fSubj: TCEDebugObserverSubject;
@@ -364,6 +376,7 @@ type
     fStackItems: TStackItems;
     fCatchPause: boolean;
     fOptions: TCEDebugOptions;
+    fAddWatchPointKind: TAddWatchPointKind;
     //
     procedure optionsChangesApplied(sender: TObject);
     procedure menuDeclare(item: TMenuItem);
@@ -843,6 +856,7 @@ begin
   fOptions:= TCEDebugOptions.create(self);
   fOptions.onChangesApplied:=@optionsChangesApplied;
   Edit1.Items.Assign(fOptions.commandsHistory);
+  fAddWatchPointKind := wpkWrite;
   //
   AssignPng(btnSendCom, 'ACCEPT');
   setState(gsNone);
@@ -1215,6 +1229,13 @@ begin
   mnuSelProj.Checked:=false;
 end;
 
+procedure TCEGdbWidget.mnuWriteWClick(Sender: TObject);
+begin
+  fAddWatchPointKind := wpkWrite;
+  mnuReadW.Checked:=false;
+  mnuReadWriteW.Checked:=false;
+end;
+
 procedure TCEGdbWidget.disableEditor;
 begin
   cpuVIewer.ItemIndex:=-1;
@@ -1547,11 +1568,27 @@ begin
   begin
     reason := val.AsString;
 
-    if (reason = 'breakpoint-hit') or (reason = 'end-stepping-range') then
+    if (reason = 'breakpoint-hit') or (reason = 'end-stepping-range') or
+      (reason = 'watchpoint-trigger') then
     begin
       case reason of
         'breakpoint-hit': brkreason := dbBreakPoint;
         'end-stepping-range': brkreason := dbStep;
+        'watchpoint-trigger': brkreason:= dbWatch;
+      end;
+      if brkreason = dbWatch then
+      begin
+        obj := TJSONObject(fJson.Find('wpt'));
+        if obj.isNotNil and (obj.JSONType = jtObject) then
+        begin
+          val := obj.Find('exp');
+          if val.isNotNil then
+          begin
+            ValueListEditor1.FindRow(val.AsString, i);
+            if i <> -1 then
+              ValueListEditor1.Row:=i;
+          end;
+        end;
       end;
       obj := TJSONObject(fJson.Find('frame'));
       if obj.isNotNil and (obj.JSONType = jtObject) then
@@ -1569,8 +1606,14 @@ begin
         readOutput;
         subjDebugBreak(fSubj, fullname, line, brkreason);
       end;
-
     end
+
+    else if reason = 'watchpoint-scope' then
+    begin
+      gdbCommand('continue', @gdboutJsonize);
+    end
+
+    // *stopped,reason="watchpoint-trigger",wpt={number="10",exp="h"},value={old="0",new="1"},frame={addr="0x000000000049fb7c",func="D main",args=[{name="args",value="..."}],file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="47"},thread-id="1",stopped-threads="all",core="1"
 
     else if reason = 'signal-received' then
     begin
@@ -1731,6 +1774,7 @@ begin
   val := fJson.Find('variables');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
+    i := ValueListEditor1.Row;
     ValueListEditor1.Clear;
     arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
@@ -1748,10 +1792,13 @@ begin
         continue;
       ValueListEditor1.InsertRow(nme, val.AsString, false);
     end;
+    if (i <> -1) and (i <= ValueListEditor1.RowCount) then
+      ValueListEditor1.Row:=i;
   end;
 
-  if fOptions.showGdbOutput then
+  if fOptions.showGdbOutput or fShowFromCustomCommand then
   begin
+    fShowFromCustomCommand := false;
     arr := TJSONArray(fJson.Find('CLI'));
     if arr.isNotNil then
       for i := 0 to arr.Count-1 do
@@ -1770,8 +1817,8 @@ begin
 
   fLog.Clear;
   fGdb.getFullLines(fLog);
-  //for str in fLog do
-   // fMsg.message(str, nil, amcMisc, amkAuto);
+  for str in fLog do
+    fMsg.message(str, nil, amcMisc, amkAuto);
 
   if flog.Text.isEmpty then
     exit;
@@ -1916,6 +1963,19 @@ begin
   setState(gsNone);
 end;
 
+procedure TCEGdbWidget.btnWatchClick(Sender: TObject);
+const
+  cmd: array[TAddWatchPointKind] of string = (
+    '-break-watch -r ','-break-watch ','-break-watch -a ');
+var
+  nme: string;
+begin
+  if ValueListEditor1.Row = -1 then
+    exit;
+  nme := ValueListEditor1.Keys[ValueListEditor1.Row];
+  gdbCommand(cmd[fAddWatchPointKind] + nme);
+end;
+
 procedure TCEGdbWidget.btnSendComClick(Sender: TObject);
 begin
   sendCustomCommand;
@@ -1927,6 +1987,20 @@ begin
     sendCustomCommand;
 end;
 
+procedure TCEGdbWidget.mnuReadWClick(Sender: TObject);
+begin
+  fAddWatchPointKind := wpkRead;
+  mnuWriteW.Checked:=false;
+  mnuReadWriteW.Checked:=false;
+end;
+
+procedure TCEGdbWidget.mnuReadWriteWClick(Sender: TObject);
+begin
+  fAddWatchPointKind := wpkReadWrite;
+  mnuReadW.Checked:=false;
+  mnuWriteW.Checked:=false;
+end;
+
 procedure TCEGdbWidget.sendCustomCommand;
 var
   cmd: string;
@@ -1934,6 +2008,7 @@ begin
   cmd := edit1.Text;
   if cmd.isBlank or cmd.isEmpty then
     exit;
+  fShowFromCustomCommand := true;
   gdbCommand(cmd, @gdboutJsonize);
   if edit1.Items.IndexOf(cmd) = -1 then
     edit1.Items.Add(cmd);

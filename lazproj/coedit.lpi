@@ -13,7 +13,7 @@
         <DpiAware Value="True"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="100">
+      <Resources Count="102">
         <Resource_0 FileName="../icons/window/layout_add.png" Type="RCDATA" ResourceName="LAYOUT_ADD"/>
         <Resource_1 FileName="../icons/window/layout.png" Type="RCDATA" ResourceName="LAYOUT"/>
         <Resource_2 FileName="../icons/window/application_go.png" Type="RCDATA" ResourceName="APPLICATION_GO"/>
@@ -114,6 +114,8 @@
         <Resource_97 FileName="../icons/arrow/go_down.png" Type="RCDATA" ResourceName="GO_DOWN"/>
         <Resource_98 FileName="../icons/arrow/go_jump.png" Type="RCDATA" ResourceName="GO_JUMP"/>
         <Resource_99 FileName="../icons/window/watch_window.png" Type="RCDATA" ResourceName="WATCH_WINDOW"/>
+        <Resource_100 FileName="../icons/other/camera_go.png" Type="RCDATA" ResourceName="CAMERA_GO"/>
+        <Resource_101 FileName="../icons/other/camera_add.png" Type="RCDATA" ResourceName="CAMERA_ADD"/>
       </Resources>
     </General>
     <i18n>

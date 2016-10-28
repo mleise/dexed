@@ -10,8 +10,8 @@ uses
 type
 
   TBreakPointKind = (
-    bpkBreak, // break
-    bpkTrace  // a message is output
+    bpkBreak, // break point
+    bpkWatch  // watch point
   );
 
   (**
@@ -28,7 +28,8 @@ type
     dbUnknown,      // ?
     dbBreakPoint,   // a break point is reached.
     dbSignal,       // an unexpected signal is emitted.
-    dbStep          // step to this line
+    dbStep,         // step to this line
+    dbWatch         // watchpoint reached
   );
   (**
    * An implementer is informed about a debuging session.
