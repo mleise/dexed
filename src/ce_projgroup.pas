@@ -309,6 +309,7 @@ begin
   begin
     p := item[i];
     p.fGroup := self;
+    p.filename := patchPlateformPath(p.filename);
     if assigned(fFreeStanding) and (p.absoluteFilename = fFreeStanding.filename) then
     begin
       p.fProj := fFreeStanding;
