@@ -256,6 +256,10 @@ begin
     widg.fastDisplay:= fFastDisplay;
     widg.fMsgColors := fMsgColors;
     widg.fAutoDemangle:=fAutoDemangle;
+    if fFastDisplay then
+      widg.updaterByLoopInterval:= 70
+    else
+      widg.updaterByLoopInterval:= 0;
   end
   else inherited;
 end;

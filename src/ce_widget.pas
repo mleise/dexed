@@ -144,7 +144,7 @@ begin
   fToolBarVisible := true;
   fIsDockable := true;
   fUpdaterAuto := TTimer.Create(self);
-  fUpdaterAuto.Interval := 70;
+  fUpdaterAuto.Interval := 0;
   fUpdaterAuto.OnTimer := @updaterAutoProc;
   fUpdaterDelay := TTimer.Create(self);
 
@@ -269,10 +269,16 @@ end;
 
 procedure TCEWidget.setLoopInt(value: Integer);
 begin
-  if value < 30 then value := 30;
-  if fLoopInter = value then exit;
+  if fLoopInter = value then
+    exit;
   fLoopInter := value;
   fUpdaterAuto.Interval := fLoopInter;
+  if value = 0 then
+  begin
+    fUpdaterAuto.Enabled:= false;
+    fLoopUpdateCount := 0;
+  end
+  else fUpdaterAuto.Enabled:= true;
 end;
 
 procedure TCEWidget.IncLoopUpdate;
