@@ -309,18 +309,21 @@ type
     btnPause: TCEToolButton;
     btnReg: TCEToolButton;
     btnStack: TCEToolButton;
-    btnStart: TCEToolButton;
     btnStop: TCEToolButton;
+    btnStart: TCEToolButton;
     button4: TCEToolButton;
     Edit1: TComboBox;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
     lstCallStack: TListView;
+    mnuSelProj: TMenuItem;
+    mnuSelRunnable: TMenuItem;
     Panel1: TPanel;
     Panel3: TPanel;
     btnSendCom: TSpeedButton;
     cpuVIewer: TTIPropertyGrid;
+    mnuProjRunnable: TPopupMenu;
     Splitter2: TSplitter;
     Splitter3: TSplitter;
     Splitter4: TSplitter;
@@ -336,6 +339,8 @@ type
     procedure btnStartClick(Sender: TObject);
     procedure btnStopClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure mnuSelProjClick(Sender: TObject);
+    procedure mnuSelRunnableClick(Sender: TObject);
   protected
     procedure setToolBarFlat(value: boolean); override;
     procedure updateLoop; override;
@@ -346,6 +351,7 @@ type
     fGdbState: TGdbState;
     fSubj: TCEDebugObserverSubject;
     fDoc: TCESynMemo;
+    fDbgRunnable: boolean;
     fProj: ICECommonProject;
     fJson: TJsonObject;
     fLog: TStringList;
@@ -1045,7 +1051,7 @@ begin
   if fProj <> project then
     exit;
   fProj := nil;
-  if fOutputName.fileExists then
+  if not fDbgRunnable and fOutputName.fileExists then
     deleteFile(fOutputName);
 end;
 
@@ -1079,8 +1085,11 @@ end;
 
 procedure TCEGdbWidget.docClosing(document: TCESynMemo);
 begin
-  if fDoc = document then
-    fDoc := nil;
+  if fDoc <> document then
+    exit;
+  fDoc := nil;
+  if fDbgRunnable and fOutputName.fileExists then
+    deleteFile(fOutputName);
 end;
 {$ENDREGION}
 
@@ -1194,6 +1203,18 @@ begin
   end;
 end;
 
+procedure TCEGdbWidget.mnuSelProjClick(Sender: TObject);
+begin
+  fDbgRunnable := false;
+  mnuSelRunnable.Checked:=false;
+end;
+
+procedure TCEGdbWidget.mnuSelRunnableClick(Sender: TObject);
+begin
+  fDbgRunnable := true;
+  mnuSelProj.Checked:=false;
+end;
+
 procedure TCEGdbWidget.disableEditor;
 begin
   cpuVIewer.ItemIndex:=-1;
@@ -1205,15 +1226,28 @@ var
   gdb: string;
   i: integer;
 begin
-  // protect
-  if fProj = nil then
+  if not fDbgRunnable and (fProj = nil) then
+    exit;
+  if fDbgRunnable and fDoc.isNil then
     exit;
   if fProj.binaryKind <> executable then
     exit;
-  fExe := fProj.outputFilename;
+  if not fDbgRunnable then
+    fExe := fProj.outputFilename
+  else
+    fExe := stripFileExt(fDoc.fileName) + exeExt;
   fOutputName := fExe + '.gdbout';
+  FreeAndNil(fOutput);
   if not fExe.fileExists then
+  begin
+    if fDbgRunnable then
+      dlgOkInfo('Either the runnable is not compiled or it cannot be found' +
+        LineEnding +  'Note that the runnable option "outputFolder" is not supported',
+          'GDB commander')
+    else
+      dlgOkInfo('The project binary is missing, cannot debug', 'GDB commander');
     exit;
+  end;
   gdb := exeFullName('gdb');
   if not gdb.fileExists then
     exit;
@@ -1263,9 +1297,6 @@ begin
   fGdb.OnReadData := @gdboutJsonize;
   // launch
   gdbCommand('run >' + fExe + '.gdbout');
-  FreeAndNil(fOutput);
-  if fOutputName.fileExists then
-    fOutput := TFileStream.Create(fOutputName, 0);
   setState(gsRunning);
 end;
 {$ENDREGION}
@@ -1771,9 +1802,17 @@ var
   lst: TStringList;
   lne: string;
 begin
-  if (fGdbState = gsNone) or not fOptions.showOutput or fOutput.isNil then
+  if (fGdbState = gsNone) or not fOptions.showOutput then
     exit;
-
+  if fOutput.isNil and fOutputName.fileExists then
+  try
+    fOutput := TFileStream.Create(fOutputName, 0);
+  except
+    if fOutput.isNotNil then
+      FreeAndNil(fOutput);
+  end;
+  if fOutput.isNil then
+    exit;
   str := TMemoryStream.Create;
   lst := TStringList.Create;
   try

@@ -176,7 +176,7 @@ inherited CEGdbWidget: TCEGdbWidget
     inherited toolbar: TCEToolBar
       Width = 509
       object btnStack: TCEToolButton[0]
-        Left = 213
+        Left = 225
         Hint = 'view call stack'
         Top = 0
         Caption = 'btnStack'
@@ -185,7 +185,7 @@ inherited CEGdbWidget: TCEGdbWidget
         scaledSeparator = False
       end
       object btnReg: TCEToolButton[1]
-        Left = 185
+        Left = 197
         Hint = 'update CPU registers values'
         Top = 0
         Caption = 'btnReg'
@@ -194,7 +194,7 @@ inherited CEGdbWidget: TCEGdbWidget
         scaledSeparator = False
       end
       object button4: TCEToolButton[2]
-        Left = 169
+        Left = 181
         Height = 28
         Top = 0
         Width = 16
@@ -203,7 +203,7 @@ inherited CEGdbWidget: TCEGdbWidget
         scaledSeparator = False
       end
       object btnPause: TCEToolButton[3]
-        Left = 85
+        Left = 97
         Hint = 'pause debugging'
         Top = 0
         Caption = 'btnPause'
@@ -212,7 +212,7 @@ inherited CEGdbWidget: TCEGdbWidget
         scaledSeparator = False
       end
       object btnStop: TCEToolButton[4]
-        Left = 29
+        Left = 41
         Hint = 'stop debugging'
         Top = 0
         Caption = 'btnStop'
@@ -221,7 +221,7 @@ inherited CEGdbWidget: TCEGdbWidget
         scaledSeparator = False
       end
       object btnContinue: TCEToolButton[5]
-        Left = 57
+        Left = 69
         Hint = 'continue debugging'
         Top = 0
         Caption = 'btnContinue'
@@ -229,17 +229,8 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'PLAY'
         scaledSeparator = False
       end
-      object btnStart: TCEToolButton[6]
-        Left = 1
-        Hint = 'start debugging'
-        Top = 0
-        Caption = 'btnStart'
-        OnClick = btnStartClick
-        resourceName = 'POWER'
-        scaledSeparator = False
-      end
-      object btnNext: TCEToolButton[7]
-        Left = 113
+      object btnNext: TCEToolButton[6]
+        Left = 125
         Hint = 'step to next instruction, including in calls'
         Top = 0
         Caption = 'btnNext'
@@ -247,8 +238,8 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'GO_DOWN'
         scaledSeparator = False
       end
-      object btnOver: TCEToolButton[8]
-        Left = 141
+      object btnOver: TCEToolButton[7]
+        Left = 153
         Hint = 'step to the next instruction, excluding calls'
         Top = 0
         Caption = 'btnOver'
@@ -256,13 +247,23 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'GO_JUMP'
         scaledSeparator = False
       end
-      object btnVariables: TCEToolButton[9]
-        Left = 241
+      object btnVariables: TCEToolButton[8]
+        Left = 253
         Hint = 'update variables list'
         Top = 0
         Caption = 'btnVariables'
         OnClick = btnVariablesClick
         resourceName = 'WATCH_WINDOW'
+        scaledSeparator = False
+      end
+      object btnStart: TCEToolButton[9]
+        Left = 1
+        Top = 0
+        Caption = 'btnStart'
+        DropdownMenu = mnuProjRunnable
+        OnClick = btnStartClick
+        Style = tbsDropDown
+        resourceName = 'POWER'
         scaledSeparator = False
       end
     end
@@ -279,5 +280,20 @@ inherited CEGdbWidget: TCEGdbWidget
   inherited contextMenu: TPopupMenu[2]
     left = 56
     top = 64
+  end
+  object mnuProjRunnable: TPopupMenu[3]
+    left = 144
+    top = 64
+    object mnuSelProj: TMenuItem
+      AutoCheck = True
+      Caption = 'Debug project'
+      Checked = True
+      OnClick = mnuSelProjClick
+    end
+    object mnuSelRunnable: TMenuItem
+      AutoCheck = True
+      Caption = 'Debug runnable'
+      OnClick = mnuSelRunnableClick
+    end
   end
 end
