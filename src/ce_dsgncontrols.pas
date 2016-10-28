@@ -92,7 +92,7 @@ begin
   fResourceName:=value;
   if csDesigning in ComponentState then
     exit;
-  if Style = tbsButton then
+  if Style in [tbsButton, tbsDropDown] then
   begin
     fPng.FreeImage;
     fPng.LoadFromResourceName(HINSTANCE, fResourceName);
@@ -146,9 +146,11 @@ var
   x, y: integer;
 begin
   inherited;
-  if (fResourceName <> '') and (style = tbsButton) then
+  if (fResourceName <> '') and (style in [tbsButton, tbsDropDown]) then
   begin
     rc := ClientRect;
+    if Style = tbsDropDown then
+      rc.Right := rc.left + FToolBar.ButtonWidth;
     x := ((rc.Right - rc.Left) - fPng.width) div 2;
     y := ((rc.Bottom - rc.Top) - fPng.Height) div 2;
     if Enabled then
