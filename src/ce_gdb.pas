@@ -427,6 +427,44 @@ type
     destructor destroy; override;
   end;
 
+  // Perfect static hash-set that detect a GDB stop reason
+  stopReasons = record
+  public
+  private
+    const fWords: array [0..15] of string =
+    (
+      'exec', 'access-watchpoint-trigger', 'location-reached', 'syscall-return',
+      'vfork', 'syscall-entry', 'watchpoint-trigger', '', 'read-watchpoint-trigger',
+      'breakpoint-hit', 'end-stepping-range', 'function-finished', '', 'fork',
+      'solib-event', ''
+    );
+    const fHasEntry: array [0..15] of boolean =
+    (
+      true, true, true, true, true, true, true, false, true, true, true, true,
+      false, true, true, false);
+    const fCoeffs: array[0..255] of Byte =
+    (
+      3, 89, 191, 109, 130, 168, 79, 148, 40, 57, 142, 200, 143, 109, 144, 128,
+      90, 119, 44, 16, 170, 160, 252, 48, 142, 79, 188, 18, 124, 157, 218, 14,
+      108, 236, 45, 97, 190, 119, 37, 44, 103, 121, 20, 36, 149, 200, 122, 188,
+      222, 195, 201, 15, 30, 183, 145, 110, 21, 186, 66, 71, 229, 247, 179, 169,
+      169, 212, 55, 0, 44, 189, 223, 250, 253, 23, 140, 204, 155, 114, 139, 39,
+      189, 35, 218, 30, 222, 168, 40, 203, 20, 208, 146, 226, 122, 200, 28, 223,
+      116, 208, 151, 27, 16, 253, 107, 207, 71, 102, 215, 69, 202, 175, 103, 240,
+      179, 198, 173, 120, 47, 48, 199, 52, 203, 207, 21, 80, 103, 33, 254, 46,
+      218, 25, 47, 131, 221, 239, 44, 33, 165, 73, 143, 121, 73, 23, 76, 159, 199,
+      172, 144, 236, 161, 249, 178, 45, 49, 157, 246, 43, 227, 145, 139, 161, 185,
+      15, 68, 254, 112, 132, 133, 5, 41, 149, 116, 82, 57, 156, 193, 250, 73, 108,
+      126, 1, 44, 151, 211, 197, 23, 225, 119, 247, 59, 20, 225, 241, 232, 192,
+      241, 1, 7, 12, 73, 160, 157, 14, 203, 109, 9, 17, 43, 20, 14, 174, 233, 108,
+      254, 204, 78, 224, 16, 15, 133, 251, 254, 204, 191, 12, 0, 131, 19, 252,
+      104, 178, 231, 176, 22, 234, 104, 181, 167, 17, 103, 23, 156, 197, 249, 237,
+      109, 53, 170, 237, 57, 126, 48, 119, 175, 238, 141, 188
+    );
+    class function hash(const w: string): Byte; static; {$IFNDEF DEBUG}inline;{$ENDIF}
+  public
+    class function match(const w: string): PString; static; {$IFNDEF DEBUG}inline;{$ENDIF}
+  end;
 
 implementation
 {$R *.lfm}
@@ -836,6 +874,32 @@ begin
       fFullFlags:= fFullFlags xor FlagValues[flg];
   fFlags := value;
   fSetFlagEvent(fFullFlags);
+end;
+{$ENDREGION}
+
+{$REGION SteopReasons ----------------------------------------------------------}
+{$IFDEF DEBUG}{$PUSH}{$R-}{$ENDIF}
+class function stopReasons.hash(const w: string): Byte;
+var
+  i: integer;
+begin
+  Result := 0;
+  for i := 1 to length(w) do
+    Result += fCoeffs[Byte(w[i])];
+  Result := Result and $F;
+end;
+{$IFDEF DEBUG}{$POP}{$ENDIF}
+
+class function stopReasons.match(const w: string): PString;
+var
+  h: Byte;
+begin
+  result := nil;
+  if (length(w) < 4) or (length(w) > 25) then
+    exit;
+  h := hash(w);
+  if fHasEntry[h] and (fWords[h] = w) then
+    result := @fWords[h];
 end;
 {$ENDREGION}
 
@@ -1543,6 +1607,7 @@ procedure TCEGdbWidget.interpretJson;
   end;
 
 var
+  r: PString;
   i: integer;
   val: TJSONData;
   obj: TJSONObject;
@@ -1570,15 +1635,14 @@ begin
   begin
     reason := val.AsString;
 
-    if (reason = 'breakpoint-hit') or (reason = 'end-stepping-range')
-    or (reason = 'watchpoint-trigger') or (reason = 'access-watchpoint-trigger')
-    or (reason = 'read-watchpoint-trigger') then
+    r := stopReasons.match(reason);
+    if assigned(r) then
     begin
-      case reason of
+      case r^ of
         'breakpoint-hit': brkreason := dbBreakPoint;
-        'end-stepping-range': brkreason := dbStep;
         'watchpoint-trigger', 'access-watchpoint-trigger', 'read-watchpoint-trigger':
           brkreason:= dbWatch;
+        else brkreason := dbStep;
       end;
       if brkreason = dbWatch then
       begin
@@ -1673,7 +1737,9 @@ begin
       end;
     end
 
-    else if (reason = 'exited-normally') or (reason = 'exited-signalled') then
+    else if (reason = 'exited-normally') or (reason = 'exited-signalled')
+    or (reason = 'exited')
+    then
     begin
       readOutput;
       if not fOptions.showGdbOutput then
@@ -1814,7 +1880,7 @@ end;
 procedure TCEGdbWidget.gdboutJsonize(sender: TObject);
 var
   str: string;
-  lst: TStringList;
+  //lst: TStringList;
 begin
   if fMsg = nil then
     exit;
