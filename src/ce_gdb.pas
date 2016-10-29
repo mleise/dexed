@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, RegExpr, ComCtrls,
   PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
-  StdCtrls, ValEdit, process, fpjson, typinfo,
+  StdCtrls, ValEdit, process, fpjson, typinfo, {$IFDEF UNIX}Unix,{$ENDIF}
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
   ce_ddemangle, ce_writableComponent, ce_symstring;
@@ -354,11 +354,11 @@ type
     procedure mnuWriteWClick(Sender: TObject);
   protected
     procedure setToolBarFlat(value: boolean); override;
-    procedure updateLoop; override;
   private
     fSyms: ICESymStringExpander;
     fExe: string;
     fOutputName: string;
+    fInputName: string;
     fShowFromCustomCommand: boolean;
     fUpdateMenu: boolean;
     fGdbState: TGdbState;
@@ -373,6 +373,7 @@ type
     fMsg: ICEMessagesDisplay;
     fGdb: TCEProcess;
     fOutput: TFileStream;
+    fInput: TFileStream;
     fInspState: TInspectableCPU;
     fStackItems: TStackItems;
     fCatchPause: boolean;
@@ -877,7 +878,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION SteopReasons ----------------------------------------------------------}
+{$REGION StopReasons -----------------------------------------------------------}
 {$IFDEF DEBUG}{$PUSH}{$R-}{$ENDIF}
 class function stopReasons.hash(const w: string): Byte;
 var
@@ -1131,8 +1132,13 @@ begin
   if fProj <> project then
     exit;
   fProj := nil;
-  if not fDbgRunnable and fOutputName.fileExists then
-    deleteFile(fOutputName);
+  if not fDbgRunnable then
+  begin
+    if fOutputName.fileExists then
+      deleteFile(fOutputName);
+    if fInputName.fileExists then
+      deleteFile(fInputName);
+  end;
 end;
 
 procedure TCEGdbWidget.projFocused(project: ICECommonProject);
@@ -1168,8 +1174,13 @@ begin
   if fDoc <> document then
     exit;
   fDoc := nil;
-  if fDbgRunnable and fOutputName.fileExists then
-    deleteFile(fOutputName);
+  if fDbgRunnable then
+  begin
+    if fOutputName.fileExists then
+      deleteFile(fOutputName);
+    if fInputName.fileExists then
+      deleteFile(fInputName);
+  end;
 end;
 {$ENDREGION}
 
@@ -1222,7 +1233,6 @@ procedure TCEGdbWidget.addBreakPoint(const fname: string; line: integer; kind: T
 begin
   if fGdb.isNil or not fGdb.Running then
     exit;
-  //TODO-cGDB: handle trace points
   gdbCommand('break ' + fname + ':' + intToStr(line));
 end;
 
@@ -1323,8 +1333,15 @@ begin
     fExe := fProj.outputFilename
   else
     fExe := stripFileExt(fDoc.fileName) + exeExt;
-  fOutputName := fExe + '.gdbout';
+  //
+  fOutputName := fExe + '.inferiorout';
+  fInputName  := fExe + '.inferiorin';
+  FreeAndNil(fInput);
+  if fInputName.fileExists then
+    deletefile(fInputName);
+  fInput:= TFileStream.Create(fInputName, fmCreate or fmShareExclusive);
   FreeAndNil(fOutput);
+  //
   if not fExe.fileExists then
   begin
     if fDbgRunnable then
@@ -1348,7 +1365,6 @@ begin
 
   //TODO-cGDB: debugee environment
   //TODO-cGDB: debugee command line
-  //TODO-cGDB: pass input to debugee
 
   fgdb.Parameters.Add('--interpreter=mi');
   fGdb.OnReadData:= @gdboutQuiet;
@@ -1383,7 +1399,7 @@ begin
   gdbCommand('-gdb-set mi-async on');
   fGdb.OnReadData := @gdboutJsonize;
   // launch
-  gdbCommand('run >' + fExe + '.gdbout');
+  gdbCommand('run >' + fOutputName + '< ' + fInputName);
   setState(gsRunning);
 end;
 {$ENDREGION}
@@ -1907,12 +1923,6 @@ begin
 
 end;
 
-procedure TCEGdbWidget.updateLoop;
-begin
-  if fGdbState <> gsNone then
-    readOutput;
-end;
-
 procedure TCEGdbWidget.readOutput;
 var
   str: TMemoryStream;
@@ -2076,13 +2086,28 @@ var
   cmd: string;
 begin
   cmd := edit1.Text;
-  if cmd.isBlank or cmd.isEmpty then
+  if cmd.isEmpty then
     exit;
   if edit1.Items.IndexOf(cmd) = -1 then
     edit1.Items.Add(cmd);
-  cmd := fSyms.expand(edit1.Text);
-  fShowFromCustomCommand := true;
-  gdbCommand(cmd, @gdboutJsonize);
+  cmd := fSyms.expand(cmd);
+  if (cmd.length > 1) and (cmd[1] = '>') and assigned(fInput) then
+  begin
+    cmd := cmd[2..cmd.length] + #10;
+    fInput.Write(cmd[1], cmd.length);
+    {$IFDEF UNIX}
+    fpfsync(fInput.Handle);
+    {$ELSE}
+    FlushFileBuffers(fInput.Handle);
+    {$ENDIF}
+    sleep(100);
+    readOutput;
+  end
+  else
+  begin
+    fShowFromCustomCommand := true;
+    gdbCommand(cmd, @gdboutJsonize);
+  end;
   edit1.Text := '';
 end;
 

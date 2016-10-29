@@ -130,7 +130,7 @@ inherited CEGdbWidget: TCEGdbWidget
         object Edit1: TComboBox
           Left = 0
           Height = 28
-          Hint = 'custom GDB command'
+          Hint = 'enter a custom GDB command or the program input with ">"'
           Top = 0
           Width = 479
           Align = alClient
