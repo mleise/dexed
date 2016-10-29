@@ -137,7 +137,7 @@ inherited CEGdbWidget: TCEGdbWidget
           AutoComplete = True
           AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
           ItemHeight = 0
-          MaxLength = 64
+          MaxLength = 128
           OnKeyUp = Edit1KeyUp
           TabOrder = 0
         end

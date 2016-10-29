@@ -10,7 +10,7 @@ uses
   StdCtrls, ValEdit, process, fpjson, typinfo,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
-  ce_ddemangle, ce_writableComponent;
+  ce_ddemangle, ce_writableComponent, ce_symstring;
 
 type
 
@@ -356,6 +356,7 @@ type
     procedure setToolBarFlat(value: boolean); override;
     procedure updateLoop; override;
   private
+    fSyms: ICESymStringExpander;
     fExe: string;
     fOutputName: string;
     fShowFromCustomCommand: boolean;
@@ -844,6 +845,7 @@ begin
   inherited;
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
+  fSyms := getSymStringExpander;
   fDocHandler:= getMultiDocHandler;
   fMsg:= getMessageDisplay;
   fFileLineBrks:= TStringList.Create;
@@ -2010,10 +2012,11 @@ begin
   cmd := edit1.Text;
   if cmd.isBlank or cmd.isEmpty then
     exit;
-  fShowFromCustomCommand := true;
-  gdbCommand(cmd, @gdboutJsonize);
   if edit1.Items.IndexOf(cmd) = -1 then
     edit1.Items.Add(cmd);
+  cmd := fSyms.expand(edit1.Text);
+  fShowFromCustomCommand := true;
+  gdbCommand(cmd, @gdboutJsonize);
   edit1.Text := '';
 end;
 
