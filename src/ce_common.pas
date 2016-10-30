@@ -76,6 +76,7 @@ type
     function extractFileExt: string;
     function extractFilePath: string;
     function extractFileDir: string;
+    function stripFileExt: string;
     function fileExists: boolean;
     function dirExists: boolean;
     function upperCase: string;
@@ -412,6 +413,11 @@ end;
 function TStringHelper.extractFileDir: string;
 begin
   exit(sysutils.extractFileDir(self));
+end;
+
+function TStringHelper.stripFileExt: string;
+begin
+  exit(ce_common.stripFileExt(self));
 end;
 
 function TStringHelper.fileExists: boolean;

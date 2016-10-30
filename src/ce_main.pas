@@ -2452,7 +2452,7 @@ begin
   if fDoc.isNil then
     exit;
 
-  result := stripFileExt(fDoc.fileName) + exeExt;
+  result := fDoc.fileName.stripFileExt + exeExt;
   if fDoc.isTemporary then
     exit;
   ofr := fRunnablesOptions.outputFolder;
@@ -2464,12 +2464,11 @@ begin
     if FilenameIsAbsolute(ofr) then
     begin
       if ofr.dirExists then
-        result := ofr + stripFileExt(fDoc.fileName.extractFileName)
-          + exeExt;
+        result := ofr + fDoc.fileName.extractFileName.stripFileExt + exeExt;
     end else
     begin
       result := fDoc.fileName.extractFilePath + ofr
-        + stripFileExt(fDoc.fileName.extractFileName) + exeExt;
+        + fDoc.fileName.extractFileName.stripFileExt + exeExt;
     end;
   end;
 end;
@@ -2592,7 +2591,7 @@ begin
       fDoc.save
     else
       fDoc.saveTempFile;
-    fname := stripFileExt(runnableExename);
+    fname := runnableExename.stripFileExt;
 
     if fRunnablesOptions.staticSwitches.Count = 0 then
       fRunnablesOptions.setDefaultSwitches;
@@ -2725,7 +2724,7 @@ begin
   asyncprocTerminate(sender);
   if fCovModUt and assigned(fRunProc) and (fRunProc.ExitStatus = 0) then
   begin
-    fname   := stripFileExt(fDoc.fileName);
+    fname   := fDoc.fileName.stripFileExt;
     fullcov := true;
     covname := ReplaceStr(fname + '.lst', DirectorySeparator, '-');
     {$IFDEF WINDOWS}
@@ -3099,7 +3098,7 @@ begin
     begin
       itm := TMenuItem.Create(self);
       itm.Caption := lst[i].extractFileName;
-      itm.Caption := stripFileExt(itm.Caption);
+      itm.Caption := itm.Caption.stripFileExt;
       itm.OnClick := @layoutMnuItemClick;
       itm.ImageIndex := 32;
       mnuLayout.Add(itm);

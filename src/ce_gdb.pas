@@ -1334,7 +1334,7 @@ begin
   if not fDbgRunnable then
     fExe := fProj.outputFilename
   else
-    fExe := stripFileExt(fDoc.fileName) + exeExt;
+    fExe := fDoc.fileName.stripFileExt + exeExt;
   //
   fOutputName := fExe + '.inferiorout';
   fInputName  := fExe + '.inferiorin';

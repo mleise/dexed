@@ -642,7 +642,7 @@ begin
   begin
     // ideally, main() should be searched for, when project binaryKind is executable
     fOutputFilename := Sources[0].extractFileName;
-    fOutputFilename := stripFileExt(fOutputFilename);
+    fOutputFilename := fOutputFilename.stripFileExt;
     if fileName.fileExists then
       fOutputFilename := fileName.extractFilePath + fOutputFilename
     else
@@ -945,7 +945,7 @@ begin
     for i := 0 to fSrcs.Count-1 do
     begin
       src := sourceAbsolute(i);
-      obj := stripFileExt(src) + objExt;
+      obj := src.stripFileExt + objExt;
       if obj.fileExists and src.fileExists then
       begin
         if FileAgeUTF8(src) > FileAgeUTF8(obj) then

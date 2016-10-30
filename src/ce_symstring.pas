@@ -206,7 +206,7 @@ begin
     fname := fProjInterface.filename;
     fSymbols[CPF] := fname;
     fSymbols[CPP] := fSymbols[CPF].extractFilePath;
-    fSymbols[CPN] := stripFileExt(fSymbols[CPF].extractFileName);
+    fSymbols[CPN] := fSymbols[CPF].extractFileName.stripFileExt;
     fSymbols[CPO] := fProjInterface.outputFilename;
     fSymbols[CPOP]:= fSymbols[CPO].extractFileDir;
     fSymbols[CPR] := fSymbols[CPP];
