@@ -900,7 +900,7 @@ begin
       srcc.LoadFromFile(path);
       lex(srcc.Text, toks, @lexFindToken, [lxoNoComments]);
       mnme := getModuleName(toks);
-      if path.extractFileName = 'package.d' then
+      if path.extractFileName.stripFileExt = 'package' then
         mnme := mnme + '.p';
       toks.Clear;
       setLength(fldn, 0);
