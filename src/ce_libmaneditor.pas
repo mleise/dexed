@@ -6,11 +6,11 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Menus, ComCtrls, Buttons, LazFileUtils, strutils, fphttpclient, StdCtrls,
+  Menus, ComCtrls, Buttons, LazFileUtils, fphttpclient, StdCtrls,
   xfpjson, xjsonparser,
   ce_widget, ce_interfaces, ce_ceproject, ce_dmdwrap, ce_common, ce_dialogs,
   ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_libman,
-  ce_projutils, ce_dsgncontrols;
+  ce_projutils, ce_dsgncontrols, ce_stringrange;
 
 type
 
@@ -864,9 +864,12 @@ var
   mnme: string;
   path: string;
   base: string;
+  fldn: array of string;
   lst: TStringList;
   srcc: TStringList;
   toks: TLexTokenList;
+  rng: TStringRange = (ptr: nil; pos: 0; len: 0);
+  sym: boolean;
 begin
 
   // 1 source, same folder
@@ -881,11 +884,11 @@ begin
   lst := TStringList.Create;
   srcc := TStringList.Create;
   toks := TLexTokenList.Create;
-  lst.Duplicates:= dupIgnore;
   try
     // get module name and store the parent.parent.parent... dir
     for i := 0 to project.sourcesCount-1 do
     begin
+      sym := true;
       path := project.sourceAbsolute(i);
       if not hasDlangSyntax(path.extractFileExt) then
         continue;
@@ -893,16 +896,42 @@ begin
       srcc.LoadFromFile(path);
       lex(srcc.Text, toks, @lexFindToken, [lxoNoComments]);
       mnme := getModuleName(toks);
+      if path.extractFileName = 'package.d' then
+        mnme := mnme + '.p';
       toks.Clear;
-      for j := 0 to WordCount(mnme, ['.'])-1 do
+      setLength(fldn, 0);
+      rng.init(mnme);
+      while true do
+      begin
+        setLength(fldn, length(fldn) + 1);
+        fldn[high(fldn)] := rng.takeUntil(['.', #0]).yield;
+        if rng.empty then
+          break
+        else
+          rng.popFront;
+      end;
+      for j:= high(fldn)-1 downto 0 do
+      begin
         path := path.extractFileDir;
-      lst.Add(path);
+        if path.extractFileName <> fldn[j] then
+        begin
+          sym := false;
+          break;
+        end
+      end;
+      if sym then
+      begin
+        path := path.extractFileDir;
+        lst.Add(path);
+      end;
     end;
+    deleteDups(lst);
     if project.sourcesCount = 0 then
       result := ''
     else
       result := lst[0];
-    if (project.sourcesCount > 1) and (lst.Count > 1) then
+    if ((project.sourcesCount > 1) and (lst.Count > 1))
+      or (not sym) then
     begin
       lst.Clear;
       for j := 0 to project.sourcesCount-1 do

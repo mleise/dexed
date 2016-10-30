@@ -287,6 +287,11 @@ type
   function indentationMode(const fname: string): TIndentationMode;
 
   (**
+   * Removes duplicate items in strings
+   *)
+  procedure deleteDups(strings: TStrings);
+
+  (**
    * like LCLIntf eponymous function but includes a woraround that's gonna
    * be in Lazarus from version 1.8 (anchor + file:/// protocol under win).
    *)
@@ -1323,6 +1328,18 @@ begin
     raise Exception.Create(Text);
   finally
     free;
+  end;
+end;
+
+procedure deleteDups(strings: TStrings);
+var
+  i,j: integer;
+begin
+  for i := strings.Count-1 downto 0 do
+  begin
+    j := strings.IndexOf(strings[i]);
+    if (j <> -1) and (j <> i) then
+      strings.Delete(i);
   end;
 end;
 
