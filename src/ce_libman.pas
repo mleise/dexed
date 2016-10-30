@@ -439,6 +439,7 @@ var
   obj: TObject;
   lib: TLibraryItem;
   cli: TLibraryItem;
+  dep: TLibraryItem;
 begin
   if data.isNil then
     exit;
@@ -449,7 +450,16 @@ begin
   case operation of
     ooDeleteItem: if fItemsByAlias.contains(lib.libAlias) then
     begin
-      fItemsByAlias.delete(lib.libAlias);
+      for i:= 0 to lib.dependencies.Count-1 do
+      begin
+        dep := libraryByAlias[lib.dependencies[i]];
+        if assigned(dep) then
+        begin
+          j := dep.clients.IndexOf(lib.libAlias);
+          if j <> -1 then
+            dep.clients.Delete(j);
+        end;
+      end;
       for i:= 0 to lib.clients.Count-1 do
       begin
         cli := libraryByAlias[lib.clients[i]];
@@ -460,6 +470,7 @@ begin
             cli.dependencies.Delete(j);
         end;
       end;
+      fItemsByAlias.delete(lib.libAlias);
     end;
     ooAddItem:
     begin
