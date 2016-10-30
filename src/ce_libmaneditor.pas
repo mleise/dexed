@@ -77,7 +77,7 @@ type
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
     function  itemForRow(row: TListItem): TLibraryItem;
-    procedure RowToLibrary(row: TListItem);
+    procedure RowToLibrary(row: TListItem; added: boolean = false);
     function sourceRoot(project: ICECommonProject): string;
     procedure lexFindToken(const token: PLexToken; out stop: boolean);
     //
@@ -536,7 +536,7 @@ begin
         row.SubItems.Add(prj.filename);
         row.SubItems.Add(enableStr[true]);
         row.Selected:=true;
-        RowToLibrary(row);
+        RowToLibrary(row, true);
         row.MakeVisible(false);
         itf.message('The package to register is a source library.' +
           'It is not pre-compiled but its sources are registered', nil, amcMisc, amkInf);
@@ -570,7 +570,7 @@ begin
       row.SubItems.Add(prj.filename);
       row.SubItems.Add(enableStr[true]);
       row.Selected:=true;
-      RowToLibrary(row);
+      RowToLibrary(row, true);
       row.MakeVisible(false);
       showWidget;
     end else
@@ -605,6 +605,7 @@ begin
         exit;
       end;
       List.Selected.Caption := al;
+      LibMan.updateItemsByAlias;
       RowToLibrary(List.Selected);
     end;
   end;
@@ -694,7 +695,7 @@ begin
     row.Selected:= true;
     row.MakeVisible(false);
     SetFocus;
-    RowToLibrary(row);
+    RowToLibrary(row, true);
   finally
     str.free;
   end;
@@ -839,7 +840,7 @@ begin
   List.EndUpdate;
 end;
 
-procedure TCELibManEditorWidget.RowToLibrary(row: TListItem);
+procedure TCELibManEditorWidget.RowToLibrary(row: TListItem; added: boolean = false);
 var
   itm: TLibraryItem;
 begin
@@ -855,7 +856,10 @@ begin
   itm.updateModulesInfo;
 
   LibMan.updateDCD;
-  LibMan.updateCrossDependencies;
+  if added then
+    LibMan.updateCrossDependencies
+  else
+    Libman.updateAfterAddition(itm);
 end;
 
 function TCELibManEditorWidget.sourceRoot(project: ICECommonProject): string;

@@ -96,7 +96,6 @@ type
     function getLibraryByAlias(const value: string): TLibraryItem;
     function getLibraryByImport(const value: string): TLibraryItem;
     procedure setCollection(value: TCollection);
-    procedure updateItemsByAlias;
     function getLibrariesCount: integer;
     procedure FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation; Data : Pointer);
   published
@@ -124,6 +123,8 @@ type
     procedure updateDCD;
     // find the aliases of the libraries used by the libraries.
     procedure updateCrossDependencies;
+    procedure updateAfterAddition(lib: TLibraryItem);
+    procedure updateItemsByAlias;
     property librariesCount: integer read getLibrariesCount;
     property libraryByIndex[value: integer]: TLibraryItem read getLibraryByIndex;
     property libraryByAlias[const value: string]: TLibraryItem read getLibraryByAlias;
@@ -472,13 +473,13 @@ begin
       end;
       fItemsByAlias.delete(lib.libAlias);
     end;
-    ooAddItem:
-    begin
-      fItemsByAlias.insert(lib.libAlias, lib);
-      // TODO-cupdate on addition, item ctor is not yet finished !
-      //updateCrossDependencies;
-    end;
   end;
+end;
+
+procedure TLibraryManager.updateAfterAddition(lib: TLibraryItem);
+begin
+  fItemsByAlias.insert(lib.libAlias, lib);
+  updateCrossDependencies;
 end;
 
 function TLibraryManager.getLibraryByIndex(index: integer): TLibraryItem;
@@ -687,6 +688,7 @@ var
   dep: TLibraryItem;
   imp: string;
 begin
+  updateItemsByAlias;
   for i := 0 to fCollection.Count-1 do
   begin
     lib := libraryByIndex[i];
