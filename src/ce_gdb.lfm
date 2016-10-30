@@ -1,46 +1,46 @@
 inherited CEGdbWidget: TCEGdbWidget
   Left = 640
-  Height = 625
+  Height = 668
   Top = 213
   Width = 517
   ActiveControl = Back
   Caption = 'GDB commander'
-  ClientHeight = 625
+  ClientHeight = 668
   ClientWidth = 517
   inherited Back: TPanel
-    Height = 619
+    Height = 662
     Top = 6
     Width = 517
-    ClientHeight = 619
+    ClientHeight = 662
     ClientWidth = 517
     inherited Content: TPanel
-      Height = 583
+      Height = 626
       Width = 517
-      ClientHeight = 583
+      ClientHeight = 626
       ClientWidth = 517
       object Panel1: TPanel[0]
         Left = 0
-        Height = 381
+        Height = 424
         Top = 166
         Width = 517
         Align = alClient
         BevelOuter = bvNone
-        ClientHeight = 381
+        ClientHeight = 424
         ClientWidth = 517
         TabOrder = 0
         object GroupBox3: TGroupBox
           Left = 0
-          Height = 184
+          Height = 227
           Top = 197
           Width = 517
           Align = alClient
           Caption = 'CPU'
-          ClientHeight = 154
+          ClientHeight = 197
           ClientWidth = 513
           TabOrder = 0
           object cpuVIewer: TTIPropertyGrid
             Left = 0
-            Height = 154
+            Height = 197
             Hint = 'cpu registers'
             Top = 0
             Width = 513
@@ -110,7 +110,7 @@ inherited CEGdbWidget: TCEGdbWidget
       object Panel3: TPanel[1]
         Left = 4
         Height = 28
-        Top = 551
+        Top = 594
         Width = 509
         Align = alBottom
         BorderSpacing.Around = 4

@@ -597,6 +597,7 @@ begin
   inherited;
   fStaticSwitches := TStringList.create;
   fStaticSwitches.Duplicates := TDuplicates.dupIgnore;
+  fStaticSwitches.Sorted:=true;
 end;
 
 
@@ -1282,6 +1283,7 @@ begin
   accept := GetKeyShiftState = [ssCtrl];
 end;
 
+//TODO-cdocking: remove the usage of TAnchorDockSplitterEx from Laz 1.8 RC1 (OnMouseWheel public)
 procedure TCEMainForm.DockSplitterMw(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 var
   offs: integer;
@@ -2193,6 +2195,9 @@ begin
   openFile(TMenuItem(Sender).Hint);
 end;
 
+//TODO-cbugfix: OpenDialogs, double path separator when shortcuts resolved
+// i.e when ofNoDereferenceLinks is not set.
+
 procedure TCEMainForm.actFileOpenExecute(Sender: TObject);
 var
   fname: string;
@@ -2602,7 +2607,6 @@ begin
       ldc: dmdProc.Executable :='ldmd2' + exeExt;
       gdc: dmdProc.Executable :='gdmd'  + exeExt;
     end;
-    TStringList(dmdproc.Parameters).Duplicates:=TDuplicates.dupIgnore;
     dmdproc.Parameters.Add(fDoc.fileName);
     if not asObj then
       dmdproc.Parameters.Add('-of' + fname + exeExt)
@@ -2640,6 +2644,7 @@ begin
       LibMan.getLibFiles(nil, dmdproc.Parameters);
       LibMan.getLibSourcePath(nil, dmdproc.Parameters);
     end;
+    deleteDups(dmdproc.Parameters);
     dmdproc.Execute;
     while dmdproc.Running do
       application.ProcessMessages;

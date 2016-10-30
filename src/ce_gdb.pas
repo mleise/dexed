@@ -10,7 +10,7 @@ uses
   StdCtrls, ValEdit, process, fpjson, typinfo, {$IFDEF UNIX}Unix,{$ENDIF}
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
-  ce_ddemangle, ce_writableComponent, ce_symstring;
+  ce_ddemangle, ce_writableComponent;
 
 type
 
@@ -504,8 +504,10 @@ begin
   fShowGdbOutput:=true;
   fIgnoredSignals := TStringList.Create;
   fIgnoredSignals.Duplicates:= dupIgnore;
+  fIgnoredSignals.Sorted:=true;
   fCommandsHistory := TStringList.Create;
   fCommandsHistory.Duplicates:= dupIgnore;
+  fCommandsHistory.Sorted:=true;
   fShortcuts := TCEDebugShortcuts.Create;
 end;
 
@@ -2110,6 +2112,11 @@ begin
   end;
   edit1.Text := '';
 end;
+
+
+//TODO-cGDB: copy from call stack list
+//TODO-cGDB: replace value list editor by TListView
+//to set focus on variable of a triggered watchpoint.
 
 procedure TCEGdbWidget.setGpr(reg: TCpuRegister; val: TCpuGprValue);
 const

@@ -299,11 +299,11 @@ begin
   fBuildTypes := TStringList.Create;
   fConfigs := TStringList.Create;
   fSrcs := TStringList.Create;
+  fSrcs.Sorted:=true;
+  fSrcs.Duplicates:=dupIgnore;
   fImportPaths := TStringList.Create;
-  fSrcs.Duplicates:=TDuplicates.dupIgnore;
-  fImportPaths.Duplicates:=TDuplicates.dupIgnore;
-  fConfigs.Duplicates:=TDuplicates.dupIgnore;
-  fBuildTypes.Duplicates:=TDuplicates.dupIgnore;
+  fImportPaths.Sorted:=true;
+  fImportPaths.Duplicates:=dupIgnore;
   //
   json.Add('name', '');
   endModification;
@@ -771,6 +771,8 @@ begin
       fBuildTypes.Add(itemname);
     end;
   end;
+  deleteDups(fConfigs);
+  deleteDups(fBuildTypes);
   fConfigsCount := fConfigs.Count * fBuildTypes.Count;
 end;
 
@@ -912,6 +914,7 @@ begin
   finally
     lst.Free;
   end;
+  deleteDups(fSrcs);
 end;
 
 function TCEDubProject.findTargetKindInd(value: TJSONObject): boolean;

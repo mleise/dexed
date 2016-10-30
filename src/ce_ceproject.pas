@@ -154,9 +154,7 @@ begin
   fProjectSubject := TCEProjectSubject.create;
   //
   fLibAliases := TStringList.Create;
-  fLibAliases.Duplicates:=TDuplicates.dupIgnore;
   fSrcs := TStringList.Create;
-  fSrcs.Duplicates:=TDuplicates.dupIgnore;
   fSrcs.OnChange := @subMemberChanged;
   fConfigs := TCollection.create(TCompilerConfiguration);
   //

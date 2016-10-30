@@ -166,8 +166,6 @@ begin
   fModulesByName := TModulesByName.create;
   fDependencies := TStringList.Create;
   fClients := TStringList.Create;
-  fDependencies.Duplicates := dupIgnore;
-  fClients.Duplicates := dupIgnore;
   fEnabled:=true;
 end;
 
@@ -438,10 +436,14 @@ procedure TLibraryManager.FPOObservedChanged(ASender: TObject; Operation:
   TFPObservedOperation; Data: Pointer);
 var
   i,j: integer;
+  obj: TObject;
   lib: TLibraryItem;
   cli: TLibraryItem;
 begin
   if data.isNil then
+    exit;
+  obj := TObject(data);
+  if not (obj is TLibraryItem) then
     exit;
   lib := TLibraryItem(data);
   case operation of
@@ -462,7 +464,8 @@ begin
     ooAddItem:
     begin
       fItemsByAlias.insert(lib.libAlias, lib);
-      updateCrossDependencies;
+      // TODO-cupdate on addition, item ctor is not yet finished !
+      //updateCrossDependencies;
     end;
   end;
 end;
@@ -704,6 +707,12 @@ begin
       lib.dependencies.Add(dep.libAlias);
       dep.clients.Add(lib.libAlias);
     end;
+  end;
+  for i := 0 to fCollection.Count-1 do
+  begin
+    lib := libraryByIndex[i];
+    deleteDups(lib.clients);
+    deleteDups(lib.dependencies);
   end;
 end;
 
