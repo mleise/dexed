@@ -234,6 +234,37 @@ type
 
   // TODO-cGDB: assembly view
 
+  // serializable breakpoint
+  TPersistentBreakPoint = class(TCollectionItem)
+  strict private
+    fFilename: string;
+    fLine: integer;
+    fKind: TBreakPointKind;
+  published
+    property filename: string read fFilename write fFilename;
+    property line: integer read fLine write fLine;
+    property kind: TBreakPointKind read fKind write fKind;
+  end;
+
+  // allow to retrieve the breakpoints even if source is not openened.
+  TPersistentBreakPoints = class(TWritableLfmTextComponent)
+  strict private
+    fItems: TOwnedCollection;
+    procedure setItems(value: TOwnedCollection);
+    function getItem(index: integer): TPersistentBreakPoint;
+    function find(const fname: string; line: integer; kind: TBreakPointKind): boolean;
+  published
+    property items: TOwnedCollection read fItems write setItems;
+  public
+    constructor create(aOwner: TComponent); override;
+    destructor destroy; override;
+    function count: integer;
+    procedure clearFile(const fname: string);
+    procedure deleteItem(const fname: string; line: integer; kind: TBreakPointKind);
+    procedure addItem(const fname: string; line: integer; kind: TBreakPointKind);
+    property item[index: integer]: TPersistentBreakPoint read getItem; default;
+  end;
+
   // Makes a category for shortcuts in the option editor.
   TCEDebugShortcuts = class(TPersistent)
   private
@@ -368,7 +399,6 @@ type
     fProj: ICECommonProject;
     fJson: TJsonObject;
     fLog: TStringList;
-    fFileLineBrks: TStringList;
     fDocHandler: ICEMultiDocHandler;
     fMsg: ICEMessagesDisplay;
     fGdb: TCEProcess;
@@ -379,6 +409,7 @@ type
     fCatchPause: boolean;
     fOptions: TCEDebugOptions;
     fAddWatchPointKind: TAddWatchPointKind;
+    fBreakPoints: TPersistentBreakPoints;
     //
     procedure optionsChangesApplied(sender: TObject);
     procedure menuDeclare(item: TMenuItem);
@@ -420,8 +451,10 @@ type
     //
     function running: boolean;
     function singleServiceName: string;
-    procedure addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind);
-    procedure removeBreakPoint(const fname: string; line: integer);
+    procedure addBreakPoint(const fname: string; line: integer;
+      kind: TBreakPointKind = bpkBReak);
+    procedure removeBreakPoint(const fname: string; line: integer;
+      kind: TBreakPointKind = bpkBreak);
     procedure executeFromShortcut(sender: TObject);
   public
     constructor create(aOwner: TComponent); override;
@@ -472,6 +505,7 @@ implementation
 
 {$REGION TCEDebugOption --------------------------------------------------------}
 const optFname = 'gdbcommander.txt';
+const bpFname = 'breakpoints.txt';
 
 
 procedure TCEDebugShortcuts.assign(source: TPersistent);
@@ -611,6 +645,98 @@ end;
 function TCEDebugOptions.optionedOptionsModified: boolean;
 begin
   exit(false);
+end;
+{$ENDREGION}
+
+{$REGION TPersistentBreakpoints ------------------------------------------------}
+
+constructor TPersistentBreakPoints.create(aOwner: TComponent);
+var
+  fname: string;
+begin
+  Inherited;
+  fItems := TOwnedCollection.Create(self, TPersistentBreakPoint);
+  fname := getCoeditDocPath + bpFname;
+  if fname.fileExists then
+    loadFromFile(fname);
+end;
+
+destructor TPersistentBreakPoints.destroy;
+begin
+  if fItems.Count > 0 then
+    saveToFile(getCoeditDocPath + bpFname);
+  inherited;
+end;
+
+procedure TPersistentBreakPoints.setItems(value: TOwnedCollection);
+begin
+  fItems.Assign(value);
+end;
+
+function TPersistentBreakPoints.getItem(index: integer): TPersistentBreakPoint;
+begin
+  exit(TPersistentBreakPoint(fItems.Items[index]));
+end;
+
+function TPersistentBreakPoints.count: integer;
+begin
+  exit(fItems.Count);
+end;
+
+function TPersistentBreakPoints.find(const fname: string; line: integer; kind: TBreakPointKind): boolean;
+var
+  i: integer;
+  b: TPersistentBreakPoint;
+begin
+  result := false;
+  for i := 0 to fItems.Count-1 do
+  begin
+    b := item[i];
+    if (b.filename = fname) and (b.line = line) and (b.kind = kind) then
+      exit(true);
+  end;
+end;
+
+procedure TPersistentBreakPoints.addItem(const fname: string; line: integer; kind: TBreakPointKind);
+var
+  b: TPersistentBreakPoint;
+begin
+  if not find(fname, line, kind) then
+  begin
+    b := TPersistentBreakPoint(fItems.Add);
+    b.filename:=fname;
+    b.line:=line;
+    b.kind:=kind;
+  end;
+end;
+
+procedure TPersistentBreakPoints.deleteItem(const fname: string; line: integer; kind: TBreakPointKind);
+var
+  i: integer;
+  b: TPersistentBreakPoint;
+begin
+  for i := fItems.Count-1 downto 0 do
+  begin
+    b := item[i];
+    if (b.filename = fname) and (b.line = line) and (b.kind = kind) then
+    begin
+      fItems.Delete(i);
+      break;
+    end;
+  end;
+end;
+
+procedure TPersistentBreakPoints.clearFile(const fname: string);
+var
+  i: integer;
+  b: TPersistentBreakPoint;
+begin
+  for i:= fItems.Count-1 downto 0 do
+  begin
+    b := item[i];
+    if b.filename = fname then
+      fItems.Delete(i);
+  end;
 end;
 {$ENDREGION}
 
@@ -915,7 +1041,6 @@ begin
   fSyms := getSymStringExpander;
   fDocHandler:= getMultiDocHandler;
   fMsg:= getMessageDisplay;
-  fFileLineBrks:= TStringList.Create;
   fLog := TStringList.Create;
   fInspState := TInspectableCPU.Create(@setGpr, @setSsr, @setFlag, @setFpr);
   cpuVIewer.TIObject := fInspState;
@@ -926,6 +1051,7 @@ begin
   fOptions.onChangesApplied:=@optionsChangesApplied;
   Edit1.Items.Assign(fOptions.commandsHistory);
   fAddWatchPointKind := wpkWrite;
+  fBreakPoints := TPersistentBreakPoints.create(self);
   //
   AssignPng(btnSendCom, 'ACCEPT');
   setState(gsNone);
@@ -936,7 +1062,6 @@ begin
   fOutput.Free;
   fOptions.commandsHistory.Assign(edit1.Items);
   fOptions.Free;
-  fFileLineBrks.Free;
   fLog.Free;
   killGdb;
   fInspState.Free;
@@ -1217,29 +1342,32 @@ var
   lne: integer;
   knd: TBreakPointKind;
 begin
-  fFileLineBrks.Clear;
   for i:= 0 to fSubj.observersCount-1 do
   begin
     obs := fSubj.observers[i] as ICEDebugObserver;
     for j := 0 to obs.debugQueryBpCount-1 do
     begin
       obs.debugQueryBreakPoint(j, nme, lne, knd);
-      {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
-      fFileLineBrks.AddObject(nme, TObject(pointer(lne)));
-      {$POP}
+      fBreakPoints.addItem(nme, lne, knd);
     end;
   end;
 end;
 
-procedure TCEGdbWidget.addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind);
+procedure TCEGdbWidget.addBreakPoint(const fname: string; line: integer;
+  kind: TBreakPointKind = bpkBreak);
 begin
+  if assigned(fBreakPoints) then
+    fBreakPoints.addItem(fname, line, kind);
   if fGdb.isNil or not fGdb.Running then
     exit;
   gdbCommand('break ' + fname + ':' + intToStr(line));
 end;
 
-procedure TCEGdbWidget.removeBreakPoint(const fname: string; line: integer);
+procedure TCEGdbWidget.removeBreakPoint(const fname: string; line: integer;
+  kind: TBreakPointKind = bpkBreak);
 begin
+  if assigned(fBreakPoints) then
+    fBreakPoints.deleteItem(fname, line, kind);
   if fGdb.isNil or not fGdb.Running then
     exit;
   gdbCommand('clear ' + fname + ':' + intToStr(line));
@@ -1324,6 +1452,7 @@ var
   str: string;
   gdb: string;
   i: integer;
+  b: TPersistentBreakPoint;
 begin
   if not fDbgRunnable and (fProj = nil) then
     exit;
@@ -1374,9 +1503,14 @@ begin
   fgdb.execute;
   // file:line breakpoints
   storeObserversBreakpoints;
-  for i:= 0 to fFileLineBrks.Count-1 do
+  for i:= 0 to fBreakPoints.Count-1 do
   begin
-    str := 'break ' + fFileLineBrks.Strings[i] + ':' + intToStr(PtrUInt(fFileLineBrks.Objects[i])) + #10;
+    b := fBreakPoints[i];
+    case b.kind of
+      bpkBreak: str := 'break ' + b.filename + ':' + intToStr(b.line) + #10;
+      bpkWatch: {TODO-cGDB: put watchpoint from persistent};
+    end;
+
     fGdb.Input.Write(str[1], str.length);
   end;
   // break on druntime exceptions + any throw'

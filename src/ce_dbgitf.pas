@@ -19,8 +19,8 @@ type
    *)
   ICEDebugger = interface(ICESingleService)
     function running: boolean;
-    procedure addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind);
-    procedure removeBreakPoint(const fname: string; line: integer);
+    procedure addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind = bpkBreak);
+    procedure removeBreakPoint(const fname: string; line: integer; kind: TBreakPointKind = bpkBreak);
   end;
 
   // Enumerates th e reason why debuging breaks.
