@@ -576,9 +576,6 @@ var
 begin
   inherited;
   fBackup := TCEDebugOptionsBase.create(self);
-  fname := getCoeditDocPath + optFname;
-  if fname.fileExists then
-    loadFromFile(fname);
   EntitiesConnector.addObserver(self);
   fShowGdbOutput:=false;
   fShowOutput:= true;
@@ -586,6 +583,9 @@ begin
   fAutoGetCallStack:= true;
   fAutoGetRegisters:= true;
   fAutoGetVariables:= true;
+  fname := getCoeditDocPath + optFname;
+  if fname.fileExists then
+    loadFromFile(fname);
 end;
 
 destructor TCEDebugOptions.destroy;
