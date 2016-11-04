@@ -1306,6 +1306,8 @@ var
   site: TControl;
   anchl: TAnchorKind;
 begin
+  if csDestroying in ComponentState then
+    exit;
   for i := 0 to fWidgList.Count-1 do
   begin
     widg := fWidgList.widget[i];
