@@ -307,8 +307,6 @@ var
 
 implementation
 
-uses
-  ce_main;
 
 class function TStringHash.hash(const key: string; maxBucketsPow2: longword): longword;
 var
@@ -754,7 +752,7 @@ begin
   result := false;
   if path.isEmpty then
     exit;
-  //
+
   if path[path.length] = '*' then
   begin
     pth := path[1..path.length-1];
@@ -870,7 +868,7 @@ begin
   if additionalPath.isNotEmpty then
     env += PathSeparator + additionalPath;
   {$IFNDEF CEBUILD}
-  if Application <> nil then
+  if Application.isNotNil then
     env += PathSeparator + ExtractFileDir(application.ExeName.ExtractFilePath);
   {$ENDIF}
   exit(ExeSearch(fname, env));
@@ -885,34 +883,21 @@ var
 begin
   if not (poUsePipes in process.Options) then
     exit;
-  //
-  // note: list.LoadFromStream() does not work, lines can be split, which breaks message parsing (e.g filename detector).
-  //
-  {
-    Split lines:
-    ------------
 
-    The problem comes from TAsynProcess.OnReadData. When the output is read in the
-    event, it does not always finish on a full line.
-
-    Resolution:
-    -----------
-
-    in TAsynProcess.OnReadData Accumulate avalaible output in a stream.
-    Detects last line terminator in the accumation.
-    Load TStrings from this stream range.
-  }
   str := TMemoryStream.Create;
   try
     buffSz := process.PipeBufferSize;
     // temp fix: messages are cut if the TAsyncProcess version is used on simple TProcess.
-    if process is TAsyncProcess then begin
-      while process.Output.NumBytesAvailable <> 0 do begin
+    if process is TAsyncProcess then
+    begin
+      while process.Output.NumBytesAvailable <> 0 do
+      begin
         str.SetSize(sum + buffSz);
         cnt := process.Output.Read((str.Memory + sum)^, buffSz);
         sum += cnt;
       end;
-    end else begin
+    end else
+    begin
       repeat
         str.SetSize(sum + buffSz);
         cnt := process.Output.Read((str.Memory + sum)^, buffSz);
@@ -935,9 +920,10 @@ const
 begin
   if not (poUsePipes in process.Options) then
     exit;
-  //
+
   sum := output.Size;
-  while process.Output.NumBytesAvailable <> 0 do begin
+  while process.Output.NumBytesAvailable <> 0 do
+  begin
     output.SetSize(sum + buffSz);
     cnt := process.Output.Read((output.Memory + sum)^, buffSz);
     sum += cnt;
@@ -948,7 +934,7 @@ end;
 
 procedure killProcess(var process: TAsyncProcess);
 begin
-  if process = nil then
+  if process.isNil then
     exit;
   if process.Running then
     process.Terminate(0);
@@ -1003,9 +989,11 @@ var
   parent: string;
 begin
   result := 0;
-  while(true) do begin
+  while true do
+  begin
     parent := fname.extractFileDir;
-    if parent = fname then exit;
+    if parent = fname then
+      exit;
     fname := parent;
     result += 1;
   end;
@@ -1143,7 +1131,7 @@ begin
 end;
 {$ENDIF}
 
-function AppIsRunning(const fname: string):Boolean;
+function AppIsRunning(const fname: string): boolean;
 begin
   Result:= internalAppIsRunning(fname) > 0;
 end;
@@ -1179,8 +1167,8 @@ begin
   if str.isEmpty then
     exit;
   if str[1] = ';' then
-    result := true;
-  if (str.length > 1) and (str[1..2] = '//') then
+    result := true
+  else if (str.length > 1) and (str[1..2] = '//') then
     result := true;
 end;
 
