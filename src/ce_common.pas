@@ -1324,14 +1324,17 @@ begin
 end;
 
 procedure tryRaiseFromStdErr(proc: TProcess);
+var
+  str: string;
 begin
-  if (proc.ExitStatus <> 0) and (poUsePipes in proc.Options) then
-    with TStringList.Create do
+  if (proc.ExitStatus <> 0) and (poUsePipes in proc.Options) and not
+    (poStderrToOutPut in proc.Options) then with TStringList.Create do
   try
     LoadFromStream(proc.Stderr);
-    Insert(0, format('tool crashed with code: %d (%s)',
-      [proc.ExitStatus, shortenPath(proc.Executable)]));
-    raise Exception.Create(Text);
+    Insert(0, format('%s crashed with code: %d',
+      [shortenPath(proc.Executable), proc.ExitStatus]));
+    str := Text;
+    raise Exception.Create(str);
   finally
     free;
   end;
@@ -1344,7 +1347,7 @@ begin
   for i := strings.Count-1 downto 0 do
   begin
     j := strings.IndexOf(strings[i]);
-    if (j <> -1) and (j <> i) then
+    if (j <> -1) and (j < i) then
       strings.Delete(i);
   end;
 end;
