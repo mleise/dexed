@@ -223,7 +223,6 @@ type
   TStackItems = class
   strict private
     fItems: TCollection;
-    procedure listDblClick(sender: TObject);
   public
     constructor create;
     destructor destroy; override;
@@ -265,7 +264,7 @@ type
     property item[index: integer]: TPersistentBreakPoint read getItem; default;
   end;
 
-  // Makes a category for shortcuts in the option editor.
+  // Makes a category for the shortcuts in the option editor.
   TCEDebugShortcuts = class(TPersistent)
   private
     fStart, fStop, fPause, fContinue, fStep, fStepOver, fStack, fRegs,
@@ -378,6 +377,7 @@ type
     procedure btnStopClick(Sender: TObject);
     procedure btnWatchClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure lstCallStackDblClick(Sender: TObject);
     procedure mnuReadWClick(Sender: TObject);
     procedure mnuReadWriteWClick(Sender: TObject);
     procedure mnuSelProjClick(Sender: TObject);
@@ -767,23 +767,6 @@ var
   sitm: TStackItem;
 begin
   list.Clear;
-  list.ReadOnly:=true;
-  list.GridLines:=true;
-  list.ViewStyle:= TViewStyle.vsReport;
-  if list.ColumnCount <> 3 then
-  begin
-    list.Columns.Clear;
-    list.Columns.Add;
-    list.Columns.Add;
-    list.Columns.Add;
-  end;
-  list.Column[0].Caption:= 'function';
-  list.Column[1].Caption:= 'address';
-  list.Column[2].Caption:= 'filename';
-  list.Column[0].AutoSize:= true;
-  list.Column[1].AutoSize:= true;
-  list.Column[2].AutoSize:= true;
-  list.OnDblClick:= @listDblClick;
   for i:= 0 to fItems.Count-1 do
   begin
     litm := list.Items.Add;
@@ -797,28 +780,6 @@ begin
     litm.SubItems.Add(shortenPath(sitm.filename));
     litm.Data:=sitm;
   end;
-end;
-
-procedure TStackItems.listDblClick(sender: TObject);
-var
-  lst: TListView;
-  itm: TStackItem;
-  nme: string;
-  doc: TCESynMemo;
-begin
-  if (sender.isNil) or not (sender is TListView) then
-    exit;
-  lst := TListView(sender);
-  if lst.Selected.isNil or lst.Selected.Data.isNil then
-    exit;
-  itm := TStackItem(lst.Selected.Data);
-  nme := itm.filename;
-  if not nme.fileExists then
-    exit;
-  getMultiDocHandler.openDocument(nme);
-  doc := getMultiDocHandler.findDocument(nme);
-  if doc.isNotNil then
-    doc.CaretY:= itm.line;
 end;
 
 procedure TStackItems.addItem(addr: PtrUint; fname, nme: string; lne: integer);
@@ -1833,8 +1794,6 @@ begin
       gdbCommand('continue', @gdboutJsonize);
     end
 
-    // *stopped,reason="watchpoint-trigger",wpt={number="10",exp="h"},value={old="0",new="1"},frame={addr="0x000000000049fb7c",func="D main",args=[{name="args",value="..."}],file="/home/basile/Dev/dproj/Resource.d/src/resource.d",fullname="/home/basile/Dev/dproj/Resource.d/src/resource.d",line="47"},thread-id="1",stopped-threads="all",core="1"
-
     else if reason = 'signal-received' then
     begin
       signame := 'unknown signal';
@@ -1890,7 +1849,7 @@ begin
     end
 
     else if (reason = 'exited-normally') or (reason = 'exited-signalled')
-    or (reason = 'exited')
+      or (reason = 'exited')
     then
     begin
       readOutput;
@@ -2201,6 +2160,29 @@ procedure TCEGdbWidget.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftS
 begin
   if Key = byte(#13) then
     sendCustomCommand;
+end;
+
+procedure TCEGdbWidget.lstCallStackDblClick(Sender: TObject);
+var
+  itm: TStackItem;
+  nme: string;
+  doc: TCESynMemo;
+begin
+  if lstCallStack.Selected.isNil or lstCallStack.Selected.Data.isNil then
+    exit;
+  itm := TStackItem(lstCallStack.Selected.Data);
+  nme := itm.filename;
+  if not nme.fileExists then
+    exit;
+  fDocHandler.openDocument(nme);
+  doc := fDocHandler.findDocument(nme);
+  if doc.isNotNil then
+    doc.CaretY:= itm.line;
+  gdbCommand('-stack-select-frame ' + intToStr(lstCallStack.ItemIndex));
+  if fOptions.autoGetVariables then
+    infoVariables;
+  if fOptions.autoGetRegisters then
+    infoRegs;
 end;
 
 procedure TCEGdbWidget.mnuReadWClick(Sender: TObject);

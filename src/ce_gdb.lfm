@@ -159,8 +159,27 @@ inherited CEGdbWidget: TCEGdbWidget
           Top = 0
           Width = 513
           Align = alClient
-          Columns = <>
+          Columns = <          
+            item
+              AutoSize = True
+              Caption = 'function'
+              Width = 62
+            end          
+            item
+              AutoSize = True
+              Caption = 'address'
+              Width = 59
+            end          
+            item
+              AutoSize = True
+              Caption = 'filename'
+              Width = 371
+            end>
+          GridLines = True
+          ReadOnly = True
           TabOrder = 0
+          ViewStyle = vsReport
+          OnDblClick = lstCallStackDblClick
         end
       end
       object Splitter3: TSplitter[3]
