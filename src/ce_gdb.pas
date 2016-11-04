@@ -164,24 +164,6 @@ type
     // 4 int ? 2 double ? 4 single ? ...
   end;
 
-  // Makes a category for the local variables in an object inspector
-  TInspectableLocals = class(TPersistent)
-  private
-    fLocals: TStringList;
-    fPropIndex: integer;
-    procedure readProp(Reader: TReader);
-    procedure writeProp(Writer: TWriter);
-  protected
-    procedure DefineProperties(Filer: TFiler); override;
-  published
-    property raw: TStringList read fLocals;
-  public
-    constructor create;
-    destructor destroy; override;
-    procedure clear;
-    procedure add(const name,value: string);
-  end;
-
   // Stores the registers content, to be displayable in an object inspector.
   TInspectableCPU = class(TPersistent)
   private
@@ -874,53 +856,6 @@ procedure TInspectableFPR.setRegister(index: TFpuRegister; value: extended);
 begin
   fSetFprEvent(index, value);
   fRegisters[index] := value;
-end;
-
-constructor TInspectableLocals.create;
-begin
-  fLocals := TStringList.Create;
-end;
-
-destructor TInspectableLocals.destroy;
-begin
-  fLocals.Free;
-  inherited;
-end;
-
-procedure TInspectableLocals.DefineProperties(Filer: TFiler);
-var
-  i: integer;
-begin
-  //TODO-cGDB: The object inspector doesn't use DefineProperties to discover custom properties
-  inherited;
-  for i := 0 to fLocals.Count-1 do
-  begin
-    fPropIndex := i;
-    filer.DefineProperty(fLocals.Names[i], @readProp, @writeProp, true);
-  end;
-end;
-
-procedure TInspectableLocals.readProp(Reader: TReader);
-begin
-end;
-
-procedure TInspectableLocals.writeProp(Writer: TWriter);
-begin
-  try
-    writer.WriteString(fLocals.ValueFromIndex[fPropIndex]);
-  except
-    writer.WriteString('<N/A>');
-  end;
-end;
-
-procedure TInspectableLocals.clear;
-begin
-  fLocals.Clear;
-end;
-
-procedure TInspectableLocals.add(const name,value: string);
-begin
-  fLocals.Values[name] := value;
 end;
 
 constructor TInspectableCPU.create(setGprEvent: TSetGprEvent; setSsrEvent: TSetSsrEvent;
