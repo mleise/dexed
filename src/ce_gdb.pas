@@ -230,12 +230,12 @@ type
   // allow to retrieve the breakpoints even if source is not openened.
   TPersistentBreakPoints = class(TWritableLfmTextComponent)
   strict private
-    fItems: TOwnedCollection;
-    procedure setItems(value: TOwnedCollection);
+    fItems: TCollection;
+    procedure setItems(value: TCollection);
     function getItem(index: integer): TPersistentBreakPoint;
     function find(const fname: string; line: integer; kind: TBreakPointKind): boolean;
   published
-    property items: TOwnedCollection read fItems write setItems;
+    property items: TCollection read fItems write setItems;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -637,7 +637,7 @@ var
   fname: string;
 begin
   Inherited;
-  fItems := TOwnedCollection.Create(self, TPersistentBreakPoint);
+  fItems := TCollection.Create(TPersistentBreakPoint);
   fname := getCoeditDocPath + bpFname;
   if fname.fileExists then
     loadFromFile(fname);
@@ -647,10 +647,11 @@ destructor TPersistentBreakPoints.destroy;
 begin
   if fItems.Count > 0 then
     saveToFile(getCoeditDocPath + bpFname);
+  fItems.Free;
   inherited;
 end;
 
-procedure TPersistentBreakPoints.setItems(value: TOwnedCollection);
+procedure TPersistentBreakPoints.setItems(value: TCollection);
 begin
   fItems.Assign(value);
 end;
