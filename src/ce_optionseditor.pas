@@ -203,7 +203,10 @@ begin
   // remove either the control, the form or the inspector used as editor.
   inspector.TIObject := nil;
   if pnlEd.ControlCount > 0 then
+  begin
+    pnlEd.Controls[0].Visible:=false;
     pnlEd.Controls[0].Parent := nil;
+  end;
   //
   if selCat.Selected.isNil then exit;
   if selCat.Selected.Data.isNil then exit;
@@ -215,19 +218,24 @@ begin
       begin
         TWinControl(dt^.container).Parent := pnlEd;
         TWinControl(dt^.container).Align := alClient;
+        TWinControl(dt^.container).Visible:=true;
       end;
     oekForm:
       begin
+        TCustomForm(dt^.container).ShowInTaskBar:= TShowInTaskbar.stNever;
         TCustomForm(dt^.container).Parent := pnlEd;
         TCustomForm(dt^.container).Align := alClient;
         TCustomForm(dt^.container).BorderIcons:= [];
         TCustomForm(dt^.container).BorderStyle:= bsNone;
+        TCustomForm(dt^.container).Show;
+        TCustomForm(dt^.container).Visible:=true;
       end;
     oekGeneric:
       begin
         inspector.Parent := pnlEd;
         inspector.Align := alClient;
         inspector.TIObject := dt^.container;
+        inspector.Visible:=true;
       end;
   end;
   //
