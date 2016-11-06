@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, xfpjson, xjsonparser, xjsonscanner, process, strutils,
   LazFileUtils, RegExpr,
   ce_common, ce_interfaces, ce_observer, ce_dialogs, ce_processes,
-  ce_writableComponent;
+  ce_writableComponent, ce_compilers;
 
 type
 
@@ -27,12 +27,12 @@ type
     fCombined: boolean;
     fDepCheck: TDubDependencyCheck;
     fOther: string;
-    fCompiler: TCECompiler;
+    fCompiler: DCompiler;
     procedure setLinkMode(value: TDubLinkMode);
-    procedure setCompiler(value: TCECompiler);
-    function getCompiler: TCECompiler;
+    procedure setCompiler(value: DCompiler);
+    function getCompiler: DCompiler;
   published
-    property compiler: TCECOmpiler read getCompiler write setCompiler;
+    property compiler: DCompiler read getCompiler write setCompiler;
     property parallel: boolean read fParallel write fParallel;
     property forceRebuild: boolean read fForceRebuild write fForceRebuild;
     property linkMode: TDubLinkMode read fLinkMode write setLinkMode;
@@ -153,11 +153,11 @@ type
   // converts a sdl description to json, returns the json
   function sdl2json(const filename: string): TJSONObject;
 
-  function getDubCompiler: TCECompiler;
-  procedure setDubCompiler(value: TCECompiler);
+  function getDubCompiler: DCompiler;
+  procedure setDubCompiler(value: DCompiler);
 
 var
-  DubCompiler: TCECompiler = TCECompiler.dmd;
+  DubCompiler: DCompiler = dmd;
   DubCompilerFilename: string = 'dmd';
 
 const
@@ -188,13 +188,13 @@ begin
   fLinkMode:=value;
 end;
 
-procedure TCEDubBuildOptionsBase.setCompiler(value: TCECompiler);
+procedure TCEDubBuildOptionsBase.setCompiler(value: DCompiler);
 begin
   fCompiler := value;
   setDubCompiler(fCompiler);
 end;
 
-function TCEDubBuildOptionsBase.getCompiler: TCECompiler;
+function TCEDubBuildOptionsBase.getCompiler: DCompiler;
 begin
   result := fCompiler;
 end;
@@ -1211,29 +1211,25 @@ begin
   end;
 end;
 
-function getDubCompiler: TCECompiler;
+function getDubCompiler: DCompiler;
 begin
   exit(DubCompiler);
 end;
 
-procedure setDubCompiler(value: TCECompiler);
+procedure setDubCompiler(value: DCompiler);
+var
+  sel: ICECompilerSelector;
 begin
-  case value of
-    TCECompiler.dmd: DubCompilerFilename := exeFullName('dmd' + exeExt);
-    TCECompiler.gdc: DubCompilerFilename := exeFullName('gdc' + exeExt);
-    TCECompiler.ldc: DubCompilerFilename := exeFullName('ldc2' + exeExt);
-  end;
-  if (not DubCompilerFilename.fileExists) or DubCompilerFilename.isEmpty then
-  begin
-    value := TCECompiler.dmd;
-    DubCompilerFilename:= 'dmd' + exeExt;
-  end;
+  sel := getCompilerSelector;
   DubCompiler := value;
+  if not sel.isCompilerValid(DubCompiler) then
+    DubCompiler := dmd;
+  DubCompilerFilename:=sel.getCompilerPath(DubCompiler);
 end;
 {$ENDREGION}
 
 initialization
-  setDubCompiler(TCECompiler.dmd);
+  setDubCompiler(dmd);
   dubBuildOptions:= TCEDubBuildOptions.create(nil);
 finalization
   dubBuildOptions.free;

@@ -36,7 +36,7 @@ type
 
   TCERunnableOptions = class(TWritableLfmTextComponent)
   private
-    fCompiler: TCECompiler;
+    fCompiler: DCompiler;
     fDetectMain: boolean;
     fDetectLibraries: boolean;
     fOutputFolder: TCEPathname;
@@ -44,12 +44,12 @@ type
     fStaticSwitches: TStringList;
     procedure setOutputFolder(const value: TCEPathname);
     procedure setStaticSwitches(value: TStringList);
-    procedure setCompiler(value: TCECompiler);
+    procedure setCompiler(value: DCompiler);
   protected
     procedure afterLoad; override;
   published
     property alwaysToFolder: boolean read fAlwaysToFolder write fAlwaysToFolder;
-    property compiler: TCECompiler read fCompiler write setCompiler;
+    property compiler: DCompiler read fCompiler write setCompiler;
     property detectMain: boolean read fDetectMain write fDetectMain;
     property detectLibraries: boolean read fDetectLibraries write fDetectLibraries;
     property outputFolder: TCEPathname read fOutputFolder write setOutputFolder;
@@ -378,6 +378,7 @@ type
     fMainMenuSubj: TCEMainMenuSubject;
     fAppliOpts: TCEApplicationOptions;
     fProjActionsLock: boolean;
+    fCompilerSelector: ICECompilerSelector;
     procedure updateMainMenuProviders;
     procedure updateFloatingWidgetOnTop(onTop: boolean);
     procedure widgetDockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
@@ -544,8 +545,8 @@ type
     fShowBuildDuration: boolean;
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
-    function getNativeProjecCompiler: TCECompiler;
-    procedure setNativeProjecCompiler(value: TCECompiler);
+    function getNativeProjecCompiler: DCompiler;
+    procedure setNativeProjecCompiler(value: DCompiler);
     procedure setSplitterScsrollSpeed(value: byte);
   published
     property additionalPATH: string read getAdditionalPATH write setAdditionalPath;
@@ -556,7 +557,7 @@ type
     property maxRecentProjects: integer read fMaxRecentProjs write fMaxRecentProjs;
     property maxRecentDocuments: integer read fMaxRecentDocs write fMaxRecentDocs;
     property maxRecentProjectsGroups: integer read fMaxRecentGroups write fMaxRecentGroups;
-    property nativeProjectCompiler: TCECompiler read getNativeProjecCompiler write setNativeProjecCompiler;
+    property nativeProjectCompiler: DCompiler read getNativeProjecCompiler write setNativeProjecCompiler;
     property dscanUnittests: boolean read fDscanUnittests write fDscanUnittests default true;
     property autoSaveProjectFiles: boolean read fAutoSaveProjectFiles write fAutoSaveProjectFiles default false;
     property flatLook: boolean read fFlatLook write fFlatLook;
@@ -690,14 +691,13 @@ begin
       fOutputFolder += DirectorySeparator;
 end;
 
-procedure TCERunnableOptions.setCompiler(value: TCECompiler);
+procedure TCERunnableOptions.setCompiler(value: DCompiler);
 begin
-  case value of
-    TCECompiler.ldc: if not exeInSysPath('ldmd2' + exeExt) then
-      value := TCECompiler.dmd;
-    TCECompiler.gdc: if not exeInSysPath('gdmd' + exeExt) then
-      value := TCECompiler.dmd;
-  end;
+  if fCompiler = value then
+    exit;
+  fCompiler := value;
+  if not getCompilerSelector.isCompilerValid(fCompiler) then
+    fCompiler := dmd;
   fCompiler :=value;
 end;
 
@@ -764,12 +764,12 @@ begin
   fFlatLook:=true;
 end;
 
-function TCEApplicationOptionsBase.getNativeProjecCompiler: TCECompiler;
+function TCEApplicationOptionsBase.getNativeProjecCompiler: DCompiler;
 begin
   exit(ce_ceproject.getCEProjectCompiler);
 end;
 
-procedure TCEApplicationOptionsBase.setNativeProjecCompiler(value: TCECompiler);
+procedure TCEApplicationOptionsBase.setNativeProjecCompiler(value: DCompiler);
 begin
   ce_ceproject.setCEProjectCompiler(value);
 end;
@@ -1138,6 +1138,7 @@ begin
   EntitiesConnector.forceUpdate;
   fSymStringExpander:= getSymStringExpander;
   fProjectGroup := getProjectGroup;
+  fCompilerSelector := getCompilerSelector;
 
   getCMdParams;
   fAppliOpts.assignTo(self);
@@ -2604,9 +2605,11 @@ begin
   	dmdproc.OnTerminate:= @asyncprocTerminate;
     dmdproc.Options := [poUsePipes, poStderrToOutPut];
     case fRunnablesOptions.compiler of
-      TCECompiler.dmd: dmdProc.Executable :='dmd'   + exeExt;
-      TCECompiler.ldc: dmdProc.Executable :='ldmd2' + exeExt;
-      TCECompiler.gdc: dmdProc.Executable :='gdmd'  + exeExt;
+      dmd: dmdProc.Executable := fCompilerSelector.getCompilerPath(dmd);
+      gdc, gdmd: dmdProc.Executable := fCompilerSelector.getCompilerPath(gdmd);
+      ldc, ldmd: dmdProc.Executable := fCompilerSelector.getCompilerPath(ldmd);
+      user1: fCompilerSelector.getCompilerPath(user1);
+      user2: fCompilerSelector.getCompilerPath(user2);
     end;
     dmdproc.Parameters.Add(fDoc.fileName);
     if not asObj then
@@ -2883,10 +2886,9 @@ begin
     fRunProc.Options := fRunProc.Options + [poNewConsole];
     {$ENDIF}
   end;
-  case fRunnablesOptions.compiler of
-    TCECompiler.gdc: fRunProc.Parameters.add('--compiler=gdc');
-    TCECompiler.ldc: fRunProc.Parameters.add('--compiler=ldc2');
-  end;
+  if fRunnablesOptions.compiler <> dmd then
+    fRunProc.Parameters.add('--compiler=' +
+      fCompilerSelector.getCompilerPath(fRunnablesOptions.compiler));
   fRunProc.execute;
 end;
 

@@ -132,8 +132,8 @@ type
   // native project have no ext constraint, this function tells if filename is project
   function isValidNativeProject(const filename: string): boolean;
 
-  function getCEProjectCompiler: TCECompiler;
-  procedure setCEProjectCompiler(value: TCECompiler);
+  function getCEProjectCompiler: DCompiler;
+  procedure setCEProjectCompiler(value: DCompiler);
 
 implementation
 
@@ -142,7 +142,7 @@ uses
 
 var
   CEProjectCompilerFilename: string = 'dmd';
-  CEProjectCompiler: TCECompiler;
+  CEProjectCompiler: DCompiler;
 
 constructor TCENativeProject.create(aOwner: TComponent);
 begin
@@ -788,7 +788,7 @@ begin
   fCompilProc.OnTerminate:= @compProcTerminated;
   getOpts(fCompilProc.Parameters);
   //getUpToDateObjects(fCompilProc.Parameters);
-  if CEProjectCompiler = TCECompiler.gdc then
+  if CEProjectCompiler = gdc then
     fCompilProc.Parameters.Add('-gdc=gdc');
   fCompilProc.Execute;
 end;
@@ -1074,28 +1074,23 @@ begin
   end;
 end;
 
-function getCEProjectCompiler: TCECompiler;
+function getCEProjectCompiler: DCompiler;
 begin
   exit(CEProjectCompiler);
 end;
 
-procedure setCEProjectCompiler(value: TCECompiler);
+procedure setCEProjectCompiler(value: DCompiler);
+var
+  sel: ICECompilerSelector;
 begin
-  case value of
-    TCECompiler.dmd: CEProjectCompilerFilename := exeFullName('dmd' + exeExt);
-    TCECompiler.gdc: CEProjectCompilerFilename := exeFullName('gdmd' + exeExt);
-    TCECompiler.ldc: CEProjectCompilerFilename := exeFullName('ldmd2' + exeExt);
-  end;
-  if (not CEProjectCompilerFilename.fileExists)
-    or CEProjectCompilerFilename.isEmpty then
-  begin
-    value := TCECompiler.dmd;
-    CEProjectCompilerFilename:= 'dmd' + exeExt;
-  end;
+  sel := getCompilerSelector;
   CEProjectCompiler := value;
+  if not sel.isCompilerValid(CEProjectCompiler) then
+    CEProjectCompiler := dmd;
+  CEProjectCompilerFilename:=sel.getCompilerPath(CEProjectCompiler);
 end;
 
 initialization
-  setCEProjectCompiler(TCECompiler.dmd);
+  setCEProjectCompiler(dmd);
   RegisterClasses([TCENativeProject]);
 end.

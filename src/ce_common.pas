@@ -29,8 +29,6 @@ type
 
   THasMain = (mainNo, mainYes, mainDefaultBehavior);
 
-  TCECompiler = (dmd, gdc, ldc);
-
   // function used as string hasher in fcl-stl
   TStringHash = class
     class function hash(const key: string; maxBucketsPow2: longword): longword;

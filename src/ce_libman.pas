@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, ce_common, ce_writableComponent, LazFileUtils,
   ghashmap, ghashset,
-  ce_dcd, ce_dialogs, ce_projutils, ce_interfaces, ce_dlang, ce_dastworx;
+  ce_dcd, ce_dialogs, ce_projutils, ce_interfaces, ce_dlang, ce_dastworx,
+  ce_compilers;
 
 type
 
@@ -314,98 +315,33 @@ end;
 
 constructor TLibraryManager.create(aOwner: TComponent);
 var
-  fName: string;
-  {$IFDEF WINDOWS}
-  fDmdPath: string;
-  {$ENDIF}
+  nme: string;
+  als: string;
+  lib: TLibraryItem;
   i: integer;
 begin
   inherited;
   fItemsByAlias := TItemsByAlias.create;
   fCollection := TCollection.Create(TLibraryItem);
   fCollection.FPOAttachObserver(self);
-  fname := getCoeditDocPath + libFname;
-  if fname.fileExists then
-    loadFromFile(fname);
-  if fCollection.Count = 0 then
+  nme := getCoeditDocPath + libFname;
+  if nme.fileExists then
+    loadFromFile(nme);
+  for i := fCollection.Count-1 downto 0 do
   begin
-    {$IFDEF WINDOWS}
-    fDmdPath := ExeSearch('dmd.exe');
-    if fDmdPath.fileExists then
+    lib := libraryByIndex[i];
+    als := lib.libAlias.upperCase;
+    // TODO-cmaintenace: from 3 upd 1 remove auto suprerssion of libman entry for phobos and rt.
+    if (als = 'PHOBOS') or (als = 'RUNTIME') or (als = 'DRUNTIME') then
     begin
-      // add phobos
-      fname := fDmdPath.ExtractFileDir;
-      fname := fname.ExtractFileDir;
-      with TLibraryItem(fCollection.Add) do begin
-        libAlias := 'phobos';
-        libFile  := fname + '\lib\phobos.lib';
-        libSourcePath := fname.ExtractFileDir + '\src\phobos';
-      end;
-      // add druntime (no lib - only for DCD)
-      fname := fDmdPath.ExtractFileDir;
-      fname := fname.ExtractFileDir;
-      with TLibraryItem(fCollection.Add) do begin
-        libAlias := 'druntime';
-        libFile  := '';
-        libSourcePath := fname.ExtractFileDir + '\src\druntime\import';
-      end;
+      fCollection.Delete(i);
+      continue;
     end;
-    {$ENDIF}
-    {$IFDEF LINUX}
-    // add phobos
-    if '/usr/include/dmd/phobos'.dirExists then
-    begin
-      with TLibraryItem(fCollection.Add) do begin
-        libAlias := 'phobos';
-        libFile := '';
-        libSourcePath := '/usr/include/dmd/phobos';
-      end;
-    end;
-    // add druntime (no libraryByIndex - only for DCD)
-    if '/usr/include/dmd/druntime/import'.dirExists then
-    begin
-      with TLibraryItem(fCollection.Add) do begin
-        libAlias := 'druntime';
-        libFile  := '';
-        libSourcePath := '/usr/include/dmd/druntime/import';
-      end;
-    end;
-    {$ENDIF}
-    {$IFDEF DARWIN}
-    if '/Library/D/dmd/src/phobos'.dirExists then
-    begin
-      with TLibraryItem(fCol.Add) do begin
-        libAlias := 'phobos';
-        libFile := '';
-        libSourcePath := '/Library/D/dmd/src/phobos';
-      end;
-    end;
-    // add druntime (no lib - only for DCD)
-    if '/Library/D/dmd/src/druntime/import'.dirExists then
-    begin
-      with TLibraryItem(fCol.Add) do begin
-        libAlias := 'druntime';
-        libFile  := '';
-        libSourcePath := '/Library/D/dmd/src/druntime/import';
-      end;
-    end;
-    {$ENDIF}
+    //
+    lib.updateModulesInfo;
   end;
   updateItemsByAlias;
-  if (fCollection.Count = 0) and not (getCoeditDocPath + libFname).fileExists then
-  begin
-    dlgOkInfo(
-      'Coedit failed to add "druntime" and "phobos" to the library manager.'
-    + 'If they are not already specified in the DCD configuration then the '
-    + 'completion will not work properly');
-  end;
   updateDCD;
-  //
-  for i := 0 to fCollection.Count-1 do
-  begin
-    if (libraryByIndex[i].libAlias <> 'phobos') and (libraryByIndex[i].libAlias <> 'druntime') then
-      libraryByIndex[i].updateModulesInfo;
-  end;
   updateCrossDependencies;
 end;
 
@@ -697,8 +633,6 @@ begin
   for i := 0 to fCollection.Count-1 do
   begin
     lib := libraryByIndex[i];
-    if (lib.libAlias = 'phobos') or (lib.libAlias = 'druntime') then
-      continue;
     lib.dependencies.Clear;
     for j := 0 to lib.modules.Count-1 do
       for m := 0 to lib.moduleByIndex[j].imports.Count-1 do
@@ -708,11 +642,11 @@ begin
       if lib.hasModule(imp) then
         continue;
       dep := libraryByImport[imp];
+      // std / core / etc ...
+      if dep.isNil then
+        continue;
       // ... this should not happen
       if dep = lib then
-        continue;
-      // core or std are always handled by sc.ini
-      if dep.isNil or (dep.libAlias = 'phobos') or (dep.libAlias = 'druntime') then
         continue;
       // add deps
       if lib.dependencies.IndexOf(dep.libAlias) > -1 then

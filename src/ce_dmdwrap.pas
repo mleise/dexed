@@ -258,7 +258,7 @@ type
     destructor destroy; override;
     procedure assign(source: TPersistent); override;
     procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
-    procedure getCompilerSpecificOpts(list: TStrings; base: TOptsGroup = nil; compiler: TCECompiler = TCECompiler.dmd);
+    procedure getCompilerSpecificOpts(list: TStrings; base: TOptsGroup = nil; compiler: DCompiler = dmd);
   end;
 
   (*****************************************************************************
@@ -1209,7 +1209,7 @@ begin
 end;
 
 procedure TOtherOpts.getCompilerSpecificOpts(list: TStrings; base:
-    TOptsGroup = nil; compiler: TCECompiler = TCECompiler.dmd);
+    TOptsGroup = nil; compiler: DCompiler = dmd);
 var
   i: integer;
   str: string;
@@ -1218,10 +1218,11 @@ var
 begin
   if base.isNil then
   begin
+    // TODO-cCompilers paths: add other options to CE proj format for the other comps
     case compiler of
-      TCECompiler.dmd: lst := fDmdOthers;
-      TCECompiler.ldc: lst := fLdcOthers;
-      TCECompiler.gdc: lst := fGdcOthers;
+      dmd: lst := fDmdOthers;
+      ldc: lst := fLdcOthers;
+      gdc: lst := fGdcOthers;
     end;
     for i := 0 to lst.Count-1 do
     begin
@@ -1236,17 +1237,17 @@ begin
   begin
     baseopt := TOtherOpts(base);
     case compiler of
-      TCECompiler.dmd:
+      dmd:
         if fDmdOthers.Count = 0 then
           lst := baseopt.fDmdOthers
         else
           lst := fDmdOthers;
-      TCECompiler.ldc:
+      ldc:
         if fLdcOthers.Count = 0 then
           lst := baseopt.fLdcOthers
         else
           lst := fLdcOthers;
-      TCECompiler.gdc:
+      gdc:
         if fGdcOthers.Count = 0 then
           lst := baseopt.fGdcOthers
         else
