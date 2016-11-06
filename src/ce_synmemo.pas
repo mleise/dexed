@@ -1949,7 +1949,7 @@ begin
   //
   fCompletion.Position := 0;
   fCompletion.ItemList.Clear;
-  DcdWrapper.getComplAtCursor(fCompletion.ItemList);
+  DcdWrapper.getComplAtCursor(TStringList(fCompletion.ItemList));
   if fLastCompletion.isNotEmpty then
   begin
     i := fCompletion.ItemList.IndexOf(fLastCompletion);
@@ -1976,6 +1976,7 @@ end;
 function TCESynMemo.completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
   Selected: boolean; Index: integer): boolean;
 var
+  dck: TDCDCompletionKind;
   knd: string;
   len: Integer;
 begin
@@ -1984,12 +1985,26 @@ begin
   if aKey.isEmpty then
     exit;
   {$PUSH} {$Warnings OFF} {$Hints OFF}
-  knd := DcdCompletionKindStrings[TDCDCompletionKind(
-    PtrUInt(fCompletion.ItemList.Objects[index]))];
+  dck := TDCDCompletionKind(PtrUInt(fCompletion.ItemList.Objects[index]));
+  knd := DcdCompletionKindStrings[dck];
   {$POP}
   ACanvas.Font.Style := [fsBold];
   len := ACanvas.TextExtent(aKey).cx;
   ACanvas.TextOut(2 + X , Y, aKey);
+  case dck of
+    dckALias, dckClass, dckStruct, dckUnion, dckEnum, dckInterface:
+      ACanvas.Font.Color:= clMaroon;
+    dckMember, dckEnum_member, dckVariable, dckArray, dckAA:
+      ACanvas.Font.Color:= clGray;
+    dckReserved:
+      ACanvas.Font.Color:= clNavy;
+    dckFunction:
+      ACanvas.Font.Color:= clGreen;
+    dckPackage, dckModule:
+      ACanvas.Font.Color:= clBlue;
+    dckTemplate, dckMixin:
+      ACanvas.Font.Color:= clTeal;
+  end;
   ACanvas.Font.Style := [fsItalic];
   ACanvas.TextOut(2 + X + len + 2, Y, knd);
 end;
