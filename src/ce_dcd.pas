@@ -61,7 +61,7 @@ type
     //
     procedure addImportFolders(const folders: TStrings);
     procedure addImportFolder(const folder: string);
-    procedure getComplAtCursor(list: TStrings);
+    procedure getComplAtCursor(list: TStringList);
     procedure getCallTip(out tips: string);
     procedure getDdocFromCursor(out comment: string);
     procedure getDeclFromCursor(out fname: string; out position: Integer);
@@ -70,10 +70,12 @@ type
     property available: boolean read fAvailable;
   end;
 
-var
-  DcdWrapper: TCEDcdWrapper;
+    function DCDWrapper: TCEDcdWrapper;
 
 implementation
+
+var
+  fDcdWrapper: TCEDcdWrapper = nil;
 
 const
   clientName = 'dcd-client' + exeExt;
@@ -402,7 +404,21 @@ begin
   {$ENDIF}
 end;
 
-procedure TCEDcdWrapper.getComplAtCursor(list: TStrings);
+function compareknd(List: TStringList; Index1, Index2: Integer): Integer;
+var
+  k1, k2: byte;
+begin
+  k1 := Byte(PtrUint(List.Objects[Index1]));
+  k2 := Byte(PtrUint(List.Objects[Index2]));
+  if k1 > k2 then
+    result := 1
+  else if k1 < k2 then
+    result := -1
+  else
+    result := CompareStr(list[Index1], list[Index2]);
+end;
+
+procedure TCEDcdWrapper.getComplAtCursor(list: TStringList);
 var
   i: Integer;
   kind: Char;
@@ -454,12 +470,12 @@ begin
       'l': kindObj := TObject(PtrUint(dckAlias));
       't': kindObj := TObject(PtrUint(dckTemplate));
       'T': kindObj := TObject(PtrUint(dckMixin));
-      // see https://github.com/Hackerpilot/dsymbol/blob/master/src/dsymbol/symbol.d#L47
       // internal DCD stuff, Should not to happen...report bug if it does.
       '*', '?': continue;
     end;
     list.AddObject(item, kindObj);
   end;
+  //list.CustomSort(@compareknd);
 end;
 
 procedure TCEDcdWrapper.getDdocFromCursor(out comment: string);
@@ -583,8 +599,13 @@ begin
 end;
 {$ENDREGION}
 
-initialization
-  DcdWrapper := TCEDcdWrapper.create(nil);
+function DCDWrapper: TCEDcdWrapper;
+begin
+  if fDcdWrapper.isNil then
+    fDcdWrapper := TCEDcdWrapper.create(nil);
+  exit(fDcdWrapper);
+end;
+
 finalization
   DcdWrapper.Free;
 end.
