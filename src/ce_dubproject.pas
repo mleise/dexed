@@ -157,7 +157,7 @@ type
   procedure setDubCompiler(value: TCECompiler);
 
 var
-  DubCompiler: TCECompiler = dmd;
+  DubCompiler: TCECompiler = TCECompiler.dmd;
   DubCompilerFilename: string = 'dmd';
 
 const
@@ -1219,13 +1219,13 @@ end;
 procedure setDubCompiler(value: TCECompiler);
 begin
   case value of
-    dmd: DubCompilerFilename := exeFullName('dmd' + exeExt);
-    gdc: DubCompilerFilename := exeFullName('gdc' + exeExt);
-    ldc: DubCompilerFilename := exeFullName('ldc2' + exeExt);
+    TCECompiler.dmd: DubCompilerFilename := exeFullName('dmd' + exeExt);
+    TCECompiler.gdc: DubCompilerFilename := exeFullName('gdc' + exeExt);
+    TCECompiler.ldc: DubCompilerFilename := exeFullName('ldc2' + exeExt);
   end;
   if (not DubCompilerFilename.fileExists) or DubCompilerFilename.isEmpty then
   begin
-    value := dmd;
+    value := TCECompiler.dmd;
     DubCompilerFilename:= 'dmd' + exeExt;
   end;
   DubCompiler := value;
@@ -1233,7 +1233,7 @@ end;
 {$ENDREGION}
 
 initialization
-  setDubCompiler(dmd);
+  setDubCompiler(TCECompiler.dmd);
   dubBuildOptions:= TCEDubBuildOptions.create(nil);
 finalization
   dubBuildOptions.free;

@@ -693,10 +693,10 @@ end;
 procedure TCERunnableOptions.setCompiler(value: TCECompiler);
 begin
   case value of
-    ldc: if not exeInSysPath('ldmd2' + exeExt) then
-      value := dmd;
-    gdc: if not exeInSysPath('gdmd' + exeExt) then
-      value := dmd;
+    TCECompiler.ldc: if not exeInSysPath('ldmd2' + exeExt) then
+      value := TCECompiler.dmd;
+    TCECompiler.gdc: if not exeInSysPath('gdmd' + exeExt) then
+      value := TCECompiler.dmd;
   end;
   fCompiler :=value;
 end;
@@ -2604,9 +2604,9 @@ begin
   	dmdproc.OnTerminate:= @asyncprocTerminate;
     dmdproc.Options := [poUsePipes, poStderrToOutPut];
     case fRunnablesOptions.compiler of
-      dmd: dmdProc.Executable :='dmd'   + exeExt;
-      ldc: dmdProc.Executable :='ldmd2' + exeExt;
-      gdc: dmdProc.Executable :='gdmd'  + exeExt;
+      TCECompiler.dmd: dmdProc.Executable :='dmd'   + exeExt;
+      TCECompiler.ldc: dmdProc.Executable :='ldmd2' + exeExt;
+      TCECompiler.gdc: dmdProc.Executable :='gdmd'  + exeExt;
     end;
     dmdproc.Parameters.Add(fDoc.fileName);
     if not asObj then
@@ -2884,8 +2884,8 @@ begin
     {$ENDIF}
   end;
   case fRunnablesOptions.compiler of
-    gdc: fRunProc.Parameters.add('--compiler=gdc');
-    ldc: fRunProc.Parameters.add('--compiler=ldc2');
+    TCECompiler.gdc: fRunProc.Parameters.add('--compiler=gdc');
+    TCECompiler.ldc: fRunProc.Parameters.add('--compiler=ldc2');
   end;
   fRunProc.execute;
 end;

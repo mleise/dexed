@@ -788,7 +788,7 @@ begin
   fCompilProc.OnTerminate:= @compProcTerminated;
   getOpts(fCompilProc.Parameters);
   //getUpToDateObjects(fCompilProc.Parameters);
-  if CEProjectCompiler = gdc then
+  if CEProjectCompiler = TCECompiler.gdc then
     fCompilProc.Parameters.Add('-gdc=gdc');
   fCompilProc.Execute;
 end;
@@ -1082,20 +1082,20 @@ end;
 procedure setCEProjectCompiler(value: TCECompiler);
 begin
   case value of
-    dmd: CEProjectCompilerFilename := exeFullName('dmd' + exeExt);
-    gdc: CEProjectCompilerFilename := exeFullName('gdmd' + exeExt);
-    ldc: CEProjectCompilerFilename := exeFullName('ldmd2' + exeExt);
+    TCECompiler.dmd: CEProjectCompilerFilename := exeFullName('dmd' + exeExt);
+    TCECompiler.gdc: CEProjectCompilerFilename := exeFullName('gdmd' + exeExt);
+    TCECompiler.ldc: CEProjectCompilerFilename := exeFullName('ldmd2' + exeExt);
   end;
   if (not CEProjectCompilerFilename.fileExists)
     or CEProjectCompilerFilename.isEmpty then
   begin
-    value := dmd;
+    value := TCECompiler.dmd;
     CEProjectCompilerFilename:= 'dmd' + exeExt;
   end;
   CEProjectCompiler := value;
 end;
 
 initialization
-  setCEProjectCompiler(dmd);
+  setCEProjectCompiler(TCECompiler.dmd);
   RegisterClasses([TCENativeProject]);
 end.

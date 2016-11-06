@@ -386,6 +386,21 @@ type
   end;
 
 
+  DCompiler = (dmd, gdc, gdmd, ldc, ldmd, user1, user2);
+
+  (**
+   * Single service provided by the options editor.
+   *)
+  ICECompilerSelector = interface(ICESingleService)
+    // Indicates wether a D compiler is usable.
+    function isCompilerValid(value: DCompiler): boolean;
+    // Returns a D compiler exe filename.
+    function getCompilerPath(value: DCompiler): string;
+    // Fills value with the runtime/phobos import paths for a particular D compiler.
+    procedure getCompilerImports(value: DCompiler; paths: TStrings);
+  end;
+
+
   TDCDCompletionKind = (
     dckClass,
     dckInterface,
@@ -445,6 +460,7 @@ type
   function getProjectGroup: ICEProjectGroup;
   function getExplorer: ICEExplorer;
   function getOptionsEditor: ICEOptionsEditor;
+  function getCompilerSelector: ICECompilerSelector;
 
 implementation
 
@@ -588,6 +604,11 @@ end;
 function getOptionsEditor: ICEOptionsEditor;
 begin
   exit(EntitiesConnector.getSingleService('ICEOptionsEditor') as ICEOptionsEditor);
+end;
+
+function getCompilerSelector: ICECompilerSelector;
+begin
+  exit(EntitiesConnector.getSingleService('ICECompilerSelector') as ICECompilerSelector);
 end;
 {$ENDREGION}
 

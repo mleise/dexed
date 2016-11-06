@@ -258,7 +258,7 @@ type
     destructor destroy; override;
     procedure assign(source: TPersistent); override;
     procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
-    procedure getCompilerSpecificOpts(list: TStrings; base: TOptsGroup = nil; compiler: TCECompiler = dmd);
+    procedure getCompilerSpecificOpts(list: TStrings; base: TOptsGroup = nil; compiler: TCECompiler = TCECompiler.dmd);
   end;
 
   (*****************************************************************************
@@ -1209,7 +1209,7 @@ begin
 end;
 
 procedure TOtherOpts.getCompilerSpecificOpts(list: TStrings; base:
-    TOptsGroup = nil; compiler: TCECompiler = dmd);
+    TOptsGroup = nil; compiler: TCECompiler = TCECompiler.dmd);
 var
   i: integer;
   str: string;
