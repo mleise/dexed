@@ -31,13 +31,15 @@ type
     procedure DragDrop(Sender, Source: TObject; X, Y: Integer);
   end;
 
-var
-  ddHandler: TDDHandler;
+function ddHandler: TDDHandler;
 
 implementation
 
 uses
   ce_observer;
+
+var
+  fDdHandler: TDDHandler = nil;
 
 constructor TDDHandler.create;
 begin
@@ -152,11 +154,14 @@ begin
   else getMultiDocHandler.openDocument(fname);
 end;
 
-initialization
-  ddHandler:= TDDHandler.create;
+function ddHandler: TDDHandler;
+begin
+  if fDdHandler.isNil then
+    fDdHandler:= TDDHandler.create;
+  result := fDdHandler;
+end;
 
 finalization
   ddHandler.free;
-
 end.
 

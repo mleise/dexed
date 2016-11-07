@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, ce_common, ce_writableComponent, LazFileUtils,
   ghashmap, ghashset,
-  ce_dcd, ce_dialogs, ce_projutils, ce_interfaces, ce_dlang, ce_dastworx,
+  ce_dcd, ce_projutils, ce_interfaces, ce_dlang, ce_dastworx,
   ce_compilers;
 
 type
@@ -135,10 +135,12 @@ type
 const
   libFname = 'libraryManager.txt';
 
-var
-  LibMan: TLibraryManager;
+function LibMan: TLibraryManager;
 
 implementation
+
+var
+  fLibMan: TLibraryManager = nil;
 
 const
   deactivatedMessage = 'Library item "%s" could be detected but it is marked disabled, ' +
@@ -663,9 +665,13 @@ begin
   end;
 end;
 
-initialization
-  registerClasses([TLibraryManager, TLibraryItem]);
-  LibMan := TLibraryManager.create(nil);
+function LibMan: TLibraryManager;
+begin
+  if fLibMan.isNil then
+    fLibMan := TLibraryManager.create(nil);
+  result := fLibMan;
+end;
+
 finalization
-  LibMan.Free;
+  fLibMan.Free;
 end.
