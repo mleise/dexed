@@ -1084,6 +1084,10 @@ var
   sel: ICECompilerSelector;
 begin
   sel := getCompilerSelector;
+  if value = gdc then
+    value := gdmd
+  else if value = ldc then
+    value := ldmd;
   CEProjectCompiler := value;
   if not sel.isCompilerValid(CEProjectCompiler) then
     CEProjectCompiler := dmd;
