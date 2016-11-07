@@ -2,38 +2,38 @@ object Form1: TForm1
   Left = 749
   Height = 869
   Top = 128
-  Width = 473
+  Width = 460
   Caption = 'Form1'
   ClientHeight = 869
-  ClientWidth = 473
+  ClientWidth = 460
   LCLVersion = '1.6.0.4'
   object ScrollBox1: TScrollBox
     Left = 0
     Height = 869
     Top = 0
-    Width = 473
+    Width = 460
     HorzScrollBar.Page = 111
     VertScrollBar.Page = 864
     Align = alClient
     ClientHeight = 865
-    ClientWidth = 469
+    ClientWidth = 456
     TabOrder = 0
     object grpDMD: TGroupBox
       Left = 0
       Height = 160
       Top = 64
-      Width = 469
+      Width = 456
       Align = alTop
       Caption = 'DMD'
       ClientHeight = 130
-      ClientWidth = 465
+      ClientWidth = 452
       TabOrder = 0
       object selDMDexe: TFileNameEdit
         Left = 2
         Height = 20
         Hint = 'select the compiler'
         Top = 19
-        Width = 461
+        Width = 448
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -49,7 +49,7 @@ object Form1: TForm1
         Height = 20
         Hint = 'select the root of druntime sources'
         Top = 60
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -64,7 +64,7 @@ object Form1: TForm1
         Height = 20
         Hint = 'select the root of phobos sources'
         Top = 101
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -78,7 +78,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 0
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'compiler'
@@ -88,7 +88,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 41
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Runtime sources'
@@ -98,7 +98,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 82
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Phobos sources'
@@ -109,18 +109,18 @@ object Form1: TForm1
       Left = 0
       Height = 160
       Top = 224
-      Width = 469
+      Width = 456
       Align = alTop
       Caption = 'GDC'
       ClientHeight = 130
-      ClientWidth = 465
+      ClientWidth = 452
       TabOrder = 1
       object selGDCexe: TFileNameEdit
         Left = 2
         Height = 20
         Hint = 'select the compiler'
         Top = 19
-        Width = 461
+        Width = 448
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -136,7 +136,7 @@ object Form1: TForm1
         Height = 20
         Hint = 'select the root of LDC runtime & phobos sources (can be a common folder)'
         Top = 60
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -151,7 +151,7 @@ object Form1: TForm1
         Height = 20
         Hint = 'select the root of LDC runtime & phobos sources (can be a common folder)'
         Top = 101
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -165,7 +165,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 0
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'compiler'
@@ -175,7 +175,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 41
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Runtime sources'
@@ -185,7 +185,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 82
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Phobos sources'
@@ -196,18 +196,18 @@ object Form1: TForm1
       Left = 0
       Height = 160
       Top = 384
-      Width = 469
+      Width = 456
       Align = alTop
       Caption = 'LDC'
       ClientHeight = 130
-      ClientWidth = 465
+      ClientWidth = 452
       TabOrder = 2
       object selLDCexe: TFileNameEdit
         Left = 2
         Height = 20
         Hint = 'select the compiler'
         Top = 19
-        Width = 461
+        Width = 448
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -223,7 +223,7 @@ object Form1: TForm1
         Height = 20
         Hint = 'select the root of druntime sources'
         Top = 60
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -238,7 +238,7 @@ object Form1: TForm1
         Height = 20
         Hint = 'select the root of phobos sources'
         Top = 101
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -252,7 +252,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 0
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'compiler'
@@ -262,7 +262,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 41
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Runtime sources'
@@ -272,7 +272,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 82
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Phobos sources'
@@ -283,17 +283,17 @@ object Form1: TForm1
       Left = 0
       Height = 160
       Top = 544
-      Width = 469
+      Width = 456
       Align = alTop
       Caption = 'User 1'
       ClientHeight = 130
-      ClientWidth = 465
+      ClientWidth = 452
       TabOrder = 3
       object selUSER1exe: TFileNameEdit
         Left = 2
         Height = 20
         Top = 19
-        Width = 461
+        Width = 448
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -308,7 +308,7 @@ object Form1: TForm1
         Left = 2
         Height = 20
         Top = 60
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -322,7 +322,7 @@ object Form1: TForm1
         Left = 2
         Height = 20
         Top = 101
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -336,7 +336,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 0
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'compiler'
@@ -346,7 +346,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 41
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Runtime sources'
@@ -356,7 +356,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 82
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Phobos sources'
@@ -367,17 +367,17 @@ object Form1: TForm1
       Left = 0
       Height = 160
       Top = 704
-      Width = 469
+      Width = 456
       Align = alTop
       Caption = 'User 2'
       ClientHeight = 130
-      ClientWidth = 465
+      ClientWidth = 452
       TabOrder = 4
       object selUSER2exe: TFileNameEdit
         Left = 2
         Height = 20
         Top = 19
-        Width = 461
+        Width = 448
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -392,7 +392,7 @@ object Form1: TForm1
         Left = 2
         Height = 20
         Top = 60
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -406,7 +406,7 @@ object Form1: TForm1
         Left = 2
         Height = 20
         Top = 101
-        Width = 461
+        Width = 448
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -420,7 +420,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 0
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'compiler'
@@ -430,7 +430,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 41
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Runtime sources'
@@ -440,7 +440,7 @@ object Form1: TForm1
         Left = 0
         Height = 17
         Top = 82
-        Width = 465
+        Width = 452
         Align = alTop
         Alignment = taCenter
         Caption = 'Phobos sources'
@@ -451,17 +451,18 @@ object Form1: TForm1
       Left = 0
       Height = 64
       Top = 0
-      Width = 469
+      Width = 456
       Align = alTop
-      Caption = 'Default compiler'
+      Caption = 'Default compiler for completion'
       ClientHeight = 34
-      ClientWidth = 465
+      ClientWidth = 452
       TabOrder = 5
       object selDefault: TComboBox
         Left = 2
         Height = 30
+        Hint = 'select which compiler paths are used by the completion daemon'
         Top = 2
-        Width = 461
+        Width = 448
         Align = alClient
         BorderSpacing.Around = 2
         ItemHeight = 0

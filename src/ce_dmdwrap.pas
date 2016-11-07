@@ -1218,7 +1218,7 @@ var
 begin
   if base.isNil then
   begin
-    // TODO-cCompilers paths: add other options to CE proj format for the other comps
+    // TODO-cCompilerPaths paths: add other options to CE proj format for the other comps
     case compiler of
       dmd: lst := fDmdOthers;
       ldc: lst := fLdcOthers;

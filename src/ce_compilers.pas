@@ -32,23 +32,45 @@ type
     fUser2ExeName: string;
     fUser2RuntimePath: string;
     fUser2PhobosPath: string;
+    fModified: boolean;
+    fWouldNeedRestart: boolean;
+    procedure setDefaultCompiler(value: DCompiler);
+    procedure setDmdExeName(const value: string);
+    procedure setDmdRuntimePath(const value: string);
+    procedure setDmdPhobosPath(const value: string);
+    procedure setGdcExeName(const value: string);
+    procedure setGdcRuntimePath(const value: string);
+    procedure setGdcPhobosPath(const value: string);
+    procedure setLdcExeName(const value: string);
+    procedure setLdcRuntimePath(const value: string);
+    procedure setLdcPhobosPath(const value: string);
+    procedure setUser1ExeName(const value: string);
+    procedure setUser1RuntimePath(const value: string);
+    procedure setUser1PhobosPath(const value: string);
+    procedure setUser2ExeName(const value: string);
+    procedure setUser2RuntimePath(const value: string);
+    procedure setUser2PhobosPath(const value: string);
+  protected
+    procedure afterLoad; override;
   published
-    property defaultCompiler: DCompiler read fDefaultCompiler write fDefaultCompiler;
-    property DmdExeName: string read fDmdExeName write fDmdExeName;
-    property DmdRuntimePath: string read fDmdRuntimePath write fDmdRuntimePath;
-    property DmdPhobosPath: string read fDmdPhobosPath write fDmdPhobosPath;
-    property GdcExeName: string read fGdcExeName write fGdcExeName;
-    property GdcRuntimePath: string read fGdcRuntimePath write fGdcRuntimePath;
-    property GdcPhobosPath: string read fGdcPhobosPath write fGdcPhobosPath;
-    property LdcExeName: string read fLdcExeName write fLdcExeName;
-    property LdcRuntimePath: string read fLdcRuntimePath write fLdcRuntimePath;
-    property LdcPhobosPath: string read fLdcPhobosPath write fLdcPhobosPath;
-    property User1ExeName: string read fUser1ExeName write fUser1ExeName;
-    property User1RuntimePath: string read fUser1RuntimePath write fUser1RuntimePath;
-    property User1PhobosPath: string read fUser1PhobosPath write fUser1PhobosPath;
-    property User2ExeName: string read fUser2ExeName write fUser2ExeName;
-    property User2RuntimePath: string read fUser2RuntimePath write fUser2RuntimePath;
-    property User2PhobosPath: string read fUser2PhobosPath write fUser2PhobosPath;
+    property wouldNeedRestart: boolean read fWouldNeedRestart write fWouldNeedRestart;
+    property modified: boolean read fModified write fModified;
+    property defaultCompiler: DCompiler read fDefaultCompiler write setDefaultCompiler;
+    property DmdExeName: string read fDmdExeName write setDmdExeName;
+    property DmdRuntimePath: string read fDmdRuntimePath write setDmdRuntimePath;
+    property DmdPhobosPath: string read fDmdPhobosPath write setDmdPhobosPath;
+    property GdcExeName: string read fGdcExeName write setGdcExeName;
+    property GdcRuntimePath: string read fGdcRuntimePath write setGdcRuntimePath;
+    property GdcPhobosPath: string read fGdcPhobosPath write setGdcPhobosPath;
+    property LdcExeName: string read fLdcExeName write setLdcExeName;
+    property LdcRuntimePath: string read fLdcRuntimePath write setLdcRuntimePath;
+    property LdcPhobosPath: string read fLdcPhobosPath write setLdcPhobosPath;
+    property User1ExeName: string read fUser1ExeName write setUser1ExeName;
+    property User1RuntimePath: string read fUser1RuntimePath write setUser1RuntimePath;
+    property User1PhobosPath: string read fUser1PhobosPath write setUser1PhobosPath;
+    property User2ExeName: string read fUser2ExeName write setUser2ExeName;
+    property User2RuntimePath: string read fUser2RuntimePath write setUser2RuntimePath;
+    property User2PhobosPath: string read fUser2PhobosPath write setUser2PhobosPath;
   public
     procedure assign(source: TPersistent); override;
   end;
@@ -196,24 +218,180 @@ begin
   if source is TCompilersPaths then
   begin
     src := TCompilersPaths(source);
-    fDefaultCompiler  := src.fDefaultCompiler;
-    fDmdExeName       := src.fDmdExeName;
-    fDmdRuntimePath   := src.fDmdRuntimePath;
-    fDmdPhobosPath    := src.fDmdPhobosPath;
-    fGdcExeName       := src.fGdcExeName;
-    fGdcRuntimePath   := src.fGdcRuntimePath;
-    fGdcPhobosPath    := src.fGdcPhobosPath;
-    fLdcExeName       := src.fLdcExeName;
-    fLdcRuntimePath   := src.fLdcRuntimePath;
-    fLdcPhobosPath    := src.fLdcPhobosPath;
-    fUser1ExeName     := src.fUser1ExeName;
-    fUser1RuntimePath := src.fUser1RuntimePath;
-    fUser1PhobosPath  := src.fUser1PhobosPath;
-    fUser2ExeName     := src.fUser2ExeName;
-    fUser2RuntimePath := src.fUser2RuntimePath;
-    fUser2PhobosPath  := src.fUser2PhobosPath;
+    DefaultCompiler  := src.fDefaultCompiler;
+    DmdExeName       := src.fDmdExeName;
+    DmdRuntimePath   := src.fDmdRuntimePath;
+    DmdPhobosPath    := src.fDmdPhobosPath;
+    GdcExeName       := src.fGdcExeName;
+    GdcRuntimePath   := src.fGdcRuntimePath;
+    GdcPhobosPath    := src.fGdcPhobosPath;
+    LdcExeName       := src.fLdcExeName;
+    LdcRuntimePath   := src.fLdcRuntimePath;
+    LdcPhobosPath    := src.fLdcPhobosPath;
+    User1ExeName     := src.fUser1ExeName;
+    User1RuntimePath := src.fUser1RuntimePath;
+    User1PhobosPath  := src.fUser1PhobosPath;
+    User2ExeName     := src.fUser2ExeName;
+    User2RuntimePath := src.fUser2RuntimePath;
+    User2PhobosPath  := src.fUser2PhobosPath;
   end
   else inherited;
+end;
+
+procedure TCompilersPaths.setDefaultCompiler(value: Dcompiler);
+begin
+  if fDefaultCompiler = value then
+    exit;
+  fDefaultCompiler:=value;
+  fWouldNeedRestart := true;
+  fModified:=true;
+end;
+
+procedure TCompilersPaths.setDmdExeName(const value: string);
+begin
+  if fDmdExeName = value then
+    exit;
+  fDmdExeName:=value;
+  fModified:=true;
+end;
+
+procedure TCompilersPaths.setDmdRuntimePath(const value: string);
+begin
+  if fDmdRuntimePath = value then
+    exit;
+  fDmdRuntimePath:=value;
+  fModified:=true;
+  if fDefaultCompiler = dmd then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.setDmdPhobosPath(const value: string);
+begin
+  if fDmdPhobosPath = value then
+    exit;
+  fDmdPhobosPath:=value;
+  fModified:=true;
+  if fDefaultCompiler = dmd then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.setGdcExeName(const value: string);
+begin
+  if fGdcExeName = value then
+    exit;
+  fGdcExeName:=value;
+  fModified:=true;
+end;
+
+procedure TCompilersPaths.setGdcRuntimePath(const value: string);
+begin
+  if fGdcRuntimePath = value then
+    exit;
+  fGdcRuntimePath:=value;
+  fModified:=true;
+  if fDefaultCompiler in [gdc,gdmd] then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.setGdcPhobosPath(const value: string);
+begin
+  if fGdcPhobosPath = value then
+    exit;
+  fGdcPhobosPath:=value;
+  fModified:=true;
+  if fDefaultCompiler in [gdc,gdmd] then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.setLdcExeName(const value: string);
+begin
+  if fLdcExeName = value then
+    exit;
+  fLdcExeName:=value;
+  fModified:=true;
+end;
+
+procedure TCompilersPaths.setLdcRuntimePath(const value: string);
+begin
+  if fLdcRuntimePath = value then
+    exit;
+  fLdcRuntimePath:=value;
+  fModified:=true;
+  if fDefaultCompiler in [ldc,ldmd] then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.setLdcPhobosPath(const value: string);
+begin
+  if fLdcPhobosPath = value then
+    exit;
+  fLdcPhobosPath:=value;
+  fModified:=true;
+  if fDefaultCompiler in [ldc,ldmd] then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.setUser1ExeName(const value: string);
+begin
+  if fUser1ExeName = value then
+    exit;
+  fUser1ExeName:=value;
+  fModified:=true;
+end;
+
+procedure TCompilersPaths.setUser1RuntimePath(const value: string);
+begin
+  if fUser1RuntimePath = value then
+    exit;
+  fUser1RuntimePath:=value;
+  fModified:=true;
+  if fDefaultCompiler = user1 then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.setUser1PhobosPath(const value: string);
+begin
+  if fUser1PhobosPath = value then
+    exit;
+  fUser1PhobosPath:=value;
+  fModified:=true;
+  if fDefaultCompiler = user1 then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.setUser2ExeName(const value: string);
+begin
+  if fUser2ExeName = value then
+    exit;
+  fUser2ExeName:=value;
+  fModified:=true;
+end;
+
+procedure TCompilersPaths.setUser2RuntimePath(const value: string);
+begin
+  if fUser2RuntimePath = value then
+    exit;
+  fUser2RuntimePath:=value;
+  fModified:=true;
+  if fDefaultCompiler = user2 then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.setUser2PhobosPath(const value: string);
+begin
+  if fUser2PhobosPath = value then
+    exit;
+  fUser2PhobosPath:=value;
+  fModified:=true;
+  if fDefaultCompiler = user2 then
+    fWouldNeedRestart := true;
+end;
+
+procedure TCompilersPaths.afterLoad;
+begin
+  inherited;
+  fModified:=false;
+  fWouldNeedRestart:=false;
 end;
 {$ENDREGION}
 
@@ -237,15 +415,26 @@ end;
 procedure TForm1.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
-    oeeAccept: fPathsBackup.assign(fPaths);
-    oeeCancel: fPaths.assign(fPathsBackup);
+    oeeAccept:
+    begin
+      fPathsBackup.assign(fPaths);
+      if fPaths.wouldNeedRestart and fPaths.modified then
+        dlgOkInfo('A restart might be necessary so that DCD caches a different version'
+          + 'of the runtime and the standard library.');
+      fPaths.modified:=false;
+      fPaths.wouldNeedRestart:=false;
+    end;
+    oeeCancel:
+    begin
+      fPaths.assign(fPathsBackup);
+      fPaths.modified:=false;
+    end;
   end;
 end;
 
 function TForm1.optionedOptionsModified: boolean;
 begin
-  //TODO-cCompilerPaths: add setters to detect if a TCompilersPaths is modified
-  exit(false);
+  exit(fPaths.modified);
 end;
 {$ENDREGION}
 
@@ -387,8 +576,6 @@ end;
 procedure TForm1.selectedDefault(sender: TObject);
 begin
   fPaths.defaultCompiler:= DCompiler(selDefault.ItemIndex);
-  dlgOkInfo('A restart might be necessary so that DCD caches a different version'
-    + 'of the runtime and the standard library.');
 end;
 
 procedure TForm1.autoDetectDMD;
