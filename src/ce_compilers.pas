@@ -428,6 +428,7 @@ begin
     begin
       fPaths.assign(fPathsBackup);
       fPaths.modified:=false;
+      fPaths.wouldNeedRestart:=false;
     end;
   end;
 end;
