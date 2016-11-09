@@ -114,6 +114,7 @@ type
     StaticText7: TStaticText;
     StaticText8: TStaticText;
     StaticText9: TStaticText;
+    procedure dialogOpen(sender: TObject);
   strict private
     fPaths: TCompilersPaths;
     fPathsBackup: TCompilersPaths;
@@ -150,7 +151,7 @@ var
 const
   optFname = 'compilerspaths.txt';
 
-{$REGION Standard Object/COmponents things -------------------------------------}
+{$REGION Standard Object/Components things -------------------------------------}
 constructor TForm1.create(aOwner: TComponent);
 var
   fname: string;
@@ -520,6 +521,26 @@ begin
     selUSER2std.Directory := User2PhobosPath;
 
     selDefault.ItemIndex := integer(defaultCompiler);
+  end;
+end;
+
+procedure TForm1.dialogOpen(sender: TObject);
+var
+  fne: TFileNameEdit;
+  dre: TDirectoryEdit;
+begin
+  if sender is TFileNameEdit then
+  begin
+    fne := TFileNameEdit(sender);
+    fne.InitialDir:=fne.FileName.extractFileDir;
+    fne.DialogTitle:='Select a D compiler';
+  end
+  else
+  begin
+    dre := TDirectoryEdit(sender);
+    dre.RootDir:=dre.Directory;
+    dre.ShowHidden:=true;
+    dre.DialogTitle:='Select a library path';
   end;
 end;
 

@@ -43,6 +43,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 0
+        OnButtonClick = dialogOpen
       end
       object selDMDrt: TDirectoryEdit
         Left = 2
@@ -58,6 +59,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 1
+        OnButtonClick = dialogOpen
       end
       object selDMDstd: TDirectoryEdit
         Left = 2
@@ -73,6 +75,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 2
+        OnButtonClick = dialogOpen
       end
       object StaticText1: TStaticText
         Left = 0
@@ -130,6 +133,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 0
+        OnButtonClick = dialogOpen
       end
       object selGDCrt: TDirectoryEdit
         Left = 2
@@ -145,6 +149,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 1
+        OnButtonClick = dialogOpen
       end
       object selGDCstd: TDirectoryEdit
         Left = 2
@@ -160,6 +165,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 2
+        OnButtonClick = dialogOpen
       end
       object StaticText4: TStaticText
         Left = 0
@@ -217,6 +223,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 0
+        OnButtonClick = dialogOpen
       end
       object selLDCrt: TDirectoryEdit
         Left = 2
@@ -232,6 +239,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 1
+        OnButtonClick = dialogOpen
       end
       object selLDCstd: TDirectoryEdit
         Left = 2
@@ -247,6 +255,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 2
+        OnButtonClick = dialogOpen
       end
       object StaticText7: TStaticText
         Left = 0
@@ -303,6 +312,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 0
+        OnButtonClick = dialogOpen
       end
       object selUSER1rt: TDirectoryEdit
         Left = 2
@@ -317,6 +327,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 1
+        OnButtonClick = dialogOpen
       end
       object selUSER1std: TDirectoryEdit
         Left = 2
@@ -331,6 +342,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 2
+        OnButtonClick = dialogOpen
       end
       object StaticText10: TStaticText
         Left = 0
@@ -387,6 +399,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 0
+        OnButtonClick = dialogOpen
       end
       object selUSER2rt: TDirectoryEdit
         Left = 2
@@ -401,6 +414,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 1
+        OnButtonClick = dialogOpen
       end
       object selUSER2std: TDirectoryEdit
         Left = 2
@@ -415,6 +429,7 @@ object Form1: TForm1
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 2
+        OnButtonClick = dialogOpen
       end
       object StaticText13: TStaticText
         Left = 0
