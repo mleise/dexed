@@ -194,7 +194,9 @@ end;
 
 function TLibraryItem.getModule(const value: string): TModuleInfo;
 begin
-  exit(fModulesByName.GetData(value));
+  result := nil;
+  if fModulesByName.contains(value) then
+    exit(fModulesByName.GetData(value));
 end;
 
 function TLibraryItem.addModuleInfo: TModuleInfo;
@@ -427,7 +429,9 @@ end;
 
 function TLibraryManager.getLibraryByAlias(const value: string): TLibraryItem;
 begin
-  exit(fItemsByAlias.GetData(value));
+  result := nil;
+  if fItemsByAlias.contains(value) then
+    exit(fItemsByAlias.GetData(value));
 end;
 
 function TLibraryManager.getLibraryByImport(const value: string): TLibraryItem;
