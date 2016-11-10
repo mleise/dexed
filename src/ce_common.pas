@@ -1319,10 +1319,10 @@ begin
     LoadFromStream(proc.Stderr);
     Insert(0, format('%s crashed with code: %d',
       [shortenPath(proc.Executable), proc.ExitStatus]));
+    str += ReplaceStr(Text, #0, #10);
     str += 'parameters:'#10;
     str += proc.Parameters.Text;
     str += 'stderr:'#10;
-    str += ReplaceStr(Text, #0, #10);
     raise Exception.Create(str);
   finally
     free;

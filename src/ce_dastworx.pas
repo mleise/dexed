@@ -51,9 +51,9 @@ begin
     prc.Input.Write(str[1], str.length);
     prc.CloseInput;
     processOutputToStrings(prc, imports);
+    while prc.Running do ;
     // TODO-cmaintenance: remove this from version 3 gold
     tryRaiseFromStdErr(prc);
-    while prc.Running do ;
   finally
     prc.free;
   end;
@@ -77,9 +77,9 @@ begin
     prc.Execute;
     prc.CloseInput;
     processOutputToStrings(prc, results);
+    while prc.Running do ;
     // TODO-cmaintenance: remove this from version 3 gold
     tryRaiseFromStdErr(prc);
-    while prc.Running do ;
   finally
     prc.free;
   end;

@@ -194,6 +194,7 @@ end;
 
 function TLibraryItem.getModule(const value: string): TModuleInfo;
 begin
+  //TODO-cFCL/LCL: use THashMap.GetValue from next FPC rlz
   result := nil;
   if fModulesByName.contains(value) then
     exit(fModulesByName.GetData(value));
@@ -429,6 +430,7 @@ end;
 
 function TLibraryManager.getLibraryByAlias(const value: string): TLibraryItem;
 begin
+  //TODO-cFCL/LCL: use THashMap.GetValue from next FPC rlz
   result := nil;
   if fItemsByAlias.contains(value) then
     exit(fItemsByAlias.GetData(value));
