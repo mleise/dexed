@@ -15,7 +15,7 @@ uses
   {$IFNDEF CEBUILD}
   forms,
   {$ENDIF}
-  process, asyncprocess, ghashmap, ghashset, LCLIntf;
+  process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils;
 
 const
   exeExt = {$IFDEF WINDOWS} '.exe' {$ELSE} ''   {$ENDIF};
@@ -1311,7 +1311,7 @@ end;
 
 procedure tryRaiseFromStdErr(proc: TProcess);
 var
-  str: string;
+  str: string = '';
 begin
   if (proc.ExitStatus <> 0) and (poUsePipes in proc.Options) and not
     (poStderrToOutPut in proc.Options) then with TStringList.Create do
@@ -1319,7 +1319,10 @@ begin
     LoadFromStream(proc.Stderr);
     Insert(0, format('%s crashed with code: %d',
       [shortenPath(proc.Executable), proc.ExitStatus]));
-    str := Text;
+    str += 'parameters:'#10;
+    str += proc.Parameters.Text;
+    str += 'stderr:'#10;
+    str += ReplaceStr(Text, #0, #10);
     raise Exception.Create(str);
   finally
     free;
