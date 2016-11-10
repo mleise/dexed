@@ -1126,15 +1126,15 @@ end;
 procedure TCEGdbWidget.executeFromShortcut(sender: TObject);
 begin
   case TMenuItem(sender).Tag of
-    0: btnStart.Click;
+    0: begin showWidget; btnStart.Click; end;
     1: btnStop.Click;
     2: btnPause.Click;
     3: btnContinue.Click;
     4: btnNext.Click;
     5: btnOver.Click;
-    6: btnReg.Click;
-    7: btnStack.Click;
-    8: btnVariables.Click;
+    6: begin showWidget; btnReg.Click; end;
+    7: begin showWidget; btnStack.Click; end;
+    8: begin showWidget; btnVariables.Click; end;
   end;
 end;
 {$ENDREGION}
@@ -1352,9 +1352,15 @@ var
   b: TPersistentBreakPoint;
 begin
   if not fDbgRunnable and (fProj = nil) then
+  begin
+    dlgOkInfo('No project to debug', 'GDB commander');
     exit;
+  end;
   if fDbgRunnable and fDoc.isNil then
+  begin
+    dlgOkInfo('No runnable to debug', 'GDB commander');
     exit;
+  end;
   if fProj.binaryKind <> executable then
     exit;
   if not fDbgRunnable then
@@ -1362,15 +1368,7 @@ begin
   else
     fExe := fDoc.fileName.stripFileExt + exeExt;
   //
-  fOutputName := fExe + '.inferiorout';
-  fInputName  := fExe + '.inferiorin';
-  FreeAndNil(fInput);
-  if fInputName.fileExists then
-    deletefile(fInputName);
-  fInput:= TFileStream.Create(fInputName, fmCreate or fmShareExclusive);
-  FreeAndNil(fOutput);
-  //
-  if not fExe.fileExists then
+  if (fExe = '/') or not fExe.fileExists then
   begin
     if fDbgRunnable then
       dlgOkInfo('Either the runnable is not compiled or it cannot be found' +
@@ -1380,9 +1378,21 @@ begin
       dlgOkInfo('The project binary is missing, cannot debug', 'GDB commander');
     exit;
   end;
+  //
+  fOutputName := fExe + '.inferiorout';
+  fInputName  := fExe + '.inferiorin';
+  FreeAndNil(fInput);
+  if fInputName.fileExists then
+    deletefile(fInputName);
+  fInput:= TFileStream.Create(fInputName, fmCreate or fmShareExclusive);
+  FreeAndNil(fOutput);
+  //
   gdb := exeFullName('gdb');
   if not gdb.fileExists then
+  begin
+    dlgOkInfo('Cannot debug, GDB is missing', 'GDB commander');
     exit;
+  end;
   subjDebugStart(fSubj, self as ICEDebugger);
   // gdb process
   killGdb;
@@ -1892,6 +1902,7 @@ begin
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
     i := ValueListEditor1.Row;
+    ValueListEditor1.BeginUpdate;
     ValueListEditor1.Clear;
     arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
@@ -1911,6 +1922,7 @@ begin
     end;
     if (i <> -1) and (i <= ValueListEditor1.RowCount) then
       ValueListEditor1.Row:=i;
+    ValueListEditor1.EndUpdate;
   end;
 
   if fOptions.showGdbOutput or fShowFromCustomCommand then
@@ -1934,8 +1946,8 @@ begin
 
   fLog.Clear;
   fGdb.getFullLines(fLog);
-  for str in fLog do
-    fMsg.message(str, nil, amcMisc, amkAuto);
+  //for str in fLog do
+  //  fMsg.message(str, nil, amcMisc, amkAuto);
 
   if flog.Text.isEmpty then
     exit;
@@ -2016,7 +2028,7 @@ end;
 
 procedure TCEGdbWidget.infoVariables;
 begin
-  gdbCommand('-stack-list-variables 1');
+  gdbCommand('-stack-list-variables --skip-unavailable --all-values');
 end;
 
 procedure TCEGdbWidget.btnStartClick(Sender: TObject);
