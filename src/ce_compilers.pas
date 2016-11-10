@@ -12,8 +12,6 @@ uses
 
 type
 
-  //TODO-cCompilerPaths: add a way to relaunch DCD after compiler change
-
   TCompilersPaths = class(TWritableLfmTextComponent)
   strict private
     fDefaultCompiler: DCompiler;
@@ -75,7 +73,7 @@ type
     procedure assign(source: TPersistent); override;
   end;
 
-  TForm1 = class(TForm, ICEEditableOptions, ICECompilerSelector)
+  TForm1 = class(TForm, ICEEditableOptions, ICECompilerSelector, ICEProjectObserver)
     selDefault: TComboBox;
     selDMDrt: TDirectoryEdit;
     selUSER2std: TDirectoryEdit;
@@ -118,6 +116,7 @@ type
   strict private
     fPaths: TCompilersPaths;
     fPathsBackup: TCompilersPaths;
+    fProj: ICECommonProject;
     procedure selectedExe(sender: TObject; var value: string);
     procedure selectedRt(sender: TObject; var value: string);
     procedure selectedStd(sender: TObject; var value: string);
@@ -137,6 +136,14 @@ type
     function isCompilerValid(value: DCompiler): boolean;
     function getCompilerPath(value: DCompiler): string;
     procedure getCompilerImports(value: DCompiler; paths: TStrings);
+    //
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure updateDCD;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -144,6 +151,9 @@ type
 
 implementation
 {$R *.lfm}
+
+uses
+  ce_libman;
 
 var
   Form1: TForm1;
@@ -155,7 +165,6 @@ const
 constructor TForm1.create(aOwner: TComponent);
 var
   fname: string;
-  imprt: TStringList;
 begin
   inherited;
   fPaths:= TCompilersPaths.Create(self);
@@ -173,13 +182,7 @@ begin
   fPathsBackup.Assign(fPaths);
   dataToGui;
 
-  imprt := TStringList.Create;
-  try
-    getCompilerImports(fPaths.defaultCompiler, imprt);
-    DcdWrapper.addImportFolders(imprt);
-  finally
-    imprt.free;
-  end;
+  updateDCD;
 
   selDMDexe.OnAcceptFileName:= @selectedExe;
   selGDCexe.OnAcceptFileName:= @selectedExe;
@@ -396,6 +399,35 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION ICEProjectObserver ----------------------------------------------------}
+procedure TForm1.projNew(project: ICECommonProject);
+begin
+end;
+
+procedure TForm1.projChanged(project: ICECommonProject);
+begin
+end;
+
+procedure TForm1.projClosing(project: ICECommonProject);
+begin
+  if fProj = project then
+    fProj := nil;
+end;
+
+procedure TForm1.projFocused(project: ICECommonProject);
+begin
+  fProj := project;
+end;
+
+procedure TForm1.projCompiling(project: ICECommonProject);
+begin
+end;
+
+procedure TForm1.projCompiled(project: ICECommonProject; success: boolean);
+begin
+end;
+{$ENDREGION}
+
 {$REGION ICEEditableOptions ----------------------------------------------------}
 function TForm1.optionedWantCategory(): string;
 begin
@@ -420,8 +452,19 @@ begin
     begin
       fPathsBackup.assign(fPaths);
       if fPaths.wouldNeedRestart and fPaths.modified then
-        dlgOkInfo('A restart might be necessary so that DCD caches a different version'
-          + 'of the runtime and the standard library.');
+      begin
+        if not DCDWrapper.launchedByCe then
+          dlgOkInfo('Coedit and DCD must be restarted manually in order to cache'
+            + ' the right runtime and the standard library versions.')
+        else
+        begin
+          DCDWrapper.relaunch;
+          updateDCD;
+          LibMan.updateDCD;
+          if assigned(fProj) then
+            fProj.activate;
+        end;
+      end;
       fPaths.modified:=false;
       fPaths.wouldNeedRestart:=false;
     end;
@@ -496,6 +539,19 @@ end;
 {$ENDREGION}
 
 {$REGION Compilers paths things ------------------------------------------------}
+procedure TForm1.updateDCD;
+var
+  imprt: TStringList;
+begin
+  imprt := TStringList.Create;
+  try
+    getCompilerImports(fPaths.defaultCompiler, imprt);
+    DcdWrapper.addImportFolders(imprt);
+  finally
+    imprt.free;
+  end;
+end;
+
 procedure TForm1.dataToGui;
 begin
   with fPaths do

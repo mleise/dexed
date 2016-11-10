@@ -41,6 +41,7 @@ type
     procedure updateServerlistening;
     procedure writeSourceToInput; inline;
     function checkDcdSocket: boolean;
+    function getIfLaunched: boolean;
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -59,6 +60,8 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     //
+    class procedure relaunch; static;
+    //
     procedure addImportFolders(const folders: TStrings);
     procedure addImportFolder(const folder: string);
     procedure getComplAtCursor(list: TStringList);
@@ -68,6 +71,7 @@ type
     procedure getLocalSymbolUsageFromCursor(var locs: TIntOpenArray);
     //
     property available: boolean read fAvailable;
+    property launchedByCe: boolean read getIfLaunched;
   end;
 
     function DCDWrapper: TCEDcdWrapper;
@@ -105,7 +109,8 @@ begin
   fClient.ShowWindow := swoHIDE;
   //
   fServerWasRunning := AppIsRunning((serverName));
-  if not fServerWasRunning then begin
+  if not fServerWasRunning then
+  begin
     fServer := TProcess.Create(self);
     fServer.Executable := exeFullName(serverName);
     fServer.Options := [{$IFDEF WINDOWS} poNewConsole{$ENDIF}];
@@ -131,6 +136,17 @@ begin
   updateServerlistening;
   //
   EntitiesConnector.addObserver(self);
+end;
+
+class procedure TCEDcdWrapper.relaunch;
+begin
+  fDcdWrapper.Free;
+  fDcdWrapper := TCEDcdWrapper.create(nil);
+end;
+
+function TCEDcdWrapper.getIfLaunched: boolean;
+begin
+  result := fServer.isNotNil;
 end;
 
 procedure TCEDcdWrapper.updateServerlistening;
@@ -159,6 +175,7 @@ begin
         i +=1;
       end;
     end;
+    fServer.Terminate(0);
     fServer.Free;
   end;
   fClient.Free;
@@ -320,7 +337,8 @@ begin
   fClient.Parameters.Clear;
   fClient.Parameters.Add('--shutdown');
   fClient.Execute;
-  sleep(500);
+  while fServer.Running or fClient.Running do
+    sleep(50);
 end;
 
 procedure TCEDcdWrapper.waitClient;
