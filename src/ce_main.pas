@@ -2789,9 +2789,7 @@ var
 begin
   if fDoc.isNil then
     exit;
-  if not InputQuery('Execution arguments', '', runargs) then
-    exit;
-  if compileRunnable(false) then
+  if compileRunnable(false) and InputQuery('Execution arguments', '', runargs) then
     executeRunnable(false, true, runargs);
 end;
 
