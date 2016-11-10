@@ -525,7 +525,7 @@
       <Unit54>
         <Filename Value="..\src\ce_compilers.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form1"/>
+        <ComponentName Value="CmopilersPathsEditor"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit54>

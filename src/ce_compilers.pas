@@ -73,7 +73,7 @@ type
     procedure assign(source: TPersistent); override;
   end;
 
-  TForm1 = class(TForm, ICEEditableOptions, ICECompilerSelector, ICEProjectObserver)
+  TCompilersPathsEditor = class(TForm, ICEEditableOptions, ICECompilerSelector, ICEProjectObserver)
     selDefault: TComboBox;
     selDMDrt: TDirectoryEdit;
     selUSER2std: TDirectoryEdit;
@@ -156,13 +156,13 @@ uses
   ce_libman;
 
 var
-  Form1: TForm1;
+  CompilersPathsEditor: TCompilersPathsEditor;
 
 const
   optFname = 'compilerspaths.txt';
 
 {$REGION Standard Object/Components things -------------------------------------}
-constructor TForm1.create(aOwner: TComponent);
+constructor TCompilersPathsEditor.create(aOwner: TComponent);
 var
   fname: string;
 begin
@@ -208,7 +208,7 @@ begin
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TForm1.destroy;
+destructor TCompilersPathsEditor.destroy;
 begin
   fPaths.saveToFile(getCoeditDocPath + optFname);
   EntitiesConnector.removeObserver(self);
@@ -400,52 +400,52 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TForm1.projNew(project: ICECommonProject);
+procedure TCompilersPathsEditor.projNew(project: ICECommonProject);
 begin
 end;
 
-procedure TForm1.projChanged(project: ICECommonProject);
+procedure TCompilersPathsEditor.projChanged(project: ICECommonProject);
 begin
 end;
 
-procedure TForm1.projClosing(project: ICECommonProject);
+procedure TCompilersPathsEditor.projClosing(project: ICECommonProject);
 begin
   if fProj = project then
     fProj := nil;
 end;
 
-procedure TForm1.projFocused(project: ICECommonProject);
+procedure TCompilersPathsEditor.projFocused(project: ICECommonProject);
 begin
   fProj := project;
 end;
 
-procedure TForm1.projCompiling(project: ICECommonProject);
+procedure TCompilersPathsEditor.projCompiling(project: ICECommonProject);
 begin
 end;
 
-procedure TForm1.projCompiled(project: ICECommonProject; success: boolean);
+procedure TCompilersPathsEditor.projCompiled(project: ICECommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
 {$REGION ICEEditableOptions ----------------------------------------------------}
-function TForm1.optionedWantCategory(): string;
+function TCompilersPathsEditor.optionedWantCategory(): string;
 begin
   exit('Compilers paths');
 end;
 
-function TForm1.optionedWantEditorKind: TOptionEditorKind;
+function TCompilersPathsEditor.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekForm);
 end;
 
-function TForm1.optionedWantContainer: TPersistent;
+function TCompilersPathsEditor.optionedWantContainer: TPersistent;
 begin
   fPathsBackup.assign(fPaths);
   exit(self);
 end;
 
-procedure TForm1.optionedEvent(event: TOptionEditorEvent);
+procedure TCompilersPathsEditor.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
     oeeAccept:
@@ -477,19 +477,19 @@ begin
   end;
 end;
 
-function TForm1.optionedOptionsModified: boolean;
+function TCompilersPathsEditor.optionedOptionsModified: boolean;
 begin
   exit(fPaths.modified);
 end;
 {$ENDREGION}
 
 {$REGION ICECompilerSelector ---------------------------------------------------}
-function TForm1.singleServiceName: string;
+function TCompilersPathsEditor.singleServiceName: string;
 begin
   exit('ICECompilerSelector');
 end;
 
-function TForm1.isCompilerValid(value: DCompiler): boolean;
+function TCompilersPathsEditor.isCompilerValid(value: DCompiler): boolean;
 begin
   result := false;
   with fPaths do case value of
@@ -503,7 +503,7 @@ begin
   end;
 end;
 
-function TForm1.getCompilerPath(value: DCompiler): string;
+function TCompilersPathsEditor.getCompilerPath(value: DCompiler): string;
 begin
   result := '';
   with fPaths do case value of
@@ -517,7 +517,7 @@ begin
   end;
 end;
 
-procedure TForm1.getCompilerImports(value: DCompiler; paths: TStrings);
+procedure TCompilersPathsEditor.getCompilerImports(value: DCompiler; paths: TStrings);
   procedure tryAdd(const pth: string);
   begin
     if pth.isNotEmpty then
@@ -539,7 +539,7 @@ end;
 {$ENDREGION}
 
 {$REGION Compilers paths things ------------------------------------------------}
-procedure TForm1.updateDCD;
+procedure TCompilersPathsEditor.updateDCD;
 var
   imprt: TStringList;
 begin
@@ -552,7 +552,7 @@ begin
   end;
 end;
 
-procedure TForm1.dataToGui;
+procedure TCompilersPathsEditor.dataToGui;
 begin
   with fPaths do
   begin
@@ -580,7 +580,7 @@ begin
   end;
 end;
 
-procedure TForm1.dialogOpen(sender: TObject);
+procedure TCompilersPathsEditor.dialogOpen(sender: TObject);
 var
   fne: TFileNameEdit;
   dre: TDirectoryEdit;
@@ -600,7 +600,7 @@ begin
   end;
 end;
 
-procedure TForm1.selectedExe(sender: TObject; var value: string);
+procedure TCompilersPathsEditor.selectedExe(sender: TObject; var value: string);
 var
   ctrl: TWinControl;
 begin
@@ -617,7 +617,7 @@ begin
     fPaths.User2ExeName:=value;
 end;
 
-procedure TForm1.selectedRt(sender: TObject; var value: string);
+procedure TCompilersPathsEditor.selectedRt(sender: TObject; var value: string);
 var
   ctrl: TWinControl;
 begin
@@ -634,7 +634,7 @@ begin
     fPaths.User2RuntimePath:=value;
 end;
 
-procedure TForm1.selectedStd(sender: TObject; var value: string);
+procedure TCompilersPathsEditor.selectedStd(sender: TObject; var value: string);
 var
   ctrl: TWinControl;
 begin
@@ -651,12 +651,12 @@ begin
     fPaths.User2PhobosPath:=value;
 end;
 
-procedure TForm1.selectedDefault(sender: TObject);
+procedure TCompilersPathsEditor.selectedDefault(sender: TObject);
 begin
   fPaths.defaultCompiler:= DCompiler(selDefault.ItemIndex);
 end;
 
-procedure TForm1.autoDetectDMD;
+procedure TCompilersPathsEditor.autoDetectDMD;
 {$IFDEF WINDOWS}
 var
   path: string;
@@ -692,20 +692,20 @@ begin
   {$ENDIF}
 end;
 
-procedure TForm1.autoDetectGDC;
+procedure TCompilersPathsEditor.autoDetectGDC;
 begin
   //TODO-cCompilerPaths: detect GDC
 end;
 
-procedure TForm1.autoDetectLDC;
+procedure TCompilersPathsEditor.autoDetectLDC;
 begin
   //TODO-cCompilerPaths: detect LDC
 end;
 {$ENDREGION}
 
 initialization
-  Form1 := TForm1.create(nil);
+  CompilersPathsEditor := TCompilersPathsEditor.create(nil);
 finalization
-  Form1.free;
+  CompilersPathsEditor.free;
 end.
 

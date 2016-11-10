@@ -1,9 +1,9 @@
-object Form1: TForm1
+object CompilersPathsEditor: TCompilersPathsEditor
   Left = 749
   Height = 869
   Top = 128
   Width = 460
-  Caption = 'Form1'
+  Caption = 'CompilersPathsEditor'
   ClientHeight = 869
   ClientWidth = 460
   LCLVersion = '1.6.0.4'
@@ -138,7 +138,7 @@ object Form1: TForm1
       object selGDCrt: TDirectoryEdit
         Left = 2
         Height = 20
-        Hint = 'select the root of LDC runtime & phobos sources (can be a common folder)'
+        Hint = 'select the root of druntime sources'
         Top = 60
         Width = 448
         ShowHidden = False
@@ -154,7 +154,7 @@ object Form1: TForm1
       object selGDCstd: TDirectoryEdit
         Left = 2
         Height = 20
-        Hint = 'select the root of LDC runtime & phobos sources (can be a common folder)'
+        Hint = 'select the root of phobos sources'
         Top = 101
         Width = 448
         ShowHidden = False
@@ -228,7 +228,7 @@ object Form1: TForm1
       object selLDCrt: TDirectoryEdit
         Left = 2
         Height = 20
-        Hint = 'select the root of druntime sources'
+        Hint = 'select the root of LDC runtime & phobos sources (can be a common folder)'
         Top = 60
         Width = 448
         ShowHidden = False
@@ -244,7 +244,7 @@ object Form1: TForm1
       object selLDCstd: TDirectoryEdit
         Left = 2
         Height = 20
-        Hint = 'select the root of phobos sources'
+        Hint = 'select the root of phobos sources (can be empty)'
         Top = 101
         Width = 448
         ShowHidden = False
@@ -301,6 +301,7 @@ object Form1: TForm1
       object selUSER1exe: TFileNameEdit
         Left = 2
         Height = 20
+        Hint = 'select the compiler'
         Top = 19
         Width = 448
         FilterIndex = 0
@@ -317,6 +318,7 @@ object Form1: TForm1
       object selUSER1rt: TDirectoryEdit
         Left = 2
         Height = 20
+        Hint = 'select the root of druntime sources'
         Top = 60
         Width = 448
         ShowHidden = False
@@ -332,6 +334,7 @@ object Form1: TForm1
       object selUSER1std: TDirectoryEdit
         Left = 2
         Height = 20
+        Hint = 'select the root of phobos sources'
         Top = 101
         Width = 448
         ShowHidden = False
@@ -388,6 +391,7 @@ object Form1: TForm1
       object selUSER2exe: TFileNameEdit
         Left = 2
         Height = 20
+        Hint = 'select the compiler'
         Top = 19
         Width = 448
         FilterIndex = 0
@@ -404,6 +408,7 @@ object Form1: TForm1
       object selUSER2rt: TDirectoryEdit
         Left = 2
         Height = 20
+        Hint = 'select the root of druntime sources'
         Top = 60
         Width = 448
         ShowHidden = False
@@ -419,6 +424,7 @@ object Form1: TForm1
       object selUSER2std: TDirectoryEdit
         Left = 2
         Height = 20
+        Hint = 'select the root of phobos sources'
         Top = 101
         Width = 448
         ShowHidden = False
@@ -475,7 +481,7 @@ object Form1: TForm1
       object selDefault: TComboBox
         Left = 2
         Height = 30
-        Hint = 'select which compiler paths are used by the completion daemon'
+        Hint = 'select which the compiler for which the library paths are used by the completion daemon'
         Top = 2
         Width = 448
         Align = alClient
