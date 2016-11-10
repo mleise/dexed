@@ -353,6 +353,7 @@ begin
   TProjectGroupItem(it).fGroup := self;
   project.inGroup(true);
   fProjectIndex := it.Index;
+  project.activate;
   doChanged;
 end;
 
