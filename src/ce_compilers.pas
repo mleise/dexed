@@ -172,13 +172,13 @@ begin
 
   fname := getCoeditDocPath + optFname;
   if fname.fileExists then
-    fPaths.loadFromFile(fname)
-  else
-  begin
+    fPaths.loadFromFile(fname);
+  if not isCompilerValid(dmd) then
     autoDetectDMD;
+  if not isCompilerValid(gdc) then
     autoDetectGDC;
+  if not isCompilerValid(ldc) then
     autoDetectLDC;
-  end;
   fPathsBackup.Assign(fPaths);
   dataToGui;
 
@@ -664,31 +664,31 @@ var
 begin
   {$IFDEF WINDOWS}
   path := exeFullName('dmd' + exeExt);
-  if path.dirExists then
+  if path.fileExists then
   begin
     fPaths.DmdExeName:= path;
     path := path.extractFileDir.extractFileDir.extractFileDir;
-    if (path + '\src\drunime\import').dirExists then
-      fPaths.DmdRuntimePath := path + '\src\drunime\import';
+    if (path + '\src\druntime\import').dirExists then
+      fPaths.DmdRuntimePath := path + '\src\druntime\import';
     if (path + '\src\phobos').dirExists then
-      fPaths.DmdRuntimePath := path + '\src\phobos';
+      fPaths.DmdPhobosPath := path + '\src\phobos';
   end;
   {$ENDIF}
   {$IFDEF LINUX}
   if '/usr/bin/dmd'.fileExists then
     fPaths.DmdExeName:='/usr/bin/dmd';
-  if '/usr/include/dmd/phobos'.dirExists then
-    fPaths.DmdPhobosPath:='/usr/include/dmd/phobos';
   if '/usr/include/dmd/druntime/import'.dirExists then
     fPaths.DmdRuntimePath:='/usr/include/dmd/druntime/import';
+  if '/usr/include/dmd/phobos'.dirExists then
+    fPaths.DmdPhobosPath:='/usr/include/dmd/phobos';
   {$ENDIF}
   {$IFDEF DARWIN}
   if '/usr/local/bin/dmd'.fileExists then
     fPaths.DmdExeName:='/usr/local/bin/dmd';
-  if '/Library/D/dmd/src/phobos'.dirExists then
-    fPaths.DmdPhobosPath:='/Library/D/dmd/src/phobos';
   if '/Library/D/dmd/src/druntime/import' then
     fPaths.DmdRuntimePath:='/Library/D/dmd/src/druntime/import';
+  if '/Library/D/dmd/src/phobos'.dirExists then
+    fPaths.DmdPhobosPath:='/Library/D/dmd/src/phobos';
   {$ENDIF}
 end;
 
