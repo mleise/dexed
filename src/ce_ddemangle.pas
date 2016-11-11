@@ -26,8 +26,6 @@ type
     property active: boolean read fActive;
   end;
 
-// TODO-cWindows: test the demangler under Windows
-
 // demangle a D name
 function demangle(const value: string): string;
 // demangle a list of D names
