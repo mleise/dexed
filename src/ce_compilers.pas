@@ -51,8 +51,6 @@ type
   protected
     procedure afterLoad; override;
   published
-    property wouldNeedRestart: boolean read fWouldNeedRestart write fWouldNeedRestart;
-    property modified: boolean read fModified write fModified;
     property defaultCompiler: DCompiler read fDefaultCompiler write setDefaultCompiler;
     property DmdExeName: string read fDmdExeName write setDmdExeName;
     property DmdRuntimePath: string read fDmdRuntimePath write setDmdRuntimePath;
@@ -71,6 +69,8 @@ type
     property User2PhobosPath: string read fUser2PhobosPath write setUser2PhobosPath;
   public
     procedure assign(source: TPersistent); override;
+    property wouldNeedRestart: boolean read fWouldNeedRestart write fWouldNeedRestart;
+    property modified: boolean read fModified write fModified;
   end;
 
   TCompilersPathsEditor = class(TForm, ICEEditableOptions, ICECompilerSelector, ICEProjectObserver)
