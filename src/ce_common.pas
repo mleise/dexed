@@ -10,12 +10,12 @@ uses
   {$IFDEF WINDOWS}
   Windows, JwaTlHelp32, registry,
   {$ELSE}
-  ExtCtrls, FileUtil, LazFileUtils,
+  ExtCtrls, FileUtil,
   {$ENDIF}
   {$IFNDEF CEBUILD}
   forms,
   {$ENDIF}
-  process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils;
+  LazFileUtils, process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils;
 
 const
   exeExt = {$IFDEF WINDOWS} '.exe' {$ELSE} ''   {$ENDIF};
