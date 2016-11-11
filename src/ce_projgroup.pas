@@ -558,9 +558,9 @@ begin
       exit;
     for fname in Files do
     begin
-      if projectGroup.findProject(fname) <> nil then
+      if projectGroup.findProject(fname.normalizePath) <> nil then
         continue;
-      projectGroup.addItem(fname);
+      projectGroup.addItem(fname.normalizePath);
       added := true;
     end;
     if added then

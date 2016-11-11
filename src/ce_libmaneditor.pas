@@ -721,7 +721,7 @@ begin
   try
     FileName := ini;
     if Execute then
-      List.Selected.SubItems[2] := FileName;
+      List.Selected.SubItems[2] := FileName.normalizePath;
   finally
     free;
   end;
@@ -741,6 +741,7 @@ begin
     filename := ini;
     if Execute then
     begin
+      filename := filename.normalizePath;
       if not filename.fileExists then
         List.Selected.SubItems[0] := filename.extractFilePath
       else

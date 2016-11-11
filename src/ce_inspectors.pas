@@ -188,7 +188,8 @@ begin
       with TOpenDialog.create(nil) do try
         InitialDir := GetValue.extractFileName;
         FileName := GetValue;
-        if Execute then SetValue(FileName);
+        if Execute then
+          SetValue(FileName.normalizePath);
       finally
         free;
       end;

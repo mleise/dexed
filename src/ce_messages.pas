@@ -633,7 +633,7 @@ begin
       try
         for itm in List.Items do
           lst.Add(itm.Text);
-        lst.SaveToFile(filename);
+        lst.SaveToFile(filename.normalizePath);
       finally
         lst.Free;
       end;

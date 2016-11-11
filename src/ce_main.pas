@@ -2161,6 +2161,7 @@ begin
     try
       if Execute then
       begin
+        filename := FileName.normalizePath;
         exp.Highlighter := fDoc.Highlighter;
         exp.Title := fDoc.fileName;
         exp.ExportAsText:=true;
@@ -2198,9 +2199,6 @@ begin
   openFile(TMenuItem(Sender).Hint);
 end;
 
-//TODO-cbugfix: OpenDialogs, double path separator when shortcuts resolved
-// i.e when ofNoDereferenceLinks is not set.
-
 procedure TCEMainForm.actFileOpenExecute(Sender: TObject);
 var
   fname: string;
@@ -2213,7 +2211,7 @@ begin
     filter := DdiagFilter;
     if execute then
       for fname in files do
-        openFile(fname);
+        openFile(fname.normalizePath);
   finally
     free;
   end;
@@ -2266,7 +2264,7 @@ begin
     if not fDoc.isTemporary and fDoc.fileName.fileExists then
       InitialDir := fDoc.fileName.extractFileDir;
     if execute then
-      fDoc.saveToFile(filename);
+      fDoc.saveToFile(filename.normalizePath);
   finally
     free;
   end;
@@ -2351,7 +2349,7 @@ begin
       str := TStringList.create;
       try
         str.assign(fDoc.Lines);
-        str.saveToFile(FileName);
+        str.saveToFile(FileName.normalizePath);
       finally
         str.free;
       end;
@@ -3308,7 +3306,7 @@ begin
     if fProject.filename.fileExists then
       InitialDir := fproject.filename.extractFileDir;
     if execute then
-      saveProjAs(filename);
+      saveProjAs(filename.normalizePath);
   finally
     Free;
   end;
@@ -3336,10 +3334,12 @@ begin
   if checkProjectLock then
       exit;
   if assigned(fProject) and fProject.modified and
-    (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then exit;
+    (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then
+      exit;
   with TOpenDialog.Create(nil) do
   try
-    if execute then openProj(filename);
+    if execute then
+      openProj(filename.normalizePath);
   finally
     Free;
   end;
@@ -3398,6 +3398,7 @@ begin
   try
     if execute then
     begin
+      filename := filename.normalizePath;
       fProjectGroup.closeGroup;
       fProjectGroup.openGroup(filename);
       fPrjGrpMru.Insert(0, filename);
@@ -3414,7 +3415,7 @@ begin
     if fProjectGroup.groupFilename.fileExists then
       InitialDir := fProjectGroup.groupFilename.extractFileDir;
     if execute then
-      fProjectGroup.saveGroup(filename);
+      fProjectGroup.saveGroup(filename.normalizePath);
   finally
     free;
   end;

@@ -857,7 +857,7 @@ begin
     begin
       fTokList.Clear;
       lex(fDoc.Text, fTokList, nil);
-      fTokList.saveToFile(FileName);
+      fTokList.saveToFile(FileName.normalizePath);
       fTokList.Clear;
     end;
   finally
@@ -923,7 +923,7 @@ begin
       fTokList.Clear;
       lex(fDoc.Text, fTokList, nil, [lxoNoComments]);
       getImports(fTOkList, str);
-      str.SaveToFile(filename);
+      str.SaveToFile(filename.normalizePath);
       fTokList.Clear;
       str.Free;
     end;

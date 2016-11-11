@@ -312,7 +312,7 @@ begin
     begin
       proj.beginUpdate;
       for fname in Files do
-        proj.addSource(fname);
+        proj.addSource(fname.normalizePath);
       proj.endUpdate;
     end;
   finally

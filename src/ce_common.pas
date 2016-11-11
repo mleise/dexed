@@ -81,6 +81,7 @@ type
     function length: integer;
     function toIntNoExcept(default: integer = -1): integer;
     function toInt: integer;
+    function normalizePath: string;
   end;
 
   (**
@@ -444,6 +445,11 @@ end;
 function TStringHelper.toIntNoExcept(default: integer = -1): integer;
 begin
   exit(StrToIntDef(self, default));
+end;
+
+function TStringHelper.normalizePath: string;
+begin
+  exit(TrimFilename(self));
 end;
 
 procedure TProcessEx.Assign(value: TPersistent);
