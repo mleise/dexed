@@ -460,8 +460,8 @@ begin
     {$IFDEF WINDOWS}
     // only link lib file if executable/shared lib
     // OS switch: read more @ http://forum.dlang.org/post/ooekdkwrefposmchekrp@forum.dlang.org
-    if (conf.outputOptions.binaryKind in [executable, sharedlib]) or
-      conf.outputOptions.alwaysLinkStaticLibs then
+    if (cfg.outputOptions.binaryKind in [executable, sharedlib]) or
+      cfg.outputOptions.alwaysLinkStaticLibs then
     {$ENDIF}
     LibMan.getLibFiles(als, opts);
     // but always adds -I<path>
