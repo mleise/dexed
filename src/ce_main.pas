@@ -273,7 +273,6 @@ type
     procedure actProjSelUngroupedExecute(Sender: TObject);
     procedure actSetRunnableSwExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure MenuItem77Click(Sender: TObject);
     procedure updateDocumentBasedAction(sender: TObject);
     procedure updateProjectBasedAction(sender: TObject);
     procedure updateDocEditBasedAction(sender: TObject);
