@@ -13,7 +13,7 @@ uses
   {$ENDIF}
   Classes, SysUtils, process, strUtils, RegExpr,
   ce_common, ce_writableComponent, ce_dmdwrap, ce_observer, ce_interfaces,
-  ce_processes, LazFileUtils;
+  ce_processes, LazFileUtils, ce_dastworx;
 
 type
 
@@ -36,6 +36,7 @@ type
     fBasePath: string;
     fRunnerOldCwd: string;
     fLibAliases: TStringList;
+    fAutoDeps: boolean;
     fConfigs: TCollection;
     fSrcs: TStringList;
     fConfIx: Integer;
@@ -81,6 +82,7 @@ type
     property Sources: TStringList read fSrcs write setSrcs; // 'read' should return a copy to avoid abs/rel errors
     property ConfigurationIndex: Integer read fConfIx write setConfIx;
     property LibraryAliases: TStringList read fLibAliases write setLibAliases;
+    property AutoSolveDependencies: boolean read fAutoDeps write fAutoDeps;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -90,7 +92,7 @@ type
     procedure addDefaults;
     procedure addSource(const fname: string);
     function addConfiguration: TCompilerConfiguration;
-    procedure getOpts(const list: TStrings);
+    procedure getOpts(opts: TStrings);
     //
     procedure activate;
     procedure inGroup(value: boolean);
@@ -408,28 +410,29 @@ begin
   fModified := false;
 end;
 
-procedure TCENativeProject.getOpts(const list: TStrings);
+procedure TCENativeProject.getOpts(opts: TStrings);
 var
-  rel: string;
   i: Integer;
   exc: TStringList;
-  libAliasesPtr: TStringList;
-  conf: TCompilerConfiguration;
+  als: TStringList;
+  cfg: TCompilerConfiguration;
   str: string;
+  rel: string;
+  lst: TStringList;
 begin
   if fConfIx = -1 then exit;
   exc := TStringList.Create;
   try
-    conf := currentConfiguration;
+    cfg := currentConfiguration;
     // prepares the exclusions
-    for i := 0 to conf.pathsOptions.exclusions.Count-1 do
+    for i := 0 to cfg.pathsOptions.exclusions.Count-1 do
     begin
-      str := fSymStringExpander.expand(conf.pathsOptions.exclusions[i]);
+      str := fSymStringExpander.expand(cfg.pathsOptions.exclusions[i]);
       exc.Add(str)
     end;
     // sources
     for rel in fSrcs do if rel <> '' then
-      list.Add(expandFilenameEx(fBasePath, rel)); // note: process.inc ln 249. double quotes are added if there's a space.
+      opts.Add(expandFilenameEx(fBasePath, rel)); // note: process.inc ln 249. double quotes are added if there's a space.
     // exclusions
     if exc.Count > 0 then with TRegExpr.Create do
     try
@@ -438,9 +441,9 @@ begin
         try
           Expression:= globToReg(str);
           Compile;
-          for i := list.Count-1 downto 0 do
-            if Exec(list[i]) then
-              list.Delete(i);
+          for i := opts.Count-1 downto 0 do
+            if Exec(opts[i]) then
+              opts.Delete(i);
         except
           continue;
         end;
@@ -449,10 +452,10 @@ begin
       free;
     end;
 
-    // libraries: an asterisk in list selects all the entries
-    libAliasesPtr := fLibAliases;
+    // libraries: an asterisk in opts selects all the entries
+    als := fLibAliases;
     if (fLibAliases.Count > 0) and (fLibAliases[0] = '*') then
-      libAliasesPtr := nil;
+      als := nil;
 
     {$IFDEF WINDOWS}
     // only link lib file if executable/shared lib
@@ -460,21 +463,39 @@ begin
     if (conf.outputOptions.binaryKind in [executable, sharedlib]) or
       conf.outputOptions.alwaysLinkStaticLibs then
     {$ENDIF}
-    LibMan.getLibFiles(libAliasesPtr, list);
-
+    LibMan.getLibFiles(als, opts);
     // but always adds -I<path>
-    LibMan.getLibSourcePath(libAliasesPtr, list);
-    // config
-    if conf.isOverriddenConfiguration then
+    LibMan.getLibSourcePath(als, opts);
+
+    if fAutoDeps then
     begin
-      conf.getOpts(list, fBaseConfig);
-      conf.otherOptions.getCompilerSpecificOpts(list, fBaseConfig.otherOptions,
+      lst := TStringList.Create;
+      try
+        str := '';
+        for i := 0 to fSrcs.Count-1 do
+          str += sourceAbsolute(i) + PathSeparator;
+        cfg.pathsOptions.getExtraSources(lst);
+        for i := 0 to lst.Count-1 do
+          str += lst[i] + PathSeparator;
+        lst.Clear;
+        getModulesImports(str, lst);
+        Libman.getLibFilesForImports(lst, opts);
+      finally
+        lst.Free;
+      end;
+    end;
+
+    // config
+    if cfg.isOverriddenConfiguration then
+    begin
+      cfg.getOpts(opts, fBaseConfig);
+      cfg.otherOptions.getCompilerSpecificOpts(opts, fBaseConfig.otherOptions,
         CEProjectCompiler);
     end
     else
     begin
-      conf.getOpts(list);
-      conf.otherOptions.getCompilerSpecificOpts(list, nil, CEProjectCompiler);
+      cfg.getOpts(opts);
+      cfg.otherOptions.getCompilerSpecificOpts(opts, nil, CEProjectCompiler);
     end;
   finally
     exc.Free;

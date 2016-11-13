@@ -230,6 +230,7 @@ type
     destructor destroy; override;
     procedure assign(source: TPersistent); override;
     procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
+    procedure getExtraSources(list: TStrings);
   end;
 
   (*****************************************************************************
@@ -973,6 +974,29 @@ begin
   TStringList(sender).BeginUpdate; // onChange not called anymore
   patchPlateformPaths(TStringList(sender));
   // EndUpdate is not called to avoid an infinite loop
+end;
+
+procedure TPathsOpts.getExtraSources(list: TStrings);
+var
+  e: TStringList;
+  s: string;
+  i: integer;
+begin
+  e := TStringList.create;
+  try
+    e.AddStrings(['.d','.di']);
+    for i := 0 to fExtraSrcs.Count-1 do
+    begin
+      s := fExtraSrcs[i];
+      if isStringDisabled(s) then
+        continue;
+      s := fSymStringExpander.expand(s);
+      if not listAsteriskPath(s, list, e) then
+        list.Add(s);
+    end;
+  finally
+    e.free;
+  end;
 end;
 
 procedure TPathsOpts.getOpts(list: TStrings; base: TOptsGroup = nil);

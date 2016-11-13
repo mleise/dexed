@@ -120,6 +120,7 @@ type
      * in "paths", as required by the specified "source" code.
      *)
     procedure getLibsForSource(source, libs, paths: TStrings);
+    procedure getLibFilesForImports(imports: TStrings; opts: TStrings);
     //
     procedure updateDCD;
     // find the aliases of the libraries used by the libraries.
@@ -622,6 +623,27 @@ begin
   finally
     sel.Free;
     imp.Free;
+  end;
+end;
+
+procedure TLibraryManager.getLibFilesForImports(imports: TStrings; opts: TStrings);
+var
+  i: integer;
+  b: TLibraryItem;
+  s: string;
+begin
+  for i := 0 to imports.Count-1 do
+  begin
+    b := libraryByImport[imports[i]];
+    if b.isNotNil and b.enabled then
+    begin
+      s := b.libFile;
+      if (opts.IndexOf(s) = -1) and (not s.isEmpty) then
+      begin
+        opts.Add(s);
+        opts.Add('-I' + b.libSourcePath);
+      end;
+    end;
   end;
 end;
 
