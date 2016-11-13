@@ -149,6 +149,7 @@ type
     MenuItem103: TMenuItem;
     MenuItem104: TMenuItem;
     MenuItem105: TMenuItem;
+    mnuOpts: TMenuItem;
     mnuItemMruGroup: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
@@ -218,7 +219,6 @@ type
     MenuItem74: TMenuItem;
     MenuItem75: TMenuItem;
     MenuItem76: TMenuItem;
-    MenuItem77: TMenuItem;
     MenuItem78: TMenuItem;
     MenuItem79: TMenuItem;
     MenuItem80: TMenuItem;
@@ -327,6 +327,7 @@ type
 
   private
 
+    fOptionCategories: TCEEditableOptionsSubject;
     fRunnablesOptions: TCEEditableRunnableOptions;
     fSymStringExpander: ICESymStringExpander;
     fProjectGroup: ICEProjectGroup;
@@ -382,6 +383,7 @@ type
     procedure updateMainMenuProviders;
     procedure updateFloatingWidgetOnTop(onTop: boolean);
     procedure widgetDockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
+    procedure mnuOptsItemClick(sender: TObject);
 
     // action provider handling;
     procedure clearActProviderEntries;
@@ -412,6 +414,7 @@ type
     procedure InitMRUs;
     procedure InitWidgets;
     procedure InitDocking;
+    procedure InitOptionsMenu;
     procedure LoadSettings;
     procedure SaveSettings;
     procedure LoadDocking;
@@ -1122,6 +1125,7 @@ begin
   inherited create(aOwner);
   fMainMenuSubj := TCEMainMenuSubject.create;
   fActionHandler := TCEActionProviderSubject.create;
+  fOptionCategories := TCEEditableOptionsSubject.create;
 
   EntitiesConnector.addObserver(self);
 
@@ -1142,6 +1146,8 @@ begin
 
   getCMdParams;
   fAppliOpts.assignTo(self);
+
+  InitOptionsMenu;
 
   fInitialized := true;
 end;
@@ -1195,6 +1201,46 @@ begin
       lst.Free;
     end;
   end;
+end;
+
+procedure TCEMainForm.InitOptionsMenu;
+var
+  l: TStringList;
+  i: integer;
+  s: string;
+  t: TMenuItem;
+  e: ICEEditableOptions;
+begin
+  l := TStringList.Create;
+  try
+    for i := 0 to fOptionCategories.observersCount-1 do
+    begin
+      e := fOptionCategories.observers[i] as ICEEditableOptions;
+      s := e.optionedWantCategory;
+      {$PUSH} {$WARNINGS OFF}
+      l.AddObject(s, TObject(e));
+      {$POP}
+    end;
+    l.Sort;
+    for i := 0 to l.Count-1 do
+    begin
+      t := TMenuItem.Create(self);
+      t.Caption := l[i];
+      t.Tag:= PtrInt(l.Objects[i]);
+      t.onClick := @mnuOptsItemClick;
+      mnuOpts.Add(t);
+    end;
+  finally
+    l.free;
+  end;
+end;
+
+procedure TCEMainForm.mnuOptsItemClick(sender: TObject);
+var
+  c: ICEEditableOptions;
+begin
+  c := ICEEditableOptions(TMenuItem(sender).Tag);
+  getOptionsEditor.showOptionEditor(c);
 end;
 
 procedure TCEMainForm.InitMRUs;
@@ -1751,11 +1797,6 @@ begin
     SaveDocking;
 end;
 
-procedure TCEMainForm.MenuItem77Click(Sender: TObject);
-begin
-  fOptEdWidg.showWidget;
-end;
-
 destructor TCEMainForm.destroy;
 begin
   SaveSettings;
@@ -1768,6 +1809,7 @@ begin
   //
   fMainMenuSubj.Free;
   fActionHandler.Free;
+  fOptionCategories.Free;
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
