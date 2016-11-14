@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, LazFileUtils, SynEditKeyCmds, SynHighlighterLFM, Forms,
   StdCtrls, AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls,
-  Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
+  Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process, math,
   {$IFDEF WINDOWS}Windows, {$ENDIF} XMLPropStorage, SynExportHTML, fphttpclient,
   xfpjson, xjsonparser, xjsonscanner,
   ce_common, ce_dmdwrap, ce_ceproject, ce_synmemo, ce_writableComponent,
@@ -15,7 +15,7 @@ uses
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor,{$IFDEF UNIX} ce_gdb,{$ENDIF}
-  ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange;
+  ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange, ce_dastworx;
 
 type
 
@@ -101,6 +101,7 @@ type
     actFileRunDub: TAction;
     actFileRunDubOut: TAction;
     actFileNewDubScript: TAction;
+    actFileMetricsHalstead: TAction;
     actProjGroupCompileCustomSync: TAction;
     actProjGroupClose: TAction;
     actProjGroupCompileSync: TAction;
@@ -149,6 +150,7 @@ type
     MenuItem103: TMenuItem;
     MenuItem104: TMenuItem;
     MenuItem105: TMenuItem;
+    MenuItem77: TMenuItem;
     mnuOpts: TMenuItem;
     mnuItemMruGroup: TMenuItem;
     MenuItem11: TMenuItem;
@@ -253,6 +255,7 @@ type
     MenuItem9: TMenuItem;
     procedure actFileCompileExecute(Sender: TObject);
     procedure actFileDscannerExecute(Sender: TObject);
+    procedure actFileMetricsHalsteadExecute(Sender: TObject);
     procedure actFileNewDubScriptExecute(Sender: TObject);
     procedure actFileRunDubExecute(Sender: TObject);
     procedure actFileRunDubOutExecute(Sender: TObject);
@@ -2870,6 +2873,84 @@ begin
     prc.Free;
     lst.Free;
   end;
+end;
+
+procedure TCEMainForm.actFileMetricsHalsteadExecute(Sender: TObject);
+procedure computeMetrics(const obj: TJSONObject);
+var
+  n1, sn1, n2, sn2: integer;
+  val: TJSONData;
+  voc, len, line: integer;
+  vol, dif, eff: single;
+begin
+  val := obj.Find('n1Count');
+  if val.isNil then
+    exit;
+  n1  := val.AsInteger;
+
+  val := obj.Find('n1Sum');
+  if val.isNil then
+    exit;
+  sn1 := val.AsInteger;
+
+  val := obj.Find('n2Count');
+  if val.isNil then
+    exit;
+  n2  := val.AsInteger;
+
+  val := obj.Find('n2Sum');
+  if val.isNil then
+    exit;
+  sn2 := val.AsInteger;
+
+  val := obj.Find('line');
+  if val.isNil then
+    exit;
+  line := val.AsInteger;
+  val := obj.Find('name');
+  if val.isNil then
+    exit;
+  fMsgs.message(format('%s(%d): Halstead metrics for "%s"',
+    [fDoc.fileName, line, val.AsString]), fDoc, amcEdit, amkInf);
+
+  voc := n1 + n2;
+  len := sn1 + sn2;
+  vol := len * log2(voc);
+  dif := n1 * 0.5 * (sn2 / n2);
+  eff := dif * vol;
+
+  fMsgs.message(format('    Vocabulary: %d', [voc]), fDoc, amcEdit, amkInf);
+  fMsgs.message(format('    Length: %d', [len]), fDoc, amcEdit, amkInf);
+  fMsgs.message(format('    Volume: %.2f', [vol]), fDoc, amcEdit, amkInf);
+  fMsgs.message(format('    Difficulty: %.2f', [dif]), fDoc, amcEdit, amkInf);
+  fMsgs.message(format('    Effort: %.2f', [eff]), fDoc, amcEdit, amkInf);
+  fMsgs.message(format('    Time required: %.2f secs.', [eff / 18]), fDoc, amcEdit, amkInf);
+
+end;
+var
+  jsn: TJSONObject = nil;
+  fnc: TJSONObject = nil;
+  val: TJSONData;
+  arr: TJSONArray;
+  i: integer;
+begin
+  if fDoc.isNil then
+    exit;
+
+  getHalsteadMetrics(fDoc.Lines, jsn);
+  if jsn.isNil then
+    exit;
+  val := jsn.Find('functions');
+  if val.isNil or (val.JSONType <> jtArray) then
+    exit;
+  arr := TJSONArray(val);
+  for i := 0 to arr.Count-1 do
+  begin
+    fnc := TJSONObject(arr.Objects[i]);
+    if fnc.isNotNil then
+      computeMetrics(fnc);
+  end;
+  jsn.Free;
 end;
 
 procedure TCEMainForm.actFileNewDubScriptExecute(Sender: TObject);

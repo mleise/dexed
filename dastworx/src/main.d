@@ -9,7 +9,7 @@ import
 import
     dparse.lexer, dparse.parser, dparse.ast, dparse.rollback_allocator;
 import
-    common, todos, symlist, imports, mainfun;
+    common, todos, symlist, imports, mainfun, halstead;
 
 
 private __gshared bool deepSymList;
@@ -59,6 +59,7 @@ void main(string[] args)
         "m", &handleMainfunOption,
         "s", &handleSymListOption,
         "t", &handleTodosOption,
+        "H", &handleHalsteadOption,
     );
 }
 
@@ -118,6 +119,21 @@ void handleMainfunOption()
         .getTokensForParser(config, &cache)
         .parseModule("", &alloc, &ignoreErrors)
         .detectMainFun();
+}
+
+/// Handles the "-H" option: write the halstead metrics
+void handleHalsteadOption()
+{
+    mixin(logCall);
+
+    RollbackAllocator alloc;
+    StringCache cache = StringCache(StringCache.defaultBucketCount);
+    LexerConfig config = LexerConfig("", StringBehavior.source);
+
+    source.data
+        .getTokensForParser(config, &cache)
+        .parseModule("", &alloc, &ignoreErrors)
+        .performHalsteadMetrics;
 }
 
 private void handleErrors(string fname, size_t line, size_t col, string message,

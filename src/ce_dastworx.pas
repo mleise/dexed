@@ -4,7 +4,7 @@ unit ce_dastworx;
 interface
 
 uses
-  Classes, SysUtils, process, ce_common;
+  Classes, SysUtils, process, xjsonscanner, xfpjson, xjsonparser, ce_common;
 
 (**
  * Gets the module name and the imports of the source code located in
@@ -19,6 +19,8 @@ procedure getModuleImports(source, imports: TStrings);
  * that a new group of import starts.
  *)
 procedure getModulesImports(const files: string; results: TStrings);
+
+procedure getHalsteadMetrics(source: TStrings; out jsn: TJSONObject);
 
 implementation
 
@@ -82,6 +84,40 @@ begin
     tryRaiseFromStdErr(prc);
   finally
     prc.free;
+  end;
+end;
+
+procedure getHalsteadMetrics(source: TStrings; out jsn: TJSONObject);
+var
+  prc: TProcess;
+  prs: TJSONParser;
+  jps: TJSONData;
+  str: string;
+begin
+  str := getToolName;
+  if str.isEmpty then
+    exit;
+  prc := TProcess.Create(nil);
+  try
+    prc.Executable := str;
+    prc.Parameters.Add('-H');
+    prc.Options := [poUsePipes {$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
+    prc.ShowWindow := swoHIDE;
+    prc.Execute;
+    str := source.Text;
+    prc.Input.Write(str[1], str.length);
+    prc.CloseInput;
+    prs := TJSONParser.Create(prc.Output, [joIgnoreTrailingComma, joUTF8]);
+    jps := prs.Parse;
+    if jps.isNotNil and (jps.JSONType = jtObject) then
+      jsn := TJSONObject(jps.Clone);
+    jps.Free;
+    while prc.Running do ;
+    // TODO-cmaintenance: remove this from version 3 gold
+    tryRaiseFromStdErr(prc);
+  finally
+    prs.Free;
+    prc.Free;
   end;
 end;
 

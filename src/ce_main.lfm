@@ -2387,6 +2387,9 @@ object CEMainForm: TCEMainForm
           AC002178AD002178AD002178AD002178AD002178AD002178AD00
         }
       end
+      object MenuItem77: TMenuItem
+        Action = actFileMetricsHalstead
+      end
       object MenuItem60: TMenuItem
         Action = actFileOpenContFold
         Bitmap.Data = {
@@ -5189,6 +5192,12 @@ object CEMainForm: TCEMainForm
       Caption = 'Close projects group'
       ImageIndex = 27
       OnExecute = actProjNewGroupExecute
+    end
+    object actFileMetricsHalstead: TAction
+      Category = 'File'
+      Caption = 'View Halstead metrics'
+      ImageIndex = 35
+      OnExecute = actFileMetricsHalsteadExecute
     end
   end
   object imgList: TImageList

@@ -41,6 +41,7 @@ object CurrentProject: TCENativeProject
     'src/imports.d'
     'src/mainfun.d'
     'src/common.d'
+    'src/halstead.d'
   )
   ConfigurationIndex = 1
 end
