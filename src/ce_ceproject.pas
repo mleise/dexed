@@ -82,7 +82,7 @@ type
     property Sources: TStringList read fSrcs write setSrcs; // 'read' should return a copy to avoid abs/rel errors
     property ConfigurationIndex: Integer read fConfIx write setConfIx;
     property LibraryAliases: TStringList read fLibAliases write setLibAliases;
-    property AutoSolveDependencies: boolean read fAutoDeps write fAutoDeps;
+    property AutoSolveDependencies: boolean read fAutoDeps write fAutoDeps default false;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
