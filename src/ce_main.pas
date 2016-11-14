@@ -2650,8 +2650,8 @@ begin
       dmd: dmdProc.Executable := fCompilerSelector.getCompilerPath(dmd);
       gdc, gdmd: dmdProc.Executable := fCompilerSelector.getCompilerPath(gdmd);
       ldc, ldmd: dmdProc.Executable := fCompilerSelector.getCompilerPath(ldmd);
-      user1: fCompilerSelector.getCompilerPath(user1);
-      user2: fCompilerSelector.getCompilerPath(user2);
+      user1: dmdProc.Executable := fCompilerSelector.getCompilerPath(user1);
+      user2: dmdProc.Executable := fCompilerSelector.getCompilerPath(user2);
     end;
     dmdproc.Parameters.Add(fDoc.fileName);
     if not asObj then

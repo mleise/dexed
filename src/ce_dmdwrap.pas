@@ -1238,17 +1238,17 @@ var
   i: integer;
   str: string;
   baseopt: TOtherOpts;
-  lst: TStringList;
+  lst: TStringList = nil;
 begin
   if base.isNil then
   begin
     // TODO-cCompilerPaths paths: add other options to CE proj format for the other comps
     case compiler of
       dmd: lst := fDmdOthers;
-      ldc: lst := fLdcOthers;
-      gdc: lst := fGdcOthers;
+      ldc, ldmd: lst := fLdcOthers;
+      gdc, gdmd: lst := fGdcOthers;
     end;
-    for i := 0 to lst.Count-1 do
+    if lst.isNotNil then for i := 0 to lst.Count-1 do
     begin
       str := lst[i];
       if str.isEmpty or isStringDisabled(str) then
@@ -1266,18 +1266,18 @@ begin
           lst := baseopt.fDmdOthers
         else
           lst := fDmdOthers;
-      ldc:
+      ldc, ldmd:
         if fLdcOthers.Count = 0 then
           lst := baseopt.fLdcOthers
         else
           lst := fLdcOthers;
-      gdc:
+      gdc, gdmd:
         if fGdcOthers.Count = 0 then
           lst := baseopt.fGdcOthers
         else
           lst := fGdcOthers;
     end;
-    for i := 0 to lst.Count-1 do
+    if lst.isNotNil then for i := 0 to lst.Count-1 do
     begin
       str := lst[i];
       if str.isEmpty or isStringDisabled(str) then

@@ -1035,7 +1035,7 @@ var
 begin
   str := TStringList.Create;
   try
-    str.Add(CEProjectCompilerFilename.extractFileName);
+    str.Add(CEProjectCompilerFilename);
     getOpts(str);
     result := str.Text;
   finally
