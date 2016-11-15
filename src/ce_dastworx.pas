@@ -93,11 +93,13 @@ var
   prs: TJSONParser;
   jps: TJSONData;
   str: string;
+  lst: TStringList;
 begin
   str := getToolName;
   if str.isEmpty then
     exit;
   prc := TProcess.Create(nil);
+  lst := TStringList.create;
   try
     prc.Executable := str;
     prc.Parameters.Add('-H');
@@ -107,7 +109,8 @@ begin
     str := source.Text;
     prc.Input.Write(str[1], str.length);
     prc.CloseInput;
-    prs := TJSONParser.Create(prc.Output, [joIgnoreTrailingComma, joUTF8]);
+    processOutputToStrings(prc, lst);
+    prs := TJSONParser.Create(lst.Text, [joIgnoreTrailingComma, joUTF8]);
     jps := prs.Parse;
     if jps.isNotNil and (jps.JSONType = jtObject) then
       jsn := TJSONObject(jps.Clone);
@@ -118,6 +121,7 @@ begin
   finally
     prs.Free;
     prc.Free;
+    lst.free;
   end;
 end;
 
