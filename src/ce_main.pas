@@ -2882,6 +2882,9 @@ var
   val: TJSONData;
   voc, len, line: integer;
   vol, dif, eff: single;
+  bgs: single;
+const
+  bgt: array[boolean] of TCEAppMessageKind = (amkInf, amkWarn);
 begin
   val := obj.Find('n1Count');
   if val.isNil then
@@ -2918,14 +2921,16 @@ begin
   vol := len * log2(voc);
   dif := n1 * 0.5 * (sn2 / n2);
   eff := dif * vol;
+  bgs := power(eff, 0.666667) / 3000;
 
   fMsgs.message(format('    Vocabulary: %d', [voc]), fDoc, amcEdit, amkInf);
   fMsgs.message(format('    Length: %d', [len]), fDoc, amcEdit, amkInf);
+  fMsgs.message(format('    Calculated program length: %f', [n1*log2(n1) + n2*log2(n2)]), fDoc, amcEdit, amkInf);
   fMsgs.message(format('    Volume: %.2f', [vol]), fDoc, amcEdit, amkInf);
-  fMsgs.message(format('    Difficulty: %.2f', [dif]), fDoc, amcEdit, amkInf);
+  fMsgs.message(format('    Difficulty to review: %.2f', [dif]), fDoc, amcEdit, amkInf);
   fMsgs.message(format('    Effort: %.2f', [eff]), fDoc, amcEdit, amkInf);
   fMsgs.message(format('    Time required: %.2f secs.', [eff / 18]), fDoc, amcEdit, amkInf);
-
+  fMsgs.message(format('    Estimated bugs: %.2f', [bgs]), fDoc, amcEdit, bgt[bgs >= 0.25]);
 end;
 var
   jsn: TJSONObject = nil;
