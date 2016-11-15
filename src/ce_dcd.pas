@@ -404,7 +404,8 @@ begin
   fClient.Execute;
   writeSourceToInput;
   //
-  fTempLines.LoadFromStream(fClient.Output);
+  fTempLines.Clear;
+  processOutputToStrings(fClient, fTempLines);
   while fClient.Running do ;
   if fTempLines.Count = 0 then
   begin
@@ -455,7 +456,8 @@ begin
   fClient.Execute;
   writeSourceToInput;
   //
-  fTempLines.LoadFromStream(fClient.Output);
+  fTempLines.Clear;
+  processOutputToStrings(fClient, fTempLines);
   while fClient.Running do ;
   if fTempLines.Count = 0 then
   begin
@@ -519,7 +521,8 @@ begin
   writeSourceToInput;
   //
   comment := '';
-  fTempLines.LoadFromStream(fClient.Output);
+  fTempLines.Clear;
+  processOutputToStrings(fClient, fTempLines);
   while fClient.Running do ;
   len := fTempLines.Count-1;
   if len = -1 then
@@ -564,7 +567,8 @@ begin
   fClient.Execute;
   writeSourceToInput;
   //
-  fTempLines.LoadFromStream(fClient.Output);
+  fTempLines.Clear;
+  processOutputToStrings(fClient, fTempLines);
   while fClient.Running do ;
   if fTempLines.Count > 0 then
   begin
@@ -602,7 +606,8 @@ begin
   writeSourceToInput;
   //
   setLength(locs, 0);
-  fTempLines.LoadFromStream(fClient.Output);
+  fTempLines.Clear;
+  processOutputToStrings(fClient, fTempLines);
   while fClient.Running do ;
   if fTempLines.Count < 2 then
     exit;
