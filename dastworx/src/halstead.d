@@ -22,6 +22,10 @@ private struct Function
     string name;
     size_t N1, n1;
     size_t N2, n2;
+    alias operatorsSum = N1;
+    alias operatorsKinds = n1;
+    alias operandsSum = N2;
+    alias operandsKinds = n2;
 }
 
 private final class HalsteadMetric: ASTVisitor
@@ -124,10 +128,9 @@ private final class HalsteadMetric: ASTVisitor
 
     override void visit(const(FunctionDeclaration) decl)
     {
+        beginFunction;
         if (!decl.functionBody)
             return;
-
-        beginFunction;
         decl.accept(this);
         endFunction(decl.name.text, decl.name.line);
     }
@@ -474,424 +477,379 @@ version(unittest)
         return result;
     }
 
-    unittest
+    Function test(string source)
     {
-        string src =
-        q{
-            void foo()
-            {
-                Object o = new Object;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 1);
-        assert(r.operators.length == 2);
+        import std.typecons;
+        HalsteadMetric hm = parseAndVisit!(HalsteadMetric)(source);
+        scope(exit) destruct(hm);
+        return hm.functions[$-1];
     }
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                auto o = new Object;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 1);
-        assert(r.operators.length == 2);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            Object o = new Object;
+        }
+    }.test;
+    assert(r.operandsKinds == 1);
+    assert(r.operatorsKinds == 2);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                auto o = 1 + 2;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 3);
-        assert(r.operators.length == 2);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            auto o = new Object;
+        }
+    }.test;
+    assert(r.operandsKinds == 1);
+    assert(r.operatorsKinds == 2);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                foo(bar,baz);
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 1);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            auto o = 1 + 2;
+        }
+    }.test;
+    assert(r.operandsKinds == 3);
+    assert(r.operatorsKinds == 2);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                int i = foo(bar,baz) + foo(bar,baz);
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 3);
-        assert(r.operators.length == 3);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            foo(bar,baz);
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                enum E{e0}
-                E e;
-                bar!(e,"lit")(baz(e));
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 2);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            int i = foo(bar,baz) + foo(bar,baz);
+        }
+    }.test;
+    assert(r.operandsKinds == 3);
+    assert(r.operatorsKinds == 3);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo();
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 0);
-        assert(r.operators.length == 0);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            enum E{e0}
+            E e;
+            bar!(e,"lit")(baz(e));
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 2);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            shared static this()
+unittest
+{
+    Function r =
+    q{
+        void foo();
+    }.test;
+    assert(r.operandsKinds == 0);
+    assert(r.operatorsKinds == 0);
+}
+
+unittest
+{
+    Function r =
+    q{
+        shared static this()
+        {
+            int i = 0;
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        shared static ~this()
+        {
+            int i = 0;
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        static this()
+        {
+            int i = 0;
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        static ~this()
+        {
+            int i = 0;
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        class Foo
+        {
+            this()
             {
                 int i = 0;
             }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 1);
-        r.destruct;
-    }
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            shared static ~this()
+unittest
+{
+    Function r =
+    q{
+        class Foo
+        {
+            ~this()
             {
                 int i = 0;
             }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 1);
-        r.destruct;
-    }
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            static this()
-            {
-                int i = 0;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 1);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            i += a << b;
+        }
+    }.test;
+    assert(r.operandsKinds == 3);
+    assert(r.operatorsKinds == 2);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            static ~this()
-            {
-                int i = 0;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 1);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            ++h;
+            i--;
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 2);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            class Foo
-            {
-                this()
-                {
-                    int i = 0;
-                }
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 1);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            ++i--;
+        }
+    }.test;
+    assert(r.operandsKinds == 1);
+    assert(r.operatorsKinds == 2);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            class Foo
-            {
-                ~this()
-                {
-                    int i = 0;
-                }
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 1);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            i = a | b & c && d || e^f + g^^h - a in b + a[0];
+        }
+    }.test;
+    assert(r.operandsKinds == 10);
+    assert(r.operatorsKinds == 11);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                i += a << b;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 3);
-        assert(r.operators.length == 2);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            Bar bar = new Bar;
+            auto baz = cast(Baz) bar;
+            delete bar;
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 4);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                ++h;
-                i--;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 2);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            foreach(i,a;z){}
+        }
+    }.test;
+    assert(r.operandsKinds == 3);
+    assert(r.operatorsKinds == 1);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                ++i--;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 1);
-        assert(r.operators.length == 2);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            foreach(i; l..h){}
+        }
+    }.test;
+    assert(r.operandsKinds == 3);
+    assert(r.operatorsKinds == 1);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                i = a | b & c && d || e^f + g^^h - a in b + a[0];
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 10);
-        assert(r.operators.length == 11);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            for(i = 0; i < len; i++){}
+        }
+    }.test;
+    assert(r.operandsKinds == 3);
+    assert(r.operatorsKinds == 4);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                Bar bar = new Bar;
-                auto baz = cast(Baz) bar;
-                delete bar;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 4);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            for(;;){continue;}
+        }
+    }.test;
+    assert(r.operandsKinds == 0);
+    assert(r.operatorsKinds == 2);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                foreach(i,a;z){}
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 3);
-        assert(r.operators.length == 1);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        int foo()
+        {
+            while(true) {return 0;}
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 2);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            switch(a)
             {
-                foreach(i; l..h){}
+                default: break;
+                case 1: return;
+                case 2: .. case 8: ;
             }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 3);
-        assert(r.operators.length == 1);
-        r.destruct;
-    }
+        }
+    }.test;
+    assert(r.operandsKinds == 4);
+    assert(r.operatorsKinds == 4);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                for(i = 0; i < len; i++){}
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 3);
-        assert(r.operators.length == 4);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            try a();
+            catch(Exception e)
+                throw v;
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 4);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                for(;;){continue;}
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 0);
-        assert(r.operators.length == 2);
-        r.destruct;
-    }
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            if (true) {} else {i = 0;}
+        }
+    }.test;
+    assert(r.operandsKinds == 3);
+    assert(r.operatorsKinds == 4);
+}
 
-    unittest
-    {
-        string src =
-        q{
-            int foo()
-            {
-                while(true) {return 0;}
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 2);
-        r.destruct;
-    }
-
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                switch(a)
-                {
-                    default: break;
-                    case 1: return;
-                    case 2: .. case 8: ;
-                }
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 4);
-        assert(r.operators.length == 4);
-        r.destruct;
-    }
-
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                try a();
-                catch(Exception e)
-                    throw v;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 2);
-        assert(r.operators.length == 4);
-        r.destruct;
-    }
-
-    unittest
-    {
-        string src =
-        q{
-            void foo()
-            {
-                if (true) {} else {i = 0;}
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        assert(r.operands.length == 3);
-        assert(r.operators.length == 4);
-        r.destruct;
-    }
-
-    unittest
-    {
-        // TODO: detect function call w/o parens
-        string src =
-        q{
-            void foo()
-            {
-                bar;
-            }
-        };
-        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
-        //assert(r.operands.length == 0);
-        //assert(r.operators.length == 1);
-        r.destruct;
-    }
+version(none) unittest
+{
+    // TODO: detect function call w/o parens
+    Function r =
+    q{
+        void foo()
+        {
+            bar;
+        }
+    }.test;
+    assert(r.operandsKinds == 0);
+    assert(r.operatorsKinds == 1);
 }
 
