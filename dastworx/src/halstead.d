@@ -1,7 +1,7 @@
 module halstead;
 
 import
-    std.meta, std.traits, std.algorithm.iteration, std.json;
+    std.meta, std.traits, std.algorithm.iteration, std.json, std.conv;
 import
     dparse.lexer, dparse.parser, dparse.ast, dparse.rollback_allocator;
 import
@@ -50,21 +50,20 @@ private final class HalsteadMetric: ASTVisitor
     }
 
     override void visit(const(PragmaExpression)){}
+    override void visit(const(Unittest)){}
 
-    //TODO: add share/static/__ctor & __dtor
-
-    override void visit(const(FunctionDeclaration) decl)
+    void beginFunction()
     {
-        if (!decl.functionBody)
-            return;
-
+        operators.clear;
+        operands.clear;
         if (functionNesting++ == 0)
             functions.length = functions.length + 1;
+    }
 
-        decl.accept(this);
-
-        functions[$-1].name = decl.name.text;
-        functions[$-1].line = decl.name.line;
+    void endFunction(string name, size_t line)
+    {
+        functions[$-1].name = name;
+        functions[$-1].line = line;
 
         if (operators.length)
         {
@@ -94,10 +93,85 @@ private final class HalsteadMetric: ASTVisitor
             writeln('\t',operands);
         }
 
-        operators.clear;
-        operands.clear;
-
         functionNesting--;
+    }
+
+    override void visit(const(FunctionCallExpression) expr)
+    {
+        if (expr.unaryExpression.primaryExpression)
+        {
+            const(PrimaryExpression) p = expr.unaryExpression.primaryExpression;
+            if (p.identifierOrTemplateInstance)
+            {
+                if (p.identifierOrTemplateInstance.templateInstance)
+                    ++operators[p.identifierOrTemplateInstance.templateInstance.identifier.text];
+                else
+                    ++operators[p.identifierOrTemplateInstance.identifier.text];
+            }
+        }
+        if (expr.templateArguments)
+        {
+            if (expr.templateArguments.templateSingleArgument)
+                ++operands[expr.templateArguments.templateSingleArgument.token.text];
+            else if (expr.templateArguments.templateArgumentList)
+            {
+                foreach(arg; expr.templateArguments.templateArgumentList.items)
+                    {}//++operands[arg.token.text];
+            }
+        }
+        expr.accept(this);
+    }
+
+    override void visit(const(FunctionDeclaration) decl)
+    {
+        if (!decl.functionBody)
+            return;
+
+        beginFunction;
+        decl.accept(this);
+        endFunction(decl.name.text, decl.name.line);
+    }
+
+    override void visit(const(SharedStaticConstructor) ssc)
+    {
+        beginFunction;
+        ssc.accept(this);
+        endFunction("sharedStaticCtorL" ~ to!string(ssc.line), ssc.line);
+    }
+
+    override void visit(const(StaticConstructor) sc)
+    {
+        beginFunction;
+        sc.accept(this);
+        endFunction("staticCtorL" ~ to!string(sc.line), sc.line);
+    }
+
+    override void visit(const(Constructor) sc)
+    {
+        beginFunction;
+        sc.accept(this);
+        endFunction("ctorL" ~ to!string(sc.line), sc.line);
+    }
+
+    override void visit(const(SharedStaticDestructor) ssc)
+    {
+        beginFunction;
+        ssc.accept(this);
+        endFunction("sharedStaticDtorL" ~ to!string(ssc.line), ssc.line);
+    }
+
+    override void visit(const(StaticDestructor) sc)
+    {
+        beginFunction;
+        sc.accept(this);
+        endFunction("staticDtorL" ~ to!string(sc.line), sc.line);
+    }
+
+    override void visit(const(Destructor) sc)
+    {
+        beginFunction;
+        sc.accept(this);
+        endFunction("dtorL" ~ to!string(sc.line), sc.line);
     }
 
     override void visit(const(PrimaryExpression) primary)
@@ -107,8 +181,6 @@ private final class HalsteadMetric: ASTVisitor
         {
             if (!functionCall)
                 ++operands[primary.identifierOrTemplateInstance.identifier.text];
-            else
-                ++operators[primary.identifierOrTemplateInstance.identifier.text];
 
         }
         else if (primary.primary.type.isLiteral)
@@ -129,13 +201,8 @@ private final class HalsteadMetric: ASTVisitor
         if (expr.suffix.type)
             ++operators[str(expr.suffix.type)];
 
-        // TODO: detect function name here
         if (expr.functionCallExpression)
             functionCall = true;
-
-        // TODO: detect function call w/o parens
-        //else if (expr.prefix.type == tok!"" && expr.suffix.type == tok!"")
-        //    functionCall = true;
 
         expr.accept(this);
     }
@@ -203,6 +270,12 @@ private final class HalsteadMetric: ASTVisitor
     override void visit(const(NewAnonClassExpression) expr)
     {
         ++operators["new"];
+        expr.accept(this);
+    }
+
+    override void visit(const(DeleteExpression) expr)
+    {
+        ++operators["delete"];
         expr.accept(this);
     }
 
@@ -317,6 +390,27 @@ private final class HalsteadMetric: ASTVisitor
         st.accept(this);
     }
 
+    override void visit(const(VariableDeclaration) decl)
+    {
+        if (decl.declarators)
+            foreach (elem; decl.declarators)
+            {
+                ++operands[elem.name.text];
+                if (elem.initializer)
+                    ++operators["="];
+            }
+        else if (decl.autoDeclaration)
+            visit(decl.autoDeclaration);
+        decl.accept(this);
+    }
+
+    final override void visit(const AutoDeclarationPart decl)
+    {
+        ++operands[decl.identifier.text];
+        ++operators["="];
+        decl.accept(this);
+    }
+
     static string exprAliases()
     {
         import std.range: iota;
@@ -367,23 +461,297 @@ version(unittest)
         return result;
     }
 
-    void test(T)(T t)
+    unittest
     {
-
-        auto a = 1;
-        auto b = a++;
-        auto c = a || b;
-        auto d = a << c;
-        auto e = a >>> c;
-        test(test());
-        test;
+        string src =
+        q{
+            void foo()
+            {
+                Object o = new Object;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 1);
+        assert(r.operators.length == 2);
     }
 
     unittest
     {
-        import std.file;
-        char[] source = cast(char[]) __FILE__.read;
-        auto r = source.parseAndVisit!HalsteadMetric;
+        string src =
+        q{
+            void foo()
+            {
+                auto o = new Object;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 1);
+        assert(r.operators.length == 2);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                auto o = 1 + 2;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 3);
+        assert(r.operators.length == 2);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                foo(bar,baz);
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 1);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                int i = foo(bar,baz) + foo(bar,baz);
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 3);
+        assert(r.operators.length == 3);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                enum E{e0}
+                E e;
+                bar!(e,"lit")(baz(e));
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 2);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo();
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 0);
+        assert(r.operators.length == 0);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            shared static this()
+            {
+                int i = 0;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 1);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            shared static ~this()
+            {
+                int i = 0;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 1);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            static this()
+            {
+                int i = 0;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 1);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            static ~this()
+            {
+                int i = 0;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 1);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            class Foo
+            {
+                this()
+                {
+                    int i = 0;
+                }
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 1);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            class Foo
+            {
+                ~this()
+                {
+                    int i = 0;
+                }
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 1);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                i += a << b;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 3);
+        assert(r.operators.length == 2);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                ++h;
+                i--;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 2);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                ++i--;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 1);
+        assert(r.operators.length == 2);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                i = a | b & c && d || e^f + g^^h - a in b + a[0];
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 10);
+        assert(r.operators.length == 11);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                Bar bar = new Bar;
+                auto baz = cast(Baz) bar;
+                delete bar;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 4);
+        r.destruct;
+    }
+
+    unittest
+    {
+        // TODO: detect function call w/o parens
+        string src =
+        q{
+            void foo()
+            {
+                bar;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        //assert(r.operands.length == 0);
+        //assert(r.operators.length == 1);
+        r.destruct;
     }
 }
 
