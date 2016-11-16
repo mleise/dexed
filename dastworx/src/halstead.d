@@ -1,7 +1,7 @@
 module halstead;
 
 import
-    std.meta, std.traits, std.algorithm.iteration, std.json, std.conv;
+    std.meta, std.algorithm.iteration, std.json, std.conv;
 import
     dparse.lexer, dparse.parser, dparse.ast, dparse.rollback_allocator;
 import
@@ -300,15 +300,15 @@ private final class HalsteadMetric: ASTVisitor
     override void visit(const(IfStatement) st)
     {
         ++operators["if"];
-        ifStatement = true;
         st.accept(this);
-        ifStatement = false;
+        if (st.thenStatement)
+            ++operators["then"];
+        if (st.elseStatement)
+            ++operators["else"];
     }
 
     override void visit(const(DeclarationOrStatement) st)
     {
-        if (ifStatement && st.statement)
-            ++operators["thenOrElse"];
         st.accept(this);
     }
 
@@ -327,6 +327,11 @@ private final class HalsteadMetric: ASTVisitor
     override void visit(const(ForeachStatement) st)
     {
         ++operators["foreach"];
+        if (st.foreachTypeList)
+            foreach(ft; st.foreachTypeList.items)
+                ++operands[ft.identifier.text];
+        if (st.foreachType)
+            ++operands[st.foreachType.identifier.text];
         st.accept(this);
     }
 
@@ -368,7 +373,7 @@ private final class HalsteadMetric: ASTVisitor
 
     override void visit(const(CaseRangeStatement) st)
     {
-        ++operators["case"];
+        ++++operators["case"];
         st.accept(this);
     }
 
@@ -388,6 +393,14 @@ private final class HalsteadMetric: ASTVisitor
     {
         ++operators["try"];
         st.accept(this);
+    }
+
+    override void visit(const(Catch) c)
+    {
+        ++operators["catch"];
+        c.accept(this);
+        if (c.identifier.text)
+            ++operands[c.identifier.text];
     }
 
     override void visit(const(VariableDeclaration) decl)
@@ -734,6 +747,133 @@ version(unittest)
         };
         HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
         assert(r.operands.length == 2);
+        assert(r.operators.length == 4);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                foreach(i,a;z){}
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 3);
+        assert(r.operators.length == 1);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                foreach(i; l..h){}
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 3);
+        assert(r.operators.length == 1);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                for(i = 0; i < len; i++){}
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 3);
+        assert(r.operators.length == 4);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                for(;;){continue;}
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 0);
+        assert(r.operators.length == 2);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            int foo()
+            {
+                while(true) {return 0;}
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 2);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                switch(a)
+                {
+                    default: break;
+                    case 1: return;
+                    case 2: .. case 8: ;
+                }
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 4);
+        assert(r.operators.length == 4);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                try a();
+                catch(Exception e)
+                    throw v;
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 2);
+        assert(r.operators.length == 4);
+        r.destruct;
+    }
+
+    unittest
+    {
+        string src =
+        q{
+            void foo()
+            {
+                if (true) {} else {i = 0;}
+            }
+        };
+        HalsteadMetric r = src.parseAndVisit!HalsteadMetric;
+        assert(r.operands.length == 3);
         assert(r.operators.length == 4);
         r.destruct;
     }
