@@ -104,7 +104,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
                 pasStream.put("\ritem\r");
                 pasStream.put(format("line=%d\r", error.line));
                 pasStream.put(format("col=%d\r", error.column));
-                pasStream.put(format("name='%s'\r", patchPascalString(error.message)));
+                pasStream.put(format("name='%s'\r", patchPascalString!100(error.message)));
                 pasStream.put(format("symType=%s\r", type));
                 pasStream.put("end");
             }

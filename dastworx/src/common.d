@@ -193,31 +193,52 @@ private void fillBadVersions()
 /**
  * Make a D string compatible with an Object Pascal string literal.
  */
-string patchPascalString(string value)
+string patchPascalString(size_t lenLimit = 0)(string value)
 {
     Appender!string app;
-    app.reserve(value.length);
+    static if (lenLimit)
+        const size_t len = value.length > 100 ? 100 : value.length;
+    else
+        const size_t len = value.length;
+    app.reserve(len);
     bool skip;
-    foreach (immutable i; 0..value.length)
+    L: foreach (immutable i; 0..value.length)
     {
         const char c = value[i];
-        if (c > 0x7F)
+        switch (c)
         {
-            app ~= value[i];
-            skip = true;
-        }
-        else if (c == '\'')
-        {
-            if (skip)
+            case 0x80: .. case 0xFF:
+            {
                 app ~= value[i];
-            else
-                app ~= "'#39'";
-            skip = false;
-        }
-        else
-        {
-            app ~= value[i];
-            skip = false;
+                skip = true;
+                break;
+            }
+            case '\'':
+            {
+                if (skip)
+                    app ~= value[i];
+                else
+                    app ~= "'#39'";
+                skip = false;
+                break;
+            }
+            case '\r': case '\n':
+            {
+                if (skip)
+                    app ~= value[i];
+                else
+                    app ~= "'#10'";
+                skip = false;
+                break;
+            }
+            default:
+            {
+                app ~= value[i];
+                skip = false;
+                static if (lenLimit)
+                    if (app.data.length >= len)
+                        break L;
+            }
         }
     }
     return app.data;
