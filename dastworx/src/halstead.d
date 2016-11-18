@@ -9,6 +9,11 @@ import
 version(unittest){} else import
     common;
 
+/**
+ * Retrieves the count and unique count of the operands and operators of
+ * each function (inc. methods) of a module. After the call the results are
+ * serialized as JSON in te standard output.
+ */
 void performHalsteadMetrics(const(Module) mod)
 {
     HalsteadMetric hm = construct!(HalsteadMetric);
@@ -91,7 +96,7 @@ private final class HalsteadMetric: ASTVisitor
 
         version(unittest)
         {
-            import std.stdio;
+            import std.stdio: writeln;
             writeln(functions[$-1]);
             writeln('\t',operators);
             writeln('\t',operands);
@@ -479,7 +484,6 @@ version(unittest)
 
     Function test(string source)
     {
-        import std.typecons;
         HalsteadMetric hm = parseAndVisit!(HalsteadMetric)(source);
         scope(exit) destruct(hm);
         return hm.functions[$-1];
