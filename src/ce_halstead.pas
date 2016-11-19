@@ -178,6 +178,8 @@ procedure THalsteadMetrics.Measure(document: TCESynMemo);
     if val.isNil then
       exit;
     n1  := val.AsInteger;
+    if n1 = 0 then
+      exit;
 
     val := obj.Find('n1Sum');
     if val.isNil then
@@ -188,6 +190,8 @@ procedure THalsteadMetrics.Measure(document: TCESynMemo);
     if val.isNil then
       exit;
     n2  := val.AsInteger;
+    if n2 = 0 then
+      exit;
 
     val := obj.Find('n2Sum');
     if val.isNil then
