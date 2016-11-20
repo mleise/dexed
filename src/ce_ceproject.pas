@@ -643,6 +643,7 @@ end;
 procedure TCENativeProject.updateOutFilename;
 var
   fe: boolean = false;
+  ext: string;
 begin
   fOutputFilename := currentConfiguration.pathsOptions.outputFilename;
   fe := currentConfiguration.pathsOptions.forceExtension;
@@ -680,11 +681,15 @@ begin
     fe := true;
   end;
   //
-  if fe then case currentConfiguration.outputOptions.binaryKind of
-    executable: fOutputFilename := ChangeFileExt(fOutputFilename, exeExt);
-    staticlib:  fOutputFilename := ChangeFileExt(fOutputFilename, libExt);
-    sharedlib:  fOutputFilename := ChangeFileExt(fOutputFilename, dynExt);
-    obj:        fOutputFilename := ChangeFileExt(fOutputFilename, objExt);
+  if fe then
+  begin
+    ext := fOutputFilename.extractFileExt;
+    case currentConfiguration.outputOptions.binaryKind of
+      executable: if ext <> exeExt then fOutputFilename += exeExt;
+      staticlib:  if ext <> libExt then fOutputFilename += libExt;
+      sharedlib:  if ext <> dynExt then fOutputFilename += dynExt;
+      obj:        if ext <> dynExt then fOutputFilename += objExt;
+    end;
   end;
   //
   fCanBeRun := false;
