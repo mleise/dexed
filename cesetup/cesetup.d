@@ -7,7 +7,11 @@ version(X86)    version(linux)  version = nux32;
 version(X86_64) version(linux)  version = nux64;
 version(X86)    version(Windows)version = win32;
 
-version(Windows) enum exeExt = ".exe";
+version(Windows)
+{
+    enum exeExt = ".exe";
+    pragma(lib, "ole32.lib");
+}
 else enum exeExt = "";
 
 alias ImpType = immutable ubyte[];
@@ -347,27 +351,40 @@ void postInstall()
 {
     version(Windows)
     {
-        import std.conv: to;
-        import std.random: uniform;
 
-        string target = exePath ~ "coedit.exe";
-        string vbsName;
-        do vbsName = environment.get("TEMP") ~ r"\cesh" ~ uniform(0,int.max).to!string ~ ".vbs";
-        while (vbsName.exists);
+        import
+            core.sys.windows.basetyps, core.sys.windows.com,
+            core.sys.windows.objbase, core.sys.windows.objidl,
+            core.sys.windows.shlobj, core.sys.windows.windef,
+            std.utf;
 
-        string vbsCode = "
-            set WshShell = CreateObject(\"WScript.shell\")
-            strDesktop = WshShell.SpecialFolders(\"Desktop\")
-            set lnk = WshShell.CreateShortcut(strDesktop + \"\\Coedit.lnk\")
-            lnk.TargetPath = \"%s\"
-            lnk.Save
-        ";
-        File vbs = File(vbsName, "w");
-        vbs.writefln(vbsCode, target);
-        vbs.close;
-        executeShell(vbsName);
+        extern(C) const GUID CLSID_ShellLink     = {0x00021401, 0x0000, 0x0000,
+          [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46]};
 
-        tryRemove(vbsName);
+        extern(C) const IID IID_IShellLinkA      = {0x000214EE, 0x0000, 0x0000,
+          [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46]};
+
+        extern(C) const IID IID_IPersistFile     = {0x0000010B, 0x0000, 0x0000,
+          [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46]};
+
+        char[MAX_PATH] _desktopFolder;
+        SHGetFolderPathA(null, CSIDL_DESKTOPDIRECTORY, null, 0, _desktopFolder.ptr);
+        char[] desktopFolder = _desktopFolder.ptr.fromStringz();
+        string target = exePath ~ "coedit.exe\0";
+        string wdir = exePath ~ "\0";
+        const(wchar)* linkPath = buildNormalizedPath(desktopFolder, "Coedit.lnk").toUTF16z();
+
+
+        CoInitialize(null);
+        IShellLinkA shellLink;
+        IPersistFile linkFile;
+        CoCreateInstance(&CLSID_ShellLink, null, CLSCTX_INPROC_SERVER,
+            &IID_IShellLinkA, cast(void**)&shellLink);
+        shellLink.SetPath(target.ptr);
+        shellLink.SetWorkingDirectory(wdir.ptr);
+        shellLink.QueryInterface(&IID_IPersistFile, cast(void**)&linkFile);
+        linkFile.Save(linkPath, TRUE);
+        CoUninitialize();
     }
     else version(linux)
     {
