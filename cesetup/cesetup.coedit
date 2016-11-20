@@ -12,6 +12,7 @@ object CurrentProject: TCENativeProject
         'win32/'
         '<CPP>'
       )
+      pathsOptions.forceExtension = True
       preBuildProcess.executable = 'cmd'
       preBuildProcess.workingDirectory = '<CPP>'
       preBuildProcess.options = [poUsePipes, poStderrToOutPut]
