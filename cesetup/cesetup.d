@@ -26,12 +26,13 @@ enum Kind
 
 struct Resource
 {
+    @disable this(this);
     ImpType data;
     immutable string destName;
     immutable Kind kind;
 }
 
-Resource[] ceResources =
+immutable Resource[] ceResources =
 [
     Resource(cast(ImpType) import("coedit" ~ exeExt), "coedit" ~ exeExt, Kind.exe),
     Resource(cast(ImpType) import("dastworx" ~ exeExt), "dastworx" ~ exeExt, Kind.exe),
@@ -40,14 +41,14 @@ Resource[] ceResources =
     Resource(cast(ImpType) import("coedit.license.txt"), "coedit.license.txt", Kind.doc)
 ];
 
-Resource[] dcdResources =
+immutable Resource[] dcdResources =
 [
     Resource(cast(ImpType) import("dcd-server" ~ exeExt), "dcd-server" ~ exeExt, Kind.exe),
     Resource(cast(ImpType) import("dcd-client" ~ exeExt), "dcd-client" ~ exeExt, Kind.exe),
     Resource(cast(ImpType) import("dcd.license.txt"), "dcd.license.txt", Kind.doc)
 ];
 
-Resource[] oldResources =
+immutable Resource[] oldResources =
 [
     Resource(cast(ImpType) [], "cesyms" ~ exeExt, Kind.exe),
     Resource(cast(ImpType) [], "cetodo" ~ exeExt, Kind.exe),
@@ -292,7 +293,7 @@ void main(string[] args)
 }
 
 /// Returns the resource target filename, according to its Kind
-string targetFilename(Resource resource)
+string targetFilename(ref ResType resource)
 {
     with(Kind) final switch(resource.kind)
     {
@@ -303,7 +304,7 @@ string targetFilename(Resource resource)
 }
 
 /// Extracts and writes a resource to a file.
-bool installResource(Resource resource)
+bool installResource(ref ResType resource)
 {
     const string fname = resource.targetFilename;
     const string path = fname.dirName;
@@ -328,11 +329,13 @@ bool installResource(Resource resource)
 }
 
 /// Deletes the file created for a resource
-bool uninstallResource(Resource resource)
+bool uninstallResource(ref ResType resource)
 {
     const string fname = resource.targetFilename;
-    if (!fname.exists) return true;
-    else return tryRemove(fname);  
+    if (!fname.exists)
+        return true;
+    else
+        return tryRemove(fname);
 }
 
 /// returns true if fname is deleted
