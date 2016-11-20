@@ -685,7 +685,9 @@ begin
   begin
     ext := fOutputFilename.extractFileExt;
     case currentConfiguration.outputOptions.binaryKind of
+      {$IFDEF WINDOWS}
       executable: if ext <> exeExt then fOutputFilename += exeExt;
+      {$ENDIF}
       staticlib:  if ext <> libExt then fOutputFilename += libExt;
       sharedlib:  if ext <> dynExt then fOutputFilename += dynExt;
       obj:        if ext <> dynExt then fOutputFilename += objExt;
