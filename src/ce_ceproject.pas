@@ -641,8 +641,17 @@ begin
 end;
 
 procedure TCENativeProject.updateOutFilename;
+var
+  fe: boolean = false;
 begin
   fOutputFilename := currentConfiguration.pathsOptions.outputFilename;
+  fe := currentConfiguration.pathsOptions.forceExtension;
+  if currentConfiguration.isOverriddenConfiguration and fOutputFilename.isEmpty and
+    fBaseConfig.isNotNil then
+  begin
+    fOutputFilename := fBaseConfig.pathsOptions.outputFilename;
+    fe := fBaseConfig.pathsOptions.forceExtension;
+  end;
   // field is specified
   if fOutputFilename.isNotEmpty then
   begin
@@ -668,13 +677,14 @@ begin
       fOutputFilename := fileName.extractFilePath + fOutputFilename
     else
       fOutputFilename := GetTempDir(false) + fOutputFilename;
-    // force extension
-    case currentConfiguration.outputOptions.binaryKind of
-      executable: fOutputFilename := ChangeFileExt(fOutputFilename, exeExt);
-      staticlib:  fOutputFilename := ChangeFileExt(fOutputFilename, libExt);
-      sharedlib:  fOutputFilename := ChangeFileExt(fOutputFilename, dynExt);
-      obj:        fOutputFilename := ChangeFileExt(fOutputFilename, objExt);
-    end;
+    fe := true;
+  end;
+  //
+  if fe then case currentConfiguration.outputOptions.binaryKind of
+    executable: fOutputFilename := ChangeFileExt(fOutputFilename, exeExt);
+    staticlib:  fOutputFilename := ChangeFileExt(fOutputFilename, libExt);
+    sharedlib:  fOutputFilename := ChangeFileExt(fOutputFilename, dynExt);
+    obj:        fOutputFilename := ChangeFileExt(fOutputFilename, objExt);
   end;
   //
   fCanBeRun := false;
