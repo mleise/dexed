@@ -434,8 +434,8 @@ private final class HalsteadMetric: ASTVisitor
             static if (is(T == AndExpression)) op = `&`;
             else static if (is(T == AndAndExpression)) op = `&&`;
             else static if (is(T == AsmAndExp)) op = `&`;
-            else static if (is(T == AsmLogAndExp)) op = "?";
-            else static if (is(T == AsmLogOrExp)) op = "?";
+            else static if (is(T == AsmLogAndExp)) op = "&&";
+            else static if (is(T == AsmLogOrExp)) op = "||";
             else static if (is(T == AsmOrExp)) op = "|";
             else static if (is(T == AsmXorExp)) op = "|";
             else static if (is(T == IdentityExpression)) op = expr.negated ? "!is" : "is";
