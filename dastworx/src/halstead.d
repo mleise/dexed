@@ -33,6 +33,12 @@ private struct Function
     alias operandsKinds = n2;
 }
 
+private struct BinaryExprFlags
+{
+    bool leftIsFunction;
+    bool rightIsFunction;
+}
+
 private final class HalsteadMetric: ASTVisitor
 {
     alias visit = ASTVisitor.visit;
@@ -40,14 +46,32 @@ private final class HalsteadMetric: ASTVisitor
     Function[] functions;
     size_t[string] operators;
     size_t[string] operands;
+    BinaryExprFlags[] binExprFlag;
     size_t functionNesting;
     bool functionCall;
     bool ifStatement;
     JSONValue fs;
 
+    void pushExprFlags(bool leftFlag = false, bool rightFlag = false)
+    {
+        binExprFlag.length += 1;
+        binExprFlag[$-1].leftIsFunction = leftFlag;
+        binExprFlag[$-1].rightIsFunction = rightFlag;
+    }
+
+    void popExprFlags()
+    {
+        binExprFlag.length -= 1;
+    }
+
+    bool exprLeftIsFunction(){return binExprFlag[$-1].leftIsFunction;}
+
+    bool exprRightIsFunction(){return binExprFlag[$-1].rightIsFunction;}
+
     this()
     {
         fs = parseJSON("[]");
+        pushExprFlags;
     }
 
     void serialize()
@@ -187,9 +211,8 @@ private final class HalsteadMetric: ASTVisitor
 	    if (primary.identifierOrTemplateInstance !is null
 		    && primary.identifierOrTemplateInstance.identifier != tok!"")
         {
-            if (!functionCall)
+            if (!functionCall ||  (functionCall & exprLeftIsFunction) || (functionCall & exprRightIsFunction))
                 ++operands[primary.identifierOrTemplateInstance.identifier.text];
-
         }
         else if (primary.primary.type.isLiteral)
         {
@@ -212,54 +235,6 @@ private final class HalsteadMetric: ASTVisitor
         if (expr.functionCallExpression)
             functionCall = true;
 
-        expr.accept(this);
-    }
-
-    override void visit(const(AndAndExpression) expr)
-    {
-        ++operators["&&"];
-        expr.accept(this);
-    }
-
-    override void visit(const(OrOrExpression) expr)
-    {
-        ++operators["||"];
-        expr.accept(this);
-    }
-
-    override void visit(const(AndExpression) expr)
-    {
-        ++operators["&"];
-        expr.accept(this);
-    }
-
-    override void visit(const(AsmAndExp) expr)
-    {
-        ++operators["&"];
-        expr.accept(this);
-    }
-
-    override void visit(const(OrExpression) expr)
-    {
-        ++operators["|"];
-        expr.accept(this);
-    }
-
-    override void visit(const(InExpression) expr)
-    {
-        ++operators["in"];
-        expr.accept(this);
-    }
-
-    override void visit(const(PowExpression) expr)
-    {
-        ++operators["^"];
-        expr.accept(this);
-    }
-
-    override void visit(const(XorExpression) expr)
-    {
-        ++operators["^^"];
         expr.accept(this);
     }
 
@@ -432,40 +407,86 @@ private final class HalsteadMetric: ASTVisitor
         decl.accept(this);
     }
 
-    static string exprAliases()
+    void visitBinExpr(T)(const(T) expr)
+    {
+        bool leftArgIsFunctFlag;
+        bool rightArgIsFunctFlag;
+        static if (__traits(hasMember, T, "left"))
+        {
+            if (expr.left && (cast(UnaryExpression) expr.left) &&
+                (cast(UnaryExpression) expr.left).functionCallExpression)
+                    leftArgIsFunctFlag = true;
+        }
+        static if (__traits(hasMember, T, "right"))
+        {
+            if (expr.right && (cast(UnaryExpression) expr.right) &&
+                (cast(UnaryExpression) expr.right).functionCallExpression)
+                    rightArgIsFunctFlag = true;
+        }
+
+        string op;
+        static if (__traits(hasMember, T, "operator"))
+        {
+            op = str(expr.operator);
+        }
+        else
+        {
+            static if (is(T == AndExpression)) op = `&`;
+            else static if (is(T == AndAndExpression)) op = `&&`;
+            else static if (is(T == AsmAndExp)) op = `&`;
+            else static if (is(T == InExpression)) op = `in`;
+            else static if (is(T == OrExpression)) op = `|`;
+            else static if (is(T == OrOrExpression)) op = `||`;
+            else static if (is(T == PowExpression)) op = `^`;
+            else static if (is(T == XorExpression)) op = `^^`;
+            else static assert(0, T.stringof);
+        }
+        ++operators[op];
+
+        pushExprFlags(leftArgIsFunctFlag, rightArgIsFunctFlag);
+        expr.accept(this);
+        popExprFlags;
+    }
+
+    static string binExprsString()
     {
         import std.range: iota;
 
-        alias ExprWithOp = AliasSeq!(
+        alias SeqOfBinExpr = AliasSeq!(
             AddExpression,
+            AndExpression,
+            AndAndExpression,
             AsmAddExp,
+            AsmAndExp,
             AsmEqualExp,
             AsmMulExp,
             AsmRelExp,
             AsmShiftExp,
             AssignExpression,
             EqualExpression,
+            InExpression,
             MulExpression,
+            OrExpression,
+            OrOrExpression,
+            PowExpression,
             RelExpression,
             ShiftExpression,
+            XorExpression,
         );
 
-        enum exprOverride(T) = "
-        override void visit(const(" ~ T.stringof ~ ") expr)
+        enum binExpOverrideOverride(T) =
+        "override void visit(const(" ~ T.stringof ~ ") expr)
         {
-            static assert(__traits(hasMember," ~ T.stringof ~ ", \"operator\"));
-            ++operators[str(expr.operator)];
-            expr.accept(this);
+            visitBinExpr(expr);
         }";
 
         string result;
-        foreach(i; aliasSeqOf!(iota(0, ExprWithOp.length)))
-            result ~= exprOverride!(ExprWithOp[i]);
+        foreach(i; aliasSeqOf!(iota(0, SeqOfBinExpr.length)))
+            result ~= binExpOverrideOverride!(SeqOfBinExpr[i]);
         return result;
     }
 
-    mixin(exprAliases);
-
+    mixin(binExprsString());
 }
 
 version(unittest)
@@ -551,7 +572,7 @@ unittest
             int i = foo(bar,baz) + foo(bar,baz);
         }
     }.test;
-    assert(r.operandsKinds == 3);
+    assert(r.operandsKinds == 4);
     assert(r.operatorsKinds == 3);
 }
 
@@ -855,5 +876,86 @@ version(none) unittest
     }.test;
     assert(r.operandsKinds == 0);
     assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            a = bar(b) + baz(z);
+        }
+    }.test;
+    assert(r.operandsKinds == 5);
+    assert(r.operatorsKinds == 4);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            a = bar(cat(0) - dog(1)) + baz(z);
+        }
+    }.test;
+    assert(r.operandsKinds == 8);
+    assert(r.operatorsKinds == 7);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            a = bar(cat(0) && dog(1)) | baz(z);
+        }
+    }.test;
+    assert(r.operandsKinds == 8);
+    assert(r.operatorsKinds == 7);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            a = bar(c)++;
+        }
+    }.test;
+    // would be 3 by considering bar as an operand
+    // but this is actually invalid code.
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 3);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            a = !!!a;
+        }
+    }.test;
+    assert(r.operandsKinds == 1);
+    assert(r.operatorsKinds == 2);
+    assert(r.operatorsSum == 4);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            a = b[foo(a)];
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 3);
 }
 
