@@ -354,7 +354,6 @@ void postInstall()
 {
     version(Windows)
     {
-
         import
             core.sys.windows.basetyps, core.sys.windows.com,
             core.sys.windows.objbase, core.sys.windows.objidl,
@@ -373,10 +372,9 @@ void postInstall()
         char[MAX_PATH] _desktopFolder;
         SHGetFolderPathA(null, CSIDL_DESKTOPDIRECTORY, null, 0, _desktopFolder.ptr);
         char[] desktopFolder = _desktopFolder.ptr.fromStringz();
-        string target = exePath ~ "coedit.exe\0";
-        string wdir = exePath ~ "\0";
+        string target = exePath ~ "coedit.exe";
+        string wdir = exePath ~ "";
         const(wchar)* linkPath = buildNormalizedPath(desktopFolder, "Coedit.lnk").toUTF16z();
-
 
         CoInitialize(null);
         IShellLinkA shellLink;
