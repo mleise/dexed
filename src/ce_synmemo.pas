@@ -10,7 +10,7 @@ uses
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
   //SynEditMarkupFoldColoring,
-  fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
+  Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
   ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer;
 
@@ -210,6 +210,7 @@ type
     procedure sortSelectedLines(descending, caseSensitive: boolean);
     procedure tokFoundForCaption(const token: PLexToken; out stop: boolean);
     procedure setGutterIcon(line: integer; value: TGutterIcon);
+    procedure patchClipboardIndentation;
     //
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
     procedure addBreakPoint(line: integer);
@@ -1031,6 +1032,7 @@ procedure TCESynMemo.DoOnProcessCommand(var Command: TSynEditorCommand;
 begin
   inherited;
   case Command of
+    ecPaste: patchClipboardIndentation;
     ecCompletionMenu:
     begin
       fCanAutoDot:=false;
@@ -2032,12 +2034,12 @@ begin
     if Beautifier.isNotNil and (Beautifier is TSynBeautifier) then
     begin
       if not (eoTabsToSpaces in Options) and not (eoSpacesToTabs in Options) then
-        TSynBEautifier(Beautifier).IndentType := sbitConvertToTabOnly
+        TSynBeautifier(Beautifier).IndentType := sbitConvertToTabOnly
       else if eoSpacesToTabs in options then
-        TSynBEautifier(Beautifier).IndentType := sbitConvertToTabOnly
+        TSynBeautifier(Beautifier).IndentType := sbitConvertToTabOnly
       else
-        TSynBEautifier(Beautifier).IndentType := sbitSpace;
-    end
+        TSynBeautifier(Beautifier).IndentType := sbitSpace;
+    end;
   end;
 end;
 
@@ -2330,6 +2332,39 @@ begin
   for i:= 0 to fMousePos.y-2 do
     result += Lines[i].length + len;
   result += fMousePos.x;
+end;
+
+procedure TCESynMemo.patchClipboardIndentation;
+var
+  lst: TStringList;
+  lne: string;
+  i: integer;
+begin
+  //TODO-cCheck for changes made to option eoSpacesToTabs
+  if not (eoTabsToSpaces in Options) then
+    exit;
+
+  lst := TStringList.Create;
+  lst.Text:=clipboard.asText;
+  try
+    for i := 0 to lst.count-1 do
+    begin
+      lne := lst[i];
+      //if eoTabsToSpaces in Options then
+      //begin
+        leadingTabsToSpaces(lne, TabWidth);
+        lst[i] := lne;
+      //end
+      {else if eoSpacesToTabs in Options then
+      begin
+        //leadingSpacesToTabs(lne, TabWidth);
+        //lst[i] := lne;
+      end}
+    end;
+    clipboard.asText := lst.Text;
+  finally
+    lst.free;
+  end;
 end;
 {$ENDREGION --------------------------------------------------------------------}
 

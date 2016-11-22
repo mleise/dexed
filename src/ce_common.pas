@@ -299,6 +299,10 @@ type
 
   procedure tryRaiseFromStdErr(proc: TProcess);
 
+  procedure leadingTabsToSpaces(var value: string; width: integer);
+
+  procedure leadingSpacesToTabs(var value: string; width: integer);
+
 var
   // supplementatl directories to find background tools
   additionalPath: string;
@@ -1345,6 +1349,58 @@ begin
     if (j <> -1) and (j < i) then
       strings.Delete(i);
   end;
+end;
+
+procedure leadingTabsToSpaces(var value: string; width: integer);
+var
+  m: integer;
+  s: string;
+begin
+  if value.length = 0 then
+    exit;
+
+  m := 1;
+  while true do
+  begin
+    if value[m] <> #9 then
+      break;
+    if m = value.length then
+      break;
+    m += 1;
+  end;
+
+  width *= (m - 1);
+  setLength(s, width);
+  if s.length <> 0 then
+    fillChar(s[1], width, ' ');
+
+  value := s + value[m..value.length];
+end;
+
+procedure leadingSpacesToTabs(var value: string; width: integer);
+var
+  m: integer;
+  t: string;
+begin
+  if value.length = 0 then
+    exit;
+
+  m := 1;
+  while true do
+  begin
+    if value[m] <> ' ' then
+      break;
+    if m = value.length then
+      break;
+    m += 1;
+  end;
+
+  width := (m - 1) div width;
+  setLength(t, width);
+  if t.length <> 0 then
+    fillChar(t[1], width, #9);
+
+  value := t + value[m..value.length];
 end;
 
 initialization
