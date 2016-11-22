@@ -155,6 +155,8 @@ private final class HalsteadMetric: ASTVisitor
         expr.accept(this);
     }
 
+    //TODO-crefactor: function-dtor-ctor-... should use a common template
+
     override void visit(const(FunctionDeclaration) decl)
     {
         beginFunction;
@@ -205,6 +207,14 @@ private final class HalsteadMetric: ASTVisitor
         sc.accept(this);
         endFunction("dtorL" ~ to!string(sc.line), sc.line);
     }
+
+    //TODO-clibdparse: Postblit needs position and line and column
+    /*override void visit(const(Postblit) pb)
+    {
+        beginFunction;
+        pb.accept(this);
+        endFunction("postblit" ~ to!string(pb.line), pb.line);
+    }*/
 
     override void visit(const(PrimaryExpression) primary)
     {
@@ -442,8 +452,8 @@ private final class HalsteadMetric: ASTVisitor
             else static if (is(T == InExpression)) op = expr.negated ? "!in" : "in";
             else static if (is(T == OrExpression)) op = `|`;
             else static if (is(T == OrOrExpression)) op = `||`;
-            else static if (is(T == PowExpression)) op = `^`;
-            else static if (is(T == XorExpression)) op = `^^`;
+            else static if (is(T == PowExpression)) op = `^^`;
+            else static if (is(T == XorExpression)) op = `^`;
             else static assert(0, T.stringof);
         }
         ++operators[op];
@@ -937,7 +947,7 @@ unittest
         }
     }.test;
     // would be 3 by considering bar as an operand
-    // but this is actually invalid code.
+    // but this is actually (almost always) invalid code.
     assert(r.operandsKinds == 2);
     assert(r.operatorsKinds == 3);
 }
