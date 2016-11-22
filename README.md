@@ -36,13 +36,13 @@ Coedit is an IDE for the [D programming language](http://dlang.org), its compile
 ---
 Download the zipped binaries or the zipped setup program for you platform:
 
-- :package: [setup program for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.2update6.linux32.setup.zip)
-- :package: [binaries for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.2update6.linux32.zip)
-- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.2update6.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.2update6.linux64.zip)
-- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.2update6.win32.setup.zip)
-- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.2update6.win32.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit-2-update6.x86_64.rpm)
+- :package: [setup program for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.linux32.setup.zip)
+- :package: [binaries for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.linux32.zip)
+- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.linux64.zip)
+- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.win32.setup.zip)
+- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.win32.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit-3-beta1.x86_64.rpm)
 
 **Download the stable build**
 ---
