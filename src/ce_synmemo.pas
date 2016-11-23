@@ -2361,7 +2361,9 @@ begin
         //lst[i] := lne;
       end}
     end;
-    clipboard.asText := lst.Text;
+    lne := lst.Text;
+    setLength(lne, lne.length - lst.LineBreak.length);
+    clipboard.asText := lne;
   finally
     lst.free;
   end;
