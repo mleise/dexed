@@ -76,6 +76,7 @@ type
     //
     procedure menuDeclare(item: TMenuItem);
     procedure menuUpdate(item: TMenuItem);
+    function menuHasItems: boolean;
     procedure executeToolFromMenu(sender: TObject);
     //
     procedure docNew(document: TCESynMemo);
@@ -338,6 +339,11 @@ begin
     if mnuitm.shortcut <> colitm.shortcut then
       mnuitm.shortcut := colitm.shortcut;
   end;
+end;
+
+function TCETools.menuHasItems: boolean;
+begin
+  result := tools.Count <> 0;
 end;
 {$ENDREGION}
 

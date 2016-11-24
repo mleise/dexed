@@ -172,6 +172,8 @@ type
     procedure menuDeclare(item: TMenuItem);
     // item is the mainMenu entry declared previously. the sub items can be updated, deleted.
     procedure menuUpdate(item: TMenuItem);
+    // indicates if menuDeclare should be called.
+    function menuHasItems: boolean;
   end;
   (**
    * An implementer collects and updates its observers menus.

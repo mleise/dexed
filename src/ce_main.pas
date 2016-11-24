@@ -1894,31 +1894,42 @@ procedure TCEMainForm.updateMainMenuProviders;
 var
   i, j: Integer;
   itm: TMenuItem;
-  doneUpdate: boolean = false;
+  hasItems: boolean;
+  doneUpdate: boolean;
 begin
   if not assigned(mainMenu.Images) then
     exit;
   for j := 0 to fMainMenuSubj.observersCount-1 do
   begin
+    doneUpdate := false;
+    hasItems := (fMainMenuSubj.observers[j] as ICEMainMenuProvider).menuHasItems;
     // try to update existing entry.
-    for i := 0 to mainMenu.Items.Count-1 do
+    for i := mainMenu.Items.Count-1 downto 0 do
       if PtrInt(fMainMenuSubj.observers[j]) = mainMenu.Items[i].Tag then
+    begin
+      if not hasItems then
+      begin
+        doneUpdate:=true;
+        mainMenu.Items[i].Clear;
+        mainMenu.Items.Delete(i);
+        break;
+      end
+      else
       begin
         (fMainMenuSubj.observers[j] as ICEMainMenuProvider).menuUpdate(mainMenu.Items[i]);
         doneUpdate := true;
         break;
       end;
-    if doneUpdate then
+    end;
+    if doneUpdate or not hasItems then
       continue;
     // otherwise propose to create a new entry
     itm := TMenuItem.Create(Self);
     mainMenu.Items.Add(itm);
     (fMainMenuSubj.observers[j] as ICEMainMenuProvider).menuDeclare(itm);
     itm.Tag:= PtrInt(fMainMenuSubj.observers[j]);
-    case itm.Count > 0 of
-      true: ;
-      false: itm.Free;
-    end;
+    if itm.Count = 0 then
+      itm.Free;
   end;
 end;
 
