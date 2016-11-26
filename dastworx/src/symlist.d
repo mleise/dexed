@@ -297,6 +297,13 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
         namedVisitorImpl!(TemplateDeclaration, SymbolType._mixin)(decl.templateDeclaration);
     }
 
+    final override void visit(const Postblit pb)
+    {
+        //TODO: activate PostBlit visit.
+        //otherVisitorImpl(pb, SymbolType._function, "postblit", pb.line, pb.column);
+        pb.accept(this);
+    }
+
     final override void visit(const StructDeclaration decl)
     {
         namedVisitorImpl!(StructDeclaration, SymbolType._struct)(decl);
