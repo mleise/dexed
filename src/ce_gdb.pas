@@ -396,6 +396,7 @@ type
     procedure optionsChangesApplied(sender: TObject);
     procedure menuDeclare(item: TMenuItem);
     procedure menuUpdate(item: TMenuItem);
+    function menuHasItems: boolean;
     //
     procedure disableEditor;
     procedure setState(value: TGdbState);
@@ -1116,6 +1117,11 @@ begin
       8: itm.ShortCut:=fOptions.shortcuts.updateVariables;
     end;
   end;
+end;
+
+function TCEGdbWidget.menuHasItems: boolean;
+begin
+  exit(true);
 end;
 
 procedure TCEGdbWidget.optionsChangesApplied(sender: TObject);
