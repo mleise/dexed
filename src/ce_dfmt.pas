@@ -305,10 +305,7 @@ begin
     try
       str := TStringList.Create;
       processOutputToStrings(prc,str);
-      fDoc.ClearAll;
-      fDoc.InsertTextAtCaret(str.Text);
-      fDoc.SelStart:= high(integer);
-      fDoc.ExecuteCommand(ecDeleteLastChar, #0, nil);
+      fDoc.replaceUndoableContent(str.strictText);
     except
       fDoc.Lines.Assign(fBackup);
     end;

@@ -268,6 +268,7 @@ type
     procedure nextProtectionGroup;
     procedure sortLines;
     function implementMain: THasMain;
+    procedure replaceUndoableContent(const value: string);
     //
     property IdentifierMatchOptions: TIdentifierMatchOptions read fMatchOpts write setMatchOpts;
     property Identifier: string read fIdentifier;
@@ -2288,10 +2289,28 @@ begin
   end;
 end;
 
+procedure TCESynMemo.replaceUndoableContent(const value: string);
+var
+  b: TPoint;
+  e: TPoint;
+  p: TPoint;
+begin
+  p := CaretXY;
+  b := point(1,1);
+  e := Point(length(Lines[lines.Count-1])+1,lines.Count);
+  TextBetweenPoints[b,e] := value;
+  CaretXY := p;
+  EnsureCursorPosVisible;
+  fModified := true;
+end;
+
 procedure TCESynMemo.checkFileDate;
 var
   newDate: double;
   str: TStringList;
+  txt: string;
+  b,e: TPoint;
+  p: TPoint;
 begin
   if fFilename = fTempFileName then exit;
   if fDisableFileDateCheck then exit;
@@ -2307,11 +2326,7 @@ begin
       str := TStringList.Create;
       try
         str.LoadFromFile(fFilename);
-        ClearAll;
-        InsertTextAtCaret(str.Text);
-        SelStart:= high(integer);
-        ExecuteCommand(ecDeleteLastChar, #0, nil);
-        fModified := true;
+        replaceUndoableContent(str.strictText);
       finally
         str.Free;
       end;
@@ -2361,9 +2376,7 @@ begin
         //lst[i] := lne;
       end}
     end;
-    lne := lst.Text;
-    setLength(lne, lne.length - lst.LineBreak.length);
-    clipboard.asText := lne;
+    clipboard.asText := lst.strictText;
   finally
     lst.free;
   end;
