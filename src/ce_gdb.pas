@@ -275,6 +275,7 @@ type
     fIgnoredSignals: TStringList;
     fShowGdbOutput: boolean;
     fShowOutput: boolean;
+    fShowRawMiOutput: boolean;
     fShortcuts: TCEDebugShortcuts;
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
@@ -288,6 +289,7 @@ type
     property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
     property shortcuts: TCEDebugShortcuts read fShortcuts write setShortcuts;
     property showGdbOutput: boolean read fShowGdbOutput write fShowGdbOutput;
+    property showRawMiOutput: boolean read fShowRawMiOutput write fShowRawMiOutput;
     property showOutput: boolean read fShowOutput write fShowOutput;
   public
     constructor create(aOwner: TComponent); override;
@@ -562,6 +564,7 @@ begin
     fAutoGetVariables:=src.autoGetVariables;
     fShowGdbOutput:=src.fShowGdbOutput;
     fShowOutput:=src.fShowOutput;
+    fShowRawMiOutput:=src.fShowRawMiOutput;
     fIgnoredSignals.Assign(src.fIgnoredSignals);
     fCommandsHistory.Assign(src.fCommandsHistory);
     fShortcuts.assign(src.fShortcuts);
@@ -1953,8 +1956,9 @@ begin
 
   fLog.Clear;
   fGdb.getFullLines(fLog);
-  //for str in fLog do
-  //  fMsg.message(str, nil, amcMisc, amkAuto);
+  if fOptions.showRawMiOutput then
+    for str in fLog do
+      fMsg.message(str, nil, amcMisc, amkAuto);
 
   if flog.Text.isEmpty then
     exit;
