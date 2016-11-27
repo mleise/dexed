@@ -4801,8 +4801,8 @@ object CEMainForm: TCEMainForm
   end
   object Actions: TActionList
     Images = imgList
-    OnUpdate = ActionsUpdate
     left = 32
+    top = 1
     object actEdCopy: TAction
       Category = 'Edit'
       Caption = 'Copy'

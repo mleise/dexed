@@ -66,17 +66,15 @@ type
     function findTool(const value: string): TCEToolItem;
   end;
 
-  TCETools = class(TWritableLfmTextComponent, ICEMainMenuProvider, ICEEditableShortcut, ICEDocumentObserver)
+  TCETools = class(TWritableLfmTextComponent, ICEEditableShortcut, ICEDocumentObserver)
   private
     fTools: TCEToolItems;
     fShctCount: Integer;
     fDoc: TCESynMemo;
+    fMenu: TMenuItem;
     function getTool(index: Integer): TCEToolItem;
     procedure setTools(value: TCEToolItems);
     //
-    procedure menuDeclare(item: TMenuItem);
-    procedure menuUpdate(item: TMenuItem);
-    function menuHasItems: boolean;
     procedure executeToolFromMenu(sender: TObject);
     //
     procedure docNew(document: TCESynMemo);
@@ -94,6 +92,7 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     //
+    procedure updateMenu;
     function addTool: TCEToolItem;
     procedure executeTool(tool: TCEToolItem); overload;
     procedure executeTool(index: Integer); overload;
@@ -290,60 +289,37 @@ end;
 {$ENDREGION}
 
 {$REGION ICEMainMenuProvider ---------------------------------------------------}
-procedure TCETools.executeToolFromMenu(sender: TObject);
-begin
-  executeTool(TCEToolItem(TMenuItem(sender).tag));
-end;
-
-procedure TCETools.menuDeclare(item: TMenuItem);
+procedure TCETools.updateMenu;
 var
-  i: Integer;
+  mnu: ICEMainMenu = nil;
   itm: TMenuItem;
   colitm: TCEToolItem;
+  i: integer;
 begin
-  if tools.Count = 0 then exit;
-  //
-  item.Caption := 'Custom tools';
-  item.Clear;
+  if fMenu.isNil then
+  begin
+    mnu := getMainMenu;
+    if not assigned(mnu) then
+      exit;
+    fMenu := mnu.mnuAdd;
+    fMenu.Caption:='Custom tools';
+  end;
+  fMenu.Clear;
   for i := 0 to tools.Count-1 do
   begin
     colitm := tool[i];
-    //
-    itm := TMenuItem.Create(item);
+    itm := TMenuItem.Create(fMenu);
     itm.ShortCut:= colitm.shortcut;
     itm.Caption := colitm.toolAlias;
     itm.tag := ptrInt(colitm);
     itm.onClick := @executeToolFromMenu;
-    item.add(itm);
+    fMenu.add(itm);
   end;
 end;
 
-procedure TCETools.menuUpdate(item: TMenuItem);
-var
-  i: Integer;
-  colitm: TCEToolItem;
-  mnuitm: TMenuItem;
+procedure TCETools.executeToolFromMenu(sender: TObject);
 begin
-  if item.isNil then exit;
-  if item.Count <> tools.Count then
-    menuDeclare(item)
-  else for i:= 0 to tools.Count-1 do
-  begin
-    colitm := tool[i];
-    mnuitm := item.Items[i];
-    //
-    if mnuitm.Tag <> ptrInt(colitm) then
-      mnuitm.Tag := ptrInt(colitm);
-    if mnuitm.Caption <> colitm.toolAlias then
-      mnuitm.Caption := colitm.toolAlias;
-    if mnuitm.shortcut <> colitm.shortcut then
-      mnuitm.shortcut := colitm.shortcut;
-  end;
-end;
-
-function TCETools.menuHasItems: boolean;
-begin
-  result := tools.Count <> 0;
+  executeTool(TCEToolItem(TMenuItem(sender).tag));
 end;
 {$ENDREGION}
 

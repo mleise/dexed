@@ -77,7 +77,7 @@ type
   end;
 
   { TCEMainForm }
-  TCEMainForm = class(TForm, ICEDocumentObserver, ICEEditableShortCut, ICEProjectObserver)
+  TCEMainForm = class(TForm, ICEDocumentObserver, ICEEditableShortCut, ICEProjectObserver, ICEMainMenu)
     actFileCompAndRun: TAction;
     actFileSaveAll: TAction;
     actFileClose: TAction;
@@ -298,7 +298,6 @@ type
     procedure actProjCompileExecute(Sender: TObject);
     procedure actEdCopyExecute(Sender: TObject);
     procedure actEdCutExecute(Sender: TObject);
-    procedure ActionsUpdate(AAction: TBasicAction; var Handled: Boolean);
     procedure actEdMacPlayExecute(Sender: TObject);
     procedure actEdMacStartStopExecute(Sender: TObject);
     procedure actFileNewExecute(Sender: TObject);
@@ -338,7 +337,6 @@ type
     fDscanUnittests: boolean;
     fDoc: TCESynMemo;
     fFirstTimeCoedit: boolean;
-    fActionHandler: TCEActionProviderSubject;
     fMultidoc: ICEMultiDocHandler;
     fScCollectCount: Integer;
     fUpdateCount: NativeInt;
@@ -379,18 +377,18 @@ type
     fInitialized: boolean;
     fRunProc: TCEProcess;
     fMsgs: ICEMessagesDisplay;
-    fMainMenuSubj: TCEMainMenuSubject;
     fAppliOpts: TCEApplicationOptions;
     fProjActionsLock: boolean;
     fCompilerSelector: ICECompilerSelector;
-    procedure updateMainMenuProviders;
     procedure updateFloatingWidgetOnTop(onTop: boolean);
     procedure widgetDockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
     procedure mnuOptsItemClick(sender: TObject);
 
-    // action provider handling;
-    procedure clearActProviderEntries;
-    procedure collectedActProviderEntries;
+
+    // ICEMainMenu
+    function singleServiceName: string;
+    function mnuAdd: TMenuItem;
+    procedure mnuDelete(value: TMenuItem);
 
     // ICEDocumentObserver
     procedure docNew(document: TCESynMemo);
@@ -1126,11 +1124,10 @@ end;
 constructor TCEMainForm.create(aOwner: TComponent);
 begin
   inherited create(aOwner);
-  fMainMenuSubj := TCEMainMenuSubject.create;
-  fActionHandler := TCEActionProviderSubject.create;
   fOptionCategories := TCEEditableOptionsSubject.create;
 
   EntitiesConnector.addObserver(self);
+  EntitiesConnector.addSingleService(self);
 
   InitMRUs;
   InitWidgets;
@@ -1141,7 +1138,6 @@ begin
   OnDragDrop:= @ddHandler.DragDrop;
   OnDragOver:= @ddHandler.DragOver;
 
-  updateMainMenuProviders;
   EntitiesConnector.forceUpdate;
   fSymStringExpander:= getSymStringExpander;
   fProjectGroup := getProjectGroup;
@@ -1810,8 +1806,6 @@ begin
   fPrjGrpMru.Free;
   FreeRunnableProc;
   //
-  fMainMenuSubj.Free;
-  fActionHandler.Free;
   fOptionCategories.Free;
   EntitiesConnector.removeObserver(self);
   inherited;
@@ -1871,66 +1865,6 @@ begin
     TAction(sender).Enabled := true
   else
     TAction(sender).Enabled := false;
-end;
-
-procedure TCEMainForm.ActionsUpdate(AAction: TBasicAction; var Handled: Boolean);
-begin
-  Handled := false;
-  if fUpdateCount > 0 then
-    exit;
-  Inc(fUpdateCount);
-  try
-    clearActProviderEntries;
-    collectedActProviderEntries;
-    if AAction.isNotNil and not AAction.Update then
-      TAction(AAction).enabled := true;
-    updateMainMenuProviders;
-  finally
-    Dec(fUpdateCount);
-  end;
-end;
-
-procedure TCEMainForm.updateMainMenuProviders;
-var
-  i, j: Integer;
-  itm: TMenuItem;
-  hasItems: boolean;
-  doneUpdate: boolean;
-begin
-  if not assigned(mainMenu.Images) then
-    exit;
-  for j := 0 to fMainMenuSubj.observersCount-1 do
-  begin
-    doneUpdate := false;
-    hasItems := (fMainMenuSubj.observers[j] as ICEMainMenuProvider).menuHasItems;
-    // try to update existing entry.
-    for i := mainMenu.Items.Count-1 downto 0 do
-      if PtrInt(fMainMenuSubj.observers[j]) = mainMenu.Items[i].Tag then
-    begin
-      if not hasItems then
-      begin
-        doneUpdate:=true;
-        mainMenu.Items[i].Clear;
-        mainMenu.Items.Delete(i);
-        break;
-      end
-      else
-      begin
-        (fMainMenuSubj.observers[j] as ICEMainMenuProvider).menuUpdate(mainMenu.Items[i]);
-        doneUpdate := true;
-        break;
-      end;
-    end;
-    if doneUpdate or not hasItems then
-      continue;
-    // otherwise propose to create a new entry
-    itm := TMenuItem.Create(Self);
-    mainMenu.Items.Add(itm);
-    (fMainMenuSubj.observers[j] as ICEMainMenuProvider).menuDeclare(itm);
-    itm.Tag:= PtrInt(fMainMenuSubj.observers[j]);
-    if itm.Count = 0 then
-      itm.Free;
-  end;
 end;
 
 procedure TCEMainForm.mruChange(Sender: TObject);
@@ -2152,55 +2086,28 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TCEActionProviderHandler ----------------------------------------------}
-procedure TCEMainForm.clearActProviderEntries;
-var
-  prov: ICEActionProvider;
-  act: TContainedAction;
-  i, j: Integer;
+{$REGION ICEMAinMenu -----------------------------------------------------------}
+function TCEMainForm.singleServiceName: string;
 begin
-  for i:= 0 to fActionHandler.observersCount-1 do
-  begin
-    prov := fActionHandler[i] as ICEActionProvider;
-    if not prov.actHandlerWantRecollect then
-      continue;
-    for j := Actions.ActionCount-1 downto 0 do
-    begin
-      act := Actions.Actions[j];
-      if (act.Owner <> Self) and (act.Tag = PtrInt(prov)) then
-        act.ActionList := nil;
-    end;
-  end;
+  exit('ICEMainMenu');
 end;
 
-procedure TCEMainForm.collectedActProviderEntries;
-var
-  prov: ICEActionProvider;
-  act: TCustomAction;
-  cat: string;
-  i: Integer;
-  procedure addAction;
-  begin
-    act.ActionList := Actions;
-    act.Tag := ptrInt(prov);
-    act.Category := cat;
-
-    act := nil;
-    cat := '';
-  end;
+function TCEMainForm.mnuAdd: TMenuItem;
 begin
-  for i:= 0 to fActionHandler.observersCount-1 do
-  begin
-    prov := fActionHandler[i] as ICEActionProvider;
-    if not prov.actHandlerWantFirst then
-      continue;
+  result := TMenuItem.Create(nil);
+  mainMenu.Items.Add(result);
+  exit(result);
+end;
 
-    act := nil;
-    cat := '';
-    while prov.actHandlerWantNext(cat, act) do
-      addAction;
-    addAction;
-  end;
+procedure TCEMainForm.mnuDelete(value: TMenuItem);
+var
+  i: integer;
+begin
+  if value.isNil then
+    exit;
+  i := mainMenu.Items.IndexOf(value);
+  if i <> -1 then
+    mainMenu.Items.Delete(i);
 end;
 {$ENDREGION}
 

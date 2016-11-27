@@ -48,6 +48,7 @@ constructor TCEToolsEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
   propsEd.CheckboxForBoolean := true;
+  propsEd.PropertyEditorHook.AddHandlerModified(@propsEdModified);
   rebuildToolList;
 end;
 
@@ -68,6 +69,7 @@ begin
     lstTools.AddItem(CustomTools[i].toolAlias, nil);
   if lstTools.Count > 0 then
     lstTools.ItemIndex := 0;
+  CustomTools.updateMenu;
 end;
 
 procedure TCEToolsEditorWidget.updateToolList;
@@ -76,6 +78,7 @@ var
 begin
   for i := 0 to CustomTools.tools.Count-1 do
     lstTools.Items[i] := CustomTools[i].toolAlias;
+  CustomTools.updateMenu;
 end;
 
 procedure TCEToolsEditorWidget.lstToolsSelectionChange(Sender: TObject;
@@ -90,7 +93,8 @@ procedure TCEToolsEditorWidget.propsEdModified(Sender: TObject);
 begin
   if propsEd.ItemIndex = -1 then
     exit;
-  if propsEd.Rows[propsEd.ItemIndex].Name = 'toolAlias' then
+  if (propsEd.Rows[propsEd.ItemIndex].Name = 'toolAlias')
+  or (propsEd.Rows[propsEd.ItemIndex].Name = 'shortcut') then
     updateToolList;
 end;
 

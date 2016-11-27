@@ -164,47 +164,6 @@ type
 
 
   (**
-   * An implementer can add a main menu entry.
-   *)
-  ICEMainMenuProvider = interface(IObserverType)
-  ['ICEMainMenuProvider']
-    // item is a new mainMenu entry. item must be filled with the sub-items to be added.
-    procedure menuDeclare(item: TMenuItem);
-    // item is the mainMenu entry declared previously. the sub items can be updated, deleted.
-    procedure menuUpdate(item: TMenuItem);
-    // indicates if menuDeclare should be called.
-    function menuHasItems: boolean;
-  end;
-  (**
-   * An implementer collects and updates its observers menus.
-   *)
-  TCEMainMenuSubject = specialize TCECustomSubject<ICEMainMenuProvider>;
-
-
-
-  (**
-   * An implementer declares some actions which have their own main menu entry and
-   * whose shortcuts are automatically handled
-   *)
-  ICEActionProvider = interface(IObserverType)
-  ['ICEActionProvider']
-    // the action handler will clear the references to the actions collected previously and start collecting if result.
-    function actHandlerWantRecollect: boolean;
-    // the action handler starts to collect the actions if result.
-    function actHandlerWantFirst: boolean;
-    // the handler continue collecting action if result.
-    function actHandlerWantNext(out category: string; out action: TCustomAction): boolean;
-    // the handler update the state of a particular action.
-    procedure actHandleUpdater(action: TCustomAction);
-  end;
-  (**
-   * An implementer handles its observers actions.
-   *)
-  TCEActionProviderSubject = specialize TCECustomSubject<ICEActionProvider>;
-
-
-
-  (**
    * An implementer can expose customizable shortcuts to be edited in a dedicated widget.
    *)
   ICEEditableShortCut = interface(IObserverType)
@@ -402,6 +361,16 @@ type
     procedure getCompilerImports(value: DCompiler; paths: TStrings);
   end;
 
+  (**
+   * Single service that provides access to the main menu.
+   *)
+  ICEMainMenu = interface(ICESingleService)
+    // adds a main menu entry
+    function mnuAdd: TMenuItem;
+    // removes a main menu entry
+    procedure mnuDelete(value: TMenuItem);
+  end;
+
 
   TDCDCompletionKind = (
     dckClass,
@@ -454,15 +423,16 @@ type
 {
   Service getters:
 }
-  function getMessageDisplay(var obj: ICEMessagesDisplay): ICEMessagesDisplay;
-  function getMessageDisplay: ICEMessagesDisplay;
-  function getprocInputHandler: ICEProcInputHandler;
-  function getMultiDocHandler: ICEMultiDocHandler;
-  function getSymStringExpander: ICESymStringExpander;
-  function getProjectGroup: ICEProjectGroup;
-  function getExplorer: ICEExplorer;
-  function getOptionsEditor: ICEOptionsEditor;
-  function getCompilerSelector: ICECompilerSelector;
+  function getMessageDisplay(var obj: ICEMessagesDisplay): ICEMessagesDisplay; inline;
+  function getMessageDisplay: ICEMessagesDisplay; inline;
+  function getprocInputHandler: ICEProcInputHandler; inline;
+  function getMultiDocHandler: ICEMultiDocHandler; inline;
+  function getSymStringExpander: ICESymStringExpander; inline;
+  function getProjectGroup: ICEProjectGroup; inline;
+  function getExplorer: ICEExplorer; inline;
+  function getOptionsEditor: ICEOptionsEditor; inline;
+  function getCompilerSelector: ICECompilerSelector; inline;
+  function getMainMenu: ICEMainMenu; inline;
 
 implementation
 
@@ -611,6 +581,11 @@ end;
 function getCompilerSelector: ICECompilerSelector;
 begin
   exit(EntitiesConnector.getSingleService('ICECompilerSelector') as ICECompilerSelector);
+end;
+
+function getMainMenu: ICEMainMenu;
+begin
+  exit(EntitiesConnector.getSingleService('ICEMainMenu') as ICEMainMenu);
 end;
 {$ENDREGION}
 
