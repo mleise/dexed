@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, RegExpr, ComCtrls,
   PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
-  StdCtrls, process, fpjson, typinfo, {$IFDEF UNIX}Unix,{$ENDIF} ListViewFilterEdit,
+  StdCtrls, process, fpjson, typinfo, Unix, ListViewFilterEdit, SynEdit,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
   ce_ddemangle, ce_writableComponent, EditBtn, strutils;
@@ -330,9 +330,13 @@ type
     btnWatch: TCEToolButton;
     button4: TCEToolButton;
     Edit1: TComboBox;
-    GroupBox1: TGroupBox;
-    GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
+    PageControl1: TPageControl;
+    PageControl2: TPageControl;
+    TabSheet1: TTabSheet;
+    TabSheet2: TTabSheet;
+    TabSheet3: TTabSheet;
+    TabSheet4: TTabSheet;
     varList: TListView;
     lstCallStack: TListView;
     mnuReadW: TMenuItem;
@@ -349,6 +353,7 @@ type
     Splitter2: TSplitter;
     Splitter3: TSplitter;
     Splitter4: TSplitter;
+    asmList: TListView;
     varListFlt: TListViewFilterEdit;
     procedure btnContClick(Sender: TObject);
     procedure btnVariablesClick(Sender: TObject);
@@ -396,6 +401,10 @@ type
     fAddWatchPointKind: TAddWatchPointKind;
     fBreakPoints: TPersistentBreakPoints;
     fMenu: TMenuItem;
+    fLastFilename: string;
+    fLastFunction: string;
+    fLastOffset: string;
+    fLastLine: string;
     procedure updateMenu;
     procedure optionsChangesApplied(sender: TObject);
     procedure disableEditor;
@@ -413,6 +422,7 @@ type
     procedure infoRegs;
     procedure infoStack;
     procedure infoVariables;
+    procedure infoAsm(const fname: string);
     procedure sendCustomCommand;
     procedure setGpr(reg: TCpuRegister; val: TCpuGprValue);
     procedure setFpr(reg: TFpuRegister; val: extended);
@@ -1660,6 +1670,18 @@ end;
 
 procedure TCEGdbWidget.interpretJson;
 
+  procedure selectAsmInstr;
+  var
+    itm: TListItem;
+  begin
+    itm := asmList.FindCaption(0, fLastOffset, false, true, false);
+    if itm.isNotNil then
+    begin
+      itm.Selected:=true;
+      itm.MakeVisible(false);
+    end;
+  end;
+
   procedure autoGetStuff;
   begin
     if fOptions.autoGetCallStack then
@@ -1668,6 +1690,7 @@ procedure TCEGdbWidget.interpretJson;
       infoRegs;
     if fOptions.autoGetVariables then
       infoVariables;
+    selectAsmInstr;
   end;
 
 var
@@ -1681,7 +1704,6 @@ var
   nme: string;
   reason: string;
   addr: PtrUint = 0;
-  fullname: string = '';
   func:string = '';
   line: integer = -1;
   // registers data
@@ -1726,18 +1748,31 @@ begin
       obj := TJSONObject(fJson.Find('frame'));
       if obj.isNotNil and (obj.JSONType = jtObject) then
       begin
+        val := obj.Find('addr');
+        if val.isNotNil then
+          fLastOffset:=val.AsString;
         val := obj.Find('fullname');
         if val.isNotNil then
-          fullname := val.AsString;
+          fLastFilename := val.AsString;
         val := obj.Find('line');
         if val.isNotNil then
+        begin
           line := val.AsInteger;
-        if fDocHandler.findDocument(fullname).isNil and fullname.fileExists then
-          fDocHandler.openDocument(fullname);
+          fLastLine := val.AsString;
+        end;
+        val := obj.Find('func');
+        if val.isNotNil then
+        begin
+          if val.AsString <> fLastFunction then
+            infoAsm(fLastFilename);
+          fLastFunction := val.AsString;
+        end;
+        if fDocHandler.findDocument(fLastFilename).isNil and fLastFilename.fileExists then
+          fDocHandler.openDocument(fLastFilename);
         setState(gsPaused);
         autoGetStuff;
         readOutput;
-        subjDebugBreak(fSubj, fullname, line, brkreason);
+        subjDebugBreak(fSubj, fLastFilename, line, brkreason);
       end;
     end
 
@@ -1762,27 +1797,37 @@ begin
       obj := TJSONObject(fJson.Find('frame'));
       if obj.isNotNil and (obj.JSONType = jtObject) then
       begin
+        val := obj.Find('addr');
+        if val.isNotNil then
+          fLastOffset:=val.AsString;
         val := obj.Find('fullname');
         if val.isNotNil then
-          fullname := val.AsString;
+          fLastFilename := val.AsString;
         val := obj.Find('line');
         if val.isNotNil then
           line := val.AsInteger;
+        val := obj.Find('func');
+        if val.isNotNil then
+        begin
+          if val.AsString <> fLastFunction then
+            infoAsm(fLastFilename);
+          fLastFunction := val.AsString;
+        end;
       end;
       if fCatchPause then
       begin
         fCatchPause := false;
-        if  fDocHandler.findDocument(fullname).isNil and fullname.fileExists then
-          fDocHandler.openDocument(fullname);
+        if  fDocHandler.findDocument(fLastFilename).isNil and fLastFilename.fileExists then
+          fDocHandler.openDocument(fLastFilename);
         autoGetStuff;
         setState(gsPaused);
         readOutput;
-        subjDebugBreak(fSubj, fullname, line, dbSignal);
+        subjDebugBreak(fSubj, fLastFilename, line, dbSignal);
       end
       else
       begin
         if dlgYesNo(format('The signal %s (%s) was received on line %d of file %s .'
-        + LineEnding + 'Do you wish to pause execution ?', [signame, sigmean, line, fullname]),
+        + LineEnding + 'Do you wish to pause execution ?', [signame, sigmean, line, fLastFilename]),
         'Unexpected signal received') = mrNo then
         begin
           gdbCommand('continue', @gdboutJsonize);
@@ -1790,12 +1835,12 @@ begin
         end
         else
         begin
-          if not fDocHandler.findDocument(fullname).isNil and fullname.fileExists then
-            fDocHandler.openDocument(fullname);
+          if not fDocHandler.findDocument(fLastFilename).isNil and fLastFilename.fileExists then
+            fDocHandler.openDocument(fLastFilename);
           autoGetStuff;
           setState(gsPaused);
           readOutput;
-          subjDebugBreak(fSubj, fullname, line, dbSignal);
+          subjDebugBreak(fSubj, fLastFilename, line, dbSignal);
         end;
       end;
     end
@@ -1884,7 +1929,7 @@ begin
         break;
       val := obj.Find('fullname');
       if val.isNotNil then
-        fullname:= val.AsString;
+        fLastFilename:= val.AsString;
       val := obj.Find('func');
       if val.isNotNil then
       begin
@@ -1899,7 +1944,7 @@ begin
       val := obj.Find('line');
       if val.isNotNil then
         line := val.AsInteger;
-      fStackItems.addItem(addr, fullname, func, line);
+      fStackItems.addItem(addr, fLastFilename, func, line);
     end;
     fStackItems.assignToList(lstCallStack);
   end;
@@ -1933,6 +1978,38 @@ begin
     if (i <> -1) and (i <= varList.Items.Count) then
       varList.ItemIndex:=i;
     varList.EndUpdate;
+  end;
+
+  val := fJson.Find('asm_insns');
+  if val.isNotNil and (val.JSONType = jtArray) then
+  begin
+    asmList.Clear;
+    asmList.BeginUpdate;
+    arr := TJSONArray(val);
+    for i := 0 to arr.Count-1 do
+    begin
+      obj := arr.Objects[i];
+      val := obj.Find('address');
+      if val.isNotNil then
+        nme := val.AsString;
+      //val := obj.Find('func-name');
+      //val := obj.Find('offset');
+      val := obj.Find('inst');
+      if val.isNotNil then
+      begin
+        asmList.AddItem(nme, nil);
+        if nme = fLastOffset then
+          asmList.Selected := asmList.Items[asmList.Items.Count-1];
+        if fOptions.autoDemangle then
+          asmList.Items[asmList.Items.Count-1].SubItems.Add(demangle(val.AsString))
+        else
+          asmList.Items[asmList.Items.Count-1].SubItems.Add(val.AsString);
+      end;
+    end;
+    if asmList.Selected.isNotNil then
+      asmList.Selected.MakeVisible(false);
+    asmList.EndUpdate;
+    selectAsmInstr;
   end;
 
   if fOptions.showGdbOutput or fShowFromCustomCommand then
@@ -2040,6 +2117,15 @@ end;
 procedure TCEGdbWidget.infoVariables;
 begin
   gdbCommand('-stack-list-variables --skip-unavailable --simple-values');
+end;
+
+procedure TCEGdbWidget.infoAsm(const fname: string);
+var
+  cmd: string;
+begin
+  cmd := format('-data-disassemble -f %s -l %s -n -1 -- 0', [fname, fLastLine]);
+  //cmd := format('-data-disassemble -s %s -e $pc -- 0', [fLastOffset]);
+  gdbCommand(cmd, @gdboutJsonize);
 end;
 
 procedure TCEGdbWidget.btnStartClick(Sender: TObject);

@@ -1,9 +1,8 @@
 inherited CEGdbWidget: TCEGdbWidget
-  Left = 640
+  Left = 635
   Height = 668
-  Top = 213
+  Top = 212
   Width = 517
-  ActiveControl = Back
   Caption = 'GDB commander'
   ClientHeight = 668
   ClientWidth = 517
@@ -20,27 +19,27 @@ inherited CEGdbWidget: TCEGdbWidget
       ClientWidth = 517
       object Panel1: TPanel[0]
         Left = 0
-        Height = 394
-        Top = 196
+        Height = 385
+        Top = 205
         Width = 517
         Align = alClient
         BevelOuter = bvNone
-        ClientHeight = 394
+        ClientHeight = 385
         ClientWidth = 517
         TabOrder = 0
         object GroupBox3: TGroupBox
           Left = 0
-          Height = 197
-          Top = 197
+          Height = 179
+          Top = 206
           Width = 517
           Align = alClient
           Caption = 'CPU'
-          ClientHeight = 167
+          ClientHeight = 149
           ClientWidth = 513
           TabOrder = 0
           object cpuVIewer: TTIPropertyGrid
             Left = 0
-            Height = 167
+            Height = 149
             Hint = 'cpu registers'
             Top = 0
             Width = 513
@@ -55,66 +54,102 @@ inherited CEGdbWidget: TCEGdbWidget
             ValueFont.Color = clMaroon
           end
         end
-        object GroupBox2: TGroupBox
-          Left = 0
-          Height = 191
-          Top = 0
-          Width = 517
-          Align = alTop
-          Caption = 'Variables'
-          ClientHeight = 161
-          ClientWidth = 513
-          TabOrder = 1
-          object varList: TListView
-            Left = 2
-            Height = 135
-            Top = 24
-            Width = 509
-            Align = alClient
-            BorderSpacing.Around = 2
-            Columns = <            
-              item
-                AutoSize = True
-                Caption = 'Name'
-                Width = 47
-              end            
-              item
-                AutoSize = True
-                Caption = 'Value'
-                Width = 458
-              end>
-            GridLines = True
-            HideSelection = False
-            ReadOnly = True
-            ScrollBars = ssAutoBoth
-            SortColumn = 0
-            SortType = stText
-            TabOrder = 0
-            ViewStyle = vsReport
-          end
-          object varListFlt: TListViewFilterEdit
-            Left = 2
-            Height = 20
-            Hint = 'locate variables'
-            Top = 2
-            Width = 509
-            ButtonWidth = 24
-            NumGlyphs = 1
-            Align = alTop
-            BorderSpacing.Around = 2
-            MaxLength = 0
-            TabOrder = 1
-            OnChange = varListFltChange
-          end
-        end
         object Splitter4: TSplitter
           Cursor = crVSplit
           Left = 0
           Height = 6
-          Top = 191
+          Top = 0
           Width = 517
           Align = alTop
           ResizeAnchor = akTop
+        end
+        object PageControl2: TPageControl
+          Left = 0
+          Height = 200
+          Top = 6
+          Width = 517
+          ActivePage = TabSheet4
+          Align = alTop
+          TabIndex = 1
+          TabOrder = 2
+          object TabSheet3: TTabSheet
+            Caption = 'Variables'
+            ClientHeight = 164
+            ClientWidth = 509
+            object varList: TListView
+              Left = 2
+              Height = 138
+              Top = 24
+              Width = 505
+              Align = alClient
+              BorderSpacing.Around = 2
+              Columns = <              
+                item
+                  AutoSize = True
+                  Caption = 'Name'
+                  Width = 47
+                end              
+                item
+                  AutoSize = True
+                  Caption = 'Value'
+                  Width = 454
+                end>
+              GridLines = True
+              HideSelection = False
+              ReadOnly = True
+              ScrollBars = ssAutoBoth
+              SortColumn = 0
+              SortType = stText
+              TabOrder = 0
+              ViewStyle = vsReport
+            end
+            object varListFlt: TListViewFilterEdit
+              Left = 2
+              Height = 20
+              Hint = 'locate variables'
+              Top = 2
+              Width = 505
+              ButtonWidth = 24
+              NumGlyphs = 1
+              Align = alTop
+              BorderSpacing.Around = 2
+              MaxLength = 0
+              TabOrder = 1
+              OnChange = varListFltChange
+            end
+          end
+          object TabSheet4: TTabSheet
+            Caption = 'Assembly'
+            ClientHeight = 164
+            ClientWidth = 509
+            object asmList: TListView
+              Left = 2
+              Height = 160
+              Top = 2
+              Width = 505
+              Align = alClient
+              AutoSort = False
+              BorderSpacing.Around = 2
+              Columns = <              
+                item
+                  AutoSize = True
+                  Caption = 'Address'
+                  Width = 60
+                end              
+                item
+                  AutoSize = True
+                  Caption = 'Instruction'
+                  Width = 441
+                end>
+              GridLines = True
+              HideSelection = False
+              ReadOnly = True
+              ScrollBars = ssAutoBoth
+              SortColumn = 0
+              TabOrder = 0
+              ViewStyle = vsReport
+            end
+          end
         end
       end
       object Panel3: TPanel[1]
@@ -152,54 +187,61 @@ inherited CEGdbWidget: TCEGdbWidget
           TabOrder = 0
         end
       end
-      object GroupBox1: TGroupBox[2]
-        Left = 0
-        Height = 191
-        Top = 0
-        Width = 517
-        Align = alTop
-        Caption = 'Call stack'
-        ClientHeight = 161
-        ClientWidth = 513
-        TabOrder = 2
-        object lstCallStack: TListView
-          Left = 0
-          Height = 161
-          Hint = 'call stack'
-          Top = 0
-          Width = 513
-          Align = alClient
-          Columns = <          
-            item
-              AutoSize = True
-              Caption = 'function'
-              Width = 62
-            end          
-            item
-              AutoSize = True
-              Caption = 'address'
-              Width = 59
-            end          
-            item
-              AutoSize = True
-              Caption = 'filename'
-              Width = 371
-            end>
-          GridLines = True
-          ReadOnly = True
-          TabOrder = 0
-          ViewStyle = vsReport
-          OnDblClick = lstCallStackDblClick
-        end
-      end
-      object Splitter3: TSplitter[3]
+      object Splitter3: TSplitter[2]
         Cursor = crVSplit
         Left = 0
         Height = 5
-        Top = 191
+        Top = 200
         Width = 517
         Align = alTop
         ResizeAnchor = akTop
+      end
+      object PageControl1: TPageControl[3]
+        Left = 0
+        Height = 200
+        Top = 0
+        Width = 517
+        ActivePage = TabSheet1
+        Align = alTop
+        TabIndex = 0
+        TabOrder = 3
+        object TabSheet1: TTabSheet
+          Caption = 'Call stack'
+          ClientHeight = 164
+          ClientWidth = 509
+          object lstCallStack: TListView
+            Left = 0
+            Height = 164
+            Hint = 'call stack'
+            Top = 0
+            Width = 509
+            Align = alClient
+            Columns = <            
+              item
+                AutoSize = True
+                Caption = 'function'
+                Width = 62
+              end            
+              item
+                AutoSize = True
+                Caption = 'address'
+                Width = 59
+              end            
+              item
+                AutoSize = True
+                Caption = 'filename'
+                Width = 367
+              end>
+            GridLines = True
+            ReadOnly = True
+            TabOrder = 0
+            ViewStyle = vsReport
+            OnDblClick = lstCallStackDblClick
+          end
+        end
+        object TabSheet2: TTabSheet
+          Caption = 'Thread list'
+        end
       end
     end
     inherited toolbar: TCEToolBar
