@@ -7,10 +7,10 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, RegExpr, ComCtrls,
   PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
-  StdCtrls, ValEdit, process, fpjson, typinfo, {$IFDEF UNIX}Unix,{$ENDIF}
+  StdCtrls, process, fpjson, typinfo, {$IFDEF UNIX}Unix,{$ENDIF} ListViewFilterEdit,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
-  ce_ddemangle, ce_writableComponent;
+  ce_ddemangle, ce_writableComponent, EditBtn, strutils;
 
 type
 
@@ -331,6 +331,7 @@ type
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
+    varList: TListView;
     lstCallStack: TListView;
     mnuReadW: TMenuItem;
     mnuWriteW: TMenuItem;
@@ -346,7 +347,7 @@ type
     Splitter2: TSplitter;
     Splitter3: TSplitter;
     Splitter4: TSplitter;
-    ValueListEditor1: TValueListEditor;
+    varListFlt: TListViewFilterEdit;
     procedure btnContClick(Sender: TObject);
     procedure btnVariablesClick(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
@@ -365,6 +366,7 @@ type
     procedure mnuSelProjClick(Sender: TObject);
     procedure mnuSelRunnableClick(Sender: TObject);
     procedure mnuWriteWClick(Sender: TObject);
+    procedure varListFltChange(Sender: TObject);
   protected
     procedure setToolBarFlat(value: boolean); override;
   private
@@ -969,8 +971,9 @@ end;
 
 procedure TCEGdbWidget.setToolBarFlat(value: boolean);
 begin
-  inherited setToolBarFLat(value);
+  inherited setToolBarFlat(value);
   btnSendCom.Flat:=value;
+  varListFlt.flat := value;
 end;
 
 procedure TCEGdbWidget.updateMenu;
@@ -1274,6 +1277,7 @@ begin
       btnReg.Enabled:=false;
       btnVariables.Enabled:=false;
       btnStack.Enabled:=false;
+      varList.Clear;
     end;
     gsPaused:
     begin
@@ -1321,6 +1325,21 @@ begin
   mnuReadWriteW.Checked:=false;
 end;
 
+procedure TCEGdbWidget.varListFltChange(Sender: TObject);
+var
+  i: integer;
+begin
+  if varListFlt.Filter = '' then
+    exit;
+  for i:= 0 to varList.Items.Count-1 do
+    if AnsiContainsText(varList.Items[i].Caption, varListFlt.Filter) then
+    begin
+      varList.ItemIndex:=i;
+      varList.Selected.MakeVisible(false);
+      break;
+    end;
+end;
+
 procedure TCEGdbWidget.disableEditor;
 begin
   cpuVIewer.ItemIndex:=-1;
@@ -1333,6 +1352,7 @@ var
   i: integer;
   b: TPersistentBreakPoint;
 begin
+  varList.Clear;
   if not fDbgRunnable and (fProj = nil) then
   begin
     dlgOkInfo('No project to debug', 'GDB commander');
@@ -1653,6 +1673,7 @@ var
   val: TJSONData;
   obj: TJSONObject;
   arr: TJSONArray;
+  k: TListItem;
   // common data
   nme: string;
   reason: string;
@@ -1693,9 +1714,9 @@ begin
           val := obj.Find('exp');
           if val.isNotNil then
           begin
-            ValueListEditor1.FindRow(val.AsString, i);
-            if i <> -1 then
-              ValueListEditor1.Row:=i;
+            k := varList.FindCaption(0, val.AsString, false, true, false);
+            if k.isNotNil then
+              varList.ItemIndex:=k.index;
           end;
         end;
       end;
@@ -1883,9 +1904,9 @@ begin
   val := fJson.Find('variables');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
-    i := ValueListEditor1.Row;
-    ValueListEditor1.BeginUpdate;
-    ValueListEditor1.Clear;
+    i := varList.ItemIndex;
+    varList.BeginUpdate;
+    varList.Clear;
     arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
     begin
@@ -1900,11 +1921,13 @@ begin
       val := obj.Find('value');
       if val.isNil then
         continue;
-      ValueListEditor1.InsertRow(nme, val.AsString, false);
+      varList.AddItem(nme, nil);
+      with varList.Items[varList.Items.Count-1] do
+        SubItems.Add(val.AsString);
     end;
-    if (i <> -1) and (i <= ValueListEditor1.RowCount) then
-      ValueListEditor1.Row:=i;
-    ValueListEditor1.EndUpdate;
+    if (i <> -1) and (i <= varList.Items.Count) then
+      varList.ItemIndex:=i;
+    varList.EndUpdate;
   end;
 
   if fOptions.showGdbOutput or fShowFromCustomCommand then
@@ -2075,9 +2098,9 @@ const
 var
   nme: string;
 begin
-  if ValueListEditor1.Row = -1 then
+  if varList.ItemIndex = -1 then
     exit;
-  nme := ValueListEditor1.Keys[ValueListEditor1.Row];
+  nme := varList.Items[varList.ItemIndex].Caption;
   gdbCommand(cmd[fAddWatchPointKind] + nme);
 end;
 
@@ -2108,11 +2131,11 @@ begin
   doc := fDocHandler.findDocument(nme);
   if doc.isNotNil then
     doc.CaretY:= itm.line;
-  gdbCommand('-stack-select-frame ' + intToStr(lstCallStack.ItemIndex));
+  {gdbCommand('-stack-select-frame ' + intToStr(lstCallStack.ItemIndex));
   if fOptions.autoGetVariables then
     infoVariables;
   if fOptions.autoGetRegisters then
-    infoRegs;
+    infoRegs;}
 end;
 
 procedure TCEGdbWidget.mnuReadWClick(Sender: TObject);
@@ -2161,8 +2184,6 @@ end;
 
 
 //TODO-cGDB: copy from call stack list
-//TODO-cGDB: replace value list editor by TListView
-//to set focus on variable of a triggered watchpoint.
 
 procedure TCEGdbWidget.setGpr(reg: TCpuRegister; val: TCpuGprValue);
 const
