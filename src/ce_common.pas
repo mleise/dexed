@@ -84,6 +84,11 @@ type
     function normalizePath: string;
   end;
 
+  TStringsHelper = class helper for TStrings
+    // Same as text but without the additional line terminator.
+    function strictText: string;
+  end;
+
   (**
    *  TProcess with assign() 'overriden'.
    *)
@@ -454,6 +459,12 @@ end;
 function TStringHelper.normalizePath: string;
 begin
   exit(TrimFilename(self));
+end;
+
+function TStringsHelper.strictText: string;
+begin
+  result := self.Text;
+  setLength(result, result.length - self.LineBreak.length);
 end;
 
 procedure TProcessEx.Assign(value: TPersistent);
