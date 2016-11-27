@@ -1902,6 +1902,8 @@ begin
   end;
 
   val := fJson.Find('variables');
+  if val.isNil then
+    val := fJson.Find('locals');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
     i := varList.ItemIndex;
@@ -2033,7 +2035,7 @@ end;
 
 procedure TCEGdbWidget.infoVariables;
 begin
-  gdbCommand('-stack-list-variables --skip-unavailable --all-values');
+  gdbCommand('-stack-list-variables --skip-unavailable --simple-values');
 end;
 
 procedure TCEGdbWidget.btnStartClick(Sender: TObject);
