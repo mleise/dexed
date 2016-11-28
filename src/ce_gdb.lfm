@@ -1,7 +1,7 @@
 inherited CEGdbWidget: TCEGdbWidget
-  Left = 635
+  Left = 1383
   Height = 668
-  Top = 212
+  Top = 333
   Width = 517
   Caption = 'GDB commander'
   ClientHeight = 668
@@ -68,9 +68,9 @@ inherited CEGdbWidget: TCEGdbWidget
           Height = 200
           Top = 6
           Width = 517
-          ActivePage = TabSheet4
+          ActivePage = TabSheet3
           Align = alTop
-          TabIndex = 1
+          TabIndex = 0
           TabOrder = 2
           object TabSheet3: TTabSheet
             Caption = 'Variables'
@@ -86,13 +86,13 @@ inherited CEGdbWidget: TCEGdbWidget
               Columns = <              
                 item
                   AutoSize = True
-                  Caption = 'Name'
-                  Width = 47
+                  Caption = 'name'
+                  Width = 46
                 end              
                 item
                   AutoSize = True
-                  Caption = 'Value'
-                  Width = 454
+                  Caption = 'value'
+                  Width = 455
                 end>
               GridLines = True
               HideSelection = False
@@ -109,10 +109,12 @@ inherited CEGdbWidget: TCEGdbWidget
               Hint = 'locate variables'
               Top = 2
               Width = 505
+              UseFormActivate = True
               ButtonWidth = 24
               NumGlyphs = 1
               Align = alTop
               BorderSpacing.Around = 2
+              AutoSelect = False
               MaxLength = 0
               TabOrder = 1
               OnChange = varListFltChange
@@ -133,13 +135,13 @@ inherited CEGdbWidget: TCEGdbWidget
               Columns = <              
                 item
                   AutoSize = True
-                  Caption = 'Address'
-                  Width = 60
+                  Caption = 'address'
+                  Width = 59
                 end              
                 item
                   AutoSize = True
-                  Caption = 'Instruction'
-                  Width = 441
+                  Caption = 'instruction'
+                  Width = 442
                 end>
               GridLines = True
               HideSelection = False
@@ -241,6 +243,57 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object TabSheet2: TTabSheet
           Caption = 'Thread list'
+          ClientHeight = 164
+          ClientWidth = 509
+          object lstThreads: TListView
+            Left = 0
+            Height = 164
+            Hint = 'call stack'
+            Top = 0
+            Width = 509
+            Align = alClient
+            Columns = <            
+              item
+                AutoSize = True
+                Caption = 'id'
+                Width = 23
+              end            
+              item
+                AutoSize = True
+                Caption = 'state'
+                Width = 42
+              end            
+              item
+                AutoSize = True
+                Caption = 'core'
+                Width = 38
+              end            
+              item
+                AutoSize = True
+                Caption = 'function'
+                Width = 62
+              end            
+              item
+                AutoSize = True
+                Caption = 'address'
+                Width = 59
+              end            
+              item
+                AutoSize = True
+                Caption = 'filename'
+                Width = 64
+              end            
+              item
+                AutoSize = True
+                Caption = 'line'
+                Width = 200
+              end>
+            GridLines = True
+            ReadOnly = True
+            TabOrder = 0
+            ViewStyle = vsReport
+            OnDblClick = lstThreadsDblClick
+          end
         end
       end
     end

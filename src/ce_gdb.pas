@@ -213,8 +213,6 @@ type
     procedure clear;
   end;
 
-  // TODO-cGDB: assembly view
-
   // serializable breakpoint
   TPersistentBreakPoint = class(TCollectionItem)
   strict private
@@ -267,6 +265,8 @@ type
 
   TCEDebugOptionsBase = class(TWritableLfmTextComponent)
   private
+    fAutoDisassemble: boolean;
+    fAutoGetThreads: boolean;
     fAutoDemangle: boolean;
     fAutoGetCallStack: boolean;
     fAutoGetRegisters: boolean;
@@ -281,10 +281,12 @@ type
     procedure setCommandsHistory(value: TStringList);
     procedure setShortcuts(value: TCEDebugShortcuts);
   published
+    property autoDisassemble: boolean read fAutoDisassemble write fAutoDisassemble;
     property autoDemangle: boolean read fAutoDemangle write fAutoDemangle;
     property autoGetCallStack: boolean read fAutoGetCallStack write fAutoGetCallStack;
     property autoGetRegisters: boolean read fAutoGetRegisters write fAutoGetRegisters;
     property autoGetVariables: boolean read fAutoGetVariables write fAutoGetVariables;
+    property autoGetThreads: boolean read fAutoGetThreads write fAutoGetThreads;
     property commandsHistory: TStringList read fCommandsHistory write setCommandsHistory;
     property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
     property shortcuts: TCEDebugShortcuts read fShortcuts write setShortcuts;
@@ -331,6 +333,7 @@ type
     button4: TCEToolButton;
     Edit1: TComboBox;
     GroupBox3: TGroupBox;
+    lstThreads: TListView;
     PageControl1: TPageControl;
     PageControl2: TPageControl;
     TabSheet1: TTabSheet;
@@ -368,6 +371,7 @@ type
     procedure btnWatchClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure lstCallStackDblClick(Sender: TObject);
+    procedure lstThreadsDblClick(Sender: TObject);
     procedure mnuReadWClick(Sender: TObject);
     procedure mnuReadWriteWClick(Sender: TObject);
     procedure mnuSelProjClick(Sender: TObject);
@@ -422,6 +426,7 @@ type
     procedure infoRegs;
     procedure infoStack;
     procedure infoVariables;
+    procedure infoThreads;
     procedure infoAsm(const fname: string);
     procedure sendCustomCommand;
     procedure setGpr(reg: TCpuRegister; val: TCpuGprValue);
@@ -528,6 +533,8 @@ begin
   fAutoGetCallStack:= true;
   fAutoGetRegisters:= true;
   fAutoGetVariables:= true;
+  fAutoDisassemble:= true;
+  fAutoGetThreads:=true;
   fShowGdbOutput:=true;
   fIgnoredSignals := TStringList.Create;
   fIgnoredSignals.Duplicates:= dupIgnore;
@@ -569,6 +576,8 @@ begin
   begin
     src := TCEDebugOptionsBase(source);
     fAutoDemangle:=src.fAutoDemangle;
+    fAutoDisassemble:=src.fAutoDisassemble;
+    fAutoGetThreads:=src.fAutoGetThreads;
     fAutoGetCallStack:=src.fAutoGetCallStack;
     fAutoGetRegisters:=src.fAutoGetRegisters;
     fAutoGetVariables:=src.autoGetVariables;
@@ -1690,12 +1699,14 @@ procedure TCEGdbWidget.interpretJson;
       infoRegs;
     if fOptions.autoGetVariables then
       infoVariables;
+    if fOptions.autoGetThreads then
+      infoThreads;
     selectAsmInstr;
   end;
 
 var
   r: PString;
-  i: integer;
+  i,j: integer;
   val: TJSONData;
   obj: TJSONObject;
   arr: TJSONArray;
@@ -1741,7 +1752,10 @@ begin
           begin
             k := varList.FindCaption(0, val.AsString, false, true, false);
             if k.isNotNil then
+            begin
               varList.ItemIndex:=k.index;
+              k.MakeVisible(false);
+            end;
           end;
         end;
       end;
@@ -1763,7 +1777,7 @@ begin
         val := obj.Find('func');
         if val.isNotNil then
         begin
-          if val.AsString <> fLastFunction then
+          if fOptions.autoDisassemble and (val.AsString <> fLastFunction) then
             infoAsm(fLastFilename);
           fLastFunction := val.AsString;
         end;
@@ -1809,7 +1823,7 @@ begin
         val := obj.Find('func');
         if val.isNotNil then
         begin
-          if val.AsString <> fLastFunction then
+          if fOptions.autoDisassemble and (val.AsString <> fLastFunction) then
             infoAsm(fLastFilename);
           fLastFunction := val.AsString;
         end;
@@ -1883,7 +1897,7 @@ begin
             0..integer(high(TCpuRegister)):
             begin
               fInspState.CPU.setInspectableRegister
-                (TCpuRegister(number), {$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
+                (TCpuRegister(number), {$IFDEF CPU64}val.AsQWord{$ELSE}val.AsInteger{$ENDIF});
             end;
             flagOffset:
             begin
@@ -1954,7 +1968,7 @@ begin
     val := fJson.Find('locals');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
-    i := varList.ItemIndex;
+    j := varList.ItemIndex;
     varList.BeginUpdate;
     varList.Clear;
     arr := TJSONArray(val);
@@ -1975,16 +1989,16 @@ begin
       with varList.Items[varList.Items.Count-1] do
         SubItems.Add(val.AsString);
     end;
-    if (i <> -1) and (i <= varList.Items.Count) then
-      varList.ItemIndex:=i;
+    if (j <> -1) and (j <= varList.Items.Count) then
+      varList.ItemIndex := j;
     varList.EndUpdate;
   end;
 
   val := fJson.Find('asm_insns');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
-    asmList.Clear;
     asmList.BeginUpdate;
+    asmList.Clear;
     arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
     begin
@@ -2010,6 +2024,51 @@ begin
       asmList.Selected.MakeVisible(false);
     asmList.EndUpdate;
     selectAsmInstr;
+  end;
+
+  val := fJson.Find('threads');
+  if val.isNotNil and (val.JSONType = jtArray) then
+  begin
+    arr := TJSONArray(val);
+    lstThreads.BeginUpdate;
+    lstThreads.Clear;
+    for i := 0 to arr.Count-1 do
+    begin
+      obj := arr.Objects[i];
+      val := obj.Find('id');
+      if val.isNotNil then
+      begin
+        lstThreads.AddItem(val.AsString, nil);
+        k := lstThreads.Items[lstThreads.Items.Count-1];
+        val := obj.Find('state');
+        if val.isNotNil then
+          k.SubItems.Add(val.AsString);
+        val := obj.Find('core');
+        if val.isNotNil then
+          k.SubItems.Add(val.AsString);
+        val := obj.Find('frame');
+        if val.isNotNil and (val.JSONType = jtObject) then
+        begin
+          obj := TJSONObject(val);
+          val := obj.Find('func');
+          if val.isNotNil then
+            if fOptions.autoDemangle then
+              k.SubItems.Add(demangle(val.AsString))
+            else
+              k.SubItems.Add(demangle(val.AsString));
+          val := obj.Find('addr');
+          if val.isNotNil then
+            k.SubItems.Add(val.AsString);
+          val := obj.Find('fullname');
+          if val.isNotNil then
+            k.SubItems.Add(val.AsString);
+          val := obj.Find('line');
+          if val.isNotNil then
+            k.SubItems.Add(val.AsString);
+        end;
+      end;
+    end;
+    lstThreads.EndUpdate;
   end;
 
   if fOptions.showGdbOutput or fShowFromCustomCommand then
@@ -2117,6 +2176,11 @@ end;
 procedure TCEGdbWidget.infoVariables;
 begin
   gdbCommand('-stack-list-variables --skip-unavailable --simple-values');
+end;
+
+procedure TCEGdbWidget.infoThreads;
+begin
+  gdbCommand('-thread-info');
 end;
 
 procedure TCEGdbWidget.infoAsm(const fname: string);
@@ -2228,6 +2292,24 @@ begin
     infoVariables;
   if fOptions.autoGetRegisters then
     infoRegs;}
+end;
+
+procedure TCEGdbWidget.lstThreadsDblClick(Sender: TObject);
+var
+  lne: integer;
+  nme: string;
+  doc: TCESynMemo = nil;
+begin
+  if (lstThreads.Selected.isNil) or (lstThreads.Selected.SubItems.Count < 6) then
+    exit;
+  lne := StrToIntDef(lstThreads.Selected.SubItems[5], -1);
+  nme := lstThreads.Selected.SubItems[4];
+  if not nme.fileExists or (lne = -1) then
+    exit;
+  fDocHandler.openDocument(nme);
+  doc := fDocHandler.findDocument(nme);
+  if doc.isNotNil then
+    doc.CaretY:= lne;
 end;
 
 procedure TCEGdbWidget.mnuReadWClick(Sender: TObject);
