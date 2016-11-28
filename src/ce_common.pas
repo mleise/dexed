@@ -15,7 +15,8 @@ uses
   {$IFNDEF CEBUILD}
   forms,
   {$ENDIF}
-  LazFileUtils, process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils;
+  LazFileUtils, process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils,
+  xfpjson;
 
 const
   exeExt = {$IFDEF WINDOWS} '.exe' {$ELSE} ''   {$ENDIF};
@@ -87,6 +88,12 @@ type
   TStringsHelper = class helper for TStrings
     // Same as text but without the additional line terminator.
     function strictText: string;
+  end;
+
+  TJSONObjectHelper = class helper for TJSONObject
+    function findObject(const key: TJSONStringType; out value: TJSONObject): boolean;
+    function findArray(const key: TJSONStringType; out value: TJSONArray): boolean;
+    function findAny(const key: TJSONStringType; out value: TJSONData): boolean;
   end;
 
   (**
@@ -465,6 +472,43 @@ function TStringsHelper.strictText: string;
 begin
   result := self.Text;
   setLength(result, result.length - self.LineBreak.length);
+end;
+
+
+function TJSONObjectHelper.findObject(const key: TJSONStringType; out value: TJSONObject): boolean;
+var
+  v: TJSONData;
+begin
+  v := self.Find(key);
+  if v.isNotNil then
+  begin
+    result := v.JSONType = jtObject;
+    if result then
+      value := TJSONObject(v);
+  end
+  else
+    result := false;
+end;
+
+function TJSONObjectHelper.findArray(const key: TJSONStringType; out value: TJSONArray): boolean;
+var
+  v: TJSONData;
+begin
+  v := self.Find(key);
+  if v.isNotNil then
+  begin
+    result := v.JSONType = jtArray;
+    if result then
+      value := TJSONArray(v);
+  end
+  else
+    result := false;
+end;
+
+function TJSONObjectHelper.findAny(const key: TJSONStringType; out value: TJSONData): boolean;
+begin
+  value := self.Find(key);
+  result := value.isNotNil;
 end;
 
 procedure TProcessEx.Assign(value: TPersistent);
