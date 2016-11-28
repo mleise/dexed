@@ -699,30 +699,25 @@ end;
 {$REGION JSON to internal fields -----------------------------------------------}
 function TCEDubProject.getCurrentCustomConfig: TJSONObject;
 var
-  item: TJSONData;
   confs: TJSONArray;
 begin
   result := nil;
-  if fConfigIx = 0 then exit;
-  //
-  item := fJSON.Find('configurations');
-  if item.isNil then exit;
-  //
-  confs := TJSONArray(item);
-  if fConfigIx > confs.Count -1 then exit;
-  //
-  result := confs.Objects[fConfigIx];
+  if fConfigIx = 0 then
+    exit;
+  if fJSON.findArray('configurations', confs) and (fConfigIx < confs.Count) then
+    result := confs.Objects[fConfigIx];
 end;
 
 procedure TCEDubProject.updatePackageNameFromJson;
 var
   value: TJSONData;
 begin
-  if not assigned(fJSON) then
+  if fJSON.isNil then
     exit;
-  value := fJSON.Find('name');
-  if value.isNil then fPackageName := ''
-  else fPackageName := value.AsString;
+  if not fJSON.findAny('name', value) then
+    fPackageName := ''
+  else
+      fPackageName := value.AsString;
 end;
 
 procedure TCEDubProject.udpateConfigsFromJson;
@@ -740,15 +735,13 @@ begin
     exit;
   // the CE interface for dub doesn't make the difference between build type
   //and config, instead each possible combination type + build is generated.
-  if fJSON.Find('configurations') <> nil then
+  if fJSON.findArray('configurations', arr) then
   begin
-    arr := fJSON.Arrays['configurations'];
     for i:= 0 to arr.Count-1 do
     begin
       item := TJSONObject(arr.Items[i]);
-      if item.Find('name').isNil then
-        continue;
-      fConfigs.Add(item.Strings['name']);
+      if item.findAny('name', dat) then
+        fConfigs.Add(dat.AsString);
     end;
   end else
   begin
@@ -758,19 +751,15 @@ begin
   end;
 
   fBuildTypes.AddStrings(DubBuiltTypeName);
-  dat := fJSON.Find('buildTypes');
-  if dat.isNotNil and (dat.JSONType = jtObject) then
+  if fJSON.findObject('buildTypes', obj) then for i := 0 to obj.Count-1 do
   begin
-    obj := fJSON.Objects['buildTypes'];
-    for i := 0 to obj.Count-1 do
-    begin
-      itemname := obj.Names[i];
-      // defaults build types can be overridden
-      if fBuildTypes.IndexOf(itemname) <> -1 then
-        continue;
-      fBuildTypes.Add(itemname);
-    end;
+    itemname := obj.Names[i];
+    // defaults build types can be overridden
+    if fBuildTypes.IndexOf(itemname) <> -1 then
+      continue;
+    fBuildTypes.Add(itemname);
   end;
+
   deleteDups(fConfigs);
   deleteDups(fBuildTypes);
   fConfigsCount := fConfigs.Count * fBuildTypes.Count;
@@ -787,13 +776,9 @@ procedure getExclusion(from: TJSONObject);
 var
   i: integer;
 begin
-  item := from.Find('excludedSourceFiles');
-  if item.isNotNil and (item.JSONType = jtArray) then
-  begin
-    arr := TJSONArray(item);
+  if from.findArray('excludedSourceFiles', arr) then
     for i := 0 to arr.Count-1 do
       lst.Add(patchPlateformPath(arr.Strings[i]));
-  end;
 end;
 procedure tryAddRelOrAbsFile(const fname: string);
 begin
@@ -829,17 +814,29 @@ begin
   lst := TStringList.Create;
   try
     // auto folders & files
-    item := fJSON.Find('mainSourceFile');
-    if item.isNotNil then
+    if fJSON.findAny('mainSourceFile', item) then
       fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, item.AsString)));
     tryAddFromFolder(fBasePath + 'src');
     tryAddFromFolder(fBasePath + 'source');
     // custom folders
-    item := fJSON.Find('sourcePaths');
-    if item.isNotNil then
+    if fJSON.findArray('sourcePaths', arr) then for i := 0 to arr.Count-1 do
     begin
-      arr := TJSONArray(item);
-      for i := 0 to arr.Count-1 do
+      pth := TrimRightSet(arr.Strings[i], ['/','\']);
+      if pth.dirExists and FilenameIsAbsolute(pth) then
+        tryAddFromFolder(pth)
+      else
+        tryAddFromFolder(expandFilenameEx(fBasePath, pth));
+    end;
+    // custom files
+    if fJSON.findArray('sourceFiles', arr) then for i := 0 to arr.Count-1 do
+      tryAddRelOrAbsFile(arr.Strings[i]);
+    conf := getCurrentCustomConfig;
+    if conf.isNotNil then
+    begin
+      if conf.findAny('mainSourceFile', item) then
+        fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, item.AsString)));
+      // custom folders in current config
+      if conf.findArray('sourcePaths', arr) then for i := 0 to arr.Count-1 do
       begin
         pth := TrimRightSet(arr.Strings[i], ['/','\']);
         if pth.dirExists and FilenameIsAbsolute(pth) then
@@ -847,43 +844,9 @@ begin
         else
           tryAddFromFolder(expandFilenameEx(fBasePath, pth));
       end;
-    end;
-    // custom files
-    item := fJSON.Find('sourceFiles');
-    if item.isNotNil then
-    begin
-      arr := TJSONArray(item);
-      for i := 0 to arr.Count-1 do
-        tryAddRelOrAbsFile(arr.Strings[i]);
-    end;
-    conf := getCurrentCustomConfig;
-    if conf.isNotNil then
-    begin
-      item := conf.Find('mainSourceFile');
-      if item.isNotNil then
-        fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, item.AsString)));
-      // custom folders in current config
-      item := conf.Find('sourcePaths');
-      if item.isNotNil then
-      begin
-        arr := TJSONArray(item);
-        for i := 0 to arr.Count-1 do
-        begin
-          pth := TrimRightSet(arr.Strings[i], ['/','\']);
-          if pth.dirExists and FilenameIsAbsolute(pth) then
-            tryAddFromFolder(pth)
-          else
-            tryAddFromFolder(expandFilenameEx(fBasePath, pth));
-        end;
-      end;
       // custom files in current config
-      item := conf.Find('sourceFiles');
-      if item.isNotNil then
-      begin
-        arr := TJSONArray(item);
-        for i := 0 to arr.Count-1 do
-          tryAddRelOrAbsFile(arr.Strings[i]);
-      end;
+      if conf.findArray('sourceFiles', arr) then for i := 0 to arr.Count-1 do
+        tryAddRelOrAbsFile(arr.Strings[i]);
     end;
     // exclusions
     lst.Clear;
@@ -923,12 +886,8 @@ var
 begin
   result := true;
   if value.Find('mainSourceFile').isNotNil then
-  begin
-    fBinKind := executable;
-    exit;
-  end;
-  tt := value.Find('targetType');
-  if tt.isNotNil then
+    fBinKind := executable
+  else if value.findAny('targetType', tt) then
   begin
     case tt.AsString of
       'executable': fBinKind := executable;
@@ -937,7 +896,8 @@ begin
       'autodetect': result := false;
       else fBinKind := executable;
     end;
-  end else result := false;
+  end
+  else result := false;
 end;
 
 procedure TCEDubProject.updateTargetKindFromJson;
@@ -975,22 +935,16 @@ procedure TCEDubProject.updateImportPathsFromJson;
   procedure addFrom(obj: TJSONObject);
   var
     arr: TJSONArray;
-    item: TJSONData;
     pth: string;
     i: integer;
   begin
-    item := obj.Find('importPaths');
-    if assigned(item) then
+    if obj.findArray('importPaths', arr) then for i := 0 to arr.Count-1 do
     begin
-      arr := TJSONArray(item);
-      for i := 0 to arr.Count-1 do
-      begin
-        pth := TrimRightSet(arr.Strings[i], ['/','\']);
-        if pth.dirExists and FilenameIsAbsolute(pth) then
-          fImportPaths.Add(pth)
-        else
-          fImportPaths.Add(expandFilenameEx(fBasePath, pth));
-      end;
+      pth := TrimRightSet(arr.Strings[i], ['/','\']);
+      if pth.dirExists and FilenameIsAbsolute(pth) then
+        fImportPaths.Add(pth)
+      else
+        fImportPaths.Add(expandFilenameEx(fBasePath, pth));
     end;
   end;
   // note: dependencies are added as import to allow DCD completion
@@ -999,20 +953,17 @@ procedure TCEDubProject.updateImportPathsFromJson;
   var
     folds: TStringList;
     deps: TJSONObject;
-    item: TJSONData;
     pth: string;
     str: string;
     i,j,k: integer;
   begin
-    item := obj.Find('dependencies');
-    if assigned(item) then
+    if obj.findObject('dependencies', deps) then
     begin
       {$IFDEF WINDOWS}
       pth := GetEnvironmentVariable('APPDATA') + '\dub\packages\';
       {$ELSE}
       pth := GetEnvironmentVariable('HOME') + '/.dub/packages/';
       {$ENDIF}
-      deps := TJSONObject(item);
       folds := TStringList.Create;
       listFolders(folds, pth);
       try
@@ -1068,16 +1019,15 @@ var
   var
     n,p: TJSONData;
   begin
-    p := obj.Find('targetPath');
-    n := obj.Find('targetName');
-    if p.isNotNil then pathPart := p.AsString;
-    if n.isNotNil then namePart := n.AsString;
+    if obj.findAny('targetPath', p) then
+      pathPart := p.AsString;
+    if obj.FindAny('targetName', n) then
+      namePart := n.AsString;
   end;
 begin
   fOutputFileName := '';
-  if fJSON.isNil then exit;
-  item := fJSON.Find('name');
-  if item.isNil then exit;
+  if fJSON.isNil or not fJSON.findAny('name', item) then
+    exit;
 
   namePart := item.AsString;
   pathPart := fBasePath;
