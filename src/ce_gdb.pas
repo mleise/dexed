@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, RegExpr, ComCtrls,
   PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
-  StdCtrls, process, fpjson, typinfo, Unix, ListViewFilterEdit, SynEdit,
+  StdCtrls, process, xfpjson, typinfo, Unix, ListViewFilterEdit, SynEdit,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
   ce_ddemangle, ce_writableComponent, EditBtn, strutils;
@@ -1761,11 +1761,9 @@ var
   fFpuRaw: array[0..9] of Byte absolute fFpuExtended;
 begin
 
-  val := fJson.Find('reason');
-  if val.isNotNil then
+  if fJson.findAny('reason', val) then
   begin
     reason := val.AsString;
-
     r := stopReasons.match(reason);
     if assigned(r) then
     begin
@@ -1777,38 +1775,28 @@ begin
       end;
       if brkreason = dbWatch then
       begin
-        obj := TJSONObject(fJson.Find('wpt'));
-        if obj.isNotNil and (obj.JSONType = jtObject) then
+        if fJson.findObject('wpt', obj) and obj.findAny('exp', val) then
         begin
-          val := obj.Find('exp');
-          if val.isNotNil then
+          k := lstVariables.FindCaption(0, val.AsString, false, true, false);
+          if k.isNotNil then
           begin
-            k := lstVariables.FindCaption(0, val.AsString, false, true, false);
-            if k.isNotNil then
-            begin
-              lstVariables.ItemIndex:=k.index;
-              k.MakeVisible(false);
-            end;
+            lstVariables.ItemIndex:=k.index;
+            k.MakeVisible(false);
           end;
         end;
       end;
-      obj := TJSONObject(fJson.Find('frame'));
-      if obj.isNotNil and (obj.JSONType = jtObject) then
+      if fJson.findObject('frame', obj) then
       begin
-        val := obj.Find('addr');
-        if val.isNotNil then
+        if obj.FindAny('addr', val) then
           fLastOffset:=val.AsString;
-        val := obj.Find('fullname');
-        if val.isNotNil then
+        if obj.FindANy('fullname', val) then
           fLastFilename := val.AsString;
-        val := obj.Find('line');
-        if val.isNotNil then
+        if obj.findAny('line', val) then
         begin
           line := val.AsInteger;
           fLastLine := val.AsString;
         end;
-        val := obj.Find('func');
-        if val.isNotNil then
+        if obj.findAny('func', val) then
         begin
           if fOptions.autoDisassemble and (val.AsString <> fLastFunction) then
             infoAsm(fLastFilename);
@@ -1832,29 +1820,22 @@ begin
     begin
       signame := 'unknown signal';
       sigmean := 'unknown meaning';
-      val := fJson.Find('signal-name');
-      if val.isNotNil then
+      if fJson.findAny('signal-name', val) then
         signame := val.AsString;
       if (fOptions.ignoredSignals.Count <> 0) and
         (fOptions.ignoredSignals.IndexOf(signame) <> -1) then
           exit;
-      val := fJson.Find('signal-meaning');
-      if val.isNotNil then
+      if fJson.findAny('signal-meaning', val) then
         sigmean := val.AsString;
-      obj := TJSONObject(fJson.Find('frame'));
-      if obj.isNotNil and (obj.JSONType = jtObject) then
+      if fJson.findObject('frame', obj) then
       begin
-        val := obj.Find('addr');
-        if val.isNotNil then
+        if obj.findAny('addr', val) then
           fLastOffset:=val.AsString;
-        val := obj.Find('fullname');
-        if val.isNotNil then
+        if obj.findAny('fullname', val) then
           fLastFilename := val.AsString;
-        val := obj.Find('line');
-        if val.isNotNil then
+        if obj.findAny('line', val) then
           line := val.AsInteger;
-        val := obj.Find('func');
-        if val.isNotNil then
+        if obj.findAny('func', val) then
         begin
           if fOptions.autoDisassemble and (val.AsString <> fLastFunction) then
             infoAsm(fLastFilename);
@@ -1902,73 +1883,61 @@ begin
       setState(gsNone);
       subjDebugStop(fSubj);
     end;
-
   end;
 
-  val := fJson.Find('msg');
-  if val.isNotNil then
-  begin
+  if fJson.findAny('msg', val) then
     fMsg.message(val.AsString, nil, amcMisc, amkAuto);
-  end;
 
-  val := fJson.Find('register-values');
-  if val.isNotNil and (val.JSONType = jtArray) then
+  if fJson.findArray('register-values', arr) then
   begin
-    arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
     begin
       obj := TJSONObject(arr.Objects[i]);
       if obj.isNil then
-        break
-      else
-      begin
-        val := obj.Find('number');
-        if val.isNotNil then
-          number := val.AsInteger;
-        val := obj.Find('value');
-        if val.isNotNil then case number of
-            0..integer(high(TCpuRegister)):
-            begin
-              fInspState.CPU.setInspectableRegister
-                (TCpuRegister(number), {$IFDEF CPU64}val.AsQWord{$ELSE}val.AsInteger{$ENDIF});
-            end;
-            flagOffset:
-            begin
-              fInspState.setInspectableFlags({$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
-            end;
-            segOffset..segOffset+5:
-            begin
-              fInspState.SSR.setInspectableRegister
-                (TSegRegister(number - segOffset), val.AsInteger);
-            end;
-            stOffset..stOffset+7:
-            begin
-              fFpuRaw[9] := StrToInt('$' + val.AsString[3..4]);
-              fFpuRaw[8] := StrToInt('$' + val.AsString[5..6]);
-              fFpuRaw[7] := StrToInt('$' + val.AsString[7..8]);
-              fFpuRaw[6] := StrToInt('$' + val.AsString[9..10]);
-              fFpuRaw[5] := StrToInt('$' + val.AsString[11..12]);
-              fFpuRaw[4] := StrToInt('$' + val.AsString[13..14]);
-              fFpuRaw[3] := StrToInt('$' + val.AsString[15..16]);
-              fFpuRaw[2] := StrToInt('$' + val.AsString[17..18]);
-              fFpuRaw[1] := StrToInt('$' + val.AsString[19..20]);
-              fFpuRaw[0] := StrToInt('$' + val.AsString[21..22]);
-              fInspState.FPU.setInspectableRegister
-                (TFpuRegister(number - stOffset), fFpuExtended);
-            end;
+        break;
+      if obj.findAny('number', val) then
+        number := val.AsInteger;
+      if obj.findAny('value', val) then
+      case number of
+        0..integer(high(TCpuRegister)):
+        begin
+          fInspState.CPU.setInspectableRegister
+            (TCpuRegister(number), {$IFDEF CPU64}val.AsQWord{$ELSE}val.AsInteger{$ENDIF});
         end;
-        // TODO-cGDB: get SSE registers
+        flagOffset:
+        begin
+          fInspState.setInspectableFlags({$IFDEF CPU64}val.AsInt64{$ELSE}val.AsInteger{$ENDIF});
+        end;
+        segOffset..segOffset+5:
+        begin
+          fInspState.SSR.setInspectableRegister
+            (TSegRegister(number - segOffset), val.AsInteger);
+        end;
+        stOffset..stOffset+7:
+        begin
+          fFpuRaw[9] := StrToInt('$' + val.AsString[3..4]);
+          fFpuRaw[8] := StrToInt('$' + val.AsString[5..6]);
+          fFpuRaw[7] := StrToInt('$' + val.AsString[7..8]);
+          fFpuRaw[6] := StrToInt('$' + val.AsString[9..10]);
+          fFpuRaw[5] := StrToInt('$' + val.AsString[11..12]);
+          fFpuRaw[4] := StrToInt('$' + val.AsString[13..14]);
+          fFpuRaw[3] := StrToInt('$' + val.AsString[15..16]);
+          fFpuRaw[2] := StrToInt('$' + val.AsString[17..18]);
+          fFpuRaw[1] := StrToInt('$' + val.AsString[19..20]);
+          fFpuRaw[0] := StrToInt('$' + val.AsString[21..22]);
+          fInspState.FPU.setInspectableRegister
+            (TFpuRegister(number - stOffset), fFpuExtended);
+        end;
       end;
+      // TODO-cGDB: get SSE registers
     end;
     cpuViewer.RefreshPropertyValues;
   end;
 
-  val := fJson.Find('stack');
-  if val.isNotNil and (val.JSONType = jtArray) then
+  if fJson.findArray('stack', arr) then
   begin
     fStackItems.clear;
     lstCallStack.Clear;
-    arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
     begin
       obj := arr.Objects[i];
@@ -2027,12 +1996,10 @@ begin
     lstVariables.EndUpdate;
   end;
 
-  val := fJson.Find('asm_insns');
-  if val.isNotNil and (val.JSONType = jtArray) then
+  if fJson.findArray('asm_insns', arr) then
   begin
     lstAsm.BeginUpdate;
     lstAsm.Clear;
-    arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
     begin
       obj := arr.Objects[i];
@@ -2059,44 +2026,35 @@ begin
     selectAsmInstr;
   end;
 
-  val := fJson.Find('threads');
-  if val.isNotNil and (val.JSONType = jtArray) then
+  if fJson.findArray('threads', arr) then
   begin
-    arr := TJSONArray(val);
     lstThreads.BeginUpdate;
     lstThreads.Clear;
     for i := 0 to arr.Count-1 do
     begin
       obj := arr.Objects[i];
-      val := obj.Find('id');
-      if val.isNotNil then
+      if obj.findAny('id', val) then
       begin
         lstThreads.AddItem(val.AsString, nil);
         k := lstThreads.Items[lstThreads.Items.Count-1];
-        val := obj.Find('state');
-        if val.isNotNil then
+        if obj.findAny('state', val) then
           k.SubItems.Add(val.AsString);
-        val := obj.Find('core');
-        if val.isNotNil then
+        if obj.findAny('core', val) then
           k.SubItems.Add(val.AsString);
         val := obj.Find('frame');
         if val.isNotNil and (val.JSONType = jtObject) then
         begin
           obj := TJSONObject(val);
-          val := obj.Find('func');
-          if val.isNotNil then
+          if obj.findAny('func', val) then
             if fOptions.autoDemangle then
               k.SubItems.Add(demangle(val.AsString))
             else
               k.SubItems.Add(demangle(val.AsString));
-          val := obj.Find('addr');
-          if val.isNotNil then
+          if obj.findAny('addr', val) then
             k.SubItems.Add(val.AsString);
-          val := obj.Find('fullname');
-          if val.isNotNil then
+          if obj.findAny('fullname', val) then
             k.SubItems.Add(val.AsString);
-          val := obj.Find('line');
-          if val.isNotNil then
+          if obj.findAny('line', val) then
             k.SubItems.Add(val.AsString);
         end;
       end;
@@ -2107,8 +2065,7 @@ begin
   if fOptions.showGdbOutput or fShowFromCustomCommand then
   begin
     fShowFromCustomCommand := false;
-    arr := TJSONArray(fJson.Find('CLI'));
-    if arr.isNotNil then
+    if fJson.findArray('CLI', arr) then
       for i := 0 to arr.Count-1 do
         fMsg.message(arr.Strings[i], nil, amcMisc, amkBub);
   end;
@@ -2118,7 +2075,6 @@ end;
 procedure TCEGdbWidget.gdboutJsonize(sender: TObject);
 var
   str: string;
-  //lst: TStringList;
 begin
   if fMsg = nil then
     exit;
@@ -2134,16 +2090,6 @@ begin
 
   parseGdbout(fLog.Text, fJson);
   interpretJson;
-
-  //lst := TStringList.Create;
-  //try
-  //  str := fJson.FormatJSON(DefaultFormat,2);
-  //  lst.Text:= str;
-  //  lst.SaveToFile('/home/basile/gdbmessage.json');
-  //finally
-  //  lst.Free;
-  //end;
-
 end;
 
 procedure TCEGdbWidget.readOutput;
