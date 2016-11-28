@@ -377,6 +377,7 @@ type
     procedure mnuSelProjClick(Sender: TObject);
     procedure mnuSelRunnableClick(Sender: TObject);
     procedure mnuWriteWClick(Sender: TObject);
+    procedure PageControl2Change(Sender: TObject);
     procedure varListFltChange(Sender: TObject);
   protected
     procedure setToolBarFlat(value: boolean); override;
@@ -1345,6 +1346,12 @@ begin
   fAddWatchPointKind := wpkWrite;
   mnuReadW.Checked:=false;
   mnuReadWriteW.Checked:=false;
+end;
+
+procedure TCEGdbWidget.PageControl2Change(Sender: TObject);
+begin
+  // workaround LCL bug, "cannot focus..." due to caret in filter
+  varListFlt.Enabled := PageControl2.PageIndex = 0
 end;
 
 procedure TCEGdbWidget.varListFltChange(Sender: TObject);

@@ -72,6 +72,7 @@ inherited CEGdbWidget: TCEGdbWidget
           Align = alTop
           TabIndex = 0
           TabOrder = 2
+          OnChange = PageControl2Change
           object TabSheet3: TTabSheet
             Caption = 'Variables'
             ClientHeight = 164
@@ -109,12 +110,10 @@ inherited CEGdbWidget: TCEGdbWidget
               Hint = 'locate variables'
               Top = 2
               Width = 505
-              UseFormActivate = True
               ButtonWidth = 24
               NumGlyphs = 1
               Align = alTop
               BorderSpacing.Around = 2
-              AutoSelect = False
               MaxLength = 0
               TabOrder = 1
               OnChange = varListFltChange
