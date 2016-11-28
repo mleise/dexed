@@ -1319,6 +1319,7 @@ begin
       btnReg.Enabled:=false;
       btnVariables.Enabled:=false;
       btnStack.Enabled:=false;
+      btnWatch.Enabled:=false;
       clearDisplays;
     end;
     gsPaused:
@@ -1332,6 +1333,7 @@ begin
       btnReg.Enabled:=true;
       btnVariables.Enabled:=true;
       btnStack.Enabled:=true;
+      btnWatch.Enabled:=true;
     end;
     gsRunning:
     begin
@@ -1344,6 +1346,7 @@ begin
       btnReg.Enabled:=false;
       btnVariables.Enabled:=false;
       btnStack.Enabled:=false;
+      btnWatch.Enabled:=false;
     end;
   end;
 end;
@@ -2217,6 +2220,8 @@ procedure TCEGdbWidget.infoAsm(const fname: string);
 var
   cmd: string;
 begin
+  if not fname.fileExists or (fLastLine = '-1') or (fLastLine = '0') then
+    exit;
   cmd := format('-data-disassemble -f %s -l %s -n -1 -- 0', [fname, fLastLine]);
   //cmd := format('-data-disassemble -s %s -e $pc -- 0', [fLastOffset]);
   gdbCommand(cmd, @gdboutJsonize);

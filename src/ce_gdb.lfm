@@ -83,6 +83,7 @@ inherited CEGdbWidget: TCEGdbWidget
               Top = 24
               Width = 505
               Align = alClient
+              AutoWidthLastColumn = True
               BorderSpacing.Around = 2
               Columns = <              
                 item
@@ -91,7 +92,6 @@ inherited CEGdbWidget: TCEGdbWidget
                   Width = 46
                 end              
                 item
-                  AutoSize = True
                   Caption = 'value'
                   Width = 455
                 end>
@@ -130,6 +130,7 @@ inherited CEGdbWidget: TCEGdbWidget
               Width = 505
               Align = alClient
               AutoSort = False
+              AutoWidthLastColumn = True
               BorderSpacing.Around = 2
               Columns = <              
                 item
@@ -138,7 +139,6 @@ inherited CEGdbWidget: TCEGdbWidget
                   Width = 59
                 end              
                 item
-                  AutoSize = True
                   Caption = 'instruction'
                   Width = 442
                 end>
@@ -217,6 +217,8 @@ inherited CEGdbWidget: TCEGdbWidget
             Top = 0
             Width = 509
             Align = alClient
+            AutoSort = False
+            AutoWidthLastColumn = True
             Columns = <            
               item
                 AutoSize = True
@@ -229,12 +231,12 @@ inherited CEGdbWidget: TCEGdbWidget
                 Width = 59
               end            
               item
-                AutoSize = True
                 Caption = 'filename'
-                Width = 367
+                Width = 384
               end>
             GridLines = True
             ReadOnly = True
+            ScrollBars = ssAutoBoth
             TabOrder = 0
             ViewStyle = vsReport
             OnDblClick = lstCallStackDblClick
@@ -251,6 +253,7 @@ inherited CEGdbWidget: TCEGdbWidget
             Top = 0
             Width = 509
             Align = alClient
+            AutoSort = False
             AutoWidthLastColumn = True
             Columns = <            
               item
@@ -285,10 +288,11 @@ inherited CEGdbWidget: TCEGdbWidget
               end            
               item
                 Caption = 'line'
-                Width = 200
+                Width = 217
               end>
             GridLines = True
             ReadOnly = True
+            ScrollBars = ssAutoBoth
             TabOrder = 0
             ViewStyle = vsReport
             OnDblClick = lstThreadsDblClick
