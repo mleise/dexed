@@ -2308,9 +2308,6 @@ procedure TCESynMemo.checkFileDate;
 var
   newDate: double;
   str: TStringList;
-  txt: string;
-  b,e: TPoint;
-  p: TPoint;
 begin
   if fFilename = fTempFileName then exit;
   if fDisableFileDateCheck then exit;
