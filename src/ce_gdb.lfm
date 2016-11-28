@@ -3,7 +3,6 @@ inherited CEGdbWidget: TCEGdbWidget
   Height = 668
   Top = 333
   Width = 517
-  ActiveControl = Splitter2
   Caption = 'GDB commander'
   ClientHeight = 668
   ClientWidth = 517
@@ -38,7 +37,7 @@ inherited CEGdbWidget: TCEGdbWidget
           ClientHeight = 149
           ClientWidth = 513
           TabOrder = 0
-          object cpuVIewer: TTIPropertyGrid
+          object cpuViewer: TTIPropertyGrid
             Left = 0
             Height = 149
             Hint = 'cpu registers'
@@ -78,7 +77,7 @@ inherited CEGdbWidget: TCEGdbWidget
             Caption = 'Variables'
             ClientHeight = 164
             ClientWidth = 509
-            object varList: TListView
+            object lstVariables: TListView
               Left = 2
               Height = 138
               Top = 24
@@ -124,7 +123,7 @@ inherited CEGdbWidget: TCEGdbWidget
             Caption = 'Assembly'
             ClientHeight = 164
             ClientWidth = 509
-            object asmList: TListView
+            object lstAsm: TListView
               Left = 2
               Height = 160
               Top = 2

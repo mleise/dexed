@@ -344,7 +344,7 @@ type
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
     TabSheet4: TTabSheet;
-    varList: TListView;
+    lstVariables: TListView;
     lstCallStack: TListView;
     mnuReadW: TMenuItem;
     mnuWriteW: TMenuItem;
@@ -354,13 +354,13 @@ type
     Panel1: TPanel;
     Panel3: TPanel;
     btnSendCom: TSpeedButton;
-    cpuVIewer: TTIPropertyGrid;
+    cpuViewer: TTIPropertyGrid;
     mnuProjRunnable: TPopupMenu;
     mnuWatch: TPopupMenu;
     Splitter2: TSplitter;
     Splitter3: TSplitter;
     Splitter4: TSplitter;
-    asmList: TListView;
+    lstAsm: TListView;
     varListFlt: TListViewFilterEdit;
     procedure btnContClick(Sender: TObject);
     procedure btnVariablesClick(Sender: TObject);
@@ -414,6 +414,7 @@ type
     fLastFunction: string;
     fLastOffset: string;
     fLastLine: string;
+    procedure clearDisplays;
     procedure updateMenu;
     procedure optionsChangesApplied(sender: TObject);
     procedure disableEditor;
@@ -966,7 +967,6 @@ begin
   fMsg:= getMessageDisplay;
   fLog := TStringList.Create;
   fInspState := TInspectableCPU.Create(@setGpr, @setSsr, @setFlag, @setFpr);
-  cpuVIewer.TIObject := fInspState;
   fJson := TJsonObject.Create;
   fStackItems := TStackItems.create;
   fSubj:= TCEDebugObserverSubject.Create;
@@ -1128,6 +1128,16 @@ begin
   itm.ImageIndex:= i;
 
   bmp.Free;
+end;
+
+procedure TCEGdbWidget.clearDisplays;
+begin
+  lstVariables.Clear;
+  lstCallStack.Clear;
+  lstThreads.Clear;
+  lstAsm.Clear;
+  cpuViewer.Clear;
+  cpuViewer.TIObject := nil;
 end;
 
 procedure TCEGdbWidget.optionsChangesApplied(sender: TObject);
@@ -1304,7 +1314,7 @@ begin
       btnReg.Enabled:=false;
       btnVariables.Enabled:=false;
       btnStack.Enabled:=false;
-      varList.Clear;
+      clearDisplays;
     end;
     gsPaused:
     begin
@@ -1364,18 +1374,18 @@ var
 begin
   if varListFlt.Filter = '' then
     exit;
-  for i:= 0 to varList.Items.Count-1 do
-    if AnsiContainsText(varList.Items[i].Caption, varListFlt.Filter) then
+  for i:= 0 to lstVariables.Items.Count-1 do
+    if AnsiContainsText(lstVariables.Items[i].Caption, varListFlt.Filter) then
     begin
-      varList.ItemIndex:=i;
-      varList.Selected.MakeVisible(false);
+      lstVariables.ItemIndex:=i;
+      lstVariables.Selected.MakeVisible(false);
       break;
     end;
 end;
 
 procedure TCEGdbWidget.disableEditor;
 begin
-  cpuVIewer.ItemIndex:=-1;
+  cpuViewer.ItemIndex:=-1;
 end;
 
 procedure TCEGdbWidget.startDebugging;
@@ -1385,7 +1395,7 @@ var
   i: integer;
   b: TPersistentBreakPoint;
 begin
-  varList.Clear;
+  clearDisplays;
   if not fDbgRunnable and (fProj = nil) then
   begin
     dlgOkInfo('No project to debug', 'GDB commander');
@@ -1452,7 +1462,6 @@ begin
       bpkBreak: str := 'break ' + b.filename + ':' + intToStr(b.line) + #10;
       bpkWatch: {TODO-cGDB: put watchpoint from persistent};
     end;
-
     fGdb.Input.Write(str[1], str.length);
   end;
   // break on druntime exceptions + any throw'
@@ -1477,6 +1486,8 @@ begin
   gdbCommand('-gdb-set mi-async on');
   fGdb.OnReadData := @gdboutJsonize;
   // launch
+  cpuViewer.TIObject := fInspState;
+  cpuViewer.RefreshPropertyValues;
   gdbCommand('run >' + fOutputName + '< ' + fInputName);
   setState(gsRunning);
 end;
@@ -1694,7 +1705,7 @@ procedure TCEGdbWidget.interpretJson;
   var
     itm: TListItem;
   begin
-    itm := asmList.FindCaption(0, fLastOffset, false, true, false);
+    itm := lstAsm.FindCaption(0, fLastOffset, false, true, false);
     if itm.isNotNil then
     begin
       itm.Selected:=true;
@@ -1761,10 +1772,10 @@ begin
           val := obj.Find('exp');
           if val.isNotNil then
           begin
-            k := varList.FindCaption(0, val.AsString, false, true, false);
+            k := lstVariables.FindCaption(0, val.AsString, false, true, false);
             if k.isNotNil then
             begin
-              varList.ItemIndex:=k.index;
+              lstVariables.ItemIndex:=k.index;
               k.MakeVisible(false);
             end;
           end;
@@ -1938,7 +1949,7 @@ begin
         // TODO-cGDB: get SSE registers
       end;
     end;
-    cpuVIewer.RefreshPropertyValues;
+    cpuViewer.RefreshPropertyValues;
   end;
 
   val := fJson.Find('stack');
@@ -1979,9 +1990,9 @@ begin
     val := fJson.Find('locals');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
-    j := varList.ItemIndex;
-    varList.BeginUpdate;
-    varList.Clear;
+    j := lstVariables.ItemIndex;
+    lstVariables.BeginUpdate;
+    lstVariables.Clear;
     arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
     begin
@@ -1996,20 +2007,20 @@ begin
       val := obj.Find('value');
       if val.isNil then
         continue;
-      varList.AddItem(nme, nil);
-      with varList.Items[varList.Items.Count-1] do
+      lstVariables.AddItem(nme, nil);
+      with lstVariables.Items[lstVariables.Items.Count-1] do
         SubItems.Add(val.AsString);
     end;
-    if (j <> -1) and (j <= varList.Items.Count) then
-      varList.ItemIndex := j;
-    varList.EndUpdate;
+    if (j <> -1) and (j <= lstVariables.Items.Count) then
+      lstVariables.ItemIndex := j;
+    lstVariables.EndUpdate;
   end;
 
   val := fJson.Find('asm_insns');
   if val.isNotNil and (val.JSONType = jtArray) then
   begin
-    asmList.BeginUpdate;
-    asmList.Clear;
+    lstAsm.BeginUpdate;
+    lstAsm.Clear;
     arr := TJSONArray(val);
     for i := 0 to arr.Count-1 do
     begin
@@ -2022,18 +2033,18 @@ begin
       val := obj.Find('inst');
       if val.isNotNil then
       begin
-        asmList.AddItem(nme, nil);
+        lstAsm.AddItem(nme, nil);
         if nme = fLastOffset then
-          asmList.Selected := asmList.Items[asmList.Items.Count-1];
+          lstAsm.Selected := lstAsm.Items[lstAsm.Items.Count-1];
         if fOptions.autoDemangle then
-          asmList.Items[asmList.Items.Count-1].SubItems.Add(demangle(val.AsString))
+          lstAsm.Items[lstAsm.Items.Count-1].SubItems.Add(demangle(val.AsString))
         else
-          asmList.Items[asmList.Items.Count-1].SubItems.Add(val.AsString);
+          lstAsm.Items[lstAsm.Items.Count-1].SubItems.Add(val.AsString);
       end;
     end;
-    if asmList.Selected.isNotNil then
-      asmList.Selected.MakeVisible(false);
-    asmList.EndUpdate;
+    if lstAsm.Selected.isNotNil then
+      lstAsm.Selected.MakeVisible(false);
+    lstAsm.EndUpdate;
     selectAsmInstr;
   end;
 
@@ -2269,9 +2280,9 @@ const
 var
   nme: string;
 begin
-  if varList.ItemIndex = -1 then
+  if lstVariables.ItemIndex = -1 then
     exit;
-  nme := varList.Items[varList.ItemIndex].Caption;
+  nme := lstVariables.Items[lstVariables.ItemIndex].Caption;
   gdbCommand(cmd[fAddWatchPointKind] + nme);
 end;
 
