@@ -334,8 +334,12 @@ type
     Edit1: TComboBox;
     GroupBox3: TGroupBox;
     lstThreads: TListView;
+    mnuNextMachine: TMenuItem;
+    mnuStepMachine: TMenuItem;
+    mnuStep: TPopupMenu;
     PageControl1: TPageControl;
     PageControl2: TPageControl;
+    mnuNext: TPopupMenu;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
@@ -2217,15 +2221,19 @@ begin
 end;
 
 procedure TCEGdbWidget.btnNextClick(Sender: TObject);
+const
+  cmd: array[boolean] of string = ('-exec-step','-exec-step-instruction');
 begin
-  gdbCommand('step', @gdboutJsonize);
+  gdbCommand(cmd[mnuNextMachine.Checked], @gdboutJsonize);
   if assigned(fGdb) and fgdb.Running then
     setState(gsRunning);
 end;
 
 procedure TCEGdbWidget.btnOverClick(Sender: TObject);
+const
+  cmd: array[boolean] of string = ('-exec-next','-exec-next-instruction');
 begin
-  gdbCommand('next', @gdboutJsonize);
+  gdbCommand(cmd[mnuStepMachine.Checked], @gdboutJsonize);
   if assigned(fGdb) and fgdb.Running then
     setState(gsRunning);
 end;
