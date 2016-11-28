@@ -14,6 +14,8 @@ uses
 
 type
 
+  TAsmSyntax = (intel, att);
+
   {$IFDEF CPU64}
   TCpuRegister = (rax, rbx, rcx, rdx, rsi, rdi, rbp, rsp, r8, r9, r10, r11, r12, r13,
     r14, r15, rip);
@@ -277,10 +279,12 @@ type
     fShowOutput: boolean;
     fShowRawMiOutput: boolean;
     fShortcuts: TCEDebugShortcuts;
+    fAsmSyntax: TAsmSyntax;
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
     procedure setShortcuts(value: TCEDebugShortcuts);
   published
+    property asmSyntax: TAsmSyntax read fAsmSyntax write fAsmSyntax;
     property autoDisassemble: boolean read fAutoDisassemble write fAutoDisassemble;
     property autoDemangle: boolean read fAutoDemangle write fAutoDemangle;
     property autoGetCallStack: boolean read fAutoGetCallStack write fAutoGetCallStack;
@@ -581,6 +585,7 @@ begin
   if source is TCEDebugOptionsBase then
   begin
     src := TCEDebugOptionsBase(source);
+    fAsmSyntax:=src.fAsmSyntax;
     fAutoDemangle:=src.fAutoDemangle;
     fAutoDisassemble:=src.fAutoDisassemble;
     fAutoGetThreads:=src.fAutoGetThreads;
@@ -1394,6 +1399,8 @@ var
   gdb: string;
   i: integer;
   b: TPersistentBreakPoint;
+const
+  asmFlavorStr: array[TAsmSyntax] of string = ('intel','att');
 begin
   clearDisplays;
   if not fDbgRunnable and (fProj = nil) then
@@ -1464,6 +1471,7 @@ begin
     end;
     fGdb.Input.Write(str[1], str.length);
   end;
+  gdbCommand('set disassembly-flavor ' + asmFlavorStr[fOptions.asmSyntax]);
   // break on druntime exceptions + any throw'
   gdbCommand('break onAssertError');
   gdbCommand('break onAssertErrorMsg');
