@@ -1416,8 +1416,11 @@ begin
     dlgOkInfo('No runnable to debug', 'GDB commander');
     exit;
   end;
-  if fProj.binaryKind <> executable then
+  if not fDbgRunnable and (fProj.binaryKind <> executable) then
+  begin
+    dlgOkInfo('The project cannot be debugged because it does not output an executable', 'GDB commander');
     exit;
+  end;
   if not fDbgRunnable then
     fExe := fProj.outputFilename
   else
