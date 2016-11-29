@@ -1831,6 +1831,11 @@ var
 begin
   canClose := false;
   SaveLastDocsAndProj;
+
+  if checkProjectLock(false) and
+    (dlgOkCancel('A project is still being compiled, close anyway ?') <> mrOK) then
+      exit;
+
   if assigned(fFreeProj) then
   begin
     if fFreeProj.modified and
