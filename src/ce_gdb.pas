@@ -1430,7 +1430,7 @@ begin
   begin
     if fDbgRunnable then
       dlgOkInfo('Either the runnable is not compiled or it cannot be found' +
-        LineEnding +  'Note that the runnable option "outputFolder" is not supported',
+        LineEnding +  'Note that the runnable option "outputFolder" is not supported by this widget',
           'GDB commander')
     else
       dlgOkInfo('The project binary is missing, cannot debug', 'GDB commander');
@@ -1440,9 +1440,6 @@ begin
   fOutputName := fExe + '.inferiorout';
   fInputName  := fExe + '.inferiorin';
   FreeAndNil(fInput);
-  if fInputName.fileExists then
-    deletefile(fInputName);
-  fInput:= TFileStream.Create(fInputName, fmCreate or fmShareExclusive);
   FreeAndNil(fOutput);
   //
   gdb := exeFullName('gdb');
@@ -1451,6 +1448,10 @@ begin
     dlgOkInfo('Cannot debug, GDB is missing', 'GDB commander');
     exit;
   end;
+  //
+  if fInputName.fileExists then
+    deletefile(fInputName);
+  fInput:= TFileStream.Create(fInputName, fmCreate or fmShareExclusive);
   subjDebugStart(fSubj, self as ICEDebugger);
   // gdb process
   killGdb;
