@@ -1430,10 +1430,11 @@ begin
   begin
     if fDbgRunnable then
       dlgOkInfo('Either the runnable is not compiled or it cannot be found' +
-        LineEnding +  'Note that the runnable option "outputFolder" is not supported by this widget',
-          'GDB commander')
+        LineEnding + 'Note that the runnable option "outputFolder" is not supported by this widget.' +
+        LineEnding + LineEnding + 'Expected target: ' + fExe, 'GDB commander')
     else
-      dlgOkInfo('The project binary is missing, cannot debug', 'GDB commander');
+      dlgOkInfo('The project binary is missing, cannot debug.' +
+        LineEnding + LineEnding + 'Expected target: ' + fExe, 'GDB commander');
     exit;
   end;
   //
