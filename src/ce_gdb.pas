@@ -983,7 +983,7 @@ begin
   //
   updateMenu;
   AssignPng(btnSendCom, 'ACCEPT');
-  setState(gsNone);
+  updateButtonsState;
 end;
 
 destructor TCEGdbWidget.destroy;
