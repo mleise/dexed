@@ -412,6 +412,7 @@ type
     fInspState: TInspectableCPU;
     fStackItems: TStackItems;
     fCatchPause: boolean;
+    fSilentPause: boolean;
     fOptions: TCEDebugOptions;
     fAddWatchPointKind: TAddWatchPointKind;
     fBreakPoints: TPersistentBreakPoints;
@@ -420,6 +421,8 @@ type
     fLastFunction: string;
     fLastOffset: string;
     fLastLine: string;
+    fCommandProcessed: boolean;
+    procedure waitCommandProcessed;
     procedure clearDisplays;
     procedure updateMenu;
     procedure optionsChangesApplied(sender: TObject);
@@ -666,7 +669,6 @@ end;
 {$ENDREGION}
 
 {$REGION TPersistentBreakpoints ------------------------------------------------}
-
 constructor TPersistentBreakPoints.create(aOwner: TComponent);
 var
   fname: string;
@@ -1280,24 +1282,79 @@ begin
   end;
 end;
 
+procedure TCEGdbWidget.waitCommandProcessed;
+var
+  i: integer = 0;
+begin
+  while not fCommandProcessed do
+  begin
+    application.ProcessMessages;
+    i += 1;
+    if i = high(integer) then
+      i := 0;
+  end;
+end;
+
 procedure TCEGdbWidget.addBreakPoint(const fname: string; line: integer;
   kind: TBreakPointKind = bpkBreak);
+var
+  r: boolean;
 begin
   if assigned(fBreakPoints) then
     fBreakPoints.addItem(fname, line, kind);
   if fGdb.isNil or not fGdb.Running then
     exit;
+  r := fGdbState = gsRunning;
+  if r then
+  begin
+    // TODO-cGDB: follow state of https://sourceware.org/bugzilla/show_bug.cgi?id=18077
+    // "async mode" is not activated until a break is triggered.
+    // The action for the "pause" button is also affected.
+    // The problem exist still in GDB 7.12
+    fSilentPause := true;
+    gdbCommand('-exec-interrupt --all', @gdboutJsonize);
+    waitCommandProcessed;
+    fSilentPause := false;
+  end;
   gdbCommand('break ' + fname + ':' + intToStr(line));
+  if r then
+    waitCommandProcessed;
+  if r then
+  begin
+    fSilentPause := true;
+    gdbCommand('-exec-continue --all', @gdboutJsonize);
+    waitCommandProcessed;
+    fSilentPause := false;
+  end;
 end;
 
 procedure TCEGdbWidget.removeBreakPoint(const fname: string; line: integer;
   kind: TBreakPointKind = bpkBreak);
+var
+  r: boolean;
 begin
   if assigned(fBreakPoints) then
     fBreakPoints.deleteItem(fname, line, kind);
   if fGdb.isNil or not fGdb.Running then
     exit;
+  r := fGdbState = gsRunning;
+  if r then
+  begin
+    fSilentPause := true;
+    gdbCommand('-exec-interrupt --all', @gdboutJsonize);
+    waitCommandProcessed;
+    fSilentPause := false;
+  end;
   gdbCommand('clear ' + fname + ':' + intToStr(line));
+  if r then
+    waitCommandProcessed;
+  if r then
+  begin
+    fSilentPause := true;
+    gdbCommand('-exec-continue --all', @gdboutJsonize);
+    waitCommandProcessed;
+    fSilentPause := false;
+  end;
 end;
 
 procedure TCEGdbWidget.setState(value: TGdbState);
@@ -1863,7 +1920,7 @@ begin
         readOutput;
         subjDebugBreak(fSubj, fLastFilename, line, dbSignal);
       end
-      else
+      else if not fSilentPause then
       begin
         if dlgYesNo(format('The signal %s (%s) was received on line %d of file %s .'
         + LineEnding + 'Do you wish to pause execution ?', [signame, sigmean, line, fLastFilename]),
@@ -2088,6 +2145,7 @@ procedure TCEGdbWidget.gdboutJsonize(sender: TObject);
 var
   str: string;
 begin
+  fCommandProcessed := true;
   if fMsg = nil then
     exit;
 
@@ -2137,6 +2195,7 @@ end;
 
 procedure TCEGdbWidget.gdboutQuiet(sender: TObject);
 begin
+  fCommandProcessed := true;
   fGdb.OutputStack.Clear;
   fGdb.OnReadData:=@gdboutJsonize;
 end;
@@ -2147,6 +2206,7 @@ procedure TCEGdbWidget.gdbCommand(aCommand: string; gdbOutProcessor: TNotifyEven
 begin
   if fGdb.isNil or not fGdb.Running then
     exit;
+  fCommandProcessed := false;
   aCommand += #10;
   if assigned(gdbOutProcessor) then
     fGdb.OnReadData := gdbOutProcessor;
