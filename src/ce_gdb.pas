@@ -280,6 +280,7 @@ type
     fShowRawMiOutput: boolean;
     fShortcuts: TCEDebugShortcuts;
     fAsmSyntax: TAsmSyntax;
+    fStopAllThreadsOnBreak: boolean;
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
     procedure setShortcuts(value: TCEDebugShortcuts);
@@ -297,6 +298,7 @@ type
     property showGdbOutput: boolean read fShowGdbOutput write fShowGdbOutput;
     property showRawMiOutput: boolean read fShowRawMiOutput write fShowRawMiOutput;
     property showOutput: boolean read fShowOutput write fShowOutput;
+    property stopAllThreadsOnBreak: boolean read fStopAllThreadsOnBreak write fStopAllThreadsOnBreak;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -546,6 +548,7 @@ begin
   fAutoDisassemble:= true;
   fAutoGetThreads:=true;
   fShowGdbOutput:=true;
+  fStopAllThreadsOnBreak:= true;
   fIgnoredSignals := TStringList.Create;
   fIgnoredSignals.Duplicates:= dupIgnore;
   fIgnoredSignals.Sorted:=true;
@@ -1500,6 +1503,8 @@ begin
   gdbCommand('break _d_arraybounds');
   gdbCommand('break _d_switch_error');
   gdbCommand('-gdb-set mi-async on');
+  if fOptions.stopAllThreadsOnBreak then
+    gdbCommand('-gdb-set non-stop on');
   fGdb.OnReadData := @gdboutJsonize;
   // launch
   cpuViewer.TIObject := fInspState;
