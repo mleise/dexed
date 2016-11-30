@@ -271,9 +271,9 @@ type
     // returns the nth document.
     function getDocument(index: Integer): TCESynMemo;
     // returns true if the document matching aFilename is already opened.
-    function findDocument(fname: string): TCESynMemo;
+    function findDocument(const fname: string): TCESynMemo;
     // opens or set the focus on the document matching aFilename.
-    procedure openDocument(fname: string);
+    procedure openDocument(const fname: string);
     // closes the nth document.
     function closeDocument(index: Integer): boolean;
     // closes a particular document.

@@ -159,8 +159,8 @@ type
     function SingleServiceName: string;
     function documentCount: Integer;
     function getDocument(index: Integer): TCESynMemo;
-    function findDocument(fname: string): TCESynMemo;
-    procedure openDocument(fname: string);
+    function findDocument(const fname: string): TCESynMemo;
+    procedure openDocument(const fname: string);
     function closeDocument(index: Integer): boolean;
     function closeDocument(doc: TCESynMemo): boolean;
   public
@@ -474,7 +474,7 @@ begin
   exit(TCESynMemo(pageControl.Pages[index].Controls[0]));
 end;
 
-function TCEEditorWidget.findDocument(fname: string): TCESynMemo;
+function TCEEditorWidget.findDocument(const fname: string): TCESynMemo;
 var
   i: Integer;
 begin
@@ -487,7 +487,7 @@ begin
   result := nil;
 end;
 
-procedure TCEEditorWidget.openDocument(fname: string);
+procedure TCEEditorWidget.openDocument(const fname: string);
 var
   doc: TCESynMemo;
 begin
