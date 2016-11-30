@@ -491,8 +491,10 @@ procedure TCEEditorWidget.openDocument(fname: string);
 var
   doc: TCESynMemo;
 begin
+  showWidget;
   doc := findDocument(fname);
-  if doc.isNotNil then begin
+  if doc.isNotNil then
+  begin
     PageControl.currentPage := TCEPage(doc.Parent);
     exit;
   end;
@@ -512,9 +514,12 @@ var
   doc: TCESynMemo;
 begin
   doc := getDocument(index);
-  if doc.isNil then exit(false);
+  if doc.isNil then
+    exit(false);
   if (doc.modified or (doc.fileName = doc.tempFilename)) and
-    (dlgFileChangeClose(doc.fileName, UnsavedFile) = mrCancel) then exit(false);
+    (dlgFileChangeClose(doc.fileName, UnsavedFile) = mrCancel) then
+      exit(false);
+  showWidget;
   doc.disableFileDateCheck:=true;
   pageControl.pageIndex:=index;
   doc.Free;
