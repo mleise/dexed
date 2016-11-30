@@ -1812,6 +1812,7 @@ begin
         setState(gsPaused);
         autoGetStuff;
         readOutput;
+        application.BringToFront;
         subjDebugBreak(fSubj, fLastFilename, line, brkreason);
       end;
     end
@@ -1882,6 +1883,7 @@ begin
       or (reason = 'exited')
     then
     begin
+      application.BringToFront;
       readOutput;
       if not fOptions.showGdbOutput then
         fMsg.message('debugging terminated: ' + reason, nil, amcMisc, amkInf);
@@ -2347,7 +2349,7 @@ begin
 end;
 
 
-//TODO-cGDB: copy from call stack list
+//TODO-cGDB: copy from the lists: value, instructions, etc.
 
 procedure TCEGdbWidget.setGpr(reg: TCpuRegister; val: TCpuGprValue);
 const
