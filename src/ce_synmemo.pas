@@ -219,6 +219,7 @@ type
     function  findBreakPoint(line: integer): boolean;
     procedure debugStart(debugger: ICEDebugger);
     procedure debugStop;
+    procedure debugContinue;
     function debugQueryBpCount: integer;
     procedure debugQueryBreakPoint(const index: integer; out fname: string; out line: integer; out kind: TBreakPointKind);
     procedure debugBreak(const fname: string; line: integer; reason: TCEDebugBreakReason);
@@ -2648,6 +2649,11 @@ end;
 procedure TCESynMemo.debugStop;
 begin
   fDebugger := nil;
+  removeDebugTimeMarks;
+end;
+
+procedure TCESynMemo.debugContinue;
+begin
   removeDebugTimeMarks;
 end;
 

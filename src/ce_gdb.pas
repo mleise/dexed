@@ -2249,7 +2249,10 @@ procedure TCEGdbWidget.btnContClick(Sender: TObject);
 begin
   gdbCommand('-exec-continue --all', @gdboutJsonize);
   if assigned(fGdb) and fgdb.Running then
+  begin
     setState(gsRunning);
+    subjDebugContinue(fSubj);
+  end;
 end;
 
 procedure TCEGdbWidget.btnVariablesClick(Sender: TObject);

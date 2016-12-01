@@ -47,6 +47,8 @@ type
       out line: integer; out kind: TBreakPointKind);
     // a break happens when code in fname at line is executed.
     procedure debugBreak(const fname: string; line: integer; reason: TCEDebugBreakReason);
+    // debugging continue
+    procedure debugContinue;
   end;
 
   (**
@@ -57,6 +59,7 @@ type
   // TCEDebugObserverSubject primitives
   procedure subjDebugStart(subj: TCEDebugObserverSubject; dbg: ICEDebugger);
   procedure subjDebugStop(subj: TCEDebugObserverSubject);
+  procedure subjDebugContinue(subj: TCEDebugObserverSubject);
   procedure subjDebugBreak(subj: TCEDebugObserverSubject; const fname: string;
     line: integer; reason: TCEDebugBreakReason);
 
@@ -86,6 +89,14 @@ var
 begin
   for i:= 0 to subj.observersCount-1 do
     (subj.observers[i] as ICEDebugObserver).debugBreak(fname, line, reason);
+end;
+
+procedure subjDebugContinue(subj: TCEDebugObserverSubject);
+var
+  i: integer;
+begin
+  for i:= 0 to subj.observersCount-1 do
+    (subj.observers[i] as ICEDebugObserver).debugContinue;
 end;
 
 end.
