@@ -1307,10 +1307,6 @@ begin
   r := fGdbState = gsRunning;
   if r then
   begin
-    // TODO-cGDB: follow state of https://sourceware.org/bugzilla/show_bug.cgi?id=18077
-    // "async mode" is not activated until a break is triggered.
-    // The action for the "pause" button is also affected.
-    // The problem exist still in GDB 7.12
     fSilentPause := true;
     gdbCommand('-exec-interrupt --all', @gdboutJsonize);
     waitCommandProcessed;
@@ -1566,7 +1562,9 @@ begin
   // launch
   cpuViewer.TIObject := fInspState;
   cpuViewer.RefreshPropertyValues;
-  gdbCommand('run >' + fOutputName + '< ' + fInputName);
+  gdbCommand('set args >' + fOutputName + '< ' + fInputName);
+  // non-MI command "run" has the same problem as https://sourceware.org/bugzilla/show_bug.cgi?id=18077
+  gdbCommand('-exec-run');
   setState(gsRunning);
 end;
 {$ENDREGION}
