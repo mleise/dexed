@@ -601,6 +601,7 @@ begin
     fShowGdbOutput:=src.fShowGdbOutput;
     fShowOutput:=src.fShowOutput;
     fShowRawMiOutput:=src.fShowRawMiOutput;
+    fStopAllThreadsOnBreak:= src.fStopAllThreadsOnBreak;
     fIgnoredSignals.Assign(src.fIgnoredSignals);
     fCommandsHistory.Assign(src.fCommandsHistory);
     fShortcuts.assign(src.fShortcuts);
