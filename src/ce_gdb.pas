@@ -1315,12 +1315,9 @@ begin
   end;
   gdbCommand('break ' + fname + ':' + intToStr(line));
   if r then
-    waitCommandProcessed;
-  if r then
   begin
     fSilentPause := true;
     gdbCommand('-exec-continue --all', @gdboutJsonize);
-    waitCommandProcessed;
     fSilentPause := false;
   end;
 end;
@@ -1344,12 +1341,9 @@ begin
   end;
   gdbCommand('clear ' + fname + ':' + intToStr(line));
   if r then
-    waitCommandProcessed;
-  if r then
   begin
     fSilentPause := true;
     gdbCommand('-exec-continue --all', @gdboutJsonize);
-    waitCommandProcessed;
     fSilentPause := false;
   end;
 end;
