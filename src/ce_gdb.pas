@@ -994,6 +994,7 @@ end;
 
 destructor TCEGdbWidget.destroy;
 begin
+  fInput.free;
   fOutput.Free;
   fOptions.commandsHistory.Assign(edit1.Items);
   fOptions.Free;
