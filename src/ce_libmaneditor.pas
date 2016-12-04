@@ -415,7 +415,7 @@ var
 begin
   if TDubPackageQueryForm.showAndWait(nme, ver) <> mrOk then
     exit;
-  if List.Items.FindCaption(0, nme, false, false, false).isNotNil then
+  if List.Items.findCaption(nme, row) then
   begin
     if dlgYesNo(format('a library item with the alias "%s" already exists, do you wish to update it ?',
       [nme])) <> mrYes then exit
@@ -522,10 +522,8 @@ begin
         and (TJSONObject(prj.json).Find('targetType').AsString = 'sourceLibrary')
       then
       begin
-        if ovw then
-           row := List.FindCaption(0, nme, true, true, true);
-        if row.isNil then
-           row := List.Items.Add;
+        if ovw and not List.items.findCaption(nme, row) then
+          row := List.Items.Add;
         if row.Data.isNil then
           row.Data := LibMan.libraries.Add;
         row.Caption:= nme;
@@ -557,9 +555,7 @@ begin
     prj.loadFromFile(dfn);
     if prj.filename.isNotEmpty and (prj.binaryKind = staticlib) then
     begin
-      if ovw then
-        row := List.FindCaption(0, nme, true, true, true);
-      if row.isNil then
+      if ovw and not List.items.findCaption(nme, row) then
         row := List.Items.Add;
       if row.Data.isNil then
         row.Data := LibMan.libraries.Add;
@@ -663,7 +659,7 @@ begin
   //
   fname := fProj.filename;
   lalias := ExtractFileNameOnly(fname);
-  if List.Items.FindCaption(0, lalias, false, false, false) <> nil then
+  if List.Items.findCaption(lalias, row) then
   begin
     dlgOkInfo(format('a library item with the alias "%s" already exists, delete it before trying again.',
       [lalias]));
