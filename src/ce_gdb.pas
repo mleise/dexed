@@ -1776,10 +1776,9 @@ procedure TCEGdbWidget.interpretJson;
 
   procedure selectAsmInstr;
   var
-    itm: TListItem;
+    itm: TListItem = nil;
   begin
-    itm := lstAsm.FindCaption(0, fLastOffset, false, true, false);
-    if itm.isNotNil then
+    if lstAsm.items.findCaption(fLastOffset, itm) then
     begin
       itm.Selected:=true;
       itm.MakeVisible(false);
@@ -1839,8 +1838,7 @@ begin
       begin
         if fJson.findObject('wpt', obj) and obj.findAny('exp', val) then
         begin
-          k := lstVariables.FindCaption(0, val.AsString, false, true, false);
-          if k.isNotNil then
+          if lstVariables.items.findCaption(val.AsString, k) then
           begin
             lstVariables.ItemIndex:=k.index;
             k.MakeVisible(false);
