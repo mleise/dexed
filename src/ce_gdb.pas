@@ -2055,7 +2055,7 @@ begin
       with lstVariables.Items[lstVariables.Items.Count-1] do
         SubItems.Add(val.AsString);
     end;
-    if (j <> -1) and (j <= lstVariables.Items.Count) then
+    if (j <> -1) and (j < lstVariables.Items.Count) then
       lstVariables.ItemIndex := j;
     lstVariables.EndUpdate;
   end;
