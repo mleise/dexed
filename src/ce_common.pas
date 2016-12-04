@@ -13,7 +13,7 @@ uses
   ExtCtrls, FileUtil,
   {$ENDIF}
   {$IFNDEF CEBUILD}
-  forms,
+  forms, ComCtrls,
   {$ENDIF}
   LazFileUtils, process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils,
   xfpjson;
@@ -94,6 +94,10 @@ type
     function findObject(const key: TJSONStringType; out value: TJSONObject): boolean;
     function findArray(const key: TJSONStringType; out value: TJSONArray): boolean;
     function findAny(const key: TJSONStringType; out value: TJSONData): boolean;
+  end;
+
+  TListItemsHelper = class helper for TListItems
+    function findCaption(const value: string; out res: TListItem): boolean; overload;
   end;
 
   (**
@@ -509,6 +513,19 @@ function TJSONObjectHelper.findAny(const key: TJSONStringType; out value: TJSOND
 begin
   value := self.Find(key);
   result := value.isNotNil;
+end;
+
+function TListItemsHelper.findCaption(const value: string; out res: TListItem): boolean;
+var
+  i: integer;
+begin
+  result := false;
+  for i := 0 to self.Count-1 do
+  begin
+    res := self.Item[i];
+    if res.Caption = value then
+      exit(true);
+  end;
 end;
 
 procedure TProcessEx.Assign(value: TPersistent);
