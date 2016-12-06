@@ -299,8 +299,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
 
     final override void visit(const Postblit pb)
     {
-        //TODO: activate PostBlit visit.
-        //otherVisitorImpl(pb, SymbolType._function, "postblit", pb.line, pb.column);
+        otherVisitorImpl(pb, SymbolType._function, "postblit", pb.line, pb.column);
         pb.accept(this);
     }
 

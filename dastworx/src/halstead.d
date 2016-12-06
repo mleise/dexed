@@ -208,13 +208,12 @@ private final class HalsteadMetric: ASTVisitor
         endFunction("dtorL" ~ to!string(sc.line), sc.line);
     }
 
-    //TODO-clibdparse: Postblit needs position and line and column
-    /*override void visit(const(Postblit) pb)
+    override void visit(const(Postblit) pb)
     {
         beginFunction;
         pb.accept(this);
         endFunction("postblit" ~ to!string(pb.line), pb.line);
-    }*/
+    }
 
     override void visit(const(PrimaryExpression) primary)
     {
