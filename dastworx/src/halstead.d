@@ -479,7 +479,7 @@ private final class HalsteadMetric: ASTVisitor
             XorExpression,
         );
 
-        enum binExpOverrideOverride(T) =
+        enum binExpOverride(T) =
         "override void visit(const(" ~ T.stringof ~ ") expr)
         {
             visitBinExpr(expr);
@@ -487,7 +487,7 @@ private final class HalsteadMetric: ASTVisitor
 
         string result;
         foreach(i; aliasSeqOf!(iota(0, SeqOfBinExpr.length)))
-            result ~= binExpOverrideOverride!(SeqOfBinExpr[i]);
+            result ~= binExpOverride!(SeqOfBinExpr[i]);
         return result;
     }
 
