@@ -10,7 +10,7 @@ uses
   StdCtrls, process, xfpjson, typinfo, Unix, ListViewFilterEdit, SynEdit,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
-  ce_ddemangle, ce_writableComponent, EditBtn, strutils;
+  ce_ddemangle, ce_writableComponent, EditBtn, strutils, ObjectInspector;
 
 type
 
@@ -421,6 +421,8 @@ type
     procedure btnStartClick(Sender: TObject);
     procedure btnStopClick(Sender: TObject);
     procedure btnWatchClick(Sender: TObject);
+    procedure dbgeeOptsEdEditorFilter(Sender: TObject;
+      aEditor: TPropertyEditor; var aShow: boolean);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure lstCallStackDblClick(Sender: TObject);
     procedure lstThreadsDblClick(Sender: TObject);
@@ -2502,6 +2504,12 @@ begin
     exit;
   nme := lstVariables.Items[lstVariables.ItemIndex].Caption;
   gdbCommand(cmd[fAddWatchPointKind] + nme);
+end;
+
+procedure TCEGdbWidget.dbgeeOptsEdEditorFilter(Sender: TObject;
+  aEditor: TPropertyEditor; var aShow: boolean);
+begin
+  aShow := aEditor.GetName <> 'filename';
 end;
 
 procedure TCEGdbWidget.btnSendComClick(Sender: TObject);

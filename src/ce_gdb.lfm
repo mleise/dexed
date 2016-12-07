@@ -203,9 +203,9 @@ inherited CEGdbWidget: TCEGdbWidget
         Hint = 'edit the command line and the environment of the debuger target'
         Top = 0
         Width = 517
-        ActivePage = TabSheet1
+        ActivePage = TabSheet5
         Align = alTop
-        TabIndex = 0
+        TabIndex = 2
         TabOrder = 3
         object TabSheet1: TTabSheet
           Caption = 'Call stack'
@@ -315,6 +315,7 @@ inherited CEGdbWidget: TCEGdbWidget
             Filter = [tkInteger, tkChar, tkEnumeration, tkFloat, tkSet, tkMethod, tkSString, tkLString, tkAString, tkWString, tkVariant, tkArray, tkRecord, tkInterface, tkClass, tkObject, tkWChar, tkBool, tkInt64, tkQWord, tkDynArray, tkInterfaceRaw, tkProcVar, tkUString, tkUChar, tkHelper, tkFile, tkClassRef, tkPointer]
             Indent = 10
             NameFont.Color = clWindowText
+            OnEditorFilter = dbgeeOptsEdEditorFilter
             PreferredSplitterX = 190
             SplitterX = 190
             ValueFont.Color = clGreen
