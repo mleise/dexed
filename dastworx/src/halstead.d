@@ -3,6 +3,8 @@ module halstead;
 import
     std.meta, std.algorithm.iteration, std.json, std.conv;
 import
+    std.range: iota;
+import
     dparse.lexer, dparse.parser, dparse.ast, dparse.rollback_allocator;
 import
     iz.memory, iz.containers;
@@ -155,8 +157,6 @@ private final class HalsteadMetric: ASTVisitor
         expr.accept(this);
     }
 
-    //TODO-crefactor: function-dtor-ctor-... should use a common template
-
     override void visit(const(FunctionDeclaration) decl)
     {
         beginFunction;
@@ -166,54 +166,42 @@ private final class HalsteadMetric: ASTVisitor
         endFunction(decl.name.text, decl.name.line);
     }
 
-    override void visit(const(SharedStaticConstructor) ssc)
+    void visitFunction(T)(const(T) decl)
     {
         beginFunction;
-        ssc.accept(this);
-        endFunction("sharedStaticCtorL" ~ to!string(ssc.line), ssc.line);
+        decl.accept(this);
+        endFunction(T.stringof ~ to!string(decl.line), decl.line);
     }
 
-    override void visit(const(StaticConstructor) sc)
+    static string funDeclString()
     {
-        beginFunction;
-        sc.accept(this);
-        endFunction("staticCtorL" ~ to!string(sc.line), sc.line);
+        alias FunDecl = AliasSeq!(
+            SharedStaticConstructor,
+            StaticConstructor,
+            Constructor,
+            SharedStaticDestructor,
+            StaticDestructor,
+            Destructor,
+            Postblit
+        );
+
+        string result;
+
+        enum funDeclOverride(T) =
+        "override void visit(const(" ~ T.stringof ~ ") decl)
+        {
+            visitFunction(decl);
+        }";
+
+        foreach(i; aliasSeqOf!(iota(0,FunDecl.length)))
+        {
+            result ~= funDeclOverride!(FunDecl[i]);
+        }
+
+        return result;
     }
 
-    override void visit(const(Constructor) sc)
-    {
-        beginFunction;
-        sc.accept(this);
-        endFunction("ctorL" ~ to!string(sc.line), sc.line);
-    }
-
-    override void visit(const(SharedStaticDestructor) ssc)
-    {
-        beginFunction;
-        ssc.accept(this);
-        endFunction("sharedStaticDtorL" ~ to!string(ssc.line), ssc.line);
-    }
-
-    override void visit(const(StaticDestructor) sc)
-    {
-        beginFunction;
-        sc.accept(this);
-        endFunction("staticDtorL" ~ to!string(sc.line), sc.line);
-    }
-
-    override void visit(const(Destructor) sc)
-    {
-        beginFunction;
-        sc.accept(this);
-        endFunction("dtorL" ~ to!string(sc.line), sc.line);
-    }
-
-    override void visit(const(Postblit) pb)
-    {
-        beginFunction;
-        pb.accept(this);
-        endFunction("postblit" ~ to!string(pb.line), pb.line);
-    }
+    mixin(funDeclString);
 
     override void visit(const(PrimaryExpression) primary)
     {
@@ -464,8 +452,6 @@ private final class HalsteadMetric: ASTVisitor
 
     static string binExprsString()
     {
-        import std.range: iota;
-
         alias SeqOfBinExpr = AliasSeq!(
             AddExpression,
             AndExpression,
@@ -976,5 +962,86 @@ unittest
     }.test;
     assert(r.operandsKinds == 2);
     assert(r.operatorsKinds == 3);
+}
+
+unittest
+{
+    Function r =
+    q{
+        this(){a = 0;}
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        static this(){a = 0;}
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        shared static this(){a = 0;}
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+
+unittest
+{
+    Function r =
+    q{
+        ~this(){a = 0;}
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        static ~this(){a = 0;}
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        shared static ~this(){a = 0;}
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        struct S{this(this){a = 0;}}
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        struct S{@disable this(this);}
+    }.test;
+    assert(r.operandsKinds == 0);
+    assert(r.operatorsKinds == 0);
 }
 
