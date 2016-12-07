@@ -324,6 +324,46 @@ type
 
   TAddWatchPointKind = (wpkRead, wpkWrite, wpkReadWrite);
 
+  // Persistent command line & environment of the inferior.
+  TCEDebugeeOption = class(TCollectionItem)
+  strict private
+    fQueryArguments: boolean;
+    fFname: string;
+    fWorkingDir: TCEPathname;
+    fAgruments: TStringList;
+    fEnvPaths: TStringList;
+    procedure setOptions(value: TStringList);
+    procedure setEnvPaths(value: TStringList);
+  published
+    property environmentPaths: TStringList read fEnvPaths write fEnvPaths;
+    property filename: string read fFname write fFname;
+    property arguments: TStringList read fAgruments write setOptions;
+    property queryArguments: boolean read fQueryArguments write fQueryArguments default false;
+    property workingDirectory: TCEPathname read fWorkingDir write fWorkingDir;
+  public
+    constructor Create(ACollection: TCollection); override;
+    destructor Destroy; override;
+  end;
+
+  // Store for the command line & environment of the inferior.
+  TCEDebugeeOptions = class(TWritableLfmTextComponent)
+  strict private
+    fProjects: TCollection;
+    procedure setProjects(value: TCollection);
+    function getProjectByIndex(index: integer): TCEDebugeeOption;
+    function getProjectByFile(const fname: string): TCEDebugeeOption;
+    procedure cleanup;
+  protected
+    procedure beforeSave; override;
+  published
+    property projects: TCollection read fProjects write setProjects;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    property projectByIndex[index: integer]: TCEDebugeeOption read getProjectByIndex;
+    property projectByFile[const fname: string]: TCEDebugeeOption read getProjectByFile; default;
+  end;
+
   { TCEGdbWidget }
   TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger)
     btnContinue: TCEToolButton;
@@ -367,6 +407,8 @@ type
     Splitter3: TSplitter;
     Splitter4: TSplitter;
     lstAsm: TListView;
+    TabSheet5: TTabSheet;
+    dbgeeOptsEd: TTIPropertyGrid;
     varListFlt: TListViewFilterEdit;
     procedure btnContClick(Sender: TObject);
     procedure btnVariablesClick(Sender: TObject);
@@ -422,6 +464,7 @@ type
     fLastOffset: string;
     fLastLine: string;
     fCommandProcessed: boolean;
+    fDebugeeOptions: TCEDebugeeOptions;
     procedure waitCommandProcessed;
     procedure clearDisplays;
     procedure updateMenu;
@@ -432,6 +475,7 @@ type
     procedure startDebugging;
     procedure killGdb;
     procedure storeObserversBreakpoints;
+    procedure updateDebugeeOptionsEditor;
     // GDB output processors
     procedure gdboutQuiet(sender: TObject);
     procedure gdboutJsonize(sender: TObject);
@@ -516,11 +560,11 @@ type
 implementation
 {$R *.lfm}
 
-{$REGION TCEDebugOption --------------------------------------------------------}
 const optFname = 'gdbcommander.txt';
 const bpFname = 'breakpoints.txt';
+const prjFname = 'projectsgdboptions.txt';
 
-
+{$REGION TCEDebugOption --------------------------------------------------------}
 procedure TCEDebugShortcuts.assign(source: TPersistent);
 var
   src: TCEDebugShortcuts;
@@ -967,6 +1011,96 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION TCEDebugeeOption ------------------------------------------------------}
+constructor TCEDebugeeOption.Create(ACollection: TCollection);
+begin
+  inherited create(ACollection);
+  fAgruments := TStringList.Create;
+  fEnvPaths := TStringList.Create;
+  fAgruments.Delimiter:= ' ';
+end;
+
+destructor TCEDebugeeOption.Destroy;
+begin
+  fAgruments.Free;
+  fEnvPaths.Free;
+  inherited;
+end;
+
+procedure TCEDebugeeOption.setOptions(value: TStringList);
+begin
+  fAgruments.Assign(value);
+end;
+
+procedure TCEDebugeeOption.setEnvPaths(value: TStringList);
+begin
+  fEnvPaths.Assign(value);
+end;
+
+constructor TCEDebugeeOptions.Create(AOwner: TComponent);
+var
+  fname: string;
+begin
+  inherited create(AOwner);
+  fProjects := TCollection.Create(TCEDebugeeOption);
+  fname := getCoeditDocPath + prjFname;
+  if fname.fileExists then
+    loadFromFile(fname);
+end;
+
+destructor TCEDebugeeOptions.Destroy;
+begin
+  saveToFile(getCoeditDocPath + prjFname);
+  fProjects.Free;
+  inherited;
+end;
+
+procedure TCEDebugeeOptions.cleanup;
+var
+  i: integer;
+  p: TCEDebugeeOption;
+begin
+  for i:= fProjects.Count-1 downto 0 do
+  begin
+    p := projectByIndex[i];
+    if not p.filename.fileExists or p.filename.isEmpty then
+      fProjects.Delete(i);
+    if (p.arguments.Count = 0) and (p.environmentPaths.Count = 0) and
+      (p.workingDirectory = '') and (p.queryArguments = false) then
+        fProjects.Delete(i);
+  end;
+end;
+
+procedure TCEDebugeeOptions.beforeSave;
+begin
+  cleanup;
+end;
+
+procedure TCEDebugeeOptions.setProjects(value: TCollection);
+begin
+  fProjects.Assign(value);
+end;
+
+function TCEDebugeeOptions.getProjectByIndex(index: integer): TCEDebugeeOption;
+begin
+  exit(TCEDebugeeOption(fProjects.Items[index]));
+end;
+
+function TCEDebugeeOptions.getProjectByFile(const fname: string): TCEDebugeeOption;
+var
+  i: integer;
+begin
+  for i := 0 to fProjects.Count-1 do
+  begin
+    result := projectByIndex[i];
+    if result.filename = fname then
+      exit;
+  end;
+  result := TCEDebugeeOption(fProjects.Add);
+  result.filename:=fname;
+end;
+{$ENDREGION}
+
 {$REGION Common/standard comp --------------------------------------------------}
 constructor TCEGdbWidget.create(aOwner: TComponent);
 begin
@@ -983,6 +1117,7 @@ begin
   fSubj:= TCEDebugObserverSubject.Create;
   fOptions:= TCEDebugOptions.create(self);
   fOptions.onChangesApplied:=@optionsChangesApplied;
+  fDebugeeOptions:= TCEDebugeeOptions.Create(self);
   Edit1.Items.Assign(fOptions.commandsHistory);
   fAddWatchPointKind := wpkWrite;
   fBreakPoints := TPersistentBreakPoints.create(self);
@@ -1190,6 +1325,7 @@ begin
   if fProj <> project then
     exit;
   fProj := nil;
+  updateDebugeeOptionsEditor;
   if not fDbgRunnable then
   begin
     if fOutputName.fileExists then
@@ -1202,6 +1338,7 @@ end;
 procedure TCEGdbWidget.projFocused(project: ICECommonProject);
 begin
   fProj := project;
+  updateDebugeeOptionsEditor;
 end;
 
 procedure TCEGdbWidget.projCompiling(project: ICECommonProject);
@@ -1221,6 +1358,7 @@ end;
 procedure TCEGdbWidget.docFocused(document: TCESynMemo);
 begin
   fDoc := document;
+  updateDebugeeOptionsEditor;
 end;
 
 procedure TCEGdbWidget.docChanged(document: TCESynMemo);
@@ -1232,6 +1370,7 @@ begin
   if fDoc <> document then
     exit;
   fDoc := nil;
+  updateDebugeeOptionsEditor;
   if fDbgRunnable then
   begin
     if fOutputName.fileExists then
@@ -1407,12 +1546,14 @@ procedure TCEGdbWidget.mnuSelProjClick(Sender: TObject);
 begin
   fDbgRunnable := false;
   mnuSelRunnable.Checked:=false;
+  updateDebugeeOptionsEditor;
 end;
 
 procedure TCEGdbWidget.mnuSelRunnableClick(Sender: TObject);
 begin
   fDbgRunnable := true;
   mnuSelProj.Checked:=false;
+  updateDebugeeOptionsEditor;
 end;
 
 procedure TCEGdbWidget.mnuWriteWClick(Sender: TObject);
@@ -1454,6 +1595,7 @@ var
   gdb: string;
   i: integer;
   b: TPersistentBreakPoint;
+  o: TCEDebugeeOption;
 const
   asmFlavorStr: array[TAsmSyntax] of string = ('intel','att');
 begin
@@ -1506,16 +1648,16 @@ begin
     deletefile(fInputName);
   fInput:= TFileStream.Create(fInputName, fmCreate or fmShareExclusive);
   subjDebugStart(fSubj, self as ICEDebugger);
+  case fDbgRunnable of
+    true: o := fDebugeeOptions.projectByFile[fDoc.fileName];
+    false:o := fDebugeeOptions.projectByFile[fProj.fileName];
+  end;
   // gdb process
   killGdb;
   fGdb := TCEProcess.create(nil);
   fGdb.Executable:= gdb;
   fgdb.Options:= [poUsePipes, poStderrToOutPut];
   fgdb.Parameters.Add(fExe);
-
-  //TODO-cGDB: debugee environment
-  //TODO-cGDB: debugee command line
-
   fgdb.Parameters.Add('--interpreter=mi');
   fGdb.OnReadData:= @gdboutQuiet;
   fGdb.OnTerminate:= @gdboutJsonize;
@@ -1557,13 +1699,61 @@ begin
   else
     gdbCommand('-gdb-set non-stop off');
   fGdb.OnReadData := @gdboutJsonize;
-  // launch
   cpuViewer.TIObject := fInspState;
   cpuViewer.RefreshPropertyValues;
-  gdbCommand('set args >' + fOutputName + '< ' + fInputName);
+  // inferior options
+  if o.environmentPaths.Count <> 0 then
+  begin
+    str := '';
+    for i:= 0 to o.environmentPaths.Count-1 do
+      str += o.environmentPaths[i] + ' ';
+    str := fSyms.expand(str[1..str.length-1]);
+    gdbCommand('-environment-path ' + str);
+  end;
+  if DirectoryExists(o.workingDirectory) then
+    gdbCommand('-environment-cd ' + fSyms.expand(o.workingDirectory));
+  if (o.arguments.Count <> 0) or (o.queryArguments) then
+  begin
+    str := '';
+    if o.queryArguments and not InputQuery('Command line arguments', 'GDB commander', str) then
+      str := ''
+    else
+      str += ' ';
+    for i := 0 to o.arguments.Count-1 do
+      str += o.arguments[i] + ' ';
+    str := fSyms.expand(str);
+  end;
+  gdbCommand('set args '+ str + '> ' + fOutputName + '< ' + fInputName);
   // non-MI command "run" has the same problem as https://sourceware.org/bugzilla/show_bug.cgi?id=18077
   gdbCommand('-exec-run');
   setState(gsRunning);
+end;
+
+procedure TCEGdbWidget.updateDebugeeOptionsEditor;
+var
+  nme: string = '';
+  opt: TCEDebugeeOption;
+begin
+  dbgeeOptsEd.ItemIndex:=-1;
+  dbgeeOptsEd.TIObject := nil;
+  if not fDbgRunnable then
+  begin
+    if fProj = nil then
+      exit
+    else nme := fProj.filename;
+    if not nme.fileExists then
+      exit;
+  end
+  else
+  begin
+    if fDoc = nil then
+      exit
+    else nme := fDoc.filename;
+    if not nme.fileExists then
+      exit;
+  end;
+  opt := fDebugeeOptions.projectByFile[nme];
+  dbgeeOptsEd.TIObject := opt;
 end;
 {$ENDREGION}
 

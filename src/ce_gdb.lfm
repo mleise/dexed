@@ -58,7 +58,7 @@ inherited CEGdbWidget: TCEGdbWidget
           Cursor = crVSplit
           Left = 0
           Height = 6
-          Top = 0
+          Top = 200
           Width = 517
           Align = alTop
           ResizeAnchor = akTop
@@ -66,7 +66,7 @@ inherited CEGdbWidget: TCEGdbWidget
         object PageControl2: TPageControl
           Left = 0
           Height = 200
-          Top = 6
+          Top = 0
           Width = 517
           ActivePage = TabSheet3
           Align = alTop
@@ -200,6 +200,7 @@ inherited CEGdbWidget: TCEGdbWidget
       object PageControl1: TPageControl[3]
         Left = 0
         Height = 200
+        Hint = 'edit the command line and the environment of the debuger target'
         Top = 0
         Width = 517
         ActivePage = TabSheet1
@@ -296,6 +297,27 @@ inherited CEGdbWidget: TCEGdbWidget
             TabOrder = 0
             ViewStyle = vsReport
             OnDblClick = lstThreadsDblClick
+          end
+        end
+        object TabSheet5: TTabSheet
+          Caption = 'Debugee options'
+          ClientHeight = 164
+          ClientWidth = 509
+          object dbgeeOptsEd: TTIPropertyGrid
+            Left = 2
+            Height = 160
+            Top = 2
+            Width = 505
+            Align = alClient
+            BorderSpacing.Around = 2
+            CheckboxForBoolean = True
+            DefaultValueFont.Color = clWindowText
+            Filter = [tkInteger, tkChar, tkEnumeration, tkFloat, tkSet, tkMethod, tkSString, tkLString, tkAString, tkWString, tkVariant, tkArray, tkRecord, tkInterface, tkClass, tkObject, tkWChar, tkBool, tkInt64, tkQWord, tkDynArray, tkInterfaceRaw, tkProcVar, tkUString, tkUChar, tkHelper, tkFile, tkClassRef, tkPointer]
+            Indent = 10
+            NameFont.Color = clWindowText
+            PreferredSplitterX = 190
+            SplitterX = 190
+            ValueFont.Color = clGreen
           end
         end
       end
