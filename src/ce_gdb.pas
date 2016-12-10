@@ -34,7 +34,7 @@ type
   {$ENDIF}
 
 
-  TFLAG = (CF, PF, AF, ZF, SF, TF, IF_, DF, OF_);
+  TFLAG = (CF, PF, AF, ZF, SF, TF, &IF, DF, &OF);
 
   const FlagValues: array[TFlag] of word = (1, 4, 16, 64, 128, 256, 512, 1024, 2048);
 
