@@ -339,6 +339,7 @@ type
     property filename: string read fFname write fFname;
     property arguments: TStringList read fAgruments write setOptions;
     property queryArguments: boolean read fQueryArguments write fQueryArguments default false;
+    property target: string read fFname;
     property workingDirectory: TCEPathname read fWorkingDir write fWorkingDir;
   public
     constructor Create(ACollection: TCollection); override;
