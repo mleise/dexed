@@ -1066,8 +1066,8 @@ begin
   begin
     p := projectByIndex[i];
     if not p.filename.fileExists or p.filename.isEmpty then
-      fProjects.Delete(i);
-    if (p.arguments.Count = 0) and (p.environmentPaths.Count = 0) and
+      fProjects.Delete(i)
+    else if (p.arguments.Count = 0) and (p.environmentPaths.Count = 0) and
       (p.workingDirectory = '') and (p.queryArguments = false) then
         fProjects.Delete(i);
   end;
