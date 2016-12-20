@@ -2392,18 +2392,21 @@ var
   win: TAnchorDockHostSite;
   str: string;
 begin
+  if fDoc.isNil then
+      exit;
   win := DockMaster.GetAnchorSite(fFindWidg);
-  if win.isNil then exit;
+  if win.isNil then
+    exit;
   win.Show;
   win.BringToFront;
-  if fDoc.isNil then exit;
-  //
+
   if fDoc.SelAvail then
     str := fDoc.SelText
   else
     str := fDoc.Identifier;
   ffindwidg.cbToFind.Text := str;
   ffindwidg.cbToFindChange(nil);
+  ffindwidg.cbToFind.SetFocus;
 end;
 
 procedure TCEMainForm.actEdFindNextExecute(Sender: TObject);
