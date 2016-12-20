@@ -268,6 +268,9 @@ type
     procedure previousProtectionGroup;
     procedure nextProtectionGroup;
     procedure sortLines;
+    procedure addCurLineBreakPoint;
+    procedure removeCurLineBreakPoint;
+    procedure toggleCurLineBreakpoint;
     function implementMain: THasMain;
     procedure replaceUndoableContent(const value: string);
     //
@@ -339,6 +342,9 @@ const
   ecSortLines           = ecUserFirst + 19;
   ecPrevProtGrp         = ecUserFirst + 20;
   ecNextProtGrp         = ecUserFirst + 21;
+  ecAddBreakpoint       = ecUserFirst + 22;
+  ecRemoveBreakpoint    = ecUserFirst + 23;
+  ecToggleBreakpoint    = ecUserFirst + 24;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -970,6 +976,9 @@ begin
     AddKey(ecSortLines, 0, [], 0, []);
     AddKey(ecPrevProtGrp, 0, [], 0, []);
     AddKey(ecNextProtGrp, 0, [], 0, []);
+    AddKey(ecAddBreakpoint, 0, [], 0, []);
+    AddKey(ecRemoveBreakpoint, 0, [], 0, []);
+    AddKey(ecToggleBreakpoint, 0, [], 0, []);
   end;
 end;
 
@@ -997,6 +1006,9 @@ begin
     'ecSortLines':          begin Int := ecSortLines; exit(true); end;
     'ecNextProtGrp':        begin Int := ecNextProtGrp; exit(true); end;
     'ecPrevProtGrp':        begin Int := ecPrevProtGrp; exit(true); end;
+    'ecAddBreakpoint':      begin Int := ecAddBreakpoint; exit(true); end;
+    'ecRemoveBreakpoint':   begin Int := ecRemoveBreakpoint; exit(true); end;
+    'ecToggleBreakpoint':   begin Int := ecToggleBreakpoint; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1025,6 +1037,9 @@ begin
     ecSortLines:          begin Ident := 'ecSortLines'; exit(true); end;
     ecNextProtGrp:        begin Ident := 'ecNextProtGrp'; exit(true); end;
     ecPrevProtGrp:        begin Ident := 'ecPrevProtGrp'; exit(true); end;
+    ecAddBreakpoint:      begin Ident := 'ecAddBreakpoint'; exit(true); end;
+    ecRemoveBreakpoint:   begin Ident := 'ecRemoveBreakpoint'; exit(true); end;
+    ecToggleBreakpoint:   begin Ident := 'ecToggleBreakpoint'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1089,6 +1104,12 @@ begin
       previousProtectionGroup;
     ecNextProtGrp:
       nextProtectionGroup;
+    ecAddBreakpoint:
+      addCurLineBreakPoint;
+    ecRemoveBreakpoint:
+      removeCurLineBreakPoint;
+    ecToggleBreakpoint:
+      toggleCurLineBreakpoint;
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1786,6 +1807,26 @@ begin
   if not assigned(fSortDialog) then
     fSortDialog := TSortDialog.construct(self);
   fSortDialog.Show;
+end;
+
+procedure TCESynMemo.addCurLineBreakPoint;
+begin
+  if not findBreakPoint(CaretY) then
+    addBreakPoint(CaretY);
+end;
+
+procedure TCESynMemo.removeCurLineBreakPoint;
+begin
+  if findBreakPoint(CaretY) then
+    removeBreakPoint(CaretY);
+end;
+
+procedure TCESynMemo.toggleCurLineBreakpoint;
+begin
+  if not findBreakPoint(CaretY) then
+    addBreakPoint(CaretY)
+  else
+    removeBreakPoint(CaretY);
 end;
 {$ENDREGION}
 
