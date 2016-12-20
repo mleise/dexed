@@ -1373,10 +1373,12 @@ var
   locs: TIntOpenArray = nil;
   old, idt, line: string;
   i, j, loc: integer;
+  p: TPoint;
   c: char;
 begin
   if not DcdWrapper.available then
     exit;
+  p := CaretXY;
   line := lineText;
   if (CaretX = 1) or not (line[LogicalCaretXY.X] in IdentChars) or
     not (line[LogicalCaretXY.X-1] in IdentChars)  then exit;
@@ -1405,6 +1407,7 @@ begin
     for c in idt do
       ExecuteCommand(ecChar, c, nil);
     EndUndoBlock;
+    CaretXY := p;
   end;
 end;
 
