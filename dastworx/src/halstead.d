@@ -271,6 +271,15 @@ private final class HalsteadMetric: ASTVisitor
         expr.accept(this);
     }
 
+    override void visit(const(TernaryExpression) expr)
+    {
+        if (expr.orOrExpression)
+            ++operators["if"];
+        if (expr.expression)
+            ++operators["else"];
+        expr.accept(this);
+    }
+
     override void visit(const(TypeidExpression) expr)
     {
         ++operators["typeid"];
@@ -867,6 +876,19 @@ unittest
     }.test;
     assert(r.operandsKinds == 3);
     assert(r.operatorsKinds == 4);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            a = true ? 0 : 1;
+        }
+    }.test;
+    assert(r.operandsKinds == 4);
+    assert(r.operatorsKinds == 3);
 }
 
 version(none) unittest
