@@ -1,13 +1,13 @@
 module halstead;
 
 import
-    std.meta, std.algorithm.iteration, std.json, std.conv;
+    std.algorithm.iteration, std.conv, std.json, std.meta;
 import
     std.range: iota;
 import
-    dparse.lexer, dparse.parser, dparse.ast, dparse.rollback_allocator;
+    dparse.ast, dparse.lexer, dparse.parser, dparse.rollback_allocator;
 import
-    iz.memory, iz.containers;
+    iz.memory;
 version(unittest){} else import
     common;
 
@@ -144,15 +144,17 @@ private final class HalsteadMetric: ASTVisitor
                     ++operators[p.identifierOrTemplateInstance.identifier.text];
             }
         }
+        else if (expr.unaryExpression.identifierOrTemplateInstance)
+        {
+            if (expr.unaryExpression.identifierOrTemplateInstance.templateInstance)
+                ++operators[expr.unaryExpression.identifierOrTemplateInstance.templateInstance.identifier.text];
+            else
+                ++operators[expr.unaryExpression.identifierOrTemplateInstance.identifier.text];
+        }
         if (expr.templateArguments)
         {
             if (expr.templateArguments.templateSingleArgument)
                 ++operands[expr.templateArguments.templateSingleArgument.token.text];
-            else if (expr.templateArguments.templateArgumentList)
-            {
-                foreach(arg; expr.templateArguments.templateArgumentList.items)
-                    {}//++operands[arg.token.text];
-            }
         }
         expr.accept(this);
     }
@@ -224,6 +226,13 @@ private final class HalsteadMetric: ASTVisitor
 
     override void visit(const(UnaryExpression) expr)
     {
+
+        if (expr.identifierOrTemplateInstance && !expr.primaryExpression)
+        {
+            ++operators["."];
+            ++operands[expr.identifierOrTemplateInstance.identifier.text];
+        }
+
         if (expr.prefix.type)
             ++operators[str(expr.prefix.type)];
         if (expr.suffix.type)
@@ -1065,5 +1074,48 @@ unittest
     }.test;
     assert(r.operandsKinds == 0);
     assert(r.operatorsKinds == 0);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            a.b.c = d.e;
+        }
+    }.test;
+    assert(r.operandsKinds == 5);
+    assert(r.operatorsKinds == 2);
+    assert(r.operatorsSum == 4);
+}
+
+unittest
+{
+    //FIXME: operands 'c' instead of 'a'
+    Function r =
+    q{
+        void foo()
+        {
+            a.b.c(d.e);
+        }
+    }.test;
+    assert(r.operandsKinds == 4);
+    assert(r.operatorsKinds == 2);
+    assert(r.operatorsSum == 4);
+}
+
+unittest
+{
+    //FIXME: operands 'c' instead of 'a'
+    Function r =
+    q{
+        void foo()
+        {
+            a.b.c(d(e.f));
+        }
+    }.test;
+    assert(r.operandsKinds == 4);
+    assert(r.operatorsKinds == 3);
 }
 
