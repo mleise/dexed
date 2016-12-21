@@ -145,7 +145,8 @@ type
   end;
 
   // these 9 built types always exist
-  TDubBuildType = (plain, debug, release, unittest, docs, ddox, profile, cov, unittestcov);
+  TDubBuildType = (plain, debug, release, releaseDebug, releaseNoBounds, unittest,
+    docs, ddox, profile, cov, unittestcov);
 
   // returns true if filename is a valid dub project. Only json format is supported.
   function isValidDubProject(const filename: string): boolean;
@@ -173,7 +174,8 @@ const
   optFname = 'dubbuild.txt';
 
   DubBuiltTypeName: array[TDubBuildType] of string = ('plain', 'debug', 'release',
-    'unittest', 'docs', 'ddox', 'profile', 'cov', 'unittest-cov'
+    'release-debug', 'release-nobounds', 'unittest', 'docs', 'ddox', 'profile',
+    'cov', 'unittest-cov'
   );
 
   DubDefaultConfigName = '(default config)';
