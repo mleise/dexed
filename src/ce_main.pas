@@ -930,37 +930,39 @@ end;
 
 procedure TCELastDocsAndProjs.Assign(source: TPersistent);
 var
-  itf: ICECommonProject = nil;
+  grp: ICEProjectGroup;
+  prj: ICECommonProject = nil;
+  pix: integer;
 begin
   if source = CEMainForm then
   begin
-    itf := CEMainForm.fFreeProj;
-    if assigned(itf) then
-      fProject := itf.filename;
+    grp := getProjectGroup;
+    pix := grp.getProjectIndex;
+    prj := CEMainForm.fFreeProj;
+    if assigned(prj) then
+      fProject := prj.filename;
     fProjectGroup := getProjectGroup.groupFilename;
-    if itf = CEMainForm.fProject then
-      fProjectIndex:=-1
+    if prj = CEMainForm.fProject then
+      fProjectIndex :=- 1
     else
-      fProjectIndex := getProjectGroup.getProjectIndex;
+      fProjectIndex := pix;
   end else
     inherited;
 end;
 
 procedure TCELastDocsAndProjs.AssignTo(target: TPersistent);
 var
-  itf: ICECommonProject = nil;
   dst: TCEMainForm;
   hdl: ICEMultiDocHandler;
   mem: TCESynMemo = nil;
+  grp: ICEProjectGroup;
 begin
   if target is TCEMainForm then
   begin
     dst := TCEMainForm(target);
     if dst.fProjFromCommandLine then
       exit;
-    itf := dst.fProject;
-    if assigned(itf) and (itf.filename = fProject) and
-      (itf.filename.fileExists) then exit;
+
     if fProject.isNotEmpty and fProject.fileExists then
     begin
       dst.openProj(fProject);
@@ -973,14 +975,20 @@ begin
         else
           mem.Highlighter := JsSyn;
     end;
+
+    grp := getProjectGroup;
     if fProjectGroup.isNotEmpty and fProjectGroup.fileExists then
-    begin
-      getProjectGroup.openGroup(fProjectGroup);
-    end;
+      grp.openGroup(fProjectGroup);
     if (fProjectIndex = -1) and assigned(dst.fFreeProj) then
-      dst.fFreeProj.activate;
-  end else
-    inherited;
+      dst.fFreeProj.activate
+    else if (fProjectIndex >= 0) and (grp.projectCount > 0)
+      and (fProjectIndex < grp.projectCount) then
+      begin
+        grp.setProjectIndex(fProjectIndex);
+        grp.getProject(grp.getProjectIndex).activate;
+      end;
+  end
+  else inherited;
 end;
 
 procedure TCELastDocsAndProjs.setDocuments(value: TStringList);
