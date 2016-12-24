@@ -614,6 +614,7 @@ begin
   lst := TStringList.Create;
   try
     listFolders(lst, PString(aRoot.Data)^ + directorySeparator);
+    lst.Sort;
     for fold in lst do
     begin
       itm := Tree.Items.AddChild(aRoot, fold.extractFileName);
