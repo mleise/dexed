@@ -29,22 +29,23 @@ Coedit is an IDE for the [D programming language](http://dlang.org), its compile
 
 **Project information**
 ---
-- latest release: version 2, update 6, Fri May 27 2016.
+- latest stable release: version 2, update 6, Fri May 27 2016.
+- latest beta release: version 3, beta 2, Sat Dec 24 2016.
 - licensed under the terms of the Boost license.
 
-**Download the latest beta build**
+**Download version 3 beta 2**
 ---
 Download the zipped binaries or the zipped setup program for you platform:
 
-- :package: [setup program for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.linux32.setup.zip)
-- :package: [binaries for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.linux32.zip)
-- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.linux64.zip)
-- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.win32.setup.zip)
-- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta1.win32.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit-3-beta1.x86_64.rpm)
+- :package: [setup program for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta2.linux32.setup.zip)
+- :package: [binaries for Linux 32 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta2.linux32.zip)
+- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta2.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta2.linux64.zip)
+- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta2.win32.setup.zip)
+- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit.3beta2.win32.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_beta_1/coedit-3-beta2.x86_64.rpm)
 
-**Download the stable build**
+**Download version 2 update 6**
 ---
 Download the zipped binaries or the zipped setup program for you platform:
 
@@ -62,7 +63,7 @@ Download the zipped binaries or the zipped setup program for you platform:
 ---
 
 - 2 update 6: The procedure is described in the [**first section of the wiki**](https://github.com/BBasile/Coedit/wiki#detailed-setup-procedure)
-- 3 alpha (master): Confers with this [**temporary document**](https://github.com/BBasile/Coedit/wiki/Building-and-using-the-developpement-version)
+- 3 beta (master): Confers with this [**temporary document**](https://github.com/BBasile/Coedit/wiki/Building-and-using-the-developpement-version)
 
 **GUI preview**
 ---
