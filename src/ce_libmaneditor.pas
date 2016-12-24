@@ -711,7 +711,7 @@ var
 begin
   if List.Selected.isNil then
     exit;
-  //
+
   ini := List.Selected.SubItems[2];
   with TOpenDialog.Create(nil) do
   try
@@ -730,7 +730,7 @@ var
 begin
   if List.Selected.isNil then
     exit;
-  //
+
   ini := List.Selected.SubItems[0];
   with TOpenDialog.Create(nil) do
   try
@@ -759,7 +759,7 @@ var
 begin
   if List.Selected.isNil then
     exit;
-  //
+
   dir := List.Selected.SubItems[0];
   if selectDirectory('folder of static libraries', dir, outdir, True, 0) then
     List.Selected.SubItems[0] := outdir;
@@ -772,10 +772,18 @@ var
 begin
   if List.Selected.isNil then
     exit;
-  //
+
   dir := List.Selected.SubItems[1];
-  if selectDirectory('sources root', dir, outdir, True, 0) then
-    List.Selected.SubItems[1] := outdir;
+  with TSelectDirectoryDialog.Create(nil) do
+  try
+    InitialDir:= dir;
+    Caption := 'sources root';
+    Options := options + [ofNoDereferenceLinks, ofForceShowHidden];
+    if execute then
+      List.Selected.SubItems[1] := FileName;
+  finally
+    free;
+  end;
   RowToLibrary(List.Selected);
 end;
 
@@ -787,7 +795,7 @@ begin
     exit;
   if list.Selected.Index = 0 then
     exit;
-  //
+
   i := list.Selected.Index;
   list.Items.Exchange(i, i - 1);
   LibMan.libraries.Exchange(i, i - 1);
@@ -801,7 +809,7 @@ begin
     exit;
   if list.Selected.Index = list.Items.Count - 1 then
     exit;
-  //
+
   i := list.Selected.Index;
   list.Items.Exchange(i, i + 1);
   LibMan.libraries.Exchange(i, i + 1);
