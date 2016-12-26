@@ -11,6 +11,7 @@ The options are applied in real time but are reversible until the green checker 
 - ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/cancel.png): cancels and restores the previous state of the current category.
 
 The options are persistent and saved in a distinct folder:
+
 - Linux: **`/home/<your account>/.config/Coedit/`**.
 - Windows: **`?:\Users\<your account>\AppData\Roaming\Coedit\`**.
 
