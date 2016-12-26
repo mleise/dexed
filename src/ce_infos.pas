@@ -211,11 +211,6 @@ begin
     'optional, the D source code formater, needed by the Dfmt commander widget');
   itm.Parent := boxTools;
   itm.ReAlign;
-  // TODO-cmaintenance: remove this entry if GDMD is distributed with GDC
-  itm := TToolInfo.Construct(self, tikOptional, 'gdmd',
-    'optional, the GDC wrapper with a DMD command line interface');
-  itm.Parent := boxTools;
-  itm.ReAlign;
   itm := TToolInfo.Construct(self, tikOptional, 'gdc',
     'optional, the GDC D compiler');
   itm.Parent := boxTools;
