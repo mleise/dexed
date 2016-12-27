@@ -12,7 +12,9 @@ The options are applied in real time but are reversible until the green checker 
 
 The options are persistent and saved in a distinct folder:
 
-- Linux: **`/home/<your account>/.config/Coedit/`**.
-- Windows: **`?:\Users\<your account>\AppData\Roaming\Coedit\`**.
+- Linux:
+**`/home/<your account>/.config/Coedit/`**.
+- Windows:
+**`?:\Users\<your account>\AppData\Roaming\Coedit\`**.
 
 Each widget and software component save their own files with a self-explanatory name so it's easy to find and modify the file that matches a particular setting.

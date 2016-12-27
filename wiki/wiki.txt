@@ -202,53 +202,6 @@ For discussions, the official D forums [propose a section dedicated to the IDEs]
 - **"Run project"**: tries to execute the output if the project output option _binaryKind_ is set to _executable_.
 - **"Run project..."**: Ditto. Before the execution of the output file, an input-query dialog lets you specify  switches and arguments to the process.
 
-# Runnable module
-
-Coedit is able to compile and execute the module that's currently edited even if it's not part of a project. Such a module is called a **runnable** module.
-A runnable module has not to be explicitly saved because Coedit will handle the task automatically, using an unique temporary file name.
-For example it's possible to call the action _Compile and run file_ directly after the action _New runnable module_.
-By default the binary is produced in the folder where is located the D source. This can be changed in the [general options](lnk_widg_opts),
-_runnableDestination_ allows to specify a path. If it's relative then the binary will be output in a sub folder named as this string. It it's an absolute path then the binary will be produced in this directory. When _runnableDestinationAlways_ is not checked, _runnableDestination_ is only handled if the D source part of the current project.
-
-A runnable is useful to test quickly an idea or to use a module as a script without messing with all the parameters that a project would require.
-However, the first script line can be used to pass additional options. They'll be parsed and automatically submitted to the compiler (runnable modules are always compiled with DMD).
-
-For example this runnable:
-
-```D
-#!runnable-flags: -O -L-lcairo
-void main(){}
-```
-
-will be optimized and _libcairo_ will be linked in the binary. The first line must start with `#!runnable-flags:`, without any spaces.
-
-To be runnable, a module must verify the following requirements:
-- a **void main()** is present.
-- the modules to import must be known, either by the [library manager][lnk_widg_lib] or by the DMD configuration file.
-- _import expressions_ ( ```import(file);``` ) are allowed if _file_ stands in the same folder as the file being edited.
-- the module should be a simple console program. When executed, the process output is redirected to the [message widget][lnk_widg_msg] and the input can be passed using the [process input widget][lnk_widg_procinp].
-
-The action _Compile file and run outside_ can be used to execute in an external console.
-This must be used if the runnable outputs thousands of lines, to display properly UTF8 characters or if it has a GUI.
-
-The version identifier **runnable_module** is automatically defined when a runnable is compiled.
-It can be used to adjust the source according to the execution context, for example:
-
-```D
-version(runnable_module)
-{
-    stdout.writeln("to output stream");
-}
-else
-{
-    myFile.writeln("to a file");
-}
-```
-
-The executable produced is deleted after each run unless the file has been saved explicitly out of the initial temporary folder.
-
-Note that the action _Run file unittest_ is based on the same internal function excepted that the **-main** and **-unittest** switches are automatically added to the switch list (menu **File**, action **Set runnable switches**).
-
 # Native projects
 
 Coedit features a native project format completely based on the _DMD_ options.
@@ -566,18 +519,6 @@ All of them can be easily build in Coedit and setup in the [_libman_](lnk_widg_l
 
 The library entries are saved in the user folder [(see options)][lnk_widg_opts] as _libraryManager.txt_.
 
-## Symbol list widget
-
-This list enumerates the symbols declared in a D module (imports, classes, variables, etc).
-The widget is a GUI front end for the [_cesyms_][lnk_cesyms] tool.
-It can be used to quickly find and go to the declaration of a symbol but also as a basic linter since the syntactic errors are displayed (almost immediately if the option _refresh on change_ is checked).
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/symlist1.png)
-
-The way the widget refreshes the list can be tweaked in the context menu or in the [options editor][lnk_widg_opts].
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/optsymlist.png)
-
 ## Project inspector widget
 
 The project inspector widget is mostly designed to manipulate the project source files. It can also be used to select a compiler configuration.
@@ -797,41 +738,6 @@ A property inspector allows to tweak the format. See the [official documentation
 The formatting is applied in memory and is undo-able either from the widget or from the code editor. The changes are not physically applied until the file is explicitly saved.
 Formatting options are saved between each session in the [Coedit data folder][lnk_widg_opts].
 
-## Message widget
-
-The message widget displays a stream of information about the current file or about the current project.
-The messages can be filtered according to their context:
-
-- All: no filter.
-- Editor: filter the messages related to the editor that has the focus (compilation, standard output of the module when executed as a [_runnable_][lnk_runa]).
-- Project: filter the messages related to the current project (DMD or DUB messages, pre/post compilation process output, project execution).
-- Application: filter the messages emitted by CE (applications warnings, application exceptions).
-- Misc: miscellaneous messages (messages emitted by the widgets, by the custom tools when their output is redirected, [find all][lnk_widg_find] results, etc). 
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/messages1.png)
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/messages2.png)
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/messages3.png)
-
-When a message is double-clicked, it is parsed in order to extract a *position* and a *file name*.
-If the operation is successful then the *file* will be opened at a *position*.
-So far, *DMD*, [*Dscanner*](https://www.github.com/Hackerpilot/Dscanner) or DUB messages are well parsed.
-The messages emitted by the custom tools can also be clickable if they follow a similar format. 
-(**`<relative|absolute filename>(<line[:column]>)<message body>`**).
-
-The context menu contains a few useful actions, such as *copy messages*, *save message(s) to file*.
-By default only the last 500 messages are displayed, regardless of the categories. 
-This value and several other options can be changed in the [options editor][lnk_widg_opts]:
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/optmesg.png)
-
-- autoSelect: defines if the widget change dynamically the message categories.
-This is a recommended setting because if a run-time error happens, it will be immediately displayed.
-- colors: allows to associate a message kind to a particular color.
-- fast display: if set, the new messages are displayed fast but by block. When not set the same amount of message takes longer to be displayed but the operation is smoother.
-- font: options for the font used in this widget: the size, the family, etc.
-- maxMessageCount: allows to limit the maximum number of messages kept in the list.
-- singleMessageClick: allows to open the file that the message parser has found by a single click.
-
 ## Custom tools widget
 
 This widget allows to define a set of third party applications that can be launched from Coedit.
@@ -899,19 +805,6 @@ The fields (-a -c -p -s) are optional but the _what_ is mandatory.
 The format is more detailed in the [tool source code](https://github.com/BBasile/Coedit/blob/master/cetodo/cetodo.d#L7). 
 The tool itself can be build with Coedit.
 
-## Process input widget
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/processinput1.png)
-
-This simple utility allows to send some text to the input stream of a process that's executed from Coedit and redirected to Coedit messages.
-It works for the runnable modules and the project output, when launched from Coedit.
-
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_go.png): sends the text to the process, also works with <kbd>ENTER</kbd>.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_delete.png): closes the process input stream.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/cancel.png): forces the process termination.
-
-The input text can contain [symbolic strings][lnk_sym].
-
 ## Mini explorer widget
 
 The mini explorer provides basic file browsing within the IDE.
@@ -925,25 +818,6 @@ The mini explorer provides basic file browsing within the IDE.
 - ***input field***: filter the files whose name contains the text typed.
 
 The favorite folders are persistent. The file list supports drag and drop. A few options are available in the [option editor][lnk_widg_opts].
-
-## Options editor widget
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/optmain.png)
-
-### Description
-
-The _Option editor_ is a special, non-dockable, widget that allows the other widgets to expose their options.
-The list at the left displays the categories. A category often matches to a single widget but not only (for example the shortcuts).
-The options are applied in real time but are reversible until the green checker icon is clicked.
-
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/accept.png): validates the modifications made to the current category, after what they can't be canceled anymore.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/cancel.png): cancels and restores the previous state of the current category.
-
-The options are persistent and saved in a distinct folder:
-- Linux: **`/home/<your account>/.config/Coedit/`** (hidden by default).
-- Windows: **`?:\Users\<your account>\AppData\Roaming\Coedit\`**.
-
-Each widget or each software component saves its own file with a self-explanatory name so it's easy to find and modify the file that matches a particular setting.
 
 # Detailed and illustrated tutorials
 
