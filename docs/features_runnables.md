@@ -9,23 +9,24 @@ Runnable modules don't have to be explicitly saved because Coedit will handle th
 For example it's possible to execute the _Compile and run file_ action directly after the _New runnable module_ action .
 By default the binary is produced in the folder where is located the D source but this can be changed in the options applied to this feature.
 
-A runnable is useful to quickly test an idea or to use a module as a script without messing with all the parameters that a project would require.
+A runnable is useful to quickly test an idea, learn how to use new libraries, or even to use modules as scripts, always without messing with the parameters that a project would require.
 
 #### Shebang line
 
 By default runnables don't need any setting however the shebang line can be used when specific compiler options are required.
 Two typical scenario:
 
-- the runnable will be debugged so symbolic debugging information must be generated with `-g`.
-- the runnable must be linked with a C static library so linker flags `-L-lthelib` must be specified.
+- the runnable will be debugged so DWARF information must be generated with `-g`.
+- the runnable must be linked with a C static library so the linker flag `-L-lthelib` must be specified.
 
-Coedit doesn't handle the program specified after the She-Bang, which means that any of the following script line are valid:
+Coedit doesn't handle the program specified after the She-Bang, which means that any of the following script lines are valid:
 
 - `#!runnable-flags: --whatever`
 - `#!usr/bin/dmd --whatever`
 - `#!options --whatever`
 
 In the three cases, every non white character after the She-Bang is ignored.
+Options are detected after the first non white character of the script line.
 
 #### Runnable I/O handling
 
@@ -67,8 +68,8 @@ Note that the action _Run file unittest_ is based on the same internal function 
 ![](img/options_runnables.png)
 
 - __alwaysToFolder__: When checked the folder specified in __outputFolder__ is handled, even if the runnable module is not part of the current project.
-- __compiler__: Select the [compiler](options_compilers_paths) used to produce the runnable binary.
+- __compiler__: Select the [compiler](options_compilers_paths) used to produce the runnable binary. When GDC or LDC is selected their bridges based on DMD command line interface are used (GDMD and LDMD).
 - __detectLibraries__: When checked the static libraries used by the runnable are detected from the [library manager](widgets_library_manager) by performing import analysis. When unchecked, all the library manager entries are passed and the compiler does the selection.
 - __detectMain__: When checked the `main()` function is detected automatically and the `-main` switch is set accordingly. When not checked `-main` is never passed. This options is useful with the **Run file unittests** action because it allows to test a module that's also a valid program.
-- __outputFolder__: Defines a folder where the runnable binary is output. If the runnable is part of the project this folder is used otherwise __alwaysToFolder__ must also be checked. When the folder is a relative path, it is solbed using the runnable module parent directory as root.
+- __outputFolder__: Defines a folder where the runnable binary is output. If the runnable is part of the project this folder is used otherwise __alwaysToFolder__ must also be checked. When the folder is a relative path, it is solved using the runnable module parent directory as root.
 - __staticSwitches__: Defines a list of switches that are always passed to the compiler when a runnable is produced or when a module is tested.

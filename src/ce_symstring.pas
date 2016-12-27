@@ -285,7 +285,7 @@ begin
           'CFF', 'CurrentFileFile'      : Result += fSymbols[CFF];
           'CFP', 'CurrentFilePath'      : Result += fSymbols[CFP];
           'CI',  'CurrentIdentifier'    : Result += fSymbols[CI];
-          'CL',  'CUrrentLine'          : Result += fSymbols[CL];
+          'CL',  'CurrentLine'          : Result += fSymbols[CL];
           'CS',  'CurrentSelection'     : Result += fSymbols[CS];
           //
           'CPF', 'CurrentProjectFile'   : Result += fSymbols[CPF];
