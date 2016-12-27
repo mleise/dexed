@@ -1,36 +1,3 @@
-[lnk_dcd]:	https://github.com/BBasile/Coedit/wiki#d-completion-daemon-integration
-[lnk_sym]:	https://github.com/BBasile/Coedit/wiki#symbolic-strings
-[lnk_runa]:	https://github.com/BBasile/Coedit/wiki#runnable-module
-
-[lnk_widg_edit]:	https://github.com/BBasile/Coedit/wiki#editor-widget
-[lnk_widg_find]:	https://github.com/BBasile/Coedit/wiki#find--replace-widget
-[lnk_widg_lib]:		https://github.com/BBasile/Coedit/wiki#library-manager-widget
-[lnk_widg_symlist]:	https://github.com/BBasile/Coedit/wiki#symbol-list-widget
-[lnk_widg_prjinsp]:	https://github.com/BBasile/Coedit/wiki#project-inspector-widget
-[lnk_widg_prjconf]:	https://github.com/BBasile/Coedit/wiki#project-configuration-widget
-[lnk_widg_prjconf_gen]:	https://github.com/BBasile/Coedit/wiki#general-options
-[lnk_widg_prjconf_msg]:	https://github.com/BBasile/Coedit/wiki#message-options
-[lnk_widg_prjconf_dbg]:	https://github.com/BBasile/Coedit/wiki#debugging-options
-[lnk_widg_prjconf_doc]:	https://github.com/BBasile/Coedit/wiki#documentation-options
-[lnk_widg_prjconf_out]:	https://github.com/BBasile/Coedit/wiki#output-options
-[lnk_widg_prjconf_misc]: https://github.com/BBasile/Coedit/wiki#other-options
-[lnk_widg_prjconf_pth]:	https://github.com/BBasile/Coedit/wiki#path-options
-[lnk_widg_prjconf_proc]: https://github.com/BBasile/Coedit/wiki#prepost-build-process-options
-[lnk_widg_prjconf_run]:	https://github.com/BBasile/Coedit/wiki#run-options
-[lnk_widg_msg]:		https://github.com/BBasile/Coedit/wiki#message-widget
-[lnk_widg_tools]:	https://github.com/BBasile/Coedit/wiki#custom-tools-widget
-[lnk_widg_todo]: 	https://github.com/BBasile/Coedit/wiki#todo-list
-[lnk_widg_procinp]:	https://github.com/BBasile/Coedit/wiki#process-input-widget
-[lnk_widg_miniexpl]:https://github.com/BBasile/Coedit/wiki#mini-explorer-widget
-[lnk_widg_opts]:	https://github.com/BBasile/Coedit/wiki#options-editor-widget
-[lnk_widg_dub]:		https://github.com/BBasile/Coedit/wiki#dub-project-editor
-
-[lnk_metad]:	https://github.com/BBasile/metad
-[lnk_cetodo]:	https://github.com/BBasile/Coedit/tree/master/cetodo
-[lnk_cesyms]:	https://github.com/BBasile/Coedit/tree/master/cesyms
-
-[lnk_bugtracker]: https://github.com/BBasile/Coedit/issues
-
 Welcome to the Coedit Wiki, the documentation source for the small Windows & Linux IDE for the D programming language.
 
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/coedit.win7.33.png) ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/coedit.linux.kde.33.png)
@@ -290,51 +257,6 @@ When Coedit stops, the server is only terminated if it was not already running w
 If the DCD server crashes while Coedit is running then both must be restarted.
 
 It's also advisable to setup [Dscanner](https://github.com/Hackerpilot/Dscanner), from the same author, as a Coedit [custom tool][lnk_widg_tools].
-
-# Symbolic strings
-
-The symbolic strings represent variables defined by the software. They are used by several widgets:
-- the processes: pre/post build [processes](https://github.com/BBasile/Coedit/wiki#prepost-build-process-options), runnable module processes, etc. The parameters (arguments) and the process name can include a symbol.
-- the [project](https://github.com/BBasile/Coedit/wiki#project-configuration-widget): the documentation folder, the json file, the output path, the object directory and the custom switches can include a symbol.
-- the [custom tools][lnk_widg_tools]: used similarly to the processes (parameters, working directory).
-- the [process input][lnk_widg_procinp]  input fields can include a symbol.
-
-Possible symbols, by context, include:
-
-Application:
-- **`<CAF>`**: also _`<CoeditApplicationFile>`_. Expanded to Coedit filename.
-- **`<CAP>`**: also _`<CoeditApplicationPath>`_. Expanded to Coedit path.
-
-Environment:
-
-- **`<ENV_HOME>`**: Expanded to the user home directory. This is the equivalent of `HOME` (on a Posix system) or `USERHOME` (on a Windows system).
-- **`<ENV_TEMP>`**: Expanded to the user temporary directory.
-- **`<ENV_USER>`**: Expanded to the user name.
-
-Current file:
-- **`<CFF>`**: also _`<CurrentFileFile>`_. Expanded to the current file filename.
-- **`<CFP>`**: also _`<CurrentFilePath>`_. Expanded to the current file path.
-- **`<CI>`**: also _`<CurrentIdentifier>`_. Expanded to the identifier located at the caret position.
-
-Current project:
-- **`<CPF>`**: also _`<CurrentProjectFile>`_. Expanded to the project filename.
-- **`<CPFS>`**: also _`<CurrentProjectFiles>`_. Expanded to a list that contains each D source of the project. Each item is separated by a line ending.
-- **`<CPN>`**: also _`<CurrentProjectName>`_. Expanded to the project name (it's filename minus its path and extension)
-- **`<CPO>`**: also _`<CurrentProjectOutput>`_. Expanded to the project output filename (a static library filename, a program name, etc.)
-- **`<CPP>`**: also _`<CurrentProjectPath>`_. Expanded to the project path.
-- **`<CPR>`**: also _`<CurrentProjectRoot>`_. Expanded to the field _RootFolder_ of a CE project (n/a if the current project is for DUB).
-- **`<CPCD>`**: also _`<CurrentProjectCommonFilesDirectory>`_. Expanded to the sources common directory.
-
-The expanded form of a symbol is never empty. When a symbol expands to nothing it's set to a pair of back-quote, 
-e.g **\``** for a **`<CPP>`** without any project opened.
-
-The slices located before and after the symbols are passed in their original form, e.g: 
-
-`http://www.google.com/search?q="dlang.org"<CI>&btnI=Im+Feeling+Lucky`
-
-is expanded to: 
-
-`http://www.google.com/search?q="dlang.org"indexOf&btnI=Im+Feeling+Lucky` if **indexOf** is the current identifier.
 
 # Docking
 
@@ -737,45 +659,6 @@ A property inspector allows to tweak the format. See the [official documentation
 
 The formatting is applied in memory and is undo-able either from the widget or from the code editor. The changes are not physically applied until the file is explicitly saved.
 Formatting options are saved between each session in the [Coedit data folder][lnk_widg_opts].
-
-## Custom tools widget
-
-This widget allows to define a set of third party applications that can be launched from Coedit.
-The tools are not just applications that are launched from the software. 
-Since they support [symbolic strings][lnk_sym] they can directly perform some actions on the current source file, in its directory, on all the sources of the project, etc. The tools can even be chained and piped between themselves.
-
-A few typical examples:
-- launch a console with its working directory set to the project file directory.
-- analyze the current document in _Dscanner_. (see the tutorials).
-- generate the documentation for all the project sources. (see the tutorials).
-- launch a custom build tool.
-- launch a script that will zip and upload the latest project build.
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/toolseditor1.png)
-
-Toolbar:
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/window/application_add.png): adds a new tool.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/window/application_delete.png): removes selected tool.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_up.png) **/** ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_down.png) : change selected tool position.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/window/application_flash.png): executes selected tool, according to the options it's associated to. This also works by double-clicking a tool alias.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/window/application_double.png): clones selected tool.
-
-A tool can be selected from the left side of the widget. If selected, a property inspector displays the options that can be edited:
-
-- clearMessages: if the tool standard output is redirected to the [messages widget][lnk_widg_msg] then the previous messages are cleared before the execution. The output is redirected to the messages when **popUsePipes** is set and if the **nextToolAlias** is empty.
-- editorToInput: when set, the content of the current editor is streamed to the tool standard input.
-- executable: the tool file name. If the system cannot find its path in the environment variables then it must be included. The field can include [symbolic strings][lnk_sym].
-- nextToolAlias: defines the alias of another tool that will be launched after this one returns.
-- options: various options for the process to create. If you set **popUsePipes** and **poStdErrToOutput** to true, then the standard output will be redirected to the message widget, category Misc.
-- outputToNext: if **popUsePipes** is set in the options and if the next tool is defined then the next tool will see its input stream filled with the output stream.
-- parameters: allows to define the parameters, switches and options passed to the process. As usual, one item per line, no quotes. The items can contains [symbolic strings][lnk_sym].
-- queryParameters: if set to true then a small input query dialog will be shown before executing the tool. It can be filled with more _--para --meters_.
-- shortcut: allow to define the keystroke used to launch the tool. The shortcut can also be edited in the [options editor][lnk_widg_opts].
-- showWindow: allow to define how the tool window is displayed. Set to *swoHIDE* if the tool std out is redirected.
-- toolAlias: the friendly name associated to the tool.
-- workingDirectory: the directory in which the tool starts. Not to mismatch with its path. The field can contain [symbolic strings][lnk_sym].
-
-The configuration is saved between each session, in the same folder as the application [options][lnk_widg_opts].
 
 ## Todo list
 

@@ -15,6 +15,7 @@
 
 #### Widgets
 
+* [Custom tools](widgets_custom_tools)
 * [Library manager](widgets_library_manager)
 * [Messages](widgets_messages)
 * [Options editor](widgets_options_editor)
