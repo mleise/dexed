@@ -1,3 +1,7 @@
+---
+title: Widgets - messages
+---
+
 ## Messages
 
 The widget displays a stream of information about the current file or about the current project.

@@ -1,3 +1,7 @@
+---
+title: Options - compiler paths
+---
+
 ### Compilers paths
 
 The _Compilers paths_ category is used to define the paths to the compilers and to their respective versions of the standard library.

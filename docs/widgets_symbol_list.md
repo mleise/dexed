@@ -1,3 +1,7 @@
+---
+title: Widgets - symbol list
+---
+
 ## Symbol list
 
 This list displays the symbols declared in the D module that has the focus (imports, classes, variables, etc).

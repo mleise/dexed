@@ -1,3 +1,7 @@
+---
+title: Options - code metrics
+---
+
 ### Code metrics
 
 The quality of the D code is verifiable using code metrics.

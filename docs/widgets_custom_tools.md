@@ -1,3 +1,7 @@
+---
+title: Widgets - custom tools
+---
+
 ### Custom tools
 
 This widget allows to define a set of third party applications that can be launched from Coedit.

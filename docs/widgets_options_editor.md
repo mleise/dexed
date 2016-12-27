@@ -1,3 +1,7 @@
+---
+title: Widgets - options editor
+---
+
 ### Options editor
 
 The _Options editor_ is a special, non-dockable, widget that allows the other widgets to expose their options.

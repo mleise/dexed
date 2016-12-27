@@ -1,1 +1,3 @@
- 
+---
+title: Widgets - library manager
+--- 

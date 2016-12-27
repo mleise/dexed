@@ -1,3 +1,7 @@
+---
+title: index
+---
+
 ### Coedit documentation
 
 #### Features

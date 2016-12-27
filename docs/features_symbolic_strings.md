@@ -1,3 +1,7 @@
+---
+title: Symbolic strings
+---
+
 ### Symbolic strings
 
 The symbolic strings represent variables defined by the software. They are used by several widgets:
