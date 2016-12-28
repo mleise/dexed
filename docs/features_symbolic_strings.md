@@ -10,7 +10,7 @@ The symbolic strings represent variables defined by the software. They are used 
 - the [native project confirguration widget](widgets_native_project_configuration): many fields accept symbols.
 - the [custom tools](widgets_custom_tools): parameters, working directory.
 - the [process input](widgets_process_input): the input field can include a symbol.
-- the [GDB commander](widgets_gdbcommander) custom commands.
+- the [GDB commander](widgets_gdb_commander) custom commands.
 
 Possible symbols, by context, include:
 

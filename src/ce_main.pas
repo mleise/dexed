@@ -126,7 +126,7 @@ type
     actProjCompileAndRun: TAction;
     actProjCompAndRunWithArgs: TAction;
     actProjClose: TAction;
-    actProjOpts: TAction;
+    actProjEditor: TAction;
     actProjOpen: TAction;
     actProjSave: TAction;
     actProjSaveAs: TAction;
@@ -307,7 +307,7 @@ type
     procedure actProjOpenExecute(Sender: TObject);
     procedure actEdPasteExecute(Sender: TObject);
     procedure actProjCloseExecute(Sender: TObject);
-    procedure actProjOptsExecute(Sender: TObject);
+    procedure actProjEditorExecute(Sender: TObject);
     procedure actEdRedoExecute(Sender: TObject);
     procedure actFileSaveAsExecute(Sender: TObject);
     procedure actFileSaveExecute(Sender: TObject);
@@ -3331,7 +3331,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjOptsExecute(Sender: TObject);
+procedure TCEMainForm.actProjEditorExecute(Sender: TObject);
 var
   win: TControl = nil;
 begin

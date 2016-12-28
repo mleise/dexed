@@ -3275,7 +3275,7 @@ object CEMainForm: TCEMainForm
         Caption = '-'
       end
       object MenuItem41: TMenuItem
-        Action = actProjOpts
+        Action = actProjEditor
         Bitmap.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           2000000000000004000064000000640000000000000000000000FFFFFF000000
@@ -4930,11 +4930,11 @@ object CEMainForm: TCEMainForm
       OnExecute = actProjCloseExecute
       OnUpdate = updateProjectBasedAction
     end
-    object actProjOpts: TAction
+    object actProjEditor: TAction
       Category = 'Project'
-      Caption = 'Project configuration'
+      Caption = 'Project editor'
       ImageIndex = 24
-      OnExecute = actProjOptsExecute
+      OnExecute = actProjEditorExecute
       OnUpdate = updateProjectBasedAction
     end
     object actProjSource: TAction
