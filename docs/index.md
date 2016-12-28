@@ -21,6 +21,7 @@ title: index
 
 #### Widgets
 
+* [DFMT commander](widgets_dfmt_commander)
 * [DUB project editor](widgets_dub_project_editor)
 * [CE project editor](widgets_ce_project_editor)
 * [Custom tools](widgets_custom_tools)

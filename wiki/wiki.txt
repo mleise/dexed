@@ -383,18 +383,6 @@ All of them can be easily build in Coedit and setup in the [_libman_](lnk_widg_l
 
 The library entries are saved in the user folder [(see options)][lnk_widg_opts] as _libraryManager.txt_.
 
-## Project inspector widget
-
-The project inspector widget is mostly designed to manipulate the project source files. It can also be used to select a compiler configuration.
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/projectinspector1.png)
-
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/file/document_add.png): adds a D source to the project from a dialog. The new source is not directly opened in the editor. To add a file that is already edited, rather use **"Add file to project"** from the **File** menu.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/file/document_delete.png): removes the selected source (_selected_ in the widget tree, not in the editor) from the project.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/folder/folder_add.png): adds a folder of D source to the project from a dialog. The procedure is recursive.
-
-Note that instead of using the dialogs to add files, it's also possible to drop items from a file explorer.
-
 ## Project configuration widget
 
 The project configuration widget is a powerful editor for the compiler options. By design it uses an "_Object Inspector_" GUI element. 
@@ -587,20 +575,6 @@ New properties can be added or removed:
 * ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/textfield_add.png): shows a small dialog that allows to add a new value, a new array or a new object. This requires to master the [DUB JSON format](http://code.dlang.org/package-format?lang=json). In the dialog, the value of the text field is only used when an object or a value is added. It matches to the _key_, not the value itself.
 
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/dub_edit2.png)
-
-## Dfmt Commander
-
-The _Dfmt commander_ widget is a simple but complete interface for the D source code formater [Dfmt](https://github.com/Hackerpilot/dfmt). The background tool has to be build and installed in one of the _PATH_ known by the operating system.
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/dfmt1.png)
-
-A property inspector allows to tweak the format. See the [official documentation](https://github.com/Hackerpilot/dfmt#configuration) to learn more about the options.
-
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/accept.png): apply the formatting. The editor state is backed up before each formatting.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/cancel.png): restore the previous backup.
-
-The formatting is applied in memory and is undo-able either from the widget or from the code editor. The changes are not physically applied until the file is explicitly saved.
-Formatting options are saved between each session in the [Coedit data folder][lnk_widg_opts].
 
 ## Todo list
 
