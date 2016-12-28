@@ -1,0 +1,3 @@
+---
+title: Widgets - project inspector
+---

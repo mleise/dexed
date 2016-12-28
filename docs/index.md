@@ -30,7 +30,7 @@ title: index
 * [Messages](widgets_messages)
 * [Options editor](widgets_options_editor)
 * [Project groups](widgets_project_groups)
-* [Process input](widgets_process_input)
 * [Project inspector](widgets_project_inspector)
+* [Process input](widgets_process_input)
 * [Search](widgets_search)
 * [Symbol list](widgets_symbol_list)

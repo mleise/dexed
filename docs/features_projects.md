@@ -32,7 +32,7 @@ The widget used to edit the properties is the [CE project editor](widgets_ce_pro
 - **"Close project"**: Closes the current project. A warning may be displayed if the current project is yet not saved.
 - **"Save project"**: Saves the current project.
 - **"Save project as"**: Saves the current project from a dialog.
-- **"Add project to group": Adds this project to the project group. See also the page dedicated to the [project groups](widgets_project_groups)
+- **"Add project to group"**: Adds this project to the project group. See also the page dedicated to the [project groups](widgets_project_groups).
 - **"Project editor"**: Displays widget used to edit the project properties,in respect with the format (CE or DUB).
 - **"Edit project file"**: Opens the project file in a new source editor. When saved from a source editor, a project file is directly reloaded.
 - **"View project command line"**: Displays the list of switches and arguments, as they would be passed to the compiler (or the build tool) when compiling.
