@@ -11,7 +11,7 @@ In general several metrics exist:
 * [Halstead complexity](https://en.wikipedia.org/wiki/Halstead_complexity_measures): quality indicator based on the count of operators and operands.
 * [Cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity): quality indicator based on the program execution flow.
 
-Coedit implements the Halstead metric. The other may be added in a further version.
+Coedit implements the Halstead metric. The others may be added in a further version.
 
 #### Halstead complexity
 
@@ -35,7 +35,7 @@ void foo()
 }
 ```
 
-Even if the SLOC count is the same.
+even if the SLOC count is the same.
 
 The verification is launched from the _File_ menu, _View Halstead metrics_.
 Each free function and member function of the module that has the focus is measured.
@@ -47,9 +47,9 @@ When thresholds are crossed warnings are emitted. There is 3 possible warnings:
 
 Warnings are informative. They should simply be interpreted as an indicator that a function must be more tested or refactorized.
 
-It's important to note that the limits of the measure:
+It's important to note the limits of the measure:
 
-* even with D embedded unit test, the measure is not able to detect that a complex function is well tested.
+* even with D embedded unit tests, the measure is not able to detect that a complex function is well tested.
 * the evolution of the quality over the time is not followed-up.
 * results are only relevant with the _imperative_ and _object oriented_ programming paradigm. Template Meta Programming will give wrong results. UFCS chain are not detected as consecutive calls.
 
@@ -57,4 +57,4 @@ Default values can be modified in the option editor:
 
 ![](img/code_metrics.png)
 
-The maximal volume of a module is not verified, simply because it's possible to have huge modules with many high quality small functions.
+The maximal volume of a module is not verified, simply because it's possible to have huge modules with many small functions of high quality.

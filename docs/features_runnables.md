@@ -18,7 +18,7 @@ A runnable is useful to quickly test an idea, learn how to use new libraries, or
 #### Shebang line
 
 By default runnables don't need any setting however the shebang line can be used when specific compiler options are required.
-Two typical scenario:
+Two typical scenarios:
 
 - the runnable will be debugged so DWARF information must be generated with `-g`.
 - the runnable must be linked with a C static library so the linker flag `-L-lthelib` must be specified.
