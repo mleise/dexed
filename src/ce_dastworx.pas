@@ -4,7 +4,7 @@ unit ce_dastworx;
 interface
 
 uses
-  Classes, SysUtils, process, xjsonscanner, xfpjson, xjsonparser, ce_common;
+  Classes, SysUtils, process, jsonscanner, fpjson, jsonparser, ce_common;
 
 (**
  * Gets the module name and the imports of the source code located in

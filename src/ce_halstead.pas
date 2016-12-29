@@ -5,7 +5,7 @@ unit ce_halstead;
 interface
 
 uses
-  Classes, SysUtils, xfpjson, math,
+  Classes, SysUtils, fpjson, math,
   ce_common, ce_observer, ce_interfaces, ce_dastworx, ce_writableComponent,
   ce_synmemo;
 

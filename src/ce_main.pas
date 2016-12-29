@@ -9,7 +9,7 @@ uses
   StdCtrls, AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls,
   Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
   {$IFDEF WINDOWS}Windows, {$ENDIF} XMLPropStorage, SynExportHTML, fphttpclient,
-  xfpjson, xjsonparser, xjsonscanner,
+  fpjson, jsonparser, jsonscanner,
   ce_common, ce_dmdwrap, ce_ceproject, ce_synmemo, ce_writableComponent,
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_ceprojeditor,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,

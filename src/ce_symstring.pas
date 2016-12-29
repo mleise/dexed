@@ -5,7 +5,7 @@ unit ce_symstring;
 interface
 
 uses
-  ce_observer, ce_interfaces, ce_ceproject, ce_synmemo, ce_common,
+  ce_observer, sysutils, ce_interfaces, ce_ceproject, ce_synmemo, ce_common,
   ce_stringrange;
 
 type
@@ -56,7 +56,7 @@ type
 implementation
 
 uses
-  Forms, SysUtils, Classes;
+  Forms, Classes;
 var
   symbolExpander: TCESymbolExpander;
 

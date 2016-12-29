@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, RegExpr, ComCtrls,
   PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
-  StdCtrls, process, xfpjson, typinfo, Unix, ListViewFilterEdit, SynEdit,
+  StdCtrls, process, fpjson, typinfo, Unix, ListViewFilterEdit, SynEdit,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
   ce_ddemangle, ce_writableComponent, EditBtn, strutils, ObjectInspector;

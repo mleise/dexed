@@ -16,7 +16,7 @@ uses
   forms, ComCtrls,
   {$ENDIF}
   LazFileUtils, process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils,
-  xfpjson;
+  fpjson;
 
 const
   exeExt = {$IFDEF WINDOWS} '.exe' {$ELSE} ''   {$ENDIF};
@@ -67,7 +67,7 @@ type
   end;
 
   // sugar for strings
-  TStringHelper = type helper for string
+  TCEStringHelper = type helper(TStringHelper) for string
     function isEmpty: boolean;
     function isNotEmpty: boolean;
     function isBlank: boolean;
@@ -397,77 +397,77 @@ begin
   exit(self <> nil);
 end;
 
-function TStringHelper.isEmpty: boolean;
+function TCEStringHelper.isEmpty: boolean;
 begin
   exit(self = '');
 end;
 
-function TStringHelper.isNotEmpty: boolean;
+function TCEStringHelper.isNotEmpty: boolean;
 begin
   exit(self <> '');
 end;
 
-function TStringHelper.isBlank: boolean;
+function TCEStringHelper.isBlank: boolean;
 begin
   exit(ce_common.isBlank(self));
 end;
 
-function TStringHelper.extractFileName: string;
+function TCEStringHelper.extractFileName: string;
 begin
   exit(sysutils.extractFileName(self));
 end;
 
-function TStringHelper.extractFileExt: string;
+function TCEStringHelper.extractFileExt: string;
 begin
   exit(sysutils.extractFileExt(self));
 end;
 
-function TStringHelper.extractFilePath: string;
+function TCEStringHelper.extractFilePath: string;
 begin
   exit(sysutils.extractFilePath(self));
 end;
 
-function TStringHelper.extractFileDir: string;
+function TCEStringHelper.extractFileDir: string;
 begin
   exit(sysutils.extractFileDir(self));
 end;
 
-function TStringHelper.stripFileExt: string;
+function TCEStringHelper.stripFileExt: string;
 begin
   exit(ce_common.stripFileExt(self));
 end;
 
-function TStringHelper.fileExists: boolean;
+function TCEStringHelper.fileExists: boolean;
 begin
   exit(sysutils.FileExists(self));
 end;
 
-function TStringHelper.dirExists: boolean;
+function TCEStringHelper.dirExists: boolean;
 begin
   exit(sysutils.DirectoryExists(self));
 end;
 
-function TStringHelper.upperCase: string;
+function TCEStringHelper.upperCase: string;
 begin
   exit(sysutils.upperCase(self));
 end;
 
-function TStringHelper.length: integer;
+function TCEStringHelper.length: integer;
 begin
   exit(system.length(self));
 end;
 
-function TStringHelper.toInt: integer;
+function TCEStringHelper.toInt: integer;
 begin
   exit(strToInt(self));
 end;
 
-function TStringHelper.toIntNoExcept(default: integer = -1): integer;
+function TCEStringHelper.toIntNoExcept(default: integer = -1): integer;
 begin
   exit(StrToIntDef(self, default));
 end;
 
-function TStringHelper.normalizePath: string;
+function TCEStringHelper.normalizePath: string;
 begin
   exit(TrimFilename(self));
 end;

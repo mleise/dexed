@@ -5,7 +5,7 @@ unit ce_dubproject;
 interface
 
 uses
-  Classes, SysUtils, xfpjson, xjsonparser, xjsonscanner, process, strutils,
+  Classes, SysUtils, fpjson, jsonparser, jsonscanner, process, strutils,
   LazFileUtils, RegExpr,
   ce_common, ce_interfaces, ce_observer, ce_dialogs, ce_processes,
   ce_writableComponent, ce_compilers;
@@ -424,9 +424,6 @@ begin
       //
       FreeAndNil(fJSON);
       parser := TJSONParser.Create(loader, [joIgnoreTrailingComma, joUTF8]);
-      //TODO-cfcl-json: remove etc/fcl-json the day they'll merge and rlz the version with 'Options'
-      //TODO-cfcl-json: track possible changes and fixes at http://svn.freepascal.org/cgi-bin/viewvc.cgi/trunk/packages/fcl-json/
-      //latest in etc = rev 34196.
       try
         try
           fJSON := parser.Parse as TJSONObject;

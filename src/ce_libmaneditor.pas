@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Menus, ComCtrls, Buttons, LazFileUtils, fphttpclient, StdCtrls,
-  xfpjson, xjsonparser,
+  fpjson, jsonparser,
   ce_widget, ce_interfaces, ce_ceproject, ce_dmdwrap, ce_common, ce_dialogs,
   ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_libman,
   ce_projutils, ce_dsgncontrols, ce_stringrange;
