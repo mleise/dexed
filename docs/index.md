@@ -6,6 +6,7 @@ title: index
 
 #### Features
 
+* [Completion deamon](features_dcd.md)
 * [Projects](features_projects)
 * [Runnable modules](features_runnables)
 * [Symbolic strings](features_symbolic_strings)
@@ -17,6 +18,7 @@ title: index
 * [DUB build](options_dub_build)
 * [Messages](widgets_messages)
 * [Runnable modules](features_runnables)
+* [Shortcuts editor](options_shortcuts_editor)
 * [Symbol list](widgets_symbol_list)
 
 #### Widgets

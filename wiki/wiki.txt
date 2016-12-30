@@ -1,3 +1,5 @@
+
+
 Welcome to the Coedit Wiki, the documentation source for the small Windows & Linux IDE for the D programming language.
 
 ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/coedit.win7.33.png) ![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/coedit.linux.kde.33.png)
@@ -150,55 +152,6 @@ For discussions, the official D forums [propose a section dedicated to the IDEs]
 - **"Set runnable switches"**: allows to modify the switches passed to DMD when compiling a runnable module. One switch by line, invalid or duplicated switches are removed, such as _-main_ and _-unittest_ since they are set with _Run file unittests_.
 - **"Verify with Dscanner"**: verifies the current file with [Dscanner](https://github.com/Hackerpilot/Dscanner). Results are displayed in the [message widget][lnk_widg_msg].
 - **"View in mini explorer"**: expands the [mini-explorer][lnk_widg_miniexpl] tree on the folder that contains the current file.
-
-# D Completion Daemon integration
-
-The **D Completion Daemon** (DCD) is used for the completion, the function call tips, to find the declaration of a symbol and to display the _DDOC_ comment associated to a symbol.
-
-### Setup
-
-_DCD_ is a third part software, it's bundled in the archives distributed for each new [release](https://github.com/BBasile/Coedit/releases).
-However, _DCD_ may have to be build manually, for example if a new version is released while _Coedit_ development is paused for a while.
-Visit the product [homepage](https://github.com/Hackerpilot/DCD) for more information.
-Note that since version 2 update 5, Coedit uses an experimental features that's not merged in the official repository.
-If you wish to test it you must build [this clone](https://github.com/BBasile/DCD/tree/reboot-localusage), after checking out the right feature branch.
- 
-Once DCD build or extracted from the release archive, copy the two programs (_dcd-client_ and _dcd-server_) to the folder where the Coedit executable stands.
-They can be put elsewhere, as long as the target directory is a known operating system PATH.
-
-### Imports
-
-In _Coedit_, _DCD_ relies on the [library manager][lnk_widg_lib] entries and on the project parameters. 
-If the [_libman_][lnk_widg_lib] is empty then the scope of DCD is limited to the current module or the to the current project sources and imports.
-To avoid that, it's absolutely necessary to add at least _phobos_ and _core_ to the [_libman_][lnk_widg_lib] (if not automatically done the first time CE is executed).
-
-_DCD_ also has its own configuration system. Refer to the official [_Readme_](https://github.com/Hackerpilot/DCD#configuration-files).
-
-### Usage
- 
-- <kbd>CTRL</kbd> + <kbd>SPACE</kbd>: Calls the completion menu or auto-completes if possible. The default shortcut can be modified in the [shortcut editor][lnk_widg_opts].
-- <kbd>.</kbd> invokes the completion if the editor option _autoDotDelay_ is greater than 0. 
-- <kbd>CTRL</kbd> + <kbd>SHIFT</kbd> + <kbd>UP</kbd>: Jumps to the declaration of the symbol located at the cursor. The default shortcut can be modified.
-- <kbd>CTRL</kbd> + <kbd>LEFT MOUSE BUTTON</kbd>: ditto. 
-- <kbd>(</kbd>: Gets the function call tips. When functions calls are nested, call tips are stacked and separated by a group of hyphen.
-- <kbd>)</kbd>: If the call tips are displayed then decreases by one the stack of call tips.
-- <kbd>ESC</kbd>: Closes the call tips window, whatever is the level of the stack.
-- <kbd>CTRL</kbd> + <kbd>F2</kbd>: Renames the identifier for the symbol located at the cursor position. This works only if the symbol is declared in this module.
- 
-Documentation comments associated to a symbol are displayed when the cursor motion stops over a symbol.
-
-![DCD completion](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/dcd1.png)
-
-![DCD ddoc hint](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/dcd2.png)
-
-![DCD call tip](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/dcd3.png)
-
-When Coedit starts and if the DCD server is not already listening then it's launched by CE.
-When Coedit stops, the server is only terminated if it was not already running when starting.
-
-If the DCD server crashes while Coedit is running then both must be restarted.
-
-It's also advisable to setup [Dscanner](https://github.com/Hackerpilot/Dscanner), from the same author, as a Coedit [custom tool][lnk_widg_tools].
 
 # Docking
 
