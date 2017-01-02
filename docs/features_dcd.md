@@ -23,7 +23,7 @@ _DCD_ is a third part software, it's bundled in the archives distributed for eac
 However, _DCD_ may have to be build manually, for example if a new version is released while _Coedit_ development is paused for a while.
 Visit the product [homepage](https://github.com/Hackerpilot/DCD) for more information.
 Note that since version 2 update 5, Coedit uses an experimental features that's not merged in the official repository.
-If you wish to test it you must build [this clone](https://github.com/BBasile/DCD/tree/reboot-localusage), after checking out the right feature branch.
+If you wish to test it you must build [this fork](https://github.com/BBasile/DCD/tree/reboot-localusage), after checking out the right feature branch.
 
 Once DCD build or extracted from the release archive, copy the two programs (_dcd-client_ and _dcd-server_) to the folder where the Coedit executable stands.
 They can be put elsewhere, as long as the target directory is a known operating system PATH.
