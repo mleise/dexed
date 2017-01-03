@@ -39,9 +39,11 @@ _Full description of Coedit options. May redirect to a specific widget page._
 * [Compiler paths](options_compilers_paths)
 * [DUB build](options_dub_build)
 * [Messages](widgets_messages)
+* [Mini explorer](widgets_mini_explorer)
 * [Runnable modules](features_runnables)
 * [Shortcuts editor](options_shortcuts_editor)
 * [Symbol list](widgets_symbol_list)
+* [Todo list](widgets_todo_list)
 
 #### Widgets
 
@@ -61,3 +63,4 @@ _Description of each widget._
 * [Process input](widgets_process_input)
 * [Search](widgets_search)
 * [Symbol list](widgets_symbol_list)
+* [Todo list](widgets_todo_list)
