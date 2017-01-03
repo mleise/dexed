@@ -4,8 +4,8 @@ title: Widgets - DUB project editor
 
 ### DUB project editor
 
-The DUB project editor allows to edit, add and remove properties of DUB project that has the [JSON format](http://code.dlang.org/package-format?lang=json).
-DUB project with the [SDL format](http://code.dlang.org/package-format?lang=sdl) are read only.
+The DUB project editor allows to edit, add and remove properties of DUB projects that has the [JSON format](http://code.dlang.org/package-format?lang=json).
+DUB projects with the [SDL format](http://code.dlang.org/package-format?lang=sdl) are read only.
 
 ![](img/dub_project_editor.png)
 

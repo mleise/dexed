@@ -23,7 +23,8 @@ The items cannot be edited in the widget.
 #### Format
 
 The _todo comments_ must follow this format:
-> TODO|FIXME|NOTE -cCategory -aAssignee -pPriority -sStatus : what
+
+`TODO|FIXME|NOTE -cCategory -aAssignee -pPriority -sStatus : what`
 
 The fields (-a -c -p -s) are optional but the _what_ is mandatory.
 
