@@ -243,6 +243,7 @@ procedure TCEDubProjectEditorWidget.setToolBarFlat(value: boolean);
 begin
   inherited;
   btnAcceptProp.Flat:=value;
+  fltEdit.Flat:=value;
 end;
 {$ENDREGION}
 
