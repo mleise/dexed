@@ -305,37 +305,6 @@ Notes:
 - To find the declaration of a symbol, <kbd>Ctrl</kbd> + <kbd>MB Left</kbd> or the [symbol list][lnk_widg_symlist] are faster.
 - To rename a variable or a type, local identifier renaming (<kbd>Ctrl</kbd> + <kbd>F2</kbd>) can be more accurate than _Replace all_ since this uses the semantic.
 
-## Library manager widget
-
-The library manager (aka the _libman_) is designed to replace the _sc.ini_ or the _sc.conf_ file to manage the static libraries. 
-Despite of its simplistic look it's a central component of the software.
-
-The _libman_ links the library files (_*.lib_ or _*.a_) to their D sources and are represented with a simple **alias** that is used in different part of the software. 
-For example, in a project, you don't need anymore to specify the **-I** path nor its matching library file name.
-Coedit handles the task automatically (see later in the project configuration widget, [general options][lnk_widg_prjconf_gen]).
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/libman1.png)
-
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_add.png): add a library item, by default its fields are initialized with _n/a_.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_delete.png): remove the selected item.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_up.png) **/** ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_down.png): change selected entry position.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_link.png): if the current project _binaryKind_ is set to _staticlib_ then the _libman_ will use its parameters to create an entry. This avoids to browse in the dialogs, for example if you wish to setup several [_metad_][lnk_metad] items. Note that sometimes the sources root folder has to be adjusted.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_open.png): if the selected item defines a _project_ then closes current project and opens the one matching to the entry.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/dub_small.png): allows to fetch the master version of a [DUB registry item](http://code.dlang.org/). When the button is clicked, a dialog is displayed. It allows to type the name of the library to download or to select a library in a list obtained from the official repository. After validation and if the name is valid, the library will be downloaded, compiled and a new entry automatically filled. This features is actually more useful for the CE projects and the runnable modules since the dependencies of a DUB projects are handled automatically. It allows to use any DUB library in a CE project, even if the package doesn't include a CE project file. Note well that this feature works even if the target project is described with the _SDL_ format.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book.png): enable or disable the selected entry. This is mainly useful to test new DMD versions since the libraries often have to be recompiled from a version to another.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_edit.png): edit the item alias.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/folder/folder_brick.png): select the library file. In some rare case, this field can be omitted (for example if the library file is set in the _sc.ini_).
-This can be skipped if the library is only a small orphan _d_ source that's not been compiled as a static library or if the entry is only used for the [DCD][lnk_dcd] completion.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/bricks.png): select a folder that contains several libraries files or several orphans modules.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/folder/folder_add.png): select the sources root folder. (the one commonly named 'import').
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/script_bricks.png): set the project file that matches to the selected item.
-
-If they're not automatically detected, it's recommended to add the _runtime library_ and _phobos_.
-A collection of third party libraries are provided by the [_metad_][lnk_metad] repository. 
-All of them can be easily build in Coedit and setup in the [_libman_](lnk_widg_lib).
-
-The library entries are saved in the user folder [(see options)][lnk_widg_opts] as _libraryManager.txt_.
-
 ## Project configuration widget
 
 The project configuration widget is a powerful editor for the compiler options. By design it uses an "_Object Inspector_" GUI element. 
