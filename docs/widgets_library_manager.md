@@ -27,7 +27,7 @@ This features is only used for the CE project format and the [runnables](feature
 - <img src="{%include icurl%}book/book_add.png" class="tlbric"/>: Adds a library item, by default its fields are initialized with _n/a_.
 - <img src="{%include icurl%}book/book_delete.png" class="tlbric"/>: Removes the selected item.
 - <img src="{%include icurl%}arrow/arrow_up.png" class="tlbric"/> **/** <img src="{%include icurl%}arrow/arrow_down.png" class="tlbric"/> Changes selected entry position.
-- <img src="{%include icurl%}book/book_link.png): If the current project is a static library then the _libman_ will use its parameters to create an entry. This avoids to browse in the dialogs. Note that sometimes the sources root folder has to be adjusted.
+- <img src="{%include icurl%}book/book_link.png" class="tlbric"/>: If the current project is a static library then the _libman_ will use its parameters to create an entry. This avoids to browse in the dialogs. Note that sometimes the sources root folder has to be adjusted.
 - <img src="{%include icurl%}book/book_open.png" class="tlbric"/>: If the selected item defines a _project_ then closes current project and opens the one matching to the entry.
 - <img src="{%include icurl%}other/dub.png" class="tlbric"/>: Allows to fetch the master version of a [DUB registry item](http://code.dlang.org/). See the last section.
 - <img src="{%include icurl%}book/book.png" class="tlbric"/>: enable or disable the selected entry. This is mainly useful to test new DMD versions since the libraries often have to be recompiled from a version to another.

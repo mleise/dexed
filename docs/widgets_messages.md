@@ -28,10 +28,10 @@ This value and several other options can be changed in the [options editor][widg
 
 ![](img/options_messages.png)
 
-- autoSelect: defines if the widget change dynamically the message categories.
+- **autoSelect**: defines if the widget change dynamically the message categories.
 This is a recommended setting because if a run-time error happens, it will be immediately displayed.
-- colors: allows to associate a message kind to a particular color.
-- fast display: if set, the new messages are displayed fast but by block. When not set the same amount of message takes longer to be displayed but the operation is smoother.
-- font: options for the font used in this widget: the size, the family, etc.
-- maxMessageCount: allows to limit the maximum number of messages kept in the list.
-- singleMessageClick: allows to open the file that the message parser has found by a single click.
+- **colors**: allows to associate a message kind to a particular color.
+- **fast display**: if set, the new messages are displayed fast but by block. When not set the same amount of message takes longer to be displayed but the operation is smoother.
+- **font**: options for the font used in this widget: the size, the family, etc.
+- **maxMessageCount**: allows to limit the maximum number of messages kept in the list.
+- **singleMessageClick**: allows to open the file that the message parser has found by a single click.
