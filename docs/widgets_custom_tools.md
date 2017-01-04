@@ -2,6 +2,8 @@
 title: Widgets - custom tools
 ---
 
+{% include xstyle.css %}
+
 ### Custom tools
 
 This widget allows to define a set of third party applications that can be launched from Coedit.
@@ -20,11 +22,11 @@ A few examples:
 
 Toolbar:
 
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/window/application_add.png): Adds a new tool.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/window/application_delete.png): Removes selected tool.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_up.png) **/** ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_down.png) : Changes the position of the selected tool.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/window/application_flash.png): Executes the tool that's selected, according to the options it's associated to. This also works by double-clicking the tool aliases.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/window/application_double.png): Clones the tool that's selected.
+- <img src="{%include icurl%}window/application_add.png" class="tlbric"/>: Adds a new tool.
+- <img src="{%include icurl%}window/application_delete.png" class="tlbric"/>: Removes selected tool.
+- <img src="{%include icurl%}arrow/arrow_up.png" class="tlbric"/> **/** <img src="{%include icurl%}arrow/arrow_down.png" class="tlbric"/>: Changes the position of the selected tool.
+- <img src="{%include icurl%}window/application_flash.png" class="tlbric"/>: Executes the tool that's selected, according to the options it's associated to. This also works by double-clicking the tool aliases.
+- <img src="{%include icurl%}window/application_double.png" class="tlbric"/>: Clones the tool that's selected.
 
 A tool can be selected from the left side of the widget. If selected, a property inspector displays the options that can be edited:
 

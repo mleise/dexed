@@ -2,6 +2,8 @@
 title: Widgets - project inspector
 ---
 
+{% include xstyle.css %}
+
 ### Project inspector
 
 The project inspector is used to
@@ -14,9 +16,9 @@ The project inspector is used to
 
 The toolbar buttons are only activated for CE projects.
 
-| ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/file/document_add.png) | Adds a D source to the project from a dialog. The new source is not directly opened in the editor. To add a file that is already edited, rather use **"Add file to project"** from the **File** menu. |
-| ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/file/document_delete.png) | Removes from the project the source that's selected in the tree. |
-| ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/folder/folder_add.png) | Adds a folder of D source to the project from a dialog. The procedure is recursive. |
-| ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/folder/folder_delete.png) | Removes from the project the sources files that stand in the same directory as the source selected in the tree. |
+- <img src="{%include icurl%}file/document_add.png" class="tlbric"/>: Adds a D source to the project from a dialog. The new source is not directly opened in the editor. To add a file that is already edited, rather use **"Add file to project"** from the **File** menu.
+- <img src="{%include icurl%}file/document_delete.png" class="tlbric"/>: Removes from the project the source that's selected in the tree.
+- <img src="{%include icurl%}folder/folder_add.png" class="tlbric"/> Adds a folder of D source to the project from a dialog. The procedure is recursive.
+- <img src="{%include icurl%}folder/folder_delete.png" class="tlbric"/> Removes from the project the sources files that stand in the same directory as the source selected in the tree.
 
 Note that instead of using the dialogs to add files, it's also possible to drop items from a file explorer.

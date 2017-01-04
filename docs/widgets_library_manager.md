@@ -2,6 +2,8 @@
 title: Widgets - library manager
 --- 
 
+{% include xstyle.css %}
+
 ### Library manager
 
 #### Description
@@ -22,19 +24,19 @@ This features is only used for the CE project format and the [runnables](feature
 
 #### Toolbar
 
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_add.png): Adds a library item, by default its fields are initialized with _n/a_.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_delete.png): Removes the selected item.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_up.png) **/** ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_down.png): Changes selected entry position.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_link.png): If the current project is a static library then the _libman_ will use its parameters to create an entry. This avoids to browse in the dialogs. Note that sometimes the sources root folder has to be adjusted.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_open.png): If the selected item defines a _project_ then closes current project and opens the one matching to the entry.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/dub.png): Allows to fetch the master version of a [DUB registry item](http://code.dlang.org/). See the last section.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book.png): enable or disable the selected entry. This is mainly useful to test new DMD versions since the libraries often have to be recompiled from a version to another.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/book/book_edit.png): edit the item alias.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/folder/folder_brick.png): select the library file. In some rare case, this field can be omitted (for example if the library file is set in the _sc.ini_).
+- <img src="{%include icurl%}book/book_add.png" class="tlbric"/>: Adds a library item, by default its fields are initialized with _n/a_.
+- <img src="{%include icurl%}book/book_delete.png" class="tlbric"/>: Removes the selected item.
+- <img src="{%include icurl%}arrow/arrow_up.png" class="tlbric"/> **/** <img src="{%include icurl%}arrow/arrow_down.png" class="tlbric"/> Changes selected entry position.
+- <img src="{%include icurl%}book/book_link.png): If the current project is a static library then the _libman_ will use its parameters to create an entry. This avoids to browse in the dialogs. Note that sometimes the sources root folder has to be adjusted.
+- <img src="{%include icurl%}book/book_open.png" class="tlbric"/>: If the selected item defines a _project_ then closes current project and opens the one matching to the entry.
+- <img src="{%include icurl%}other/dub.png" class="tlbric"/>: Allows to fetch the master version of a [DUB registry item](http://code.dlang.org/). See the last section.
+- <img src="{%include icurl%}book/book.png" class="tlbric"/>: enable or disable the selected entry. This is mainly useful to test new DMD versions since the libraries often have to be recompiled from a version to another.
+- <img src="{%include icurl%}book/book_edit.png" class="tlbric"/>: edit the item alias.
+- <img src="{%include icurl%}folder/folder_brick.png" class="tlbric"/>: select the library file. In some rare case, this field can be omitted (for example if the library file is set in the _sc.ini_).
 This can be skipped if the library is only a small orphan _d_ source that's not been compiled as a static library or if the entry is only used for the [DCD](features_dcd) completion.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/bricks.png): select a folder that contains several libraries files or several orphans modules.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/folder/folder_add.png): select the sources root folder. (the one commonly named 'import').
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/script_bricks.png): set the project file that matches to the selected item.
+- <img src="{%include icurl%}other/bricks.png" class="tlbric"/>: select a folder that contains several libraries files or several orphans modules.
+- <img src="{%include icurl%}folder/folder_add.png" class="tlbric"/>: select the sources root folder. (the one commonly named 'import').
+- <img src="{%include icurl%}other/script_bricks.png" class="tlbric"/>: set the project file that matches to the selected item.
 
 #### Register online DUB packages
 
@@ -44,7 +46,7 @@ When the toolbar button that displays DUB logo is clicked, a dialog is displayed
 
 The text field is used to select the name of the package to install.
 
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_update.png): Update the list of the online packages.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/tag_purple.png): By the default the master version of the package is installed. When the tag button is down Coedit rather installs the package from its latest tag.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/accept.png): Closes the dialog and start downloading before installing.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/cancel.png): Cancels and does nothing.
+- <img src="{%include icurl%}arrow/arrow_update.png" class="tlbric"/>: Update the list of the online packages.
+- <img src="{%include icurl%}other/tag_purple.png" class="tlbric"/>: By the default the master version of the package is installed. When the tag button is down Coedit rather installs the package from its latest tag.
+- <img src="{%include icurl%}other/accept.png" class="tlbric"/>: Closes the dialog and start downloading before installing.
+- <img src="{%include icurl%}other/cancel.png" class="tlbric"/>: Cancels and does nothing.

@@ -2,6 +2,8 @@
 title: Widgets - options editor
 ---
 
+{% include xstyle.css %}
+
 ### Options editor
 
 The _Options editor_ is a special, non-dockable, widget that allows the other widgets to expose their options.
@@ -11,8 +13,8 @@ The list at the left displays the categories. A category often matches to a sing
 
 The options are applied in real time but are reversible until the green checker icon is clicked.
 
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/accept.png): validates the modifications made to the current category, after what they can't be canceled anymore.
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/cancel.png): cancels and restores the previous state of the current category.
+- <img src="{%include icurl%}other/accept.png" class="tlbric"/>: Validates the modifications made to the current category, after what they can't be canceled anymore.
+- <img src="{%include icurl%}other/cancel.png" class="tlbric"/>: Cancels and restores the previous state of the current category.
 
 The options are persistent and saved in a distinct folder:
 

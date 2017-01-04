@@ -2,6 +2,8 @@
 title: Widgets - DUB project editor
 ---
 
+{% include xstyle.css %}
+
 ### DUB project editor
 
 The DUB project editor allows to edit, add and remove properties of DUB projects that has the [JSON format](http://code.dlang.org/package-format?lang=json).
@@ -12,8 +14,8 @@ DUB projects with the [SDL format](http://code.dlang.org/package-format?lang=sdl
 A property value can be modified in the field at the bottom. New values always require an extra validation.
 New properties can be added or removed:
 
-* ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/textfield_delete.png): Removes the selected property. Note that the effect is not reflected until the project is saved as a file (since Coedit does not communicate directly with DUB).
-* ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/textfield_add.png): Shows a small dialog that allows to add a new value, a new array or a new object.
+- <img src="{%include icurl%}other/textfield_delete.png" class="tlbric"/>: Removes the selected property. Note that the effect is not reflected until the project is saved as a file (since Coedit does not communicate directly with DUB).
+- <img src="{%include icurl%}other/textfield_add.png" class="tlbric"/>: Shows a small dialog that allows to add a new value, a new array or a new object.
 
 ![](img/dub_add_property.png)
 

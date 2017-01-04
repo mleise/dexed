@@ -2,6 +2,8 @@
 title: Widgets - Todo list
 ---
 
+{% include xstyle.css %}
+
 ### Todo list
 
 #### Description
@@ -17,8 +19,8 @@ Otherwise if a file has the focus and if it's part of the project then the whole
 It's possible to jump to a particular item in its file with a double click.
 The items cannot be edited in the widget.
 
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_update.png): Refreshes the list manually .
-- ![](https://raw.githubusercontent.com/BBasile/Coedit/master/icons/arrow/arrow_pen.png): Jump to the item declaration.
+- <img src="{%include icurl%}arrow/arrow_update.png" class="tlbric"/>: Refreshes the list manually.
+- <img src="{%include icurl%}arrow/arrow_pen.png" class="tlbric"/>: Jump to the item declaration.
 
 #### Format
 
