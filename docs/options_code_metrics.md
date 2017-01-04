@@ -17,7 +17,7 @@ Coedit implements the Halstead metric. The others may be added in a further vers
 
 The metric uses the count and the sum of the functions operands and operators to compute several indexes. Even it's clearly related to the SLOC it's more accurate. For example:
 
-```D
+```d
 void foo() 
 {
     int a = 1, b;
@@ -27,7 +27,7 @@ void foo()
 
 Is seen as less complex than
 
-```D
+```d
 void foo() 
 {
     int a = 1, b;

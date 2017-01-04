@@ -32,7 +32,7 @@ The fields (-a -c -p -s) are optional but the _what_ is mandatory.
 
 For example
 
-```D
+```d
 // TODO: something.
 // TODO-cfixes: something to fix.
 // TODO-cfixes-aMrFreeze: something that MrFreezae has to fix.

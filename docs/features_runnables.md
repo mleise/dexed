@@ -53,7 +53,7 @@ This must be used if the runnable outputs thousands of lines, to display properl
 The version identifier **runnable_module** is automatically defined when a runnable is compiled.
 It can be used to adjust the source according to the execution context, for example:
 
-```D
+```d
 version(runnable_module)
 {
     stdout.writeln("to output stream");
