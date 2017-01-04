@@ -1,7 +1,8 @@
 ---
 title: Widgets - process input
-css: xstyle
 ---
+
+{% include xstyle.css %}
 
 ### Process input
 
@@ -9,8 +10,8 @@ The process input widget is used to pass input to a processes that are executed 
 
 ![](img/process_input.png)
 
-- <img src="https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_go.png" class="tlbric"/>: sends the text to the process, also works with <kbd>ENTER</kbd>.
-- <img src="https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/pencil_delete.png" class="tlbric"/>: closes the process input stream.
-- <img src="https://raw.githubusercontent.com/BBasile/Coedit/master/icons/other/cancel.png" class="tlbric"/>: forces the process termination.
+- <img src="{%include icurl%}other/pencil_go.png" class="tlbric"/>: Sends the text to the process, also works with <kbd>ENTER</kbd>.
+- <img src="{%include icurl%}other/pencil_delete.png" class="tlbric"/>: Closes the process input stream.
+- <img src="{%include icurl%}other/cancel.png" class="tlbric"/>: Forces the process termination.
 
 The input text can contain [symbolic strings](features_symbolic_strings).
