@@ -80,7 +80,7 @@ implementation
 {$R *.lfm}
 
 const
-  proposals: array[0..42] of TEditorProposal = (
+  proposals: array[0..43] of TEditorProposal = (
     (name: 'authors';             jtype: ptArray),
     (name: 'buildOptions';        jtype: ptArray),
     (name: 'buildRequirements';   jtype: ptArray),
@@ -113,6 +113,7 @@ const
     (name: 'profile';             jtype: ptArray),
     (name: 'release';             jtype: ptArray),
     (name: 'sourceFiles';         jtype: ptArray),
+    (name: 'sourcePaths';         jtype: ptArray),
     (name: 'stringImportPaths';   jtype: ptArray),
     (name: 'subConfigurations';   jtype: ptObject),
     (name: 'subPackages';         jtype: ptArray),
