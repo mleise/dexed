@@ -1440,7 +1440,7 @@ procedure TCESynMemo.ShowPhobosDoc;
 var
   str: string;
   pth: string;
-  idt: string;
+  idt: string = '';
   pos: integer;
   len: integer;
   sum: integer;
@@ -2132,8 +2132,8 @@ var
   i: integer;
   p: integer;
   c: integer = 0;
-  tok: PLexToken;
-  ton: PLexToken;
+  tok: PLexToken = nil;
+  ton: PLexToken = nil;
   bet: boolean;
 begin
   p := SelStart;

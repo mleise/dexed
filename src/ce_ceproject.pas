@@ -526,7 +526,7 @@ end;
 
 procedure TCENativeProject.checkMissingFiles;
 var
-  hasPatched: Boolean;
+  hasPatched: Boolean = false;
   // either all the source files have moved or only the project file
   procedure checkMissingAllSources;
   var

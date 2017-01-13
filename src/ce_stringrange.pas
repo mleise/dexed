@@ -108,6 +108,7 @@ end;
 
 function TStringRange.init(const str: string): PStringRange;
 begin
+  Result := @self;
   ptr := nil;
   pos := 0;
   len := 0;
@@ -116,7 +117,6 @@ begin
   ptr := @str[1];
   pos := 0;
   len := length(str);
-  Result := @self;
 end;
 
 function TStringRange.init(const pchr: PChar; length: integer): PStringRange;

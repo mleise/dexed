@@ -768,7 +768,7 @@ end;
 
 procedure TCELibManEditorWidget.btnSelRootClick(Sender: TObject);
 var
-  dir, outdir: string;
+  dir: string;
 begin
   if List.Selected.isNil then
     exit;

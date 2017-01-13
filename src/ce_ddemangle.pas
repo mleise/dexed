@@ -72,7 +72,8 @@ var
 begin
   init;
   fDone := false;
-  fProc.Input.Write(value[1], value.length);
+  if value.isNotEmpty then
+    fProc.Input.Write(value[1], value.length);
   fProc.Input.WriteByte(10);
   while not fDone do
   begin

@@ -16,11 +16,11 @@ The options are applied in real time but are reversible until the green checker 
 - <img src="{%include icurl%}other/accept.png" class="tlbric"/>: Validates the modifications made to the current category, after what they can't be canceled anymore.
 - <img src="{%include icurl%}other/cancel.png" class="tlbric"/>: Cancels and restores the previous state of the current category.
 
-The options are persistent and saved in a distinct folder:
+The options are persistent and saved in a specific folder:
 
 - Linux:
 **`/home/<your account>/.config/Coedit/`**.
 - Windows:
 **`?:\Users\<your account>\AppData\Roaming\Coedit\`**.
 
-Each widget and software component save their own files with a self-explanatory name so it's easy to find and modify the file that matches a particular setting.
+Each software component saves its own file with a self-explanatory name so it's easy to find and modify the file that matches a particular setting.

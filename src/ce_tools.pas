@@ -398,7 +398,7 @@ end;
 
 procedure TCETools.executeTool(tool: TCEToolItem);
 var
-  txt: string;
+  txt: string = '';
 begin
   if tool.isNil then exit;
   //
@@ -412,7 +412,8 @@ begin
       pikLine:      txt := fDoc.LineText;
       pikSelection: txt := fDoc.SelText;
     end;
-    tool.fProcess.Input.Write(txt[1], txt.length);
+    if txt.isNotEmpty then
+      tool.fProcess.Input.Write(txt[1], txt.length);
     tool.fProcess.CloseInput;
   end;
 end;

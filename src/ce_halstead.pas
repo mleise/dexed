@@ -215,6 +215,7 @@ procedure THalsteadMetrics.Measure(document: TCESynMemo);
     case fBugCountMethod of
       pow23div3000: bgs := power(eff, 0.666667) / 3000;
       div3000: bgs := eff / 3000;
+      else bgs := 0;
     end;
 
     bugsSum += bgs;

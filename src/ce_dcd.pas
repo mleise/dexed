@@ -442,7 +442,7 @@ var
   i: Integer;
   kind: Char;
   item: string;
-  kindObj: TObject;
+  kindObj: TObject = nil;
 begin
   if not fAvailable then exit;
   if not fServerListening then exit;

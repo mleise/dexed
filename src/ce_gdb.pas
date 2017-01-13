@@ -1594,7 +1594,7 @@ end;
 
 procedure TCEGdbWidget.startDebugging;
 var
-  str: string;
+  str: string = '';
   gdb: string;
   i: integer;
   b: TPersistentBreakPoint;
@@ -1671,10 +1671,13 @@ begin
   begin
     b := fBreakPoints[i];
     case b.kind of
-      bpkBreak: str := 'break ' + b.filename + ':' + intToStr(b.line) + #10;
+      bpkBreak:
+      begin
+        str := 'break ' + b.filename + ':' + intToStr(b.line) + #10;
+        fGdb.Input.Write(str[1], str.length);
+      end;
       bpkWatch: {TODO-cGDB: put watchpoint from persistent};
     end;
-    fGdb.Input.Write(str[1], str.length);
   end;
   gdbCommand('set disassembly-flavor ' + asmFlavorStr[fOptions.asmSyntax]);
   // break on druntime exceptions + any throw'
@@ -1845,7 +1848,8 @@ procedure parseGdbout(const str: string; var json: TJSONObject);
 
   procedure parseProperty(node: TJSONObject; r: PStringRange);
   var
-    idt,v: string;
+    idt: string = '';
+    v: string;
     c: char;
   begin
     while true do
@@ -2000,7 +2004,7 @@ var
   arr: TJSONArray;
   k: TListItem;
   // common data
-  nme: string;
+  nme: string = '';
   reason: string;
   addr: PtrUint = 0;
   func:string = '';

@@ -16,7 +16,7 @@ When no source file is opened but a project is, the widget displays the comments
 When a source file has the focus and if it is not part of the project then the widget only displays the items located in this file.
 Otherwise if a file has the focus and if it's part of the project then the whole project *todos* are displayed.
 
-It's possible to jump to a particular item in its file with a double click.
+It's possible to display the comment that matches to a particular item with a double click.
 The items cannot be edited in the widget.
 
 - <img src="{%include icurl%}arrow/arrow_update.png" class="tlbric"/>: Refreshes the list manually.
