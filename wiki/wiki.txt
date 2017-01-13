@@ -54,80 +54,9 @@ If they are not correctly set, for each of the following file **coedit**, **dcd-
 either set the permission in the context menu (check _allow execution_ or _executable_ depending on the desktop)
 or `chmod a+x` the file in a console.
 
-## Build the sources
-
-_warning, these instructions are not valid for the development version. Instead [follow these](https://github.com/BBasile/Coedit/wiki/Building-the-development-version)_
-
-Download and setup the tools:
-
-* [Download](http://lazarus.freepascal.org/index.php?page=downloads) and setup the latest Lazarus version (1.6) and  FPC + FPC sources (3.0.0) for your platform.
-	* Windows: the three packages are bundled in an installer. Even on Windows 64 bit, the 32 version must be setup.
-	* Linux: the three packages must be downloaded and setup individually. It's recommended to download the packages from _SourceForge_ and not from the official repository of the distribution because they don't always propose the latest version.
-* `cd <user dir where to clone>`
-* `git clone https://github.com/BBasile/Coedit.git`
-* `git submodule update --init --recursive`, to clone _libdparse_, which is used by the background tools.
-
-You're now ready to build Coedit. This can be done in the IDE or using the _lazbuild_ utility.
-
-* _using the IDE_: 
-	* start Lazarus,
-	* in the **project** menu, click *open...* and select the file **Coedit.lpi**, which is located in the sub-folder **lazproj**.
-	* in the menu **Execute** click **Create**.
-
-* _using Lazbuild_: 
-	* open a console.
-	* `cd` to the repository location, sub folder **lazproj**.
-	* type `lazbuild -B coedit.lpi` and <kbd>ENTER</kbd>. note that the path to _lazbuild_ may have to be specified.
-
-After what Coedit should be build. The executable is output to the _bin_ folder.
-
-![](https://raw.githubusercontent.com/BBasile/CoeditWikiData/master/builddone1.png)
-
-Note that additionally you'll have to build [the completion daemon **DCD**][lnk_dcd], [the symbol list builder **cesyms**][lnk_cesyms] and [the todo comment parser **cetodo**][lnk_cetodo]. 
-See the products documentation for more information.
-
 ## Linux package
 
 Only the _x86-64_ _rpm_ is available (Fedora, openSuse, ...). After the installation, you must also build [DCD][lnk_dcd].
-
-# How to contribute
-
-## Development
-
-Any Pascal or Delphi programmer who is also interested by the D language can contribute.
-The process is based on _git_ and _Github_, using what's called the _fork push pull_ model:
-
-- fork the _Coedit_ repository in your _Github_ account.
-- clone this fork to your computer.
-- using Lazarus and FPC, develop, fix, optimize, do whatever could improve Coedit.
-- _push_ your changes to your online fork.
-- propose a _pull_ request to the main Coedit repository: in [this page](https://github.com/BBasile/Coedit/compare), 
-- click on the link **compare across forks** and select your modified fork as *HEAD* and Coedit/master as *base* repository and validate with **Create pull request**.
-
-[This tutorial](http://codingdiscovery.blogspot.fr/2015/01/how-to-contribute-to-github-project.html) exactly describes the procedure.
-
-The maintainer will be notified of the request, which could be merged after review.
-
-## Distribution
-
-In addition to the setup program, **.deb** and **.rpm** would be welcome. They can be build using the binaries that are proposed in a zip for each release.
-
-## Documentation
-
-The documentation (the sources of this wiki) need to be reviewed, as it's currently written by a non native English speaker.
-The wiki can be edited locally by cloning [this git repository](https://github.com/BBasile/Coedit.wiki.git).
-It's also possible to propose pull requests in the main repository since the [wiki source is present](https://github.com/BBasile/Coedit/tree/master/wiki).
-As tool, one of the markdown editor available on the web can be used, for example [StackEdit](https://stackedit.io/editor).
-
-There is also a huge need to split the wiki in pages. 
-Because the page becomes huge and a long to load, the browsers can fail to scroll to a particular anchor.
-
-## Bug reports
-
-Bugs can be reported using [this dedicated online utility][lnk_bugtracker].
-This place can also be used to suggest enhancements and new features.
-
-For discussions, the official D forums [propose a section dedicated to the IDEs](http://forum.dlang.org/group/ide).
 
 # Menu reference
 

@@ -8,8 +8,8 @@ title: index
 
 _Install and configure Coedit._
 
-* [Build]()
-* [Download]()
+* [Build](build.md)
+* [Setup](setup.md)
 
 #### Features
 
