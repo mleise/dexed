@@ -40,5 +40,5 @@ The background tool used by the IDE is a D program.
 
 #### Third party tools:
 
-Additionally you'll have to build [the completion daemon **DCD**](https://github.com/BBasile/DCD#setup) and the D linter [Dscanner](https://github.com/Hackerpilot/Dscanner#building-and-installing).
+Additionally you'll have to build [the completion daemon **DCD**](https://github.com/BBasile/DCD#setup) and the [D linter **Dscanner**](https://github.com/Hackerpilot/Dscanner#building-and-installing).
 See the products documentation for more information.
