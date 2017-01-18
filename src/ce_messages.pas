@@ -952,7 +952,8 @@ begin
     'exception', 'Exception', 'illegal', 'Illegal',
     'fatal', 'Fatal', 'Critical', 'critical', 'errorlevel':
       exit(amkErr);
-    'Warning', 'warning', 'caution', 'Caution', 'warn', 'Warn':
+    'Warning', 'warning', 'caution', 'Caution', 'warn', 'Warn',
+    'Deprecation', 'deprecation', 'Deprecated', 'deprecated':
       exit(amkWarn);
     'Hint', 'hint', 'Tip', 'tip', 'advice', 'Advice',
     'suggestion', 'Suggestion':
