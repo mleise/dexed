@@ -1709,6 +1709,12 @@ object CEMainForm: TCEMainForm
           ADFFB0B0AEEA000000000000000000000000FFFFFF00FFFFFF00
         }
       end
+      object MenuItem107: TMenuItem
+        Action = actFileCloseAll
+      end
+      object MenuItem106: TMenuItem
+        Action = actFileCloseAllOthers
+      end
       object MenuItem6: TMenuItem
         Caption = '-'
       end
@@ -5234,6 +5240,20 @@ object CEMainForm: TCEMainForm
       Caption = 'View Halstead metrics'
       ImageIndex = 35
       OnExecute = actFileMetricsHalsteadExecute
+    end
+    object actFileCloseAllOthers: TAction
+      Category = 'File'
+      Caption = 'Close all the others files'
+      ImageIndex = 27
+      OnExecute = actFileCloseAllOthersExecute
+      OnUpdate = updateDocumentBasedAction
+    end
+    object actFileCloseAll: TAction
+      Category = 'File'
+      Caption = 'Close all the files'
+      ImageIndex = 27
+      OnExecute = actFileCloseAllExecute
+      OnUpdate = updateDocumentBasedAction
     end
   end
   object imgList: TImageList

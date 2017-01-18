@@ -103,6 +103,8 @@ type
     actFileRunDubOut: TAction;
     actFileNewDubScript: TAction;
     actFileMetricsHalstead: TAction;
+    actFileCloseAllOthers: TAction;
+    actFileCloseAll: TAction;
     actProjGroupCompileCustomSync: TAction;
     actProjGroupClose: TAction;
     actProjGroupCompileSync: TAction;
@@ -151,6 +153,8 @@ type
     MenuItem103: TMenuItem;
     MenuItem104: TMenuItem;
     MenuItem105: TMenuItem;
+    MenuItem106: TMenuItem;
+    MenuItem107: TMenuItem;
     MenuItem77: TMenuItem;
     mnuOpts: TMenuItem;
     mnuItemMruGroup: TMenuItem;
@@ -254,6 +258,8 @@ type
     MenuItem7: TMenuItem;
     MenuItem8: TMenuItem;
     MenuItem9: TMenuItem;
+    procedure actFileCloseAllExecute(Sender: TObject);
+    procedure actFileCloseAllOthersExecute(Sender: TObject);
     procedure actFileCompileExecute(Sender: TObject);
     procedure actFileDscannerExecute(Sender: TObject);
     procedure actFileMetricsHalsteadExecute(Sender: TObject);
@@ -2816,6 +2822,33 @@ end;
 procedure TCEMainForm.actFileCompileExecute(Sender: TObject);
 begin
   compileRunnable(false);
+end;
+
+procedure TCEMainForm.actFileCloseAllOthersExecute(Sender: TObject);
+var
+  i: integer;
+  d: TCESynMemo;
+  c: TCESynMemo;
+begin
+  if fDoc.isNil then
+    exit;
+  c := fDoc;
+  for i := fMultidoc.documentCount-1 downto 0 do
+  begin
+    d := fMultidoc.document[i];
+    if not d.Equals(c) then
+      fMultidoc.closeDocument(d);
+  end;
+end;
+
+procedure TCEMainForm.actFileCloseAllExecute(Sender: TObject);
+var
+  i: integer;
+begin
+  if fDoc.isNil then
+    exit;
+  for i := fMultidoc.documentCount-1 downto 0 do
+    fMultidoc.closeDocument(i);
 end;
 
 procedure TCEMainForm.actFileDscannerExecute(Sender: TObject);
