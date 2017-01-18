@@ -2,25 +2,25 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
   Left = 771
   Height = 424
   Top = 245
-  Width = 402
+  Width = 407
   Caption = 'DUB project editor'
   ClientHeight = 424
-  ClientWidth = 402
+  ClientWidth = 407
   inherited Back: TPanel
     Height = 424
-    Width = 402
+    Width = 407
     ClientHeight = 424
-    ClientWidth = 402
+    ClientWidth = 407
     inherited Content: TPanel
       Height = 388
-      Width = 402
+      Width = 407
       ClientHeight = 388
-      ClientWidth = 402
+      ClientWidth = 407
       object propTree: TTreeView[0]
         Left = 4
         Height = 352
         Top = 4
-        Width = 394
+        Width = 399
         Align = alClient
         BorderSpacing.Around = 4
         DefaultItemHeight = 16
@@ -38,24 +38,24 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         Left = 2
         Height = 26
         Top = 360
-        Width = 398
+        Width = 403
         Align = alBottom
         BorderSpacing.Around = 2
         BevelOuter = bvNone
         ClientHeight = 26
-        ClientWidth = 398
+        ClientWidth = 403
         TabOrder = 1
         object edProp: TEdit
           Left = 2
           Height = 22
           Top = 2
-          Width = 366
+          Width = 371
           Align = alClient
           BorderSpacing.Around = 2
           TabOrder = 0
         end
         object btnAcceptProp: TSpeedButton
-          Left = 370
+          Left = 375
           Height = 26
           Hint = 'accept property value'
           Top = 0
@@ -68,9 +68,9 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Width = 394
+      Width = 399
       object btnUpdate: TCEToolButton[0]
-        Left = 57
+        Left = 85
         Hint = 'reload project'
         Top = 0
         Caption = 'btnUpdate'
@@ -96,21 +96,12 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         resourceName = 'TEXTFIELD_ADD'
         scaledSeparator = False
       end
-      object button3: TCEToolButton[3]
-        Left = 85
-        Height = 28
-        Top = 0
-        Width = 11
-        Caption = 'button3'
-        Style = tbsDivider
-        scaledSeparator = False
-      end
-      object fltEdit: TTreeFilterEdit[4]
-        Left = 96
+      object fltEdit: TTreeFilterEdit[3]
+        Left = 128
         Height = 26
         Hint = 'filter properties'
         Top = 2
-        Width = 296
+        Width = 269
         ButtonWidth = 23
         NumGlyphs = 1
         Align = alRight
@@ -119,6 +110,24 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         MaxLength = 0
         TabOrder = 0
         FilteredTreeview = propTree
+      end
+      object btnCloneObject: TCEToolButton[4]
+        Left = 57
+        Hint = 'clone selected object'
+        Top = 0
+        Caption = 'btnCloneObject'
+        OnClick = btnCloneObjectClick
+        resourceName = 'COPY'
+        scaledSeparator = False
+      end
+      object button1: TCEToolButton[5]
+        Left = 113
+        Height = 28
+        Top = 0
+        Width = 15
+        Caption = 'button1'
+        Style = tbsDivider
+        scaledSeparator = False
       end
     end
   end

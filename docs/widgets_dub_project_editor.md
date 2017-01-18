@@ -14,8 +14,10 @@ DUB projects with the [SDL format](http://code.dlang.org/package-format?lang=sdl
 A property value can be modified in the field at the bottom. New values always require an extra validation.
 New properties can be added or removed:
 
-- <img src="{%include icurl%}other/textfield_delete.png" class="tlbric"/>: Removes the selected property. Note that the effect is not reflected until the project is saved as a file (since Coedit does not communicate directly with DUB).
 - <img src="{%include icurl%}other/textfield_add.png" class="tlbric"/>: Shows a small dialog that allows to add a new value, a new array or a new object.
+- <img src="{%include icurl%}other/textfield_delete.png" class="tlbric"/>: Removes the selected property. Note that the effect is not reflected until the project is saved as a file (since Coedit does not communicate directly with DUB).
+- <img src="{%include icurl%}other/copy.png" class="tlbric"/>: Duplicates the selected object. Can be used to clone a configuration or a build type.
+- <img src="{%include icurl%}arrow/arrow_update.png" class="tlbric"/>: Updates the source files list.
 
 ![](img/dub_add_property.png)
 

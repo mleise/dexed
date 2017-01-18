@@ -40,6 +40,7 @@ type
   TCEDubProjectEditorWidget = class(TCEWidget, ICEProjectObserver)
     btnAcceptProp: TSpeedButton;
     btnAddProp: TCEToolButton;
+    btnCloneObject: TCEToolButton;
     btnDelProp: TCEToolButton;
     btnUpdate: TCEToolButton;
     edProp: TEdit;
@@ -52,6 +53,7 @@ type
     procedure btnAddPropClick(Sender: TObject);
     procedure btnDelPropClick(Sender: TObject);
     procedure btnRefreshClick(Sender: TObject);
+    procedure btnCloneObjectClick(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure propTreeSelectionChanged(Sender: TObject);
   private
@@ -317,18 +319,23 @@ end;
 
 {$REGION Editor ----------------------------------------------------------------}
 procedure TCEDubProjectEditorWidget.propTreeSelectionChanged(Sender: TObject);
+var
+  tpe: TJSONtype;
 begin
   fSelectedNode := nil;
   btnDelProp.Enabled := false;
   btnAddProp.Enabled := false;
+  btnCloneObject.Enabled := false;
   if propTree.Selected.isNil then
     exit;
 
   fSelectedNode := propTree.Selected;
+  tpe := TJSONData(fSelectedNode.Data).JSONType;
   btnDelProp.Enabled := (fSelectedNode.Level > 0) and (fSelectedNode.Text <> 'name')
     and fSelectedNode.data.isNotNil;
+  btnAddProp.Enabled := tpe in [jtObject, jtArray];
+  btnCloneObject.Enabled := (tpe = jtObject) and (fSelectedNode.Level > 0);
   updateValueEditor;
-  btnAddProp.Enabled := TJSONData(fSelectedNode.Data).JSONType in [jtObject, jtArray];
 end;
 
 procedure TCEDubProjectEditorWidget.btnAcceptPropClick(Sender: TObject);
@@ -416,6 +423,52 @@ begin
   if fProj.isNil or not fProj.filename.fileExists then
       exit;
   fProj.loadFromFile(fProj.filename);
+end;
+
+procedure TCEDubProjectEditorWidget.btnCloneObjectClick(Sender: TObject);
+var
+  dat: TJSONData;
+  prt: TJSONData;
+  arr: TJSONArray;
+  obj: TJSONObject;
+  nme: string = '';
+  inm: string;
+  idx: integer = 0;
+begin
+  if fSelectedNode.isNil or fSelectedNode.Data.isNil or fProj.isNil or
+    fSelectedNode.Parent.Data.isNil then
+      exit;
+
+  dat := TJSONData(fSelectedNode.Data);
+  prt := TJSONData(fSelectedNode.Parent.Data);
+
+  if ((prt.JSONType <> jtArray) and (prt.JSONType <> jtObject)) or
+    (dat.JSONType <> jtObject) then
+      exit;
+
+  dat := dat.Clone;
+  if prt.JSONType = jtArray then
+  begin
+    fProj.beginModification;
+    arr := TJSONArray(prt);
+    arr.Insert(arr.Count-1, dat);
+    fProj.endModification;
+  end
+  else
+  begin
+    if not InputQuery('Clone object', 'name of the clone', nme) then
+      exit;
+    fProj.beginModification;
+    obj := TJSONObject(prt);
+    inm := nme;
+    while obj.IndexOfName(inm) <> -1 do
+    begin
+      inm := format('%s_%d', [nme, idx]);
+      idx += 1;
+    end;
+    obj.Add(inm, dat);
+    fProj.endModification;
+  end;
 end;
 
 procedure TCEDubProjectEditorWidget.MenuItem1Click(Sender: TObject);
