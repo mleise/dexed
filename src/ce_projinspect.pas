@@ -7,13 +7,14 @@ interface
 uses
   Classes, SysUtils, TreeFilterEdit, Forms, Controls, Graphics, actnlist,
   Dialogs, ExtCtrls, ComCtrls, Menus, Buttons, lcltype, ce_ceproject, ce_interfaces,
-  ce_common, ce_widget, ce_observer, ce_dialogs, ce_sharedres, ce_dsgncontrols;
+  ce_common, ce_widget, ce_observer, ce_dialogs, ce_sharedres, ce_dsgncontrols,
+  ce_dubproject, ce_synmemo;
 
 type
 
   { TCEProjectInspectWidget }
 
-  TCEProjectInspectWidget = class(TCEWidget, ICEProjectObserver)
+  TCEProjectInspectWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver)
     btnAddFile: TCEToolButton;
     btnAddFold: TCEToolButton;
     btnRemFile: TCEToolButton;
@@ -44,6 +45,7 @@ type
     fLastFileOrFolder: string;
     fSymStringExpander: ICESymStringExpander;
     procedure actUpdate(sender: TObject);
+    procedure DetectNewDubSources(const document: TCESynMemo);
     procedure TreeDblClick(sender: TObject);
     procedure actOpenFileExecute(sender: TObject);
     procedure actBuildExecute(sender: TObject);
@@ -55,6 +57,11 @@ type
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
     procedure updateButtons;
+    //
+    procedure docNew(document: TCESynMemo);
+    procedure docFocused(document: TCESynMemo);
+    procedure docChanged(document: TCESynMemo);
+    procedure docClosing(document: TCESynMemo);
   protected
     function contextName: string; override;
     function contextActionCount: integer; override;
@@ -104,7 +111,8 @@ end;
 procedure TCEProjectInspectWidget.SetVisible(value: boolean);
 begin
   inherited;
-  if value then updateImperative;
+  if value then
+    updateImperative;
 end;
 
 procedure TCEProjectInspectWidget.setToolBarFlat(value: boolean);
@@ -149,7 +157,28 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectMonitor -----------------------------------------------------}
+{$REGION ICEDocumentObserver ---------------------------------------------------}
+procedure TCEProjectInspectWidget.docNew(document: TCESynMemo);
+begin
+  DetectNewDubSources(document);
+end;
+
+procedure TCEProjectInspectWidget.docFocused(document: TCESynMemo);
+begin
+  DetectNewDubSources(document);
+end;
+
+procedure TCEProjectInspectWidget.docChanged(document: TCESynMemo);
+begin
+end;
+
+procedure TCEProjectInspectWidget.docClosing(document: TCESynMemo);
+begin
+  DetectNewDubSources(document);
+end;
+{$ENDREGION}
+
+{$REGION ICEProjectObserver -----------------------------------------------------}
 procedure TCEProjectInspectWidget.projNew(project: ICECommonProject);
 begin
   fLastFileOrFolder := '';
@@ -174,6 +203,7 @@ procedure TCEProjectInspectWidget.projFocused(project: ICECommonProject);
 begin
   fLastFileOrFolder := '';
   fProject := project;
+  DetectNewDubSources(nil);
   updateButtons;
   if Visible then
     beginDelayedUpdate;
@@ -289,6 +319,20 @@ begin
   fActSelConf.Enabled := Tree.Selected.Parent = fConfNode;
   fActBuildConf.Enabled := Tree.Selected.Parent = fConfNode;
   fActOpenFile.Enabled := Tree.Selected.Parent = fFileNode;
+end;
+
+procedure TCEProjectInspectWidget.DetectNewDubSources(const document: TCESynMemo
+  );
+begin
+  if not assigned(fProject) or (fProject.getFormat <> pfDUB) then
+    exit;
+  if document.isNotNil then
+  begin
+    if document.fileName.contains(fProject.basePath) then
+      TCEDubProject(fProject.getProject).updateSourcesList;
+  end
+  else TCEDubProject(fProject.getProject).updateSourcesList;
+  updateImperative;
 end;
 
 procedure TCEProjectInspectWidget.btnAddFileClick(Sender: TObject);

@@ -111,6 +111,7 @@ type
     procedure loadFromFile(const fname: string);
     procedure saveToFile(const fname: string);
     //
+    procedure updateSourcesList;
     procedure activate;
     function inGroup: boolean;
     procedure inGroup(value: boolean);
@@ -762,6 +763,11 @@ begin
   deleteDups(fConfigs);
   deleteDups(fBuildTypes);
   fConfigsCount := fConfigs.Count * fBuildTypes.Count;
+end;
+
+procedure TCEDubProject.updateSourcesList;
+begin
+  updateSourcesFromJson;
 end;
 
 procedure TCEDubProject.updateSourcesFromJson;
