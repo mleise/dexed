@@ -435,7 +435,7 @@ var
   i, j: integer;
 begin
   if not assigned(fProject) or (fProject.getFormat = pfDUB)
-  or Tree.Selected.isNil or (Tree.Selected.Parent = fFileNode) then
+  or Tree.Selected.isNil or (Tree.Selected.Parent <> fFileNode) then
     exit;
 
   proj := TCENativeProject(fProject.getProject);
