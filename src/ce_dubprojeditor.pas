@@ -400,6 +400,7 @@ end;
 procedure TCEDubProjectEditorWidget.btnDelPropClick(Sender: TObject);
 var
   prt: TJSONData;
+  sel: TTreeNode;
 begin
   if fSelectedNode.isNil then exit;
   if fSelectedNode.Level = 0 then exit;
@@ -413,6 +414,13 @@ begin
     TJSONObject(prt).Delete(fSelectedNode.Index)
   else if prt.JSONType = jtArray then
     TJSONArray(prt).Delete(fSelectedNode.Index);
+  sel := fSelectedNode.GetPrevSibling;
+  if sel.isNil then
+    sel := fSelectedNode.GetNextSibling;
+  if sel.isNil then
+      sel := fSelectedNode.Parent;
+  if sel.isNotNil then
+    sel.Selected:=true;
   fProj.endModification;
 
   updateValueEditor;
@@ -581,8 +589,14 @@ procedure TCEDubProjectEditorWidget.updateEditor;
       end;
     end;
   end;
-
+var
+  str: string = '';
+  rcl: TTreeNode;
 begin
+
+  if propTree.Selected.isNotNil then
+    str := propTree.Selected.GetTextPath;
+
   propTree.Items.Clear;
   edProp.Clear;
   if fProj.isNil or fProj.json.isNil then
@@ -590,6 +604,15 @@ begin
 
   propTree.BeginUpdate;
   addPropsFrom(propTree.Items.Add(nil, 'project'), fProj.json);
+  if str.isNotEmpty then
+  begin
+    rcl := propTree.Items.FindNodeWithTextPath(str);
+    if rcl.isNotNil then
+    begin
+      rcl.Selected := true;
+      rcl.MakeVisible;
+    end;
+  end;
   propTree.EndUpdate;
 end;
 {$ENDREGION}
