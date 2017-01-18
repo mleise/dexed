@@ -161,8 +161,8 @@ type
     function getDocument(index: Integer): TCESynMemo;
     function findDocument(const fname: string): TCESynMemo;
     procedure openDocument(const fname: string);
-    function closeDocument(index: Integer): boolean;
-    function closeDocument(doc: TCESynMemo): boolean;
+    function closeDocument(index: Integer;promptOnChanged: boolean = true): boolean;
+    function closeDocument(doc: TCESynMemo;promptOnChanged: boolean = true): boolean;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -509,14 +509,14 @@ begin
   end;
 end;
 
-function TCEEditorWidget.closeDocument(index: Integer): boolean;
+function TCEEditorWidget.closeDocument(index: Integer; promptOnChanged: boolean = true): boolean;
 var
   doc: TCESynMemo;
 begin
   doc := getDocument(index);
   if doc.isNil then
     exit(false);
-  if (doc.modified or (doc.fileName = doc.tempFilename)) and
+  if promptOnChanged and (doc.modified or (doc.fileName = doc.tempFilename)) and
     (dlgFileChangeClose(doc.fileName, UnsavedFile) = mrCancel) then
       exit(false);
   showWidget;
@@ -526,14 +526,14 @@ begin
   result := true;
 end;
 
-function TCEEditorWidget.closeDocument(doc: TCESynMemo): boolean;
+function TCEEditorWidget.closeDocument(doc: TCESynMemo;promptOnChanged: boolean = true): boolean;
 var
   page: TCEPage = nil;
 begin
   page := TCEPage(doc.Parent);
   if page.isNil then
     exit(false);
-  exit(closeDocument(page.index));
+  exit(closeDocument(page.index, promptOnChanged));
 end;
 {$ENDREGION}
 

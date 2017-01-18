@@ -1836,6 +1836,17 @@ end;
 procedure TCEMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 var
   i: Integer;
+  files: string = '';
+  projs: string = '';
+  group: string =  #9'no';
+  chang: boolean = false;
+  d: TCESynMemo;
+const
+  s: string = 'The following content is modified and changes will be lost'#10#10 +
+              '- Modified files:'#10' %s '#10 +
+              '- Modified projects:'#10' %s '#10 +
+              '- Project group modified:'#10' %s'#10#10 +
+              'Close without saving ?';
 begin
   canClose := false;
   SaveLastDocsAndProj;
@@ -1844,22 +1855,54 @@ begin
     (dlgOkCancel('A project is still being compiled, close anyway ?') <> mrOK) then
       exit;
 
-  if assigned(fFreeProj) then
+  if assigned(fFreeProj) and fFreeProj.modified then
   begin
-    if fFreeProj.modified and
-      (dlgFileChangeClose(fFreeProj.filename, UnsavedProj) = mrCancel) then
-        exit;
-    fFreeProj.getProject.Free;
-    fFreeProj := nil;
+    projs += #9 + fFreeProj.filename + LineEnding;
+    chang := true;
   end;
-  for i := fMultidoc.documentCount-1 downto 0 do
-    if not fMultidoc.closeDocument(i) then
-      exit;
-  if fProjectGroup.groupModified and
-    (dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel) then
-      exit;
-  canClose := true;
+
+  for i := 0 to fMultidoc.documentCount-1 do
+  begin
+    d := fMultidoc.getDocument(i);
+    if d.modified then
+    begin
+      files += #9 + shortenPath(d.filename) + LineEnding;
+      chang := true;
+    end;
+  end;
+
+  for i:= 0 to fProjectGroup.projectCount-1 do
+  begin
+    if not fProjectGroup.projectModified(i) then
+      continue;
+    projs += #9 + shortenPath(fProjectGroup.getProject(i).filename) + LineEnding;
+    chang := true;
+  end;
+
+  if fProjectGroup.groupModified then
+  begin
+    group := #9'yes';
+    chang := true;
+  end;
+
+  if chang then
+  begin
+    if projs.isEmpty then
+      projs := '(no modified projects)'#10;
+    if files.isEmpty then
+      files := '(no modified files)'#10;
+
+    if MessageDlg('Modified content', format(s, [files, projs, group]),
+      TMsgDlgType.mtConfirmation, [mbOk, mbCancel], '') <> mrOk then
+        exit;
+  end;
+
+  CanClose:= true;
   fProjectGroup.closeGroup;
+  if assigned(fFreeProj) then
+    fFreeProj.getProject.Free;
+  for i:= fMultidoc.documentCount-1 downto 0 do
+    fMultidoc.closeDocument(i, false);
 end;
 
 procedure TCEMainForm.updateDocumentBasedAction(sender: TObject);

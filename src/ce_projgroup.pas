@@ -85,7 +85,8 @@ type
     function getProject(ix: Integer): ICECommonProject;
     function findProject(const fname: string): ICECommonProject;
     procedure setProjectIndex(value: Integer);
-    function projectIsAsync(index: integer): boolean;
+    function projectIsAsync(ix: integer): boolean;
+    function projectModified(ix: integer): boolean;
     //
     function addItem(const fname: string): TProjectGroupItem;
     property item[ix: integer]: TProjectGroupItem read getItem; default;
@@ -245,9 +246,9 @@ begin
   end;
 end;
 
-function TProjectGroup.projectIsAsync(index: integer): boolean;
+function TProjectGroup.projectIsAsync(ix: integer): boolean;
 begin
-  exit(item[index].asyncMode = amParallel);
+  exit(item[ix].asyncMode = amParallel);
 end;
 
 function TProjectGroup.addItem(const fname: string): TProjectGroupItem;
@@ -282,6 +283,16 @@ begin
   result := item[ix].project;
   if result.getFormat = pfDUB then
     result.setActiveConfigurationIndex(item[ix].configurationIndex);
+end;
+
+function TProjectGroup.projectModified(ix: integer): boolean;
+var
+  p: ICECommonProject;
+begin
+  result := false;
+  p := item[ix].project;
+  if assigned(p) and (p.modified) then
+    result := true
 end;
 
 function TProjectGroup.findProject(const fname: string): ICECommonProject;
@@ -407,7 +418,7 @@ var
   b: boolean = false;
 begin
   for i:= 0 to fItems.Count-1 do
-    if (getItem(i).fProj <> nil) and getItem(i).fProj.modified then
+    if projectModified(i) then
     begin
       b := true;
       break;

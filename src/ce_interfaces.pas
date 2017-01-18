@@ -275,9 +275,9 @@ type
     // opens or set the focus on the document matching aFilename.
     procedure openDocument(const fname: string);
     // closes the nth document.
-    function closeDocument(index: Integer): boolean;
+    function closeDocument(index: Integer; promptOnChanged: boolean = true): boolean;
     // closes a particular document.
-    function closeDocument(doc: TCESynMemo): boolean;
+    function closeDocument(doc: TCESynMemo; promptOnChanged: boolean = true): boolean;
     // conveniance property.
     property document[index: integer]: TCESynMemo read getDocument;
   end;
@@ -306,6 +306,8 @@ type
     function getProjectIndex: integer;
     // returns the nth project.
     function getProject(index: Integer): ICECommonProject;
+    // returns true if the nth project is modified
+    function projectModified(index: integer): boolean;
     // tries to find the project named fname.
     function findProject(const fname: string): ICECommonProject;
     // selects the nth project of the group.
@@ -335,8 +337,6 @@ type
     function currentLocation: string;
   end;
 
-
-  // TODO-cOptions: widgets that expose options can use ICEOptionsEditor in their ctxt menu
 
   (**
    * Single service provided by the options editor.
