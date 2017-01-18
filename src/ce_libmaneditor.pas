@@ -938,7 +938,11 @@ begin
     if project.sourcesCount = 0 then
       result := ''
     else
+    begin
       result := lst[0];
+      if FilenameIsAbsolute(result) then
+        result := expandFilenameEx(GetCurrentDir, result);
+    end;
     if ((project.sourcesCount > 1) and (lst.Count > 1))
       or (not sym) then
     begin

@@ -334,7 +334,7 @@ begin
   begin
     lib := libraryByIndex[i];
     als := lib.libAlias.upperCase;
-    // TODO-cmaintenace: from 3 upd 1 remove auto suprerssion of libman entry for phobos and rt.
+    // TODO-cmaintenace: from 3 upd 1 remove auto deletion of libman entry for phobos and rt.
     if (als = 'PHOBOS') or (als = 'RUNTIME') or (als = 'DRUNTIME') then
     begin
       fCollection.Delete(i);
