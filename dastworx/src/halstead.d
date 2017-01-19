@@ -160,6 +160,21 @@ private final class HalsteadMetric: ASTVisitor
         functionNesting--;
     }
 
+    override void visit(const(TemplateArguments) ta)
+    {
+        ta.accept(this);
+        if (ta.templateSingleArgument)
+        {
+            if (!isLiteral(ta.templateSingleArgument.token.type))
+                ++operands[ta.templateSingleArgument.token.text];
+            else
+            {
+                import std.digest.crc: crc32Of, toHexString;
+                ++operands["literal" ~ ta.templateSingleArgument.token.text.crc32Of.toHexString.idup];
+            }
+        }
+    }
+
     override void visit(const(FunctionCallExpression) expr)
     {
 
@@ -273,7 +288,6 @@ private final class HalsteadMetric: ASTVisitor
                     ++operands[expr.identifierOrTemplateInstance.identifier.text];
                 else
                     ++operands[expr.identifierOrTemplateInstance.templateInstance.identifier.text];
-
             }
         }
 
@@ -1184,7 +1198,6 @@ unittest
 
 unittest
 {
-    //FIXME: single template param without parens not detected
     Function r =
     q{
         void foo()
@@ -1192,7 +1205,7 @@ unittest
             a.b!8.c = f;
         }
     }.test;
-    //assert(r.operandsKinds == 5);
+    assert(r.operandsKinds == 5);
     assert(r.operatorsKinds == 2);
 }
 
