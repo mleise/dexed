@@ -1,1 +1,1 @@
-isitthere --if=d2sp.txt --ml=16 --hf=0
+isitthere --if=d2sp.txt --ml=16 --fk=pascal --of=d2sp.pas --fn=specialKeywordsMap

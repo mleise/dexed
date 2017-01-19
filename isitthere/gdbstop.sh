@@ -1,1 +1,1 @@
-isitthere --if=gdbstop.txt --ml=16 --hf=0
+isitthere --if=gdbstop.txt --ml=16 --fk=pascal --of=gdbstop.pas --fn=stopReasons
