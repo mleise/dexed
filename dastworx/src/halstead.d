@@ -3,7 +3,7 @@ module halstead;
 import
     std.algorithm.iteration, std.conv, std.json, std.meta;
 import
-    std.range: iota;
+    std.stdio, std.range: iota;
 import
     dparse.ast, dparse.lexer, dparse.parser, dparse.rollback_allocator;
 import
@@ -50,9 +50,37 @@ private final class HalsteadMetric: ASTVisitor
     size_t[string] operands;
     BinaryExprFlags[] binExprFlag;
     size_t functionNesting;
-    bool functionCall;
+    bool[] inFunctionCallChain;
+    const(IdentifierOrTemplateInstance)[] chain;
     bool ifStatement;
     JSONValue fs;
+
+    void processCallChain()
+    {
+        version(none)
+        {
+            import std.array : join;
+            writeln("chain: ", chain.map!(a => a.identifier.text).join("."));
+        }
+        if (chain.length)
+        {
+            static Token getIdent(const(IdentifierOrTemplateInstance) i)
+            {
+                if (i.identifier != tok!"")
+                    return i.identifier;
+                else
+                    return i.templateInstance.identifier;
+            }
+            foreach(i, ident; chain)
+            {
+                if (i == chain.length-1)
+                    ++operators[getIdent(ident).text];
+                else
+                    ++operands[getIdent(ident).text];
+            }
+            chain.length = 0;
+        }
+    }
 
     void pushExprFlags(bool leftFlag = false, bool rightFlag = false)
     {
@@ -74,6 +102,7 @@ private final class HalsteadMetric: ASTVisitor
     {
         fs = parseJSON("[]");
         pushExprFlags;
+        inFunctionCallChain.length++;
     }
 
     void serialize()
@@ -124,8 +153,8 @@ private final class HalsteadMetric: ASTVisitor
         {
             import std.stdio: writeln;
             writeln(functions[$-1]);
-            writeln('\t',operators);
-            writeln('\t',operands);
+            writeln("\toperators: ",operators);
+            writeln("\toperands : ",operands);
         }
 
         functionNesting--;
@@ -133,30 +162,24 @@ private final class HalsteadMetric: ASTVisitor
 
     override void visit(const(FunctionCallExpression) expr)
     {
-        if (expr.unaryExpression.primaryExpression)
-        {
-            const(PrimaryExpression) p = expr.unaryExpression.primaryExpression;
-            if (p.identifierOrTemplateInstance)
-            {
-                if (p.identifierOrTemplateInstance.templateInstance)
-                    ++operators[p.identifierOrTemplateInstance.templateInstance.identifier.text];
-                else
-                    ++operators[p.identifierOrTemplateInstance.identifier.text];
-            }
-        }
-        else if (expr.unaryExpression.identifierOrTemplateInstance)
-        {
-            if (expr.unaryExpression.identifierOrTemplateInstance.templateInstance)
-                ++operators[expr.unaryExpression.identifierOrTemplateInstance.templateInstance.identifier.text];
-            else
-                ++operators[expr.unaryExpression.identifierOrTemplateInstance.identifier.text];
-        }
+
+        inFunctionCallChain.length++;
+        inFunctionCallChain[$-1] = true;
+
         if (expr.templateArguments)
         {
             if (expr.templateArguments.templateSingleArgument)
                 ++operands[expr.templateArguments.templateSingleArgument.token.text];
         }
+
         expr.accept(this);
+
+        if (inFunctionCallChain[$-1])
+        {
+            processCallChain;
+        }
+
+        inFunctionCallChain.length--;
     }
 
     override void visit(const(FunctionDeclaration) decl)
@@ -207,41 +230,57 @@ private final class HalsteadMetric: ASTVisitor
 
     override void visit(const(PrimaryExpression) primary)
     {
-	    if (primary.identifierOrTemplateInstance !is null
-		    && primary.identifierOrTemplateInstance.identifier != tok!"")
+	    if (primary.identifierOrTemplateInstance !is null)
         {
-            if (!functionCall ||  (functionCall & exprLeftIsFunction) || (functionCall & exprRightIsFunction))
+            if (inFunctionCallChain[$-1])
+                chain ~= primary.identifierOrTemplateInstance;
+            if ((!inFunctionCallChain[$-1]) ||
+                (inFunctionCallChain[$-1] & exprLeftIsFunction) ||
+                (inFunctionCallChain[$-1] & exprRightIsFunction))
+            {
                 ++operands[primary.identifierOrTemplateInstance.identifier.text];
+            }
         }
         else if (primary.primary.type.isLiteral)
         {
             import std.digest.crc: crc32Of, toHexString;
             ++operands["literal" ~ primary.primary.text.crc32Of.toHexString.idup];
         }
-
-        functionCall = false;
-
         primary.accept(this);
+    }
+
+    override void visit(const(ArgumentList) al)
+    {
+        if (inFunctionCallChain[$-1])
+            processCallChain;
+        inFunctionCallChain[$-1] = false;
+        al.accept(this);
     }
 
     override void visit(const(UnaryExpression) expr)
     {
+        expr.accept(this);
 
-        if (expr.identifierOrTemplateInstance && !expr.primaryExpression)
+        if (expr.identifierOrTemplateInstance)
         {
             ++operators["."];
-            ++operands[expr.identifierOrTemplateInstance.identifier.text];
+
+            if (inFunctionCallChain[$-1])
+                chain ~= expr.identifierOrTemplateInstance;
+            else
+            {
+                if (expr.identifierOrTemplateInstance.identifier != tok!"")
+                    ++operands[expr.identifierOrTemplateInstance.identifier.text];
+                else
+                    ++operands[expr.identifierOrTemplateInstance.templateInstance.identifier.text];
+
+            }
         }
 
         if (expr.prefix.type)
             ++operators[str(expr.prefix.type)];
         if (expr.suffix.type)
             ++operators[str(expr.suffix.type)];
-
-        if (expr.functionCallExpression)
-            functionCall = true;
-
-        expr.accept(this);
     }
 
     override void visit(const(IndexExpression) expr)
@@ -415,7 +454,7 @@ private final class HalsteadMetric: ASTVisitor
         decl.accept(this);
     }
 
-    final override void visit(const AutoDeclarationPart decl)
+    override void visit(const AutoDeclarationPart decl)
     {
         ++operands[decl.identifier.text];
         ++operators["="];
@@ -605,6 +644,19 @@ unittest
     q{
         void foo()
         {
+            bar!("lit")(a);
+        }
+    }.test;
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
             enum E{e0}
             E e;
             bar!(e,"lit")(baz(e));
@@ -714,11 +766,11 @@ unittest
     q{
         void foo()
         {
-            i += a << b;
+            i += a << b.c;
         }
     }.test;
-    assert(r.operandsKinds == 3);
-    assert(r.operatorsKinds == 2);
+    assert(r.operandsKinds == 4);
+    assert(r.operatorsKinds == 3);
 }
 
 unittest
@@ -1092,7 +1144,6 @@ unittest
 
 unittest
 {
-    //FIXME: operands 'c' instead of 'a'
     Function r =
     q{
         void foo()
@@ -1107,15 +1158,41 @@ unittest
 
 unittest
 {
-    //FIXME: operands 'c' instead of 'a'
     Function r =
     q{
         void foo()
         {
-            a.b.c(d(e.f));
+            a.b.c.d(e.f());
         }
     }.test;
     assert(r.operandsKinds == 4);
     assert(r.operatorsKinds == 3);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            a.b!(8,9).c = f;
+        }
+    }.test;
+    assert(r.operandsKinds == 6);
+    assert(r.operatorsKinds == 2);
+}
+
+unittest
+{
+    //FIXME: single template param without parens not detected
+    Function r =
+    q{
+        void foo()
+        {
+            a.b!8.c = f;
+        }
+    }.test;
+    //assert(r.operandsKinds == 5);
+    assert(r.operatorsKinds == 2);
 }
 
