@@ -178,6 +178,69 @@ type
     destructor destroy; override;
   end;
 
+  // Maps an identifier to a message kind
+  type messageSemantic = record
+  private
+
+    {
+          rendered on 2017-Jan-19 21:11:15.6560057 by IsItThere.
+           - PRNG seed: 0
+           - map length: 64
+           - case sensitive: true
+    }
+
+    const fWords: array [0..63] of string =
+      ('caution', '', '', '', 'Fatal', 'Critical', 'Error', 'Advice',
+       'Warn', '', '', 'advice', '', 'warning', '', 'information',
+       '', '', '', 'Exception', '', '', 'illegal', '',
+       '', 'Hint', 'errorlevel', 'Warning', 'critical', 'Deprecated', 'Invalid', 'fatal',
+       '', 'Deprecation', 'hint', '', '', 'error', '', '',
+       '', 'Caution', 'Tip', '', 'deprecated', '', '', 'Suggestion',
+       'deprecation', '', 'exception', 'ERROR', 'Information', '', '', '',
+       'suggestion', 'invalid', 'warn', 'Illegal', '', '', '', 'tip');
+
+    const fFilled: array [0..63] of boolean =
+      (true, false, false, false, true, true, true, true, true, false, false,
+       true, false, true, false, true, false, false, false, true, false, false,
+       true, false, false, true, true, true, true, true, true, true, false, true,
+       true, false, false, true, false, false, false, true, true, false, true,
+       false, false, true, true, false, true, true, true, false, false, false,
+       true, true, true, true, false, false, false, true);
+
+    const fMap: array [0..63] of TCEAppMessageKind =
+      ( amkWarn, amkBub,  amkBub, amkBub, amkErr, amkErr, amkErr, amkHint,
+        amkWarn, amkBub,  amkBub, amkHint, amkBub, amkWarn, amkBub, amkInf,
+        amkBub, amkBub,  amkBub, amkErr, amkBub, amkBub, amkErr, amkBub,
+        amkBub, amkHint,  amkErr, amkWarn, amkErr, amkWarn, amkErr, amkErr,
+        amkBub, amkWarn,  amkHint, amkBub, amkBub, amkErr, amkBub, amkBub,
+        amkBub, amkWarn,  amkHint, amkBub, amkWarn, amkBub, amkBub, amkHint,
+        amkWarn, amkBub,  amkErr, amkErr, amkInf, amkBub, amkBub, amkBub,
+        amkHint, amkErr,  amkWarn, amkErr, amkBub, amkBub, amkBub, amkHint);
+
+    const fCoefficients: array [0..255] of Byte =
+      (151, 145, 214, 156, 15, 232, 156, 185, 180, 64, 178, 95, 6, 249, 69, 68,
+       240, 111, 93, 41, 229, 240, 146, 62, 148, 157, 106, 190, 120, 112, 104,
+       207, 85, 123, 228, 254, 43, 2, 236, 108, 39, 221, 41, 251, 144, 192, 247,
+       101, 210, 134, 105, 39, 208, 115, 116, 65, 209, 36, 237, 87, 195, 162,
+       142, 33, 203, 95, 12, 200, 124, 111, 9, 145, 187, 238, 173, 155, 214,
+       127, 229, 197, 232, 87, 213, 92, 39, 25, 218, 24, 193, 223, 45, 35, 157,
+       4, 34, 244, 154, 99, 21, 95, 203, 14, 100, 113, 68, 201, 199, 174, 249,
+       30, 153, 251, 122, 129, 244, 229, 188, 101, 103, 138, 164, 136, 188, 209,
+       164, 192, 76, 159, 40, 182, 137, 202, 107, 115, 9, 23, 14, 166, 47, 71,
+       243, 156, 148, 176, 187, 247, 143, 124, 180, 14, 250, 157, 212, 18, 151,
+       246, 174, 222, 41, 114, 148, 24, 34, 97, 116, 37, 173, 30, 177, 20, 55,
+       18, 15, 149, 94, 129, 87, 72, 25, 3, 82, 200, 198, 214, 49, 228, 10, 39,
+       191, 83, 128, 30, 117, 209, 216, 152, 89, 237, 253, 24, 173, 116, 65, 64,
+       55, 222, 210, 243, 140, 82, 219, 8, 35, 13, 123, 43, 15, 72, 174, 28, 10,
+       242, 74, 136, 18, 198, 247, 240, 196, 146, 49, 39, 175, 186, 38, 8, 110,
+       101, 179, 242, 152, 251, 227, 60, 25, 31, 123, 80, 149, 187, 67, 157, 120,
+       84, 83, 192);
+
+    class function hash(const w: string): Word; static;
+  public
+    class function getType(const w: string): TCEAppMessageKind; static;
+  end;
+
 implementation
 {$R *.lfm}
 
@@ -941,29 +1004,30 @@ begin
   list.EndUpdate;
 end;
 
+class function messageSemantic.hash(const w: string): Word;
+var
+  i: integer;
+begin
+  Result := 0;
+  for i := 1 to length(w) do
+    Result += fCoefficients[Byte(w[i])];
+  Result := Result and $3F;
+end;
+
+class function messageSemantic.getType(const w: string): TCEAppMessageKind;
+var
+  h: Word;
+begin
+  result := amkBub;
+  h := hash(w);
+  if fFilled[h] and (fWords[h] = w) then
+    result := messageSemantic.fMap[h];
+end;
+
 function TCEMessagesWidget.guessMessageKind(const aMessg: string): TCEAppMessageKind;
 var
   idt: string;
   rng: TStringRange = (ptr:nil; pos:0; len: 0);
-function checkIdent: TCEAppMessageKind;
-begin
-  case idt of
-    'ERROR', 'error', 'Error', 'Invalid', 'invalid',
-    'exception', 'Exception', 'illegal', 'Illegal',
-    'fatal', 'Fatal', 'Critical', 'critical', 'errorlevel':
-      exit(amkErr);
-    'Warning', 'warning', 'caution', 'Caution', 'warn', 'Warn',
-    'Deprecation', 'deprecation', 'Deprecated', 'deprecated':
-      exit(amkWarn);
-    'Hint', 'hint', 'Tip', 'tip', 'advice', 'Advice',
-    'suggestion', 'Suggestion':
-      exit(amkHint);
-    'Information', 'information':
-      exit(amkInf);
-    else
-      exit(amkBub);
-  end;
-end;
 const
   alp = ['a'..'z', 'A'..'Z'];
 begin
@@ -976,7 +1040,7 @@ begin
     idt := rng.popUntil(alp)^.takeWhile(alp).yield;
     if idt = '' then
       exit;
-    result := checkIdent;
+    result := messageSemantic.getType(idt);
     if result <> amkBub then
       exit;
   end;
