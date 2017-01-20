@@ -45,5 +45,11 @@ private final class MainFunctionDetector: ASTVisitor
         if (decl.name.text == "main")
             hasMain = true;
     }
+
+    override void visit(const(Unittest)){}
+    override void visit(const(ClassDeclaration)){}
+    override void visit(const(StructDeclaration)){}
+    override void visit(const(InterfaceDeclaration)){}
+    override void visit(const(FunctionBody)){}
 }
 
