@@ -2,7 +2,7 @@
 title: D Completion Daemon
 ---
 
-### D Dompletion Daemon
+### D Completion Daemon
 
 The D Completion Daemon (DCD) is used to accomplish IDE-grade features such as
 
