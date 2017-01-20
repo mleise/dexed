@@ -1021,7 +1021,7 @@ begin
   result := amkBub;
   h := hash(w);
   if fFilled[h] and (fWords[h] = w) then
-    result := messageSemantic.fMap[h];
+    result := fMap[h];
 end;
 
 function TCEMessagesWidget.guessMessageKind(const aMessg: string): TCEAppMessageKind;

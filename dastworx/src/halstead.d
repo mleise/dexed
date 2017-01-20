@@ -1209,3 +1209,17 @@ unittest
     assert(r.operatorsKinds == 2);
 }
 
+unittest
+{
+    //TODO: handle iasm
+    Function r =
+    q{
+        void foo()
+        {
+            asm{xor EAX,ECX;}
+        }
+    }.test;
+    //assert(r.operandsKinds == 2);
+    //assert(r.operatorsKinds == 1);
+}
+
