@@ -2,7 +2,9 @@
 title: Widgets - messages
 ---
 
-## Messages
+### Messages
+
+#### Description
 
 The widget displays a stream of information about the current file or about the current project.
 The messages can be filtered according to their context:
@@ -24,7 +26,9 @@ The messages emitted by the custom tools may also be clickable if they follow a 
 
 The context menu contains a few useful actions, such as *copy messages*, *save message(s) to file*.
 By default only the last 500 messages are displayed, regardless of the categories. 
-This value and several other options can be changed in the [options editor][widgets_options]:
+This value and several other options can be changed in the options.
+
+#### Options
 
 ![](img/options_messages.png)
 
