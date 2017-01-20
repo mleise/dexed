@@ -1870,7 +1870,7 @@ begin
   for i := 0 to fMultidoc.documentCount-1 do
   begin
     d := fMultidoc.getDocument(i);
-    if d.modified then
+    if d.modified or (d.fileName = d.tempFilename) then
     begin
       files += #9 + shortenPath(d.filename) + LineEnding;
       chang := true;
