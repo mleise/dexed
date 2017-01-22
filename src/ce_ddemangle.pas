@@ -11,13 +11,11 @@ uses
 type
 
   TCEDDemangler = class
-  private
+  strict private
     fActive: boolean;
-    fDone: boolean;
     fProc: TCEProcess;
     fList, fOut: TStringList;
-    procedure procOutput(sender: TObject);
-    procedure init;
+    procedure procTerminate(sender: TObject);
   public
     constructor create;
     destructor destroy; override;
@@ -38,9 +36,15 @@ var
 
 constructor TCEDDemangler.create;
 begin
-  init;
   fList := TStringList.Create;
   fOut  := TStringList.Create;
+  fProc := TCEProcess.create(nil);
+  fProc.Executable:= exeFullName('ddemangle' + exeExt);
+  fProc.Options:= [poUsePipes];
+  fProc.OnTerminate:=@procTerminate;
+  fProc.ShowWindow:= swoHIDE;
+  fProc.execute;
+  fActive := true;
 end;
 
 destructor TCEDDemangler.destroy;
@@ -52,44 +56,28 @@ begin
   inherited;
 end;
 
-procedure TCEDDemangler.init;
+procedure TCEDDemangler.procTerminate(sender: TObject);
 begin
-  if assigned(fProc) and fProc.Running then
-    exit;
-  fProc.free;
-  fProc := TCEProcess.create(nil);
-  fProc.Executable:= exeFullName('ddemangle' + exeExt);
-  fProc.Options:= [poUsePipes];
-  fProc.OnReadData:=@procOutput;
-  fProc.ShowWindow:= swoHIDE;
-  fProc.execute;
-  fActive := true;
+  fActive := false;
 end;
 
 procedure TCEDDemangler.demangle(const value: string);
 var
-  i: integer = 0;
+  nb: integer;
 begin
-  init;
-  fDone := false;
   if value.isNotEmpty then
     fProc.Input.Write(value[1], value.length);
   fProc.Input.WriteByte(10);
-  while not fDone do
+  while true do
   begin
-    Application.ProcessMessages;
-    i += 1;
-    if i = high(integer) then
-      i := 0;
+    nb := fProc.NumBytesAvailable;
+    if nb <> 0 then
+      break;
   end;
-end;
-
-procedure TCEDDemangler.procOutput(sender: TObject);
-begin
+  fProc.fillOutputStack;
   fProc.getFullLines(fOut);
   if fOut.Count <> 0 then
     fList.Add(fOut[0]);
-  fDone := true;
 end;
 
 function demangle(const value: string): string;

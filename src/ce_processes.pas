@@ -34,6 +34,7 @@ type
     fOutputStack: TMemoryStream;
     fTerminateChecker: TTimer;
     fDoneTerminated: boolean;
+    fHasRead: boolean;
     procedure checkTerminated(sender: TObject);
     procedure setOnTerminate(value: TNotifyEvent);
     procedure setOnReadData(value: TNotifyEvent);
@@ -53,6 +54,8 @@ type
     procedure getFullLines(list: TStrings; consume: boolean = true);
     // access to a flexible copy of TProcess.Output
     property OutputStack: TMemoryStream read fOutputStack;
+    // indicates if an output buffer is read
+    property hasRead: boolean read fHasRead;
   end;
 
   {
@@ -111,6 +114,7 @@ end;
 
 procedure TCEProcess.Execute;
 begin
+  fHasRead := false;
   fOutputStack.Clear;
   fDoneTerminated := false;
   TAsyncProcess(self).OnReadData := @internalDoOnReadData;
@@ -184,6 +188,7 @@ end;
 
 procedure TCEProcess.internalDoOnReadData(sender: TObject);
 begin
+  fHasRead := true;
   fillOutputStack;
   if fRealOnReadData <> nil then
     fRealOnReadData(self);
@@ -191,6 +196,7 @@ end;
 
 procedure TCEProcess.internalDoOnTerminate(sender: TObject);
 begin
+  fHasRead := false;
   fTerminateChecker.Enabled := false;
   if fDoneTerminated then exit;
   fDoneTerminated := true;
