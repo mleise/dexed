@@ -1,9 +1,9 @@
 module halstead;
 
 import
-    std.algorithm.iteration, std.conv, std.json, std.meta;
+    std.algorithm, std.conv, std.json, std.meta;
 import
-    std.stdio, std.range: iota;
+    std.stdio, std.ascii, std.digest.crc, std.range: iota;
 import
     dparse.ast, dparse.lexer, dparse.parser, dparse.rollback_allocator;
 import
@@ -82,6 +82,16 @@ private final class HalsteadMetric: ASTVisitor
         }
     }
 
+    void addOperandFromToken(const ref Token tk)
+    {
+        if (isLiteral(tk.type))
+        {
+            alias immutHexStr = toHexString!(Order.increasing, LetterCase.upper);
+            ++operands["literal" ~ immutHexStr(tk.text.crc32Of)];
+        }
+        else ++operands[tk.text];
+    }
+
     void pushExprFlags(bool leftFlag = false, bool rightFlag = false)
     {
         binExprFlag.length += 1;
@@ -107,7 +117,6 @@ private final class HalsteadMetric: ASTVisitor
 
     void serialize()
     {
-        import std.stdio: write;
         JSONValue js;
         js["functions"] = fs;
         js.toString.write;
@@ -151,7 +160,6 @@ private final class HalsteadMetric: ASTVisitor
 
         version(unittest)
         {
-            import std.stdio: writeln;
             writeln(functions[$-1]);
             writeln("\toperators: ",operators);
             writeln("\toperands : ",operands);
@@ -164,15 +172,7 @@ private final class HalsteadMetric: ASTVisitor
     {
         ta.accept(this);
         if (ta.templateSingleArgument)
-        {
-            if (!isLiteral(ta.templateSingleArgument.token.type))
-                ++operands[ta.templateSingleArgument.token.text];
-            else
-            {
-                import std.digest.crc: crc32Of, toHexString;
-                ++operands["literal" ~ ta.templateSingleArgument.token.text.crc32Of.toHexString.idup];
-            }
-        }
+            addOperandFromToken(ta.templateSingleArgument.token);
     }
 
     override void visit(const(FunctionCallExpression) expr)
@@ -184,7 +184,7 @@ private final class HalsteadMetric: ASTVisitor
         if (expr.templateArguments)
         {
             if (expr.templateArguments.templateSingleArgument)
-                ++operands[expr.templateArguments.templateSingleArgument.token.text];
+                addOperandFromToken(expr.templateArguments.templateSingleArgument.token);
         }
 
         expr.accept(this);
@@ -256,11 +256,7 @@ private final class HalsteadMetric: ASTVisitor
                 ++operands[primary.identifierOrTemplateInstance.identifier.text];
             }
         }
-        else if (primary.primary.type.isLiteral)
-        {
-            import std.digest.crc: crc32Of, toHexString;
-            ++operands["literal" ~ primary.primary.text.crc32Of.toHexString.idup];
-        }
+        else addOperandFromToken(primary.primary);
         primary.accept(this);
     }
 
@@ -295,6 +291,39 @@ private final class HalsteadMetric: ASTVisitor
             ++operators[str(expr.prefix.type)];
         if (expr.suffix.type)
             ++operators[str(expr.suffix.type)];
+    }
+    override void visit(const(AsmInstruction) ai)
+    {
+        if (ai.identifierOrIntegerOrOpcode != tok!"")
+        {
+            ++operators[ai.identifierOrIntegerOrOpcode.text];
+        }
+        ai.accept(this);
+    }
+
+    override void visit(const(Register) reg)
+    {
+        if (reg.identifier != tok!"")
+        {
+            ++operands[reg.identifier.text];
+        }
+        if (reg.hasIntegerLiteral)
+        {
+            addOperandFromToken(reg.intLiteral);
+        }
+        reg.accept(this);
+    }
+
+    override void visit(const(AsmPrimaryExp) ape)
+    {
+        if (ape.token != tok!"")
+            addOperandFromToken(ape.token);
+        if (ape.identifierChain)
+            ape.identifierChain.identifiers
+            .filter!(a => !a.text.among("dword","ptr"))
+            .each!(a => addOperandFromToken(a));
+
+        ape.accept(this);
     }
 
     override void visit(const(IndexExpression) expr)
@@ -356,11 +385,6 @@ private final class HalsteadMetric: ASTVisitor
             ++operators["then"];
         if (st.elseStatement)
             ++operators["else"];
-    }
-
-    override void visit(const(DeclarationOrStatement) st)
-    {
-        st.accept(this);
     }
 
     override void visit(const(WhileStatement) st)
@@ -1211,7 +1235,6 @@ unittest
 
 unittest
 {
-    //TODO: handle iasm
     Function r =
     q{
         void foo()
@@ -1219,7 +1242,60 @@ unittest
             asm{xor EAX,ECX;}
         }
     }.test;
-    //assert(r.operandsKinds == 2);
-    //assert(r.operatorsKinds == 1);
+    assert(r.operandsKinds == 2);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    // needs https://github.com/Hackerpilot/libdparse/pull/124
+    Function r =
+    q{
+        void foo()
+        {
+            asm{mov EAX, SS:CL;}
+        }
+    }.test;
+    //assert(r.operandsKinds == 3);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            asm{mov EAX, a.b.c;}
+        }
+    }.test;
+    assert(r.operandsKinds == 4);
+    assert(r.operatorsKinds == 1);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            asm{imul EAX, dword [EBP + EBX * 4 + 0x0FFFFFFD4];}
+        }
+    }.test;
+    assert(r.operandsKinds == 5);
+    assert(r.operatorsKinds == 3);
+}
+
+unittest
+{
+    Function r =
+    q{
+        void foo()
+        {
+            asm{imul EAX, ECX, dword[ESP + 8];}
+        }
+    }.test;
+    assert(r.operandsKinds == 4);
+    assert(r.operatorsKinds == 2);
 }
 
