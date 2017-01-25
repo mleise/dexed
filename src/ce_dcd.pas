@@ -10,7 +10,7 @@ uses
   windows,
   {$ENDIF}
   ce_common, ce_writableComponent, ce_interfaces, ce_observer, ce_synmemo,
-  ce_stringrange;
+  ce_stringrange, ce_projutils;
 
 type
 
@@ -202,6 +202,9 @@ begin
   //
   folds := TStringList.Create;
   try
+    fold := ce_projutils.projectSourcePath(project);
+    if fold.dirExists and (folds.IndexOf(fold) = -1) then
+      folds.Add(fold);
   	for i:= 0 to fProj.sourcesCount-1 do
     begin
       fold := fProj.sourceAbsolute(i).extractFilePath;

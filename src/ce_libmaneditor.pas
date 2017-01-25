@@ -9,8 +9,8 @@ uses
   Menus, ComCtrls, Buttons, LazFileUtils, fphttpclient, StdCtrls,
   fpjson, jsonparser,
   ce_widget, ce_interfaces, ce_ceproject, ce_dmdwrap, ce_common, ce_dialogs,
-  ce_sharedres, process, ce_dubproject, ce_observer, ce_dlang, ce_libman,
-  ce_projutils, ce_dsgncontrols, ce_stringrange;
+  ce_sharedres, process, ce_dubproject, ce_observer, ce_libman,
+  ce_projutils, ce_dsgncontrols;
 
 type
 
@@ -63,12 +63,10 @@ type
     procedure btnMoveUpClick(Sender: TObject);
     procedure btnMoveDownClick(Sender: TObject);
     procedure ListEdited(Sender: TObject; Item: TListItem; var value: string);
-    procedure ListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean
-      );
+    procedure ListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
   private
     fProj: ICECommonProject;
     fFreeProj: ICECommonProject;
-    fModStart: boolean;
     procedure updateButtonsState;
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -78,8 +76,6 @@ type
     procedure projCompiled(project: ICECommonProject; success: boolean);
     function  itemForRow(row: TListItem): TLibraryItem;
     procedure RowToLibrary(row: TListItem; added: boolean = false);
-    function sourceRoot(project: ICECommonProject): string;
-    procedure lexFindToken(const token: PLexToken; out stop: boolean);
     //
     procedure dataToGrid;
   protected
@@ -528,7 +524,7 @@ begin
           row.Data := LibMan.libraries.Add;
         row.Caption:= nme;
         row.SubItems.Clear;
-        nme := sourceRoot(prj as ICECommonProject);
+        nme := projectSourcePath(prj as ICECommonProject);
         row.SubItems.Add(nme);
         row.SubItems.Add(nme);
         row.SubItems.Add(prj.filename);
@@ -562,7 +558,7 @@ begin
       row.Caption := nme;
       row.SubItems.Clear;
       row.SubItems.Add(prj.outputFilename);
-      row.SubItems.Add(sourceRoot(prj as ICECommonProject));
+      row.SubItems.Add(projectSourcePath(prj as ICECommonProject));
       row.SubItems.Add(prj.filename);
       row.SubItems.Add(enableStr[true]);
       row.Selected:=true;
@@ -668,7 +664,7 @@ begin
   //
   str := TStringList.Create;
   try
-    root := sourceRoot(fProj);
+    root := projectSourcePath(fProj);
     if root.isEmpty then
     begin
       dlgOkInfo('the static library can not be registered because its source files have no common folder');
@@ -865,116 +861,6 @@ begin
     LibMan.updateCrossDependencies
   else
     Libman.updateAfterAddition(itm);
-end;
-
-function TCELibManEditorWidget.sourceRoot(project: ICECommonProject): string;
-var
-  i, j: integer;
-  mnme: string;
-  path: string;
-  base: string;
-  fldn: array of string;
-  lst: TStringList;
-  srcc: TStringList;
-  toks: TLexTokenList;
-  rng: TStringRange = (ptr: nil; pos: 0; len: 0);
-  sym: boolean;
-begin
-
-  // 1 source, same folder
-  if project.sourcesCount = 1 then
-  begin
-    base := project.basePath;
-    path := project.sourceAbsolute(0);
-    if path.extractFilePath = base then
-      exit(base);
-  end;
-
-  lst := TStringList.Create;
-  srcc := TStringList.Create;
-  toks := TLexTokenList.Create;
-  try
-    // get module name and store the parent.parent.parent... dir
-    for i := 0 to project.sourcesCount-1 do
-    begin
-      sym := true;
-      path := project.sourceAbsolute(i);
-      if not hasDlangSyntax(path.extractFileExt) then
-        continue;
-      fModStart := false;
-      srcc.LoadFromFile(path);
-      lex(srcc.Text, toks, @lexFindToken, [lxoNoComments]);
-      mnme := getModuleName(toks);
-      if path.extractFileName.stripFileExt = 'package' then
-        mnme := mnme + '.p';
-      toks.Clear;
-      setLength(fldn, 0);
-      rng.init(mnme);
-      while true do
-      begin
-        setLength(fldn, length(fldn) + 1);
-        fldn[high(fldn)] := rng.takeUntil(['.', #0]).yield;
-        if rng.empty then
-          break
-        else
-          rng.popFront;
-      end;
-      for j:= high(fldn)-1 downto 0 do
-      begin
-        path := path.extractFileDir;
-        if path.extractFileName <> fldn[j] then
-        begin
-          sym := false;
-          break;
-        end
-      end;
-      if sym then
-      begin
-        path := path.extractFileDir;
-        lst.Add(path);
-      end;
-    end;
-    deleteDups(lst);
-    if project.sourcesCount = 0 then
-      result := ''
-    else
-    begin
-      result := lst[0];
-      if FilenameIsAbsolute(result) then
-        result := expandFilenameEx(GetCurrentDir, result);
-    end;
-    if ((project.sourcesCount > 1) and (lst.Count > 1))
-      or (not sym) then
-    begin
-      lst.Clear;
-      for j := 0 to project.sourcesCount-1 do
-      begin
-        path := project.sourceAbsolute(j);
-        if hasDlangSyntax(path.extractFileExt) then
-          lst.Add(path);
-      end;
-      result := commonFolder(lst);
-      result := result.extractFileDir;
-    end;
-  finally
-    srcc.Free;
-    lst.Free;
-    toks.Free;
-  end;
-end;
-
-procedure TCELibManEditorWidget.lexFindToken(const token: PLexToken; out stop: boolean);
-begin
-  if (token^.kind = ltkKeyword) and (token^.data = 'module') then
-  begin
-    fModStart := true;
-    exit;
-  end;
-  if fModStart and (token^.kind = ltkSymbol) and (token^.data = ';') then
-  begin
-    stop := true;
-    fModStart := false;
-  end;
 end;
 
 end.
