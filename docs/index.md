@@ -39,6 +39,7 @@ _Full description of Coedit options. May redirect to a specific widget page._
 * [Code metrics](options_code_metrics)
 * [Compiler paths](options_compilers_paths)
 * [DUB build](options_dub_build)
+* [Editor pages](options_editor_pages)
 * [Messages](widgets_messages)
 * [Mini explorer](widgets_mini_explorer)
 * [Runnable modules](features_runnables)

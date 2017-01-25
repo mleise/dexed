@@ -2,6 +2,8 @@
 title: Widgets - application options
 ---
 
+#### Application
+
 {% include xstyle.css %}
 
 The page exposes unsorted options. In the future some of them might be moved to their own category.
