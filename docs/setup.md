@@ -3,6 +3,7 @@ title: Setup Coedit
 ---
 
 There are four ways to get the program:
+
 * download and run the setup program build for each release.
 * download and extract the binaries build for each release.
 * [build](build) the program from the sources.
@@ -56,5 +57,5 @@ Only the _x86-64_ _rpm_ is available (Fedora, openSuse, ...). After the installa
 
 ### First steps
 
-- verify the [compilers paths](widgets_compiler_paths).
+- verify the [compilers paths](widgets_compilers_paths).
 - check the information [about the tools](widgets_about).
