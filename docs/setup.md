@@ -57,5 +57,5 @@ Only the _x86-64_ _rpm_ is available (Fedora, openSuse, ...). After the installa
 
 ### First steps
 
-- verify the [compilers paths](widgets_compilers_paths).
+- verify the [compilers paths](options_compilers_paths).
 - check the information [about the tools](widgets_about).
