@@ -35,6 +35,7 @@ _Description of each entry in the main menu. May redirect to a specific widget p
 
 _Full description of Coedit options. May redirect to a specific widget page._
 
+* [Application](options_application)
 * [Code metrics](options_code_metrics)
 * [Compiler paths](options_compilers_paths)
 * [DUB build](options_dub_build)
