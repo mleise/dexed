@@ -345,7 +345,7 @@ begin
   if propvalue.value <> shc.data then
   begin
     propvalue.value := shc.data;
-    propedit.Update;
+    propedit.BuildPropertyList;
   end;
 end;
 
