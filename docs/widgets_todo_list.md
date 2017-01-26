@@ -3,10 +3,9 @@ title: Widgets - Todo list
 ---
 
 {% include xstyle.css %}
+{% include anchors %}
 
 ### Todo list
-
-{% include anchors %}
 
 #### Description
 
