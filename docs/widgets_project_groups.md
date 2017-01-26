@@ -17,7 +17,7 @@ Even if a group would not be used to build, for example with DUB since it manage
 
 The actions operated on the group are available from the **Projects group** menu. The widget is only used to modify the items.
 
-![](img/widgets_projects_groups)
+![](img/widgets_projects_groups.png)
 
 The groups don't affect the workflow and the feature can be totally ignored to preserve the way CE worked in version 1 and 2. 
 A project is not part of the group until it's explicitly added. The project that has this independent status is called the _Free Standing Project_ (FSP).
