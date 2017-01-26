@@ -29,8 +29,8 @@ The FSP is actually a project, as it got handled in the previous versions.
 - <img src="{%include icurl%}file/document_delete.png" class="tlbric"/>: Removes the select project from the group.
 - <img src="{%include icurl%}arrow/arrow_up.png" class="tlbric"/>: Moves the selected project to the top. This modifies the order of construction.
 - <img src="{%include icurl%}arrow/arrow_down.png" class="tlbric"/>: Moves the selected project to the bottom. This modifies the order of construction.
-- <img src="{%include icurl%}arrow/arrow_divide.png" class="tlbric"/>: When the last icon indicates this state and if the group is build using the wait points than this project is build in a new parallel process.
-- <img src="{%include icurl%}arrow/arrow_join.png" class="tlbric"/>: When the last icon indicates this state and if the group is build using the wait points than this project is not build until the previous project are build. A wait point is often used for the last item since the binaries produced by the other projects have to be linked in.
+- <img src="{%include icurl%}arrow/arrow_divide.png" class="tlbric"/>: When the last icon indicates this state and if the group is build using the wait points then this project is build in a new parallel process. An async point is often used for the static libraries.
+- <img src="{%include icurl%}arrow/arrow_join.png" class="tlbric"/>: When the last icon indicates this state and if the group is build using the wait points then this project is not build until the previous project are build. A wait point is often used for the last item since the binaries produced by the other projects have to be linked in.
 
 The field at the bottom indicates the status of the FSP.
 
