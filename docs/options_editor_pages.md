@@ -4,11 +4,11 @@ title: Options - DUB build
 
 #### Editor pages
 
-This category exposes the options of the page control used to host the code editors.
+This category exposes the options of the page control that hosts the code editors.
 
 ![](img/options_editor_pages.png)
 
-- **detectModuleName**: Defines what will be displyaed in the tabs. If sets then a module is lexed in order to find its [module declaration](https://dlang.org/spec/module.html#ModuleDeclaration). Can be deactivated on slowest machines.
+- **detectModuleName**: Defines what will be displayed in the tabs. If set modules are lexed in order to find their [module declaration](https://dlang.org/spec/module.html#ModuleDeclaration). Can be deactivated on slowest machines.
 - **moveLeft**: Sets the shortcut used to move a page to left.
 - **moveRight**: Sets the shortcut used to move a page to right.
 - **nextPage**: Sets the shortcut used to select the next page.

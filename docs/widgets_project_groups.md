@@ -8,8 +8,8 @@ title: Widgets - project groups
 
 #### Description
 
-Project groups ease the way to work with several projects, it's easier to activate a one, recompile it and to go back to another one. 
-A group can include any project whose the format is handled by Coedit.
+Project groups allow to work with several projects. It's easier to activate one, to recompile it and to go back to another one. 
+A group can include any project whose the format is handled by Coedit (Dub JSON, Sub SDL and CE formats).
 
 Another interesting feature is that the groups can be build by a single click, in parallel, sequentially or using wait points which are defined for each item in the group. When working with static libraries, this system allows faster builds.
 
@@ -19,8 +19,8 @@ The actions operated on the group are available from the **Projects group** menu
 
 ![](img/widgets_projects_groups.png)
 
-The groups don't affect the workflow and the feature can be totally ignored to preserve the way CE worked in version 1 and 2. 
-A project is not part of the group until it's explicitly added. The project that has this independent status is called the _Free Standing Project_ (FSP).
+The groups don't affect the workflow and the feature can be totally ignored. 
+A project is not part of the group until it's explicitly included. The project that has this independent status is called the _Free Standing Project_ (FSP).
 The FSP is actually a project, as it got handled in the previous versions.
 
 #### Toolbar
@@ -30,7 +30,7 @@ The FSP is actually a project, as it got handled in the previous versions.
 - <img src="{%include icurl%}arrow/arrow_up.png" class="tlbric"/>: Moves the selected project to the top. This modifies the order of construction.
 - <img src="{%include icurl%}arrow/arrow_down.png" class="tlbric"/>: Moves the selected project to the bottom. This modifies the order of construction.
 - <img src="{%include icurl%}arrow/arrow_divide.png" class="tlbric"/>: When the last icon indicates this state and if the group is build using the wait points then this project is build in a new parallel process. An async point is often used for the static libraries.
-- <img src="{%include icurl%}arrow/arrow_join.png" class="tlbric"/>: When the last icon indicates this state and if the group is build using the wait points then this project is not build until the previous project are build. A wait point is often used for the last item since the binaries produced by the other projects have to be linked in.
+- <img src="{%include icurl%}arrow/arrow_join.png" class="tlbric"/>: When the last icon indicates this state and if the group is build using the wait points then this project is not build until the previous projects are build. A wait point is often used for the last item since the binaries produced by the other projects have to be linked in.
 
 The field at the bottom indicates the status of the FSP.
 
