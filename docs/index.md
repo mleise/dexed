@@ -25,7 +25,7 @@ _General features or concepts that are not wrapped in a widget_
 _Description of each entry in the main menu. May redirect to a specific widget page._
 
 * [File]()
-* [Debugger]()
+* [Debugger](widgets_gdb_commander)
 * [Edit]()
 * [Project](features_projects)
 * [Project groups](widgets_project_groups)

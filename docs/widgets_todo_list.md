@@ -35,7 +35,7 @@ For example
 ```d
 // TODO: something.
 // TODO-cfixes: something to fix.
-// TODO-cfixes-aMrFreeze: something that MrFreezae has to fix.
+// TODO-cfixes-aMrFreeze: something that MrFreeze has to fix.
 // NOTE: a reminder.
 ```
 
