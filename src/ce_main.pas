@@ -27,7 +27,7 @@ type
     property OnMouseWheel;
   end;
 
-  TAsynWait = (awNo, awYes, awCustom);
+  TAsyncWait = (awNo, awYes, awCustom);
 
   TRunnableToFolderCondition = (
     ifInProject,  // runnable src is part of the project
@@ -460,7 +460,7 @@ type
     function closeProj: boolean;
     procedure showProjTitle;
     function  checkProjectLock(message: boolean = true): boolean;
-    procedure compileGroup(async: TAsynWait);
+    procedure compileGroup(async: TAsyncWait);
 
     // mru
     procedure mruChange(Sender: TObject);
@@ -3518,7 +3518,7 @@ end;
 
 // TODO-cprojectsgroup: add a "out of mem" protection in async mode.
 
-procedure TCEMainForm.compileGroup(async: TAsynWait);
+procedure TCEMainForm.compileGroup(async: TAsyncWait);
 var
   i, j: integer;
 begin
@@ -3582,11 +3582,9 @@ end;
 
 procedure TCEMainForm.actProjNewGroupExecute(Sender: TObject);
 begin
-  if fProjectGroup.groupModified then
-  begin
-    if dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel then
+  if fProjectGroup.groupModified and
+    (dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel) then
       exit;
-  end;
   fProjectGroup.closeGroup;
 end;
 {$ENDREGION}
