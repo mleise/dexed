@@ -71,9 +71,13 @@ Note that the action _Run file unittest_ is based on the same internal function 
 
 ![](img/options_runnables.png)
 
-- __alwaysToFolder__: When checked the folder specified in __outputFolder__ is handled, even if the runnable module is not part of the current project.
-- __compiler__: Select the [compiler](options_compilers_paths) used to produce the runnable binary. When GDC or LDC is selected their bridges based on DMD command line interface are used (GDMD and LDMD).
-- __detectLibraries__: When checked the static libraries used by the runnable are detected from the [library manager](widgets_library_manager) by performing import analysis. When unchecked, all the library manager entries are passed and the compiler does the selection.
-- __detectMain__: When checked the `main()` function is detected automatically and the `-main` switch is set accordingly. When not checked `-main` is never passed. This options is useful with the **Run file unittests** action because it allows to test a module that's also a valid program.
-- __outputFolder__: Defines a folder where the runnable binary is output. If the runnable is part of the project this folder is used otherwise __alwaysToFolder__ must also be checked. When the folder is a relative path, it is solved using the runnable module parent directory as root.
-- __staticSwitches__: Defines a list of switches that are always passed to the compiler when a runnable is produced or when a module is tested.
+- **alwaysToFolder**: deprecated, checked meant **outputFolderCondition** set to [ifSaved, ifInProject], and [ifInProject] otherwise.
+- **compiler**: Select the [compiler](options_compilers_paths) used to produce the runnable binary. When GDC or LDC is selected their bridges based on DMD command line interface are used (GDMD and LDMD).
+- **detectLibraries**: When checked the static libraries used by the runnable are detected from the [library manager](widgets_library_manager) by performing import analysis. When unchecked, all the library manager entries are passed and the compiler does the selection.
+- **detectMain**: When checked the `main()` function is detected automatically and the `-main` switch is set accordingly. When not checked `-main` is never passed. This options is useful with the **Run file unittests** action because it allows to test a module that's also a valid program.
+- **outputFolder**: Defines a folder where the runnable binary is output. If the value starts by a drive letter or a directory separator then the folder must exist, otherwise it's considered as a subfolder, relative to the runnable filename, which is created automatically.
+- **outputFolderConditions**: Defines the conditions for which **outputFolder** is handled.
+    - **ifInProject**: The runnable file is part of the current project. For example if **temp/** is in the `.gitignore` and if **outputFolder** is also set to **temp/** then the binary won't appear in the staging area.
+    - **ifSaved**: The runnable file is not in the current project but it's been saved explicitly out of the temp folder that's automatically used by Coedit.
+    - **ifNotSaved**: The runnable file is not part of the project and has never been saved explicitly.
+- **staticSwitches**: Defines a list of switches that are always passed to the compiler when a runnable is produced or when a module is tested.

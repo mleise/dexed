@@ -35,6 +35,8 @@ type
     ifSaved       // runnable src not in project but saved not in temp dir
   );
 
+  TRunnablesToFolderConditions = set of TRunnableToFolderCondition;
+
   TCERunnableOptions = class(TWritableLfmTextComponent)
   private
     fCompiler: DCompiler;
@@ -43,17 +45,19 @@ type
     fOutputFolder: TCEPathname;
     fAlwaysToFolder: boolean;
     fStaticSwitches: TStringList;
+    fToFolderConditions: TRunnablesToFolderConditions;
     procedure setOutputFolder(const value: TCEPathname);
     procedure setStaticSwitches(value: TStringList);
     procedure setCompiler(value: DCompiler);
   protected
     procedure afterLoad; override;
   published
-    property alwaysToFolder: boolean read fAlwaysToFolder write fAlwaysToFolder;
+    property alwaysToFolder: boolean read fAlwaysToFolder write fAlwaysToFolder stored false; deprecated;
     property compiler: DCompiler read fCompiler write setCompiler;
     property detectMain: boolean read fDetectMain write fDetectMain;
     property detectLibraries: boolean read fDetectLibraries write fDetectLibraries;
     property outputFolder: TCEPathname read fOutputFolder write setOutputFolder;
+    property outputFolderConditions: TRunnablesToFolderConditions read fToFolderConditions write fToFolderConditions;
     property staticSwitches: TStringList read fStaticSwitches write setStaticSwitches;
   public
     constructor create(aOwner: TComponent); override;
@@ -629,7 +633,7 @@ begin
     fDetectMain:= src.fDetectMain;
     fDetectLibraries:= src.fDetectLibraries;
     fOutputFolder:= src.fOutputFolder;
-    fAlwaysToFolder:= src.alwaysToFolder;
+    fToFolderConditions:= src.fToFolderConditions;
     fStaticSwitches.assign(src.fStaticSwitches);
   end
   else inherited;
@@ -2475,31 +2479,43 @@ end;
 {$REGION run -------------------------------------------------------------------}
 function TCEMainForm.runnableExename: string;
 var
-  ofr: string;
+  of_yes: string;
+  of_no: string;
 begin
   result := '';
   if fDoc.isNil then
     exit;
 
-  result := fDoc.fileName.stripFileExt + exeExt;
-  if fDoc.isTemporary then
-    exit;
-  ofr := fRunnablesOptions.outputFolder;
-  if ofr.isNotEmpty then
+  of_no := fDoc.fileName.stripFileExt + exeExt;
+  of_yes:= fRunnablesOptions.outputFolder;
+
+  if not FilenameIsAbsolute(of_yes) then
+    of_yes := fDoc.fileName.extractFilePath + of_yes +
+    fDoc.fileName.extractFileName.stripFileExt + exeExt
+  else
+    of_yes := fRunnablesOptions.outputFolder +
+    fDoc.fileName.extractFileName.stripFileExt + exeExt;
+  result := of_no;
+
+  if fRunnablesOptions.outputFolderConditions <> [] then
   begin
-    if not fRunnablesOptions.alwaysToFolder and assigned(fProject)
-      and not fProject.isSource(fDoc.fileName) then
-        exit;
-    if FilenameIsAbsolute(ofr) then
+    if ifNotSaved in fRunnablesOptions.outputFolderConditions then
     begin
-      if ofr.dirExists then
-        result := ofr + fDoc.fileName.extractFileName.stripFileExt + exeExt;
-    end else
+      if fDoc.isTemporary then
+        result := of_yes;
+    end
+    else if ifInProject in fRunnablesOptions.outputFolderConditions then
     begin
-      result := fDoc.fileName.extractFilePath + ofr
-        + fDoc.fileName.extractFileName.stripFileExt + exeExt;
+      if fProject.isSource(fDoc.fileName) then
+        result := of_yes;
+    end
+    else if ifSaved in fRunnablesOptions.outputFolderConditions then
+    begin
+      if not fProject.isSource(fDoc.fileName) and not fDoc.isTemporary then
+        result := of_yes;
     end;
   end;
+
 end;
 
 procedure TCEMainForm.asyncprocOutput(sender: TObject);
