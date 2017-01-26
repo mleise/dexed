@@ -4,6 +4,8 @@ title: index
 
 ### Coedit documentation
 
+![](img/coedit_kde4_thumb.png)
+
 #### First steps
 
 _Install and configure Coedit._
@@ -24,12 +26,10 @@ _General features or concepts that are not wrapped in a widget_
 
 _Description of each entry in the main menu. May redirect to a specific widget page._
 
-* [File]()
+* [File](menu_file)
 * [Debugger](widgets_gdb_commander)
-* [Edit]()
 * [Project](features_projects)
 * [Project groups](widgets_project_groups)
-* [Run]()
 
 #### Options categories
 

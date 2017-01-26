@@ -4,7 +4,7 @@
 
 Coedit is an IDE for the [D programming language](http://dlang.org), its compilers, tools and libraries.
 
-[![](https://github.com/BBasile/CoeditWikiData/raw/master/coedit.win7.33.png)](https://github.com/BBasile/CoeditWikiData/raw/master/coedit.win7.png)
+[![](https://github.com/BBasile/Coedit/raw/master/doc/img/coedit_kde4_thumb.png)](https://github.com/BBasile/Coedit/raw/master/doc/img/coedit_kde4.png)
 
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AQDJVC39PJF7J)
 
@@ -62,16 +62,4 @@ Download the zipped binaries or the zipped setup program for you platform:
 **Build**
 ---
 
-- 2 update 6: The procedure is described in the [**first section of the wiki**](https://github.com/BBasile/Coedit/wiki#detailed-setup-procedure)
-- 3 beta (master): Confers with this [**temporary document**](https://github.com/BBasile/Coedit/wiki/Building-and-using-the-developpement-version)
-
-**GUI preview**
----
-Windows version (Windows 7, x86):
-![Win screen-cap](https://github.com/BBasile/CoeditWikiData/raw/master/coedit.win7.png "Coedit GUI preview")
-
-Linux version (OpenSuse 13.2, KDE, x86_64):
-![Nux screen-cap](https://github.com/BBasile/CoeditWikiData/raw/master/coedit.linux.kde.png "Coedit GUI preview")
-
-Linux version (Mint 17.1, Cinnamon, x86):
-![Nux screen-cap](https://github.com/BBasile/CoeditWikiData/raw/master/coedit.linux.cinnamon.png "Coedit GUI preview")
+The procedure is described in [**this page**](http://bbasile.github.io/Coedit/build.html).
