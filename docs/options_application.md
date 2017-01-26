@@ -15,7 +15,7 @@ The page exposes unsorted options. In the future some of them might be moved to 
 - **autoSaveProjectFiles**: If checked the sources are automatically saved before compilation.
 - **coverModuleTests**: If checked then the coverage by the tests is measured and displayed in the messages after executing the action __File/Run file unittests__.
 - **dcdPort**: Sets the port used by the [completion daemon](feaures_dcd) server. `0` means the default value.
-- **dscanUnuttests**: If checked the content of the `unittest` blocks are analyzed when using the action __File/Verify with Dscanner__.
+- **dscanUnittests**: If checked the content of the `unittest` blocks are analyzed when using the action __File/Verify with Dscanner__.
 - **flatLook**: Doesn't draw the buttons shape unless they're hovered by the mouse.
 - **floatingWidgetOnTop**: Keeps the widgets that are not docked on top of the application window.
 - **maxReventDocuments**: Sets how many entries can be stored in __File/Open recent file__.
