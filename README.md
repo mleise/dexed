@@ -4,7 +4,7 @@
 
 Coedit is an IDE for the [D programming language](http://dlang.org), its compilers, tools and libraries.
 
-[![](https://github.com/BBasile/Coedit/raw/master/doc/img/coedit_kde4_thumb.png)](https://github.com/BBasile/Coedit/raw/master/doc/img/coedit_kde4.png)
+[![](http://bbasile.github.io/Coedit/img/coedit_kde4_thumb.png)](http://bbasile.github.io/Coedit/img/coedit_kde4.png)
 
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AQDJVC39PJF7J)
 
