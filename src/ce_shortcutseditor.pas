@@ -6,9 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, Forms, Controls, Menus, Graphics,
-  ExtCtrls, LCLProc, ComCtrls, StdCtrls, Buttons, LCLType, PropEdits, strutils,
-  ce_sharedres, ce_observer, ce_interfaces, ce_common, ce_writableComponent,
-  ce_dialogs, EditBtn;
+  ExtCtrls, LCLProc, ComCtrls, Buttons, LCLType, PropEdits, RTTIGrids,
+  strutils, ce_sharedres, ce_observer, ce_interfaces, ce_common,
+  ce_writableComponent, ce_dialogs, EditBtn;
 
 type
 
@@ -46,29 +46,36 @@ type
     property item[index: Integer]: TShortcutItem read getItem; default;
   end;
 
+  TEditableShortcut = class(TPersistent)
+  public
+    value: TShortCut;
+  published
+    property shortcut: TShortCut read value write value;
+  end;
+
   { TCEShortcutEditor }
 
   TCEShortcutEditor = class(TFrame, ICEEditableOptions)
     btnClear: TSpeedButton;
-    shortcutCatcher: TEdit;
+    btnEdit: TSpeedButton;
     Panel1: TPanel;
     fltItems: TTreeFilterEdit;
     Panel2: TPanel;
-    schrtText: TStaticText;
-    btnActivate: TSpeedButton;
+    propedit: TTIPropertyGrid;
     tree: TTreeView;
-    procedure btnActivateClick(Sender: TObject);
     procedure btnClearClick(Sender: TObject);
+    procedure btnEditClick(Sender: TObject);
     function fltItemsFilterItem(Item: TObject; out Done: Boolean): Boolean;
-    procedure LabeledEdit1KeyDown(Sender: TObject; var Key: Word;Shift: TShiftState);
     procedure shortcutCatcherExit(Sender: TObject);
     procedure shortcutCatcherMouseLeave(Sender: TObject);
+    procedure propeditModified(Sender: TObject);
     procedure treeSelectionChanged(Sender: TObject);
   private
     fObservers: TCEEditableShortCutSubject;
     fShortcuts: TShortCutCollection;
     fBackup: TShortCutCollection;
     fHasChanged: boolean;
+    propvalue: TEditableShortcut;
     //
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
@@ -82,8 +89,7 @@ type
     procedure receiveShortcuts;
     procedure updateEditCtrls;
     procedure sendShortcuts;
-  protected
-    procedure UpdateShowing; override;
+    function anItemIsSelected: boolean;
   public
     constructor create(TheOwner: TComponent); override;
     destructor destroy; override;
@@ -175,25 +181,29 @@ end;
 constructor TCEShortcutEditor.create(TheOwner: TComponent);
 begin
   inherited;
+  propvalue := TEditableShortcut.Create;
   fObservers := TCEEditableShortCutSubject.create;
   fShortcuts := TShortCutCollection.create(self);
   fBackup := TShortCutCollection.create(self);
   AssignPng(btnClear, 'CLEAN');
+  AssignPng(btnEdit, 'KEYBOARD_PENCIL');
   EntitiesConnector.addObserver(self);
+  propedit.TIObject := propvalue;
+  propedit.PropertyEditorHook.AddHandlerModified(@propeditModified);
 end;
 
 destructor TCEShortcutEditor.destroy;
 begin
+  propvalue.Free;
   fObservers.Free;
   inherited;
 end;
 
-procedure TCEShortcutEditor.UpdateShowing;
+function TCEShortcutEditor.anItemIsSelected: boolean;
 begin
-  inherited;
-  if not visible then exit;
-  //
-  AssignPng(btnActivate, 'KEYBOARD_PENCIL');
+  result := true;
+  if tree.Selected.isNil or (tree.Selected.Level = 0) or tree.Selected.Data.isNil then
+    result := false;
 end;
 {$ENDREGION}
 
@@ -247,41 +257,60 @@ end;
 
 procedure TCEShortcutEditor.shortcutCatcherExit(Sender: TObject);
 begin
-  shortcutCatcher.Enabled := false;
   updateEditCtrls;
 end;
 
 procedure TCEShortcutEditor.shortcutCatcherMouseLeave(Sender: TObject);
 begin
-  shortcutCatcher.Enabled := false;
   updateEditCtrls;
 end;
 
-procedure TCEShortcutEditor.btnActivateClick(Sender: TObject);
+procedure TCEShortcutEditor.propeditModified(Sender: TObject);
+var
+  i: integer;
+  sh: TShortCut;
+  sht: string;
+  dup: TShortcutItem = nil;
+const
+  msg = '"%s" is already assigned in the same category by "%s". The new shortcut will be ignored';
 begin
-  if tree.Selected.isNil then exit;
-  if tree.Selected.Level = 0 then exit;
-  if tree.Selected.Data.isNil then exit;
-  //
-  shortcutCatcher.Enabled := not shortcutCatcher.Enabled;
-  if shortcutCatcher.Enabled then
-    shortcutCatcher.SetFocus;
+  if not anItemIsSelected then
+    exit;
+  sh := propvalue.value;
+  sht := shortCutToText(sh);
+  if sht.isEmpty then
+    exit;
+  for i:= 0 to tree.Selected.Parent.Count-1 do
+    if i <> tree.Selected.Index then
+      if TShortcutItem(tree.Selected.Parent.Items[i].Data).data = sh then
+        dup := TShortcutItem(tree.Selected.Parent.Items[i].Data);
+  if dup.isNotNil then
+    dlgOkInfo(format(msg,[ShortCutToText(sh), dup.identifier]))
+  else if TShortcutItem(tree.Selected.Data).data <> sh then
+  begin
+    TShortcutItem(tree.Selected.Data).data := sh;
+    fHasChanged := true;
+  end;
+  updateEditCtrls;
 end;
 
 procedure TCEShortcutEditor.btnClearClick(Sender: TObject);
 begin
-  if tree.Selected.isNil then exit;
-  if tree.Selected.Level = 0 then exit;
-  if tree.Selected.Data.isNil then exit;
-  //
+  if not anItemIsSelected then
+    exit;
   if TShortcutItem(tree.Selected.Data).data <> 0 then
   begin
     TShortcutItem(tree.Selected.Data).data := 0;
     fHasChanged := true;
   end;
-  //
-  shortcutCatcher.Enabled := false;
   updateEditCtrls;
+end;
+
+procedure TCEShortcutEditor.btnEditClick(Sender: TObject);
+begin
+  if not anItemIsSelected then
+    exit;
+  propedit.Rows[0].Editor.Edit;
 end;
 
 function TCEShortcutEditor.fltItemsFilterItem(Item: TObject; out Done: Boolean): Boolean;
@@ -306,56 +335,18 @@ begin
   end;
 end;
 
-procedure TCEShortcutEditor.LabeledEdit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  i: integer;
-  sh: TShortCut;
-  sht: string;
-  dup: TShortcutItem = nil;
-const
-  msg = '"%s" is already assigned in the same category by "%s". The new shortcut will be ignored';
-begin
-  if tree.Selected.isNil then exit;
-  if tree.Selected.Level = 0 then exit;
-  if tree.Selected.Data.isNil then exit;
-  //
-  if Key = VK_RETURN then
-    shortcutCatcher.Enabled := false
-  else
-  begin
-    sh := Shortcut(Key, Shift);
-    sht := shortCutToText(sh);
-    if sht.isEmpty then
-      exit;
-    for i:= 0 to tree.Selected.Parent.Count-1 do
-      if i <> tree.Selected.Index then
-        if TShortcutItem(tree.Selected.Parent.Items[i].Data).data = sh then
-          dup := TShortcutItem(tree.Selected.Parent.Items[i].Data);
-    if dup.isNotNil then
-      dlgOkInfo(format(msg,[ShortCutToText(sh), dup.identifier]))
-    else if TShortcutItem(tree.Selected.Data).data <> sh then
-    begin
-      TShortcutItem(tree.Selected.Data).data := sh;
-      fHasChanged := true;
-    end;
-  end;
-  //
-  updateEditCtrls;
-end;
-
 procedure TCEShortcutEditor.updateEditCtrls;
+var
+  shc: TShortcutItem;
 begin
-  schrtText.Caption := '';
-  shortcutCatcher.TextHint := '(Enter shortcut)';
-  //
-  if tree.Selected.isNil then exit;
-  if tree.Selected.Level = 0 then exit;
-  if tree.Selected.Data.isNil then exit;
-  //
-  schrtText.Caption := TShortcutItem(tree.Selected.Data).combination;
-  shortcutCatcher.Text := '';
-  if schrtText.Caption <> '' then
-    shortcutCatcher.TextHint := '(' + schrtText.Caption + ')';
+  if not anItemIsSelected then
+    exit;
+  shc := TShortcutItem(tree.Selected.Data);
+  if propvalue.value <> shc.data then
+  begin
+    propvalue.value := shc.data;
+    propedit.Update;
+  end;
 end;
 
 function TCEShortcutEditor.findCategory(const aName: string; aData: Pointer): TTreeNode;

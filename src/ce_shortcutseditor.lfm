@@ -62,53 +62,41 @@ object CEShortcutEditor: TCEShortcutEditor
       ClientHeight = 26
       ClientWidth = 420
       TabOrder = 2
-      object schrtText: TStaticText
-        Left = 0
-        Height = 22
-        Top = 2
-        Width = 247
-        Align = alClient
-        Alignment = taCenter
-        BorderSpacing.Top = 2
-        BorderSpacing.Bottom = 2
-        BorderStyle = sbsSunken
-        TabOrder = 0
-      end
-      object shortcutCatcher: TEdit
-        Left = 299
-        Height = 22
-        Hint = 'type a key combination while active'
-        Top = 2
-        Width = 120
-        Align = alRight
-        BorderSpacing.Top = 1
-        BorderSpacing.Bottom = 1
-        BorderSpacing.Around = 1
-        Enabled = False
-        OnExit = shortcutCatcherExit
-        OnKeyDown = LabeledEdit1KeyDown
-        OnMouseLeave = shortcutCatcherMouseLeave
-        TabOrder = 1
-      end
-      object btnActivate: TSpeedButton
-        Left = 274
-        Height = 22
-        Hint = 'enable shortcut capture'
-        Top = 2
-        Width = 23
-        Align = alRight
-        BorderSpacing.Around = 2
-        OnClick = btnActivateClick
-      end
       object btnClear: TSpeedButton
-        Left = 249
+        Left = 2
         Height = 22
         Hint = 'clear shortcut'
         Top = 2
         Width = 23
-        Align = alRight
+        Align = alLeft
         BorderSpacing.Around = 2
+        Flat = True
         OnClick = btnClearClick
+      end
+      object propedit: TTIPropertyGrid
+        Left = 52
+        Height = 26
+        Top = 0
+        Width = 368
+        Align = alClient
+        CheckboxForBoolean = False
+        DefaultValueFont.Color = clWindowText
+        Filter = [tkInteger, tkChar, tkEnumeration, tkFloat, tkSet, tkMethod, tkSString, tkLString, tkAString, tkWString, tkVariant, tkArray, tkRecord, tkInterface, tkClass, tkObject, tkWChar, tkBool, tkInt64, tkQWord, tkDynArray, tkInterfaceRaw, tkProcVar, tkUString, tkUChar, tkHelper, tkFile, tkClassRef, tkPointer]
+        Indent = 10
+        NameFont.Color = clWindowText
+        OnModified = propeditModified
+        ValueFont.Color = clMaroon
+      end
+      object btnEdit: TSpeedButton
+        Left = 27
+        Height = 22
+        Hint = 'edit selected shortcut'
+        Top = 2
+        Width = 23
+        Align = alLeft
+        BorderSpacing.Around = 2
+        Flat = True
+        OnClick = btnEditClick
       end
     end
   end
