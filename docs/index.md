@@ -27,8 +27,8 @@ _Description of each entry in the main menu. May redirect to a specific widget p
 * [File]()
 * [Debugger]()
 * [Edit]()
-* [Project]()
-* [Project groups]()
+* [Project](features_projects)
+* [Project groups](widgets_project_groups)
 * [Run]()
 
 #### Options categories

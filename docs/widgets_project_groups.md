@@ -36,3 +36,16 @@ The field at the bottom indicates the status of the FSP.
 
 - <img src="{%include icurl%}other/pencil.png" class="tlbric"/>: Activates the FSP.
 - <img src="{%include icurl%}file/document_add.png" class="tlbric"/>: Adds the FSP to the group.
+
+#### Menu reference
+
+- **Activate the free standing project**: Puts the focus on the FSP.
+- **New projects group**: Closes the current group and start an empty one.
+- **Open projects group...**: Proposes to open a group from an open dialog.
+- **Open recent projects group**: Displays a list of the most recently opened groups.
+- **Close projects group**: Same as __New projects group__. A group is always opened, even if empty.
+- **Saves projects group**: Writes modification to the disk.
+- **Saves projects group as...**: Proposes to save the group from a save dialog.
+- **Compiles projects group in parallel**: Starts compiling the group. Wait points are ignored and each item is compiled in a new process.
+- **Compiles projects group sequentially**: Starts compiling the group. Wait points are ignored and items are compiled one by one.
+- **Compiles projects group using wait points**: Starts compiling the group. Wait points are respected.
