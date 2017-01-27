@@ -32,7 +32,7 @@ This value and several other options can be changed in the options.
 
 ![](img/options_messages.png)
 
-- ***autoDemangle**: Automatically filters the new messages with [ddemangle](https://github.com/dlang/tools#d-tools). Note that Coedit uses the tool as a daemon so it's perfectly normal that it remains in the task list when the IDE runs.
+- **autoDemangle**: Automatically filters the new messages with [ddemangle](https://github.com/dlang/tools#d-tools). Note that Coedit uses the tool as a daemon so it's perfectly normal that it remains in the task list when the IDE runs.
 - **autoSelect**: Defines if the widget change dynamically the message categories.
 This is a recommended setting because if a run-time error happens, it will be immediately displayed.
 - **colors**: Allows to associate a message kind to a particular color.
