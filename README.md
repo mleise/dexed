@@ -20,7 +20,7 @@ Coedit is an IDE for the [D programming language](http://dlang.org), its compile
 - todo list based on the _todo comments_ located in a project or in the current source.
 - user-defined tools powered by a string interpolation system.
 - full [D Completion Daemon](https://github.com/Hackerpilot/DCD) integration (completion, hints, call tips, jump to symbol declaration).
-- mini file browser, dfmt interface, search & replace, [discover more in the manual](http://bbasile.github.io/).
+- mini file browser, dfmt interface, search & replace, [discover more in the manual](http://bbasile.github.io/Coedit/).
 
 **Project information**
 ---
