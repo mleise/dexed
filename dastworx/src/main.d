@@ -40,7 +40,7 @@ void main(string[] args)
         // even when files are passed, the std input has to be closed by the IDE
         foreach(ref buffer; stdin.byChunk(4096))
             source.put(buffer);
-        if (!source.data.length)
+        if (!source.data.length && args.length > 1)
         {
             import std.file: exists;
             files = args[1].splitter(pathSeparator).filter!exists.array;
@@ -82,7 +82,8 @@ void handleSymListOption()
 void handleTodosOption()
 {
     mixin(logCall);
-    getTodos(files);
+    if (files.length)
+        getTodos(files);
 }
 
 /// Handles the "-i" option: create the import list in the output
