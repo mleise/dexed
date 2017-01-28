@@ -138,6 +138,7 @@ begin
   case index of
     0: exit(fActOpenFile);
     1: exit(fActSelConf);
+    2: exit(fActBuildConf);
     else exit(nil);
   end;
 end;
