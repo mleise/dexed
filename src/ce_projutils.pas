@@ -180,8 +180,20 @@ begin
   if project.getFormat = pfDUB then
   begin
     pdb := TCEDubProject(project.getProject);
-    if pdb.json.findArray('sourcePath', jsn) and (jsn.Count = 1) then
-      exit(project.filename.extractFilePath + jsn.Strings[0]);
+    if pdb.json.findArray('sourcePath', jsn) then
+    begin
+      if (jsn.Count = 1) then
+        exit(project.filename.extractFilePath + jsn.Strings[0]);
+    end
+    else
+    begin
+      result := project.filename.extractFilePath + 'src';
+      if result.dirExists then
+        exit;
+      result := project.filename.extractFilePath + 'source';
+      if result.dirExists then
+        exit;
+    end;
   end;
 
   lst := TStringList.Create;
@@ -199,9 +211,11 @@ begin
       srcc.LoadFromFile(path);
       lex(srcc.Text, toks, @clbck.lexFindToken, [lxoNoComments]);
       mnme := getModuleName(toks);
+      toks.Clear;
+      if mnme.isEmpty then
+        continue;
       if path.extractFileName.stripFileExt = 'package' then
         mnme := mnme + '.p';
-      toks.Clear;
       setLength(fldn, 0);
       rng.init(mnme);
       while true do
