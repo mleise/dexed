@@ -29,6 +29,7 @@ Current file:
 
 - **`<CFF>`**: also _`<CurrentFileFile>`_. Expanded to the current file filename.
 - **`<CFP>`**: also _`<CurrentFilePath>`_. Expanded to the current file path.
+- **`<CFR>`**: also _`<CurrentFileRunnable>`_. Expanded to the runnable produced for the current file. The [OutputFolder](features_runnables) option is not handled.
 - **`<CI>`**: also _`<CurrentIdentifier>`_. Expanded to the identifier located at the caret position.
 - **`<CL>`**: also _`<CurrentLine>`_. Expanded to the current line of code.
 - **`<CS>`**: also _`<CurrentSelection>`_. Expanded to the current selection.
