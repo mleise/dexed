@@ -479,6 +479,7 @@ type
     procedure killGdb;
     procedure storeObserversBreakpoints;
     procedure updateDebugeeOptionsEditor;
+    procedure synchronizeBreakpointsFromDoc;
     // GDB output processors
     procedure gdboutQuiet(sender: TObject);
     procedure gdboutJsonize(sender: TObject);
@@ -730,8 +731,7 @@ end;
 
 destructor TPersistentBreakPoints.destroy;
 begin
-  if fItems.Count > 0 then
-    saveToFile(getCoeditDocPath + bpFname);
+  saveToFile(getCoeditDocPath + bpFname);
   fItems.Free;
   inherited;
 end;
@@ -1362,6 +1362,7 @@ procedure TCEGdbWidget.docFocused(document: TCESynMemo);
 begin
   fDoc := document;
   updateDebugeeOptionsEditor;
+  synchronizeBreakpointsFromDoc;
 end;
 
 procedure TCEGdbWidget.docChanged(document: TCESynMemo);
@@ -1760,6 +1761,46 @@ begin
   end;
   opt := fDebugeeOptions.projectByFile[nme];
   dbgeeOptsEd.TIObject := opt;
+end;
+
+procedure TCEGdbWidget.synchronizeBreakpointsFromDoc;
+var
+  i: integer;
+  c: integer;
+  j: integer;
+  l: integer;
+  k: TBreakPointKind;
+  s: string;
+  b: boolean;
+  f: ICEDebugObserver;
+begin
+  if fDoc.isNil then
+    exit;
+  f := fDoc as ICEDebugObserver;
+  if not assigned(f) then
+    exit;
+  c :=  f.debugQueryBpCount;
+  if c <> 0 then
+  begin
+    for i := fBreakPoints.count-1 downto 0 do
+    begin
+      b := false;
+      if not (fBreakPoints[i].filename = fDoc.fileName) then
+        continue;
+      for j := 0 to c-1 do
+      begin
+        f.debugQueryBreakPoint(j, s, l, k);
+        if l = fBreakPoints[i].line then
+        begin
+          b := true;
+          break;
+        end;
+      end;
+      if not b then
+        fBreakPoints.items.Delete(i);
+    end;
+  end
+  else fBreakPoints.clearFile(fDoc.fileName);
 end;
 {$ENDREGION}
 
