@@ -314,6 +314,8 @@ type
     procedure setProjectIndex(index: Integer);
     // indicates wether a project is marked for async compilation
     function projectIsAsync(index: integer): boolean;
+    // indicates the project index after reloading
+    function reloadedProjectIndex: integer;
   end;
 
 

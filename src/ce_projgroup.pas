@@ -53,6 +53,7 @@ type
     fModified: boolean;
     fOnChanged: TNotifyEvent;
     fBasePath: string;
+    fSavedIndex: integer;
     fFreeStanding: ICECommonProject;
     procedure setItems(value: TCollection);
     function getItem(index: integer): TProjectGroupItem;
@@ -87,6 +88,7 @@ type
     procedure setProjectIndex(value: Integer);
     function projectIsAsync(ix: integer): boolean;
     function projectModified(ix: integer): boolean;
+    function reloadedProjectIndex: integer;
     //
     function addItem(const fname: string): TProjectGroupItem;
     property item[ix: integer]: TProjectGroupItem read getItem; default;
@@ -162,6 +164,7 @@ begin
   fItems.FPOAttachObserver(self);
   EntitiesConnector.addSingleService(self);
   EntitiesConnector.addObserver(self);
+  fSavedIndex := -1;
 end;
 
 destructor TProjectGroup.destroy;
@@ -308,6 +311,11 @@ begin
     end;
 end;
 
+function TProjectGroup.reloadedProjectIndex: integer;
+begin
+  exit(fSavedIndex);
+end;
+
 procedure TProjectGroup.afterLoad;
 var
   p: TProjectGroupItem;
@@ -316,6 +324,7 @@ var
   f: string = '';
 begin
   inherited;
+  fSavedIndex := fProjectIndex;
   for i:= projectCount-1 downto 0 do
   begin
     p := item[i];
@@ -344,7 +353,8 @@ end;
 procedure TProjectGroup.afterSave;
 begin
   inherited;
-  fModified:=false;
+  fModified := false;
+  fSavedIndex := fProjectIndex;
 end;
 
 procedure TProjectGroup.addProject(project: ICECommonProject);
@@ -409,6 +419,7 @@ begin
   fFilename:= '';
   fModified:=false;
   fProjectIndex := -1;
+  fSavedIndex := -1;
   doChanged;
 end;
 

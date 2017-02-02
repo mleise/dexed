@@ -948,7 +948,7 @@ begin
   if source = CEMainForm then
   begin
     grp := getProjectGroup;
-    pix := grp.getProjectIndex;
+    pix := grp.reloadedProjectIndex;
     prj := CEMainForm.fFreeProj;
     if assigned(prj) then
       fProject := prj.filename;
