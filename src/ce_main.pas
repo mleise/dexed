@@ -352,6 +352,7 @@ type
     fUpdateCount: NativeInt;
     fProject: ICECommonProject;
     fFreeProj: ICECommonProject;
+    fProjBeforeGroup: ICECommonProject;
     fDubProject: TCEDubProject;
     fNativeProject: TCENativeProject;
     fProjMru: TCEMRUProjectList;
@@ -2069,6 +2070,7 @@ procedure TCEMainForm.projCompiled(project: ICECommonProject; success: boolean);
 var
   runArgs: string = '';
   runprev: boolean = true;
+  groupok: boolean = true;
   i: integer;
 begin
   fProjActionsLock := false;
@@ -2094,22 +2096,30 @@ begin
     fRunProjAfterCompile := false;
     fRunProjAfterCompArg := false;
   end
-  else begin
+  else
+  begin
     fGroupCompilationCnt += 1;
     if (fGroupCompilationCnt = fProjectGroup.projectCount) then
     begin
       for i:= 0 to fProjectGroup.projectCount-1 do
         if not fProjectGroup.getProject(i).compiled then
-        begin
-          fMsgs.message('error, the project group is not fully compiled', nil, amcAll, amkErr);
-          exit;
-        end;
-      fMsgs.message('the project group is successfully compiled', nil, amcAll, amkInf);
+      begin
+        groupok := false;
+        break;
+      end;
+      if not groupok then
+        fMsgs.message('error, the project group is not fully compiled', nil, amcAll, amkErr)
+      else
+        fMsgs.message('the project group is successfully compiled', nil, amcAll, amkInf);
       if fAppliOpts.showBuildDuration then
       begin
         fCompStart := Time - fCompStart;
         fMsgs.message('Group build duration: ' + TimeToStr(fCompStart), nil, amcAll, amkInf);
       end;
+      if assigned(fProjBeforeGroup) then
+        fProjBeforeGroup.activate;
+      fProjBeforeGroup := nil;
+      fIsCompilingGroup := false;
     end;
   end;
 end;
@@ -3542,6 +3552,7 @@ begin
     exit;
   if fProjectGroup.projectCount = 0 then
     exit;
+  fProjBeforeGroup := fProject;
   fGroupCompilationCnt := 0;
   fIsCompilingGroup := true;
   fMsgs.message('start compiling a project group...', nil, amcAll, amkInf);
