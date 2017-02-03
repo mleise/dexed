@@ -1248,7 +1248,6 @@ unittest
 
 unittest
 {
-    // needs https://github.com/Hackerpilot/libdparse/pull/124
     Function r =
     q{
         void foo()
@@ -1256,7 +1255,7 @@ unittest
             asm{mov EAX, SS:CL;}
         }
     }.test;
-    //assert(r.operandsKinds == 3);
+    assert(r.operandsKinds == 3);
     assert(r.operatorsKinds == 1);
 }
 
