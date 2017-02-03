@@ -38,6 +38,7 @@ _Full description of Coedit options. May redirect to a specific widget page._
 * [Application](options_application)
 * [Code metrics](options_code_metrics)
 * [Compiler paths](options_compilers_paths)
+* [Debugger](widgets_gdb_commander)
 * [DUB build](options_dub_build)
 * [Editor pages](options_editor_pages)
 * [Messages](widgets_messages)
