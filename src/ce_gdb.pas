@@ -280,6 +280,7 @@ type
     fShowRawMiOutput: boolean;
     fShortcuts: TCEDebugShortcuts;
     fAsmSyntax: TAsmSyntax;
+    fKeepRedirectedStreams: boolean;
     fStopAllThreadsOnBreak: boolean;
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
@@ -294,6 +295,7 @@ type
     property autoGetThreads: boolean read fAutoGetThreads write fAutoGetThreads;
     property commandsHistory: TStringList read fCommandsHistory write setCommandsHistory;
     property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
+    property keepRedirectedStreams: boolean read fKeepRedirectedStreams write fKeepRedirectedStreams default false;
     property shortcuts: TCEDebugShortcuts read fShortcuts write setShortcuts;
     property showGdbOutput: boolean read fShowGdbOutput write fShowGdbOutput;
     property showRawMiOutput: boolean read fShowRawMiOutput write fShowRawMiOutput;
@@ -480,6 +482,7 @@ type
     procedure storeObserversBreakpoints;
     procedure updateDebugeeOptionsEditor;
     procedure synchronizeBreakpointsFromDoc;
+    procedure deleteRedirectedIO;
     // GDB output processors
     procedure gdboutQuiet(sender: TObject);
     procedure gdboutJsonize(sender: TObject);
@@ -653,6 +656,7 @@ begin
     fIgnoredSignals.Assign(src.fIgnoredSignals);
     fCommandsHistory.Assign(src.fCommandsHistory);
     fShortcuts.assign(src.fShortcuts);
+    fKeepRedirectedStreams := src.fKeepRedirectedStreams;
   end
   else inherited;
 end;
@@ -1329,13 +1333,6 @@ begin
     exit;
   fProj := nil;
   updateDebugeeOptionsEditor;
-  if not fDbgRunnable then
-  begin
-    if fOutputName.fileExists then
-      deleteFile(fOutputName);
-    if fInputName.fileExists then
-      deleteFile(fInputName);
-  end;
 end;
 
 procedure TCEGdbWidget.projFocused(project: ICECommonProject);
@@ -1375,13 +1372,6 @@ begin
     exit;
   fDoc := nil;
   updateDebugeeOptionsEditor;
-  if fDbgRunnable then
-  begin
-    if fOutputName.fileExists then
-      deleteFile(fOutputName);
-    if fInputName.fileExists then
-      deleteFile(fInputName);
-  end;
 end;
 {$ENDREGION}
 
@@ -1802,6 +1792,16 @@ begin
   end
   else fBreakPoints.clearFile(fDoc.fileName);
 end;
+
+procedure TCEGdbWidget.deleteRedirectedIO;
+begin
+  if fOptions.keepRedirectedStreams then
+    exit;
+  if fOutputName.fileExists then
+    deleteFile(fOutputName);
+  if fInputName.fileExists then
+    deleteFile(fInputName);
+end;
 {$ENDREGION}
 
 {$REGION GDB output processors -------------------------------------------------}
@@ -2183,6 +2183,7 @@ begin
         fMsg.message('debugging terminated: ' + reason, nil, amcMisc, amkInf);
       setState(gsNone);
       subjDebugStop(fSubj);
+      deleteRedirectedIO;
     end;
   end;
 
@@ -2537,6 +2538,7 @@ begin
   gdbCommand('kill', @gdboutJsonize);
   subjDebugStop(fSubj);
   setState(gsNone);
+  deleteRedirectedIO;
 end;
 
 procedure TCEGdbWidget.btnWatchClick(Sender: TObject);

@@ -203,9 +203,9 @@ inherited CEGdbWidget: TCEGdbWidget
         Hint = 'edit the command line and the environment of the debuger target'
         Top = 0
         Width = 517
-        ActivePage = TabSheet5
+        ActivePage = TabSheet1
         Align = alTop
-        TabIndex = 2
+        TabIndex = 0
         TabOrder = 3
         object TabSheet1: TTabSheet
           Caption = 'Call stack'
