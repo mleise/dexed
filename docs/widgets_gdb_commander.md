@@ -40,7 +40,7 @@ Note that for now SSE registers are not supported by the inspector.
 
 #### Toolbar
 
-- <img src="{%include icurl%}other/power.png" class="tlbric"/>: Starts debugging. By default the project output is launched. It Should to be compiled with the debug info generation. A context menu at the right allows to debug the [runnable](features_runnables) binary produced for the editor that has the selection.
+- <img src="{%include icurl%}other/power.png" class="tlbric"/>: Starts debugging. By default the project output is launched. It should be compiled with the debug info generation. A context menu at the right allows to debug the [runnable](features_runnables) binary produced for the editor that has the selection.
 - <img src="{%include icurl%}other/stop.png" class="tlbric"/>: Stops the debugging cession.
 - <img src="{%include icurl%}other/play.png" class="tlbric"/>: Resume the debugging cession.
 - <img src="{%include icurl%}other/pause.png" class="tlbric"/>: Pauses the debugging cession.
@@ -56,8 +56,8 @@ Note that for now SSE registers are not supported by the inspector.
 The field at the bottom allows to pass custom commands to GDB.
 A custom command can include a [symbol string](features_symbolic_strings).
 
-You may pass command with the standard CLI syntax, however since GDB is launched with the option that activates the machine interface (MI) the standard commands are not guaranteed to succeed.
-The option _showRawMiOutput__ must be activated in order to get GDB the answer to a custom command in the [messages](widgets_messages).
+You may pass command with the standard CLI syntax, however since GDB is launched with the option that activates the machine interface (MI) the standard commands are not guaranteed to work properly.
+The option _showRawMiOutput__ must be activated in order to get the GDB answer for a custom command in the [messages](widgets_messages).
 
 Learn more about the commands and the MI syntax in [the official manual](http://sourceware.org/gdb/current/onlinedocs/gdb/).
 
@@ -78,7 +78,7 @@ To differentiate a custom command from an input line, use the `>` (greater than)
 ![](img/options_gdb_commander.png)
 
 - **asmSyntax**: Sets the assembler syntax used in the _Assembly_ tab. Intel or AT&T.
-- **autoDemangle**: Sets if the GDB output is automatically filtered by [ddemangle](). Useful in the _Call stack_ tab.
+- **autoDemangle**: Sets if the GDB output is automatically filtered by [ddemangle](https://github.com/dlang/tools#d-tools). Mostly useful for the _Call stack_ page.
 - **autoDisassemble**: Sets if the assembly output is automatically retrieved when the execution breaks.
 - **autoGetCallStack**: Sets if the call stack is automatically retrieved when the execution breaks.
 - **autoGetRegisters**: Sets if the CPU view is automatically retrieved when the execution breaks.
