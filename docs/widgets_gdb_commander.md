@@ -10,7 +10,7 @@ GDB commander is a GUI front-end for the [GNU debugger](https://www.sourceware.o
 
 ![](img/gdb_commander.png)
 
-It allows to debug the project output (is it's an application) but also the [runnable modules](features_runnables).
+It allows to debug the project output (if it's an application) but also the [runnable modules](features_runnables).
 
 #### Breakpoints
 
@@ -18,8 +18,8 @@ The breakpoints are handled by the editor. Click the gutter to add or to remove 
 After a break, the following icons may be displayed in the gutter:
 
 - <img src="{%include icurl%}other/breaks.png" class="tlbric"/>: A breakpoint is reached.
-- <img src="{%include icurl%}other/camera_go.png" class="tlbric"/>: A watch point is reached is reached. For now the only watchpoints that are supported those monitoring a variable (see the toolbar description).
-- <img src="{%include icurl%}other/step.png" class="tlbric"/>: The program execution stopped here for another reason. It may be caused by step by step execution or because of an unexpected signal has been received.
+- <img src="{%include icurl%}other/camera_go.png" class="tlbric"/>: A watch point is reached. For now the only watchpoints supported are those that monitor a variable (see the toolbar description).
+- <img src="{%include icurl%}other/step.png" class="tlbric"/>: The program execution stopped here for another reason. It may be caused by step by step execution or because an unexpected signal has been received.
 
 #### Target options
 
@@ -28,7 +28,7 @@ This page allows to edit the options passed to the debugger target (also called 
 ![](img/gdb_commander_debugeeopts.png)
 
 - **arguments**: Allows to set the target command line arguments. One item per line. Items can include [symbolic strings](features_symbolic_strings).
-- **environmentPaths**: Allows to add additional folder for the PATH variable. One item per line.
+- **environmentPaths**: Allows to add additional folders to the PATH variable. One item per line.
 - **queryArguments**: When checked and when the debugging cession starts a small input dialog is displayed. It can be used to pass more **--para --meters** to the target.
 - **target**: Read-only. Indicates clearly which is the project or the runnable module that will be debugged.
 - **workingDirectory**: Allows to set the target working directory. Can include [symbolic strings](features_symbolic_strings).
@@ -57,7 +57,7 @@ The field at the bottom allows to pass custom commands to GDB.
 A custom command can include a [symbol string](features_symbolic_strings).
 
 You may pass command with the standard CLI syntax, however since GDB is launched with the option that activates the machine interface (MI) the standard commands are not guaranteed to work properly.
-The option _showRawMiOutput__ must be activated in order to get the GDB answer for a custom command in the [messages](widgets_messages).
+The option **showRawMiOutput** must be activated in order to get the GDB answer for a custom command in the [messages](widgets_messages).
 
 Learn more about the commands and the MI syntax in [the official manual](http://sourceware.org/gdb/current/onlinedocs/gdb/).
 
@@ -70,8 +70,9 @@ It's also possible to add breaks for libraries load and unload. Each possible br
 
 #### Target input stream
 
-The field at the bottom is also used to pass input to the target standard input. 
-To differentiate a custom command from an input line, use the `>` (greater than) symbol. The text following the symbol is written to the input stream, with an implicit new line character.
+The field at the bottom is also used to pass new lines to the target standard input.
+To differentiate a custom command from an input line, use the `>` (greater than) symbol.
+The text following the symbol is written to the input stream, with an implicit new line character at the end.
 
 #### Options
 
@@ -79,14 +80,14 @@ To differentiate a custom command from an input line, use the `>` (greater than)
 
 - **asmSyntax**: Sets the assembler syntax used in the _Assembly_ tab. Intel or AT&T.
 - **autoDemangle**: Sets if the GDB output is automatically filtered by [ddemangle](https://github.com/dlang/tools#d-tools). Mostly useful for the _Call stack_ page.
-- **autoDisassemble**: Sets if the assembly output is automatically retrieved when the execution breaks.
-- **autoGetCallStack**: Sets if the call stack is automatically retrieved when the execution breaks.
-- **autoGetRegisters**: Sets if the CPU view is automatically retrieved when the execution breaks.
-- **autoGetThreads**: Sets if the thread list is automatically retrieved when the execution breaks.
-- **autoGetVariables**: Sets if the list of the local variables is automatically retrieved when the execution breaks.
+- **autoDisassemble**: Sets if the assembly output is automatically updated when the execution breaks.
+- **autoGetCallStack**: Sets if the call stack is automatically updated when the execution breaks.
+- **autoGetRegisters**: Sets if the CPU view is automatically updated when the execution breaks.
+- **autoGetThreads**: Sets if the thread list is automatically updated when the execution breaks.
+- **autoGetVariables**: Sets if the list of the local variables is automatically updated when the execution breaks.
 - **commandHistory**: Container that stores the custom GDB commands.
 - **ignoredSignals**: Sets the signal that won't break the execution.
-- **keepRedirectedStream**: Sets if the files that contain the inferior I/O history are kept on the disk. These files stands in the target directory and are named _.inferiorin_ and _.inferiorout_.
+- **keepRedirectedStream**: Sets if the files that contain the inferior I/O history are kept on the disk. These files stands in the target directory with the extensions _.inferiorin_ and _.inferiorout_.
 - **shortcuts**: Allows to define a shortcut for each button in the toolbar.
 - **showGdbOutput**: For debugging the widget. When checked the raw GDB output (before being interpreted) is displayed in [the messages](widgets_messages).
 - **showOutput**: Displays the target output in [the messages](widgets_messages). May be deactivated for a GUI program.
