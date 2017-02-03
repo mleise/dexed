@@ -48,7 +48,7 @@ Note that for now SSE registers are not supported by the inspector.
 - <img src="{%include icurl%}arrow/go_jump.png" class="tlbric"/>: Steps to the next instruction, excluding functions calls. A context menu at the right allows to define if stepping is done at the source level (line by line) or at the hardware level (instruction by instruction).
 - <img src="{%include icurl%}other/processor.png" class="tlbric"/>: Updates the CPU inspector.
 - <img src="{%include icurl%}other/list.png" class="tlbric"/>: Updates the call stack list.
-- <img src="{%include icurl%}windows/watch_window.png" class="tlbric"/>: Updates the local variables list.
+- <img src="{%include icurl%}window/watch_window.png" class="tlbric"/>: Updates the local variables list.
 - <img src="{%include icurl%}other/camera_add.png" class="tlbric"/>: Allows to set or remove a watch point. When the button is clicked, a watch is added for the variable that's selected in the variables list. A context menu at the right allows to define the access for which the debugger breaks.
 
 #### Custom commands
@@ -57,7 +57,7 @@ The field at the bottom allows to pass custom commands to GDB.
 A custom command can include a [symbol string](features_symbolic_strings).
 
 You may pass command with the standard CLI syntax, however since GDB is launched with the option that activates the machine interface (MI) the standard commands are not guaranteed to succeed.
-The option _showRawMIOutput__ must be activated in order to get GDB the answer to a custom command in the [messages](widgets_messages).
+The option _showRawMiOutput__ must be activated in order to get GDB the answer to a custom command in the [messages](widgets_messages).
 
 Learn more about the commands and the MI syntax in [the official manual](http://sourceware.org/gdb/current/onlinedocs/gdb/).
 
@@ -89,6 +89,6 @@ To differentiate a custom command from an input line, use the `>` (greater than)
 - **keepRedirectedStream**: Sets if the files that contain the inferior I/O history are kept on the disk. These files stands in the target directory and are named _.inferiorin_ and _.inferiorout_.
 - **shortcuts**: Allows to define a shortcut for each button in the toolbar.
 - **showGdbOutput**: For debugging the widget. When checked the raw GDB output (before being interpreted) is displayed in [the messages](widgets_messages).
-- **showOutput: Displays the target output in [the messages](widgets_messages). May be deactivated for a GUI program.
-- **showRawMIOutput**: For debugging the widget. When checked the GDB output (after JSON-ization) is displayed in [the messages](widgets_messages).
-- **stopAllThreadOnBreak: Sets if all the target threads are stopped when the execution breaks. Not applied until next debugging cession.
+- **showOutput**: Displays the target output in [the messages](widgets_messages). May be deactivated for a GUI program.
+- **showRawMiOutput**: For debugging the widget. When checked the GDB output (after JSON-ization) is displayed in [the messages](widgets_messages).
+- **stopAllThreadsOnBreak**: Sets if all the target threads are stopped when the execution breaks. Not applied until next debugging cession.
