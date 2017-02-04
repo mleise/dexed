@@ -56,7 +56,7 @@ Note that for now SSE registers are not supported by the inspector.
 The field at the bottom allows to pass custom commands to GDB.
 A custom command can include a [symbol string](features_symbolic_strings).
 
-You may pass command with the standard CLI syntax, however since GDB is launched with the option that activates the machine interface (MI) the standard commands are not guaranteed to work properly.
+You may pass command with the standard CLI syntax (e.g _show_, _set_, etc), however since GDB is launched with the option that activates the machine interface (MI) the standard commands are not guaranteed to work properly.
 The option **showRawMiOutput** must be activated in order to get the GDB answer for a custom command in the [messages](widgets_messages).
 
 Learn more about the commands and the MI syntax in [the official manual](http://sourceware.org/gdb/current/onlinedocs/gdb/).
@@ -66,7 +66,10 @@ Example of useful commands:
 - **-stack-list-variables --skip-unavailable --all-values**: prints a more complete list of variable that the default one. Can be used to set a watchpoint on a variable that's not listed by default.
 - **-data-list-register-values xmm0 d**: prints the value of XMM0 as a decimal number. For now the CPU inspector doesn't display the SSE registers so this is the only way to inspect them.
 
-It's also possible to add breaks for libraries load and unload. Each possible break reason that GDB can output is interpreted by the widget.
+Note that even if in most of the cases the results of a custom command are displayed in the messages a special processing may happen:
+
+- Any commands that may cause an execution break is handled by the interpreter (.so library events, fork events, system calls, function finished, etc).
+- Any variation of the `-stack-list-variables` has for effect to update the variable list.
 
 #### Target input stream
 
@@ -86,10 +89,10 @@ The text following the symbol is written to the input stream, with an implicit n
 - **autoGetThreads**: Sets if the thread list is automatically updated when the execution breaks.
 - **autoGetVariables**: Sets if the list of the local variables is automatically updated when the execution breaks.
 - **commandHistory**: Container that stores the custom GDB commands.
-- **ignoredSignals**: Sets the signal that won't break the execution.
+- **ignoredSignals**: Sets the signals that won't break the execution.
 - **keepRedirectedStream**: Sets if the files that contain the inferior I/O history are kept on the disk. These files stands in the target directory with the extensions _.inferiorin_ and _.inferiorout_.
 - **shortcuts**: Allows to define a shortcut for each button in the toolbar.
 - **showGdbOutput**: For debugging the widget. When checked the raw GDB output (before being interpreted) is displayed in [the messages](widgets_messages).
 - **showOutput**: Displays the target output in [the messages](widgets_messages). May be deactivated for a GUI program.
-- **showRawMiOutput**: For debugging the widget. When checked the GDB output (after JSON-ization) is displayed in [the messages](widgets_messages).
-- **stopAllThreadsOnBreak**: Sets if all the target threads are stopped when the execution breaks. Not applied until next debugging cession.
+- **showRawMiOutput**: For the custom commands or for debugging the widget. When checked the GDB output (after JSON-ization) is displayed in [the messages](widgets_messages).
+- **stopAllThreadsOnBreak**: Sets if all the threads of the target are stopped when the execution breaks. Not applied until next debugging cession.
