@@ -5,7 +5,8 @@ unit ce_controls;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, buttons, Graphics;
+  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, buttons, Graphics,
+  Menus, Clipbrd;
 
 type
   TCEPageControlButton = (pbClose, pbMoveLeft, pbMoveRight, pbAdd, pbSplit);
@@ -127,6 +128,26 @@ type
 
     property OnDragOver read fOnDragOver write setOnDragOver;
     property OnDragDrop read fOnDragDrop write setOnDragDrop;
+  end;
+
+  (**
+   * A context menu dedicated to TlistView with read-only content.
+   * Contains items allowing to copy a column, a line, a cell, etc.
+   *)
+  TCEListViewCopyMenu = class(TPopupMenu)
+  private
+    fList: TListView;
+    function getColumnIndex: integer;
+    function getLine(item: TListItem): string;
+    function getLineAsList(item: TListItem): string;
+    procedure copyCell(sender: TObject);
+    procedure copyLine(sender: TObject);
+    procedure copyLineAsList(sender: TObject);
+    procedure copyColumn(sender: TObject);
+    procedure copyAll(sender: TObject);
+    procedure copyAllAsList(sender: TObject);
+  public
+    constructor create(aOwner: TComponent); override;
   end;
 
 implementation
@@ -600,6 +621,196 @@ begin
   fCloseBtn.Enabled := fPageIndex <> -1;
   fMoveLeftBtn.Enabled := fPageIndex > 0;
   fMoveRightBtn.Enabled := fPageIndex < fPages.Count-1;
+end;
+
+constructor TCEListViewCopyMenu.create(aOwner: TComponent);
+var
+  itm: TMenuItem;
+begin
+  inherited create(aOwner);
+
+  if not (aOwner is TListView) then
+  begin
+    {$IFDEF DEBUG}
+    raise Exception.Create(self.ClassName + ' owner must be a TListView');
+    {$ENDIF}
+    exit;
+  end;
+  fList := TListView(aOwner);
+  fList.PopupMenu := self;
+
+  itm := TMenuItem.Create(self);
+  itm.Caption := 'copy cell';
+  itm.OnClick := @copyCell;
+  items.Add(itm);
+
+  itm := TMenuItem.Create(self);
+  itm.Caption := 'copy line';
+  itm.OnClick := @copyLine;
+  items.Add(itm);
+
+  itm := TMenuItem.Create(self);
+  itm.Caption := 'copy line as list';
+  itm.OnClick := @copyLineAsList;
+  items.Add(itm);
+
+  itm := TMenuItem.Create(self);
+  itm.Caption := 'copy column';
+  itm.OnClick := @copyColumn;
+  items.Add(itm);
+
+  itm := TMenuItem.Create(self);
+  itm.Caption := 'copy all';
+  itm.OnClick := @copyAll;
+  items.Add(itm);
+
+  itm := TMenuItem.Create(self);
+  itm.Caption := 'copy all as list';
+  itm.OnClick := @copyAllAsList;
+  items.Add(itm);
+end;
+
+function TCEListViewCopyMenu.getColumnIndex: integer;
+var
+  i: integer;
+  w: integer = 0;
+  o: integer = 0;
+  p: TPoint;
+begin
+  result:= 0;
+
+  p := fList.ScreenToControl(PopupPoint);
+
+  for i := 0 to fList.ColumnCount - 1 do
+  begin
+    o := w;
+    w += fList.Column[i].Width;
+    if (o < p.x) and (p.x < w) then
+      exit(i);
+  end;
+end;
+
+function TCEListViewCopyMenu.getLine(item: TListItem): string;
+var
+  c: integer;
+  i: integer;
+begin
+  result := '';
+  if not assigned(item) then
+    exit;
+
+  result := item.Caption;
+  c := item.SubItems.count-1;
+  for i := 0 to c do
+  begin
+    if i <> c + 1 then
+      result += ' | ';
+    result += item.SubItems[i];
+  end;
+end;
+
+function TCEListViewCopyMenu.getLineAsList(item: TListItem): string;
+var
+  i: integer;
+begin
+  result := '';
+  if not assigned(item) then
+    exit;
+
+  result := item.Caption;
+  for i := 0 to item.SubItems.count-1 do
+    result += LineEnding + item.SubItems[i];
+end;
+
+procedure TCEListViewCopyMenu.copyCell(sender: TObject);
+var
+  s: string = '';
+  c: integer;
+begin
+  if not assigned(fList) or not assigned(fList.Selected) then
+    exit;
+
+  c := getColumnIndex;
+  if c = 0 then
+    s := fList.Selected.Caption
+  else
+    s := fList.Selected.SubItems[c-1];
+
+  clipboard.AsText := s;
+end;
+
+procedure TCEListViewCopyMenu.copyLine(sender: TObject);
+begin
+  if not assigned(fList) or not assigned(fList.Selected) then
+    exit;
+
+  Clipboard.AsText := getLine(fList.Selected);
+end;
+
+procedure TCEListViewCopyMenu.copyLineAsList(sender: TObject);
+begin
+  if not assigned(fList) or not assigned(fList.Selected) then
+    exit;
+
+  Clipboard.AsText := getLineAsList(fList.Selected);
+end;
+
+procedure TCEListViewCopyMenu.copyColumn(sender: TObject);
+var
+  s: string = '';
+  c: integer;
+  i: integer;
+begin
+  if not assigned(fList) or not assigned(fList.Selected) then
+    exit;
+
+  c := getColumnIndex;
+  if c = 0 then
+  begin
+    for i := 0 to fList.Items.Count - 1 do
+      s += fList.Items[i].Caption + LineEnding;
+  end
+  else
+  begin
+    for i := 0 to fList.Items.Count - 1 do
+      s += fList.Items[i].SubItems[c-1] + LineEnding;
+  end;
+
+  clipboard.AsText := s;
+end;
+
+procedure TCEListViewCopyMenu.copyAll(sender: TObject);
+var
+  s: string = '';
+  c: integer;
+  i: integer;
+begin
+  c := fList.Items.Count - 1;
+  for i := 0 to c do
+  begin
+    s += getLine(fList.Items[i]);
+    if i <> c then
+      s += LineEnding;
+  end;
+
+  clipboard.AsText := s;
+end;
+
+procedure TCEListViewCopyMenu.copyAllAsList(sender: TObject);
+var
+  s: string = '';
+  c: integer;
+  i: integer;
+begin
+  c := fList.Items.Count - 1;
+  for i := 0 to c do
+  begin
+    s += getLineAsList(fList.Items[i]);
+    if i <> c then
+      s += LineEnding + LineEnding;
+  end;
+
+  clipboard.AsText := s;
 end;
 
 end.

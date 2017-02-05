@@ -8,9 +8,10 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, RegExpr, ComCtrls,
   PropEdits, GraphPropEdits, RTTIGrids, Dialogs, ExtCtrls, Menus, Buttons,
   StdCtrls, process, fpjson, typinfo, Unix, ListViewFilterEdit, SynEdit,
+  ObjectInspector,
   ce_common, ce_interfaces, ce_widget, ce_processes, ce_observer, ce_synmemo,
   ce_sharedres, ce_stringrange, ce_dsgncontrols, ce_dialogs, ce_dbgitf,
-  ce_ddemangle, ce_writableComponent, EditBtn, strutils, ObjectInspector;
+  ce_ddemangle, ce_writableComponent, EditBtn, strutils, ce_controls;
 
 type
 
@@ -1110,6 +1111,8 @@ end;
 
 {$REGION Common/standard comp --------------------------------------------------}
 constructor TCEGdbWidget.create(aOwner: TComponent);
+var
+  m: TCEListViewCopyMenu;
 begin
   inherited;
   EntitiesConnector.addObserver(self);
@@ -1128,7 +1131,12 @@ begin
   Edit1.Items.Assign(fOptions.commandsHistory);
   fAddWatchPointKind := wpkWrite;
   fBreakPoints := TPersistentBreakPoints.create(self);
-  //
+
+  TCEListViewCopyMenu.create(lstCallStack);
+  TCEListViewCopyMenu.create(lstAsm);
+  TCEListViewCopyMenu.create(lstVariables);
+  TCEListViewCopyMenu.create(lstThreads);
+
   updateMenu;
   AssignPng(btnSendCom, 'ACCEPT');
   updateButtonsState;
@@ -2660,9 +2668,6 @@ begin
   end;
   edit1.Text := '';
 end;
-
-
-//TODO-cGDB: copy from the lists: value, instructions, etc.
 
 procedure TCEGdbWidget.setGpr(reg: TCpuRegister; val: TCpuGprValue);
 const
