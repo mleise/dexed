@@ -1358,7 +1358,8 @@ end;
 procedure TCEGdbWidget.docFocused(document: TCESynMemo);
 begin
   fDoc := document;
-  updateDebugeeOptionsEditor;
+  if fGdbState = gsNone then
+    updateDebugeeOptionsEditor;
   synchronizeBreakpointsFromDoc;
 end;
 
@@ -1371,7 +1372,8 @@ begin
   if fDoc <> document then
     exit;
   fDoc := nil;
-  updateDebugeeOptionsEditor;
+  if fGdbState = gsNone then
+    updateDebugeeOptionsEditor;
 end;
 {$ENDREGION}
 
@@ -1396,6 +1398,7 @@ begin
   if fGdb.Running then
     fGdb.Terminate(0);
   FreeAndNil(fGdb);
+  updateDebugeeOptionsEditor;
 end;
 
 procedure TCEGdbWidget.storeObserversBreakpoints;
@@ -2184,6 +2187,7 @@ begin
       setState(gsNone);
       subjDebugStop(fSubj);
       deleteRedirectedIO;
+      updateDebugeeOptionsEditor;
     end;
   end;
 
@@ -2539,6 +2543,7 @@ begin
   subjDebugStop(fSubj);
   setState(gsNone);
   deleteRedirectedIO;
+  updateDebugeeOptionsEditor;
 end;
 
 procedure TCEGdbWidget.btnWatchClick(Sender: TObject);
