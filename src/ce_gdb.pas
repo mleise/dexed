@@ -179,7 +179,7 @@ type
   published
     property CPU: TInspectableGPR read fGpr;
     property FPU: TInspectableFPR read fFpr;
-    property SSR: TInspectableSSR read fSsr;
+    property SEG: TInspectableSSR read fSsr;
     property FLAGS: TFlags read fFlags write setFlag;
   public
     constructor create(setGprEvent: TSetGprEvent; setSsrEvent: TSetSsrEvent;
@@ -2212,7 +2212,7 @@ begin
         end;
         segOffset..segOffset+5:
         begin
-          fInspState.SSR.setInspectableRegister
+          fInspState.SEG.setInspectableRegister
             (TSegRegister(number - segOffset), val.AsInteger);
         end;
         stOffset..stOffset+7:
