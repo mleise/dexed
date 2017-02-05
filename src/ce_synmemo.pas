@@ -2667,6 +2667,8 @@ begin
     removeBreakPoint(line)
   else
     addBreakPoint(line);
+  CaretY := Line;
+  EnsureCursorPosVisible;
 end;
 
 procedure TCESynMemo.setGutterIcon(line: integer; value: TGutterIcon);
@@ -2721,6 +2723,7 @@ begin
     exit;
   showPage;
   caretY := line;
+  EnsureCursorPosVisible;
   removeDebugTimeMarks;
   case reason of
     dbBreakPoint: setGutterIcon(line, giBreak);
