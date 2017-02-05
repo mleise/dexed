@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, process, forms,
-  ce_processes, ce_common;
+  ce_processes, ce_common, ce_stringrange;
 
 type
 
@@ -35,21 +35,50 @@ var
   demangler: TCEDDemangler;
 
 constructor TCEDDemangler.create;
+var
+  s: string = '.0.';
+  r: TStringRange;
+  v: integer;
 begin
   fList := TStringList.Create;
   fOut  := TStringList.Create;
   fProc := TCEProcess.create(nil);
-  fProc.Executable:= exeFullName('ddemangle' + exeExt);
-  fProc.Options:= [poUsePipes];
-  fProc.OnTerminate:=@procTerminate;
-  fProc.ShowWindow:= swoHIDE;
-  fProc.execute;
-  fActive := true;
+
+  // up to version 2.071 ddemangle cannot be daemon-ized
+  with TProcess.Create(nil) do
+  try
+    Executable := exeFullName('dmd' + exeExt);
+    if Executable.fileExists then
+    begin
+      setLength(s, 128);
+      Parameters.Text:= '--version';
+      Options:= [poUsePipes];
+      ShowWindow:= swoHIDE;
+      execute;
+      output.Read(s[1], 128);
+    end;
+  finally
+    free;
+  end;
+  r := r.create(s);
+  v := r.popUntil('.')^.popFront^.takeUntil('.').yield.toInt;
+
+  fProc.Executable := exeFullName('ddemangle' + exeExt);
+  if  (v >= 72) and fProc.Executable.fileExists then
+  begin
+    fProc.Options:= [poUsePipes];
+    fProc.OnTerminate:=@procTerminate;
+    fProc.ShowWindow:= swoHIDE;
+    fProc.execute;
+    fActive := true;
+  end
+  else fActive := false;
 end;
 
 destructor TCEDDemangler.destroy;
 begin
-  fProc.Terminate(0);
+  if fProc.Running then
+    fProc.Terminate(0);
   fProc.Free;
   fOut.Free;
   fList.Free;

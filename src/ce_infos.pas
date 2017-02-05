@@ -43,10 +43,12 @@ type
     Label1: TLabel;
   private
     procedure RefreshAllStatus;
+    function findCriticalyMissingTool: boolean;
   protected
     procedure SetVisible(Value: Boolean); override;
   public
     constructor create(aOwner: TComponent); override;
+    property hasMissingTools: boolean read findCriticalyMissingTool;
   end;
 
 implementation
@@ -219,7 +221,7 @@ begin
     'optional, the LDC D compiler');
   itm.Parent := boxTools;
   itm.ReAlign;
-  itm := TToolInfo.Construct(self, tikOptional, 'ddemangle',
+  itm := TToolInfo.Construct(self, tikFindable, 'ddemangle',
     'optional, allows to demangle the symbols in the message widget');
   itm.Parent := boxTools;
   itm.ReAlign;
@@ -247,6 +249,23 @@ begin
   //
   Height := boxTools.ControlCount * 30 + 150;
   Realign;
+end;
+
+function TCEInfoWidget.findCriticalyMissingTool: boolean;
+var
+  i: integer;
+  t: TToolInfo;
+begin
+  result := false;
+  for i := 0 to boxTools.ControlCount -1 do
+  begin
+    if not (boxTools.Controls[i] is TToolInfo) then
+      continue;
+    t := TToolInfo(boxTools.Controls[i]);
+    t.refreshStatus;
+    if (t.fKind in [tikFindable, tikRunning]) and not t.present then
+      result := true;
+  end;
 end;
 
 procedure TCEInfoWidget.RefreshAllStatus;

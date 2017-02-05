@@ -1794,7 +1794,11 @@ begin
   setSplitterWheelEvent;
 
   if fFirstTimeCoedit then
+  begin
     actFileNewRun.Execute;
+    if fInfoWidg.hasMissingTools then
+      fInfoWidg.showWidget;
+  end;
 
   if fAppliOpts.autoCheckUpdates then
   begin
