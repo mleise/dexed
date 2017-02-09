@@ -120,7 +120,7 @@ inherited CEGdbWidget: TCEGdbWidget
             end
           end
           object TabSheet4: TTabSheet
-            Caption = 'Assembly'
+            Caption = 'Assembler'
             ClientHeight = 164
             ClientWidth = 509
             object lstAsm: TListView

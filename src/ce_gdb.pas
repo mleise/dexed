@@ -1657,6 +1657,7 @@ begin
     true: o := fDebugeeOptions.projectByFile[fDoc.fileName];
     false:o := fDebugeeOptions.projectByFile[fProj.fileName];
   end;
+  fLastFunction := '';
   // gdb process
   killGdb;
   fGdb := TCEProcess.create(nil);
