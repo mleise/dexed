@@ -526,6 +526,22 @@ type
     destructor destroy; override;
   end;
 
+const
+  SR_exec = 0;
+  SR_access_watchpoint_trigger = 1;
+  SR_location_reached = 2;
+  SR_syscall_return = 3;
+  SR_vfork = 4;
+  SR_syscall_entry = 5;
+  SR_watchpoint_trigger= 6;
+  SR_read_watchpoint_trigger = 8;
+  SR_breakpoint_hit = 9;
+  SR_end_stepping_range = 10;
+  SR_function_finished = 11;
+  SR_fork = 13;
+  SR_solib_event = 14;
+
+type
   // Perfect static hash-set that detect a GDB stop reason
   stopReasons = record
   public
@@ -562,7 +578,7 @@ type
     );
     class function hash(const w: string): Byte; static; {$IFNDEF DEBUG}inline;{$ENDIF}
   public
-    class function match(const w: string): PString; static; {$IFNDEF DEBUG}inline;{$ENDIF}
+    class function match(const w: string): shortint; static; {$IFNDEF DEBUG}inline;{$ENDIF}
   end;
 
 implementation
@@ -1006,16 +1022,16 @@ begin
 end;
 {$IFDEF DEBUG}{$POP}{$ENDIF}
 
-class function stopReasons.match(const w: string): PString;
+class function stopReasons.match(const w: string): shortint;
 var
   h: Byte;
 begin
-  result := nil;
+  result := -1;
   if (length(w) < 4) or (length(w) > 25) then
     exit;
   h := hash(w);
   if fHasEntry[h] and (fWords[h] = w) then
-    result := @fWords[h];
+    result := h;
 end;
 {$ENDREGION}
 
@@ -2050,7 +2066,7 @@ procedure TCEGdbWidget.interpretJson;
   end;
 
 var
-  r: PString;
+  r: shortint;
   i,j: integer;
   val: TJSONData;
   obj: TJSONObject;
@@ -2077,13 +2093,15 @@ begin
   begin
     reason := val.AsString;
     r := stopReasons.match(reason);
-    if assigned(r) then
+    if r <> -1 then
     begin
-      case r^ of
-        'breakpoint-hit': brkreason := dbBreakPoint;
-        'watchpoint-trigger', 'access-watchpoint-trigger', 'read-watchpoint-trigger':
+      case r of
+        SR_breakpoint_hit:
+          brkreason := dbBreakPoint;
+        SR_watchpoint_trigger, SR_access_watchpoint_trigger, SR_read_watchpoint_trigger:
           brkreason:= dbWatch;
-        else brkreason := dbStep;
+        else
+          brkreason := dbStep;
       end;
       if brkreason = dbWatch then
       begin
