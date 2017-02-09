@@ -295,6 +295,8 @@ begin
       majv := Byte(inp[1]) - Byte('0');
       minv := Byte(inp[3]) - Byte('0');
     end;
+    while prc.Running do
+      sleep(1);
 
     prc.Parameters.Clear;
     fDmtWrapper.getParameters(prc.Parameters, majv, minv);

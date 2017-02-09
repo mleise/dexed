@@ -56,6 +56,8 @@ begin
       ShowWindow:= swoHIDE;
       execute;
       output.Read(s[1], 128);
+      while Running do
+        sleep(1);
     end;
   finally
     free;
