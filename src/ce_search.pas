@@ -23,8 +23,12 @@ type
     fWholeWord: boolean;
     fMrSearches: TStringList;
     fMrReplacements: TStringList;
+    procedure cleanIvnalidHistoryItems;
     procedure setMrSearches(value: TStringList);
     procedure setMrReplacements(value: TStringList);
+  protected
+    procedure afterLoad; override;
+    procedure beforeSave; override;
   published
     property prompt: boolean read fPrompt write fPrompt;
     property fromCursor: boolean read fFromCur write fFromCur;
@@ -35,7 +39,6 @@ type
     property recentSearches: TStringList read fMrSearches write setMrSearches;
     property recentReplacements: TStringList read fMrReplacements write setMrReplacements;
   public
-    procedure afterLoad; override;
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     procedure assign(source: TPersistent); override;
@@ -175,22 +178,31 @@ begin
   fMrSearches.Assign(value);
 end;
 
-procedure TCESearchOptions.setMrReplacements(value: TStringList);
-begin
-  fMrReplacements.Assign(value);
-end;
-
-procedure TCESearchOptions.afterLoad;
+procedure TCESearchOptions.cleanIvnalidHistoryItems;
 var
   i: integer;
 begin
-  inherited;
   for i := fMrReplacements.Count-1 downto 0 do
     if fMrReplacements[i].length > 128 then
       fMrReplacements.Delete(i);
   for i := fMrSearches.Count-1 downto 0 do
       if fMrSearches[i].length > 128 then
         fMrSearches.Delete(i);
+end;
+
+procedure TCESearchOptions.setMrReplacements(value: TStringList);
+begin
+  fMrReplacements.Assign(value);
+end;
+
+procedure TCESearchOptions.afterLoad;
+begin
+  cleanIvnalidHistoryItems;
+end;
+
+procedure TCESearchOptions.beforeSave;
+begin
+  cleanIvnalidHistoryItems;
 end;
 {$ENDREGION}
 

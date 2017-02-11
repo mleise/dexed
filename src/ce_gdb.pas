@@ -286,6 +286,7 @@ type
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
     procedure setShortcuts(value: TCEDebugShortcuts);
+    procedure cleanInvalidHistoryEntries;
   published
     property asmSyntax: TAsmSyntax read fAsmSyntax write fAsmSyntax;
     property autoDisassemble: boolean read fAutoDisassemble write fAutoDisassemble;
@@ -302,6 +303,9 @@ type
     property showRawMiOutput: boolean read fShowRawMiOutput write fShowRawMiOutput;
     property showOutput: boolean read fShowOutput write fShowOutput;
     property stopAllThreadsOnBreak: boolean read fStopAllThreadsOnBreak write fStopAllThreadsOnBreak;
+  protected
+    procedure beforeSave; override;
+    procedure afterLoad; override;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -635,6 +639,25 @@ begin
   fCommandsHistory.Free;
   fShortcuts.Free;
   inherited;
+end;
+
+procedure TCEDebugOptionsBase.cleanInvalidHistoryEntries;
+var
+  i: integer;
+begin
+  for i := fCommandsHistory.Count-1 downto 0 do
+    if fCommandsHistory[i].length > 128 then
+      fCommandsHistory.Delete(i);
+end;
+
+procedure TCEDebugOptionsBase.beforeSave;
+begin
+  cleanInvalidHistoryEntries;
+end;
+
+procedure TCEDebugOptionsBase.afterLoad;
+begin
+  cleanInvalidHistoryEntries;
 end;
 
 procedure TCEDebugOptionsBase.setIgnoredSignals(value: TStringList);
