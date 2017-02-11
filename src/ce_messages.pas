@@ -1056,8 +1056,8 @@ begin
   if aMessage.isEmpty then
     exit;
   rng.init(aMessage);
-  rng.popUntil('(')^.popWhile('(');
-  lne := rng.takeUntil([',', ':', ')']).yield;
+  rng.popUntil(['(', ':'])^.popWhile(['(', ':']);
+  lne := rng.takeUntil([',', ':', ')', ' ']).yield;
   if rng.front in [',', ':'] then
     col := rng.popWhile([',', ':'])^.takeUntil(')').yield;
   result.y := strToIntDef(lne, -1);
@@ -1078,9 +1078,9 @@ begin
       exit;
     // '(': line will be indicated after fname
     // -mixin: dmd, error in mixin(token string) '<fname>-mixinXX<index>('
-    if isEditable(ident.extractFileExt) and ((aMessage[i] = '(') or
-      ((aMessage[i] = '-') and (i < aMessage.length-5)
-        and (aMessage[i..i+5] = '-mixin'))) then
+    if isEditable(ident.extractFileExt) and
+    ((aMessage[i] = '(') or (aMessage[i] = ':') or
+    ((aMessage[i] = '-') and (i < aMessage.length-5) and (aMessage[i..i+5] = '-mixin'))) then
     begin
       // absolute fname
       if ident.fileExists then
