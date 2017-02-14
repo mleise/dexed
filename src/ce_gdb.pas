@@ -1150,8 +1150,6 @@ end;
 
 {$REGION Common/standard comp --------------------------------------------------}
 constructor TCEGdbWidget.create(aOwner: TComponent);
-var
-  m: TCEListViewCopyMenu;
 begin
   inherited;
   EntitiesConnector.addObserver(self);
