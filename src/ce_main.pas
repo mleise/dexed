@@ -2518,16 +2518,19 @@ begin
       if fDoc.isTemporary then
         result := of_yes;
     end
-    else if ifInProject in fRunnablesOptions.outputFolderConditions then
+    else if assigned(fProject) then
     begin
-      if fProject.isSource(fDoc.fileName) then
-        result := of_yes;
+      if ifInProject in fRunnablesOptions.outputFolderConditions then
+      begin
+        if fProject.isSource(fDoc.fileName) then
+          result := of_yes;
+      end
+      else if ifSaved in fRunnablesOptions.outputFolderConditions then
+      begin
+        if not fProject.isSource(fDoc.fileName) and not fDoc.isTemporary then
+          result := of_yes;
+      end;
     end
-    else if ifSaved in fRunnablesOptions.outputFolderConditions then
-    begin
-      if not fProject.isSource(fDoc.fileName) and not fDoc.isTemporary then
-        result := of_yes;
-    end;
   end;
 
 end;
