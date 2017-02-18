@@ -208,7 +208,7 @@ type
   (**
    * Lets the shell open a file.
    *)
-  function shellOpen(const fname: string): boolean;
+  function shellOpen(const fname: string; wait: boolean = true): boolean;
 
   (**
    * Returns true if anExeName can be spawn without its full path.
@@ -895,33 +895,29 @@ begin
   {$ENDIF}
 end;
 
-function shellOpen(const fname: string): boolean;
+function shellOpen(const fname: string; wait: boolean = true): boolean;
 begin
   {$IFDEF WINDOWS}
   result := ShellExecute(0, 'OPEN', PChar(fname), nil, nil, SW_SHOW) > 32;
   {$ENDIF}
-  {$IFDEF LINUX}
   with TProcess.Create(nil) do
   try
+    {$IFDEF LINUX}
     Executable := 'xdg-open';
+    {$ELSE}
+    {$IFDEF DARWIN}
+    Executable := 'open';
+    {$ENDIF}
+    {$ENDIF}
     Parameters.Add(fname);
     Execute;
+    if wait then
+      while Running do
+        sleep(1);
   finally
     result := true;
     Free;
   end;
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  with TProcess.Create(nil) do
-  try
-    Executable := 'open';
-    Parameters.Add(aFilename);
-    Execute;
-  finally
-    result := true;
-    Free;
-  end;
-  {$ENDIF}
 end;
 
 function exeInSysPath(fname: string): boolean;
