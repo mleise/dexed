@@ -6,7 +6,7 @@ title: Widgets - process input
 
 ### Process input
 
-The process input widget is used to pass input to a processes that are executed within Coedit.
+The process input widget is used to pass input to the processes that are executed within Coedit.
 
 ![](img/process_input.png)
 
