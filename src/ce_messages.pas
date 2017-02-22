@@ -678,9 +678,11 @@ procedure TCEMessagesWidget.actSelAllExecute(Sender: TObject);
 var
   i: Integer;
 begin
+  List.BeginUpdate;
   for i := 0 to List.Items.Count-1 do
     if List.Items[i].Visible then
       List.Items[i].MultiSelected := true;
+  List.EndUpdate;
 end;
 
 procedure TCEMessagesWidget.actSaveMsgExecute(Sender: TObject);
