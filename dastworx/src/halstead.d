@@ -7,7 +7,7 @@ import
 import
     dparse.ast, dparse.lexer, dparse.parser, dparse.rollback_allocator;
 import
-    iz.memory;
+    iz.memory, iz.containers;
 version(unittest){} else import
     common;
 
@@ -46,8 +46,8 @@ private final class HalsteadMetric: ASTVisitor
     alias visit = ASTVisitor.visit;
 
     Function[] functions;
-    size_t[string] operators;
-    size_t[string] operands;
+    HashMap_AB!(string, size_t) operators;
+    HashMap_AB!(string, size_t) operands;
     BinaryExprFlags[] binExprFlag;
     size_t functionNesting;
     bool[] inFunctionCallChain;
@@ -74,9 +74,9 @@ private final class HalsteadMetric: ASTVisitor
             foreach(i, ident; chain)
             {
                 if (i == chain.length-1)
-                    ++operators[getIdent(ident).text];
+                    operators[getIdent(ident).text] +=1;
                 else
-                    ++operands[getIdent(ident).text];
+                    operands[getIdent(ident).text] +=1;
             }
             chain.length = 0;
         }
@@ -87,9 +87,9 @@ private final class HalsteadMetric: ASTVisitor
         if (isLiteral(tk.type))
         {
             alias immutHexStr = toHexString!(Order.increasing, LetterCase.upper);
-            ++operands["literal" ~ immutHexStr(tk.text.crc32Of)];
+            operands["literal" ~ immutHexStr(tk.text.crc32Of)] +=1;
         }
-        else ++operands[tk.text];
+        else operands[tk.text] +=1;
     }
 
     void pushExprFlags(bool leftFlag = false, bool rightFlag = false)
@@ -138,15 +138,15 @@ private final class HalsteadMetric: ASTVisitor
         functions[$-1].name = name;
         functions[$-1].line = line;
 
-        if (operators.length)
+        if (operators.count)
         {
             functions[$-1].N1 = operators.byValue.fold!((a,b) => b = a + b);
-            functions[$-1].n1 = operators.length;
+            functions[$-1].n1 = operators.count;
         }
-        if (operands.length)
+        if (operands.count)
         {
             functions[$-1].N2 = operands.byValue.fold!((a,b) => b = a + b);
-            functions[$-1].n2 = operands.length;
+            functions[$-1].n2 = operands.count;
         }
 
         JSONValue f;
@@ -253,7 +253,7 @@ private final class HalsteadMetric: ASTVisitor
                 (inFunctionCallChain[$-1] & exprLeftIsFunction) ||
                 (inFunctionCallChain[$-1] & exprRightIsFunction))
             {
-                ++operands[primary.identifierOrTemplateInstance.identifier.text];
+                operands[primary.identifierOrTemplateInstance.identifier.text] +=1;
             }
         }
         else addOperandFromToken(primary.primary);
@@ -274,29 +274,29 @@ private final class HalsteadMetric: ASTVisitor
 
         if (expr.identifierOrTemplateInstance)
         {
-            ++operators["."];
+            operators["."] += 1;
 
             if (inFunctionCallChain[$-1])
                 chain ~= expr.identifierOrTemplateInstance;
             else
             {
                 if (expr.identifierOrTemplateInstance.identifier != tok!"")
-                    ++operands[expr.identifierOrTemplateInstance.identifier.text];
+                    operands[expr.identifierOrTemplateInstance.identifier.text] +=1;
                 else
-                    ++operands[expr.identifierOrTemplateInstance.templateInstance.identifier.text];
+                    operands[expr.identifierOrTemplateInstance.templateInstance.identifier.text] +=1;
             }
         }
 
         if (expr.prefix.type)
-            ++operators[str(expr.prefix.type)];
+            operators[str(expr.prefix.type)] += 1;
         if (expr.suffix.type)
-            ++operators[str(expr.suffix.type)];
+            operators[str(expr.suffix.type)] += 1;
     }
     override void visit(const(AsmInstruction) ai)
     {
         if (ai.identifierOrIntegerOrOpcode != tok!"")
         {
-            ++operators[ai.identifierOrIntegerOrOpcode.text];
+            operators[ai.identifierOrIntegerOrOpcode.text] += 1;
         }
         ai.accept(this);
     }
@@ -305,7 +305,7 @@ private final class HalsteadMetric: ASTVisitor
     {
         if (reg.identifier != tok!"")
         {
-            ++operands[reg.identifier.text];
+            operands[reg.identifier.text] +=1;
         }
         if (reg.hasIntegerLiteral)
         {
@@ -328,154 +328,154 @@ private final class HalsteadMetric: ASTVisitor
 
     override void visit(const(IndexExpression) expr)
     {
-        ++operators["[]"];
+        operators["[]"] += 1;
         expr.accept(this);
     }
 
     override void visit(const(NewExpression) expr)
     {
-        ++operators["new"];
+        operators["new"] += 1;
         expr.accept(this);
     }
 
     override void visit(const(NewAnonClassExpression) expr)
     {
-        ++operators["new"];
+        operators["new"] += 1;
         expr.accept(this);
     }
 
     override void visit(const(DeleteExpression) expr)
     {
-        ++operators["delete"];
+        operators["delete"] += 1;
         expr.accept(this);
     }
 
     override void visit(const(CastExpression) expr)
     {
-        ++operators["cast"];
+        operators["cast"] += 1;
         expr.accept(this);
     }
 
     override void visit(const(IsExpression) expr)
     {
-        ++operators["is"];
+        operators["is"] += 1;
         expr.accept(this);
     }
 
     override void visit(const(TernaryExpression) expr)
     {
         if (expr.orOrExpression)
-            ++operators["if"];
+            operators["if"] += 1;
         if (expr.expression)
-            ++operators["else"];
+            operators["else"] += 1;
         expr.accept(this);
     }
 
     override void visit(const(TypeidExpression) expr)
     {
-        ++operators["typeid"];
+        operators["typeid"] += 1;
         expr.accept(this);
     }
 
     override void visit(const(IfStatement) st)
     {
-        ++operators["if"];
+        operators["if"] += 1;
         st.accept(this);
         if (st.thenStatement)
-            ++operators["then"];
+            operators["then"] += 1;
         if (st.elseStatement)
-            ++operators["else"];
+            operators["else"] += 1;
     }
 
     override void visit(const(WhileStatement) st)
     {
-        ++operators["while"];
+        operators["while"] +=1;
         st.accept(this);
     }
 
     override void visit(const(ForStatement) st)
     {
-        ++operators["for"];
+        operators["for"] +=1;
         st.accept(this);
     }
 
     override void visit(const(ForeachStatement) st)
     {
-        ++operators["foreach"];
+        operators["foreach"] +=1;
         if (st.foreachTypeList)
             foreach(ft; st.foreachTypeList.items)
-                ++operands[ft.identifier.text];
+                operands[ft.identifier.text] +=1;
         if (st.foreachType)
-            ++operands[st.foreachType.identifier.text];
+            operands[st.foreachType.identifier.text] +=1;
         st.accept(this);
     }
 
     override void visit(const(ReturnStatement) st)
     {
-        ++operators["return"];
+        operators["return"] +=1;
         st.accept(this);
     }
 
     override void visit(const(BreakStatement) st)
     {
-        ++operators["break"];
+        operators["break"] +=1;
         st.accept(this);
     }
 
     override void visit(const(ContinueStatement) st)
     {
-        ++operators["continue"];
+        operators["continue"] +=1;
         st.accept(this);
     }
 
     override void visit(const(GotoStatement) st)
     {
-        ++operators["goto"];
+        operators["goto"] +=1;
         st.accept(this);
     }
 
     override void visit(const(SwitchStatement) st)
     {
-        ++operators["switch"];
+        operators["switch"] +=1;
         st.accept(this);
     }
 
     override void visit(const(CaseStatement) st)
     {
-        ++operators["case"];
+        operators["case"] +=1;
         st.accept(this);
     }
 
     override void visit(const(CaseRangeStatement) st)
     {
-        ++++operators["case"];
+        operators["case"] +=2;
         st.accept(this);
     }
 
     override void visit(const(DefaultStatement) st)
     {
-        ++operators["case"];
+        operators["case"] +=1;
         st.accept(this);
     }
 
     override void visit(const(ThrowStatement) st)
     {
-        ++operators["throw"];
+        operators["throw"] +=1;
         st.accept(this);
     }
 
     override void visit(const(TryStatement) st)
     {
-        ++operators["try"];
+        operators["try"] +=1;
         st.accept(this);
     }
 
     override void visit(const(Catch) c)
     {
-        ++operators["catch"];
+        operators["catch"] +=1;
         c.accept(this);
         if (c.identifier.text)
-            ++operands[c.identifier.text];
+            operands[c.identifier.text] +=1;
     }
 
     override void visit(const(VariableDeclaration) decl)
@@ -483,9 +483,9 @@ private final class HalsteadMetric: ASTVisitor
         if (decl.declarators)
             foreach (elem; decl.declarators)
             {
-                ++operands[elem.name.text];
+                operands[elem.name.text] +=1;
                 if (elem.initializer)
-                    ++operators["="];
+                    operators["="] +=1;
             }
         else if (decl.autoDeclaration)
             visit(decl.autoDeclaration);
@@ -494,8 +494,8 @@ private final class HalsteadMetric: ASTVisitor
 
     override void visit(const AutoDeclarationPart decl)
     {
-        ++operands[decl.identifier.text];
-        ++operators["="];
+        operands[decl.identifier.text] +=1;
+        operators["="] +=1;
         decl.accept(this);
     }
 
@@ -538,7 +538,7 @@ private final class HalsteadMetric: ASTVisitor
             else static if (is(T == XorExpression)) op = `^`;
             else static assert(0, T.stringof);
         }
-        ++operators[op];
+        operators[op] +=1;
 
         pushExprFlags(leftArgIsFunctFlag, rightArgIsFunctFlag);
         expr.accept(this);
