@@ -195,6 +195,7 @@ begin
   fMouseLinkAttribs := TSynSelectedColor.Create;
   fBracketMatchAttribs := TSynSelectedColor.Create;
   fIdentifierMarkup := TSynSelectedColor.Create;
+  fCompletionMenuCaseCare := true;
   //
   // note: default values come from TSynEditFoldedView ctor.
   fFoldedColor.Background := clNone;
@@ -642,6 +643,7 @@ begin
   anEditor.completionMenu.TheForm.Width   := fCompletionMenuWidth;
   anEditor.completionMenu.LinesInWindow   := fCompletionMenuLines;
   anEditor.completionMenu.CaseSensitive   := fCompletionMenuCaseCare;
+  TStringList(anEditor.completionMenu.ItemList).CaseSensitive := fCompletionMenuCaseCare;
 
   anEditor.Gutter.LineNumberPart.ShowOnlyLineNumbersMultiplesOf:=fLineNumEvery;
 

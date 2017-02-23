@@ -725,7 +725,8 @@ begin
   fCompletion.OnExecute:= @completionExecute;
   fCompletion.OnCodeCompletion:=@completionCodeCompletion;
   fCompletion.OnPaintItem:= @completionItemPaint;
-  fCompletion.CaseSensitive:=false;
+  fCompletion.CaseSensitive:=true;
+  TStringList(fCompletion.ItemList).CaseSensitive:=true;
   fCompletion.LongLineHintType:=sclpNone;
   fCompletion.TheForm.ShowInTaskBar:=stNever;
   fCompletion.ShortCut:=0;
