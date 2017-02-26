@@ -475,6 +475,7 @@ type
     fLastLine: string;
     fCommandProcessed: boolean;
     fDebugeeOptions: TCEDebugeeOptions;
+    procedure continueDebugging;
     procedure waitCommandProcessed;
     procedure clearDisplays;
     procedure updateMenu;
@@ -2175,7 +2176,10 @@ begin
         signame := val.AsString;
       if (fOptions.ignoredSignals.Count <> 0) and
         (fOptions.ignoredSignals.IndexOf(signame) <> -1) then
-          exit;
+      begin
+        continueDebugging;
+        exit;
+      end;
       if fJson.findAny('signal-meaning', val) then
         sigmean := val.AsString;
       if fJson.findObject('frame', obj) then
@@ -2530,12 +2534,7 @@ begin
   gdbCommand(cmd, @gdboutJsonize);
 end;
 
-procedure TCEGdbWidget.btnStartClick(Sender: TObject);
-begin
-  startDebugging;
-end;
-
-procedure TCEGdbWidget.btnContClick(Sender: TObject);
+procedure TCEGdbWidget.continueDebugging;
 begin
   gdbCommand('-exec-continue --all', @gdboutJsonize);
   if assigned(fGdb) and fgdb.Running then
@@ -2543,6 +2542,16 @@ begin
     setState(gsRunning);
     subjDebugContinue(fSubj);
   end;
+end;
+
+procedure TCEGdbWidget.btnStartClick(Sender: TObject);
+begin
+  startDebugging;
+end;
+
+procedure TCEGdbWidget.btnContClick(Sender: TObject);
+begin
+  continueDebugging;
 end;
 
 procedure TCEGdbWidget.btnVariablesClick(Sender: TObject);
