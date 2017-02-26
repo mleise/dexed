@@ -129,6 +129,8 @@ private final class HalsteadMetric: ASTVisitor
     {
         operators.clear;
         operands.clear;
+        operators.reserve(64);
+        operands.reserve(64);
         if (functionNesting++ == 0)
             functions.length = functions.length + 1;
     }
