@@ -28,7 +28,6 @@ type
     fToolAlias: string;
     fQueryParams: boolean;
     fClearMessages: boolean;
-    fEditorToInput: boolean;
     fOutputToNext: boolean;
     fShortcut: TShortcut;
     fMsgs: ICEMessagesDisplay;
@@ -50,8 +49,6 @@ type
     property nextToolAlias: string read fNextToolAlias write fNextToolAlias;
     property outputToNext: boolean read fOutputToNext write fOutputToNext;
     property pipeInputKind: TPipeInputKind read fPipeInputKind write fPipeInputKind;
-    // TODO-cmaintenance: remove this property from version 3 update 1
-    property editorToInput: boolean read fEditorToInput write fEditorToInput stored false;
   public
     constructor create(ACollection: TCollection); override;
     destructor destroy; override;
@@ -156,7 +153,6 @@ begin
     options           := tool.options;
     executable        := tool.executable;
     workingDirectory  := tool.workingDirectory;
-    editorToInput     := tool.editorToInput;
     showWindows       := tool.showWindows;
     pipeInputKind     := tool.pipeInputKind;
     parameters.Assign(tool.parameters);
@@ -403,7 +399,6 @@ begin
   if tool.isNil then exit;
   //
   tool.execute(nil);
-  if tool.editorToInput then tool.pipeInputKind:= pikEditor;
   if (tool.pipeInputKind <> pikNone) and fDoc.isNotNil
     and (poUsePipes in tool.options) and tool.fProcess.Input.isNotNil then
   begin

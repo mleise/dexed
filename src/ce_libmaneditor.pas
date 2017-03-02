@@ -835,7 +835,7 @@ begin
     row.Caption := itm.libAlias;
     row.SubItems.Add(itm.libFile);
     row.SubItems.Add(itm.libSourcePath);
-    row.SubItems.Add(itm.projectFile);
+    row.SubItems.Add(itm.libProject);
     row.SubItems.Add(enableStr[itm.enabled]);
   end;
   List.EndUpdate;
@@ -852,7 +852,7 @@ begin
   itm.libAlias      := row.Caption;
   itm.libFile       := row.SubItems[0];
   itm.libSourcePath := row.SubItems[1];
-  itm.projectFile   := row.SubItems[2];
+  itm.libProject    := row.SubItems[2];
   itm.enabled       := row.SubItems[3] = enableStr[true];
   itm.updateModulesInfo;
 

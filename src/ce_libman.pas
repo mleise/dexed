@@ -64,8 +64,6 @@ type
     property libFile: string read fLibFile write setLibFile;
     property libProject: string read fLibProject write setLibProject;
     property enabled: boolean read fEnabled write fEnabled default true;
-    // TODO-cmaintenance: remove this property from version 3 update 1
-    property projectFile: string read fLibProject write fLibProject stored false;
   public
     constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
