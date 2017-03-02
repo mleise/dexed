@@ -735,7 +735,7 @@ begin
     exit;
   // the CE interface for dub doesn't make the difference between build type
   //and config, instead each possible combination type + build is generated.
-  if fJSON.findArray('configurations', arr) then
+  if fJSON.findArray('configurations', arr) and (arr.Count > 0) then
   begin
     for i:= 0 to arr.Count-1 do
     begin
