@@ -8,7 +8,7 @@ title: Build Coedit
 
 Coedit is mostly programmed in Object Pascal, using the the [Lazarus development platform](http://www.lazarus-ide.org/).
 
-* [Download](http://lazarus.freepascal.org/index.php?page=downloads) and setup the latest Lazarus version (1.6.4) and  FPC + FPC sources (3.0.2) for your platform.
+* [Download](http://lazarus.freepascal.org/index.php?page=downloads) and setup the latest Lazarus version (>= 1.6.4) and  FPC + FPC sources (>= 3.0.2) for your platform.
     * Windows: the three packages are bundled in an installer. Even on Windows 64 bit, the 32 version must be setup.
     * Linux: the three packages must be downloaded and setup individually. It's recommended to download the packages from _SourceForge_ and not from the official repository of the distribution because they don't always propose the latest version.
 * `cd <user dir where to clone>`
@@ -33,10 +33,11 @@ After what Coedit should be build. The executable is output to the _bin_ folder.
 
 The background tool used by the IDE is a D program.
 
-* [Download]() and setup latest DMD version.
-* In the repository, wrowse to the `dastworx` folder.
+* [Download](https://dlang.org/download.html#dmd) and setup latest DMD version.
+* In the repository, browse to the `dastworx` folder.
     * Windows: double click `build.bat`
     * Linux: `sh ./build.sh`
+You can also build it in CE using the project file _dastworx.ce_.
 
 #### Third party tools:
 
