@@ -782,8 +782,6 @@ begin
   clearTree;
   updateVisibleCat;
   if fDoc.isNil then exit;
-  // TODO-cmaintenance: remove this from version 3 gold
-  tryRaiseFromStdErr(fToolProc);
   //
   fToolProc.OnTerminate := nil;
   fToolProc.OnReadData  := nil;

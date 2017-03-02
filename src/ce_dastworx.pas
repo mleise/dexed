@@ -116,8 +116,6 @@ begin
       jsn := TJSONObject(jps.Clone);
     jps.Free;
     while prc.Running do ;
-    // TODO-cmaintenance: remove this from version 3 gold
-    tryRaiseFromStdErr(prc);
   finally
     prs.Free;
     prc.Free;

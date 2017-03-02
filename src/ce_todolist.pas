@@ -482,10 +482,6 @@ procedure TCETodoListWidget.toolTerminated(Sender: TObject);
 begin
   fToolProc.OutputStack.Position := 0;
   fTodos.loadFromTxtStream(fToolProc.OutputStack);
-
-  // TODO-cmaintenance: remove this from version 3 gold
-  tryRaiseFromStdErr(fToolProc);
-
   fillTodoList;
   fToolProc.OnTerminate := nil;
 end;
