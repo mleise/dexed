@@ -22,6 +22,11 @@ type
 
   TCEApplicationOptions = class;
 
+  TAnchorDockSplitterEx = class(TAnchorDockSplitter)
+  public
+    property OnMouseWheel;
+  end;
+
   TAsyncWait = (awNo, awYes, awCustom);
 
   TRunnableToFolderCondition = (
@@ -1343,6 +1348,7 @@ begin
   accept := GetKeyShiftState = [ssCtrl];
 end;
 
+//TODO-cdocking: remove the usage of TAnchorDockSplitterEx from Laz 1.8 RC1 (OnMouseWheel public)
 procedure TCEMainForm.DockSplitterMw(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 var
   offs: integer;
@@ -1378,10 +1384,10 @@ begin
         if site is TAnchorDockHostSite then
         begin
           if TAnchorDockHostSite(site).BoundSplitter.isNotNil then
-            TSplitter(TAnchorDockHostSite(site).BoundSplitter).OnMouseWheel:=@DockSplitterMw;
+            TAnchorDockSplitterEx(TAnchorDockHostSite(site).BoundSplitter).OnMouseWheel:=@DockSplitterMw;
         end
         else if site is TAnchorDockSplitter then
-          TSplitter(TAnchorDockSplitter(site)).OnMouseWheel:=@DockSplitterMw;
+          TAnchorDockSplitterEx(TAnchorDockSplitter(site)).OnMouseWheel:=@DockSplitterMw;
       end;
   end;
 end;
