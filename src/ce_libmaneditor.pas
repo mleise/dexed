@@ -131,7 +131,8 @@ end;
 
 procedure TCELibManEditorWidget.projClosing(project: ICECommonProject);
 begin
-  fProj := nil;
+  if fProj = project then
+    fProj := nil;
   if project = fFreeProj then
     fFreeProj := nil;
   updateButtonsState;
@@ -699,6 +700,7 @@ begin
     exit;
   LibMan.libraries.Delete(List.Selected.Index);
   List.Items.Delete(List.Selected.Index);
+  updateButtonsState;
 end;
 
 procedure TCELibManEditorWidget.btnSelProjClick(Sender: TObject);
