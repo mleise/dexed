@@ -146,6 +146,7 @@ type
     procedure copyColumn(sender: TObject);
     procedure copyAll(sender: TObject);
     procedure copyAllAsList(sender: TObject);
+    procedure copyAllAsMarkdown(sender: TObject);
   public
     constructor create(aOwner: TComponent); override;
   end;
@@ -668,6 +669,11 @@ begin
   itm.Caption := 'copy all as list';
   itm.OnClick := @copyAllAsList;
   items.Add(itm);
+
+  itm := TMenuItem.Create(self);
+  itm.Caption := 'copy all as markdown table';
+  itm.OnClick := @copyAllAsMarkdown;
+  items.Add(itm);
 end;
 
 function TCEListViewCopyMenu.getColumnIndex: integer;
@@ -810,6 +816,28 @@ begin
       s += LineEnding + LineEnding;
   end;
 
+  clipboard.AsText := s;
+end;
+
+procedure TCEListViewCopyMenu.copyAllAsMarkdown(sender: TObject);
+var
+  s: string = '';
+  c: integer;
+  i: integer;
+begin
+  c := fList.Items.Count - 1;
+  for i:= 0 to fList.ColumnCount-1 do
+    s += '| ' + fList.Column[i].Caption;
+  s += LineEnding;
+  for i:= 0 to fList.ColumnCount-1 do
+    s += '| ---';
+  s += LineEnding;
+  for i := 0 to c do
+  begin
+    s += getLine(fList.Items[i]);
+    if i <> c then
+      s += LineEnding;
+  end;
   clipboard.AsText := s;
 end;
 
