@@ -333,7 +333,7 @@ begin
       TCEDubProject(fProject.getProject).updateSourcesList;
   end
   else TCEDubProject(fProject.getProject).updateSourcesList;
-  updateImperative;
+  //updateImperative;
 end;
 
 procedure TCEProjectInspectWidget.btnAddFileClick(Sender: TObject);
@@ -500,7 +500,10 @@ var
   conf: string;
   itm: TTreeNode;
   i,j: integer;
+  sel: string = '';
 begin
+  if Tree.Selected.isNotNil then
+    sel := Tree.Selected.GetTextPath;
   fConfNode.DeleteChildren;
   fFileNode.DeleteChildren;
 
@@ -531,6 +534,15 @@ begin
     begin
       itm.ImageIndex := 3;
       itm.SelectedIndex:= 3;
+    end;
+  end;
+  if sel.isNotEmpty then
+  begin
+    itm := Tree.Items.FindNodeWithTextPath(sel);
+    if itm.isNotNil then
+    begin
+      itm.Selected := true;
+      itm.MakeVisible;
     end;
   end;
   Tree.EndUpdate;

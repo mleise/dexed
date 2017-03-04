@@ -30,6 +30,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         BorderSpacing.Around = 2
         DefaultItemHeight = 16
         DragMode = dmAutomatic
+        HideSelection = False
         Images = imgList
         ReadOnly = True
         RightClickSelect = True
@@ -41,7 +42,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         OnDeletion = TreeDeletion
         OnKeyDown = TreeKeyDown
         OnSelectionChanged = TreeSelectionChanged
-        Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowLines, tvoThemedDraw]
+        Options = [tvoAutoExpand, tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowLines, tvoThemedDraw]
         Items.Data = {
           F9FFFFFF020002000000000000000000000000000000FFFFFFFF000000000000
           0000000C000000536F757263652066696C6573010000000100000001000000FF
