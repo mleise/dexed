@@ -899,7 +899,7 @@ function shellOpen(const fname: string; wait: boolean = true): boolean;
 begin
   {$IFDEF WINDOWS}
   result := ShellExecute(0, 'OPEN', PChar(fname), nil, nil, SW_SHOW) > 32;
-  {$ENDIF}
+  {$ELSE}
   with TProcess.Create(nil) do
   try
     {$IFDEF LINUX}
@@ -918,6 +918,7 @@ begin
     result := true;
     Free;
   end;
+  {$ENDIF}
 end;
 
 function exeInSysPath(fname: string): boolean;
