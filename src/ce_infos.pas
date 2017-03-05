@@ -199,6 +199,10 @@ begin
     free;
   end;
   //
+  itm := TToolInfo.Construct(self, tikOptional, 'diff',
+      'The diff tool as included in linux or msysgit');
+  itm.Parent := boxTools;
+  itm.ReAlign;
   {$IFDEF UNIX}
   itm := TToolInfo.Construct(self, tikOptional, 'gdb',
       'optional, the GNU debugger');

@@ -244,7 +244,7 @@
         <PackageName Value="LCL"/>
       </Item7>
     </RequiredPackages>
-    <Units Count="56">
+    <Units Count="58">
       <Unit0>
         <Filename Value="coedit.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -533,6 +533,18 @@
         <Filename Value="..\src\ce_halstead.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit55>
+      <Unit56>
+        <Filename Value="..\src\ce_diff.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="..\src\ce_diff.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CEDiffViewer"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit57>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

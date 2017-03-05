@@ -9,10 +9,11 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
+  md5,
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
-  ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer;
+  ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer, ce_diff;
 
 type
 
@@ -1127,7 +1128,8 @@ var
   numSpac: integer = 0;
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
-      exit;
+    exit;
+
   i := CaretY - 1;
   while true do
   begin
@@ -2352,30 +2354,49 @@ end;
 
 procedure TCESynMemo.checkFileDate;
 var
+  mr: TModalResult;
   newDate: double;
+  newMd5: TMDDigest;
+  curMd5: TMDDigest;
   str: TStringList;
+  txt: string;
 begin
-  if fFilename = fTempFileName then exit;
-  if fDisableFileDateCheck then exit;
-  if not FileAge(fFilename, newDate) then exit;
-  if fFileDate = newDate then exit;
-  if fFileDate <> 0.0 then
+  if (fFilename = fTempFileName) or fDisableFileDateCheck
+  or not FileAge(fFilename, newDate) or (fFileDate = newDate) then
+    exit;
+  if (fFileDate <> 0.0) then
   begin
-    // note: this could cause a bug during the DST switch.
-    // e.g: save at 2h59, 3h00 reset to 2h00, set the focus on the doc: new version message.
-    if dlgYesNo(format('"%s" has been modified by another program, load the new version ?',
-      [shortenPath(fFilename, 25)])) = mrYes then
-    begin
-      str := TStringList.Create;
-      try
-        str.LoadFromFile(fFilename);
-        replaceUndoableContent(str.strictText);
-      finally
-        str.Free;
+    str := TStringList.Create;
+    try
+      str.LoadFromFile(fFilename);
+      txt := str.strictText;
+      newMd5 := MD5String(txt);
+      txt := lines.strictText;
+      curMd5 := MD5String(txt);
+      if not MDMatch(curMd5, newMd5) then
+      begin
+        lines.SaveToFile(tempFilename);
+        With TCEDiffViewer.construct(fTempFileName, fFilename) do
+        try
+          mr := ShowModal;
+          case mr of
+            mrOK:
+            begin
+              replaceUndoableContent(str.strictText);
+              fFileDate := newDate;
+            end;
+            mrIgnore: fFileDate := newDate;
+            mrCancel:;
+          end;
+        finally
+          free;
+        end;
       end;
+    finally
+      str.Free;
     end;
-  end;
-  fFileDate := newDate;
+  end
+  else fFileDate := newDate;
 end;
 
 function TCESynMemo.getMouseBytePosition: Integer;
