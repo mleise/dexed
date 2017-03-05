@@ -17,7 +17,7 @@ object CEDiffViewer: TCEDiffViewer
     Font.Height = -15
     Font.Name = 'DejaVu Sans Mono'
     Font.Pitch = fpFixed
-    Font.Quality = fqAntialiased
+    Font.Quality = fqProof
     ParentColor = False
     ParentFont = False
     TabOrder = 0
