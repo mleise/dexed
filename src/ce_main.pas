@@ -16,7 +16,7 @@ uses
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor,{$IFDEF UNIX} ce_gdb,{$ENDIF}
   ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange, ce_dastworx,
-  ce_halstead;
+  ce_halstead, ce_profileviewer;
 
 type
 
@@ -377,7 +377,8 @@ type
     {$IFDEF UNIX}
     fGdbWidg: TCEGdbWidget;
     {$ENDIF}
-    fDfmtWidg:  TCEDfmtWidget;
+    fDfmtWidg: TCEDfmtWidget;
+    fProfWidg: TCEProfileViewerWidget;
     fCompStart: TDateTime;
 
     fRunProjAfterCompArg: boolean;
@@ -1297,6 +1298,7 @@ begin
   fDubProjWidg:= TCEDubProjectEditorWidget.create(self);
   fDfmtWidg   := TCEDfmtWidget.create(self);
   fPrjGrpWidg := TCEProjectGroupWidget.create(self);
+  fProfWidg   := TCEProfileViewerWidget.create(self);
   {$IFDEF UNIX}
   fGdbWidg    := TCEGdbWidget.create(self);
   {$ENDIF}
@@ -1319,6 +1321,7 @@ begin
   fWidgList.addWidget(@fDubProjWidg);
   fWidgList.addWidget(@fDfmtWidg);
   fWidgList.addWidget(@fPrjGrpWidg);
+  fWidgList.addWidget(@fProfWidg);
   {$IFDEF UNIX}
   fWidgList.addWidget(@fGdbWidg);
   {$ENDIF}

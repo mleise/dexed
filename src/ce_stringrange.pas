@@ -75,6 +75,9 @@ type
     // advances the range until the front is equal to value.
     function popUntil(value: Char): PStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
 
+    // advances the range until the beginning of the next line.
+    function popLine: PStringRange; {$IFNDEF DEBUG}inline;{$ENDIF}
+
     // returns the next word.
     function nextWord: string; {$IFNDEF DEBUG}inline;{$ENDIF}
     // returns the next line.
@@ -264,6 +267,14 @@ begin
       break;
     popFront;
   end;
+  Result := @self;
+end;
+
+function TStringRange.popLine: PStringRange;
+begin
+  popUntil(#10);
+  if not empty then
+    popFront;
   Result := @self;
 end;
 

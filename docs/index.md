@@ -62,6 +62,7 @@ _Description of each widget._
 * [Mini explorer](widgets_mini_explorer)
 * [Messages](widgets_messages)
 * [Options editor](widgets_options_editor)
+* [Profile viewer](widgets_profile_viewer)
 * [Project groups](widgets_project_groups)
 * [Project inspector](widgets_project_inspector)
 * [Process input](widgets_process_input)
