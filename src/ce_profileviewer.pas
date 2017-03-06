@@ -241,15 +241,13 @@ end;
 
 procedure TCEProfileViewerWidget.listCompare(Sender: TObject; item1, item2: TListItem; Data: Integer; var Compare: Integer);
 var
-  txt1: string = '';
-  txt2: string = '';
   i1, i2: qword;
   col: Integer;
 begin
   col := list.SortColumn;
   if col = 4 then
   begin
-    Compare := AnsiCompareStr(txt1, txt2);
+    Compare := AnsiCompareStr(item1.SubItems[3], item2.SubItems[3]);
   end
   else
   begin
