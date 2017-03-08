@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, TASources, TAGraph, TATransformations, TASeries,
   TATools, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus, ComCtrls,
-  StdCtrls, ce_widget, ce_common, ce_stringrange, ce_dsgncontrols, ce_ddemangle;
+  StdCtrls, TALegend, TADrawUtils, math,
+  ce_widget, ce_common, ce_stringrange, ce_dsgncontrols, ce_ddemangle;
 
 type
 
@@ -15,10 +16,10 @@ type
     btnOpen: TCEToolButton;
     btnRefresh: TCEToolButton;
     button0: TCEToolButton;
+    ChartToolset1: TChartToolset;
+    ChartToolset1DataPointHintTool1: TDataPointHintTool;
+    ImageList1: TImageList;
     selPieSource: TComboBox;
-    pieTools: TChartToolset;
-    pieToolsPanDragTool1: TPanDragTool;
-    pieToolsZoomMouseWheelTool1: TZoomMouseWheelTool;
     datNumCalls: TListChartSource;
     datTreeTime: TListChartSource;
     datFuncTime: TListChartSource;
@@ -30,11 +31,18 @@ type
     Splitter1: TSplitter;
     procedure btnOpenClick(Sender: TObject);
     procedure btnRefreshClick(Sender: TObject);
+    procedure pieDrawLegend(ASender: TChart; ADrawer: IChartDrawer;
+      ALegendItems: TChartLegendItems; ALegendItemSize: TPoint;
+      const ALegendRect: TRect; AColCount, ARowCount: Integer);
+    procedure pieSeriesGetMark(out AFormattedMark: String; AIndex: Integer);
     procedure selPieSourceSelect(Sender: TObject);
     procedure selPieSourceSelectionChange(Sender: TObject; User: boolean);
+    procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer;
+      var Accept: Boolean);
     procedure Splitter1Moved(Sender: TObject);
   private
     logFname: string;
+    procedure updateIcons;
     procedure clearViewer;
     procedure updateFromFile(const fname: string);
     procedure updatePie;
@@ -52,6 +60,7 @@ begin
   clearViewer;
   updatePie;
   list.OnCompare:=@listCompare;
+  selPieSourceSelect(nil);
 end;
 
 procedure TCEProfileViewerWidget.btnRefreshClick(Sender: TObject);
@@ -71,9 +80,29 @@ begin
   end;
 end;
 
+procedure TCEProfileViewerWidget.pieDrawLegend(ASender: TChart;
+  ADrawer: IChartDrawer; ALegendItems: TChartLegendItems;
+  ALegendItemSize: TPoint; const ALegendRect: TRect; AColCount,
+  ARowCount: Integer);
+begin
+
+end;
+
+procedure TCEProfileViewerWidget.pieSeriesGetMark(out AFormattedMark: String;
+  AIndex: Integer);
+begin
+
+end;
+
 procedure TCEProfileViewerWidget.selPieSourceSelect(Sender: TObject);
 begin
-  updatePie;
+  case selPieSource.ItemIndex of
+    1: pieSeries.Source := datTreeTime;
+    2: pieSeries.Source := datFuncTime;
+    3: pieSeries.Source := datPerCall;
+    else pieSeries.Source := datNumCalls;
+  end;
+  updateIcons;
 end;
 
 procedure TCEProfileViewerWidget.btnOpenClick(Sender: TObject);
@@ -94,18 +123,19 @@ end;
 
 procedure TCEProfileViewerWidget.updatePie;
 begin
-  case selPieSource.ItemIndex of
-    1: pieSeries.ListSource.DataPoints.Assign(datTreeTime.DataPoints);
-    2: pieSeries.ListSource.DataPoints.Assign(datFuncTime.DataPoints);
-    3: pieSeries.ListSource.DataPoints.Assign(datPerCall.DataPoints);
-    else pieSeries.ListSource.DataPoints.Assign(datNumCalls.DataPoints);
-  end;
-  pieSeries.FixedRadius:= pie.Height div 2 - 10;
+  pieSeries.FixedRadius:= max(1, pie.Height div 2 - 10);
 end;
 
 procedure TCEProfileViewerWidget.selPieSourceSelectionChange(Sender: TObject;User: boolean);
 begin
   updatePie;
+end;
+
+procedure TCEProfileViewerWidget.Splitter1CanResize(Sender: TObject;
+  var NewSize: Integer; var Accept: Boolean);
+begin
+  if accept then
+    updatePie;
 end;
 
 procedure TCEProfileViewerWidget.Splitter1Moved(Sender: TObject);
@@ -123,6 +153,33 @@ begin
   datPerCall.Clear;
 end;
 
+procedure TCEProfileViewerWidget.updateIcons;
+var
+  b: TBitmap;
+  i: integer;
+begin
+  ImageList1.Clear;
+  b := TBitmap.Create;
+  try
+    for i:= 0 to pieSeries.Count-1 do
+    begin
+      b.SetSize(12,12);
+      b.Canvas.Brush.Color := pieSeries.GetColor(i);
+      b.Canvas.Pen.Color:= clblack;
+      b.Canvas.Brush.Style := bsSolid;
+      b.Canvas.Pen.Style := psSolid;
+      b.Canvas.Pen.Width := 1;
+      b.Transparent := false;
+      b.Canvas.Rectangle(Rect(0,0,12,12));
+      ImageList1.Add(b, nil);
+      list.Items.Item[i].ImageIndex:=i;
+      b.Clear;
+    end;
+  finally
+    b.Free;
+  end;
+end;
+
 procedure TCEProfileViewerWidget.updateFromFile(const fname: string);
 var
   log: string;
@@ -137,17 +194,20 @@ var
   procedure fillRow();
   var
     itm: TListItem;
+    c: TColor;
   begin
-    list.AddItem(fnc.ToString, nil);
+    list.AddItem('', nil);
     itm := list.Items[list.Items.Count-1];
+    itm.SubItems.Add(fnc.ToString);
     itm.SubItems.Add(fft.ToString);
     itm.SubItems.Add(ftt.ToString);
     itm.SubItems.Add(fpc.ToString);
     itm.SubItems.Add(idt);
-    datNumCalls.Add(100, fnc, idt);
-    datFuncTime.Add(100, fft, idt);
-    datTreeTime.Add(100, ftt, idt);
-    datPerCall.Add(100, fpc, idt);
+    c := Random($70F0F0F0) + $F0F0F0F;
+    datNumCalls.Add(0, fnc, idt, c);
+    datFuncTime.Add(0, fft, idt, c);
+    datTreeTime.Add(0, ftt, idt, c);
+    datPerCall.Add(0, fpc, idt, c);
   end;
 
 begin
@@ -235,7 +295,7 @@ begin
   end;
 
   list.EndUpdate;
-  updatePie;
+  selPieSourceSelect(nil);
 
 end;
 
@@ -245,26 +305,18 @@ var
   col: Integer;
 begin
   col := list.SortColumn;
-  if col = 4 then
+  if col = 5 then
   begin
     Compare := AnsiCompareStr(item1.SubItems[3], item2.SubItems[3]);
   end
-  else
+  else if col <> 0 then
   begin
-    if col = 0 then
-    begin
-      i1 := item1.Caption.ToInt64;
-      i2 := item2.Caption.ToInt64;
-    end
-    else
-    begin
-      i1 := item1.SubItems[col-1].ToInt64;
-      i2 := item2.SubItems[col-1].ToInt64;
-    end;
-    if (i1 = i2)
-      then Compare := 0
-    else if (i1 < i2)
-      then Compare := -1
+    i1 := item1.SubItems[col-1].ToInt64;
+    i2 := item2.SubItems[col-1].ToInt64;
+    if (i1 = i2) then
+      Compare := 0
+    else if (i1 < i2) then
+      Compare := -1
     else
       Compare := 1;
   end;

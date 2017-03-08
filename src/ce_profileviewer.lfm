@@ -26,31 +26,38 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         Columns = <        
           item
             AutoSize = True
+            MaxWidth = 18
+            MinWidth = 18
+            Width = 18
+          end        
+          item
+            AutoSize = True
             Caption = 'Num calls'
             Width = 71
           end        
           item
             AutoSize = True
             Caption = 'Tree time'
-            Width = 67
-          end        
-          item
-            AutoSize = True
-            Caption = 'Func time'
             Width = 72
           end        
           item
             AutoSize = True
-            Caption = 'Per call'
+            Caption = 'Func time'
             Width = 55
           end        
           item
             AutoSize = True
+            Caption = 'Per call'
+            Width = 62
+          end        
+          item
+            AutoSize = True
             Caption = 'function'
-            Width = 274
+            Width = 261
           end>
         ReadOnly = True
         ScrollBars = ssAutoBoth
+        SmallImages = ImageList1
         SortType = stText
         TabOrder = 0
         ViewStyle = vsReport
@@ -90,7 +97,8 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
           Title.Text.Strings = (
             'TAChart'
           )
-          Toolset = pieTools
+          Toolset = ChartToolset1
+          OnDrawLegend = pieDrawLegend
           Align = alClient
           BorderSpacing.Around = 2
           object pieSeries: TPieSeries
@@ -100,7 +108,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
             Marks.Shape = clsRoundRect
             Marks.Format = '%2:s %1:.2f%%'
             Marks.Style = smsLabelPercent
-            FixedRadius = 100
+            Exploded = True
             MarkPositions = pmpLeftRight
           end
         end
@@ -112,6 +120,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         Top = 204
         Width = 551
         Align = alTop
+        OnCanResize = Splitter1CanResize
         OnMoved = Splitter1Moved
         ResizeAnchor = akTop
       end
@@ -168,38 +177,37 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
     end
   end
   inherited contextMenu: TPopupMenu
-    left = 16
-    top = 152
+    left = 8
+    top = 48
   end
-  object pieTools: TChartToolset[2]
-    left = 192
-    top = 112
-    object pieToolsZoomMouseWheelTool1: TZoomMouseWheelTool
-      ZoomFactor = 2
-      ZoomRatio = 2
-    end
-    object pieToolsPanDragTool1: TPanDragTool
-      Shift = [ssRight]
-    end
-  end
-  object datNumCalls: TListChartSource[3]
+  object datNumCalls: TListChartSource[2]
     Sorted = True
     left = 192
     top = 56
   end
-  object datTreeTime: TListChartSource[4]
+  object datTreeTime: TListChartSource[3]
     Sorted = True
     left = 232
     top = 56
   end
-  object datFuncTime: TListChartSource[5]
+  object datFuncTime: TListChartSource[4]
     Sorted = True
     left = 272
     top = 56
   end
-  object datPerCall: TListChartSource[6]
+  object datPerCall: TListChartSource[5]
     Sorted = True
     left = 312
     top = 56
+  end
+  object ImageList1: TImageList[6]
+    left = 192
+    top = 120
+  end
+  object ChartToolset1: TChartToolset[7]
+    left = 232
+    top = 120
+    object ChartToolset1DataPointHintTool1: TDataPointHintTool
+    end
   end
 end
