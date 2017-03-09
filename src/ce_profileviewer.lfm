@@ -28,34 +28,36 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
             AutoSize = True
             MaxWidth = 18
             MinWidth = 18
-            Width = 18
+            Width = 0
           end        
           item
             AutoSize = True
             Caption = 'Num calls'
-            Width = 71
+            Width = 68
           end        
           item
             AutoSize = True
             Caption = 'Tree time'
-            Width = 72
+            Width = 65
           end        
           item
             AutoSize = True
             Caption = 'Func time'
-            Width = 55
+            Width = 68
           end        
           item
             AutoSize = True
             Caption = 'Per call'
-            Width = 62
+            Width = 53
           end        
           item
             AutoSize = True
             Caption = 'function'
-            Width = 261
+            Width = 60
           end>
+        HideSelection = False
         ReadOnly = True
+        RowSelect = True
         ScrollBars = ssAutoBoth
         SmallImages = ImageList1
         SortType = stText
@@ -98,7 +100,6 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
             'TAChart'
           )
           Toolset = ChartToolset1
-          OnDrawLegend = pieDrawLegend
           Align = alClient
           BorderSpacing.Around = 2
           object pieSeries: TPieSeries
@@ -156,12 +157,12 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
       end
       object selPieSource: TComboBox[3]
         Left = 70
-        Height = 28
+        Height = 23
         Hint = 'select the pie representation'
         Top = 0
         Width = 154
         BorderSpacing.InnerBorder = 3
-        ItemHeight = 0
+        ItemHeight = 15
         ItemIndex = 0
         Items.Strings = (
           'Number of calls'

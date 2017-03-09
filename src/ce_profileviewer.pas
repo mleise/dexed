@@ -31,10 +31,6 @@ type
     Splitter1: TSplitter;
     procedure btnOpenClick(Sender: TObject);
     procedure btnRefreshClick(Sender: TObject);
-    procedure pieDrawLegend(ASender: TChart; ADrawer: IChartDrawer;
-      ALegendItems: TChartLegendItems; ALegendItemSize: TPoint;
-      const ALegendRect: TRect; AColCount, ARowCount: Integer);
-    procedure pieSeriesGetMark(out AFormattedMark: String; AIndex: Integer);
     procedure selPieSourceSelect(Sender: TObject);
     procedure selPieSourceSelectionChange(Sender: TObject; User: boolean);
     procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer;
@@ -78,20 +74,6 @@ begin
       logFname:=fname;
     end;
   end;
-end;
-
-procedure TCEProfileViewerWidget.pieDrawLegend(ASender: TChart;
-  ADrawer: IChartDrawer; ALegendItems: TChartLegendItems;
-  ALegendItemSize: TPoint; const ALegendRect: TRect; AColCount,
-  ARowCount: Integer);
-begin
-
-end;
-
-procedure TCEProfileViewerWidget.pieSeriesGetMark(out AFormattedMark: String;
-  AIndex: Integer);
-begin
-
 end;
 
 procedure TCEProfileViewerWidget.selPieSourceSelect(Sender: TObject);
@@ -158,6 +140,8 @@ var
   b: TBitmap;
   i: integer;
 begin
+  list.SmallImages := nil;
+  ImageList1.BeginUpdate;
   ImageList1.Clear;
   b := TBitmap.Create;
   try
@@ -177,6 +161,8 @@ begin
     end;
   finally
     b.Free;
+    ImageList1.EndUpdate;
+    list.SmallImages := ImageList1;
   end;
 end;
 
