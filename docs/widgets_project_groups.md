@@ -9,7 +9,7 @@ title: Widgets - project groups
 #### Description
 
 Project groups allow to work with several projects. It's easier to activate one, to recompile it and to go back to another one. 
-A group can include any project whose the format is handled by Coedit (Dub JSON, Sub SDL and CE formats).
+A group can include any project whose the format is handled by Coedit (Dub JSON, Dub SDL and CE formats).
 
 Another interesting feature is that the groups can be build by a single click, in parallel, sequentially or using wait points which are defined for each item in the group. When working with static libraries, this system allows faster builds.
 
