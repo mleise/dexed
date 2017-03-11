@@ -113,7 +113,7 @@ end;
 
 function demangle(const value: string): string;
 begin
-  if demangler.active then
+  if demangler.active and (pos('_D', value) <> -1) then
   begin
     demangler.output.Clear;
     demangler.demangle(value);
