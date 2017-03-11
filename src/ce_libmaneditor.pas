@@ -6,11 +6,11 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Menus, ComCtrls, Buttons, LazFileUtils, fphttpclient, StdCtrls,
+  Menus, ComCtrls, Buttons, LazFileUtils, fphttpclient, StdCtrls, math,
   fpjson, jsonparser,
   ce_widget, ce_interfaces, ce_ceproject, ce_dmdwrap, ce_common, ce_dialogs,
   ce_sharedres, process, ce_dubproject, ce_observer, ce_libman,
-  ce_projutils, ce_dsgncontrols;
+  ce_projutils, ce_dsgncontrols, ce_controls;
 
 type
 
@@ -33,7 +33,6 @@ type
     property packageVersion: string read getPackageVersion;
   end;
 
-  { TCELibManEditorWidget }
   TCELibManEditorWidget = class(TCEWidget, ICEProjectObserver)
     btnAddLib: TCEToolButton;
     btnDubFetch: TCEToolButton;
@@ -76,7 +75,6 @@ type
     procedure projCompiled(project: ICECommonProject; success: boolean);
     function  itemForRow(row: TListItem): TLibraryItem;
     procedure RowToLibrary(row: TListItem; added: boolean = false);
-    //
     procedure dataToGrid;
   protected
     procedure DoShow; override;
@@ -84,12 +82,9 @@ type
     constructor Create(aOwner: TComponent); override;
   end;
 
-  // determine the root of a library, according to the module names
-  //function sourceRoot(project: ICECommonProject): string;
 
 implementation
 {$R *.lfm}
-
 
 const
   notav: string = '< n/a >';
@@ -98,6 +93,7 @@ const
 constructor TCELibManEditorWidget.Create(aOwner: TComponent);
 begin
   inherited;
+  TCEListViewCopyMenu.create(List);
 end;
 
 procedure TCELibManEditorWidget.updateButtonsState;
@@ -125,7 +121,7 @@ begin
   if fProj = nil then exit;
   if fProj <> project then
     exit;
-  //
+
   updateButtonsState;
 end;
 
@@ -582,26 +578,22 @@ var
 begin
   if List.Selected.isNil then
     exit;
+
   al := List.Selected.Caption;
-  if (al = 'phobos') or (al = 'druntime') then
+  if inputQuery('library alias', '', al) then
   begin
-    dlgOkInfo('phobos and druntime cannot be renamed');
-  end else
-  begin
-    if inputQuery('library alias', '', al) then
+    for i := 0 to LibMan.librariesCount-1 do
+      if (LibMan.libraryByIndex[i].libAlias = al) and
+        (LibMan.libraryByIndex[i] <> itemForRow(List.Selected)) then
     begin
-      for i := 0 to LibMan.librariesCount-1 do
-        if (LibMan.libraryByIndex[i].libAlias = al) and
-          (LibMan.libraryByIndex[i] <> itemForRow(List.Selected)) then
-      begin
-        dlgOkError('This alias is already used by another library, the renaming is canceled');
-        exit;
-      end;
-      List.Selected.Caption := al;
-      LibMan.updateItemsByAlias;
-      RowToLibrary(List.Selected);
+      dlgOkError('This alias is already used by another library, the renaming is canceled');
+      exit;
     end;
+    List.Selected.Caption := al;
+    LibMan.updateItemsByAlias;
+    RowToLibrary(List.Selected);
   end;
+
 end;
 
 procedure TCELibManEditorWidget.btnEnabledClick(Sender: TObject);
@@ -622,10 +614,12 @@ var
   fname: string;
   fmt: TCEProjectFileFormat;
 begin
-  if List.Selected.isNil then exit;
+  if List.Selected.isNil then
+    exit;
   fname := List.Selected.SubItems[2];
-  if not fname.fileExists then exit;
-  //
+  if not fname.fileExists then
+    exit;
+
   fmt := projectFormat(fname);
   if fmt in [pffCe, pffDub] then
   begin
@@ -652,8 +646,9 @@ var
   lalias: string;
   row: TListItem;
 begin
-  if fProj = nil then exit;
-  //
+  if fProj = nil then
+    exit;
+
   fname := fProj.filename;
   lalias := ExtractFileNameOnly(fname);
   if List.Items.findCaption(lalias, row) then
@@ -662,7 +657,7 @@ begin
       [lalias]));
     exit;
   end;
-  //
+
   str := TStringList.Create;
   try
     root := projectSourcePath(fProj);
@@ -671,7 +666,7 @@ begin
       dlgOkInfo('the static library can not be registered because its source files have no common folder');
       exit;
     end;
-    //
+
     fname := fProj.outputFilename;
     row := List.Items.Add;
     row.Data := LibMan.libraries.Add;
@@ -698,6 +693,7 @@ procedure TCELibManEditorWidget.btnRemLibClick(Sender: TObject);
 begin
   if List.Selected.isNil then
     exit;
+
   LibMan.libraries.Delete(List.Selected.Index);
   List.Items.Delete(List.Selected.Index);
   updateButtonsState;
@@ -713,6 +709,7 @@ begin
   ini := List.Selected.SubItems[2];
   with TOpenDialog.Create(nil) do
   try
+    Title := 'Select the project that compiles the library';
     FileName := ini;
     if Execute then
       List.Selected.SubItems[2] := FileName.normalizePath;
@@ -732,6 +729,7 @@ begin
   ini := List.Selected.SubItems[0];
   with TOpenDialog.Create(nil) do
   try
+    Title := 'Select the static library file';
     filename := ini;
     if Execute then
     begin
@@ -775,7 +773,7 @@ begin
   with TSelectDirectoryDialog.Create(nil) do
   try
     InitialDir:= dir;
-    Caption := 'sources root';
+    Title := 'Select the root of the sources';
     Options := options + [ofNoDereferenceLinks, ofForceShowHidden];
     if execute then
       List.Selected.SubItems[1] := FileName;
@@ -789,9 +787,7 @@ procedure TCELibManEditorWidget.btnMoveUpClick(Sender: TObject);
 var
   i: integer;
 begin
-  if list.Selected.isNil then
-    exit;
-  if list.Selected.Index = 0 then
+  if list.Selected.isNil or (list.Selected.Index = 0) then
     exit;
 
   i := list.Selected.Index;
@@ -803,9 +799,7 @@ procedure TCELibManEditorWidget.btnMoveDownClick(Sender: TObject);
 var
   i: integer;
 begin
-  if list.Selected.isNil then
-    exit;
-  if list.Selected.Index = list.Items.Count - 1 then
+  if list.Selected.isNil or (list.Selected.Index = list.Items.Count - 1) then
     exit;
 
   i := list.Selected.Index;
@@ -827,6 +821,7 @@ var
 begin
   if LibMan.isNil then
     exit;
+
   List.BeginUpdate;
   List.Clear;
   for i := 0 to LibMan.libraries.Count - 1 do

@@ -1,7 +1,7 @@
 inherited CELibManEditorWidget: TCELibManEditorWidget
-  Left = 790
+  Left = 1051
   Height = 297
-  Top = 274
+  Top = 0
   Width = 641
   Caption = 'Library manager'
   ClientHeight = 297
@@ -25,29 +25,24 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         BorderSpacing.Around = 4
         Columns = <        
           item
-            AutoSize = True
             Caption = 'Alias'
-            Width = 39
+            Width = 100
           end        
           item
-            AutoSize = True
             Caption = 'Library file or folder of sources'
-            Width = 195
+            Width = 230
           end        
           item
-            AutoSize = True
             Caption = 'Sources root'
-            Width = 88
+            Width = 230
           end        
           item
-            AutoSize = True
             Caption = 'project'
-            Width = 54
+            Width = 230
           end        
           item
-            AutoSize = True
             Caption = 'enabled'
-            Width = 236
+            Width = 30
           end>
         GridLines = True
         HideSelection = False
@@ -191,7 +186,6 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
     end
   end
   inherited contextMenu: TPopupMenu
-    left = 304
-    top = 16
+    left = 400
   end
 end
