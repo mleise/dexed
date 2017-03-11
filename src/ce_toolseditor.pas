@@ -64,7 +64,7 @@ var
 begin
   clearInspector;
   lstTools.Clear;
-  //
+
   for i := 0 to CustomTools.tools.Count-1 do
     lstTools.AddItem(CustomTools[i].toolAlias, nil);
   if lstTools.Count > 0 then
@@ -93,6 +93,7 @@ procedure TCEToolsEditorWidget.propsEdModified(Sender: TObject);
 begin
   if propsEd.ItemIndex = -1 then
     exit;
+
   if (propsEd.Rows[propsEd.ItemIndex].Name = 'toolAlias')
   or (propsEd.Rows[propsEd.ItemIndex].Name = 'shortcut') then
     updateToolList;
@@ -110,6 +111,7 @@ var
 begin
   if lstTools.ItemIndex = -1 then
     exit;
+
   itm := CustomTools.addTool;
   itm.Assign(CustomTools[lstTools.ItemIndex]);
   itm.toolAlias := itm.toolAlias + ' (copy)';
@@ -120,6 +122,7 @@ procedure TCEToolsEditorWidget.btnRemToolClick(Sender: TObject);
 begin
   if lstTools.ItemIndex = -1 then
     exit;
+
   clearInspector;
   CustomTools.tools.Delete(lstTools.ItemIndex);
   rebuildToolList;
@@ -127,9 +130,9 @@ end;
 
 procedure TCEToolsEditorWidget.btnMoveUpClick(Sender: TObject);
 begin
-  if lstTools.ItemIndex = -1 then exit;
-  if lstTools.ItemIndex = 0 then exit;
-  //
+  if lstTools.ItemIndex < 1 then
+    exit;
+
   CustomTools.tools.Exchange(lstTools.ItemIndex, lstTools.ItemIndex - 1);
   lstTools.ItemIndex := lstTools.ItemIndex - 1;
   updateToolList;
@@ -137,9 +140,9 @@ end;
 
 procedure TCEToolsEditorWidget.btnMoveDownClick(Sender: TObject);
 begin
-  if lstTools.ItemIndex = -1 then exit;
-  if lstTools.ItemIndex = lstTools.Items.Count-1 then exit;
-  //
+  if (lstTools.ItemIndex = -1) or (lstTools.ItemIndex = lstTools.Items.Count-1) then
+    exit;
+
   CustomTools.tools.Exchange(lstTools.ItemIndex, lstTools.ItemIndex + 1);
   lstTools.ItemIndex := lstTools.ItemIndex + 1;
   updateToolList;
@@ -149,6 +152,7 @@ procedure TCEToolsEditorWidget.executeSelectedTool;
 begin
   if lstTools.ItemIndex = -1 then
     exit;
+
   CustomTools.executeTool(lstTools.ItemIndex);
 end;
 
