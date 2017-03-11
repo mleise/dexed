@@ -27,7 +27,7 @@ type
   published
     property maxCount: Integer read fMaxCount write setMaxCount;
   public
-    constructor Create; virtual;
+    constructor create; virtual;
     procedure Insert(index: Integer; const value: string); override;
     property objectTag: TObject read fObj write fObj;
   end;
@@ -39,6 +39,7 @@ type
   protected
     function checkItem(const value: string): boolean; override;
   public
+    constructor create; override;
     procedure assign(source: TPersistent); override;
   end;
 
@@ -106,7 +107,7 @@ end;
 
 function TCEMruList.checkItem(const value: string): boolean;
 var
-  i: NativeInt;
+  i: integer;
 begin
   i := indexOf(value);
   if i = -1 then
@@ -141,6 +142,14 @@ begin
     exit;
   inherited;
   clearOutOfRange;
+end;
+
+constructor TCEMRUFileList.create;
+begin
+  inherited;
+  {$IFDEF WINDOWS}
+  CaseSensitive := true;
+  {$ENDIF}
 end;
 
 procedure TCEMRUFileList.assign(source: TPersistent);
@@ -224,8 +233,9 @@ procedure TCEMRUProjectList.projClosing(project: ICECommonProject);
 var
   fname: string;
 begin
-  if project = nil then exit;
-  //
+  if project = nil then
+    exit;
+
   fname := project.filename;
   if fname.fileExists then
     Insert(0, fname);

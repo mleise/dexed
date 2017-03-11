@@ -481,7 +481,7 @@ begin
   for i := 0 to PageControl.PageCount-1 do
   begin
     result := getDocument(i);
-    if result.fileName = fname then
+    if SameFileName(result.fileName, fname) then
       exit;
   end;
   result := nil;
