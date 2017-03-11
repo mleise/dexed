@@ -34,6 +34,8 @@ var
 begin
   inherited create(nil);
 
+  editor.Gutter.LineNumberPart.Visible:=false;
+
   p := TProcess.Create(self);
   try
     p.Executable:= 'diff' + exeExt;
