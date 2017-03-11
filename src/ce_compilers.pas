@@ -693,13 +693,42 @@ begin
 end;
 
 procedure TCompilersPathsEditor.autoDetectGDC;
+var
+  path: string;
+  str: TStringList;
 begin
-  //TODO-cCompilerPaths: detect GDC
+  path := exeFullName('gdc' + exeExt);
+  if path.fileExists then
+  begin
+    fPaths.GdcExeName:= path;
+    str := TStringList.Create;
+    try
+      path := path.extractFileDir.extractFilePath;
+      FindAllDirectories(str, path, true);
+      for path in str do
+        if pos('include' + DirectorySeparator + 'd', path) > 0 then
+      begin
+        fPaths.GdcRuntimePath:= path;
+        break;
+      end;
+    finally
+      str.Free;
+    end;
+  end;
 end;
 
 procedure TCompilersPathsEditor.autoDetectLDC;
+var
+  path: string;
 begin
-  //TODO-cCompilerPaths: detect LDC
+  path := exeFullName('ldc2' + exeExt);
+  if path.fileExists then
+  begin
+    fPaths.LdcExeName:= path;
+    path := path.extractFilePath.extractFilePath + DirectorySeparator + 'import';
+    if path.dirExists then
+      fPaths.LdcRuntimePath:=path;
+  end;
 end;
 {$ENDREGION}
 
