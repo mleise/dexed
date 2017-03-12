@@ -6519,6 +6519,7 @@ object CEMainForm: TCEMainForm
     }
   end
   object ApplicationProperties1: TApplicationProperties
+    OnActivate = ApplicationProperties1Activate
     OnException = ApplicationProperties1Exception
     left = 96
     top = 1

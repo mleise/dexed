@@ -286,6 +286,7 @@ type
     procedure actProjSaveGroupExecute(Sender: TObject);
     procedure actProjSelUngroupedExecute(Sender: TObject);
     procedure actSetRunnableSwExecute(Sender: TObject);
+    procedure ApplicationProperties1Activate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure updateDocumentBasedAction(sender: TObject);
     procedure updateProjectBasedAction(sender: TObject);
@@ -2601,6 +2602,12 @@ begin
   fRunnablesOptions.sanitizeSwitches;
 
   form.Free;
+end;
+
+procedure TCEMainForm.ApplicationProperties1Activate(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.checkFileDate;
 end;
 
 function TCEMainForm.compileRunnable(unittest: boolean = false): boolean;
