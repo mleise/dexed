@@ -531,8 +531,9 @@ var
   i, start, prev: Integer;
   itm : TCEFoldCache;
 begin
-  if fMemo.isNil then exit;
-  //
+  if fMemo.isNil then
+    exit;
+
   fCaretPosition := fMemo.SelStart;
   fSourceFilename := fMemo.fileName;
   fSelectionEnd := fMemo.SelEnd;
@@ -563,13 +564,16 @@ var
   i: integer;
   itm : TCEFoldCache;
 begin
-  if fMemo.isNil then exit;
-  //
+  if fMemo.isNil then
+    exit;
+
   if fFontSize > 0 then
     fMemo.Font.Size := fFontSize;
+
   // Currently collisions are not handled.
-  if fMemo.fileName <> fSourceFilename then exit;
-  //
+  if fMemo.fileName <> fSourceFilename then
+    exit;
+
   for i := 0 to fFolds.Count-1 do
   begin
     itm := TCEFoldCache(fFolds.Items[i]);
@@ -577,7 +581,7 @@ begin
       continue;
     fMemo.TextView.FoldAtLine(itm.lineIndex-1);
   end;
-  //
+
   fMemo.SelStart := fCaretPosition;
   fMemo.SelEnd := fSelectionEnd;
 end;
@@ -590,9 +594,9 @@ var
   chksm: Cardinal;
 begin
   tempn := fMemo.fileName;
-  if tempn = fMemo.tempFilename then exit;
-  if not tempn.fileExists then exit;
-  //
+  if (tempn = fMemo.tempFilename) or (not tempn.fileExists) then
+    exit;
+
   fname := getCoeditDocPath + 'editorcache' + DirectorySeparator;
   ForceDirectories(fname);
   chksm := crc32(0, nil, 0);
@@ -608,14 +612,16 @@ var
   chksm: Cardinal;
 begin
   tempn := fMemo.fileName;
-  if not tempn.fileExists then exit;
-  //
+  if not tempn.fileExists then
+    exit;
+
   fname := getCoeditDocPath + 'editorcache' + DirectorySeparator;
   chksm := crc32(0, nil, 0);
   chksm := crc32(chksm, @tempn[1], tempn.length);
   fname := fname + format('%.8X.txt', [chksm]);
-  //
-  if not fname.fileExists then exit;
+
+  if not fname.fileExists then
+    exit;
   loadFromFile(fname);
 end;
 {$IFDEF DEBUG}{$R+}{$ENDIF}
@@ -683,16 +689,16 @@ end;
 constructor TCESynMemo.Create(aOwner: TComponent);
 begin
   inherited;
-  //
+
   OnStatusChange:= @handleStatusChanged;
   fDefaultFontSize := 10;
   Font.Size:=10;
   SetDefaultCoeditKeystrokes(Self); // not called in inherited if owner = nil !
   fLexToks:= TLexTokenList.Create;
-  //
+
   OnDragDrop:= @ddHandler.DragDrop;
   OnDragOver:= @ddHandler.DragOver;
-  //
+
   ShowHint := false;
   InitHintWins;
   fDDocDelay := 200;
@@ -700,13 +706,13 @@ begin
   fDDocTimer.AutoEnabled:=true;
   fDDocTimer.Interval := fDDocDelay;
   fDDocTimer.OnTimer := @DDocTimerEvent;
-  //
+
   fAutoDotDelay := 20;
   fAutoDotTimer := TIdleTimer.Create(self);
   fAutoDotTimer.AutoEnabled:=true;
   fAutoDotTimer.Interval := fAutoDotDelay;
   fAutoDotTimer.OnTimer := @AutoDotTimerEvent;
-  //
+
   Gutter.LineNumberPart.ShowOnlyLineNumbersMultiplesOf := 5;
   Gutter.LineNumberPart.MarkupInfo.Foreground := clWindowText;
   Gutter.LineNumberPart.MarkupInfo.Background := clBtnFace;
@@ -714,12 +720,12 @@ begin
   Gutter.SeparatorPart.LineWidth := 1;
   Gutter.OnGutterClick:= @gutterClick;
   BracketMatchColor.Foreground:=clRed;
-  //
+
   fSyncEdit := TSynPluginSyncroEdit.Create(self);
   fSyncEdit.Editor := self;
   fSyncEdit.CaseSensitive := true;
   AssignPng(fSyncEdit.GutterGlyph, 'LINK_EDIT');
-  //
+
   fCompletion := TSyncompletion.create(nil);
   fCompletion.ShowSizeDrag := true;
   fCompletion.Editor := Self;
@@ -734,23 +740,23 @@ begin
   fCompletion.LinesInWindow:=15;
   fCompletion.Width:= 250;
   fCallTipStrings:= TStringList.Create;
-  //
+
   MouseLinkColor.Style:= [fsUnderline];
   with MouseActions.Add do begin
     Command := emcMouseLink;
     shift := [ssCtrl];
     ShiftMask := [ssCtrl];
   end;
-  //
+
   fD2Highlighter := TSynD2Syn.create(self);
   fTxtHighlighter := TSynTxtSyn.Create(self);
   Highlighter := fD2Highlighter;
-  //
+
   fTempFileName := GetTempDir(false) + 'temp_' + uniqueObjStr(self) + '.d';
   fFilename := '<new document>';
   fModified := false;
   TextBuffer.AddNotifyHandler(senrUndoRedoAdded, @changeNotify);
-  //
+
   fImages := TImageList.Create(self);
   fImages.AddResourceName(HINSTANCE, 'BULLET_RED');
   fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN');
@@ -759,28 +765,28 @@ begin
   fImages.AddResourceName(HINSTANCE, 'STEP');
   fImages.AddResourceName(HINSTANCE, 'CAMERA_GO');
   fBreakPoints := TFPList.Create;
-  //
+
   fPositions := TCESynMemoPositions.create(self);
   fMultiDocSubject := TCEMultiDocSubject.create;
-  //
+
   HighlightAllColor.Foreground := clNone;
   HighlightAllColor.Background := clSilver;
   HighlightAllColor.BackAlpha  := 70;
   IdentifierMatchOptions:= [caseSensitive];
-  //
+
   LineHighlightColor.Background := color - $080808;
   LineHighlightColor.Foreground := clNone;
-  //
+
   //fIndentGuideMarkup:= TSynEditMarkupFoldColors.Create(self);
   //MarkupManager.AddMarkUp(fIndentGuideMarkup);
-  //
+
   fAutoCloseCurlyBrace:= autoCloseOnNewLineLexically;
   fAutoClosedPairs:= [autoCloseSquareBracket];
-  //
+
   fDastWorxExename:= exeFullName('dastworx' + exeExt);
-  //
+
   fDebugger := EntitiesConnector.getSingleService('ICEDebugger') as ICEDebugger;
-  //
+
   subjDocNew(TCEMultiDocSubject(fMultiDocSubject), self);
   EntitiesConnector.addObserver(self);
 end;
@@ -788,7 +794,7 @@ end;
 destructor TCESynMemo.destroy;
 begin
   saveCache;
-  //
+
   //fIndentGuideMarkup.Free;
   EntitiesConnector.removeObserver(self);
   subjDocClosing(TCEMultiDocSubject(fMultiDocSubject), self);
@@ -800,10 +806,10 @@ begin
   fLexToks.Clear;
   fLexToks.Free;
   fSortDialog.Free;
-  //
+
   if fTempFileName.fileExists then
     sysutils.DeleteFile(fTempFileName);
-  //
+
   inherited;
 end;
 
@@ -812,7 +818,8 @@ var
   old: Integer;
 begin
   old := Font.Size;
-  if value < 5 then value := 5;
+  if value < 5 then
+    value := 5;
   fDefaultFontSize:= value;
   if Font.Size = old then
     Font.Size := fDefaultFontSize;
@@ -872,9 +879,10 @@ end;
 {$REGION Custom editor commands and shortcuts ----------------------------------}
 procedure SetDefaultCoeditKeystrokes(ed: TSynEdit);
 begin
-  with ed do begin
+  with ed do
+  begin
     Keystrokes.Clear;
-    //
+
     AddKey(ecUp, VK_UP, [], 0, []);
     AddKey(ecSelUp, VK_UP, [ssShift], 0, []);
     AddKey(ecScrollUp, VK_UP, [ssCtrl], 0, []);
@@ -1357,17 +1365,17 @@ begin
   for i := fLexToks.Count-1 downto 2 do
   begin
     tok := PLexToken(fLexToks[i]);
-    //
+
     if sel and ((tok^.position.Y < st.Y)
       or (tok^.position.Y > nd.Y)) then
         continue;
     if ((tok^.Data <> 'all') and (tok^.Data <> 'none'))
       or (tok^.kind <> ltkIdentifier) or (i < 2) then
         continue;
-    //
+
     tok1 := PLexToken(fLexToks[i-2]);
     tok2 := PLexToken(fLexToks[i-1]);
-    //
+
     if  ((tok1^.kind = ltkKeyword) and (tok1^.data = 'version')
       and (tok2^.kind = ltkSymbol) and (tok2^.data = '(')) then
     begin
@@ -1413,12 +1421,12 @@ begin
     dlgOkInfo('Unknown, ambiguous or non-local symbol for "'+ old +'"');
     exit;
   end;
-  //
+
   idt := 'new identifier for "' + old + '"';
   idt := InputBox('Local identifier renaming', idt, old);
   if idt.isEmpty or idt.isBlank then
     exit;
-  //
+
   for i:= high(locs) downto 0 do
   begin
     loc := locs[i];
@@ -1908,10 +1916,9 @@ procedure TCESynMemo.showCallTips(const tips: string);
 var
   pnt: TPoint;
 begin
-  if not fIsDSource and not alwaysAdvancedFeatures then
+  if (not fIsDSource and not alwaysAdvancedFeatures) or tips.isEmpty then
     exit;
-  if tips.isEmpty then exit;
-  //
+
   pnt := ClientToScreen(point(CaretXPix, CaretYPix));
   fCallTipWin.FontSize := Font.Size;
   fCallTipWin.HintRect := fCallTipWin.CalcHintRect(0, tips, nil);
@@ -1948,7 +1955,7 @@ begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
   DcdWrapper.getDdocFromCursor(str);
-  //
+
   if str.isNotEmpty then
   begin
     fDDocWin.FontSize := Font.Size;
@@ -1972,10 +1979,9 @@ end;
 
 procedure TCESynMemo.DDocTimerEvent(sender: TObject);
 begin
-  if not Visible then exit;
-  if not isDSource then exit;
-  //
-  if not fCanShowHint then exit;
+  if (not Visible) or (not isDSource) or (not fCanShowHint) then
+    exit;
+
   showDDocs;
 end;
 {$ENDREGION --------------------------------------------------------------------}
@@ -1996,8 +2002,9 @@ var
   i: integer;
   o: TObject;
 begin
-  if not DcdWrapper.available then exit;
-  //
+  if not DcdWrapper.available then
+    exit;
+
   fCompletion.Position := 0;
   fCompletion.ItemList.Clear;
   DcdWrapper.getComplAtCursor(TStringList(fCompletion.ItemList));
@@ -2062,8 +2069,9 @@ end;
 
 procedure TCESynMemo.AutoDotTimerEvent(sender: TObject);
 begin
-  if not fCanAutoDot then exit;
-  if fAutoDotDelay = 0 then exit;
+  if (not fCanAutoDot) or (fAutoDotDelay = 0) then
+    exit;
+
   fCanAutoDot := false;
   fCompletion.Execute('', ClientToScreen(point(CaretXPix, CaretYPix + LineHeight)));
 end;
@@ -2221,7 +2229,7 @@ begin
   fFilename := fname;
   FileAge(fFilename, fFileDate);
   ReadOnly := FileIsReadOnly(fFilename);
-  //
+
   fModified := false;
   if Showing then
   begin
@@ -2419,7 +2427,7 @@ var
   lne: string;
   i: integer;
 begin
-  //TODO-cCheck for changes made to option eoSpacesToTabs
+  //TODO: Check for changes made to option eoSpacesToTabs
   if not (eoTabsToSpaces in Options) then
     exit;
 
@@ -2516,7 +2524,7 @@ begin
     VK_OEM_PERIOD, VK_DECIMAL: fCanAutoDot := true;
   end;
   inherited;
-  //
+
   if StaticEditorMacro.automatic then
     StaticEditorMacro.Execute;
 end;
