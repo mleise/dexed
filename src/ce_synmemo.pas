@@ -828,7 +828,7 @@ end;
 procedure TCESynMemo.setFocus;
 begin
   inherited;
-  checkFileDate;
+  //checkFileDate;
   highlightCurrentIdentifier;
   subjDocFocused(TCEMultiDocSubject(fMultiDocSubject), self);
 end;

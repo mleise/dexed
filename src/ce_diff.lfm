@@ -26,7 +26,31 @@ object CEDiffViewer: TCEDiffViewer
     RightGutter.Width = 0
     RightGutter.MouseActions = <>
     Highlighter = diffHl
-    Keystrokes = <>
+    Keystrokes = <    
+      item
+        Command = ecUp
+        ShortCut = 38
+      end    
+      item
+        Command = ecDown
+        ShortCut = 40
+      end    
+      item
+        Command = ecLeft
+        ShortCut = 37
+      end    
+      item
+        Command = ecRight
+        ShortCut = 39
+      end    
+      item
+        Command = ecPageUp
+        ShortCut = 33
+      end    
+      item
+        Command = ecPageDown
+        ShortCut = 34
+      end>
     MouseActions = <>
     MouseTextActions = <>
     MouseSelActions = <>
