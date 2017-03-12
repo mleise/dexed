@@ -17,7 +17,13 @@ type
 
   TCEWidget = class;
 
-  TWidgetDockingState = (wdsUndocked, wdsDocked);
+  TWidgetDockingState =
+  (
+    wdsUndocked,  // from docked to undocked
+    wdsDocked,    // from undocked to docked
+    wdsRedocked   // docked from a site to another
+  );
+
   TWidgetDockingChangedEvent = procedure(sender: TCEWidget; newState: TWidgetDockingState) of object;
 
   { TCEWidget }
@@ -45,7 +51,7 @@ type
     fIsModal: boolean;
     fToolBarFlat: boolean;
     fToolBarVisible: boolean;
-    fOldParent: TWinControl;
+    fOldSiteParent: TWinControl;
     // TODO-cdocking: find a better way to detect that the docking state changed
     procedure Resize; override;
     // a descendant overrides to implement a periodic update.
@@ -69,7 +75,7 @@ type
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
-    // prevent closing when 'locked' is cjecked in the header context menu
+    // prevent closing when 'locked' is checked in the header context menu
     function closeQuery: boolean; override;
     // restarts the wait period to the delayed update event.
     // if not re-called during 'updaterByDelayDuration' ms then
@@ -126,7 +132,7 @@ type
 
   operator enumerator(aWidgetList: TCEWidgetList): TWidgetEnumerator;
 
-   function CompareWidgCaption(Item1, Item2: Pointer): Integer;
+  function CompareWidgCaption(Item1, Item2: Pointer): Integer;
 
 implementation
 {$R *.lfm}
@@ -178,8 +184,10 @@ end;
 
 function TCEWidget.getIfModal: boolean;
 begin
-  if isDockable then result := false
-  else result := fIsModal;
+  if isDockable then
+    result := false
+  else
+    result := fIsModal;
 end;
 
 procedure TCEWidget.showWidget;
@@ -195,7 +203,8 @@ begin
       win.BringToFront;
     end;
   end
-  else begin
+  else
+  begin
     if isModal then ShowModal else
     begin
       Show;
@@ -214,31 +223,32 @@ end;
 
 procedure TCEWidget.setToolBarFlat(value: boolean);
 begin
-    if fToolBarFlat = value then
-      exit;
-    toolbar.Flat := value;
-    fToolBarFlat := value;
+  if fToolBarFlat = value then
+    exit;
+  toolbar.Flat := value;
+  fToolBarFlat := value;
 end;
 
 procedure TCEWidget.Resize;
 var
-  newParent: TWinControl;
-  site: TAnchorDockHostSite;
+  n: TWinControl = nil;
+  s: TAnchorDockHostSite;
 begin
   inherited;
-  site := DockMaster.GetAnchorSite(self);
-  if site.isNil then
-    exit;
-  newParent := site.Parent;
-  if fOldParent <> newParent then
+  s := DockMaster.GetAnchorSite(self);
+  if s.isNotNil then
+    n := s.Parent;
+  if fOldSiteParent <> n then
   begin
-    if fOldParent.isNil and newParent.isNotNil and assigned(fOnDockingChanged) then
+    if fOldSiteParent.isNil and n.isNotNil and assigned(fOnDockingChanged) then
       fOnDockingChanged(self, wdsDocked)
-    else if fOldParent.isNotNil and newParent.isNil and assigned(fOnDockingChanged) then
-      fOnDockingChanged(self, wdsUndocked);
+    else if fOldSiteParent.isNotNil and n.isNil and assigned(fOnDockingChanged) then
+      fOnDockingChanged(self, wdsUndocked)
+    else
+      fOnDockingChanged(self, wdsRedocked);
+    fOldSiteParent := n;
   end;
 end;
-
 {$ENDREGION}
 
 {$REGION ICEContextualActions---------------------------------------------------}
