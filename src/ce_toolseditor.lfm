@@ -68,7 +68,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
     inherited toolbar: TCEToolBar
       Width = 433
       object btnRun: TCEToolButton[0]
-        Left = 157
+        Left = 185
         Hint = 'execute selected tool'
         Top = 0
         Caption = 'btnRun'
@@ -77,7 +77,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         scaledSeparator = False
       end
       object button1: TCEToolButton[1]
-        Left = 141
+        Left = 169
         Height = 28
         Top = 0
         Width = 16
@@ -86,7 +86,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         scaledSeparator = False
       end
       object btnClone: TCEToolButton[2]
-        Left = 113
+        Left = 141
         Hint = 'clone selected tool'
         Top = 0
         Caption = 'btnClone'
@@ -95,7 +95,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         scaledSeparator = False
       end
       object btnMoveUp: TCEToolButton[3]
-        Left = 85
+        Left = 113
         Hint = 'move selected tool up'
         Top = 0
         Caption = 'btnMoveUp'
@@ -104,7 +104,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         scaledSeparator = False
       end
       object btnMoveDown: TCEToolButton[4]
-        Left = 57
+        Left = 85
         Hint = 'move selected tool down'
         Top = 0
         Caption = 'btnMoveDown'
@@ -113,7 +113,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         scaledSeparator = False
       end
       object btnRemTool: TCEToolButton[5]
-        Left = 29
+        Left = 57
         Hint = 'remove selected tool'
         Top = 0
         Caption = 'btnRemTool'
@@ -122,12 +122,21 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         scaledSeparator = False
       end
       object btnAddTool: TCEToolButton[6]
-        Left = 1
+        Left = 29
         Hint = 'add a new empty tool'
         Top = 0
         Caption = 'btnAddTool'
         OnClick = BtnAddToolClick
         resourceName = 'APPLICATION_ADD'
+        scaledSeparator = False
+      end
+      object btnEdit: TCEToolButton[7]
+        Left = 1
+        Hint = 'enable or disable edition'
+        Top = 0
+        Caption = 'btnEdit'
+        OnClick = btnEditClick
+        resourceName = 'APPLICATION_EDIT'
         scaledSeparator = False
       end
     end

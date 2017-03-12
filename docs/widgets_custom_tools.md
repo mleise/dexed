@@ -22,6 +22,7 @@ A few examples:
 
 Toolbar:
 
+- <img src="{%include icurl%}window/application_edit.png" class="tlbric"/>: Enables or disables edition.
 - <img src="{%include icurl%}window/application_add.png" class="tlbric"/>: Adds a new tool.
 - <img src="{%include icurl%}window/application_delete.png" class="tlbric"/>: Removes selected tool.
 - <img src="{%include icurl%}arrow/arrow_up.png" class="tlbric"/> **/** <img src="{%include icurl%}arrow/arrow_down.png" class="tlbric"/>: Changes the position of the selected tool.

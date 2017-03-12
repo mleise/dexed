@@ -69,6 +69,7 @@ type
     fShctCount: Integer;
     fDoc: TCESynMemo;
     fMenu: TMenuItem;
+    fReadOnly: boolean;
     function getTool(index: Integer): TCEToolItem;
     procedure setTools(value: TCEToolItems);
     //
@@ -85,6 +86,7 @@ type
     procedure scedSendDone;
   published
     property tools: TCEToolItems read fTools write setTools;
+    property readOnly: boolean read fReadOnly write fReadOnly;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
