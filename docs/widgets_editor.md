@@ -15,8 +15,8 @@ The _editor widget_ is a standard code editor, specialized for highlighting D so
 In addition to the standard actions used to navigate in a source, Coedit implements several helpers:
 
 - **Next/Previous location**: The two actions are used to jump to the locations where the caret was activated. They follow the chronology and not the line numbers. In the [shortcut editor](options_shortcuts_editor) they can be found under the names _PreviousLocation_ and _NextLocation_. The actions are also hard linked to the mouse buttons X1 and X2 and the multimedia keys usually used by web browsers to reload the next or the previous page.
-- **Next/Previous changed area: The two actions are used to jump to the locations that contain changes. They follow the line numbers. In the [shortcut editor](options_shortcuts_editor) they can be found under the names _PreviousChangedArea_ and _NextChangedArea_.
-- **Next/Previous protection attribute: This especially made to navigate in the aggregates. In the [shortcut editor](options_shortcuts_editor) they can be found under the names _PrevProtGroup_ and _NextProtGroup_.
+- **Next/Previous changed area**: The two actions are used to jump to the locations that contain changes. They follow the line numbers. In the [shortcut editor](options_shortcuts_editor) they can be found under the names _PreviousChangedArea_ and _NextChangedArea_.
+- **Next/Previous protection attribute**: This especially made to navigate in the aggregates. In the [shortcut editor](options_shortcuts_editor) they can be found under the names _PrevProtGroup_ and _NextProtGroup_.
 
 #### Edition helpers
 
