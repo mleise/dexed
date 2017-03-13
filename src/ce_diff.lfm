@@ -9,19 +9,19 @@ object CEDiffViewer: TCEDiffViewer
   LCLVersion = '1.6.4.0'
   inline editor: TSynEdit
     Left = 4
-    Height = 320
+    Height = 321
     Top = 76
     Width = 508
     Align = alClient
     BorderSpacing.Around = 4
-    Font.Height = -15
+    Font.Height = -13
     Font.Name = 'DejaVu Sans Mono'
     Font.Pitch = fpFixed
     Font.Quality = fqProof
     ParentColor = False
     ParentFont = False
     TabOrder = 0
-    Gutter.Width = 59
+    Gutter.Width = 57
     Gutter.MouseActions = <>
     RightGutter.Width = 0
     RightGutter.MouseActions = <>
@@ -80,7 +80,7 @@ object CEDiffViewer: TCEDiffViewer
         MouseActions = <>
       end
       object SynGutterLineNumber1: TSynGutterLineNumber
-        Width = 19
+        Width = 17
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -112,18 +112,18 @@ object CEDiffViewer: TCEDiffViewer
   end
   object Panel1: TPanel
     Left = 4
-    Height = 37
-    Top = 400
+    Height = 36
+    Top = 401
     Width = 508
     Align = alBottom
     BorderSpacing.Around = 4
     BevelOuter = bvLowered
-    ClientHeight = 37
+    ClientHeight = 36
     ClientWidth = 508
     TabOrder = 1
     object btnIgnore: TBitBtn
       Left = 114
-      Height = 33
+      Height = 32
       Hint = 'Don''t show this dialog until more modifications are detected'
       Top = 2
       Width = 130
@@ -137,7 +137,7 @@ object CEDiffViewer: TCEDiffViewer
     end
     object btnAccept: TBitBtn
       Left = 245
-      Height = 33
+      Height = 32
       Hint = 'Load the new version'
       Top = 2
       Width = 130
@@ -151,7 +151,7 @@ object CEDiffViewer: TCEDiffViewer
     end
     object btnCancel: TBitBtn
       Left = 376
-      Height = 33
+      Height = 32
       Hint = 'Don''t reload the modifications for now'
       Top = 2
       Width = 130
@@ -183,7 +183,6 @@ object CEDiffViewer: TCEDiffViewer
       Align = alClient
       Alignment = taCenter
       BorderSpacing.Around = 2
-      Caption = 'lbl'
       Layout = tlCenter
       ParentColor = False
       WordWrap = True
@@ -194,7 +193,7 @@ object CEDiffViewer: TCEDiffViewer
     LineAddedAttri.Style = [fsBold]
     LineRemovedAttri.Style = [fsBold]
     LineChangedAttri.Style = [fsBold]
-    left = 8
-    top = 64
+    left = 16
+    top = 16
   end
 end
