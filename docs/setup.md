@@ -13,7 +13,7 @@ In all the cases, the _DMD_ D2 compiler must setup and its location has to match
 If it's not already installed, [download](http://dlang.org/download.html) and setup DMD2 for your platform.
 The latest Coedit version requires at least DMD 2.072.
 
-For each platform Coedit can be setup from using a setup program or by extracting the binaries.
+For each platform Coedit can be setup using a setup program or by extracting the binaries.
 
 ### Setup program
 

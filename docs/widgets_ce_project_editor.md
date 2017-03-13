@@ -11,8 +11,8 @@ The widget is used to edit the properties of a project that has the CE (Coedit) 
 ![](img/ce_project_editor.png)
 
 
-The format is modeled from DMD command line interface but it can be compiled with LDC or GDC too,
-using the bridges that convert DMD options to LDC (LDMD) or to GDC (GDMD).
+The format is modeled based on the DMD command line interface but it can be compiled with LDC or GDC too,
+using the bridges that convert DMD options to LDC (LDMD) or to GDC (GDMD), which is done automatically when they are [set to compile CE the projects](options_application).
 
 #### Toolbar
 
@@ -21,10 +21,11 @@ using the bridges that convert DMD options to LDC (LDMD) or to GDC (GDMD).
 - <img src="{%include icurl%}cog/cog_go.png" class="tlbric"/>: Clones the current compiler configuration.
 - <img src="{%include icurl%}link/link_break.png" class="tlbric"/> / <img src="{%include icurl%}link/link.png" class="tlbric"/>: De/activates the synchro-mode. When activated, each particular option edited will be copied to the other configurations.
 
-Notes: 
+Notes:
+
 - changing the configuration name is only possible in the section _All Categories_, field _name_.
 
-#### General options:
+#### General options
 
 The general options are common to each configuration.
 
@@ -38,7 +39,7 @@ When dependencies are complex, it's possible to select all the entries by settin
 It's recommended to use the [project inspector](widgets_project_inspector) instead of this archaic editor. To include a folder of source it's also possible to specify a path with a asterisk in the **Paths** options, **ExtraSources** editor.
 This avoids to manually remove the obsolete source or to manually add the new source files.
 
-#### Message options:
+#### Message options
 
 Groups the options related to the messages emitted by the compiler.
 These options are defined per-configuration.
@@ -52,7 +53,7 @@ These options are defined per-configuration.
 - **warnings**: Sets if the warnings are displayed. (**-w**)
 - **warningsAsInfo**: Defines if the warnings don't prevent the project to be compiled.
 
-#### Debugging options:
+#### Debugging options
 
 Groups the options related to the debugging information added to the output binary.
 These options are defined per-configuration.
@@ -64,7 +65,7 @@ These options are defined per-configuration.
 - **debugIdentifiers**: List of debug identifiers. (for each item **-debug=item** is generated). One item per line.
 - **generateMapFile**: sets if a map file is generated. (**-map**)
 
-#### Documentation options:
+#### Documentation options
 
 Groups the options related to the generation of the project documentation.
 These options are defined per-configuration.
@@ -74,7 +75,7 @@ These options are defined per-configuration.
 - **generateJSON**: Sets if the JSON documentation is generated. This field is constrained to _true_ if the JSON file name is defined. (**-X**)
 - **JSONFilename**: Sets the JSON file name. (**-Xf**)
 
-#### Output options:
+#### Output options
 
 Groups the options related to the code generation.
 These options are defined per-configuration.
@@ -91,7 +92,7 @@ These options are defined per-configuration.
 - **unittest**: generates the unittest code. (**-unittest**)
 - **versionIdentifiers**: list of version identifiers. One per line, the switches **-version=** are added automatically. An entry can be disabled by prefixing it with a semicolon or a pair of backslash.
 
-#### Other Options:
+#### Other Options
 
 - **coverage**: Adds the code to generate coverage file after the output gets executed.
 - **customOptions**: Allows to add custom options, whatever is the compiler used.
@@ -109,7 +110,7 @@ Syntax for the custom / other options:
 
 These custom switches are defined per-configuration.
 
-#### Path options:
+#### Path options
 
 Groups the options defining the location of the files used or produced by the compiler.
 These options are defined per-configuration.
@@ -122,7 +123,7 @@ These options are defined per-configuration.
 - **objectDirectory**: The directory where object files (_*.o_ or _*.obj_) must be written. (**-od**)
 - **outputFilename**: The output filename. The identifier should only include a period to specify a non default extension otherwise it prevents _DMD_ to add the default one. (**-of**)
 
-#### Pre/Post build process options:
+#### Pre/Post build process options
 
 They define the options of two processes and a bunch of commands, respectively executed before and after the compilation.
 These options are defined per-configuration.
@@ -142,7 +143,7 @@ This can be used as a trick to compile from another tool.
 An interesting post-build process feature is that it can be set on the executable that's just been build.
 This is possible when the post compilation process _executable_ is set to the [symbolic strings](features_symbolic_strings) **`<CPO>`**, which is expanded to the name of the file produced by the compiler.
 
-#### Run options:
+#### Run options
 
 They define the options applied when running the project output (e.g: menu **"project"**, **"compile and run"**). 
 The _executable_ field is not present because it relies on the project parameters (**-of** for a CE project and the combination of _targetPath_ with _targetName_ for a DUB project).

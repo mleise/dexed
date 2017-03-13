@@ -37,6 +37,7 @@ The background tool used by the IDE is a D program.
 * In the repository, browse to the `dastworx` folder.
     * Windows: double click `build.bat`
     * Linux: `sh ./build.sh`
+
 You can also build it in CE using the project file _dastworx.ce_.
 
 #### Third party tools:

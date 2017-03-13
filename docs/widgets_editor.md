@@ -35,7 +35,7 @@ All these actions are assignable to a shortcut via the [shortcut editor](options
 
 Options exist to automatically close the curly brackets (`{ }`), the square brackets (`[ ]`), the parenthesis (`( )`) the double quotes (`" "`), the back-ticks and the single quotes.
 
-The way the right curly bracket is insert can be tweaked. For the other symbols the feature is always either individually on or off.
+The way the right curly bracket is inserted can be tweaked. For the other symbols the feature is always either individually on or off.
 
 Options for the curly brackets:
 

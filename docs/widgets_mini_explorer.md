@@ -8,7 +8,7 @@ title: Widgets - mini explorer
 
 #### Description
 
-The mini explorer provides basic file browsing within the IDE.
+The mini explorer provides basic file browsing functionality within the IDE.
 
 ![](img/mini_explorer.png)
 

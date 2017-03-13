@@ -23,7 +23,7 @@ Two typical scenarios:
 - the runnable will be debugged so DWARF information must be generated with `-g`.
 - the runnable must be linked with a C static library so the linker flag `-L-lthelib` must be specified.
 
-Coedit doesn't handle the program specified after the She-Bang, which means that any of the following script lines are valid:
+Coedit doesn't handle the program specified after the She-Bang, which means that all the following script lines are valid:
 
 - `#!runnable-flags: --whatever`
 - `#!usr/bin/dmd --whatever`
@@ -43,12 +43,12 @@ When the program is not run outside, the [process input widget](widgets_process_
 
 To be runnable, a module must verify:
 
-- a `void main()` is present.
+- a `void main()` is present or the option to automatically detect the `main()` function is activated.
 - the modules to import must be known, either by the [library manager](widgets_library_manager) or by the compiler configuration file.
 - _import expressions_ ( `import(file);` ) are allowed if _file_ stands in the same folder as the module being edited.
 
 The _Compile file and run outside_ action can be used to execute in an external console.
-This must be used if the runnable outputs thousands of lines, to display properly UTF8 characters or if it has a GUI.
+It must be used if the runnable outputs thousands of lines, to display properly UTF8 characters or if it has a GUI.
 
 The version identifier **runnable_module** is automatically defined when a runnable is compiled.
 It can be used to adjust the source according to the execution context, for example:
