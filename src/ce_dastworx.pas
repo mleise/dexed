@@ -54,8 +54,9 @@ begin
     prc.CloseInput;
     processOutputToStrings(prc, imports);
     while prc.Running do ;
-    // TODO-cmaintenance: remove this from version 3 gold
+    {$IFDEF DEBUG}
     tryRaiseFromStdErr(prc);
+    {$ENDIF}
   finally
     prc.free;
   end;
@@ -80,8 +81,9 @@ begin
     prc.CloseInput;
     processOutputToStrings(prc, results);
     while prc.Running do ;
-    // TODO-cmaintenance: remove this from version 3 gold
+    {$IFDEF DEBUG}
     tryRaiseFromStdErr(prc);
+    {$ENDIF}
   finally
     prc.free;
   end;
