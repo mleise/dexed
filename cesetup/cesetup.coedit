@@ -7,7 +7,7 @@ object CurrentProject: TCENativeProject
       outputOptions.boundsCheck = offAlways
       outputOptions.optimizations = True
       outputOptions.release = True
-      pathsOptions.outputFilename = 'output/coedit.3beta4.win32.setup'
+      pathsOptions.outputFilename = 'output/coedit.3gold.win32.setup'
       pathsOptions.importStringPaths.Strings = (
         'win32/'
         '<CPP>'
@@ -35,7 +35,7 @@ object CurrentProject: TCENativeProject
       outputOptions.boundsCheck = offAlways
       outputOptions.optimizations = True
       outputOptions.release = True
-      pathsOptions.outputFilename = 'output/coedit.3beta4.linux32.setup'
+      pathsOptions.outputFilename = 'output/coedit.3gold.linux32.setup'
       pathsOptions.importStringPaths.Strings = (
         'nux32/'
         '<CPP>'
@@ -58,7 +58,7 @@ object CurrentProject: TCENativeProject
       outputOptions.boundsCheck = offAlways
       outputOptions.optimizations = True
       outputOptions.release = True
-      pathsOptions.outputFilename = 'output/coedit.3beta4.linux64.setup'
+      pathsOptions.outputFilename = 'output/coedit.3gold.linux64.setup'
       pathsOptions.importStringPaths.Strings = (
         'nux64/'
         '<CPP>'
