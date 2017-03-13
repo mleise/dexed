@@ -22,7 +22,7 @@ using the bridges that convert DMD options to LDC (LDMD) or to GDC (GDMD).
 - <img src="{%include icurl%}link/link_break.png" class="tlbric"/> / <img src="{%include icurl%}link/link.png" class="tlbric"/>: De/activates the synchro-mode. When activated, each particular option edited will be copied to the other configurations.
 
 Notes: 
-- changing the configuration name is only possible in the section [**All Categories**](https://github.com/BBasile/Coedit/wiki#all-categories), field **name**.
+- changing the configuration name is only possible in the section _All Categories_, field _name_.
 
 #### General options:
 
@@ -95,9 +95,9 @@ These options are defined per-configuration.
 
 - **coverage**: Adds the code to generate coverage file after the output gets executed.
 - **customOptions**: Allows to add custom options, whatever is the compiler used.
-- **dmdOtherOptions**: custom options, only for DMD.
-- **gdcOtherOptions**: custom options, only for GDC.
-- **ldcOtherOptions**: custom options, only for LDC.
+- **dmdOtherOptions**: Custom options, only for DMD.
+- **gdcOtherOptions**: Custom options, only for GDC.
+- **ldcOtherOptions**: Custom options, only for LDC.
 
 Syntax for the custom / other options:
 
