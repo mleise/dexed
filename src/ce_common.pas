@@ -208,7 +208,7 @@ type
   (**
    * Lets the shell open a file.
    *)
-  function shellOpen(const fname: string; wait: boolean = true): boolean;
+  function shellOpen(fname: string; wait: boolean = true): boolean;
 
   (**
    * Returns true if anExeName can be spawn without its full path.
@@ -895,7 +895,7 @@ begin
   {$ENDIF}
 end;
 
-function shellOpen(const fname: string; wait: boolean = true): boolean;
+function shellOpen(fname: string; wait: boolean = true): boolean;
 begin
   {$IFDEF WINDOWS}
   result := ShellExecute(0, 'OPEN', PChar(fname), nil, nil, SW_SHOW) > 32;
@@ -904,6 +904,8 @@ begin
   try
     {$IFDEF LINUX}
     Executable := 'xdg-open';
+    if (fname.length > 1) and (fname[1..2] = '//') then
+      fname := fname[2..fname.length];
     {$ELSE}
     {$IFDEF DARWIN}
     Executable := 'open';
