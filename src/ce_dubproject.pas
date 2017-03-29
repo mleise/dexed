@@ -930,8 +930,13 @@ begin
         or (src = 'src' + DirectorySeparator + fPackageName + DirectorySeparator + 'app.d')
         or (src = 'source' + DirectorySeparator + fPackageName + DirectorySeparator + 'main.d')
         or (src = 'src' + DirectorySeparator + fPackageName + DirectorySeparator + 'main.d')
-      then fBinKind:= executable
-      else fBinKind:= staticlib;
+      then
+      begin
+        fBinKind:= executable;
+        break;
+      end
+      else
+        fBinKind:= staticlib;
     end;
   end;
 end;
