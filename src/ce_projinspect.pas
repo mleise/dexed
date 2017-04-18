@@ -448,6 +448,20 @@ begin
     if i <> -1 then
       proj.Sources.Delete(i);
   end;
+
+  fname := '';
+  for i := 0 to proj.sourcesCount-1 do
+    if not proj.sourceAbsolute(i).fileExists then
+      fname += LineEnding + '    "' + proj.sourceAbsolute(i) + '" ';
+
+  if fname.isNotEmpty and (dlgOkCancel('Other source(s) not found: ' + LineEnding
+    + fname + LineEnding + LineEnding + 'Remove all invalid files ?') = mrOK) then
+  begin
+    for j := proj.sourcesCount-1 downto 0 do
+      if not proj.sourceAbsolute(j).fileExists then
+        proj.Sources.Delete(j);
+  end;
+
   proj.endUpdate;
 end;
 

@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
   SynEdit, SynHighlighterDiff, process,
-  ce_common, ComCtrls, StdCtrls, ExtCtrls, Buttons;
+  ce_common, StdCtrls, ExtCtrls, Buttons;
 
 type
   TCEDiffViewer = class(TForm)

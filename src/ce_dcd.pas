@@ -207,6 +207,8 @@ begin
       folds.Add(fold);
   	for i:= 0 to fProj.sourcesCount-1 do
     begin
+      if not (fProj.sourceAbsolute(i).fileExists) then
+        continue;
       fold := fProj.sourceAbsolute(i).extractFilePath;
       if folds.IndexOf(fold) = -1 then
         folds.Add(fold);

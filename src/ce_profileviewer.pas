@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, TASources, TAGraph, TATransformations, TASeries,
   TATools, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus, ComCtrls,
-  StdCtrls, TALegend, TADrawUtils, math,
+  StdCtrls, TALegend, math,
   ce_widget, ce_common, ce_stringrange, ce_dsgncontrols, ce_ddemangle;
 
 type

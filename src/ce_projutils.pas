@@ -205,7 +205,7 @@ begin
     begin
       sym := true;
       path := project.sourceAbsolute(i);
-      if not hasDlangSyntax(path.extractFileExt) then
+      if not hasDlangSyntax(path.extractFileExt) or not path.fileExists then
         continue;
       clbck.fModStart := false;
       srcc.LoadFromFile(path);
