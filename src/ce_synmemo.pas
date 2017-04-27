@@ -12,7 +12,7 @@ uses
   md5,
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
-  ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs,
+  ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs, ce_dastworx,
   ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer, ce_diff;
 
 type
@@ -272,6 +272,7 @@ type
     procedure addCurLineBreakPoint;
     procedure removeCurLineBreakPoint;
     procedure toggleCurLineBreakpoint;
+    procedure insertDdocTemplate;
     function implementMain: THasMain;
     procedure replaceUndoableContent(const value: string);
     //
@@ -346,6 +347,7 @@ const
   ecAddBreakpoint       = ecUserFirst + 22;
   ecRemoveBreakpoint    = ecUserFirst + 23;
   ecToggleBreakpoint    = ecUserFirst + 24;
+  ecInsertDdocTemplate     = ecUserFirst + 25;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -989,6 +991,7 @@ begin
     AddKey(ecAddBreakpoint, 0, [], 0, []);
     AddKey(ecRemoveBreakpoint, 0, [], 0, []);
     AddKey(ecToggleBreakpoint, 0, [], 0, []);
+    AddKey(ecInsertDdocTemplate, 0, [], 0, []);
   end;
 end;
 
@@ -1019,6 +1022,7 @@ begin
     'ecAddBreakpoint':      begin Int := ecAddBreakpoint; exit(true); end;
     'ecRemoveBreakpoint':   begin Int := ecRemoveBreakpoint; exit(true); end;
     'ecToggleBreakpoint':   begin Int := ecToggleBreakpoint; exit(true); end;
+    'ecInsertDdocTemplate': begin Int := ecInsertDdocTemplate; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1050,6 +1054,7 @@ begin
     ecAddBreakpoint:      begin Ident := 'ecAddBreakpoint'; exit(true); end;
     ecRemoveBreakpoint:   begin Ident := 'ecRemoveBreakpoint'; exit(true); end;
     ecToggleBreakpoint:   begin Ident := 'ecToggleBreakpoint'; exit(true); end;
+    ecInsertDdocTemplate: begin Ident := 'ecInsertDdocTemplate'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1120,6 +1125,8 @@ begin
       removeCurLineBreakPoint;
     ecToggleBreakpoint:
       toggleCurLineBreakpoint;
+    ecInsertDdocTemplate:
+      insertDdocTemplate;
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1838,6 +1845,42 @@ begin
     addBreakPoint(CaretY)
   else
     removeBreakPoint(CaretY);
+end;
+
+procedure TCESynMemo.insertDdocTemplate;
+var
+  d: TStringList;
+  i: integer;
+  j: integer;
+  k: integer;
+  s: string;
+  p: TPoint;
+begin
+  d := TStringList.Create;
+  try
+    getDdocTemplate(lines, d, CaretY);
+    if d.Text.isNotEmpty then
+    begin
+      BeginUndoBlock;
+      ExecuteCommand(ecLineStart, #0, nil);
+      k := CaretX;
+      p.y:= CaretY -1 ;
+      p.x:= 1 ;
+      ExecuteCommand(ecGotoXY, #0, @p);
+      for i := 0 to d.Count-1 do
+      begin
+        s := d[i];
+        ExecuteCommand(ecLineBreak, #0, nil);
+        while caretX < k do
+          ExecuteCommand(ecTab, #0, nil);
+        for j := 1 to s.length do
+          ExecuteCommand(ecChar, s[j], nil);
+      end;
+      EndUndoBlock;
+    end;
+  finally
+    d.Free;
+  end;
 end;
 {$ENDREGION}
 

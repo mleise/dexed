@@ -22,6 +22,8 @@ procedure getModulesImports(const files: string; results: TStrings);
 
 procedure getHalsteadMetrics(source: TStrings; out jsn: TJSONObject);
 
+procedure getDdocTemplate(source, res: TStrings;caretLine: integer);
+
 implementation
 
 var
@@ -122,6 +124,31 @@ begin
     prs.Free;
     prc.Free;
     lst.free;
+  end;
+end;
+
+procedure getDdocTemplate(source, res: TStrings; caretLine: integer);
+var
+  prc: TProcess;
+  str: string;
+begin
+  str := getToolName;
+  if str.isEmpty then
+    exit;
+  prc := TProcess.Create(nil);
+  try
+    prc.Executable := str;
+    prc.Parameters.Add('-K');
+    prc.Parameters.Add('-l' + caretLine.ToString);
+    prc.Options := [poUsePipes {$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
+    prc.ShowWindow := swoHIDE;
+    prc.Execute;
+    str := source.Text;
+    prc.Input.Write(str[1], str.length);
+    prc.CloseInput;
+    processOutputToStrings(prc, res);
+  finally
+    prc.Free;
   end;
 end;
 

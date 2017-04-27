@@ -155,6 +155,10 @@ inherited CEEditorWidget: TCEEditorWidget
     object MenuItem12: TMenuItem
       Caption = '-'
     end
+    object mnuedDdocTmp: TMenuItem
+      Caption = 'Insert DDOC template'
+      OnClick = mnuedDdocTmpClick
+    end
     object mnuedRename: TMenuItem
       Caption = 'Rename identifier'
       OnClick = mnuedRenameClick

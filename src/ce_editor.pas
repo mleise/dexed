@@ -58,6 +58,7 @@ type
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
+    mnuedDdocTmp: TMenuItem;
     mnuedPrevProtGrp: TMenuItem;
     mnuedNextProtGrp: TMenuItem;
     MenuItem2: TMenuItem;
@@ -89,6 +90,7 @@ type
     macRecorder: TSynMacroRecorder;
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
+    procedure mnuedDdocTmpClick(Sender: TObject);
     procedure mnuedPrevProtGrpClick(Sender: TObject);
     procedure mnuedNextProtGrpClick(Sender: TObject);
     procedure mnuedNextCareaClick(Sender: TObject);
@@ -898,6 +900,12 @@ procedure TCEEditorWidget.mnuedPrevProtGrpClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.previousProtectionGroup;
+end;
+
+procedure TCEEditorWidget.mnuedDdocTmpClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.insertDdocTemplate;
 end;
 
 procedure TCEEditorWidget.mnuedNextProtGrpClick(Sender: TObject);

@@ -42,6 +42,7 @@ object CurrentProject: TCENativeProject
     'src/mainfun.d'
     'src/common.d'
     'src/halstead.d'
+    'src/ddoc_template.d'
   )
   ConfigurationIndex = 1
 end

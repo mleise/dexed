@@ -9,9 +9,10 @@ import
 import
     dparse.lexer, dparse.parser, dparse.ast, dparse.rollback_allocator;
 import
-    common, todos, symlist, imports, mainfun, halstead;
+    common, todos, symlist, imports, mainfun, halstead, ddoc_template;
 
 
+private __gshared int caretLine;
 private __gshared bool deepSymList;
 private __gshared static Appender!(ubyte[]) source;
 private __gshared static Appender!(AstErrors) errors;
@@ -50,7 +51,8 @@ void main(string[] args)
 
     // options for the work
     getopt(args, std.getopt.config.passThrough,
-        "d", &deepSymList
+        "d", &deepSymList,
+        "l", &caretLine
     );
 
     // launch directly a work
@@ -60,6 +62,7 @@ void main(string[] args)
         "s", &handleSymListOption,
         "t", &handleTodosOption,
         "H", &handleHalsteadOption,
+        "K", &handleDdocTemplateOption,
     );
 }
 
@@ -135,6 +138,21 @@ void handleHalsteadOption()
         .getTokensForParser(config, &cache)
         .parseModule("", &alloc, &ignoreErrors)
         .performHalsteadMetrics;
+}
+
+/// Handles the "-D" option: write the ddoc template for a given declaration
+void handleDdocTemplateOption()
+{
+    mixin(logCall);
+
+    RollbackAllocator alloc;
+    StringCache cache = StringCache(StringCache.defaultBucketCount);
+    LexerConfig config = LexerConfig("", StringBehavior.source);
+
+    source.data
+        .getTokensForParser(config, &cache)
+        .parseModule("", &alloc, &ignoreErrors)
+        .getDdocTemplate(caretLine);
 }
 
 private void handleErrors(string fname, size_t line, size_t col, string message,
