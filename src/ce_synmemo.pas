@@ -168,6 +168,7 @@ type
     fCallTipStrings: TStringList;
     fOverrideColMode: boolean;
     fAutoCloseCurlyBrace: TBraceAutoCloseStyle;
+    fSmartDdocNewline: boolean;
     fLexToks: TLexTokenList;
     fDisableFileDateCheck: boolean;
     fDetectIndentMode: boolean;
@@ -203,6 +204,7 @@ type
       var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
     procedure showCallTips(const tips: string);
     function lexCanCloseBrace: boolean;
+    function lexInDdoc: char;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
     procedure gotoToChangedArea(next: boolean);
     procedure gotoToProtectionGroup(next: boolean);
@@ -255,6 +257,7 @@ type
     procedure saveTempFile;
     //
     procedure curlyBraceCloseAndIndent;
+    procedure insertLeadingDDocSymbol(c: char);
     procedure commentSelection;
     procedure commentIdentifier;
     procedure renameIdentifier;
@@ -301,6 +304,7 @@ type
     property autoDotDelay: Integer read fAutoDotDelay write setAutoDotDelay;
     property autoCloseCurlyBrace: TBraceAutoCloseStyle read fAutoCloseCurlyBrace write fAutoCloseCurlyBrace;
     property autoClosedPairs: TAutoClosePairs read fAutoClosedPairs write fAutoClosedPairs;
+    property smartDdocNewline: boolean read fSmartDdocNewline write fSmartDdocNewline;
   end;
 
   TSortDialog = class(TForm)
@@ -697,6 +701,7 @@ begin
   Font.Size:=10;
   SetDefaultCoeditKeystrokes(Self); // not called in inherited if owner = nil !
   fLexToks:= TLexTokenList.Create;
+  fSmartDdocNewline := true;
 
   OnDragDrop:= @ddHandler.DragDrop;
   OnDragOver:= @ddHandler.DragOver;
@@ -1133,6 +1138,15 @@ begin
     fOverrideColMode := false;
     Options := Options - [eoScrollPastEol];
   end;
+end;
+
+procedure TCESynMemo.insertLeadingDDocSymbol(c: char);
+begin
+  BeginUndoBlock;
+  if ((CaretX-1) and 1) = 0 then
+    ExecuteCommand(ecChar, ' ', nil);
+  ExecuteCommand(ecChar, c, nil);
+  EndUndoBlock;
 end;
 
 procedure TCESynMemo.curlyBraceCloseAndIndent;
@@ -2131,6 +2145,8 @@ procedure TCESynMemo.handleStatusChanged(Sender: TObject; Changes: TSynStatusCha
 begin
   if scOptions in Changes then
   begin
+    if fSmartDdocNewline and not (eoAutoIndent in Options) then
+      Options := Options + [eoAutoIndent];
     if Beautifier.isNotNil and (Beautifier is TSynBeautifier) then
     begin
       if not (eoTabsToSpaces in Options) and not (eoSpacesToTabs in Options) then
@@ -2178,6 +2194,32 @@ begin
     stop := true;
     fModuleTokFound := false;
     fHasModuleDeclaration := true;
+  end;
+end;
+
+function TCESynMemo.lexInDdoc: char;
+var
+  i: integer;
+  p: integer;
+  tk1: PLexToken = nil;
+  tk2: PLexToken = nil;
+begin
+  result := #0;
+  p := SelStart;
+  for i := 0 to fLexToks.Count-1 do
+  begin
+    tk1 := fLexToks[i];
+    if (i <> fLexToks.Count-1) then
+    begin
+      tk2 := fLexToks[i+1];
+      if (tk1^.offset < p) and (tk1^.kind in [ltkComment, ltkIllegal])
+        and (tk2^.offset > p) then
+          exit(tk1^.Data[1])
+      else if (tk1^.offset > p) then
+        exit;
+    end
+    else if (tk1^.offset < p) and (tk1^.kind in [ltkComment, ltkIllegal]) then
+      exit(tk1^.Data[1]);
   end;
 end;
 
@@ -2502,6 +2544,7 @@ end;
 procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
 var
   line: string;
+  ddc: char;
 begin
   case Key of
     VK_BACK: if fCallTipWin.Visible and (CaretX > 1)
@@ -2510,7 +2553,7 @@ begin
     VK_RETURN:
     begin
       line := LineText;
-      if (fAutoCloseCurlyBrace in [autoCloseOnNewLineEof .. autoCloseOnNewLineLexically]) then
+
       case fAutoCloseCurlyBrace of
         autoCloseOnNewLineAlways: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
         begin
@@ -2518,20 +2561,37 @@ begin
           curlyBraceCloseAndIndent;
         end;
         autoCloseOnNewLineEof: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
-          if (CaretY = Lines.Count) and (CaretX = line.length+1) then
-          begin
-            Key := 0;
-            curlyBraceCloseAndIndent;
-          end;
-        autoCloseOnNewLineLexically: if (LogicalCaretXY.X - 1 >= line.length)
+        if (CaretY = Lines.Count) and (CaretX = line.length+1) then
+        begin
+          Key := 0;
+          curlyBraceCloseAndIndent;
+        end;
+      end;
+
+      if (fAutoCloseCurlyBrace = autoCloseOnNewLineLexically) or
+        fSmartDdocNewline then
+      begin
+        fLexToks.Clear;
+        lex(lines.Text, fLexToks);
+        if (LogicalCaretXY.X - 1 >= line.length)
             or isBlank(line[LogicalCaretXY.X .. line.length]) then
         begin
-          fLexToks.Clear;
-          lex(lines.Text, fLexToks);
           if lexCanCloseBrace then
           begin
             Key := 0;
             curlyBraceCloseAndIndent;
+          end;
+        end;
+        if (fSmartDdocNewline) then
+        begin
+          ddc := lexInDdoc;
+          if ddc in ['*', '+'] then
+          begin
+            inherited;
+            insertLeadingDDocSymbol(ddc);
+            fCanShowHint:=false;
+            fDDocWin.Hide;
+            exit;
           end;
         end;
       end;

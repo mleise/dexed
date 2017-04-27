@@ -62,6 +62,7 @@ type
     fPhobosDocRoot: TCEPathname;
     fAlwaysAdvancedFeatures: boolean;
     fAutoClosedPairs: TAutoClosePairs;
+    fSmartDdocNewline: boolean;
     //
     procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
@@ -111,6 +112,7 @@ type
     property rightEdgeColor: TColor read fRightEdgeColor write fRightEdgeColor default clSilver;
     property selection: TSynSelectedColor read fSelAttribs write setSelCol;
     property shortcuts: TCollection read fShortCuts write setShortcuts;
+    property smartDdocNewline: boolean read fSmartDdocNewline write fSmartDdocNewline;
     property tabulationWidth: Integer read fTabWidth write fTabWidth default 4;
   public
     constructor Create(AOwner: TComponent); override;
@@ -302,6 +304,10 @@ begin
     identifierMatchOptions:=srcopt.identifierMatchOptions;
     detectIndentMode:=srcopt.detectIndentMode;
     fPhobosDocRoot:=srcopt.fPhobosDocRoot;
+
+    fSmartDdocNewline:=srcopt.fSmartDdocNewline;
+    if fSmartDdocNewline then
+      fOptions1 += [eoAutoIndent];
 
     tabulationWidth := srcopt.tabulationWidth;
     blockIndentation := srcopt.blockIndentation;
@@ -667,6 +673,7 @@ begin
   anEditor.detectIndentMode := detectIndentMode;
   anEditor.phobosDocRoot:=fPhobosDocRoot;
   anEditor.alwaysAdvancedFeatures:=fAlwaysAdvancedFeatures;
+  anEditor.smartDdocNewline:= fSmartDdocNewline;
   for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
     kst := anEditor.Keystrokes.Items[i];
