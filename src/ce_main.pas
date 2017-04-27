@@ -3638,6 +3638,8 @@ begin
     (dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel) then
       exit;
   fProjectGroup.closeGroup;
+  if assigned(fFreeProj) then
+    fFreeProj.activate;
 end;
 {$ENDREGION}
 
