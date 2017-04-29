@@ -5,9 +5,9 @@ unit ce_tools;
 interface
 
 uses
-  Classes, SysUtils, LazFileUtils, process, menus, ce_processes,
+  Classes, SysUtils, LazFileUtils, process, menus, ce_processes, controls,
   ce_common, ce_writableComponent, ce_interfaces, ce_observer, ce_inspectors,
-  ce_synmemo;
+  ce_synmemo, ce_dialogs;
 
 type
 
@@ -33,6 +33,7 @@ type
     fMsgs: ICEMessagesDisplay;
     fSymStringExpander: ICESymStringExpander;
     fPipeInputKind: TPipeInputKind;
+    fAskConfirmation: boolean;
     procedure setParameters(value: TStringList);
     procedure processOutput(sender: TObject);
     procedure setToolAlias(value: string);
@@ -49,11 +50,11 @@ type
     property nextToolAlias: string read fNextToolAlias write fNextToolAlias;
     property outputToNext: boolean read fOutputToNext write fOutputToNext;
     property pipeInputKind: TPipeInputKind read fPipeInputKind write fPipeInputKind;
+    property askConfirmation: boolean read fAskConfirmation write fAskConfirmation;
   public
     constructor create(ACollection: TCollection); override;
     destructor destroy; override;
     procedure assign(Source: TPersistent); override;
-    //
     procedure execute(previous: TCEToolItem);
     property process: TCEProcess read fProcess;
   end;
@@ -148,7 +149,6 @@ begin
   if Source is TCEToolItem then
   begin
     tool := TCEToolItem(Source);
-    //
     toolAlias         := tool.toolAlias;
     queryParameters   := tool.queryParameters;
     clearMessages     := tool.clearMessages;
@@ -157,6 +157,7 @@ begin
     workingDirectory  := tool.workingDirectory;
     showWindows       := tool.showWindows;
     pipeInputKind     := tool.pipeInputKind;
+    askConfirmation   := tool.askConfirmation;
     parameters.Assign(tool.parameters);
   end
   else inherited;
@@ -185,16 +186,21 @@ var
   prm: string;
   inp: string;
   old: string;
+const
+  confSpec = 'Are you sure you want to execute the "%s" tool ?';
 begin
   ce_processes.killProcess(fProcess);
-  //
+
   if fMsgs = nil then
     fMsgs := getMessageDisplay;
   if fClearMessages then
     fMsgs.clearByContext(amcMisc);
   if fSymStringExpander = nil then
     fSymStringExpander:= getSymStringExpander;
-  //
+
+  if askConfirmation and (dlgOkCancel(format(confSpec, [toolAlias])) <> mrOk) then
+    exit;
+
   old := GetCurrentDirUTF8;
   fProcess := TCEProcess.Create(nil);
   fProcess.OnReadData:= @processOutput;
