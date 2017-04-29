@@ -2545,6 +2545,7 @@ procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
 var
   line: string;
   ddc: char;
+  lxd: boolean;
 begin
   case Key of
     VK_BACK: if fCallTipWin.Visible and (CaretX > 1)
@@ -2571,11 +2572,13 @@ begin
       if (fAutoCloseCurlyBrace = autoCloseOnNewLineLexically) or
         fSmartDdocNewline then
       begin
-        fLexToks.Clear;
-        lex(lines.Text, fLexToks);
+        lxd := false;
         if (LogicalCaretXY.X - 1 >= line.length)
             or isBlank(line[LogicalCaretXY.X .. line.length]) then
         begin
+          lxd := true;
+          fLexToks.Clear;
+          lex(lines.Text, fLexToks);
           if lexCanCloseBrace then
           begin
             Key := 0;
@@ -2584,6 +2587,11 @@ begin
         end;
         if (fSmartDdocNewline) then
         begin
+          if not lxd then
+          begin
+            fLexToks.Clear;
+            lex(lines.Text, fLexToks);
+          end;
           ddc := lexInDdoc;
           if ddc in ['*', '+'] then
           begin
