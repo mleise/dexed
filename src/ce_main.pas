@@ -431,7 +431,7 @@ type
     procedure InitOptionsMenu;
     procedure LoadSettings;
     procedure SaveSettings;
-    procedure LoadDocking;
+    function LoadDocking: boolean;
     procedure SaveDocking;
     procedure LoadLastDocsAndProj;
     procedure SaveLastDocsAndProj;
@@ -1432,8 +1432,8 @@ begin
   end;
 
   // load existing or default docking
-  if FileExists(getCoeditDocPath + 'docking.xml') then
-    LoadDocking
+  if FileExists(getCoeditDocPath + 'docking.xml') and LoadDocking() then
+  begin end
   else
   begin
     Height := 0;
@@ -1588,7 +1588,8 @@ begin
     DockMaster.SaveLayoutToConfig(xcfg);
     xcfg.WriteToDisk;
     // TODO-cdocking: remove this when AnchorDocking wont save anymore invalid layout
-    with TMemoryStream.Create do try
+    with TMemoryStream.Create do
+    try
       LoadFromFile(getCoeditDocPath + 'docking.xml.tmp');
       if Size < 10000 then
       begin
@@ -1611,11 +1612,12 @@ begin
   end;
 end;
 
-procedure TCEMainForm.LoadDocking;
+function TCEMainForm.LoadDocking: boolean;
 var
   xcfg: TXMLConfigStorage;
   str: TMemoryStream;
 begin
+  result := false;
   if fileExists(getCoeditDocPath + 'docking.xml') then
   begin
     xcfg := TXMLConfigStorage.Create(getCoeditDocPath + 'docking.xml', true);
@@ -1656,6 +1658,7 @@ begin
       xcfg.Free;
     end;
   end;
+  result := true;
 end;
 
 procedure TCEMainForm.FreeRunnableProc;
@@ -3176,7 +3179,8 @@ begin
     xcfg.WriteToDisk;
     // prevent any invalid layout to be saved (AnchorDocking bug)
     // TODO-cdocking: remove this when AnchorDocking wont save anymore invalid layout
-    with TMemoryStream.Create do try
+    with TMemoryStream.Create do
+    try
       LoadFromFile(fname + '.tmp');
       if Size < 10000 then
       begin
