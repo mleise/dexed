@@ -11,9 +11,9 @@ import
  * Finds the declaration at caretLine and write its ddoc template
  * in the standard output.
  */
-void getDdocTemplate(const(Module) mod, int caretLine)
+void getDdocTemplate(const(Module) mod, int caretLine, bool plusComment)
 {
-    DDocTemplateGenerator dtg = construct!DDocTemplateGenerator(caretLine);
+    DDocTemplateGenerator dtg = construct!DDocTemplateGenerator(caretLine, plusComment);
     dtg.visit(mod);
 }
 
@@ -23,24 +23,28 @@ final class DDocTemplateGenerator: ASTVisitor
 
 private:
 
-    int _caretline;
+    immutable int _caretline;
+    immutable char c1;
+    immutable char[2] c2;
 
 public:
 
-    this(int caretline)
+    this(int caretline, bool plusComment)
     {
         _caretline = caretline;
+        c1 = plusComment ? '+' : '*';
+        c2 = plusComment ? "++" : "**";
     }
 
     override void visit(const(FunctionDeclaration) decl)
     {
         if (decl.name.line == _caretline)
         {
-            writeln("/**\n * <short description> \n * \n * <detailed description>\n *");
+            writeln("/", c2, "\n ", c1, " <short description> \n ", c1, " \n ", c1, " <detailed description>\n ", c1);
 
             if (decl.templateParameters || decl.parameters)
             {
-                writeln(" * Params:");
+                writeln(" ", c1, " Params:");
 
                 if (decl.templateParameters && decl.templateParameters.templateParameterList)
                 {
@@ -48,13 +52,13 @@ public:
                                                             .templateParameterList.items)
                     {
                         if (p.templateAliasParameter)
-                            writeln(" *     ", p.templateAliasParameter.identifier.text, " = <description>");
+                            writeln(" ", c1, "     ", p.templateAliasParameter.identifier.text, " = <description>");
                         else if (p.templateTupleParameter)
-                            writeln(" *     ", p.templateTupleParameter.identifier.text, " = <description>");
+                            writeln(" ", c1, "     ", p.templateTupleParameter.identifier.text, " = <description>");
                         else if (p.templateTypeParameter)
-                            writeln(" *     ", p.templateTypeParameter.identifier.text, " = <description>");
+                            writeln(" ", c1, "     ", p.templateTypeParameter.identifier.text, " = <description>");
                         else if (p.templateValueParameter)
-                            writeln(" *     ", p.templateValueParameter.identifier.text, " = <description>");
+                            writeln(" ", c1, "     ", p.templateValueParameter.identifier.text, " = <description>");
                     }
                 }
                 if (decl.parameters)
@@ -62,9 +66,9 @@ public:
                     foreach(i, const Parameter p; decl.parameters.parameters)
                     {
                         if (p.name.text != "")
-                            writeln(" *     ", p.name.text, " = <description>");
+                            writeln(" ", c1, "     ", p.name.text, " = <description>");
                         else
-                            writeln(" *     __param", i, " = <description>");
+                            writeln(" ",c1, "     __param", i, " = <description>");
                     }
                 }
             }
@@ -73,10 +77,10 @@ public:
             {
                 if (decl.returnType.type2 && decl.returnType.type2
                     && decl.returnType.type2.builtinType != tok!"void")
-                        writeln(" * \n * Returns: <return description>");
+                        writeln(" ", c1, " \n ", c1, " Returns: <return description>");
             }
 
-            writeln(" */");
+            writeln(" ", c1, "/");
 
         }
         else if (decl.name.line > _caretline)
@@ -108,11 +112,11 @@ public:
     {
         if (decl.name.line == _caretline)
         {
-            writeln("/**\n * <short description> \n * \n * <detailed description>\n *");
+            writeln("/", c2, "\n ", c1, " <short description> \n ", c1, " \n ", c1, " <detailed description>\n ", c1);
 
             if (decl.templateParameters)
             {
-                writeln(" * Params:");
+                writeln(" ", c1, " Params:");
 
                 if (decl.templateParameters && decl.templateParameters.templateParameterList)
                 {
@@ -120,18 +124,18 @@ public:
                                                             .templateParameterList.items)
                     {
                         if (p.templateAliasParameter)
-                            writeln(" *     ", p.templateAliasParameter.identifier.text, " = <description>");
+                            writeln(" ", c1, "     ", p.templateAliasParameter.identifier.text, " = <description>");
                         else if (p.templateTupleParameter)
-                            writeln(" *     ", p.templateTupleParameter.identifier.text, " = <description>");
+                            writeln(" ", c1, "     ", p.templateTupleParameter.identifier.text, " = <description>");
                         else if (p.templateTypeParameter)
-                            writeln(" *     ", p.templateTypeParameter.identifier.text, " = <description>");
+                            writeln(" ", c1, "     ", p.templateTypeParameter.identifier.text, " = <description>");
                         else if (p.templateValueParameter)
-                            writeln(" *     ", p.templateValueParameter.identifier.text, " = <description>");
+                            writeln(" ", c1, "     ", p.templateValueParameter.identifier.text, " = <description>");
                     }
                 }
 
             }
-            writeln(" */");
+            writeln(" ", c1, "/");
 
         }
         else if (decl.name.line > _caretline)
@@ -142,7 +146,7 @@ public:
 
 version(unittest)
 {
-    DDocTemplateGenerator parseAndVisit(const(char)[] source, int caretLine)
+    DDocTemplateGenerator parseAndVisit(const(char)[] source, int caretLine, bool p = false)
     {
         writeln;
         RollbackAllocator allocator;
@@ -150,7 +154,7 @@ version(unittest)
         StringCache cache = StringCache(StringCache.defaultBucketCount);
         const(Token)[] tokens = getTokensForParser(cast(ubyte[]) source, config, &cache);
         Module mod = parseModule(tokens, "", &allocator);
-        DDocTemplateGenerator result = construct!(DDocTemplateGenerator)(caretLine);
+        DDocTemplateGenerator result = construct!(DDocTemplateGenerator)(caretLine, p);
         result.visit(mod);
         return result;
     }
@@ -160,7 +164,7 @@ unittest
 {
     q{ module a;
        void foo(A...)(A a){}
-    }.parseAndVisit(2);
+    }.parseAndVisit(2, true);
 }
 
 unittest
@@ -174,7 +178,7 @@ unittest
 {
     q{ module a;
        int foo(int){}
-    }.parseAndVisit(2);
+    }.parseAndVisit(2, true);
 }
 
 unittest

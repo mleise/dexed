@@ -63,6 +63,7 @@ type
     fAlwaysAdvancedFeatures: boolean;
     fAutoClosedPairs: TAutoClosePairs;
     fSmartDdocNewline: boolean;
+    fInsertPlusDdoc: boolean;
     //
     procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
@@ -107,6 +108,7 @@ type
     property options1: TSynEditorOptions read fOptions1 write fOptions1;
     property options2: TSynEditorOptions2 read fOptions2 write fOptions2;
     property phobosDocRoot: TCEPathname read fPhobosDocRoot write setPhobosDocRoot;
+    property plusDdoc: boolean read fInsertPlusDdoc write fInsertPlusDdoc;
     property resetFontSize: boolean read fResetFontSize write fResetFontSize default true;
     property rightEdge: Integer read fRightEdge write fRightEdge default 80;
     property rightEdgeColor: TColor read fRightEdgeColor write fRightEdgeColor default clSilver;
@@ -304,6 +306,7 @@ begin
     identifierMatchOptions:=srcopt.identifierMatchOptions;
     detectIndentMode:=srcopt.detectIndentMode;
     fPhobosDocRoot:=srcopt.fPhobosDocRoot;
+    fInsertPlusDdoc:= srcopt.fInsertPlusDdoc;
 
     fSmartDdocNewline:=srcopt.fSmartDdocNewline;
     if fSmartDdocNewline then
@@ -674,6 +677,7 @@ begin
   anEditor.phobosDocRoot:=fPhobosDocRoot;
   anEditor.alwaysAdvancedFeatures:=fAlwaysAdvancedFeatures;
   anEditor.smartDdocNewline:= fSmartDdocNewline;
+  anEditor.insertPlusDdoc:= fInsertPlusDdoc;
   for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
     kst := anEditor.Keystrokes.Items[i];

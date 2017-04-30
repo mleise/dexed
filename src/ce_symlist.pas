@@ -685,7 +685,7 @@ begin
   fToolProc.OnTerminate := @toolTerminated;
   fToolProc.CurrentDirectory := Application.ExeName.extractFileDir;
   if fDeep then
-    fToolProc.Parameters.Add('-d');
+    fToolProc.Parameters.Add('-o');
   fToolProc.Parameters.Add('-s');
   fToolProc.Execute;
   str := fDoc.Text;

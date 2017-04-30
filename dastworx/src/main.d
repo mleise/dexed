@@ -13,10 +13,15 @@ import
 
 
 private __gshared int caretLine;
-private __gshared bool deepSymList;
+private __gshared bool option1;
 private __gshared static Appender!(ubyte[]) source;
 private __gshared static Appender!(AstErrors) errors;
 private __gshared string[] files;
+
+// -o : deep visit the symbols
+alias deepSymList = option1;
+// -o : outputs /++ +/ ddoc instead of /** */
+alias plusComment = option1;
 
 static this()
 {
@@ -51,7 +56,7 @@ void main(string[] args)
 
     // options for the work
     getopt(args, std.getopt.config.passThrough,
-        "d", &deepSymList,
+        "o", &option1,
         "l", &caretLine
     );
 
@@ -152,7 +157,7 @@ void handleDdocTemplateOption()
     source.data
         .getTokensForParser(config, &cache)
         .parseModule("", &alloc, &ignoreErrors)
-        .getDdocTemplate(caretLine);
+        .getDdocTemplate(caretLine, plusComment);
 }
 
 private void handleErrors(string fname, size_t line, size_t col, string message,

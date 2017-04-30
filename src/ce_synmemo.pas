@@ -181,6 +181,7 @@ type
     fHasModuleDeclaration: boolean;
     fLastCompletion: string;
     fDebugger: ICEDebugger;
+    fInsertPlusDdoc: boolean;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseBytePosition: Integer;
@@ -305,6 +306,7 @@ type
     property autoCloseCurlyBrace: TBraceAutoCloseStyle read fAutoCloseCurlyBrace write fAutoCloseCurlyBrace;
     property autoClosedPairs: TAutoClosePairs read fAutoClosedPairs write fAutoClosedPairs;
     property smartDdocNewline: boolean read fSmartDdocNewline write fSmartDdocNewline;
+    property insertPlusDdoc: boolean read fInsertPlusDdoc write fInsertPlusDdoc;
   end;
 
   TSortDialog = class(TForm)
@@ -1872,7 +1874,7 @@ var
 begin
   d := TStringList.Create;
   try
-    getDdocTemplate(lines, d, CaretY);
+    getDdocTemplate(lines, d, CaretY, fInsertPlusDdoc);
     if d.Text.isNotEmpty then
     begin
       BeginUndoBlock;
