@@ -65,6 +65,8 @@ type
     fSmartDdocNewline: boolean;
     fInsertPlusDdoc: boolean;
     fAutoCallCompletion: boolean;
+    fCloseCompletionCharsWithSpace: AnsiString;
+    fCloseCompletionChars: AnsiString;
     //
     procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
@@ -91,6 +93,8 @@ type
     property blockIndentation: Integer read fBlockIdent write fBlockIdent default 4;
     property bracketMatch: TSynSelectedColor read fBracketMatchAttribs write setBracketMatchColor;
     property characterSpacing: Integer read fCharSpacing write fCharSpacing default 0;
+    property closeCompletionCharsWithSpace: AnsiString read fCloseCompletionCharsWithSpace write fCloseCompletionCharsWithSpace;
+    property closeCompletionChars: AnsiString read fCloseCompletionChars write fCloseCompletionChars;
     property completionMenuCaseCare: boolean read fCompletionMenuCaseCare write fCompletionMenuCaseCare;
     property completionMenuLines: byte read fCompletionMenuLines write setCompletionMenuLines;
     property completionMenuWidth: integer read fCompletionMenuWidth write fCompletionMenuWidth;
@@ -240,6 +244,9 @@ begin
   fCurrLineAttribs.Background := 15789545;
   fCurrLineAttribs.Foreground := clNone;
   //
+  fCloseCompletionCharsWithSpace := '*+-/^=~><';
+  fCloseCompletionChars:= ',;)}]!';
+  //
   options1 :=
     [eoAutoIndent, eoBracketHighlight, eoGroupUndo, eoTabsToSpaces, eoTrimTrailingSpaces,
     eoDragDropEditing, eoShowCtrlMouseLinks, eoEnhanceHomeKey, eoTabIndent];
@@ -310,6 +317,8 @@ begin
     fPhobosDocRoot:=srcopt.fPhobosDocRoot;
     fInsertPlusDdoc:= srcopt.fInsertPlusDdoc;
     fAutoCallCompletion:= srcopt.fAutoCallCompletion;
+    fCloseCompletionChars:=srcopt.fCloseCompletionChars;
+    fCloseCompletionCharsWithSpace:=srcopt.fCloseCompletionCharsWithSpace;
 
     fSmartDdocNewline:=srcopt.fSmartDdocNewline;
     if fSmartDdocNewline then
@@ -637,6 +646,8 @@ var
   kst: TSynEditKeyStroke;
   dup: boolean;
   savedSize: integer;
+  cs: TSysCharSet;
+  c: char;
 begin
   anEditor.D2Highlighter.Assign(D2Syn);
   anEditor.TxtHighlighter.Assign(TxtSyn);
@@ -682,6 +693,17 @@ begin
   anEditor.smartDdocNewline:= fSmartDdocNewline;
   anEditor.insertPlusDdoc:= fInsertPlusDdoc;
   anEditor.autoCallCompletion:= fAutoCallCompletion;
+
+  cs := [];
+  for c in fCloseCompletionCharsWithSpace do
+    include(cs, c);
+  anEditor.closeCompletionCharsWithSpace:=cs;
+
+  cs := [];
+  for c in fCloseCompletionChars do
+    include(cs, c);
+  anEditor.closeCompletionChars:=cs;
+
   for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
     kst := anEditor.Keystrokes.Items[i];

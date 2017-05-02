@@ -13,8 +13,7 @@ uses
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs, ce_dastworx,
-  ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer, ce_diff,
-  ce_dlangutils;
+  ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer, ce_diff;
 
 type
 
@@ -184,6 +183,8 @@ type
     fDebugger: ICEDebugger;
     fInsertPlusDdoc: boolean;
     fAutoCallCompletion: boolean;
+    fCloseCompletionCharsWithSpace: TSysCharSet;
+    fCloseCompletionChars: TSysCharSet;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseBytePosition: Integer;
@@ -311,6 +312,8 @@ type
     property smartDdocNewline: boolean read fSmartDdocNewline write fSmartDdocNewline;
     property insertPlusDdoc: boolean read fInsertPlusDdoc write fInsertPlusDdoc;
     property autoCallCompletion: boolean read fAutoCallCompletion write fAutoCallCompletion;
+    property closeCompletionCharsWithSpace: TSysCharSet read fCloseCompletionCharsWithSpace write fCloseCompletionCharsWithSpace;
+    property closeCompletionChars: TSysCharSet read fCloseCompletionChars write fCloseCompletionChars;
   end;
 
   TSortDialog = class(TForm)
@@ -2089,10 +2092,18 @@ procedure TCESynMemo.completionCodeCompletion(var value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
 begin
-  if (isOperator1(KeyChar[1])) or (KeyChar[1] = ' ') then
-    value := SourceValue + KeyChar
+  if (KeyChar[1] = ' ') then
+  begin
+    value := sourceValue + KeyChar;
+  end
   else
+  begin
     fLastCompletion := value;
+    if KeyChar[1] in fCloseCompletionCharsWithSpace then
+      value += ' ' + KeyChar
+    else if KeyChar[1] in fCloseCompletionChars then
+      value += KeyChar;
+  end;
 end;
 
 procedure TCESynMemo.completionFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
