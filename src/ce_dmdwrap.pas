@@ -239,16 +239,19 @@ type
   TOtherOpts = class(TOptsGroup)
   private
     fCov: boolean;
+    fGui: boolean;
     fCustom: TStringList;
     fDmdOthers: TstringList;
     fLdcOthers: TStringList;
     fGdcOthers: TStringList;
-    procedure setCov(const value: boolean);
+    procedure setCov(value: boolean);
+    procedure setGui(value: boolean);
     procedure setCustom(value: TStringList);
     procedure setDmdOtherOptions(value: TStringList);
     procedure setLdcOtherOptions(value: TStringList);
     procedure setGdcOtherOptions(value: TStringList);
   published
+    property guiApplication: boolean read fGui write setGui;
     property coverage: boolean read fCov write setCov default false;
     property customOptions: TStringList read fCustom write setCustom;
     property dmdOtherOptions: TStringList read fDmdOthers write setDmdOtherOptions;
@@ -1169,6 +1172,7 @@ begin
   begin
     src := TOtherOpts(source);
     fCov := src.fCov;
+    fGUi := src.fGui;
     fCustom.Assign(src.fCustom);
     fDmdOthers.Assign(src.fDmdOthers);
     fLdcOthers.Assign(src.fLdcOthers);
@@ -1186,10 +1190,19 @@ begin
   inherited;
 end;
 
-procedure TOtherOpts.setCov(const value: boolean);
+procedure TOtherOpts.setCov(value: boolean);
 begin
-  if fCov = value then exit;
+  if fCov = value then
+    exit;
   fCov := value;
+  doChanged;
+end;
+
+procedure TOtherOpts.setGui(value: boolean);
+begin
+  if fGui = value then
+    exit;
+  fGui := value;
   doChanged;
 end;
 
@@ -1211,7 +1224,10 @@ begin
         str := '-' + str;
       list.AddText(fSymStringExpander.expand(str));
     end;
-    if fCov then list.Add('-cov');
+    if fCov then
+      list.Add('-cov');
+    if fGui then
+      list.Add('-L/SUBSYSTEM:WINDOWS:5.0');
   end else
   begin
     baseopt := TOtherOpts(base);
@@ -1228,7 +1244,10 @@ begin
         str := '-' + str;
       list.AddText(fSymStringExpander.expand(str));
     end;
-    if baseopt.fCov or fCov then list.Add('-cov');
+    if baseopt.fCov or fCov then
+      list.Add('-cov');
+    if baseopt.fGui or fGui then
+      list.Add('-L/SUBSYSTEM:WINDOWS:5.0');
   end;
 end;
 

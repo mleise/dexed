@@ -99,6 +99,7 @@ These options are defined per-configuration.
 - **dmdOtherOptions**: Custom options, only for DMD.
 - **gdcOtherOptions**: Custom options, only for GDC.
 - **ldcOtherOptions**: Custom options, only for LDC.
+- **guiApplication**: Under windows, use this option to hide the console if the target is a GUI application. Under Linux this option has no effect.
 
 Syntax for the custom / other options:
 
