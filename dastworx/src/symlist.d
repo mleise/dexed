@@ -10,18 +10,15 @@ import
 import
     common;
 
-private __gshared bool deep = void;
-
 /**
  * Serializes the symbols in the standard output
  */
 void listSymbols(const(Module) mod, AstErrors errors, bool deep = true)
 {
     mixin(logCall);
-    symlist.deep = deep;
     alias SL = SymbolListBuilder!(ListFmt.Pas);
     SL.addAstErrors(errors);
-    SL sl = construct!(SL);
+    SL sl = construct!(SL)(deep);
     sl.visit(mod);
     sl.serialize.writeln;
 }
@@ -65,6 +62,8 @@ mixin(makeSymbolTypeArray);
 
 class SymbolListBuilder(ListFmt Fmt): ASTVisitor
 {
+    private immutable bool _deep;
+
     static if (Fmt == ListFmt.Pas)
     {
         static Appender!string pasStream;
@@ -76,6 +75,11 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
     }
 
     static uint utc;
+
+    this(bool deep)
+    {
+        _deep = deep;
+    }
 
     alias visit = ASTVisitor.visit;
 
@@ -149,7 +153,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             pasStream.put(format("col=%d\r", dt.name.column));
             pasStream.put(format("name='%s'\r", dt.name.text));
             pasStream.put("symType=" ~ symbolTypeStrings[st] ~ "\r");
-            static if (dig) if (deep)
+            static if (dig) if (_deep)
             {
                 pasStream.put("subs = <");
                 dt.accept(this);
@@ -164,7 +168,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             item["col"]  = JSONValue(dt.name.column);
             item["name"] = JSONValue(dt.name.text);
             item["type"] = JSONValue(symbolTypeStrings[st]);
-            static if (dig) if (deep)
+            static if (dig) if (_deep)
             {
                 JSONValue subs = parseJSON("[]");
                 const JSONValue* old = jarray;
