@@ -68,7 +68,7 @@ public:
                         if (p.name.text != "")
                             writeln(" ", c1, "     ", p.name.text, " = <description>");
                         else
-                            writeln(" ",c1, "     __param", i, " = <description>");
+                            writeln(" ", c1, "     __param", i, " = <description>");
                     }
                 }
             }
@@ -108,9 +108,21 @@ public:
         visitTemplateOrAggregate(decl);
     }
 
+    override void visit(const(AutoDeclarationPart) decl)
+    {
+        if (decl.templateParameters)
+            visitTemplateOrAggregate(decl);
+    }
+
     private void visitTemplateOrAggregate(T)(const(T) decl)
     {
-        if (decl.name.line == _caretline)
+        size_t line;
+        static if (__traits(hasMember, T, "name"))
+            line = decl.name.line;
+        else
+            line = decl.identifier.line;
+
+        if (_caretline == line)
         {
             writeln("/", c2, "\n ", c1, " <short description> \n ", c1, " \n ", c1, " <detailed description>\n ", c1);
 
@@ -138,7 +150,7 @@ public:
             writeln(" ", c1, "/");
 
         }
-        else if (decl.name.line > _caretline)
+        else if (line > _caretline)
             return;
         decl.accept(this);
     }
@@ -192,6 +204,13 @@ unittest
 {
     q{ module a;
        struct Foo(alias Fun, A...){}
+    }.parseAndVisit(2);
+}
+
+unittest
+{
+    q{ module a;
+       enum trait(alias Variable) = whatever;
     }.parseAndVisit(2);
 }
 
