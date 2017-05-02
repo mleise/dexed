@@ -31,6 +31,7 @@ Toolbar:
 
 A tool can be selected from the left side of the widget. If selected, a property inspector displays the options that can be edited:
 
+- **askConfirmation**: Asks for a confirmation before executing the tool.
 - **clearMessages**: If the tool standard output is redirected to the [messages widget](widgets_messages) then the previous messages are cleared before the execution. The output is redirected to the messages when **popUsePipes** is set and if **nextToolAlias** is empty.
 - **editorToInput**: Deprecated, see **pipeInputKind**.
 - **executable**: The tool file name. If the system cannot find its path in the environment variables then it must be included. The field can include [symbolic strings](features_symbolic_strings).

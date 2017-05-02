@@ -112,6 +112,7 @@ The category _Highlighter presets_ can be used to customize more easily the styl
 The shortcuts are editable in the [shortcut editor](options_shortcuts_editor), under the category _Code editor._
 
 - **alwaysAdvancedFeatures**: When checked, auto-closing or DCD features also work on documents that don't have the _.d_ or the _.di_ extensions.
+- **autoCallCompletion**: Call completion after an alphabetic character, without explicit <kbd>CTRL</kbd>+<kbd>SPACE</kbd>.
 - **autoCloseCurlyBraces**: See the _Automatic features_ section.
 - **autoClosedPairs**: See the _Automatic features_ section.
 - **autoDotDelay**: Sets, in milliseconds, how responsive is the completion menu after a `.`.
@@ -123,4 +124,6 @@ The shortcuts are editable in the [shortcut editor](options_shortcuts_editor), u
 - **folding**: Sets the code regions that can be folded in the gutter.
 - **lineNumberEvery**: Sets the frequency of the line numbers in the gutter.
 - **phobosDocRoot**: Sets the location of the standard library html documentation. This is used when <kbd>F1</kbd> is pressed. The value can be a local folder or an http address.
+- **plusDdoc**: Sets if instead of `*`, `+` are used in the comment produced by the command _Insert DDoc Template_.
 - **resetFontSize**: When checked and if the font size is modified then the font size is resets in all the documents that are opened. The option can be disabled in order to keep the current zoom ration.
+- **smartDdocNewLine**: Allow the auto insertion of a leading `*` or a `+` while writing documentation comments.
