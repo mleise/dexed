@@ -13,7 +13,8 @@ uses
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs, ce_dastworx,
-  ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer, ce_diff;
+  ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer, ce_diff,
+  ce_dlangutils;
 
 type
 
@@ -182,6 +183,7 @@ type
     fLastCompletion: string;
     fDebugger: ICEDebugger;
     fInsertPlusDdoc: boolean;
+    fAutoCallCompletion: boolean;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseBytePosition: Integer;
@@ -307,6 +309,7 @@ type
     property autoClosedPairs: TAutoClosePairs read fAutoClosedPairs write fAutoClosedPairs;
     property smartDdocNewline: boolean read fSmartDdocNewline write fSmartDdocNewline;
     property insertPlusDdoc: boolean read fInsertPlusDdoc write fInsertPlusDdoc;
+    property autoCallCompletion: boolean read fAutoCallCompletion write fAutoCallCompletion;
   end;
 
   TSortDialog = class(TForm)
@@ -2084,8 +2087,8 @@ procedure TCESynMemo.completionCodeCompletion(var value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
 begin
-  if KeyChar = '.' then
-    value := '.'
+  if (isOperator1(KeyChar[1])) or (KeyChar[1] = ' ') then
+    value := SourceValue + KeyChar
   else
     fLastCompletion := value;
 end;
@@ -2610,7 +2613,7 @@ begin
   inherited;
   highlightCurrentIdentifier;
   if fCompletion.IsActive then
-      fCompletion.CurrentString:= GetWordAtRowCol(LogicalCaretXY);
+    fCompletion.CurrentString:= GetWordAtRowCol(LogicalCaretXY);
   case Key of
     VK_BROWSER_BACK: fPositions.back;
     VK_BROWSER_FORWARD: fPositions.next;
@@ -2637,7 +2640,12 @@ begin
     VK_OEM_PERIOD, VK_DECIMAL: fCanAutoDot := true;
   end;
   inherited;
-
+  if fAutoCallCompletion and fIsDSource and (not fCompletion.IsActive) and
+    (Key < $80) and (char(Key) in ['a'..'z', 'A'..'Z']) then
+  begin
+    fCompletion.Execute(GetWordAtRowCol(LogicalCaretXY),
+      ClientToScreen(point(CaretXPix, CaretYPix + LineHeight)));
+  end;
   if StaticEditorMacro.automatic then
     StaticEditorMacro.Execute;
 end;

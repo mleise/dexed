@@ -64,6 +64,7 @@ type
     fAutoClosedPairs: TAutoClosePairs;
     fSmartDdocNewline: boolean;
     fInsertPlusDdoc: boolean;
+    fAutoCallCompletion: boolean;
     //
     procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
@@ -82,6 +83,7 @@ type
     procedure setLineNumEvery(value: integer);
   published
     property alwaysAdvancedFeatures: boolean read fAlwaysAdvancedFeatures write fAlwaysAdvancedFeatures;
+    property autoCallCompletion: boolean read fAutoCallCompletion write fAutoCallCompletion;
     property autoCloseCurlyBrace: TBraceAutoCloseStyle read fAutoCloseCurlyBrace write fAutoCloseCurlyBrace default TBraceAutoCloseStyle.autoCloseNever;
     property autoClosedPairs: TAutoClosePairs read fAutoClosedPairs write fAutoClosedPairs default[];
     property autoDotDelay: integer read fAutoDotDelay write SetautoDotDelay;
@@ -307,6 +309,7 @@ begin
     detectIndentMode:=srcopt.detectIndentMode;
     fPhobosDocRoot:=srcopt.fPhobosDocRoot;
     fInsertPlusDdoc:= srcopt.fInsertPlusDdoc;
+    fAutoCallCompletion:= srcopt.fAutoCallCompletion;
 
     fSmartDdocNewline:=srcopt.fSmartDdocNewline;
     if fSmartDdocNewline then
@@ -678,6 +681,7 @@ begin
   anEditor.alwaysAdvancedFeatures:=fAlwaysAdvancedFeatures;
   anEditor.smartDdocNewline:= fSmartDdocNewline;
   anEditor.insertPlusDdoc:= fInsertPlusDdoc;
+  anEditor.autoCallCompletion:= fAutoCallCompletion;
   for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
     kst := anEditor.Keystrokes.Items[i];
