@@ -125,5 +125,5 @@ The shortcuts are editable in the [shortcut editor](options_shortcuts_editor), u
 - **lineNumberEvery**: Sets the frequency of the line numbers in the gutter.
 - **phobosDocRoot**: Sets the location of the standard library html documentation. This is used when <kbd>F1</kbd> is pressed. The value can be a local folder or an http address.
 - **plusDdoc**: Sets if instead of `*`, `+` are used in the comment produced by the command _Insert DDoc Template_.
-- **resetFontSize**: When checked and if the font size is modified then the font size is resets in all the documents that are opened. The option can be disabled in order to keep the current zoom ration.
+- **resetFontSize**: When checked and if the font size is modified then the font size is resets in all the documents that are opened. The option can be disabled in order to keep the current zoom ratio.
 - **smartDdocNewLine**: Allow the auto insertion of a leading `*` or a `+` while writing documentation comments.

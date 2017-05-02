@@ -201,6 +201,7 @@ type
     procedure setAutoDotDelay(value: Integer);
     procedure completionExecute(sender: TObject);
     procedure getCompletionList;
+    procedure completionFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     function completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
       Selected: boolean; Index: integer): boolean;
     procedure completionCodeCompletion(var value: string; SourceValue: string;
@@ -744,6 +745,7 @@ begin
   fCompletion.OnExecute:= @completionExecute;
   fCompletion.OnCodeCompletion:=@completionCodeCompletion;
   fCompletion.OnPaintItem:= @completionItemPaint;
+  fCompletion.TheForm.OnKeyDown:= @completionFormKeyDown;
   fCompletion.CaseSensitive:=true;
   TStringList(fCompletion.ItemList).CaseSensitive:=true;
   fCompletion.LongLineHintType:=sclpNone;
@@ -2091,6 +2093,12 @@ begin
     value := SourceValue + KeyChar
   else
     fLastCompletion := value;
+end;
+
+procedure TCESynMemo.completionFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if char(key) = #9 then
+    key := 13;
 end;
 
 function TCESynMemo.completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
