@@ -244,8 +244,8 @@ begin
   fCurrLineAttribs.Background := 15789545;
   fCurrLineAttribs.Foreground := clNone;
   //
-  fCloseCompletionCharsWithSpace := '*+-/^=~><';
-  fCloseCompletionChars:= ',;)}]!';
+  fCloseCompletionCharsWithSpace := '*+-/^=~><%';
+  fCloseCompletionChars:= '.,;)}]!';
   //
   options1 :=
     [eoAutoIndent, eoBracketHighlight, eoGroupUndo, eoTabsToSpaces, eoTrimTrailingSpaces,
