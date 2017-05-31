@@ -2237,13 +2237,14 @@ begin
     begin
       tk2 := fLexToks[i+1];
       if (tk1^.offset < p) and (tk1^.kind in [ltkComment, ltkIllegal])
-        and (tk2^.offset > p) then
+        and (tk1^.Data[1] in ['*','+']) and (tk2^.offset > p) then
           exit(tk1^.Data[1])
       else if (tk1^.offset > p) then
         exit;
     end
-    else if (tk1^.offset < p) and (tk1^.kind in [ltkComment, ltkIllegal]) then
-      exit(tk1^.Data[1]);
+    else if (tk1^.offset < p) and (tk1^.kind in [ltkComment, ltkIllegal])
+      and (tk1^.Data[1] in ['*','+']) then
+        exit(tk1^.Data[1]);
   end;
 end;
 
@@ -2607,6 +2608,7 @@ begin
           begin
             Key := 0;
             curlyBraceCloseAndIndent;
+            lxd := false;
           end;
         end;
         if (fSmartDdocNewline) then
@@ -2619,6 +2621,7 @@ begin
           ddc := lexInDdoc;
           if ddc in ['*', '+'] then
           begin
+            fLexToks.saveToFile('/home/basile/lx.txt');
             inherited;
             insertLeadingDDocSymbol(ddc);
             fCanShowHint:=false;
