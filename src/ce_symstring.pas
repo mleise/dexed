@@ -120,9 +120,6 @@ end;
 
 procedure TCESymbolExpander.projChanged(project: ICECommonProject);
 begin
-  fProjInterface := project;
-  if fProj <> project.getProject then
-    exit;
   fNeedUpdate := true;
 end;
 
