@@ -201,6 +201,7 @@ type
     procedure setDDocDelay(value: Integer);
     procedure setAutoDotDelay(value: Integer);
     procedure completionExecute(sender: TObject);
+    procedure completionDeleteKey(sender: TObject);
     procedure getCompletionList;
     procedure completionFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     function completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
@@ -748,6 +749,7 @@ begin
   fCompletion.OnExecute:= @completionExecute;
   fCompletion.OnCodeCompletion:=@completionCodeCompletion;
   fCompletion.OnPaintItem:= @completionItemPaint;
+  fCompletion.OnKeyDelete:= @completionDeleteKey;
   fCompletion.TheForm.OnKeyDown:= @completionFormKeyDown;
   fCompletion.CaseSensitive:=true;
   TStringList(fCompletion.ItemList).CaseSensitive:=true;
@@ -2062,6 +2064,14 @@ begin
   fCompletion.TheForm.BackgroundColor:= self.Color;
   fCompletion.TheForm.TextColor:= fD2Highlighter.identifiers.Foreground;
   getCompletionList;
+end;
+
+procedure TCESynMemo.completionDeleteKey(sender: TObject);
+var
+  e: string;
+begin
+  if fCompletion.CurrentString.length < 2 then
+    fCompletion.TheForm.Close;
 end;
 
 procedure TCESynMemo.getCompletionList;
