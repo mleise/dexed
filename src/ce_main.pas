@@ -3010,8 +3010,10 @@ var
   older: boolean = false;
   exist: boolean = false;
 const
-  messg: string = 'Either the runnable does not exist or it is older than its source.' +
+  messg1: string = 'Either the runnable does not exist or it is older than its source.' +
     LineEnding +  'Do you wish to recompile it ?';
+  messg2: string = 'The binary produced for a runnable that is not explicitly saved ' +
+    'must be recompiled after each execution.' + LineEnding +  'Do you wish to recompile it now ?';
 begin
   if fDoc.isNil then
     exit;
@@ -3024,7 +3026,9 @@ begin
   end;
   if (not exist) or (older) then
   begin
-    if dlgYesNo(messg) = mrYes then
+    if fDoc.isTemporary and (dlgYesNo(messg2) = mrYes) then
+      compileRunnable
+    else if dlgYesNo(messg1) = mrYes then
       compileRunnable
     else if not exist then
       exit;
