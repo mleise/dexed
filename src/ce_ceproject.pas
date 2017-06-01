@@ -35,6 +35,7 @@ type
     fRootFolder: string;
     fBasePath: string;
     fRunnerOldCwd: string;
+    fVersion: string;
     fLibAliases: TStringList;
     fAutoDeps: boolean;
     fConfigs: TCollection;
@@ -83,6 +84,7 @@ type
     property ConfigurationIndex: Integer read fConfIx write setConfIx;
     property LibraryAliases: TStringList read fLibAliases write setLibAliases;
     property AutoSolveDependencies: boolean read fAutoDeps write fAutoDeps default false;
+    property version: string read fVersion write fVersion;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;

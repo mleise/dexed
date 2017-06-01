@@ -38,6 +38,7 @@ When dependencies are complex, it's possible to select all the entries by settin
 - **Sources**: Shows a dialog used to edit the filenames of the project sources. Relative paths are automatically handled. Only one item must stand by line.
 It's recommended to use the [project inspector](widgets_project_inspector) instead of this archaic editor. To include a folder of source it's also possible to specify a path with a asterisk in the **Paths** options, **ExtraSources** editor.
 This avoids to manually remove the obsolete source or to manually add the new source files.
+- **version**: Defines a string used to expand the [_CPV_ symbolic string](features_symbolic_strings).
 
 #### Message options
 

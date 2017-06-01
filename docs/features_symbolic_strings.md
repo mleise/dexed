@@ -44,6 +44,7 @@ Current project:
 - **`<CPP>`**: also _`<CurrentProjectPath>`_. Expanded to the project path.
 - **`<CPR>`**: also _`<CurrentProjectRoot>`_. Expanded to the field _RootFolder_ of a CE project (n/a if the current project is for DUB).
 - **`<CPCD>`**: also _`<CurrentProjectCommonFilesDirectory>`_. Expanded to the sources common directory.
+- **`<CPV>`**: also _`<CurrentProjectVersion>`_. Expanded to the value of the _version_ field of a [CE project](widgets_native_project_configuration).
 
 The expanded form of a symbol is never empty. When a symbol expands to nothing it's set to a pair of back quotes, e.g **\``** for a **`<CPP>`** when no project is opened.
 

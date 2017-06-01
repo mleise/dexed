@@ -251,7 +251,7 @@ type
     procedure setLdcOtherOptions(value: TStringList);
     procedure setGdcOtherOptions(value: TStringList);
   published
-    property guiApplication: boolean read fGui write setGui;
+    property guiApplication: boolean read fGui write setGui default false;
     property coverage: boolean read fCov write setCov default false;
     property customOptions: TStringList read fCustom write setCustom;
     property dmdOtherOptions: TStringList read fDmdOthers write setDmdOtherOptions;
