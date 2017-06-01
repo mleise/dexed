@@ -6,7 +6,7 @@ title: index
 
 ![](img/coedit_kde4_thumb.png)
 
-This documentation is based on version 3, update 1.
+This documentation is based on version 3, update 2.
 
 #### First steps
 
