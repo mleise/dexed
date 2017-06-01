@@ -2489,9 +2489,17 @@ var
   str: TStringList;
   txt: string;
 begin
-  if (fFilename = fTempFileName) or fDisableFileDateCheck
-  or not FileAge(fFilename, newDate) or (fFileDate = newDate) then
+  if fDisableFileDateCheck then
     exit;
+  if fFilename.isNotEmpty and not fFilename.fileExists and
+    (fFilename <> '<new document>') then
+  begin
+    // cant use a dialog: dialog closed -> doc focused -> warn again, etc
+    getMessageDisplay.message(fFilename + ' does not exist anymore', self, amcEdit, amkWarn);
+  end;
+  if (fFilename = fTempFileName) or fDisableFileDateCheck
+    or not FileAge(fFilename, newDate) or (fFileDate = newDate) then
+      exit;
   if (fFileDate <> 0.0) then
   begin
     str := TStringList.Create;
