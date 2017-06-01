@@ -7,7 +7,7 @@ title: Symbolic strings
 The symbolic strings represent variables defined by the software. They are used by several widgets:
 
 - the [runnable modules shebang line](features_runnables).
-- the [native project confirguration widget](widgets_native_project_configuration): many fields accept symbols.
+- the [native project confirguration widget](widgets_ce_project_editor): many fields accept symbols.
 - the [custom tools](widgets_custom_tools): parameters, working directory.
 - the [process input](widgets_process_input): the input field can include a symbol.
 - the [GDB commander](widgets_gdb_commander) custom commands.
@@ -44,7 +44,7 @@ Current project:
 - **`<CPP>`**: also _`<CurrentProjectPath>`_. Expanded to the project path.
 - **`<CPR>`**: also _`<CurrentProjectRoot>`_. Expanded to the field _RootFolder_ of a CE project (n/a if the current project is for DUB).
 - **`<CPCD>`**: also _`<CurrentProjectCommonFilesDirectory>`_. Expanded to the sources common directory.
-- **`<CPV>`**: also _`<CurrentProjectVersion>`_. Expanded to the value of the _version_ field of a [CE project](widgets_native_project_configuration).
+- **`<CPV>`**: also _`<CurrentProjectVersion>`_. Expanded to the value of the _version_ field of a [CE project](widgets_ce_project_editor).
 
 The expanded form of a symbol is never empty. When a symbol expands to nothing it's set to a pair of back quotes, e.g **\``** for a **`<CPP>`** when no project is opened.
 
