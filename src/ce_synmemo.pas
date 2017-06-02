@@ -2639,7 +2639,6 @@ begin
           ddc := lexInDdoc;
           if ddc in ['*', '+'] then
           begin
-            fLexToks.saveToFile('/home/basile/lx.txt');
             inherited;
             insertLeadingDDocSymbol(ddc);
             fCanShowHint:=false;
