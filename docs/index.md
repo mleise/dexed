@@ -15,6 +15,10 @@ _Install and configure Coedit._
 * [Build](build.md)
 * [Setup](setup.md)
 
+#### Tutos and guides
+
+* [Usage in videos](videos.md)
+
 #### Features
 
 _General features or concepts that are not wrapped in a widget_
