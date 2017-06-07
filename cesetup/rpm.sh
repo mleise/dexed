@@ -23,7 +23,7 @@ echo "[Desktop Entry]
 Categories=Application;IDE;Development;
 Exec=coedit %f
 GenericName=coedit
-Icon=/usr/share/pixmaps/coedit.png
+Icon=coedit
 Keywords=editor;Dlang;IDE;dmd;
 Name=coedit
 StartupNotify=true
@@ -35,7 +35,7 @@ echo "Name: coedit
 Version: $maj
 Release: $min
 Summary: IDE for the D programming language
-License: Boost Software License version 1
+License: Boost
 URL: www.github.com/BBasile/Coedit
 
 %description
