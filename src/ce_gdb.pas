@@ -1757,7 +1757,7 @@ begin
     str := fSyms.expand(str[1..str.length-1]);
     gdbCommand('-environment-path ' + str);
   end;
-  if DirectoryExists(o.workingDirectory) then
+  if DirectoryExists(fSyms.expand(o.workingDirectory)) then
     gdbCommand('-environment-cd ' + fSyms.expand(o.workingDirectory));
   if (o.arguments.Count <> 0) or (o.queryArguments) then
   begin
@@ -1785,22 +1785,19 @@ begin
   dbgeeOptsEd.TIObject := nil;
   if not fDbgRunnable then
   begin
-    if fProj = nil then
-      exit
-    else nme := fProj.filename;
-    if not nme.fileExists then
-      exit;
+    if fProj <> nil then
+      nme := fProj.filename;
   end
   else
   begin
-    if fDoc = nil then
-      exit
-    else nme := fDoc.filename;
-    if not nme.fileExists then
-      exit;
+    if fDoc.isNotNil then
+      nme := fDoc.filename;
   end;
-  opt := fDebugeeOptions.projectByFile[nme];
-  dbgeeOptsEd.TIObject := opt;
+  if nme.fileExists then
+  begin
+    opt := fDebugeeOptions.projectByFile[nme];
+    dbgeeOptsEd.TIObject := opt;
+  end;
 end;
 
 procedure TCEGdbWidget.synchronizeBreakpointsFromDoc;
