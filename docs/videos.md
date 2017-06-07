@@ -20,3 +20,12 @@ The trick is to set the tool's current working directory with a [symbolic string
 {% raw %}
 <div class="tumblr-post" data-href="https://embed.tumblr.com/embed/post/RfMjxAacl04tQydtQ8GmYA/161538065841" data-did="da39a3ee5e6b4b0d3255bfef95601890afd80709" data-language="en_US"><a href="https://abstractop.tumblr.com/post/161538065841">https://abstractop.tumblr.com/post/161538065841</a></div>  <script async src="https://assets.tumblr.com/post.js"></script>
 {% endraw %}
+
+### Compiler paths
+
+This video shows how it's easy to [select a specific D compiler](options_compilers_paths) on the fly: official dmd, upstream dmd, ldc and gdc.
+Here the choice is applied to the compiler used to make a runnable but the same setting also exists for the projects.
+
+{% raw %}
+<div class="tumblr-post" data-href="https://embed.tumblr.com/embed/post/RfMjxAacl04tQydtQ8GmYA/161552390630" data-did="da39a3ee5e6b4b0d3255bfef95601890afd80709"><a href="https://abstractop.tumblr.com/post/161552390630">https://abstractop.tumblr.com/post/161552390630</a></div>  <script async src="https://assets.tumblr.com/post.js"></script>
+{% endraw %}
