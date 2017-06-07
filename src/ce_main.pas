@@ -3382,6 +3382,7 @@ begin
 
   fProject.loadFromFile(fname);
   showProjTitle;
+  fProject.activate;
 end;
 
 procedure TCEMainForm.mruProjItemClick(Sender: TObject);

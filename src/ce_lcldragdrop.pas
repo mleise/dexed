@@ -150,6 +150,7 @@ begin
     else
       TCEDubProject.create(nil);
     fProj.loadFromFile(fname);
+    fProj.activate;
   end
   else getMultiDocHandler.openDocument(fname);
 end;

@@ -634,6 +634,7 @@ begin
     else
       TCEDubProject.create(nil);
     fProj.loadFromFile(fname);
+    fProj.activate;
   end
   else dlgOkInfo('the project file for this library seems to be invalid');
 end;
