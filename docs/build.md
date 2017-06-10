@@ -2,6 +2,10 @@
 title: Build Coedit
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### Build
 
 #### Coedit
@@ -44,3 +48,9 @@ You can also build it in CE using the project file _dastworx.ce_.
 
 Additionally you'll have to build [the completion daemon **DCD**](https://github.com/BBasile/DCD#setup) and the [D linter **Dscanner**](https://github.com/Hackerpilot/Dscanner#building-and-installing).
 See the products documentation for more information.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

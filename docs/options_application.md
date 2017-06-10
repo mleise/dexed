@@ -2,6 +2,10 @@
 title: Widgets - application options
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 #### Application
 
 {% include xstyle.css %}
@@ -25,3 +29,9 @@ The page exposes unsorted options. In the future some of them might be moved to 
 - **reloadLastDocuments**: Sets if the sources, the project, and the group that were opened on exit are reloaded automatically.
 - **showBuildDuration**: Sets if the duration of a project build is measured.
 - **splitterScrollSpeed**: Sets how fast the splitters are moved when the scroll wheel is used.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

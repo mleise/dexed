@@ -2,6 +2,10 @@
 title: Options - compiler paths
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### Compilers paths
 
 The _Compilers paths_ category is used to define the paths to the compilers and to their respective versions of the standard library.
@@ -26,3 +30,9 @@ In other options categories one of these compilers can be selected.
 * Category _Application_, _nativeProjectCompiler_: defines the compiler used to compile a project that has the native format.
 * Category [_Runnable modules_](features_runnables), _compiler_: defines the compiler used to compile a _runnable module_ or a DUB script.
 * Category [_DUB build_](options_dub_build), _compiler_: defines the compiler used to compile a project that has the DUB format.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

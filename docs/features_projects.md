@@ -2,6 +2,10 @@
 title: Projects
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### Projects
 
 Two project formats are supported. 
@@ -49,3 +53,9 @@ It's possible to use the [custom tools](widgets_custom_tools) to call other buil
 For example to call _make_, add a new tool with _make_ as _executable_ and sets the _workingDirectory_ to the folder that contains the makefile. 
 To specify a special target, such as _release_, add _release_ in the parameters editor.
 To get _make_ output in the messages, check _popUsesPipes_ in the tool options.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

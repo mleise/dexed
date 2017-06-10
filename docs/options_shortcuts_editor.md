@@ -2,6 +2,10 @@
 title: Options - shortcuts
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### Shortcuts editor
@@ -18,3 +22,9 @@ Each item is editable.
 ![](img/options_shortcuts_edit.png)
 
 After an assignation attempt and if the selected combination is already used the new shortcut is not validated and a warning is displayed.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

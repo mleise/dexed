@@ -2,6 +2,10 @@
 title: Widgets - options editor
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### Options editor
@@ -24,3 +28,9 @@ The options are persistent and saved in a specific folder:
 **`?:\Users\<your account>\AppData\Roaming\Coedit\`**.
 
 Each software component saves its own file with a self-explanatory name so it's easy to find and modify the file that matches a particular setting.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

@@ -2,6 +2,10 @@
 title: Usage in video
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### Debug a runnable
 
 This video shows how a [runnable module](features_runnables) can be debugged in the [GDB commander](widgets_gdb_commander) widget.
@@ -28,4 +32,10 @@ Here the choice is applied to the compiler used to make a runnable but the same 
 
 {% raw %}
 <div class="tumblr-post" data-href="https://embed.tumblr.com/embed/post/RfMjxAacl04tQydtQ8GmYA/161552390630" data-did="da39a3ee5e6b4b0d3255bfef95601890afd80709"><a href="https://abstractop.tumblr.com/post/161552390630">https://abstractop.tumblr.com/post/161552390630</a></div>  <script async src="https://assets.tumblr.com/post.js"></script>
+{% endraw %}
+
+{% raw %}
+<script>
+anchors.add();
+</script>
 {% endraw %}

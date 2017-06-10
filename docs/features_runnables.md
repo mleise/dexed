@@ -2,6 +2,10 @@
 title: Runnable modules
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### Runnable modules
 
 #### Description
@@ -81,3 +85,9 @@ Note that the action _Run file unittest_ is based on the same internal function 
     - **ifSaved**: The runnable file is not in the current project but it's been saved explicitly out of the temp folder that's automatically used by Coedit.
     - **ifNotSaved**: The runnable file is not part of the project and has never been saved explicitly.
 - **staticSwitches**: Defines a list of switches that are always passed to the compiler when a runnable is produced or when a module is tested.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

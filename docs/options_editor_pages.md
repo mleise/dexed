@@ -2,6 +2,10 @@
 title: Options - DUB build
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 #### Editor pages
 
 This category exposes the options of the page control that hosts the code editors.
@@ -18,3 +22,9 @@ This category exposes the options of the page control that hosts the code editor
     - **poFlatButtons**: Sets the tool bar buttons look. Normally controlled by the [application option **flatLook**](options_application).
     - **poBottomHeader**: Sets if the toolbar is displayed at the bottom.
 - **previousPage**: Sets the shortcut used to select the previous page.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

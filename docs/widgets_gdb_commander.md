@@ -2,6 +2,10 @@
 title: Widgets - GDB commander
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### GDB commander
@@ -96,3 +100,9 @@ The text following the symbol is written to the input stream, with an implicit n
 - **showOutput**: Displays the target output in [the messages](widgets_messages). May be deactivated for a GUI program.
 - **showRawMiOutput**: For the custom commands or for debugging the widget. When checked the GDB output (after JSON-ization) is displayed in [the messages](widgets_messages).
 - **stopAllThreadsOnBreak**: Sets if all the threads of the target are stopped when the execution breaks. Not applied until next debugging cession.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

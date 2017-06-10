@@ -2,6 +2,10 @@
 title: Setup Coedit
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 There are four ways to get the program:
 
 * download and run the setup program build for each release.
@@ -59,3 +63,9 @@ Only the _x86-64_ _rpm_ is available (Fedora, openSuse, ...). After the installa
 
 - verify the [compilers paths](options_compilers_paths).
 - check the information [about the tools](widgets_about).
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

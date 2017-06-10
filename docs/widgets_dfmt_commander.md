@@ -2,6 +2,10 @@
 title: Widgets - DFMT commander
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### DFMT commander
@@ -19,3 +23,9 @@ See the [official documentation](https://github.com/Hackerpilot/dfmt#configurati
 
 The formatting is applied in memory and can be undone either from the widget or from the code editor. 
 The changes are not physically applied until the file is explicitly saved.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

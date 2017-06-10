@@ -2,6 +2,10 @@
 title: Options - DUB build
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 #### DUB build
 
 This category exposes the DUB options that are passed to the build tool each time it's used.
@@ -17,3 +21,9 @@ This category exposes the DUB options that are passed to the build tool each tim
 - **parallel**: If checked, tries to build using several CPU.
 
 See also [the official DUB command line reference](http://code.dlang.org/docs/commandline) for more detailed descriptions.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

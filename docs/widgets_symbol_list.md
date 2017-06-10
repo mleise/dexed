@@ -2,6 +2,10 @@
 title: Widgets - symbol list
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ## Symbol list
 
 This list displays the symbols declared in the D module that has the focus (imports, classes, variables, etc).
@@ -24,3 +28,9 @@ The way the widget refreshes the list can be tweaked in the context menu or in t
 - **smartExpander**: If checked then the the tree follows the caret position.
 - **smartFilter**: Change the behavior of the list when the symbols are filtered.
 - **sortSymbols**: If checked then the symbols are sorted alphabetically instead of following the declaration order.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

@@ -2,6 +2,10 @@
 title: Widgets - application options
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### File menu - reference
 
 - **New empty file**: Adds a new, untyped, file to the source editor.
@@ -30,3 +34,9 @@ title: Widgets - application options
 - **Verify with Dscanner**: verifies the current source with [Dscanner](https://github.com/Hackerpilot/Dscanner). Results are displayed in the [messages](widgets_messages).
 - **View Halstead metrics**: Checks the halstead metrics in the source that has the focus and reports abnormal functions in the [messages](widgets_messages). [Description of the metric](options_code_metrics).
 - **View in mini explorer**: expands the [mini explorer](widgets_mini_explorer) tree on the folder that contains the current file.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

@@ -2,6 +2,10 @@
 title: Widgets - GDB commander
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### Editor
@@ -129,3 +133,9 @@ The shortcuts are editable in the [shortcut editor](options_shortcuts_editor), u
 - **plusDdoc**: Sets if instead of `*`, `+` are used in the comment produced by the command _Insert DDoc Template_.
 - **resetFontSize**: When checked and if the font size is modified then the font size is resets in all the documents that are opened. The option can be disabled in order to keep the current zoom ratio.
 - **smartDdocNewLine**: Allow the auto insertion of a leading `*` or a `+` while writing documentation comments.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

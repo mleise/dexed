@@ -2,6 +2,9 @@
 title: Widgets - mini explorer
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
 {% include xstyle.css %}
 
 ### Mini explorer
@@ -28,3 +31,9 @@ A few options are available in the [option editor](widgets_options_editor).
 
 - **contextExpands**: If checked then the tree auto expands to the folder that contains the source or the project file that's been selected.
 - **doubleClick**: Defines what happens when a file is double clicked.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

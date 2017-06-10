@@ -2,6 +2,10 @@
 title: Widgets - library manager
 --- 
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### Library manager
@@ -50,3 +54,9 @@ The text field is used to select the name of the package to install.
 - <img src="{%include icurl%}other/tag_purple.png" class="tlbric"/>: By the default the master version of the package is installed. When the tag button is down Coedit rather installs the package from its latest tag.
 - <img src="{%include icurl%}other/accept.png" class="tlbric"/>: Closes the dialog and start downloading before installing.
 - <img src="{%include icurl%}other/cancel.png" class="tlbric"/>: Cancels and does nothing.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

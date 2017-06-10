@@ -2,6 +2,10 @@
 title: Widgets - custom tools
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### Custom tools
@@ -45,3 +49,9 @@ A tool can be selected from the left side of the widget. If selected, a property
 - **showWindow**: Defines how the tool window is displayed. Set to **swoHIDE** if the tool standard output is redirected.
 - **toolAlias**: The friendly name associated to the tool.
 - **workingDirectory**: The directory in which the tool starts. Not to mismatch with its path. The field can contain [symbolic strings](features_symbolic_strings).
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

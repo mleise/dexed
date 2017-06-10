@@ -2,6 +2,10 @@
 title: Widgets - search and replace
 --- 
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 The _find and replace_ widget allows to find and replace text patterns in the focused source editor.
 
 ![](img/search.png)
@@ -26,3 +30,9 @@ Notes:
 
 - To find the declaration of a symbol, <kbd>Ctrl</kbd> + <kbd>MB Left</kbd> or the [symbol list](widgets_symbol_list) are faster.
 - To rename a variable or a type, local identifier renaming (<kbd>Ctrl</kbd> + <kbd>F2</kbd>) can be more accurate than _Replace all_ since the action uses the semantic.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

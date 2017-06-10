@@ -2,6 +2,10 @@
 title: D Completion Daemon
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### D Completion Daemon
 
 The D Completion Daemon (DCD) is used to accomplish IDE-grade features such as
@@ -54,3 +58,9 @@ If the DCD server crashes while Coedit is running then both must be restarted.
 - <kbd>F1</kbd>: Displays the phobos documentation for the symbol that has the focus.
 
 Documentation comments associated to a symbol are displayed when the cursor motion stops over a symbol.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

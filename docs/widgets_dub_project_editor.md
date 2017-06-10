@@ -2,6 +2,10 @@
 title: Widgets - DUB project editor
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### DUB project editor
@@ -29,3 +33,9 @@ There's two ways to add a property:
 When the second method is used the property type is selected automatically, which is safer.
 The property name is not always required. For example when when an array item is added the content of the field is ignored.
 After adding a property, its value still needs to be set at the bottom of the tree.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

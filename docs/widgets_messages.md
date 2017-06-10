@@ -2,6 +2,10 @@
 title: Widgets - messages
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### Messages
 
 #### Description
@@ -40,3 +44,9 @@ This is a recommended setting because if a run-time error happens, it will be im
 - **font**: Options for the font used in this widget: the size, the family, etc.
 - **maxMessageCount**: Allows to limit the maximum number of messages kept in the list.
 - **singleMessageClick**: Allows to open the file that the message parser has found by a single click.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

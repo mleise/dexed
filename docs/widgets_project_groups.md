@@ -2,6 +2,10 @@
 title: Widgets - project groups
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### Project groups
@@ -49,3 +53,9 @@ The field at the bottom indicates the status of the FSP.
 - **Compiles projects group in parallel**: Starts compiling the group. Wait points are ignored and each item is compiled in a new process.
 - **Compiles projects group sequentially**: Starts compiling the group. Wait points are ignored and items are compiled one by one.
 - **Compiles projects group using wait points**: Starts compiling the group. Wait points are respected.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

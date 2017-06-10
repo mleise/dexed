@@ -1,7 +1,9 @@
 ---
 title: Widgets - CE project editor
 ---
-
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
 {% include xstyle.css %}
 
 ### Coedit project editor
@@ -161,3 +163,9 @@ Unfiltered options, sub categories can be expanded or collapsed.
 - **name**: The current configurations name.
 - **isBaseConfiguration**: When checked, the current configuration defines the default options of a configuration which is set as overridden.
 - **isOverriddenConfiguration**: When checked, the options of the current configuration are only handled if they don't match to the base configuration or if the base configuration is not set. This system avoids to edit using the synchro-mode.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

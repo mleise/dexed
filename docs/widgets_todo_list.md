@@ -2,6 +2,10 @@
 title: Widgets - Todo list
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### Todo list
@@ -48,3 +52,9 @@ are valid _todos_.
 - **autoRefresh**: Automatically refreshes the list when a document or a project is activated and following the rules described upper.
 - **columns**: Selects which columns are visible. Despite of the settings a column is only displayed when at least one item uses the matching field.
 - **singleClickSelect**: Defines how the mouse is used to go to the item declaration.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

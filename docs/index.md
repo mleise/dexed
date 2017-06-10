@@ -2,6 +2,10 @@
 title: index
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### Coedit documentation
 
 ![](img/coedit_kde4_thumb.png)
@@ -78,3 +82,9 @@ _Description of each widget._
 * [Search](widgets_search)
 * [Symbol list](widgets_symbol_list)
 * [Todo list](widgets_todo_list)
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

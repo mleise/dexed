@@ -2,6 +2,10 @@
 title: Symbolic strings
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### Symbolic strings
 
 The symbolic strings represent variables defined by the software. They are used by several widgets:
@@ -55,3 +59,9 @@ The slices located before and after the symbols are passed in their original for
 is expanded to: 
 
 `http://www.google.com/search?q="dlang.org"indexOf&btnI=Im+Feeling+Lucky` if **indexOf** is the current identifier. 
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

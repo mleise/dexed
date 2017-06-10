@@ -2,6 +2,10 @@
 title: Options - code metrics
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 ### Code metrics
 
 The quality of the D code is verifiable using code metrics.
@@ -58,3 +62,9 @@ Default values can be modified in the option editor:
 ![](img/code_metrics.png)
 
 The maximal volume of a module is not verified, simply because it's possible to have huge modules with many small functions of high quality.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

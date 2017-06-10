@@ -2,6 +2,10 @@
 title: Widgets - Profile viewer
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### Profile viewer
@@ -21,3 +25,9 @@ The list displays all the results, which can be inspected more accurately after 
 
 - <img src="{%include icurl%}folder/folder.png" class="tlbric"/>: Propose to open the _trace.log_ from a dialog.
 - <img src="{%include icurl%}arrow/arrow_update.png" class="tlbric"/>: Reloads the current _trace.log_ or tries to load it from the current directory.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}

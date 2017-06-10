@@ -2,6 +2,10 @@
 title: Widgets - project inspector
 ---
 
+{% raw %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
+{% endraw %}
+
 {% include xstyle.css %}
 
 ### Project inspector
@@ -22,3 +26,9 @@ The toolbar buttons are only activated for CE projects.
 - <img src="{%include icurl%}folder/folder_delete.png" class="tlbric"/> Removes from the project the sources files that stand in the same directory as the source selected in the tree.
 
 Note that instead of using the dialogs to add files, it's also possible to drop items from a file explorer.
+
+{% raw %}
+<script>
+anchors.add();
+</script>
+{% endraw %}
