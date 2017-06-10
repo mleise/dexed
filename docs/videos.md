@@ -34,6 +34,17 @@ Here the choice is applied to the compiler used to make a runnable but the same 
 <div class="tumblr-post" data-href="https://embed.tumblr.com/embed/post/RfMjxAacl04tQydtQ8GmYA/161552390630" data-did="da39a3ee5e6b4b0d3255bfef95601890afd80709"><a href="https://abstractop.tumblr.com/post/161552390630">https://abstractop.tumblr.com/post/161552390630</a></div>  <script async src="https://assets.tumblr.com/post.js"></script>
 {% endraw %}
 
+### Library manager and runnables
+
+This video shows how a DUB library can be downloaded, installed and used directly in a [runnable](features_runnables) module.
+The most important operations are made in the [library manager](widgets_library_manager).
+At the end and to make obvious the automatic aspect of a library selection, the runnable is compiled while the new libman entry is deactivated, which results in a compiler error.
+
+{% raw %}
+<div class="tumblr-post" data-href="https://embed.tumblr.com/embed/post/RfMjxAacl04tQydtQ8GmYA/161655243088" data-did="af776982db9ee6d2165b243bceccac121d668407"><a href="https://abstractop.tumblr.com/post/161655243088/coedit-library-manager-and-runnables">https://abstractop.tumblr.com/post/161655243088/coedit-library-manager-and-runnables</a></div>  <script async src="https://assets.tumblr.com/post.js"></script>
+{% endraw %}
+
+
 {% raw %}
 <script>
 anchors.add();
