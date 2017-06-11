@@ -80,8 +80,14 @@ private final class ImportLister: ASTVisitor
 
     override void visit(const ConditionalDeclaration decl)
     {
-        const VersionCondition ver = decl.compileCondition.versionCondition;
-        if (ver is null || ver.token.text !in badVersions)
+        bool acc = true;
+        if (decl.compileCondition)
+        {
+            const ver = decl.compileCondition.versionCondition;
+            if (ver && ver.token.text in badVersions)
+                acc = false;
+        }
+        if (acc)
             decl.accept(this);
     }
 
