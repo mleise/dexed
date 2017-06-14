@@ -619,6 +619,7 @@ procedure TCEDubProject.compileOrRun(run: boolean; const runArgs: string = '');
 var
   olddir: string;
   prjname: string;
+  rargs: TStringList;
 begin
   if fDubProc.isNotNil and fDubProc.Active then
   begin
@@ -666,7 +667,16 @@ begin
     fDubProc.Parameters.Add('--compiler=' + DubCompilerFilename);
     dubBuildOptions.getOpts(fDubProc.Parameters);
     if run and runArgs.isNotEmpty then
-      fDubProc.Parameters.Add('--' + runArgs);
+    begin
+      fDubProc.Parameters.Add('--');
+      rargs := TStringList.Create;
+      try
+        CommandToList(runArgs, rargs);
+        fDubProc.Parameters.AddStrings(rargs);
+      finally
+        rargs.Free;
+      end;
+    end;
     fDubProc.Execute;
   finally
     SetCurrentDirUTF8(olddir);
@@ -686,7 +696,7 @@ end;
 
 procedure TCEDubProject.run(const runArgs: string = '');
 begin
-  compileOrRun(true);
+  compileOrRun(true, runArgs);
 end;
 
 function TCEDubProject.targetUpToDate: boolean;
