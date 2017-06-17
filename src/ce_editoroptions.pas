@@ -56,6 +56,7 @@ type
     fOptions2: TSynEditorOptions2;
     fMouseOptions: TSynEditorMouseOptions;
     fCompletionMenuCaseCare: boolean;
+    fCompletionMenuAutoClose: boolean;
     fCompletionMenuWidth: integer;
     fCompletionMenuLines: Byte;
     fAutoCloseCurlyBrace: TBraceAutoCloseStyle;
@@ -95,6 +96,7 @@ type
     property characterSpacing: Integer read fCharSpacing write fCharSpacing default 0;
     property closeCompletionCharsWithSpace: AnsiString read fCloseCompletionCharsWithSpace write fCloseCompletionCharsWithSpace;
     property closeCompletionChars: AnsiString read fCloseCompletionChars write fCloseCompletionChars;
+    property completionMenuAutoClose: boolean read fCompletionMenuAutoClose write fCompletionMenuAutoClose;
     property completionMenuCaseCare: boolean read fCompletionMenuCaseCare write fCompletionMenuCaseCare;
     property completionMenuLines: byte read fCompletionMenuLines write setCompletionMenuLines;
     property completionMenuWidth: integer read fCompletionMenuWidth write fCompletionMenuWidth;
@@ -300,6 +302,7 @@ begin
     fCompletionMenuWidth:=srcopt.fCompletionMenuWidth;
     fCompletionMenuLines:=srcopt.fCompletionMenuLines;
     fCompletionMenuCaseCare:=srcopt.fCompletionMenuCaseCare;
+    fCompletionMenuAutoClose:= srcopt.fCompletionMenuAutoClose;
     fAutoDotDelay:=srcopt.fAutoDotDelay;
     fDDocDelay:=srcopt.fDDocDelay;
     fFont.Assign(srcopt.fFont);
@@ -693,6 +696,7 @@ begin
   anEditor.smartDdocNewline:= fSmartDdocNewline;
   anEditor.insertPlusDdoc:= fInsertPlusDdoc;
   anEditor.autoCallCompletion:= fAutoCallCompletion;
+  anEditor.completionMenuAutoClose:=fCompletionMenuAutoClose;
 
   cs := [];
   for c in fCloseCompletionCharsWithSpace do

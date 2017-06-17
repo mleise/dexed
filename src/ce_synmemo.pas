@@ -185,6 +185,7 @@ type
     fAutoCallCompletion: boolean;
     fCloseCompletionCharsWithSpace: TSysCharSet;
     fCloseCompletionChars: TSysCharSet;
+    fCompletionMenuAutoClose: boolean;
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseBytePosition: Integer;
@@ -315,6 +316,7 @@ type
     property autoCallCompletion: boolean read fAutoCallCompletion write fAutoCallCompletion;
     property closeCompletionCharsWithSpace: TSysCharSet read fCloseCompletionCharsWithSpace write fCloseCompletionCharsWithSpace;
     property closeCompletionChars: TSysCharSet read fCloseCompletionChars write fCloseCompletionChars;
+    property completionMenuAutoClose: boolean read fCompletionMenuAutoClose write fCompletionMenuAutoClose;
   end;
 
   TSortDialog = class(TForm)
@@ -2067,10 +2069,8 @@ begin
 end;
 
 procedure TCESynMemo.completionDeleteKey(sender: TObject);
-var
-  e: string;
 begin
-  if fCompletion.CurrentString.length < 2 then
+  if fCompletionMenuAutoClose and (fCompletion.CurrentString.length < 2) then
     fCompletion.TheForm.Close;
 end;
 
