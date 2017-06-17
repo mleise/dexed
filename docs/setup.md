@@ -57,7 +57,8 @@ If they are not correctly set, for each of the following file **coedit**, **dcd-
 
 ### Linux package
 
-Only the _x86-64_ _rpm_ is available (Fedora, openSuse, ...). After the installation, you must also build [DCD](features_dcd).
+Are provided a _deb_ package (Debian and derived Ubuntu, Mint, etc) and a _rpm_ (Fedora, openSUSE), only for x86_64 (amd64).
+After the installation, you must also build [DCD](features_dcd).
 
 ### First steps
 

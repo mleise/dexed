@@ -4,6 +4,7 @@ min1=${ver//_}
 min=${min1:1}
 dte=$(LC_TIME='en_EN.UTF-8' date -u +"%a %b %d %Y")
 
+arch=""
 if [ $CPU = "x86_64" ]; then
     arch="amd64"
 else
@@ -17,7 +18,6 @@ cfgdir=$basdir/DEBIAN
 bindir=$basdir/usr/bin
 pixdir=$basdir/usr/share/pixmaps
 shcdir=$basdir/usr/share/applications
-arch=""
 
 mkdir -p $basdir
 mkdir -p $cfgdir
@@ -45,6 +45,7 @@ echo "Package: coedit
 Version: $maj$min
 Section: base
 Priority: optional
+Date: $dte
 Architecture: $arch
 Depends: bash
 Maintainer: Basile Burg <b2.temp@gmx.com>
