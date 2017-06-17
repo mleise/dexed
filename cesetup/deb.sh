@@ -3,7 +3,14 @@ maj=${ver:0:1}
 min1=${ver//_}
 min=${min1:1}
 dte=$(LC_TIME='en_EN.UTF-8' date -u +"%a %b %d %Y")
-name=coedit.$maj-$min.$arch
+
+if [ $CPU = "x86_64" ]; then
+    arch="amd64"
+else
+    arch="i386"
+fi
+
+name=coedit-$maj-$min.$arch
 
 basdir=$HOME/$name/
 cfgdir=$basdir/DEBIAN
@@ -11,12 +18,6 @@ bindir=$basdir/usr/bin
 pixdir=$basdir/usr/share/pixmaps
 shcdir=$basdir/usr/share/applications
 arch=""
-
-if [ $CPU = "x86_64" ]; then
-    arch="amd64"
-else
-    arch="i386"
-fi
 
 mkdir -p $basdir
 mkdir -p $cfgdir
