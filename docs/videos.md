@@ -46,10 +46,10 @@ At the end and to make obvious the automatic aspect of a library selection, the 
 
 ### Programming sessions - parse enum in YATOL
 
-This video shows a full programming session during which i add a new grammar construct to my toy programming language.
+This video shows a full programming session during which i add a new grammar construct to my [toy programming language](https://github.com/BBasile/yatol).
 There are 3 parts:
 
-1. The formal grammar (i use a PEG that can be used in Pegged) is updated.
+1. The formal grammar (i use a PEG that can be used in [Pegged](https://github.com/PhilippeSigaud/Pegged)) is updated.
 2. The hand written parser is updated.
 3. Changes are pushed on line and i wait for TravisCI to start (which didn't happen !).
 
@@ -58,8 +58,8 @@ There are 3 parts:
 {% endraw %}
 
 The video illustrate well that the [runnable](features_runnables) modules (the command Run module unittest is a subset of the feature) are valuable.
-The PEG can be tested on the fly because pegged is registered in the libman.
-The parser can be tested on the fly because the compiler (as a library) is registered in the libman.
+The PEG can be tested on the fly because pegged is registered in the [library manager](widgets_library_manager).
+The parser can be tested on the fly because the compiler (as a library) is registered in the [library manager](widgets_library_manager).
 The custom tools allows to easily push changes online.
 
 
