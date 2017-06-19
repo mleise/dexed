@@ -2805,6 +2805,8 @@ var
   fname, covname: string;
   lst: TStringList;
   i: integer;
+const
+  ic : array[boolean] of TCEAppMessageKind = (amkWarn, amkInf);
 begin
   asyncprocTerminate(sender);
   if fCovModUt and assigned(fRunProc) and (fRunProc.ExitStatus = 0) then
@@ -2822,15 +2824,14 @@ begin
         lst.LoadFromFile(covname);
         for i := 0 to lst.Count-1 do
           if lst[i][1..7] = '0000000' then
-          begin
-            fMsgs.message(format('%s(%d): %s', [fDoc.fileName, i+1,
-              'not covered by the unittests']), fDoc, amcEdit, amkWarn);
-            fullcov := false;
-          end;
+        begin
+          fMsgs.message(format('%s(%d): %s', [fDoc.fileName, i+1,
+            'not covered by the unittests']), fDoc, amcEdit, amkWarn);
+          fullcov := false;
+        end;
         sysutils.DeleteFile(covname);
         sysutils.DeleteFile('__main.lst');
-        if fullcov then fMsgs.message(shortenPath(fDoc.fileName, 25)
-          + ' is 100% covered by the unittests', fDoc, amcEdit, amkInf);
+        fMsgs.message(lst[lst.Count-1], fDoc, amcEdit, ic[fullcov]);
       finally
         lst.free;
       end;
