@@ -25,9 +25,7 @@ The D Completion Daemon (DCD) is used to accomplish IDE-grade features such as
 
 _DCD_ is a third part software, it's bundled in the archives distributed for each new [release](https://github.com/BBasile/Coedit/releases).
 However, _DCD_ may have to be build manually, for example if a new version is released while _Coedit_ development is paused for a while.
-Visit the product [homepage](https://github.com/Hackerpilot/DCD) for more information.
-Note that since version 2 update 5, Coedit uses an experimental features that's not merged in the official repository.
-If you wish to test it you must build [this fork](https://github.com/BBasile/DCD/tree/reboot-localusage), after checking out the right feature branch.
+Visit the product [homepage](https://github.com/dlang-community/DCD) for more information.
 
 Once DCD build or extracted from the release archive, copy the two programs (_dcd-client_ and _dcd-server_) to the folder where the Coedit executable stands.
 They can be put elsewhere, as long as the target directory is a known operating system PATH.
@@ -36,7 +34,7 @@ They can be put elsewhere, as long as the target directory is a known operating 
 
 In _Coedit_, _DCD_ relies on the [compilers paths](options_compilers_paths), on the [library manager](widgets_library_manager) entries and on the project parameters. When the [_libman_](widgets_library_manager) is empty then the scope of DCD is limited to the symbols of current module, of the current project sources and of the standard library, that's why it necessary to register the development libraries used in the _libman_.
 
-_DCD_ also has its own configuration system. Refer to the official [Readme](https://github.com/Hackerpilot/DCD#configuration-files).
+_DCD_ also has its own configuration system. Refer to the official [Readme](https://github.com/dlang-community/DCD#configuration-files).
 
 #### Initialization
 
