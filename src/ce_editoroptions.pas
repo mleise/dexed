@@ -68,6 +68,7 @@ type
     fAutoCallCompletion: boolean;
     fCloseCompletionCharsWithSpace: AnsiString;
     fCloseCompletionChars: AnsiString;
+    fTransparentGutter: boolean;
     //
     procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
@@ -124,6 +125,7 @@ type
     property shortcuts: TCollection read fShortCuts write setShortcuts;
     property smartDdocNewline: boolean read fSmartDdocNewline write fSmartDdocNewline;
     property tabulationWidth: Integer read fTabWidth write fTabWidth default 4;
+    property transparentGutter: boolean read fTransparentGutter write fTransparentGutter default false;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -295,6 +297,7 @@ begin
   begin
     srcopt := TCEEditorOptionsBase(source);
     //
+    fTransparentGutter:=srcopt.fTransparentGutter;
     fAlwaysAdvancedFeatures:=srcopt.fAlwaysAdvancedFeatures;
     fResetFontSize:=srcopt.fResetFontSize;
     fAutoCloseCurlyBrace := srcopt.fAutoCloseCurlyBrace;
@@ -697,6 +700,7 @@ begin
   anEditor.insertPlusDdoc:= fInsertPlusDdoc;
   anEditor.autoCallCompletion:= fAutoCallCompletion;
   anEditor.completionMenuAutoClose:=fCompletionMenuAutoClose;
+  anEditor.transparentGutter:=fTransparentGutter;
 
   cs := [];
   for c in fCloseCompletionCharsWithSpace do

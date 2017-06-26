@@ -186,6 +186,8 @@ type
     fCloseCompletionCharsWithSpace: TSysCharSet;
     fCloseCompletionChars: TSysCharSet;
     fCompletionMenuAutoClose: boolean;
+    fTransparentGutter: boolean;
+    procedure setGutterTransparent(value: boolean);
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
     function getMouseBytePosition: Integer;
@@ -298,6 +300,7 @@ type
     property isTemporary: boolean read getIfTemp;
     property TextView;
     //
+    property transparentGutter: boolean read fTransparentGutter write setGutterTransparent;
     property isProjectDescription: boolean read fIsProjectDescription write fIsProjectDescription;
     property alwaysAdvancedFeatures: boolean read fAlwaysAdvancedFeatures write fAlwaysAdvancedFeatures;
     property phobosDocRoot: string read fPhobosDocRoot write fPhobosDocRoot;
@@ -832,6 +835,29 @@ begin
     sysutils.DeleteFile(fTempFileName);
 
   inherited;
+end;
+
+procedure TCESynMemo.setGutterTransparent(value: boolean);
+begin
+  fTransparentGutter:=value;
+  if fTransparentGutter then
+  begin
+    Gutter.LineNumberPart.MarkupInfo.Background:= Color;
+    Gutter.SeparatorPart.MarkupInfo.Background:= Color;
+    Gutter.MarksPart.MarkupInfo.Background:= Color;
+    Gutter.ChangesPart.MarkupInfo.Background:= Color;
+    Gutter.CodeFoldPart.MarkupInfo.Background:= Color;
+    Gutter.Color:=Color;
+  end
+  else
+  begin
+    Gutter.LineNumberPart.MarkupInfo.Background:= clBtnFace;
+    Gutter.SeparatorPart.MarkupInfo.Background:= clBtnFace;
+    Gutter.MarksPart.MarkupInfo.Background:= clBtnFace;
+    Gutter.ChangesPart.MarkupInfo.Background:= clBtnFace;
+    Gutter.CodeFoldPart.MarkupInfo.Background:= clBtnFace;
+    Gutter.Color:=clBtnFace;
+  end;
 end;
 
 procedure TCESynMemo.setDefaultFontSize(value: Integer);
