@@ -43,6 +43,20 @@ begin
   fList := TStringList.Create;
   fOut  := TStringList.Create;
   fProc := TCEProcess.create(nil);
+  fProc.Options:= [poUsePipes];
+  fProc.OnTerminate:=@procTerminate;
+  fProc.ShowWindow:= swoHIDE;
+
+  // Arch Linux users can have the tool setup w/o DMD
+  {$IFDEF POSIX}
+  fProc.Executable := exeFullName('dtools-ddemangle');
+  if fProc.Executable.fileExists then
+  begin
+    fProc.execute;
+    fActive := true;
+    exit;
+  end;
+  {$ENDIF}
 
   // up to version 2.071 ddemangle cannot be daemon-ized
   with TProcess.Create(nil) do
@@ -68,9 +82,6 @@ begin
   fProc.Executable := exeFullName('ddemangle' + exeExt);
   if  (v >= 72) and fProc.Executable.fileExists then
   begin
-    fProc.Options:= [poUsePipes];
-    fProc.OnTerminate:=@procTerminate;
-    fProc.ShowWindow:= swoHIDE;
     fProc.execute;
     fActive := true;
   end
