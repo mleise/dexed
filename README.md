@@ -40,6 +40,7 @@ Download the zipped binaries or the zip that contains the setup program for you 
 - :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_update_2/coedit.3update2.win32.setup.zip)
 - :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/3_update_2/coedit.3update2.win32.zip)
 - :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_update_2/coedit-3-update2.x86_64.rpm)
+- :package: [deb for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/3_update_2/coedit-3-update2.amd64.deb)
 
 [**See this page**](http://bbasile.github.io/Coedit/setup.html) for more information about the setup.
 
