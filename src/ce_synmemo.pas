@@ -2277,7 +2277,7 @@ var
 begin
   for i:= 0 to fList.Count-1 do
     dispose(PDscannerResult(fList[i]));
-  fList.Clear
+  fList.Clear;
 end;
 
 procedure TDscannerResults.push(const warning: string; line, column: integer);
@@ -2306,11 +2306,9 @@ begin
   fDscannerTimer.Interval:=dsDelay;
   fDscannerEnabled := dsEnabled;
   if not dsEnabled then
-  begin
-    removeDscannerWarnings;
-    fDscannerResults.clear;
-  end
-  else dscannerTimerEvent(nil);
+    removeDscannerWarnings
+  else
+    dscannerTimerEvent(nil);
 end;
 
 procedure TCESynMemo.dscannerTimerEvent(sender: TObject);
@@ -2321,9 +2319,7 @@ begin
     or not fCanDscan then
       exit;
 
-  fDscannerResults.clear;
   removeDscannerWarnings;
-  Repaint();
   fCanDscan := false;
   fDScanner.execute;
   s := Lines.strictText;
@@ -2356,7 +2352,6 @@ var
   s: string;
   m: TStringList;
 begin
-  removeDscannerWarnings;
   m := TStringList.Create;
   try
     fDscanner.getFullLines(m);
@@ -2373,10 +2368,18 @@ end;
 procedure TCESynMemo.removeDscannerWarnings;
 var
   i: integer;
+  n: TSynEditMark;
 begin
+  IncPaintLock;
+  fDscannerResults.clear;
   for i:= Marks.Count-1 downto 0 do
     if marks.Items[i].ImageIndex = longint(giWarn) then
-      marks.Delete(i);
+  begin
+    n := marks.Items[i];
+    marks.Delete(i);
+    FreeAndNil(n);
+  end;
+  DecPaintLock;
   repaint;
 end;
 
@@ -3084,11 +3087,13 @@ procedure TCESynMemo.removeDebugTimeMarks;
 var
   i: integer;
 begin
+  IncPaintLock;
   for i:= marks.Count-1 downto 0 do
   begin
     if TGutterIcon(Marks.Items[i].ImageIndex) in debugTimeGutterIcons then
       Marks.Delete(i);
   end;
+  DecPaintLock;
 end;
 
 function TCESynMemo.findBreakPoint(line: integer): boolean;
@@ -3143,7 +3148,10 @@ begin
   begin
     n := m.Items[i];
     if n.ImageIndex = longint(value) then
+    begin
       m.Delete(i);
+      FreeAndNil(n);
+    end;
   end;
   Repaint;
 end;

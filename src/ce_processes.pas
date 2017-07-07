@@ -200,7 +200,14 @@ begin
   fTerminateChecker.Enabled := false;
   if fDoneTerminated then exit;
   fDoneTerminated := true;
-  //
+
+  // TODO-cbugfix: check that manual unhooking isn't an issue
+  // note: made to fix a leak in the process used by the linter
+  // onTerminate is sometimes determined by an internal timer
+  // and not the base method of TAsyncProcess (which usually unhooks)
+  UnhookPipeHandle;
+  UnhookProcessHandle;
+
   fillOutputStack;
   if fRealOnTerminate <> nil then
     fRealOnTerminate(self);
