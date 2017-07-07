@@ -69,6 +69,8 @@ type
     fCloseCompletionCharsWithSpace: AnsiString;
     fCloseCompletionChars: AnsiString;
     fTransparentGutter: boolean;
+    fDscannerDelay: integer;
+    fDscannerEnabled: boolean;
     //
     procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
@@ -82,6 +84,7 @@ type
     procedure setTxtSyn(value: TPersistent);
     procedure setShortcuts(value: TCollection);
     procedure setDDocDelay(value: Integer);
+    procedure setDscannerDelay(value: Integer);
     procedure setAutoDotDelay(value: Integer);
     procedure setCompletionMenuLines(value: byte);
     procedure setLineNumEvery(value: integer);
@@ -103,6 +106,8 @@ type
     property completionMenuWidth: integer read fCompletionMenuWidth write fCompletionMenuWidth;
     property currentLine: TSynSelectedColor read fCurrLineAttribs write setCurrLineAttribs;
     property ddocDelay: Integer read fDDocDelay write setDDocDelay;
+    property dscannerDelay: integer read fDscannerDelay write setDscannerDelay;
+    property dscannerEnabled: boolean read fDscannerEnabled write fDscannerEnabled;
     property detectIndentMode: boolean read fDetectIndentationMode write fDetectIndentationMode;
     property folding: TSynSelectedColor read fFoldedColor write setFoldedColor;
     property font: TFont read fFont write setFont;
@@ -245,6 +250,9 @@ begin
   fBackground := clWhite;
   fRightEdgeColor := clSilver;
   //
+  fDscannerEnabled:=true;
+  fDscannerDelay:= 2200;
+  //
   fCurrLineAttribs.Background := 15789545;
   fCurrLineAttribs.Foreground := clNone;
   //
@@ -297,6 +305,8 @@ begin
   begin
     srcopt := TCEEditorOptionsBase(source);
     //
+    fDscannerDelay:=srcopt.fDscannerDelay;
+    fDscannerEnabled:=srcopt.dscannerEnabled;
     fTransparentGutter:=srcopt.fTransparentGutter;
     fAlwaysAdvancedFeatures:=srcopt.fAlwaysAdvancedFeatures;
     fResetFontSize:=srcopt.fResetFontSize;
@@ -350,6 +360,13 @@ begin
   if value > 2000 then value := 2000
   else if value < 20 then value := 20;
   fDDocDelay:=value;
+end;
+
+procedure TCEEditorOptionsBase.setDscannerDelay(value: Integer);
+begin
+  if value > 10000 then value := 10000
+  else if value < 500 then value := 500;
+  fDscannerDelay:=value;
 end;
 
 procedure TCEEditorOptionsBase.setAutoDotDelay(value: Integer);
@@ -701,6 +718,7 @@ begin
   anEditor.autoCallCompletion:= fAutoCallCompletion;
   anEditor.completionMenuAutoClose:=fCompletionMenuAutoClose;
   anEditor.transparentGutter:=fTransparentGutter;
+  anEditor.setDscannerOptions(fDscannerEnabled, fDscannerDelay);
 
   cs := [];
   for c in fCloseCompletionCharsWithSpace do
