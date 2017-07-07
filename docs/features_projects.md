@@ -41,6 +41,7 @@ The widget used to edit the properties is the [CE project editor](widgets_ce_pro
 - **"Edit project file"**: Opens the project file in a new source editor. When saved from a source editor, a project file is directly reloaded.
 - **"View project command line"**: Displays the list of switches and arguments, as they would be passed to the compiler (or the build tool) when compiling.
 - **"View in mini explorer"**: Expands the [mini-explorer](widgets_mini_explorer) tree on the folder that contains the project file.
+- **"Verify project with Dscanner"**: Performs some static checks on each source of the project and using [Dscanner](https://github.com/dlang-community/D-Scanner).
 - **"Compile project"**: Compiles the project using the current configuration.
 - **"Compile and run project"**: Compiles the project using the current configuration and executes the output when the binary produced is executable.
 - **"Compile and run project..."**: Ditto. Before the execution of the binary an input query dialog lets you pass options to the process.

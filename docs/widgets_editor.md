@@ -104,6 +104,14 @@ When a document that's edited in Coedit is modified by another program, a _diff_
 
 The dialog is guaranteed to be only displayed when the content contains changes. A simple date of modification has no effect.
 
+#### Linting
+
+If activated in the options (see beyond), the source can be automatically linted, after a relative period of time, following the last keystroke.
+Results are displayed in the gutter and the warning body can be consulted in the hint displayed when the mouse motin stops over the icon.
+Linting requires [D-Scanner](https://github.com/dlang-community/D-Scanner) to be setup.
+It's possible to use the [information box](widgets_about) to determine if Coedit can find the tool.
+Note that linting can also be launched manually from the _File_ or the _Project_ menus.
+
 #### Notable options
 
 The editor is highly configurable. 
@@ -126,6 +134,8 @@ The shortcuts are editable in the [shortcut editor](options_shortcuts_editor), u
 - **closeCompletionCharsWithSapce**: Defines the characters that, in addition to close the completion menu, are inserted after the proposal and a space.
 - **currentLine**: Defines the visual style applied to the current line.
 - **ddocDelay**: Sets, in milliseconds, how responsive is the popup that displays the inline documentation.
+- **dscannerDelay**: Sets, in milliseconds, the delay between the last keystroke and a call to the linter (if enabled).
+- **dscannerEanbled**: Sets if the linter D-Scanner is enabled.
 - **detectIndentMode**: If checked the the indentation style (tabs or spaces) is detected when a document is opened. It's applied automatically when <kbd>TAB</kbd> is used.
 - **folding**: Sets the code regions that can be folded in the gutter.
 - **lineNumberEvery**: Sets the frequency of the line numbers in the gutter.
