@@ -109,6 +109,7 @@ type
     actFileMetricsHalstead: TAction;
     actFileCloseAllOthers: TAction;
     actFileCloseAll: TAction;
+    actProjDscan: TAction;
     actProjGroupCompileCustomSync: TAction;
     actProjGroupClose: TAction;
     actProjGroupCompileSync: TAction;
@@ -159,6 +160,7 @@ type
     MenuItem105: TMenuItem;
     MenuItem106: TMenuItem;
     MenuItem107: TMenuItem;
+    MenuItem108: TMenuItem;
     MenuItem77: TMenuItem;
     mnuOpts: TMenuItem;
     mnuItemMruGroup: TMenuItem;
@@ -275,6 +277,7 @@ type
     procedure actFileSaveCopyAsExecute(Sender: TObject);
     procedure actNewGroupExecute(Sender: TObject);
     procedure actProjAddToGroupExecute(Sender: TObject);
+    procedure actProjDscanExecute(Sender: TObject);
     procedure actProjGroupCompileCustomSyncExecute(Sender: TObject);
     procedure actProjGroupCompileExecute(Sender: TObject);
     procedure actProjGroupCompileSyncExecute(Sender: TObject);
@@ -2934,7 +2937,7 @@ begin
     processOutputToStrings(prc, lst);
     while prc.Running do;
     for msg in lst do
-      fMsgs.message(msg, fDoc, amcEdit, amkAuto);
+      fMsgs.message(msg, fDoc, amcEdit, amkWarn);
   finally
     prc.Free;
     lst.Free;
@@ -3508,6 +3511,43 @@ begin
   if not assigned(fProject) then
     exit;
   dlgOkInfo(fProject.getCommandLine, 'Compilation command line');
+end;
+
+procedure TCEMainForm.actProjDscanExecute(Sender: TObject);
+var
+  lst: TStringList;
+  prc: TProcess;
+  pth: string;
+  msg: string;
+  i: integer;
+begin
+  if fProject = nil then
+    exit;
+
+  pth := exeFullName('dscanner' + exeExt);
+  if not pth.fileExists then
+    exit;
+  prc := TProcess.Create(nil);
+  lst := TStringList.Create;
+  try
+    prc.Executable:=pth;
+    prc.Options := [poUsePipes, poStderrToOutPut {$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
+    prc.ShowWindow:= swoHIDE;
+    prc.Parameters.Add(fDoc.fileName);
+    prc.Parameters.Add('-S');
+    if not fDscanUnittests then
+      prc.Parameters.Add('--skipTests');
+    for i := 0 to fProject.sourcesCount-1 do
+      prc.Parameters.Add(fProject.sourceAbsolute(i));
+    prc.Execute;
+    processOutputToStrings(prc, lst);
+    while prc.Running do;
+    for msg in lst do
+      fMsgs.message(msg, fProject, amcProj, amkWarn);
+  finally
+    prc.Free;
+    lst.Free;
+  end;
 end;
 
 procedure TCEMainForm.actProjOpenGroupExecute(Sender: TObject);

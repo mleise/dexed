@@ -3508,6 +3508,9 @@ object CEMainForm: TCEMainForm
           8FFFB4A191FFB6A393FFB5A292FFB4A191FFBBA99AFFB8A696B0
         }
       end
+      object MenuItem108: TMenuItem
+        Action = actProjDscan
+      end
       object MenuItem40: TMenuItem
         Caption = '-'
       end
@@ -5326,6 +5329,13 @@ object CEMainForm: TCEMainForm
       ImageIndex = 27
       OnExecute = actFileCloseAllExecute
       OnUpdate = updateDocumentBasedAction
+    end
+    object actProjDscan: TAction
+      Category = 'Project'
+      Caption = 'Verify project with Dscanner'
+      ImageIndex = 35
+      OnExecute = actProjDscanExecute
+      OnUpdate = updateProjectBasedAction
     end
   end
   object imgList: TImageList
