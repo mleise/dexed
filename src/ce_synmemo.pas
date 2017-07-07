@@ -13,7 +13,8 @@ uses
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs, ce_dastworx,
-  ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer, ce_diff;
+  ce_sharedres, ce_dlang, ce_stringrange, ce_dbgitf, ce_observer, ce_diff,
+  ce_processes;
 
 type
 
@@ -116,6 +117,26 @@ type
     procedure next;
   end;
 
+  PDscannerResult = ^TDscannerResult;
+  TDscannerResult = record
+    warning: string;
+    line, column: integer;
+  end;
+
+  TDscannerResults = class
+  private
+    fList: TFPList;
+    function getItem(index: integer): PDscannerResult;
+    function getCount: integer;
+  public
+    constructor create;
+    destructor destroy; override;
+    procedure clear;
+    procedure push(const warning: string; line, column: integer);
+    property count: integer read getCount;
+    property item[index: integer]: PDscannerResult read getItem; default;
+  end;
+
   TSortDialog = class;
 
   TGutterIcon = (
@@ -125,8 +146,13 @@ type
     giBreak       = 3,          // break point reached
     giStep        = 4,          // step / signal / pause
     giWatch       = 5,          // watch point reached
-    giNone        = high(byte)  // remove
+    giWarn        = 6,          // Dscanner result with text hint
+    giNone        = high(byte)  //
   );
+
+  const debugTimeGutterIcons = [giBreak, giStep, giWatch];
+
+type
 
   //TODO-cGDB: add a system allowing to define watch points
 
@@ -151,8 +177,10 @@ type
     fDDocWin: TCEEditorHintWindow;
     fDDocDelay: Integer;
     fAutoDotDelay: Integer;
+    fDscannerDelay: Integer;
     fDDocTimer: TIdleTimer;
     fAutoDotTimer: TIdleTimer;
+    fDscannerTimer: TIdleTimer;
     fCanShowHint: boolean;
     fCanAutoDot: boolean;
     fOldMousePos: TPoint;
@@ -187,6 +215,12 @@ type
     fCloseCompletionChars: TSysCharSet;
     fCompletionMenuAutoClose: boolean;
     fTransparentGutter: boolean;
+    fDscanner: TCEProcess;
+    fDscannerResults: TDscannerResults;
+    fCanDscan: boolean;
+    fKnowsDscanner: boolean;
+    fDscannerEnabled: boolean;
+    procedure showHintEvent(Sender: TObject; HintInfo: PHintInfo);
     procedure setGutterTransparent(value: boolean);
     procedure decCallTipsLvl;
     procedure setMatchOpts(value: TIdentifierMatchOptions);
@@ -199,6 +233,10 @@ type
     procedure setDefaultFontSize(value: Integer);
     procedure DDocTimerEvent(sender: TObject);
     procedure AutoDotTimerEvent(sender: TObject);
+    procedure dscannerTimerEvent(sender: TObject);
+    procedure dscannerTerminate(sender: TObject);
+    procedure removeDscannerWarnings;
+    function getDscannerWarning(line: integer): string;
     procedure InitHintWins;
     function getIfTemp: boolean;
     procedure setDDocDelay(value: Integer);
@@ -221,7 +259,8 @@ type
     procedure setSelectionOrWordCase(upper: boolean);
     procedure sortSelectedLines(descending, caseSensitive: boolean);
     procedure tokFoundForCaption(const token: PLexToken; out stop: boolean);
-    procedure setGutterIcon(line: integer; value: TGutterIcon);
+    procedure addGutterIcon(line: integer; value: TGutterIcon);
+    procedure removeGutterIcon(line: integer; value: TGutterIcon);
     procedure patchClipboardIndentation;
     //
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
@@ -287,6 +326,7 @@ type
     procedure insertDdocTemplate;
     function implementMain: THasMain;
     procedure replaceUndoableContent(const value: string);
+    procedure setDscannerOptions(dsEnabled: boolean; dsDelay: integer);
     //
     property IdentifierMatchOptions: TIdentifierMatchOptions read fMatchOpts write setMatchOpts;
     property Identifier: string read fIdentifier;
@@ -711,6 +751,7 @@ constructor TCESynMemo.Create(aOwner: TComponent);
 begin
   inherited;
 
+  OnShowHint:= @showHintEvent;
   OnStatusChange:= @handleStatusChanged;
   fDefaultFontSize := 10;
   Font.Size:=10;
@@ -734,6 +775,21 @@ begin
   fAutoDotTimer.AutoEnabled:=true;
   fAutoDotTimer.Interval := fAutoDotDelay;
   fAutoDotTimer.OnTimer := @AutoDotTimerEvent;
+
+  fDscannerDelay := 500;
+  fDscannerTimer := TIdleTimer.Create(self);
+  fDscannerTimer.AutoEnabled:=true;
+  fDscannerTimer.Interval := fDscannerDelay;
+  fDscannerTimer.OnTimer := @dscannerTimerEvent;
+  fDscanner := TCEProcess.create(self);
+  fDscanner.Executable:= exeFullName('dscanner' + exeExt);
+  fDscanner.Options:=[poUsePipes];
+  fDscanner.ShowWindow:=swoHIDE;
+  fDscanner.OnTerminate:=@dscannerTerminate;
+  fDscanner.Parameters.add('-S');
+  fDscanner.Parameters.add('stdin');
+  fDscannerResults:= TDscannerResults.create;
+  fKnowsDscanner := fDscanner.Executable.fileExists;
 
   Gutter.LineNumberPart.ShowOnlyLineNumbersMultiplesOf := 5;
   Gutter.LineNumberPart.MarkupInfo.Foreground := clWindowText;
@@ -788,6 +844,7 @@ begin
   fImages.AddResourceName(HINSTANCE, 'BREAKS');
   fImages.AddResourceName(HINSTANCE, 'STEP');
   fImages.AddResourceName(HINSTANCE, 'CAMERA_GO');
+  fImages.AddResourceName(HINSTANCE, 'WARNING');
   fBreakPoints := TFPList.Create;
 
   fPositions := TCESynMemoPositions.create(self);
@@ -830,6 +887,7 @@ begin
   fLexToks.Clear;
   fLexToks.Free;
   fSortDialog.Free;
+  fDscannerResults.Free;
 
   if fTempFileName.fileExists then
     sysutils.DeleteFile(fTempFileName);
@@ -2200,6 +2258,141 @@ begin
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
+{$REGION Dscanner --------------------------------------------------------------}
+constructor TDscannerResults.create;
+begin
+  fList := TFPList.Create;
+end;
+
+destructor TDscannerResults.destroy;
+begin
+  clear;
+  fList.Free;
+  inherited;
+end;
+
+procedure TDscannerResults.clear;
+var
+  i: integer;
+begin
+  for i:= 0 to fList.Count-1 do
+    dispose(PDscannerResult(fList[i]));
+  fList.Clear
+end;
+
+procedure TDscannerResults.push(const warning: string; line, column: integer);
+var
+  r: PDscannerResult;
+begin
+  r := new(PDscannerResult);
+  r^.column:=column;
+  r^.warning:=warning;
+  r^.line:=line;
+  fList.Add(r);
+end;
+
+function TDscannerResults.getCount: integer;
+begin
+  result := fList.Count;
+end;
+
+function TDscannerResults.getItem(index: integer): PDscannerResult;
+begin
+  result := PDscannerResult(fList[index]);
+end;
+
+procedure TCESynMemo.setDscannerOptions(dsEnabled: boolean; dsDelay: integer);
+begin
+  fDscannerTimer.Interval:=dsDelay;
+  fDscannerEnabled := dsEnabled;
+  if not dsEnabled then
+  begin
+    removeDscannerWarnings;
+    fDscannerResults.clear;
+  end
+  else dscannerTimerEvent(nil);
+end;
+
+procedure TCESynMemo.dscannerTimerEvent(sender: TObject);
+var
+  s: string;
+begin
+  if not fDscannerEnabled or not fKnowsDscanner or not isDSource
+    or not fCanDscan then
+      exit;
+
+  fDscannerResults.clear;
+  removeDscannerWarnings;
+  Repaint();
+  fCanDscan := false;
+  fDScanner.execute;
+  s := Lines.strictText;
+  if s.length > 0 then
+    fDscanner.Input.Write(s[1], s.length);
+  fDscanner.CloseInput;
+end;
+
+procedure TCESynMemo.dscannerTerminate(sender: TObject);
+  procedure processLine(const lne: string);
+  var
+    r: TStringRange = (ptr:nil; pos:0; len: 0);
+    line: integer;
+    column: integer;
+  begin
+    if lne.isBlank then
+      exit;
+    r.init(lne);
+    line := r.popUntil('(')^.popFront^.takeWhile(['0'..'9']).yield.toIntNoExcept();
+    column := r.popFront^.takeWhile(['0'..'9']).yield.toIntNoExcept();
+    r.popUntil(':');
+    r.popFront;
+    fDscannerResults.push(r.takeUntil(#0).yield, line, column);
+
+    addGutterIcon(line, giWarn);
+
+  end;
+var
+  i: integer;
+  s: string;
+  m: TStringList;
+begin
+  removeDscannerWarnings;
+  m := TStringList.Create;
+  try
+    fDscanner.getFullLines(m);
+    for i := 0 to m.Count-1 do
+    begin
+      s := m[i];
+      processLine(s);
+    end;
+  finally
+    m.free;
+  end;
+end;
+
+procedure TCESynMemo.removeDscannerWarnings;
+var
+  i: integer;
+begin
+  for i:= Marks.Count-1 downto 0 do
+    if marks.Items[i].ImageIndex = longint(giWarn) then
+      marks.Delete(i);
+  repaint;
+end;
+
+function TCESynMemo.getDscannerWarning(line: integer): string;
+const
+  spec = '@column %d: %s' + LineEnding;
+var
+  i: integer;
+begin
+  result := '';
+  for i := 0 to fDscannerResults.count-1 do
+    if fDscannerResults[i]^.line = line then
+      result += format(spec, [fDscannerResults[i]^.column, fDscannerResults[i]^.warning]);
+end;
+{$ENDREGION --------------------------------------------------------------------}
+
 {$REGION Coedit memo things ----------------------------------------------------}
 procedure TCESynMemo.handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
 begin
@@ -2391,6 +2584,7 @@ begin
     end;
   end;
   subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
+  fCanDscan := true;
 end;
 
 procedure TCESynMemo.saveToFile(const fname: string);
@@ -2617,13 +2811,17 @@ var
   lxd: boolean;
 begin
   case Key of
-    VK_BACK: if fCallTipWin.Visible and (CaretX > 1)
-      and (LineText[LogicalCaretXY.X-1] = '(') then
-        decCallTipsLvl;
+    VK_BACK:
+    begin
+      fCanDscan:=true;
+      if fCallTipWin.Visible and (CaretX > 1)
+        and (LineText[LogicalCaretXY.X-1] = '(') then
+          decCallTipsLvl;
+    end;
     VK_RETURN:
     begin
+      fCanDscan:=true;
       line := LineText;
-
       case fAutoCloseCurlyBrace of
         autoCloseOnNewLineAlways: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
         begin
@@ -2721,6 +2919,7 @@ var
 begin
   c := Key;
   inherited;
+  fCanDscan := true;
   case c of
     #39: if autoCloseSingleQuote in fAutoClosedPairs then
       autoClosePair(autoCloseSingleQuote);
@@ -2838,7 +3037,7 @@ procedure TCESynMemo.addBreakPoint(line: integer);
 begin
   if findBreakPoint(line) then
     exit;
-  setGutterIcon(line, giBulletRed);
+  addGutterIcon(line, giBulletRed);
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   fBreakPoints.Add(pointer(line));
   {$POP}
@@ -2850,7 +3049,7 @@ procedure TCESynMemo.removeBreakPoint(line: integer);
 begin
   if not findBreakPoint(line) then
     exit;
-  setGutterIcon(line, giNone);
+  removeGutterIcon(line, giBulletRed);
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   fBreakPoints.Remove(pointer(line));
   {$POP}
@@ -2858,15 +3057,37 @@ begin
     fDebugger.removeBreakPoint(fFilename, line);
 end;
 
+procedure TCESynMemo.showHintEvent(Sender: TObject; HintInfo: PHintInfo);
+var
+  p: TPoint;
+  s: string;
+begin
+  if cursor <> crDefault then
+    exit;
+  p := ScreenToClient(mouse.CursorPos);
+  if p.x > Gutter.Width then
+    exit;
+
+  p := self.PixelsToRowColumn(p);
+  s := getDscannerWarning(p.y);
+  if s.isNotEmpty then
+  begin
+    s := 'Warning(s):' + LineEnding + s;
+    fDDocWin.FontSize := Font.Size;
+    fDDocWin.HintRect := fDDocWin.CalcHintRect(0, s, nil);
+    fDDocWin.OffsetHintRect(mouse.CursorPos, Font.Size);
+    fDDocWin.ActivateHint(fDDocWin.HintRect, s);
+  end;
+end;
+
 procedure TCESynMemo.removeDebugTimeMarks;
 var
   i: integer;
 begin
-  for i:= 0 to Lines.Count-1 do
+  for i:= marks.Count-1 downto 0 do
   begin
-    Marks.ClearLine(i);
-    if findBreakPoint(i) then
-      setGutterIcon(i, giBulletRed);
+    if TGutterIcon(Marks.Items[i].ImageIndex) in debugTimeGutterIcons then
+      Marks.Delete(i);
   end;
 end;
 
@@ -2887,20 +3108,44 @@ begin
   EnsureCursorPosVisible;
 end;
 
-procedure TCESynMemo.setGutterIcon(line: integer; value: TGutterIcon);
+procedure TCESynMemo.addGutterIcon(line: integer; value: TGutterIcon);
 var
-  m: TSynEditMark;
+  m: TSynEditMarkLine;
+  n: TSynEditMark;
+  i: integer;
 begin
-  Marks.ClearLine(line);
+  m := Marks.Line[line];
+  if m.isNotNil then
+    for i := 0 to m.Count-1 do
+      if m.Items[i].ImageIndex = longint(value) then
+        exit;
+
   if value <> giNone then
   begin
-    m:= TSynEditMark.Create(self);
-    m.Line := line;
-    m.ImageList := fImages;
-    m.ImageIndex := longint(value);
-    m.Visible := true;
-    Marks.Add(m);
+    n:= TSynEditMark.Create(self);
+    n.Line := line;
+    n.ImageList := fImages;
+    n.ImageIndex := longint(value);
+    n.Visible := true;
+    Marks.Add(n);
   end;
+end;
+
+procedure TCESynMemo.removeGutterIcon(line: integer; value: TGutterIcon);
+var
+  m: TSynEditMarkLine;
+  n: TSynEditMark;
+  i: integer;
+begin
+  m := Marks.Line[line];
+  if m.isNotNil then
+    for i := m.Count-1 downto 0 do
+  begin
+    n := m.Items[i];
+    if n.ImageIndex = longint(value) then
+      m.Delete(i);
+  end;
+  Repaint;
 end;
 
 procedure TCESynMemo.debugStart(debugger: ICEDebugger);
@@ -2942,9 +3187,9 @@ begin
   EnsureCursorPosVisible;
   removeDebugTimeMarks;
   case reason of
-    dbBreakPoint: setGutterIcon(line, giBreak);
-    dbStep, dbSignal: setGutterIcon(line, giStep);
-    dbWatch: setGutterIcon(line, giWatch);
+    dbBreakPoint: addGutterIcon(line, giBreak);
+    dbStep, dbSignal: addGutterIcon(line, giStep);
+    dbWatch: addGutterIcon(line, giWatch);
   end;
 end;
 {$ENDREGION --------------------------------------------------------------------}
