@@ -3068,7 +3068,7 @@ begin
   if cursor <> crDefault then
     exit;
   p := ScreenToClient(mouse.CursorPos);
-  if p.x > Gutter.Width then
+  if p.x > Gutter.MarksPart.Width then
     exit;
 
   p := self.PixelsToRowColumn(p);
