@@ -253,8 +253,9 @@ type
     function lexCanCloseBrace: boolean;
     function lexInDdoc: char;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
-    procedure gotoToChangedArea(next: boolean);
-    procedure gotoToProtectionGroup(next: boolean);
+    procedure goToChangedArea(next: boolean);
+    procedure goToProtectionGroup(next: boolean);
+    procedure goToWarning(next: boolean);
     procedure autoClosePair(value: TAutoClosedPair);
     procedure setSelectionOrWordCase(upper: boolean);
     procedure sortSelectedLines(descending, caseSensitive: boolean);
@@ -319,6 +320,8 @@ type
     procedure nextChangedArea;
     procedure previousProtectionGroup;
     procedure nextProtectionGroup;
+    procedure previousWarning;
+    procedure nextWarning;
     procedure sortLines;
     procedure addCurLineBreakPoint;
     procedure removeCurLineBreakPoint;
@@ -406,7 +409,9 @@ const
   ecAddBreakpoint       = ecUserFirst + 22;
   ecRemoveBreakpoint    = ecUserFirst + 23;
   ecToggleBreakpoint    = ecUserFirst + 24;
-  ecInsertDdocTemplate     = ecUserFirst + 25;
+  ecInsertDdocTemplate  = ecUserFirst + 25;
+  ecNextWarning         = ecUserFirst + 26;
+  ecPrevWarning         = ecUserFirst + 27;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -1095,6 +1100,8 @@ begin
     AddKey(ecRemoveBreakpoint, 0, [], 0, []);
     AddKey(ecToggleBreakpoint, 0, [], 0, []);
     AddKey(ecInsertDdocTemplate, 0, [], 0, []);
+    AddKey(ecPrevWarning, 0, [], 0, []);
+    AddKey(ecNextWarning, 0, [], 0, []);
   end;
 end;
 
@@ -1126,6 +1133,8 @@ begin
     'ecRemoveBreakpoint':   begin Int := ecRemoveBreakpoint; exit(true); end;
     'ecToggleBreakpoint':   begin Int := ecToggleBreakpoint; exit(true); end;
     'ecInsertDdocTemplate': begin Int := ecInsertDdocTemplate; exit(true); end;
+    'ecPrevWarning':        begin Int := ecPrevWarning; exit(true); end;
+    'ecNextWarning':        begin Int := ecNextWarning; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1158,6 +1167,8 @@ begin
     ecRemoveBreakpoint:   begin Ident := 'ecRemoveBreakpoint'; exit(true); end;
     ecToggleBreakpoint:   begin Ident := 'ecToggleBreakpoint'; exit(true); end;
     ecInsertDdocTemplate: begin Ident := 'ecInsertDdocTemplate'; exit(true); end;
+    ecPrevWarning:        begin Ident := 'ecPrevWarning'; exit(true); end;
+    ecNextWarning:        begin Ident := 'ecNextWarning'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1209,9 +1220,9 @@ begin
     ecShowPhobosDoc:
       ShowPhobosDoc;
     ecNextChangedArea:
-      gotoToChangedArea(true);
+      goToChangedArea(true);
     ecPreviousChangedArea:
-      gotoToChangedArea(false);
+      goToChangedArea(false);
     ecUpperCaseWordOrSel:
       setSelectionOrWordCase(true);
     ecLowerCaseWordOrSel:
@@ -1230,6 +1241,10 @@ begin
       toggleCurLineBreakpoint;
     ecInsertDdocTemplate:
       insertDdocTemplate;
+    ecPrevWarning:
+      goToWarning(false);
+    ecNextWarning:
+      goToWarning(true);
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1660,15 +1675,25 @@ end;
 
 procedure TCESynMemo.nextChangedArea;
 begin
-  gotoToChangedArea(true);
+  goToChangedArea(true);
 end;
 
 procedure TCESynMemo.previousChangedArea;
 begin
-  gotoToChangedArea(false);
+  goToChangedArea(false);
 end;
 
-procedure TCESynMemo.gotoToChangedArea(next: boolean);
+procedure TCESynMemo.previousWarning;
+begin
+  goToWarning(false);
+end;
+
+procedure TCESynMemo.nextWarning;
+begin
+  goToWarning(true);
+end;
+
+procedure TCESynMemo.goToChangedArea(next: boolean);
 var
   i: integer;
   s: TSynLineState;
@@ -1709,7 +1734,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.gotoToProtectionGroup(next: boolean);
+procedure TCESynMemo.goToProtectionGroup(next: boolean);
 var
   i: integer;
   tk0, tk1: PLexToken;
@@ -1743,14 +1768,49 @@ begin
     ExecuteCommand(ecGotoXY, #0, @tk^.position);
 end;
 
+procedure TCESynMemo.goToWarning(next: boolean);
+var
+  i: integer;
+  j: integer = -1;
+begin
+  if not next then
+  begin
+    for i:= 0 to fDscannerResults.count-1 do
+    begin
+      j := i - 1;
+      if fDscannerResults.item[i]^.line >= caretY then
+        break;
+    end;
+    if j <> -1 then
+    begin
+      CaretY:= fDscannerResults.item[j]^.line;
+      EnsureCursorPosVisible;
+    end;
+  end
+  else
+  begin
+    for i:= fDscannerResults.count-1 downto 0 do
+    begin
+      j := i + 1;
+      if fDscannerResults.item[i]^.line <= caretY then
+        break;
+    end;
+    if j < fDscannerResults.count then
+    begin
+      CaretY:= fDscannerResults.item[j]^.line;
+      EnsureCursorPosVisible;
+    end;
+  end;
+end;
+
 procedure TCESynMemo.previousProtectionGroup;
 begin
-  gotoToProtectionGroup(false);
+  goToProtectionGroup(false);
 end;
 
 procedure TCESynMemo.nextProtectionGroup;
 begin
-  gotoToProtectionGroup(true);
+  goToProtectionGroup(true);
 end;
 
 function TCESynMemo.implementMain: THasMain;

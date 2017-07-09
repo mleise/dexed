@@ -58,6 +58,10 @@ type
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
+    MenuItem13: TMenuItem;
+    MenuItem14: TMenuItem;
+    mnuedPrevWarn: TMenuItem;
+    mnuedNextWarn: TMenuItem;
     mnuedDdocTmp: TMenuItem;
     mnuedPrevProtGrp: TMenuItem;
     mnuedNextProtGrp: TMenuItem;
@@ -91,11 +95,13 @@ type
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
     procedure mnuedDdocTmpClick(Sender: TObject);
+    procedure mnuedNextWarnClick(Sender: TObject);
     procedure mnuedPrevProtGrpClick(Sender: TObject);
     procedure mnuedNextProtGrpClick(Sender: TObject);
     procedure mnuedNextCareaClick(Sender: TObject);
     procedure mnuedPrevCareaClick(Sender: TObject);
     procedure mnuedLowcaseClick(Sender: TObject);
+    procedure mnuedPrevWarnClick(Sender: TObject);
     procedure mnuedSortLinesClick(Sender: TObject);
     procedure mnuedUpcaseClick(Sender: TObject);
     procedure MenuItem5Click(Sender: TObject);
@@ -334,6 +340,8 @@ begin
   AssignPng(mnuedSortLines.Bitmap, 'SORT_AZ');
   AssignPng(mnuedNextProtGrp.Bitmap, 'GO_NEXT');
   AssignPng(mnuedPrevProtGrp.Bitmap, 'GO_PREVIOUS');
+  AssignPng(mnuedNextWarn.Bitmap, 'GO_NEXT');
+  AssignPng(mnuedPrevWarn.Bitmap, 'GO_PREVIOUS');
   //
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
@@ -884,6 +892,12 @@ begin
     fDoc.CommandProcessor(ecLowerCaseWordOrSel, #0, nil);
 end;
 
+procedure TCEEditorWidget.mnuedPrevWarnClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.previousWarning;
+end;
+
 procedure TCEEditorWidget.mnuedSortLinesClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
@@ -906,6 +920,12 @@ procedure TCEEditorWidget.mnuedDdocTmpClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.insertDdocTemplate;
+end;
+
+procedure TCEEditorWidget.mnuedNextWarnClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.nextWarning;
 end;
 
 procedure TCEEditorWidget.mnuedNextProtGrpClick(Sender: TObject);
