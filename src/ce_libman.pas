@@ -118,6 +118,10 @@ type
      * in "paths", as required by the specified "source" code.
      *)
     procedure getLibsForSource(source, libs, paths: TStrings);
+    (**
+     * The caller gets the "-I" (import) command line arguments in opts
+     *  for the imports (as identifier chains) in "imports".
+     *)
     procedure getLibFilesForImports(imports: TStrings; opts: TStrings);
     //
     procedure updateDCD;

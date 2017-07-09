@@ -76,6 +76,7 @@ type
     function  itemForRow(row: TListItem): TLibraryItem;
     procedure RowToLibrary(row: TListItem; added: boolean = false);
     procedure dataToGrid;
+    function isAliasRegistered(const anAlias: string): boolean;
   protected
     procedure DoShow; override;
   public
@@ -107,6 +108,13 @@ begin
       btnEnabled.resourceName := 'BOOK'
   else
     btnEnabled.resourceName := 'BOOK_GREY';
+end;
+
+function TCELibManEditorWidget.isAliasRegistered(const anAlias: string): boolean;
+var
+  i: TListItem = nil;
+begin
+  result := list.Items.findCaption(anAlias, i);
 end;
 
 procedure TCELibManEditorWidget.projNew(project: ICECommonProject);
@@ -408,11 +416,13 @@ var
 begin
   if TDubPackageQueryForm.showAndWait(nme, ver) <> mrOk then
     exit;
-  if List.Items.findCaption(nme, row) then
+  if isAliasRegistered(nme) then
   begin
     if dlgYesNo(format('a library item with the alias "%s" already exists, do you wish to update it ?',
-      [nme])) <> mrYes then exit
-    else ovw := true;
+      [nme])) <> mrYes then
+        exit
+    else
+      ovw := true;
   end;
   {$IFDEF WINDOWS}
   pth := GetEnvironmentVariable('APPDATA') + '\dub\packages\' + nme + '-' + ver;
@@ -650,9 +660,9 @@ begin
   if fProj = nil then
     exit;
 
-  fname := fProj.filename;
+  fname := fProj.outputFilename;
   lalias := ExtractFileNameOnly(fname);
-  if List.Items.findCaption(lalias, row) then
+  if isAliasRegistered(lalias) then
   begin
     dlgOkInfo(format('a library item with the alias "%s" already exists, delete it before trying again.',
       [lalias]));
@@ -668,10 +678,9 @@ begin
       exit;
     end;
 
-    fname := fProj.outputFilename;
     row := List.Items.Add;
     row.Data := LibMan.libraries.Add;
-    row.Caption := ExtractFileNameOnly(fname);
+    row.Caption := lalias;
     if fname.extractFileExt <> libExt then
       row.SubItems.add(fname + libExt)
     else
