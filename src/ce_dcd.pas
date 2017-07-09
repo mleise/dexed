@@ -195,24 +195,14 @@ var
   fold: string;
   folds: TStringList;
 begin
-  if fProj <> project then
+  if (fProj = nil) or (fProj <> project) then
     exit;
-  if fProj = nil then
-    exit;
-  //
+
   folds := TStringList.Create;
   try
     fold := ce_projutils.projectSourcePath(project);
-    if fold.dirExists and (folds.IndexOf(fold) = -1) then
+    if fold.dirExists then
       folds.Add(fold);
-  	for i:= 0 to fProj.sourcesCount-1 do
-    begin
-      if not (fProj.sourceAbsolute(i).fileExists) then
-        continue;
-      fold := fProj.sourceAbsolute(i).extractFilePath;
-      if folds.IndexOf(fold) = -1 then
-        folds.Add(fold);
-    end;
   	for i := 0 to fProj.importsPathCount-1 do
   	begin
     	fold := fProj.importPath(i);
