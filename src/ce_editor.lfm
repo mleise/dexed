@@ -119,6 +119,17 @@ inherited CEEditorWidget: TCEEditorWidget
       Caption = 'Next protection attribute'
       OnClick = mnuedNextProtGrpClick
     end
+    object MenuItem14: TMenuItem
+      Caption = '-'
+    end
+    object mnuedPrevWarn: TMenuItem
+      Caption = 'Previous warning'
+      OnClick = mnuedPrevWarnClick
+    end
+    object mnuedNextWarn: TMenuItem
+      Caption = 'Next warning'
+      OnClick = mnuedNextWarnClick
+    end
     object MenuItem2: TMenuItem
       Caption = '-'
     end
