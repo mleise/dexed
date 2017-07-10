@@ -130,8 +130,10 @@ The shortcuts are editable in the [shortcut editor](options_shortcuts_editor), u
 - **autoDotDelay**: Sets, in milliseconds, how responsive is the completion menu after a `.`.
 - **blockIndentation**: By default 4 for the D style.
 - **bracketMatch**: Defines the visual style applied to matching brackets pairs.
-- **closeCompletionChars**: Defines the characters that, in addition to close the completion menu, are inserted after the proposal.
-- **closeCompletionCharsWithSapce**: Defines the characters that, in addition to close the completion menu, are inserted after the proposal and a space.
+- **closeCompletionChars**: Defines the characters that, in addition to closing the completion menu, are inserted after the proposal.
+- **closeCompletionCharsWithSapce**: Defines the characters that, in addition of closing the completion menu, are inserted after the proposal and a space.
+- **completionMenuAutoClose**: Defines if the completion menu is automatically closed when characters are suppressed.
+- **completionMenuCaseCare**: Sets if the completion menu is case sensitive.
 - **currentLine**: Defines the visual style applied to the current line.
 - **ddocDelay**: Sets, in milliseconds, how responsive is the popup that displays the inline documentation.
 - **dscannerDelay**: Sets, in milliseconds, the delay between the last keystroke and a call to the linter (if enabled).
