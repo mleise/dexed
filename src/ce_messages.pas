@@ -31,10 +31,12 @@ type
     fAutoSelect: boolean;
     fSingleClick: boolean;
     fAutoDemangle: boolean;
+    fAlwaysFilter: boolean;
     fFont: TFont;
     fMsgColors: array[TCEAppMessageKind] of TColor;
     procedure setFont(value: TFont);
   published
+    property alwaysFilter: boolean read fAlwaysFilter write fAlwaysFilter;
     property fastDisplay: boolean read fFastDisplay write fFastDisplay;
     property maxMessageCount: integer read fMaxCount write fMaxCount;
     property autoSelect: boolean read fAutoSelect write fAutoSelect;
@@ -93,6 +95,7 @@ type
     fActSelAll: TAction;
     fActDemangle: TAction;
     fMaxMessCnt: Integer;
+    fAlwaysFilter: boolean;
     fProj: ICECommonProject;
     fDoc: TCESynMemo;
     fCtxt: TCEAppMessageCtxt;
@@ -289,6 +292,7 @@ begin
     fSingleClick := opts.fSingleClick;
     fFastDisplay := opts.fFastDisplay;
     fMsgColors := opts.fMsgColors;
+    fAlwaysFilter := opts.fAlwaysFilter;
     fFont.EndUpdate;
   end
   else if source is TCEMessagesWidget then
@@ -301,6 +305,7 @@ begin
     fFastDisplay := widg.fastDisplay;
     fMsgColors := widg.fMsgColors;
     fAutoDemangle:= widg.fAutoDemangle;
+    fAlwaysFilter:=widg.fAlwaysFilter;
   end
   else inherited;
 end;
@@ -319,6 +324,7 @@ begin
     widg.fastDisplay:= fFastDisplay;
     widg.fMsgColors := fMsgColors;
     widg.fAutoDemangle:=fAutoDemangle;
+    widg.fAlwaysFilter:=fAlwaysFilter;
     if fFastDisplay then
       widg.updaterByLoopInterval:= 70
     else
@@ -825,6 +831,8 @@ var
   msg: string;
 begin
   showWidget;
+  if not fAlwaysFilter then
+    TreeFilterEdit1.Filter:='';
   case fAutoDemangle of
     false: msg := value;
     true: msg := demangle(value);
@@ -866,6 +874,10 @@ begin
     TTreeHack(list).scrolledLeft := 0;
     List.Update;
     filterMessages(fCtxt);
+  end
+  else if fAlwaysFilter and fFiltering then
+  begin
+    filterMessages(fCtxt);
   end;
 end;
 
@@ -897,6 +909,7 @@ begin
   if (TObject(data) = fDoc) and (fDoc.isNotNil) then
     fEditorMessagePos[fDoc.fileName] := -1;
   list.BeginUpdate;
+  TreeFilterEdit1.Filter := '';
   for i := List.Items.Count-1 downto 0 do
   begin
     msgdt := PMessageData(List.Items[i].Data);
@@ -990,6 +1003,7 @@ procedure TCEMessagesWidget.filterMessages(aCtxt: TCEAppMessageCtxt);
 var
   itm: TTreeNode;
   i: integer;
+  f: boolean;
 begin
   if updating then
     exit;
@@ -997,10 +1011,11 @@ begin
   for i := 0 to List.Items.Count-1 do
   begin
     itm := List.Items.Item[i];
-    if not fFiltering then
-      itm.Visible := itemShouldBeVisible(itm, aCtxt)
+    if fFiltering then
+      itm.Visible := itemShouldBeVisible(itm, aCtxt) and
+        itm.Text.Contains(TreeFilterEdit1.Filter)
     else
-      itm.Visible := itm.Visible and itemShouldBeVisible(itm, aCtxt);
+      itm.Visible:= itemShouldBeVisible(itm, aCtxt);
     itm.Selected := false;
   end;
   list.EndUpdate;
