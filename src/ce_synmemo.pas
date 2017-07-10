@@ -140,17 +140,16 @@ type
   TSortDialog = class;
 
   TGutterIcon = (
-    giBulletRed   = 0,          // breakpoint
+    giBreakSet    = 0,          // breakpoint set here
     giBulletGreen = 1,
     giBulletBlack = 2,
-    giBreak       = 3,          // break point reached
+    giBreakReached= 3,          // break point reached
     giStep        = 4,          // step / signal / pause
     giWatch       = 5,          // watch point reached
-    giWarn        = 6,          // Dscanner result with text hint
-    giNone        = high(byte)  //
+    giWarn        = 6           // Dscanner result with text hint
   );
 
-  const debugTimeGutterIcons = [giBreak, giStep, giWatch];
+  const debugTimeGutterIcons = [giBreakReached, giStep, giWatch];
 
 type
 
@@ -843,10 +842,10 @@ begin
   TextBuffer.AddNotifyHandler(senrUndoRedoAdded, @changeNotify);
 
   fImages := TImageList.Create(self);
-  fImages.AddResourceName(HINSTANCE, 'BULLET_RED');
+  fImages.AddResourceName(HINSTANCE, 'BREAK_SET');
   fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN');
   fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK');
-  fImages.AddResourceName(HINSTANCE, 'BREAKS');
+  fImages.AddResourceName(HINSTANCE, 'BREAK_REACHED');
   fImages.AddResourceName(HINSTANCE, 'STEP');
   fImages.AddResourceName(HINSTANCE, 'CAMERA_GO');
   fImages.AddResourceName(HINSTANCE, 'WARNING');
@@ -3100,7 +3099,7 @@ procedure TCESynMemo.addBreakPoint(line: integer);
 begin
   if findBreakPoint(line) then
     exit;
-  addGutterIcon(line, giBulletRed);
+  addGutterIcon(line, giBreakSet);
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   fBreakPoints.Add(pointer(line));
   {$POP}
@@ -3112,7 +3111,7 @@ procedure TCESynMemo.removeBreakPoint(line: integer);
 begin
   if not findBreakPoint(line) then
     exit;
-  removeGutterIcon(line, giBulletRed);
+  removeGutterIcon(line, giBreakSet);
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   fBreakPoints.Remove(pointer(line));
   {$POP}
@@ -3149,10 +3148,7 @@ var
 begin
   IncPaintLock;
   for i:= marks.Count-1 downto 0 do
-  begin
-    if TGutterIcon(Marks.Items[i].ImageIndex) in debugTimeGutterIcons then
-      Marks.Delete(i);
-  end;
+    Marks.Items[i].Visible := not (TGutterIcon(Marks.Items[i].ImageIndex) in debugTimeGutterIcons);
   DecPaintLock;
 end;
 
@@ -3178,14 +3174,16 @@ var
   m: TSynEditMarkLine;
   n: TSynEditMark;
   i: integer;
+  s: boolean = false;
 begin
   m := Marks.Line[line];
   if m.isNotNil then
     for i := 0 to m.Count-1 do
-      if m.Items[i].ImageIndex = longint(value) then
-        exit;
-
-  if value <> giNone then
+  begin
+    s := m.Items[i].ImageIndex = longint(value);
+    m.Items[i].Visible := s;
+  end;
+  if not s then
   begin
     n:= TSynEditMark.Create(self);
     n.Line := line;
@@ -3254,8 +3252,9 @@ begin
   caretY := line;
   EnsureCursorPosVisible;
   removeDebugTimeMarks;
+  removeDscannerWarnings;
   case reason of
-    dbBreakPoint: addGutterIcon(line, giBreak);
+    dbBreakPoint: addGutterIcon(line, giBreakReached);
     dbStep, dbSignal: addGutterIcon(line, giStep);
     dbWatch: addGutterIcon(line, giWatch);
   end;

@@ -58,7 +58,6 @@ type
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
-    MenuItem13: TMenuItem;
     MenuItem14: TMenuItem;
     mnuedPrevWarn: TMenuItem;
     mnuedNextWarn: TMenuItem;
