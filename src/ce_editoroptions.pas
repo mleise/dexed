@@ -71,6 +71,7 @@ type
     fTransparentGutter: boolean;
     fDscannerDelay: integer;
     fDscannerEnabled: boolean;
+    fScrollPreview: boolean;
     //
     procedure setPhobosDocRoot(value: TCEPathname);
     procedure setFont(value: TFont);
@@ -128,6 +129,7 @@ type
     property rightEdgeColor: TColor read fRightEdgeColor write fRightEdgeColor default clSilver;
     property selection: TSynSelectedColor read fSelAttribs write setSelCol;
     property shortcuts: TCollection read fShortCuts write setShortcuts;
+    property scrollPreview: boolean read fScrollPreview write fScrollPreview;
     property smartDdocNewline: boolean read fSmartDdocNewline write fSmartDdocNewline;
     property tabulationWidth: Integer read fTabWidth write fTabWidth default 4;
     property transparentGutter: boolean read fTransparentGutter write fTransparentGutter default false;
@@ -335,6 +337,7 @@ begin
     fAutoCallCompletion:= srcopt.fAutoCallCompletion;
     fCloseCompletionChars:=srcopt.fCloseCompletionChars;
     fCloseCompletionCharsWithSpace:=srcopt.fCloseCompletionCharsWithSpace;
+    fScrollPreview:=srcopt.fScrollPreview;
 
     fSmartDdocNewline:=srcopt.fSmartDdocNewline;
     if fSmartDdocNewline then
@@ -719,6 +722,7 @@ begin
   anEditor.completionMenuAutoClose:=fCompletionMenuAutoClose;
   anEditor.transparentGutter:=fTransparentGutter;
   anEditor.setDscannerOptions(fDscannerEnabled, fDscannerDelay);
+  anEditor.scrollPreview:=fScrollPreview;
 
   cs := [];
   for c in fCloseCompletionCharsWithSpace do

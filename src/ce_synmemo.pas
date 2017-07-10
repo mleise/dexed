@@ -155,9 +155,25 @@ type
 
   //TODO-cGDB: add a system allowing to define watch points
 
+  // Partial read-only editor displayed as scroll hint
+  TCEScrollMemo = class(TPanel)
+  private
+    fMemo: TSynEdit;
+    fD2Hl: TSynD2Syn;
+    fTxtHl: TSynTxtSyn;
+    fSource: TCESynMemo;
+    procedure updateFromSource;
+  protected
+    procedure SetVisible(Value: Boolean); override;
+  public
+    constructor construct(editor: TCESynMemo);
+    procedure goToLine(value: integer);
+  end;
+
   TCESynMemo = class(TSynEdit, ICEDebugObserver)
   private
     //fIndentGuideMarkup: TSynEditMarkupFoldColors;
+    fScrollMemo: TCEScrollMemo;
     fFilename: string;
     fDastWorxExename: string;
     fModified: boolean;
@@ -219,6 +235,7 @@ type
     fCanDscan: boolean;
     fKnowsDscanner: boolean;
     fDscannerEnabled: boolean;
+    fScrollPreview: boolean;
     procedure showHintEvent(Sender: TObject; HintInfo: PHintInfo);
     procedure setGutterTransparent(value: boolean);
     procedure decCallTipsLvl;
@@ -362,6 +379,7 @@ type
     property closeCompletionCharsWithSpace: TSysCharSet read fCloseCompletionCharsWithSpace write fCloseCompletionCharsWithSpace;
     property closeCompletionChars: TSysCharSet read fCloseCompletionChars write fCloseCompletionChars;
     property completionMenuAutoClose: boolean read fCompletionMenuAutoClose write fCompletionMenuAutoClose;
+    property scrollPreview: boolean read fScrollPreview write fScrollPreview;
   end;
 
   TSortDialog = class(TForm)
@@ -748,12 +766,81 @@ begin
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
+{$REGION TCEScrollMemo ---------------------------------------------------------}
+constructor TCEScrollMemo.construct(editor: TCESynMemo);
+begin
+  inherited create(editor);
+  visible := false;
+
+  parent := editor;
+  width := 475;
+  height := 275;
+  CaptureMouseButtons:=[];
+
+  fMemo:= TSynEdit.Create(self);
+  fMemo.Parent := self;
+  fMemo.Align:= alCLient;
+  fMemo.ReadOnly:=true;
+  fMemo.ScrollBars:=ssNone;
+  fMemo.MouseActions.Clear;
+  fMemo.Keystrokes.Clear;
+  fMemo.CaptureMouseButtons:=[];
+
+  fD2Hl:= TSynD2Syn.create(self);
+  fTxtHl:= TSynTxtSyn.Create(self);
+
+  fSource:= editor;
+  updateFromSource();
+end;
+
+procedure TCEScrollMemo.updateFromSource;
+begin
+  fMemo.Font.Assign(fSource.Font);
+  fMemo.Lines := fSource.Lines;
+  if fSource.Highlighter.isNotNil then
+  begin
+    fMemo.Color:= fSource.Color;
+    fMemo.LineHighlightColor.Assign(fSource.LineHighlightColor);
+    fMemo.SelectedColor.Assign(fSource.SelectedColor);
+    if fSource.Highlighter is TSynD2Syn then
+    begin
+      fD2Hl.Assign(fSource.Highlighter);
+      fMemo.Highlighter := fD2Hl;
+    end
+    else
+    begin
+      fTxtHl.Assign(fSource.Highlighter);
+      fMemo.Highlighter := fTxtHl;
+    end;
+  end;
+end;
+
+procedure TCEScrollMemo.SetVisible(Value: Boolean);
+var
+  o: boolean;
+begin
+  o := IsVisible();
+  inherited;
+  if (o <> value) and value then
+    updateFromSource;
+end;
+
+procedure TCEScrollMemo.goToLine(value: integer);
+begin
+  fMemo.CaretY := value;
+  fMemo.SelectLine(true);
+  fMemo.CaretX := 1;
+end;
+{$ENDREGION}
+
 {$REGION TCESynMemo ------------------------------------------------------------}
 
 {$REGION Standard Obj and Comp -------------------------------------------------}
 constructor TCESynMemo.Create(aOwner: TComponent);
 begin
   inherited;
+
+  fScrollMemo := TCEScrollMemo.construct(self);
 
   OnShowHint:= @showHintEvent;
   OnStatusChange:= @handleStatusChanged;
@@ -962,6 +1049,7 @@ begin
   fFocusForInput := false;
   hideDDocs;
   hideCallTips;
+  fScrollMemo.Visible:=false;
   if fCompletion.IsActive then
     fCompletion.Deactivate;
 end;
@@ -976,9 +1064,11 @@ begin
       loadCache;
     fCacheLoaded := true;
   end
-  else begin
+  else
+  begin
     hideDDocs;
     hideCallTips;
+    fScrollMemo.Visible:=false;
     if fCompletion.IsActive then
       fCompletion.Deactivate;
   end;
@@ -3038,6 +3128,22 @@ begin
   fMousePos := PixelsToRowColumn(fOldMousePos);
   if ssLeft in Shift then
     highlightCurrentIdentifier;
+
+  if fScrollPreview then
+  begin
+    if (x > width - 40) and (x < width - 1) then
+    begin;
+      fScrollMemo.Visible:=true;
+      fScrollMemo.goToLine((lines.Count div height) * (Y));
+      fScrollMemo.left := width - 40 - fScrollMemo.Width;
+      fScrollMemo.Top:= Y - 5;
+    end
+    else
+    begin
+      fScrollMemo.Visible:=false;
+    end;
+  end;
+
 end;
 
 procedure TCESynMemo.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y:Integer);
@@ -3056,8 +3162,20 @@ begin
 end;
 
 procedure TCESynMemo.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y:Integer);
+var
+  pt: TPoint;
 begin
   inherited;
+  if fScrollPreview and fScrollMemo.Visible and (button = mbLeft) then
+  begin
+    pt := Mouse.CursorPos;
+    pt.x:= pt.x - 40;
+    CaretY := fScrollMemo.fMemo.CaretY;
+    EnsureCursorPosVisible;
+    fScrollMemo.Visible:=false;
+    mouse.CursorPos := pt;
+    fPositions.store;
+  end;
   case Button of
     mbMiddle: if (Shift = [ssCtrl]) then
       Font.Size := fDefaultFontSize;
