@@ -815,6 +815,8 @@ begin
     begin
       reader.saveBeginning;
       identifier += reader.head^;
+      if (reader.head^ = '}') and ((reader.head + 1)^  in stringPostfixes) then
+        reader.Next;
       reader.Next;
       addToken(ltkSymbol);
       if callBackDoStop then

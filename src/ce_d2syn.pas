@@ -14,7 +14,7 @@ type
   TTokenKind = (tkCommt, tkIdent, tkKeywd, tkStrng, tkBlank, tkSymbl, tkNumbr,
     tkDDocs, tkSpecK, tkError, tkAsmbl, tkAttri, tkLost,  tkTypes);
 
-  TRangeKind = (rkString1, rkString2, rkTokString, rkBlockCom1, rkBlockCom2,
+  TRangeKind = (rkString1, rkString2, rkBlockCom1, rkBlockCom2,
     rkBlockDoc1, rkBlockDoc2, rkAsm);
 
   TRangeKinds = set of TRangeKind;
@@ -28,7 +28,6 @@ type
   private
     namedRegionCount: Integer;
     nestedCommentsCount: Integer;
-    tokenStringBracketsCount: Integer;
     rangeKinds: TRangeKinds;
     // double quoted multi-line string prefixed with 'r':
     // => don't skip '"' following '\'
@@ -130,8 +129,6 @@ begin
   begin
     rng := TSynD2SynRange(source);
     rangeKinds := rng.rangeKinds;
-    nestedCommentsCount := rng.nestedCommentsCount;
-    tokenStringBracketsCount := rng.tokenStringBracketsCount;
     namedRegionCount := rng.namedRegionCount;
   end;
 end;
@@ -153,8 +150,6 @@ begin
     if src_t.rString <> rString then exit(1);
     if src_t.nestedCommentsCount <> nestedCommentsCount then
       exit(cmpRes[src_t.nestedCommentsCount > nestedCommentsCount]);
-    if src_t.tokenStringBracketsCount <> tokenStringBracketsCount then
-      exit(cmpRes[src_t.tokenStringBracketsCount > tokenStringBracketsCount]);
     if src_t.namedRegionCount <> namedRegionCount then
       exit(cmpRes[src_t.namedRegionCount > namedRegionCount]);
   end;
@@ -165,7 +160,6 @@ begin
   inherited;
   nestedCommentsCount := 0;
   namedRegionCount := 0;
-  tokenStringBracketsCount := 0;
   rangeKinds := [];
   rString := false;
 end;
@@ -174,7 +168,6 @@ procedure TSynD2SynRange.copyFrom(source: TSynD2SynRange);
 begin
   nestedCommentsCount := source.nestedCommentsCount;
   namedRegionCount := source.namedRegionCount;
-  tokenStringBracketsCount := source.tokenStringBracketsCount;
   rangeKinds := source.rangeKinds;
   rString := source.rString;
 end;
@@ -450,8 +443,7 @@ begin
   end;
 
   // line comments / region beg-end
-  if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkTokString]) or
-    (fCurrRange.rangeKinds = [rkAsm])
+  if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkAsm])
       then if readDelim(reader, fTokStop, '//') then
   begin
     fTokKind := tkCommt;
@@ -483,8 +475,8 @@ begin
   end else readerReset;
 
   // block comments 1
-  if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkTokString]) or
-    (fCurrRange.rangeKinds = [rkAsm]) then if readDelim(reader, fTokStop, '/*') then
+  if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkAsm]) then
+    if readDelim(reader, fTokStop, '/*') then
   begin
     fTokKind := tkCommt;
     if readDelim(reader, fTokStop, '*') then
@@ -521,8 +513,8 @@ begin
   end;
 
   // block comments 2
-  if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkTokString]) or
-    (fCurrRange.rangeKinds = [rkAsm]) then if readDelim(reader, fTokStop, '/+') then
+  if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkAsm]) then
+    if readDelim(reader, fTokStop, '/+') then
   begin
     fTokKind := tkCommt;
     if readDelim(reader, fTokStop, '+') then
@@ -602,8 +594,7 @@ begin
   end;
 
   // double quoted strings | raw double quoted strings
-  if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkTokString])
-    then if readDelim(reader, fTokStop, stringPrefixes) then
+  if (fCurrRange.rangeKinds = []) and readDelim(reader, fTokStop, stringPrefixes) then
   begin
     if readerPrev^ in ['r','x','q'] then
     begin
@@ -672,8 +663,7 @@ begin
   end;
 
   // backticks strings
-  if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkTokString]) then
-    if readDelim(reader, fTokStop, '`') then
+  if (fCurrRange.rangeKinds = []) and readDelim(reader, fTokStop, '`') then
   begin
     fTokKind := tkStrng;
     if readUntil(reader, fTokStop, '`') then
@@ -704,15 +694,12 @@ begin
   if readDelim(reader, fTokStop, 'q{') then
   begin
     fTokKind := tkSymbl;
-    inc(fCurrRange.tokenStringBracketsCount);
-    fCurrRange.rangeKinds += [rkTokString];
     StartCodeFoldBlock(nil, fkBrackets in fFoldKinds);
     exit;
   end else readerReset;
 
   // char literals
-  if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkTokString])
-    then if readDelim(reader, fTokStop, #39) then
+  if (fCurrRange.rangeKinds = []) and readDelim(reader, fTokStop, #39) then
   begin
     fTokKind := tkStrng;
     while true do
@@ -847,12 +834,8 @@ begin
         EndCodeFoldBlock(fkBrackets in fFoldKinds);
         if (reader^ = '}') and (rkAsm in fCurrRange.rangeKinds) then
           fCurrRange.rangeKinds -= [rkAsm]; ;
-        if (rkTokString in fCurrRange.rangeKinds) then
-        begin
-          Dec(fCurrRange.tokenStringBracketsCount);
-          if (fCurrRange.tokenStringBracketsCount = 0) then
-            fCurrRange.rangeKinds -= [rkTokString];
-        end;
+        if (reader+1)^ in stringPostfixes then
+          readerNext;
       end;
     end;
     readerNext;
