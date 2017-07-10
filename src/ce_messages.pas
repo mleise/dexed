@@ -1003,7 +1003,6 @@ procedure TCEMessagesWidget.filterMessages(aCtxt: TCEAppMessageCtxt);
 var
   itm: TTreeNode;
   i: integer;
-  f: boolean;
 begin
   if updating then
     exit;

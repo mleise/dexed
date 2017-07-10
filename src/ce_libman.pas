@@ -322,8 +322,8 @@ end;
 constructor TLibraryManager.create(aOwner: TComponent);
 var
   nme: string;
-  als: string;
-  lib: TLibraryItem;
+  lb2: TLibraryItem;
+  lb1: TLibraryItem;
   i: integer;
 begin
   inherited;
@@ -335,9 +335,14 @@ begin
     loadFromFile(nme);
   for i := fCollection.Count-1 downto 0 do
   begin
-    lib := libraryByIndex[i];
-    als := lib.libAlias.upperCase;
-    lib.updateModulesInfo;
+    lb2 := libraryByIndex[i];
+    lb1 := libraryByAlias[lb2.libAlias];
+    if lb1.isNotNil and (lb1.Index < lb2.Index) then
+    begin
+      fCollection.Delete(i);
+      continue;
+    end;
+    lb2.updateModulesInfo;
   end;
   updateItemsByAlias;
   updateDCD;
