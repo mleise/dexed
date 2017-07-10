@@ -797,6 +797,7 @@ procedure TCEScrollMemo.updateFromSource;
 begin
   fMemo.Font.Assign(fSource.Font);
   fMemo.Lines := fSource.Lines;
+  width := fSource.Width div 2;
   if fSource.Highlighter.isNotNil then
   begin
     fMemo.Color:= fSource.Color;
@@ -827,9 +828,12 @@ end;
 
 procedure TCEScrollMemo.goToLine(value: integer);
 begin
+  if value > fMemo.Lines.Count then
+    value := fMemo.Lines.Count
+  else if value < 1 then
+    value := 1;
   fMemo.CaretY := value;
   fMemo.SelectLine(true);
-  fMemo.CaretX := 1;
 end;
 {$ENDREGION}
 
@@ -3134,7 +3138,7 @@ begin
     if (x > width - 40) and (x < width - 1) then
     begin;
       fScrollMemo.Visible:=true;
-      fScrollMemo.goToLine((lines.Count div height) * (Y));
+      fScrollMemo.goToLine(trunc((lines.Count / Height) * Y));
       fScrollMemo.left := width - 40 - fScrollMemo.Width;
       fScrollMemo.Top:= Y - 5;
     end
