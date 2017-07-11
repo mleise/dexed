@@ -719,15 +719,30 @@ end;
 
 procedure TCompilersPathsEditor.autoDetectLDC;
 var
+  i: integer;
   path: string;
+  str: TStringList;
 begin
   path := exeFullName('ldc2' + exeExt);
   if path.fileExists then
   begin
     fPaths.LdcExeName:= path;
-    path := path.extractFilePath.extractFilePath + DirectorySeparator + 'import';
-    if path.dirExists then
-      fPaths.LdcRuntimePath:=path;
+    str := TStringList.Create;
+    try
+      path := path.extractFileDir.extractFilePath;
+      FindAllDirectories(str, path, true);
+      for path in str do
+      begin
+        i := pos('import' + DirectorySeparator + 'ldc', path);
+        if i > 0 then
+        begin
+          fPaths.LdcRuntimePath:= path[1..i + 5];
+          break;
+        end;
+      end;
+    finally
+      str.Free;
+    end;
   end;
 end;
 {$ENDREGION}
