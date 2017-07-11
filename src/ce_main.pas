@@ -10,7 +10,7 @@ uses
   Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
   {$IFDEF WINDOWS}Windows, {$ENDIF} XMLPropStorage, SynExportHTML, fphttpclient,
   fpjson, jsonparser, jsonscanner,
-  ce_common, ce_dmdwrap, ce_ceproject, ce_synmemo, ce_writableComponent,
+  ce_common, ce_ceproject, ce_synmemo, ce_writableComponent,
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_ceprojeditor,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
@@ -781,6 +781,7 @@ begin
   fMaxRecentProjs := 10;
   fMaxRecentDocs := 10;
   fMaxRecentGroups:= 10;
+  fReloadLastDocuments:=true;
   fFlatLook:=true;
 end;
 
@@ -1695,10 +1696,14 @@ begin
 end;
 
 procedure TCEMainForm.LoadLastDocsAndProj;
+var
+  str: string;
 begin
-  with TCELastDocsAndProjs.create(nil) do
+  str := getCoeditDocPath + 'lastdocsandproj.txt';
+  if str.fileExists then
+    with TCELastDocsAndProjs.create(nil) do
   try
-    loadFromFile(getCoeditDocPath + 'lastdocsandproj.txt');
+    loadFromFile(str);
     assignTo(self);
   finally
     free;
