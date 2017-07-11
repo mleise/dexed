@@ -1454,14 +1454,9 @@ begin
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fFindWidg), DockMaster.GetAnchorSite(fSymlWidg), alBottom, fSymlWidg);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fPrInpWidg), DockMaster.GetAnchorSite(fFindWidg), alTop, fFindWidg);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fExplWidg), DockMaster.GetSite(fSymlWidg), alClient, fSymlWidg);
-    if GetDockSplitter(DockMaster.GetSite(fFindWidg), akTop, topsplt) then
-    begin
-      topsplt.MoveSplitter(40);
-      topsplt := nil;
-    end;
     if GetDockSplitter(DockMaster.GetSite(fPrInpWidg), akTop, topsplt) then
     begin
-      topsplt.MoveSplitter(40);
+      topsplt.MoveSplitter(50);
       topsplt := nil;
     end;
     fSymlWidg.showWidget;

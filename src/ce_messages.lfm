@@ -25,6 +25,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Width = 840
         Align = alClient
         BorderSpacing.Around = 2
+        Font.Style = [fsBold]
         HideSelection = False
         Images = imgList
         MultiSelect = True

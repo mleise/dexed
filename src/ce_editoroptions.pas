@@ -242,7 +242,7 @@ begin
   fAutoCloseCurlyBrace:= autoCloseOnNewLineLexically;
   fAutoClosedPairs:= [autoCloseSquareBracket];
   //
-  fCompletionMenuWidth:= 250;
+  fCompletionMenuWidth:= 320;
   fCompletionMenuLines:= 15;
   //
   fLineNumEvery := 5;
@@ -251,6 +251,8 @@ begin
   blockIndentation := 4;
   fBackground := clWhite;
   fRightEdgeColor := clSilver;
+  fSmartDdocNewline:=true;
+  fScrollPreview:=true;
   //
   fDscannerEnabled:=true;
   fDscannerDelay:= 2200;
