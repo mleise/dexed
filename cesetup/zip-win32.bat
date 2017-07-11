@@ -7,4 +7,4 @@ cd win32
  dcd.license.txt coedit.license.txt^
  coedit.exe dastworx.exe^
  coedit.ico coedit.png^
- dcd-server.exe dcd-client.exe
+ dcd-server.exe dcd-client.exe dscanner.exe

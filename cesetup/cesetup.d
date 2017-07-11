@@ -41,10 +41,11 @@ immutable Resource[] ceResources =
     Resource(cast(ImpType) import("coedit.license.txt"), "coedit.license.txt", Kind.doc)
 ];
 
-immutable Resource[] dcdResources =
+immutable Resource[] thirdPartBinaries =
 [
     Resource(cast(ImpType) import("dcd-server" ~ exeExt), "dcd-server" ~ exeExt, Kind.exe),
     Resource(cast(ImpType) import("dcd-client" ~ exeExt), "dcd-client" ~ exeExt, Kind.exe),
+    Resource(cast(ImpType) import("dscanner" ~ exeExt), "dscanner" ~ exeExt, Kind.exe),
     Resource(cast(ImpType) import("dcd.license.txt"), "dcd.license.txt", Kind.doc)
 ];
 
@@ -119,12 +120,13 @@ static this()
 
 void main(string[] args)
 {
-    bool nodcd;
+    bool noTools;
     bool uninstall;
     bool listfiles;
 
     getopt(args, config.passThrough, 
-        "nodcd", &nodcd, 
+        "nodcd", &noTools,
+        "notools", &noTools,
         "u|uninstall", &uninstall,
         "l|list", &listfiles
     );
@@ -146,7 +148,7 @@ void main(string[] args)
             fname = targetFilename(res);
             writefln(fmtRes, fname, exists(fname));
         }
-        foreach (ref res; dcdResources)
+        foreach (ref res; thirdPartBinaries)
         {
             fname = targetFilename(res);
             writefln(fmtRes, fname, exists(fname));
@@ -179,10 +181,10 @@ void main(string[] args)
     Formater.justify!'L'("-l | --list: list files and status");
     if (!uninstall) 
     {
-        if (!nodcd) Formater.justify!'L'("--nodcd: skip DCD setup");
         Formater.justify!'L'("-u | --uninstall: uninstall");
+        if (!noTools) Formater.justify!'L'("--notools: skip DCD and Dscanner setup");
     }
-    else if (!nodcd) Formater.justify!'L'("--nodcd: do not remove DCD");
+    else if (!noTools) Formater.justify!'L'("--notools: do not remove DCD and Dscanner");
     Formater.justify!'L'("press A to abort or another key to start...");
     Formater.separate;   
     
@@ -211,7 +213,7 @@ void main(string[] args)
             Formater.justify!'L'(res.destName ~ oldMsg[done]);
             failures += !done;
         }
-        if (!nodcd) foreach (ref res; dcdResources)
+        if (!noTools) foreach (ref res; thirdPartBinaries)
         {
             done = installResource(res);
             Formater.justify!'L'(res.destName ~ extractMsg[done]);
@@ -254,7 +256,7 @@ void main(string[] args)
             Formater.justify!'L'(res.destName ~ rmMsg[done]);
             failures += !done;
         }
-        if (!nodcd) foreach (ref res; dcdResources)
+        if (!noTools) foreach (ref res; thirdPartBinaries)
         {
             done = uninstallResource(res);
             Formater.justify!'L'(res.destName ~ rmMsg[done]);

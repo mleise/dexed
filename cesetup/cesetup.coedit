@@ -41,11 +41,13 @@ object CurrentProject: TCENativeProject
         '<CPP>'
       )
       preBuildProcess.executable = 'bash'
+      preBuildProcess.workingDirectory = '<CPP>'
       preBuildProcess.options = [poUsePipes, poStderrToOutPut]
       preBuildProcess.parameters.Strings = (
         'zip-nux32.sh'
       )
       postBuildProcess.executable = 'bash'
+      postBuildProcess.workingDirectory = '<CPP>'
       postBuildProcess.options = [poUsePipes, poStderrToOutPut]
       postBuildProcess.parameters.Strings = (
         'setupzip-nux-noarch.sh'
@@ -64,20 +66,23 @@ object CurrentProject: TCENativeProject
         '<CPP>'
       )
       preBuildProcess.executable = 'sh'
+      preBuildProcess.workingDirectory = '<CPP>'
       preBuildProcess.options = [poUsePipes, poStderrToOutPut]
       preBuildProcess.parameters.Strings = (
         'zip-nux64.sh'
       )
       postBuildProcess.executable = 'sh'
+      postBuildProcess.workingDirectory = '<CPP>'
       postBuildProcess.options = [poUsePipes, poStderrToOutPut]
       postBuildProcess.parameters.Strings = (
         'setupzip-nux-noarch.sh'
         '<CPO>'
       )
+      runOptions.options = [poUsePipes]
     end>
   Sources.Strings = (
     'cesetup.d'
   )
   ConfigurationIndex = 2
-  version = '3update2'
+  version = '3update3'
 end

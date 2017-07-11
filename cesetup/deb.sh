@@ -43,7 +43,7 @@ Type=Application" > $shcdir/coedit.desktop
 cd $cfgdir 
 echo "Package: coedit
 Version: $maj$min
-Section: base
+Section: devel
 Priority: optional
 Date: $dte
 Architecture: $arch

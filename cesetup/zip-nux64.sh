@@ -8,5 +8,5 @@ zip -9 \
 $fld/dcd.license.txt $fld/coedit.license.txt \
 $fld/coedit $fld/dastworx \
 $fld/coedit.ico $fld/coedit.png \
-$fld/dcd-server $fld/dcd-client
+$fld/dcd-server $fld/dcd-client $fld/dscanner
 rm -rf coedit-x86_64
