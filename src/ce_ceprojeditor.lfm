@@ -35,7 +35,6 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
           Width = 160
           Align = alLeft
           AutoExpand = True
-          DefaultItemHeight = 18
           HideSelection = False
           ReadOnly = True
           ScrollBars = ssAutoBoth
@@ -126,17 +125,15 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         scaledSeparator = False
       end
       object selConf: TComboBox[4]
-        Left = 117
-        Height = 23
+        Left = 116
+        Height = 28
         Hint = 'select a configuration'
-        Top = 3
-        Width = 317
+        Top = 1
+        Width = 320
         Align = alClient
         BorderSpacing.Left = 114
-        BorderSpacing.Top = 1
-        BorderSpacing.Right = 1
-        BorderSpacing.Around = 2
-        ItemHeight = 15
+        BorderSpacing.Around = 1
+        ItemHeight = 0
         OnChange = selConfChange
         Style = csDropDownList
         TabOrder = 0
