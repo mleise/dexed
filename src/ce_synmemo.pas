@@ -3142,6 +3142,7 @@ begin
   inherited;
   hideDDocs;
   hideCallTips;
+  fScrollMemo.Visible:=false;
 end;
 
 procedure TCESynMemo.MouseMove(Shift: TShiftState; X, Y: Integer);
