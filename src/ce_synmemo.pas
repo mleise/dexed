@@ -343,6 +343,7 @@ type
     procedure removeCurLineBreakPoint;
     procedure toggleCurLineBreakpoint;
     procedure insertDdocTemplate;
+    procedure gotoLinePrompt;
     function implementMain: THasMain;
     procedure replaceUndoableContent(const value: string);
     procedure setDscannerOptions(dsEnabled: boolean; dsDelay: integer);
@@ -429,6 +430,7 @@ const
   ecInsertDdocTemplate  = ecUserFirst + 25;
   ecNextWarning         = ecUserFirst + 26;
   ecPrevWarning         = ecUserFirst + 27;
+  ecGotoLine            = ecUserFirst + 28;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -1195,6 +1197,7 @@ begin
     AddKey(ecInsertDdocTemplate, 0, [], 0, []);
     AddKey(ecPrevWarning, 0, [], 0, []);
     AddKey(ecNextWarning, 0, [], 0, []);
+    AddKey(ecGotoLine, 0, [], 0, []);
   end;
 end;
 
@@ -1228,6 +1231,7 @@ begin
     'ecInsertDdocTemplate': begin Int := ecInsertDdocTemplate; exit(true); end;
     'ecPrevWarning':        begin Int := ecPrevWarning; exit(true); end;
     'ecNextWarning':        begin Int := ecNextWarning; exit(true); end;
+    'ecGotoLine':           begin Int := ecGotoLine; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1262,6 +1266,7 @@ begin
     ecInsertDdocTemplate: begin Ident := 'ecInsertDdocTemplate'; exit(true); end;
     ecPrevWarning:        begin Ident := 'ecPrevWarning'; exit(true); end;
     ecNextWarning:        begin Ident := 'ecNextWarning'; exit(true); end;
+    ecGotoLine:           begin Ident := 'ecGotoLine'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1338,6 +1343,8 @@ begin
       goToWarning(false);
     ecNextWarning:
       goToWarning(true);
+    ecGotoLine:
+      gotoLinePrompt;
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1784,6 +1791,29 @@ end;
 procedure TCESynMemo.nextWarning;
 begin
   goToWarning(true);
+end;
+
+procedure TCESynMemo.gotoLinePrompt;
+var
+  d: string;
+  v: string;
+  i: integer;
+begin
+  d := caretY.ToString;
+  v := InputBox('Goto line', 'line number', d);
+  if v.isNotEmpty and not v.Equals(d) then
+  begin
+    i := v.toIntNoExcept;
+    if i <> -1 then
+    begin
+      if i < 1 then
+        i := 1
+      else if i > lines.Count then
+        i := lines.Count;
+      CaretY:= i;
+      EnsureCursorPosVisible;
+    end;
+  end;
 end;
 
 procedure TCESynMemo.goToChangedArea(next: boolean);

@@ -58,7 +58,7 @@ type
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
-    MenuItem14: TMenuItem;
+    mnuedGotoline: TMenuItem;
     mnuedPrevWarn: TMenuItem;
     mnuedNextWarn: TMenuItem;
     mnuedDdocTmp: TMenuItem;
@@ -94,6 +94,7 @@ type
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
     procedure mnuedDdocTmpClick(Sender: TObject);
+    procedure mnuedGotolineClick(Sender: TObject);
     procedure mnuedNextWarnClick(Sender: TObject);
     procedure mnuedPrevProtGrpClick(Sender: TObject);
     procedure mnuedNextProtGrpClick(Sender: TObject);
@@ -919,6 +920,12 @@ procedure TCEEditorWidget.mnuedDdocTmpClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.insertDdocTemplate;
+end;
+
+procedure TCEEditorWidget.mnuedGotolineClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.gotoLinePrompt;
 end;
 
 procedure TCEEditorWidget.mnuedNextWarnClick(Sender: TObject);

@@ -93,42 +93,43 @@ inherited CEEditorWidget: TCEEditorWidget
       Caption = 'Previous location'
       OnClick = mnuedPrevClick
     end
-    object mnuedNext: TMenuItem
-      Caption = 'Next location'
-      OnClick = mnuedNextClick
-    end
-    object MenuItem10: TMenuItem
-      Caption = '-'
-    end
     object mnuedPrevCarea: TMenuItem
       Caption = 'Previous changed area'
       OnClick = mnuedPrevCareaClick
-    end
-    object mnuedNextCarea: TMenuItem
-      Caption = 'Next changed area'
-      OnClick = mnuedNextCareaClick
-    end
-    object MenuItem9: TMenuItem
-      Caption = '-'
     end
     object mnuedPrevProtGrp: TMenuItem
       Caption = 'Previous protection attribute'
       OnClick = mnuedPrevProtGrpClick
     end
-    object mnuedNextProtGrp: TMenuItem
-      Caption = 'Next protection attribute'
-      OnClick = mnuedNextProtGrpClick
-    end
-    object MenuItem14: TMenuItem
-      Caption = '-'
-    end
     object mnuedPrevWarn: TMenuItem
       Caption = 'Previous warning'
       OnClick = mnuedPrevWarnClick
     end
+    object MenuItem10: TMenuItem
+      Caption = '-'
+    end
+    object mnuedNext: TMenuItem
+      Caption = 'Next location'
+      OnClick = mnuedNextClick
+    end
+    object mnuedNextCarea: TMenuItem
+      Caption = 'Next changed area'
+      OnClick = mnuedNextCareaClick
+    end
+    object mnuedNextProtGrp: TMenuItem
+      Caption = 'Next protection attribute'
+      OnClick = mnuedNextProtGrpClick
+    end
     object mnuedNextWarn: TMenuItem
       Caption = 'Next warning'
       OnClick = mnuedNextWarnClick
+    end
+    object MenuItem9: TMenuItem
+      Caption = '-'
+    end
+    object mnuedGotoline: TMenuItem
+      Caption = 'Goto line...'
+      OnClick = mnuedGotolineClick
     end
     object MenuItem2: TMenuItem
       Caption = '-'
