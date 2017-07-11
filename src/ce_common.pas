@@ -917,7 +917,7 @@ begin
       while Running do
         sleep(1);
   finally
-    result := true;
+    result := ExitStatus = 0;
     Free;
   end;
   {$ENDIF}
