@@ -1016,6 +1016,4 @@ begin
   Result := Integer(fTokKind);
 end;
 
-initialization
-  registerClasses([TSynD2Syn]);
 end.

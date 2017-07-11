@@ -293,12 +293,12 @@ type
   function globToReg(const glob: string ): string;
 
   (**
-   * Detects the main indetation mode used in a file
+   * Detects the main indentation mode used in a file
    *)
   function indentationMode(strings: TStrings): TIndentationMode;
 
   (**
-   * Detects the main indetation mode used in a file
+   * Detects the main indentation mode used in a file
    *)
   function indentationMode(const fname: string): TIndentationMode;
 
@@ -1474,6 +1474,4 @@ begin
   value := t + value[m..value.length];
 end;
 
-initialization
-  registerClasses([TCEPersistentShortcut]);
 end.

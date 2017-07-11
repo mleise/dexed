@@ -763,7 +763,6 @@ end;
 {$ENDREGION}
 
 initialization
-  RegisterClasses([TCEEditorOptionsBase, TCEEditorOptions]);
   EditorOptions := TCEEditorOptions.Create(nil);
 
 finalization

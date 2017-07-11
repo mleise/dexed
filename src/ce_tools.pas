@@ -431,7 +431,6 @@ end;
 {$ENDREGION}
 
 initialization
-  RegisterClasses([TCEToolItem, TCETools]);
   CustomTools := TCETools.create(nil);
 finalization
   CustomTools.Free;

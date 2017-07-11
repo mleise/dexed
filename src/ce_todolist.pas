@@ -664,6 +664,4 @@ begin
 end;
 {$ENDREGION}
 
-initialization
-  RegisterClasses([TCETodoOptions]);
 end.

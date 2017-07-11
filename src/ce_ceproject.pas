@@ -1136,5 +1136,4 @@ end;
 
 initialization
   setCEProjectCompiler(dmd);
-  RegisterClasses([TCENativeProject]);
 end.

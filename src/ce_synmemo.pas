@@ -3439,7 +3439,6 @@ initialization
   TCEEditorHintWindow.FontSize := 10;
   //
   RegisterKeyCmdIdentProcs(@CustomStringToCommand, @CustomCommandToSstring);
-  RegisterClasses([TCESynMemoCache, TCEFoldCache]);
 finalization
   D2Syn.Free;
   LfmSyn.Free;

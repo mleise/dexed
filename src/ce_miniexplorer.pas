@@ -729,6 +729,4 @@ begin
 end;
 {$ENDREGION}
 
-initialization
-  RegisterClasses([TCEMiniExplorerOptions]);
 end.

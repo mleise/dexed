@@ -3693,7 +3693,4 @@ begin
 end;
 {$ENDREGION}
 
-initialization
-  registerClasses([TCEPersistentMainShortcuts, TCEPersistentMainMrus,
-    TCELastDocsAndProjs, TCEApplicationOptionsBase, TCEApplicationOptions]);
 end.

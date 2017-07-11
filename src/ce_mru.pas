@@ -241,6 +241,4 @@ begin
     Insert(0, fname);
 end;
 
-initialization
-  RegisterClasses([TCEMRUList, TCEMRUFileList, TCEMRUProjectList, TCEMRUDocumentList]);
 end.

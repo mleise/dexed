@@ -199,6 +199,4 @@ begin
 end;
 {$ENDREGION}
 
-initialization
-  registerClasses([TCustomWritableComponent, TWritableLfmTextComponent, TWritableJsonComponent]);
 end.

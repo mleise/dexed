@@ -451,7 +451,6 @@ end;
 {$ENDREGION}
 
 initialization
-  RegisterClasses([TShortcutItem, TShortCutCollection]);
   CEShortcutEditor := TCEShortcutEditor.Create(nil);
 finalization
   CEShortcutEditor.Free;

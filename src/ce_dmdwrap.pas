@@ -1645,7 +1645,4 @@ begin
 end;
 {$ENDREGION}
 
-initialization
-  RegisterClasses([TOtherOpts, TPathsOpts, TDebugOpts, TOutputOpts, TMsgOpts,
-    TDocOpts, TCompileProcOptions, TProjectRunOptions, TCompilerConfiguration]);
 end.
