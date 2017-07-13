@@ -8,12 +8,46 @@ uses
   Classes, SysUtils, FileUtil, TASources, TAGraph, TATransformations, TASeries,
   TATools, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus, ComCtrls,
   StdCtrls, TALegend, math,
-  ce_widget, ce_common, ce_stringrange, ce_dsgncontrols, ce_ddemangle;
+  ce_widget, ce_common, ce_stringrange, ce_dsgncontrols, ce_ddemangle,
+  ce_interfaces, ce_observer, ce_writableComponent;
 
 type
 
-  TCEProfileViewerWidget = class(TCEWidget)
+  TCEProfileViewerOptionsBase = class(TWritableLfmTextComponent)
+  private
+    fHideAttributes: boolean;
+    fHideStandardLibraryCalls: boolean;
+    fHideRunTimeCalls: boolean;
+    fOtherExclusions: TStringList;
+    procedure setOtherExclusions(value: TStringList);
+  public
+    constructor create(aOwner: TComponent); override;
+    destructor destroy; override;
+    procedure assign(value: TPersistent); override;
+  published
+    property hideAttributes: boolean read fHideAttributes write fHideAttributes;
+    property hideStandardLibraryCalls: boolean read fHideStandardLibraryCalls write fHideStandardLibraryCalls;
+    property hideRuntimeCalls: boolean read fHideRunTimeCalls write fHideRunTimeCalls;
+    property otherExclusions: TStringList read fOtherExclusions write setOtherExclusions;
+  end;
+
+  TCEprofileViewerOptions = class(TCEProfileViewerOptionsBase, ICEEditableOptions)
+  private
+    fBackup: TCEProfileViewerOptionsBase;
+    function optionedWantCategory(): string;
+    function optionedWantEditorKind: TOptionEditorKind;
+    function optionedWantContainer: TPersistent;
+    procedure optionedEvent(event: TOptionEditorEvent);
+    function optionedOptionsModified: boolean;
+  public
+    constructor create(aOwner: TComponent); override;
+    destructor destroy; override;
+  end;
+
+  TCEProfileViewerWidget = class(TCEWidget, ICEProjectObserver)
     btnOpen: TCEToolButton;
+    btnOpts: TCEToolButton;
+    btnProj: TCEToolButton;
     btnRefresh: TCEToolButton;
     button0: TCEToolButton;
     ChartToolset1: TChartToolset;
@@ -30,36 +64,175 @@ type
     pieSeries: TPieSeries;
     Splitter1: TSplitter;
     procedure btnOpenClick(Sender: TObject);
+    procedure btnProjClick(Sender: TObject);
     procedure btnRefreshClick(Sender: TObject);
+    procedure btnOptsClick(Sender: TObject);
     procedure selPieSourceSelect(Sender: TObject);
     procedure selPieSourceSelectionChange(Sender: TObject; User: boolean);
-    procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer;
-      var Accept: Boolean);
+    procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
     procedure Splitter1Moved(Sender: TObject);
   private
+    fOptions: TCEprofileViewerOptions;
     logFname: string;
+    fProj: ICECommonProject;
     procedure updateIcons;
     procedure clearViewer;
     procedure updateFromFile(const fname: string);
     procedure updatePie;
     procedure listCompare(Sender: TObject; item1, item2: TListItem; Data: Integer; var Compare: Integer);
+    procedure projNew(project: ICECommonProject);
+    procedure projChanged(project: ICECommonProject);
+    procedure projClosing(project: ICECommonProject);
+    procedure projFocused(project: ICECommonProject);
+    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiled(project: ICECommonProject; success: boolean);
   public
     constructor create(aOwner: TComponent); override;
+    destructor destroy; override;
+    procedure reloadCurrent;
   end;
+
+  const optFname = 'profileviewer.txt';
 
 implementation
 {$R *.lfm}
 
+constructor TCEProfileViewerOptionsBase.create(aOwner: TComponent);
+begin
+  inherited create(aOwner);
+  fOtherExclusions := TStringList.Create;
+end;
+
+destructor TCEProfileViewerOptionsBase.destroy;
+begin
+  fOtherExclusions.free;
+  inherited;
+end;
+
+procedure TCEProfileViewerOptionsBase.assign(value: TPersistent);
+var
+  s: TCEProfileViewerOptionsBase;
+begin
+  if value is TCEProfileViewerOptionsBase then
+  begin
+    s := TCEProfileViewerOptionsBase(value);
+    fOtherExclusions.Assign(s.fOtherExclusions);
+    fHideRunTimeCalls:=s.fHideRunTimeCalls;
+    fHideStandardLibraryCalls:=fHideStandardLibraryCalls;
+  end
+  else inherited;
+end;
+
+procedure TCEProfileViewerOptionsBase.setOtherExclusions(value: TStringList);
+begin
+  fOtherExclusions.assign(value);
+end;
+
+constructor TCEprofileViewerOptions.create(aOwner: TComponent);
+var
+  s: string;
+begin
+  inherited create(aOwner);
+  fBackup := TCEProfileViewerOptionsBase.create(nil);
+  EntitiesConnector.addObserver(self);
+  s := getCoeditDocPath + optFname;
+  if s.fileExists then
+    loadFromFile(s);
+end;
+
+destructor TCEprofileViewerOptions.destroy;
+begin
+  saveTofile(getCoeditDocPath + optFname);
+  EntitiesConnector.removeObserver(self);
+  fBackup.free;
+  inherited;
+end;
+
+function TCEprofileViewerOptions.optionedWantCategory(): string;
+begin
+  result := 'Profile viewer';
+end;
+
+function TCEprofileViewerOptions.optionedWantEditorKind: TOptionEditorKind;
+begin
+  result := oekGeneric;
+end;
+
+function TCEprofileViewerOptions.optionedWantContainer: TPersistent;
+begin
+  result := self;
+end;
+
+procedure TCEprofileViewerOptions.optionedEvent(event: TOptionEditorEvent);
+begin
+  case event of
+    oeeAccept:
+      begin
+        fBackup.assign(self);
+        TCEProfileViewerWidget(owner).reloadCurrent;
+      end;
+    oeeCancel:
+      begin
+        self.assign(fBackup);
+        TCEProfileViewerWidget(owner).reloadCurrent;
+      end;
+    oeeSelectCat:
+      fBackup.assign(self);
+    oeeChange:
+      TCEProfileViewerWidget(owner).reloadCurrent;
+  end;
+end;
+
+function TCEprofileViewerOptions.optionedOptionsModified: boolean;
+begin
+  result := false;
+end;
+
 constructor TCEProfileViewerWidget.create(aOwner: TComponent);
 begin
   inherited;
+  EntitiesConnector.addObserver(self);
+  fOptions:= TCEprofileViewerOptions.create(self);
   clearViewer;
   updatePie;
   list.OnCompare:=@listCompare;
   selPieSourceSelect(nil);
 end;
 
-procedure TCEProfileViewerWidget.btnRefreshClick(Sender: TObject);
+destructor TCEProfileViewerWidget.destroy;
+begin
+  EntitiesConnector.removeObserver(self);
+  inherited;
+end;
+
+procedure TCEProfileViewerWidget.projNew(project: ICECommonProject);
+begin
+end;
+
+procedure TCEProfileViewerWidget.projChanged(project: ICECommonProject);
+begin
+end;
+
+procedure TCEProfileViewerWidget.projClosing(project: ICECommonProject);
+begin
+  if project = fProj then
+    fProj := nil;
+end;
+
+procedure TCEProfileViewerWidget.projFocused(project: ICECommonProject);
+begin
+  fProj := project;
+end;
+
+procedure TCEProfileViewerWidget.projCompiling(project: ICECommonProject);
+begin
+end;
+
+procedure TCEProfileViewerWidget.projCompiled(project: ICECommonProject; success: boolean);
+begin
+end;
+
+procedure TCEProfileViewerWidget.reloadCurrent;
 var
   fname: string;
 begin
@@ -74,6 +247,16 @@ begin
       logFname:=fname;
     end;
   end;
+end;
+
+procedure TCEProfileViewerWidget.btnRefreshClick(Sender: TObject);
+begin
+  reloadCurrent;
+end;
+
+procedure TCEProfileViewerWidget.btnOptsClick(Sender: TObject);
+begin
+  getOptionsEditor.showOptionEditor(fOptions as ICEEditableOptions);
 end;
 
 procedure TCEProfileViewerWidget.selPieSourceSelect(Sender: TObject);
@@ -100,6 +283,21 @@ begin
     end;
   finally
     free;
+  end;
+end;
+
+procedure TCEProfileViewerWidget.btnProjClick(Sender: TObject);
+var
+  fname: string;
+begin
+  if assigned(fProj) then
+  begin
+    fname := fProj.outputFilename.extractFileDir + DirectorySeparator + 'trace.log';
+    if fileExists(fname) then
+    begin
+      updateFromFile(fname);
+      logFname:=fname;
+    end;
   end;
 end;
 
@@ -176,6 +374,7 @@ var
   fft: qword;
   ftt: qword;
   fpc: qword;
+  exc: string;
 
   procedure fillRow();
   var
@@ -194,6 +393,47 @@ var
     datFuncTime.Add(0, fft, idt, c);
     datTreeTime.Add(0, ftt, idt, c);
     datPerCall.Add(0, fpc, idt, c);
+  end;
+
+  function canShow: boolean;
+  begin
+    result := true;
+    if fOptions.hideRuntimeCalls and (Pos(' core.', idt) > 0) then
+      exit(false);
+    if fOptions.hideStandardLibraryCalls and (Pos(' std.', idt) > 0) then
+      exit(false);
+    if fOptions.otherExclusions.Count > 0 then
+      for exc in fOptions.otherExclusions do
+        if Pos(exc, idt) > 0 then
+          exit(false);
+  end;
+
+  procedure filterAttributes;
+  const
+    a: array[0..12] of string = ('const','pure','nothrow','@safe','@nogc',
+      '@trusted', '@system', 'immutable', 'inout', 'return', '@property',
+      'shared', 'scope');
+  var
+    i: integer = 0;
+    j: integer;
+    p: integer;
+    s: string;
+  begin
+    if not fOptions.hideAttributes then
+      exit;
+    p := pos('(', idt);
+    if p = 0 then
+      p := integer.MaxValue;
+    for s in a do
+    begin
+      j := pos(s, idt);
+      if (j > 0) then
+        j += s.length + 1;
+      if (j < p) and (j >= i) then
+        i := j;
+    end;
+    if i > 0 then
+      idt := idt[i..idt.length];
   end;
 
 begin
@@ -272,7 +512,12 @@ begin
     rng.popWhile(' ')^.empty;
     idt := demangle(rng.takeUntil(#10).yield);
 
-    fillRow;
+    // apply options and add item
+    if canShow then
+    begin
+      filterAttributes;
+      fillRow;
+    end;
 
     if not rng.empty then
       rng.popFront

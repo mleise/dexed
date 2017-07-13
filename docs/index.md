@@ -54,6 +54,7 @@ _Full description of Coedit options. May redirect to a specific widget page._
 * [Editor pages](options_editor_pages)
 * [Messages](widgets_messages)
 * [Mini explorer](widgets_mini_explorer)
+* [Profile viewer](widgets_profile_viewer)
 * [Runnable modules](features_runnables)
 * [Shortcuts editor](options_shortcuts_editor)
 * [Static macros](widgets_editor)
