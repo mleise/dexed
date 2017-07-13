@@ -624,9 +624,7 @@ begin
   fSelectionEnd := fMemo.SelEnd;
   fFontSize := fMemo.Font.Size;
   TCEEditorHintWindow.FontSize := fMemo.Font.Size;
-  //
-  // TODO-cimprovment: handle nested folding in TCESynMemoCache
-  // cf. other ways: http://forum.lazarus.freepascal.org/index.php?topic=26748.msg164722#msg164722
+
   prev := fMemo.Lines.Count-1;
   for i := fMemo.Lines.Count-1 downto 0 do
   begin

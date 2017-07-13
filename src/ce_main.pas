@@ -1356,7 +1356,7 @@ begin
   accept := GetKeyShiftState = [ssCtrl];
 end;
 
-//TODO-cdocking: remove the usage of TAnchorDockSplitterEx from Laz 1.8 RC1 (OnMouseWheel public)
+//TODO-cdocking: remove the usage of TAnchorDockSplitterEx from Laz 1.8 (OnMouseWheel public)
 procedure TCEMainForm.DockSplitterMw(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 var
   offs: integer;
