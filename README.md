@@ -30,7 +30,7 @@ Coedit is an IDE for the [D programming language](http://dlang.org), its compile
 - licensed under the terms of the Boost software license.
 - Development can be supported by [donating here](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AQDJVC39PJF7J).
 
-**Download version 3 update 2**
+**Download version 3 update 3**
 ---
 Download the zipped binaries or the zip that contains the setup program for you platform:
 
