@@ -21,6 +21,7 @@ Todo by hand for each release
 ===
 
 - change the text in the _version.txt_ file.
-- change the setup program _outputFilename_ for each configuration, according to the new version.
+- change the setup program _version_ field.
 - put the content (programs, icon, license, etc.) in each of the nux32/nux64/win32 folders.
 - compile on each platform with the right project configuration.
+- run the _rpm.sh_ and the _deb.sh_ scripts.
