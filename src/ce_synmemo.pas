@@ -3164,7 +3164,7 @@ begin
 
   if fScrollPreview then
   begin
-    if (x > width - 40) and (x < width - 1) then
+    if (x > width - 40) and (x < width - 20) then
     begin;
       fScrollMemo.Visible:=true;
       fScrollMemo.goToLine(trunc((lines.Count / Height) * Y));
