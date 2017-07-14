@@ -256,7 +256,11 @@ constructor TCEMessagesOptions.Create(AOwner: TComponent);
 begin
   inherited;
   fFont := TFont.Create;
-  fAutoSelect:=true;
+  fFont.Style := [fsBold];
+  {$IFDEF WINDOWS}
+  fFont.name := 'Consolas';
+  {$ENDIF}
+  fAutoSelect :=true;
   fMaxCount := 1000;
   fMsgColors[amkBub] := $FCE7D2;
   fMsgColors[amkWarn]:= $B3FFFF;

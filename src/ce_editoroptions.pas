@@ -194,7 +194,7 @@ begin
   fPhobosDocRoot := 'https://dlang.org/phobos/';
   fFont := TFont.Create;
   {$IFDEF WINDOWS}
-  fFont.Name := 'Courier New';
+  fFont.Name := 'Consolas';
   {$ELSE}
   fFont.Name := 'DejaVu Sans Mono';
   {$ENDIF}
