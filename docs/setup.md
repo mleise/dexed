@@ -16,6 +16,7 @@ There are four ways to get the program:
 In all the cases, the _DMD_ D2 compiler must setup and its location has to match to one of the directory of the PATH environment variable.
 If it's not already installed, [download](http://dlang.org/download.html) and setup DMD2 for your platform.
 The latest Coedit version requires at least DMD 2.072.
+Note that DMD is only required for the _ddemangle_ tool otherwise the software can be fully used with only LDC or GDC as compiler.
 
 For each platform Coedit can be setup using a setup program or by extracting the binaries.
 
@@ -59,6 +60,13 @@ If they are not correctly set, for each of the following file **coedit**, **dcd-
 
 Are provided a _deb_ package (Debian and derived Ubuntu, Mint, etc) and a _rpm_ (Fedora, openSUSE), only for x86_64 (amd64).
 After the installation, you must also build [DCD](features_dcd).
+
+### Other OS-specific packages
+
+Maintained by volunteers and for specific operating systems:
+
+- [FreeBSD ports](http://www.freshports.org/editors/coedit/)
+- [ArchLinux AUR package](https://aur.archlinux.org/packages/coedit-bin/)
 
 ### First steps
 

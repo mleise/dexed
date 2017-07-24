@@ -8,7 +8,7 @@ Coedit is an IDE for the [D programming language](http://dlang.org), its compile
 
 **Overview**
 ---
-- available for _Windows_ or _Linux_.
+- available for _Linux_, FreeBSD or Windows.
 - supports all the D compilers (DMD-GDC-LDC).
 - supports the DUB projects (JSON + SDL) and also Coedit own project format.
 - support the DUB scripts (aka _single file packages_) and Coedit own script format (aka _runnable modules_).
@@ -48,6 +48,11 @@ The _setup.zip_ install to predefined locations so that the software can be run 
 The _deb_ and the _rpm_ are for those who prefer the official setup system for their linux systems.
 
 [**See this page**](http://bbasile.github.io/Coedit/setup.html) for more information about the setup.
+
+There is also 3rd part packages, maintained by volunteer, but the version that's available is not guaranteed to be the latest:
+
+- :package: [ports for FreeBSD](http://www.freshports.org/editors/coedit/)
+- :package: [AUR package for ArchLinux](https://aur.archlinux.org/packages/coedit-bin/)
 
 **Build**
 ---
