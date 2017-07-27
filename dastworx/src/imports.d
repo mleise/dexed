@@ -1,7 +1,7 @@
 module imports;
 
 import
-    std.stdio, std.algorithm, std.array, std.file;
+    std.stdio, std.algorithm, std.array, std.file, std.functional;
 import
     iz.memory;
 import
@@ -57,7 +57,7 @@ void listFilesImports(string[] files)
     {
         ubyte[] source = cast(ubyte[]) std.file.read(fname);
         Module mod = parseModule(getTokensForParser(source, config, &cache),
-            fname, &allocator, &ignoreErrors);
+            fname, &allocator, toDelegate(&ignoreErrors));
         if (mod.moduleDeclaration)
             writeln('"', mod.moduleDeclaration.moduleName.identifiers
                 .map!(a => a.text).join("."), '"');

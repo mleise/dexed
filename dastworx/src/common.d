@@ -370,11 +370,13 @@ unittest
  */
 T parseAndVisit(T : ASTVisitor)(const(char)[] source)
 {
+    import std.functional;
+
     RollbackAllocator allocator;
     LexerConfig config = LexerConfig("", StringBehavior.source, WhitespaceBehavior.skip);
     StringCache cache = StringCache(StringCache.defaultBucketCount);
     const(Token)[] tokens = getTokensForParser(cast(ubyte[]) source, config, &cache);
-    Module mod = parseModule(tokens, "", &allocator, &ignoreErrors);
+    Module mod = parseModule(tokens, "", &allocator, toDelegate(&ignoreErrors));
     T result = construct!(T);
     result.visit(mod);
     return result;

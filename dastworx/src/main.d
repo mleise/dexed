@@ -3,7 +3,7 @@ module dastworx;
 import
     core.memory;
 import
-    std.array, std.getopt, std.stdio, std.path, std.algorithm;
+    std.array, std.getopt, std.stdio, std.path, std.algorithm, std.functional;
 import
     iz.memory;
 import
@@ -15,7 +15,6 @@ import
 private __gshared int caretLine;
 private __gshared bool option1;
 private __gshared static Appender!(ubyte[]) source;
-private __gshared static Appender!(AstErrors) errors;
 private __gshared string[] files;
 
 // -o : deep visit the symbols
@@ -27,7 +26,6 @@ static this()
 {
     GC.disable;
     source.reserve(1024^^2);
-    errors.reserve(32);
 }
 
 void main(string[] args)
@@ -76,14 +74,25 @@ void handleSymListOption()
 {
     mixin(logCall);
 
+    static struct ErrorHandler
+    {
+        Appender!(AstErrors) _errors;
+
+        void handleErrors(string fname, size_t line, size_t col, string message, bool err)
+        {
+            _errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
+        }
+    }
+
+    ErrorHandler eh;
     RollbackAllocator alloc;
     StringCache cache = StringCache(StringCache.defaultBucketCount);
     LexerConfig config = LexerConfig("", StringBehavior.source);
 
     source.data
         .getTokensForParser(config, &cache)
-        .parseModule("", &alloc, &handleErrors)
-        .listSymbols(errors.data, deepSymList);
+        .parseModule("", &alloc, &eh.handleErrors)
+        .listSymbols(eh._errors.data, deepSymList);
 }
 
 /// Handles the "-t" option: create the list of todo comments in the output
@@ -110,7 +119,7 @@ void handleImportsOption()
 
         source.data
             .getTokensForParser(config, &cache)
-            .parseModule("", &alloc, &ignoreErrors)
+            .parseModule("", &alloc, toDelegate(&ignoreErrors))
             .listImports();
     }
 }
@@ -126,7 +135,7 @@ void handleMainfunOption()
 
     source.data
         .getTokensForParser(config, &cache)
-        .parseModule("", &alloc, &ignoreErrors)
+        .parseModule("", &alloc, toDelegate(&ignoreErrors))
         .detectMainFun();
 }
 
@@ -141,7 +150,7 @@ void handleHalsteadOption()
 
     source.data
         .getTokensForParser(config, &cache)
-        .parseModule("", &alloc, &ignoreErrors)
+        .parseModule("", &alloc, toDelegate(&ignoreErrors))
         .performHalsteadMetrics;
 }
 
@@ -156,14 +165,8 @@ void handleDdocTemplateOption()
 
     source.data
         .getTokensForParser(config, &cache)
-        .parseModule("", &alloc, &ignoreErrors)
+        .parseModule("", &alloc, toDelegate(&ignoreErrors))
         .getDdocTemplate(caretLine, plusComment);
-}
-
-private void handleErrors(string fname, size_t line, size_t col, string message,
-    bool err)
-{
-    errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
 }
 
 version(devel)
