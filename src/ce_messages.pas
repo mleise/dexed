@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
   EditBtn, lcltype, ce_widget, ActnList, Menus, clipbrd, AnchorDocking, math,
-  TreeFilterEdit, Buttons, GraphType, fgl,
+  TreeFilterEdit, Buttons, GraphType, fgl, strutils,
   ce_ddemangle, ce_writableComponent, ce_common, ce_synmemo, ce_interfaces,
   ce_observer, ce_sharedres, ce_stringrange, ce_dsgncontrols;
 
@@ -1016,7 +1016,7 @@ begin
     itm := List.Items.Item[i];
     if fFiltering then
       itm.Visible := itemShouldBeVisible(itm, aCtxt) and
-        itm.Text.Contains(TreeFilterEdit1.Filter)
+        AnsiContainsText(itm.Text, TreeFilterEdit1.Filter)
     else
       itm.Visible:= itemShouldBeVisible(itm, aCtxt);
     itm.Selected := false;
