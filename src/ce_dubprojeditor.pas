@@ -170,6 +170,7 @@ begin
     fEdName.Items.Add(proposals[i].name);
   fEdName.AutoComplete := true;
   fEdName.OnChange := @setSelFromProposal;
+  fEdName.OnSelect:= @setSelFromProposal;
   //
   fBtnValidate := TBitBtn.Create(self);
   fBtnValidate.Parent := layout;
