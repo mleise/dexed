@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, Forms, Controls, Graphics,
   Dialogs, ExtCtrls, Menus, StdCtrls, Buttons, ComCtrls, jsonparser, fpjson,
   ce_widget, ce_common, ce_interfaces, ce_observer, ce_dubproject, ce_sharedres,
-  ce_dsgncontrols;
+  ce_dsgncontrols, ce_dialogs;
 
 type
 
@@ -220,8 +220,13 @@ begin
       1: tpe := TJSONtype.jtObject;
       else tpe := TJSONtype.jtString;
     end;
-    fEvent(fEdName.Text, tpe);
-    Close;
+    if (tpe in [jtObject, jtString]) and (fEdName.Text = '') then
+      dlgOkError('This property requires a name')
+    else
+    begin
+      fEvent(fEdName.Text, tpe);
+      Close;
+    end;
   end;
 end;
 {$ENDREGION}
