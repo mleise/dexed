@@ -221,8 +221,8 @@ begin
       1: tpe := TJSONtype.jtObject;
       else tpe := TJSONtype.jtString;
     end;
-    if (tpe in [jtObject, jtString]) and (fEdName.Text = '') then
-      dlgOkError('This property requires a name')
+    if fEdName.Enabled and (fEdName.Text = '') then
+      dlgOkError('New properties require a name')
     else
     begin
       fEvent(fEdName.Text, tpe);
