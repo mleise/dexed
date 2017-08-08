@@ -712,8 +712,6 @@ var
   confs: TJSONArray;
 begin
   result := nil;
-  if fConfigIx = 0 then
-    exit;
   if fJSON.findArray('configurations', confs) and (fConfigIx < confs.Count) then
     result := confs.Objects[fConfigIx];
 end;
@@ -786,7 +784,7 @@ var
   item: TJSONData;
   conf: TJSONObject;
   arr: TJSONArray;
-  i, j: integer;
+  i{, j}: integer;
 procedure getExclusion(from: TJSONObject);
 var
   i: integer;
@@ -821,7 +819,7 @@ begin
 end;
 var
   pth: string;
-  glb: TRegExpr;
+  //glb: TRegExpr;
 begin
   fSrcs.Clear;
   if not assigned(fJSON) then
@@ -863,8 +861,9 @@ begin
       if conf.findArray('sourceFiles', arr) then for i := 0 to arr.Count-1 do
         tryAddRelOrAbsFile(arr.Strings[i]);
     end;
-    // exclusions
-    lst.Clear;
+    // exclusions : not managed anymore because of other IDE features that rely
+    // on the full list (scan TODOs, <CPFS>, search in project, etc)
+    {lst.Clear;
     getExclusion(fJSON);
       conf := getCurrentCustomConfig;
     if conf.isNotNil then
@@ -888,7 +887,7 @@ begin
       finally
         glb.Free;
       end;
-    end;
+    end;}
   finally
     lst.Free;
   end;
