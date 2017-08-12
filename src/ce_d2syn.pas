@@ -912,7 +912,7 @@ begin
       fTokKind:=tkAttri;
       while isAlNum(reader^) or (reader^ = '_') do
       begin
-        if reader^= #10 then
+        if (reader^= #10) or (reader^= '@') then
           exit;
         readerNext;
       end;
@@ -927,8 +927,9 @@ begin
     fTokKind := tkIdent;
     while(true) do
     begin
-      if isWhite(readerNext^) or isSymbol(reader^) or isOperator1(reader^) then
-        break;
+      if isWhite(readerNext^) or isSymbol(reader^) or isOperator1(reader^) or
+        (reader^ = '@') then
+          break;
     end;
     if keywordsMap.match(fLineBuf[FTokStart..fTokStop-1]) then
     begin
