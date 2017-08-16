@@ -2369,15 +2369,15 @@ procedure TCESynMemo.completionCodeCompletion(var value: string;
 begin
   if (KeyChar[1] = ' ') then
   begin
-    value := sourceValue + KeyChar;
+    value := sourceValue + KeyChar[1];
   end
   else
   begin
     fLastCompletion := value;
     if KeyChar[1] in fCloseCompletionCharsWithSpace then
-      value += ' ' + KeyChar
+      value += ' ' + KeyChar[1]
     else if KeyChar[1] in fCloseCompletionChars then
-      value += KeyChar;
+      value += KeyChar[1];
   end;
 end;
 
@@ -3099,9 +3099,9 @@ end;
 
 procedure TCESynMemo.UTF8KeyPress(var Key: TUTF8Char);
 var
-  c: TUTF8Char;
+  c: AnsiChar;
 begin
-  c := Key;
+  c := Key[1];
   inherited;
   fCanDscan := true;
   case c of
