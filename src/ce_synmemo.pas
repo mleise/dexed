@@ -3372,7 +3372,6 @@ end;
 
 procedure TCESynMemo.debugStop;
 begin
-  fDebugger := nil;
   removeDebugTimeMarks;
 end;
 

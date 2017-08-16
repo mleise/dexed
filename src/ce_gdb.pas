@@ -242,8 +242,8 @@ type
     destructor destroy; override;
     function count: integer;
     procedure clearFile(const fname: string);
-    procedure deleteItem(const fname: string; line: integer; kind: TBreakPointKind);
-    procedure addItem(const fname: string; line: integer; kind: TBreakPointKind);
+    function deleteItem(const fname: string; line: integer; kind: TBreakPointKind): boolean;
+    function addItem(const fname: string; line: integer; kind: TBreakPointKind): boolean;
     property item[index: integer]: TPersistentBreakPoint read getItem; default;
   end;
 
@@ -810,29 +810,33 @@ begin
   end;
 end;
 
-procedure TPersistentBreakPoints.addItem(const fname: string; line: integer; kind: TBreakPointKind);
+function TPersistentBreakPoints.addItem(const fname: string; line: integer; kind: TBreakPointKind): boolean;
 var
   b: TPersistentBreakPoint;
 begin
+  result := false;
   if not find(fname, line, kind) then
   begin
     b := TPersistentBreakPoint(fItems.Add);
     b.filename:=fname;
     b.line:=line;
     b.kind:=kind;
+    result := true;
   end;
 end;
 
-procedure TPersistentBreakPoints.deleteItem(const fname: string; line: integer; kind: TBreakPointKind);
+function TPersistentBreakPoints.deleteItem(const fname: string; line: integer; kind: TBreakPointKind): boolean;
 var
   i: integer;
   b: TPersistentBreakPoint;
 begin
+  result := false;
   for i := fItems.Count-1 downto 0 do
   begin
     b := item[i];
     if (b.filename = fname) and (b.line = line) and (b.kind = kind) then
     begin
+      result := true;
       fItems.Delete(i);
       break;
     end;
@@ -1483,10 +1487,11 @@ procedure TCEGdbWidget.addBreakPoint(const fname: string; line: integer;
   kind: TBreakPointKind = bpkBreak);
 var
   r: boolean;
+  a: boolean = false;
 begin
   if assigned(fBreakPoints) then
-    fBreakPoints.addItem(fname, line, kind);
-  if fGdb.isNil or not fGdb.Running then
+    a := fBreakPoints.addItem(fname, line, kind);
+  if not a or fGdb.isNil or not fGdb.Running then
     exit;
   r := fGdbState = gsRunning;
   if r then
@@ -1509,10 +1514,11 @@ procedure TCEGdbWidget.removeBreakPoint(const fname: string; line: integer;
   kind: TBreakPointKind = bpkBreak);
 var
   r: boolean;
+  d: boolean = false;
 begin
   if assigned(fBreakPoints) then
-    fBreakPoints.deleteItem(fname, line, kind);
-  if fGdb.isNil or not fGdb.Running then
+    d := fBreakPoints.deleteItem(fname, line, kind);
+  if not d or fGdb.isNil or not fGdb.Running then
     exit;
   r := fGdbState = gsRunning;
   if r then
