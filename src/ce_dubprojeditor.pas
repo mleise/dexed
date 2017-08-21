@@ -465,7 +465,7 @@ begin
   begin
     fProj.beginModification;
     arr := TJSONArray(prt);
-    arr.Insert(arr.Count-1, dat);
+    arr.Insert(arr.Count, dat);
     fProj.endModification;
   end
   else
