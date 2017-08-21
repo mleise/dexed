@@ -236,6 +236,7 @@ type
     fKnowsDscanner: boolean;
     fDscannerEnabled: boolean;
     fScrollPreview: boolean;
+    fDiffDialogWillClose: boolean;
     procedure showHintEvent(Sender: TObject; HintInfo: PHintInfo);
     procedure setGutterTransparent(value: boolean);
     procedure decCallTipsLvl;
@@ -2893,7 +2894,7 @@ var
   str: TStringList;
   txt: string;
 begin
-  if fDisableFileDateCheck then
+  if fDiffDialogWillClose or fDisableFileDateCheck then
     exit;
   if fFilename.isNotEmpty and not fFilename.fileExists and
     (fFilename <> '<new document>') then
@@ -2916,6 +2917,7 @@ begin
       if not MDMatch(curMd5, newMd5) then
       begin
         lines.SaveToFile(tempFilename);
+        fDiffDialogWillClose := true;
         With TCEDiffViewer.construct(fTempFileName, fFilename) do
         try
           mr := ShowModal;
@@ -2930,6 +2932,7 @@ begin
           end;
         finally
           free;
+          fDiffDialogWillClose := false;
         end;
       end;
     finally
