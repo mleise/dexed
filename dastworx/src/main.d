@@ -76,7 +76,7 @@ void handleSymListOption()
 
     static struct ErrorHandler
     {
-        Appender!(AstErrors) _errors;
+        static Appender!(AstErrors) _errors;
 
         void handleErrors(string fname, size_t line, size_t col, string message, bool err)
         {

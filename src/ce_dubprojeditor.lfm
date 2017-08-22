@@ -23,7 +23,6 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         Width = 399
         Align = alClient
         BorderSpacing.Around = 4
-        DefaultItemHeight = 16
         HideSelection = False
         Images = imgList
         ReadOnly = True
