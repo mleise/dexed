@@ -2368,17 +2368,18 @@ procedure TCESynMemo.completionCodeCompletion(var value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
 begin
-  if (KeyChar[1] = ' ') then
+  if KeyChar <> '' then
   begin
-    value := sourceValue + KeyChar[1];
-  end
-  else
-  begin
-    fLastCompletion := value;
-    if KeyChar[1] in fCloseCompletionCharsWithSpace then
-      value += ' ' + KeyChar[1]
-    else if KeyChar[1] in fCloseCompletionChars then
-      value += KeyChar[1];
+    if KeyChar[1] = ' ' then
+      value := sourceValue + KeyChar[1]
+    else
+    begin
+      fLastCompletion := value;
+      if KeyChar[1] in fCloseCompletionCharsWithSpace then
+        value += ' ' + KeyChar[1]
+      else if KeyChar[1] in fCloseCompletionChars then
+        value += KeyChar[1];
+    end;
   end;
 end;
 
