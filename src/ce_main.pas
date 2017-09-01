@@ -1418,13 +1418,6 @@ begin
   DockMaster.HeaderStyle := adhsPoints;
   DockMaster.HideHeaderCaptionFloatingControl := true;
 
-  // this is a fix (?) copied from Laz.
-  if DockManager is TAnchorDockManager then
-  begin
-    aManager:=TAnchorDockManager(DockManager);
-    aManager.PreferredSiteSizeAsSiteMinimum:=false;
-  end;
-
   // makes widget dockable
   for i := 0 to fWidgList.Count-1 do
   begin
