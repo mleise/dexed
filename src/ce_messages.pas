@@ -1057,7 +1057,12 @@ begin
   begin
     if rng.empty then
       break;
-    idt := rng.popUntil(alp)^.takeWhile(alp).yield;
+    idt := '';
+    // core|std.exception...
+    if rng.front = '.' then
+      rng.popFront^.popUntil(alp)
+    else
+      idt := rng.popUntil(alp)^.takeWhile(alp).yield;
     if idt = '' then
       exit;
     result := messageSemantic.getType(idt);
