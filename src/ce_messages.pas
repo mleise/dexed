@@ -1049,7 +1049,7 @@ var
   idt: string;
   rng: TStringRange = (ptr:nil; pos:0; len: 0);
 const
-  alp = ['a'..'z', 'A'..'Z'];
+  alp = ['a'..'z', 'A'..'Z', '_'];
 begin
   result := amkBub;
   rng.init(aMessg);
