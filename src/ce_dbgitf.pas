@@ -10,6 +10,7 @@ uses
 type
 
   TBreakPointKind = (
+    bpkNone,  // nothing
     bpkBreak, // break point
     bpkWatch  // watch point
   );
@@ -21,6 +22,7 @@ type
     function running: boolean;
     procedure addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind = bpkBreak);
     procedure removeBreakPoint(const fname: string; line: integer; kind: TBreakPointKind = bpkBreak);
+    procedure removeBreakPoints(const fname: string);
   end;
 
   // Enumerates th e reason why debuging breaks.
@@ -40,11 +42,6 @@ type
     procedure debugStart(debugger: ICEDebugger);
     // a debugging session terminates. Any pointer to a ICEDebugger becomes invalid.
     procedure debugStop;
-    // the debuger wants to know how many times debugQueryBreakPoints must be called.
-    function debugQueryBpCount: integer;
-    // the debuger wants breakpoints.
-    procedure debugQueryBreakPoint(const index: integer; out fname: string;
-      out line: integer; out kind: TBreakPointKind);
     // a break happens when code in fname at line is executed.
     procedure debugBreak(const fname: string; line: integer; reason: TCEDebugBreakReason);
     // debugging continue

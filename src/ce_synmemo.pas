@@ -82,8 +82,6 @@ type
     fFontSize: Integer;
     fSourceFilename: string;
     procedure setFolds(someFolds: TCollection);
-    procedure writeBreakpoints(str: TStream);
-    procedure readBreakpoints(str: TStream);
   published
     property caretPosition: Integer read fCaretPosition write fCaretPosition;
     property sourceFilename: string read fSourceFilename write fSourceFilename;
@@ -93,8 +91,6 @@ type
   public
     constructor create(aComponent: TComponent); override;
     destructor destroy; override;
-    procedure DefineProperties(Filer: TFiler); override;
-    //
     procedure beforeSave; override;
     procedure afterLoad; override;
     procedure save;
@@ -204,7 +200,6 @@ type
     fD2Highlighter: TSynD2Syn;
     fTxtHighlighter: TSynTxtSyn;
     fImages: TImageList;
-    fBreakPoints: TFPList;
     fMatchSelectionOpts: TSynSearchOptions;
     fMatchIdentOpts: TSynSearchOptions;
     fMatchOpts: TIdentifierMatchOptions;
@@ -282,18 +277,15 @@ type
     procedure patchClipboardIndentation;
     //
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
-    procedure addBreakPoint(line: integer);
-    procedure removeBreakPoint(line: integer);
     procedure removeDebugTimeMarks;
     function  findBreakPoint(line: integer): boolean;
     procedure debugStart(debugger: ICEDebugger);
     procedure debugStop;
     procedure debugContinue;
     function debugQueryBpCount: integer;
-    procedure debugQueryBreakPoint(const index: integer; out fname: string; out line: integer; out kind: TBreakPointKind);
+    procedure debugQueryBreakPoint(const line: integer; out fname: string; out kind: TBreakPointKind);
     procedure debugBreak(const fname: string; line: integer; reason: TCEDebugBreakReason);
     function breakPointsCount: integer;
-    function breakPointLine(index: integer): integer;
   protected
     procedure DoEnter; override;
     procedure DoExit; override;
@@ -322,6 +314,8 @@ type
     procedure save;
     procedure saveTempFile;
     //
+    procedure addBreakPoint(line: integer);
+    procedure removeBreakPoint(line: integer);
     procedure curlyBraceCloseAndIndent;
     procedure insertLeadingDDocSymbol(c: char);
     procedure commentSelection;
@@ -576,40 +570,9 @@ begin
   inherited;
 end;
 
-procedure TCESynMemoCache.DefineProperties(Filer: TFiler);
-begin
-  inherited;
-  Filer.DefineBinaryProperty('breakpoints', @readBreakpoints, @writeBreakpoints, true);
-end;
-
 procedure TCESynMemoCache.setFolds(someFolds: TCollection);
 begin
   fFolds.Assign(someFolds);
-end;
-
-procedure TCESynMemoCache.writeBreakpoints(str: TStream);
-var
-  i: integer;
-begin
-  if fMemo.isNil then exit;
-  {$HINTS OFF}
-  for i:= 0 to fMemo.fBreakPoints.Count-1 do
-    str.Write(PtrUint(fMemo.fBreakPoints.Items[i]), sizeOf(PtrUint));
-  {$HINTS ON}
-end;
-
-procedure TCESynMemoCache.readBreakpoints(str: TStream);
-var
-  i, cnt: integer;
-  line: ptrUint = 0;
-begin
-  if fMemo.isNil then exit;
-  cnt := str.Size div sizeOf(PtrUint);
-  for i := 0 to cnt-1 do
-  begin
-    str.Read(line, sizeOf(line));
-    fMemo.addBreakPoint(line);
-  end;
 end;
 
 procedure TCESynMemoCache.beforeSave;
@@ -941,7 +904,6 @@ begin
   fImages.AddResourceName(HINSTANCE, 'STEP');
   fImages.AddResourceName(HINSTANCE, 'CAMERA_GO');
   fImages.AddResourceName(HINSTANCE, 'WARNING');
-  fBreakPoints := TFPList.Create;
 
   fPositions := TCESynMemoPositions.create(self);
   fMultiDocSubject := TCEMultiDocSubject.create;
@@ -978,7 +940,6 @@ begin
   fMultiDocSubject.Free;
   fPositions.Free;
   fCompletion.Free;
-  fBreakPoints.Free;
   fCallTipStrings.Free;
   fLexToks.Clear;
   fLexToks.Free;
@@ -3237,17 +3198,12 @@ end;
 
 {$REGION debugging/breakpoints -----------------------------------------------------------}
 function TCESynMemo.breakPointsCount: integer;
+var
+  i: integer;
 begin
-  exit(fBreakPoints.Count);
-end;
-
-function TCESynMemo.BreakPointLine(index: integer): integer;
-begin
-  if index >= fBreakPoints.Count then
-    exit(0);
-  {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
-  exit(Integer(fBreakPoints.Items[index]));
-  {$POP}
+  result := 0;
+  for i := 0 to marks.count-1 do
+    result += byte(marks[i].ImageIndex = integer(giBreakSet));
 end;
 
 procedure TCESynMemo.addBreakPoint(line: integer);
@@ -3255,9 +3211,6 @@ begin
   if findBreakPoint(line) then
     exit;
   addGutterIcon(line, giBreakSet);
-  {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
-  fBreakPoints.Add(pointer(line));
-  {$POP}
   if assigned(fDebugger) then
     fDebugger.addBreakPoint(fFilename, line, bpkBreak);
 end;
@@ -3267,9 +3220,6 @@ begin
   if not findBreakPoint(line) then
     exit;
   removeGutterIcon(line, giBreakSet);
-  {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
-  fBreakPoints.Remove(pointer(line));
-  {$POP}
   if assigned(fDebugger) then
     fDebugger.removeBreakPoint(fFilename, line);
 end;
@@ -3308,10 +3258,17 @@ begin
 end;
 
 function TCESynMemo.findBreakPoint(line: integer): boolean;
+var
+  m: TSynEditMarkLine;
+  i: integer;
 begin
-  {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
-  exit(fBreakPoints.IndexOf(pointer(line)) <> -1);
-  {$POP}
+  result := false;
+  if line <= lines.count then
+    m := marks.Line[line];
+  if m.isNotNil then
+    for i := 0 to m.count - 1 do
+      if m[i].ImageIndex = integer(giBreakSet) then
+        exit(true);
 end;
 
 procedure TCESynMemo.gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
@@ -3370,8 +3327,18 @@ begin
 end;
 
 procedure TCESynMemo.debugStart(debugger: ICEDebugger);
+var
+  i: integer;
+  m: TSynEditMark;
 begin
   fDebugger := debugger;
+  fDebugger.removeBreakPoints(fileName);
+  for i := 0 to marks.count - 1 do
+  begin
+    m := marks[i];
+    if m.ImageIndex = integer(giBreakSet) then
+      fDebugger.addBreakPoint(filename, m.line, bpkBreak);
+  end;
 end;
 
 procedure TCESynMemo.debugStop;
@@ -3386,15 +3353,17 @@ end;
 
 function TCESynMemo.debugQueryBpCount: integer;
 begin
-  exit(fBreakPoints.Count);
+  exit(breakPointsCount());
 end;
 
-procedure TCESynMemo.debugQueryBreakPoint(const index: integer; out fname: string;
-  out line: integer; out kind: TBreakPointKind);
+procedure TCESynMemo.debugQueryBreakPoint(const line: integer; out fname: string; out kind: TBreakPointKind);
 begin
-  fname:= fFilename;
-  line := breakPointLine(index);
-  kind := bpkBreak;
+  if findBreakPoint(line) then
+  begin
+    fname:= fFilename;
+    kind := bpkBreak;
+  end
+  else kind := bpkNone;
 end;
 
 procedure TCESynMemo.debugBreak(const fname: string; line: integer;

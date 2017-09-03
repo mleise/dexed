@@ -444,6 +444,8 @@ type
   protected
     procedure setToolBarFlat(value: boolean); override;
   private
+    fSynchronizedDocuments: TStringList;
+    fSynchronizingBreakpoints: boolean;
     fSyms: ICESymStringExpander;
     fExe: string;
     fOutputName: string;
@@ -485,9 +487,7 @@ type
     procedure updateButtonsState;
     procedure startDebugging;
     procedure killGdb;
-    procedure storeObserversBreakpoints;
     procedure updateDebugeeOptionsEditor;
-    procedure synchronizeBreakpointsFromDoc;
     procedure deleteRedirectedIO;
     // GDB output processors
     procedure gdboutQuiet(sender: TObject);
@@ -525,6 +525,7 @@ type
       kind: TBreakPointKind = bpkBReak);
     procedure removeBreakPoint(const fname: string; line: integer;
       kind: TBreakPointKind = bpkBreak);
+    procedure removeBreakPoints(const fname: string);
     procedure executeFromShortcut(sender: TObject);
   public
     constructor create(aOwner: TComponent); override;
@@ -1173,6 +1174,7 @@ begin
   Edit1.Items.Assign(fOptions.commandsHistory);
   fAddWatchPointKind := wpkWrite;
   fBreakPoints := TPersistentBreakPoints.create(self);
+  fSynchronizedDocuments := TStringList.Create;
 
   TCEListViewCopyMenu.create(lstCallStack);
   TCEListViewCopyMenu.create(lstAsm);
@@ -1195,6 +1197,7 @@ begin
   fInspState.Free;
   fJson.Free;
   fStackItems.Free;
+  fSynchronizedDocuments.Free;
   EntitiesConnector.removeObserver(self);
   fSubj.free;
   inherited;
@@ -1406,11 +1409,22 @@ begin
 end;
 
 procedure TCEGdbWidget.docFocused(document: TCESynMemo);
+var
+  i: integer;
+  b: TPersistentBreakPoint;
 begin
   fDoc := document;
   if fGdbState = gsNone then
     updateDebugeeOptionsEditor;
-  synchronizeBreakpointsFromDoc;
+  fSynchronizingBreakpoints:= true;
+  if fSynchronizedDocuments.IndexOf(document.fileName) = -1 then
+    for i:= 0 to fBreakPoints.count-1 do
+  begin
+    b := fBreakPoints.item[i];
+    if b.filename = fDoc.fileName then
+      fDoc.addBreakpoint(b.line);
+  end;
+  fSynchronizingBreakpoints:= false;
 end;
 
 procedure TCEGdbWidget.docChanged(document: TCESynMemo);
@@ -1418,9 +1432,14 @@ begin
 end;
 
 procedure TCEGdbWidget.docClosing(document: TCESynMemo);
+var
+  i: integer;
 begin
   if fDoc <> document then
     exit;
+  i := fSynchronizedDocuments.IndexOf(fDoc.fileName);
+  if i <> -1 then
+    fSynchronizedDocuments.delete(i);
   fDoc := nil;
   if fGdbState = gsNone then
     updateDebugeeOptionsEditor;
@@ -1451,25 +1470,6 @@ begin
   updateDebugeeOptionsEditor;
 end;
 
-procedure TCEGdbWidget.storeObserversBreakpoints;
-var
-  i,j: integer;
-  obs: ICEDebugObserver;
-  nme: string;
-  lne: integer;
-  knd: TBreakPointKind;
-begin
-  for i:= 0 to fSubj.observersCount-1 do
-  begin
-    obs := fSubj.observers[i] as ICEDebugObserver;
-    for j := 0 to obs.debugQueryBpCount-1 do
-    begin
-      obs.debugQueryBreakPoint(j, nme, lne, knd);
-      fBreakPoints.addItem(nme, lne, knd);
-    end;
-  end;
-end;
-
 procedure TCEGdbWidget.waitCommandProcessed;
 var
   i: integer = 0;
@@ -1489,6 +1489,8 @@ var
   r: boolean;
   a: boolean = false;
 begin
+  if fSynchronizingBreakpoints then
+    exit;
   if assigned(fBreakPoints) then
     a := fBreakPoints.addItem(fname, line, kind);
   if not a or fGdb.isNil or not fGdb.Running then
@@ -1535,6 +1537,11 @@ begin
     gdbCommand('-exec-continue --all', @gdboutJsonize);
     fSilentPause := false;
   end;
+end;
+
+procedure TCEGdbWidget.removeBreakPoints(const fname: string);
+begin
+  fBreakPoints.clearFile(fname);
 end;
 
 procedure TCEGdbWidget.setState(value: TGdbState);
@@ -1713,7 +1720,6 @@ begin
   fGdb.OnTerminate:= @gdboutJsonize;
   fgdb.execute;
   // file:line breakpoints
-  storeObserversBreakpoints;
   for i:= 0 to fBreakPoints.Count-1 do
   begin
     b := fBreakPoints[i];
@@ -1804,46 +1810,6 @@ begin
     opt := fDebugeeOptions.projectByFile[nme];
     dbgeeOptsEd.TIObject := opt;
   end;
-end;
-
-procedure TCEGdbWidget.synchronizeBreakpointsFromDoc;
-var
-  i: integer;
-  c: integer;
-  j: integer;
-  l: integer;
-  k: TBreakPointKind;
-  s: string;
-  b: boolean;
-  f: ICEDebugObserver;
-begin
-  if fDoc.isNil then
-    exit;
-  f := fDoc as ICEDebugObserver;
-  if not assigned(f) then
-    exit;
-  c :=  f.debugQueryBpCount;
-  if c <> 0 then
-  begin
-    for i := fBreakPoints.count-1 downto 0 do
-    begin
-      b := false;
-      if not (fBreakPoints[i].filename = fDoc.fileName) then
-        continue;
-      for j := 0 to c-1 do
-      begin
-        f.debugQueryBreakPoint(j, s, l, k);
-        if l = fBreakPoints[i].line then
-        begin
-          b := true;
-          break;
-        end;
-      end;
-      if not b then
-        fBreakPoints.items.Delete(i);
-    end;
-  end
-  else fBreakPoints.clearFile(fDoc.fileName);
 end;
 
 procedure TCEGdbWidget.deleteRedirectedIO;
@@ -2043,9 +2009,7 @@ begin
       // internal gdb messages
       '&':
       begin
-        rng.popUntil(#10);
-        if not rng.empty then
-          rng.popFront;
+        parseCLI(json, rng.popFront);
       end;
       // async notify / status / out stream when remote (@)
       '=', '+','@':
@@ -2243,6 +2207,7 @@ begin
       subjDebugStop(fSubj);
       deleteRedirectedIO;
       updateDebugeeOptionsEditor;
+      killGdb;
     end;
   end;
 
@@ -2428,7 +2393,7 @@ begin
     fShowFromCustomCommand := false;
     if fJson.findArray('CLI', arr) then
       for i := 0 to arr.Count-1 do
-        fMsg.message(arr.Strings[i], nil, amcMisc, amkBub);
+        fMsg.message(arr.Strings[i], nil, amcMisc, amkAuto);
   end;
 
 end;
@@ -2518,7 +2483,7 @@ end;
 
 procedure TCEGdbWidget.infoVariables;
 begin
-  gdbCommand('-stack-list-variables --skip-unavailable --simple-values');
+  gdbCommand('-stack-list-variables --skip-unavailable --all-values');
 end;
 
 procedure TCEGdbWidget.infoThreads;
@@ -2604,6 +2569,7 @@ begin
   setState(gsNone);
   deleteRedirectedIO;
   updateDebugeeOptionsEditor;
+  killGdb;
 end;
 
 procedure TCEGdbWidget.btnWatchClick(Sender: TObject);
