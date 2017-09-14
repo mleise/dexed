@@ -248,7 +248,7 @@ begin
     else
     begin
       result := lst[0];
-      if FilenameIsAbsolute(result) then
+      if not FilenameIsAbsolute(result) then
         result := expandFilenameEx(GetCurrentDir, result);
     end;
     // Use common directory
