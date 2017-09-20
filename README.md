@@ -14,14 +14,14 @@ Coedit is an IDE for the [D programming language](http://dlang.org), its compile
 - support the DUB scripts (aka _single file packages_) and Coedit own script format (aka _runnable modules_).
 - full [D Completion Daemon](https://github.com/dlang-community/DCD) integration (completion, ddoc display, call tips, jump to declaration, rename identifier).
 - Dynamic [D-Scanner](https://github.com/dlang-community/D-Scanner) linting with results displayed in the editor gutter.
-- single click to compile and to _unittest_ a module.
+- single click to compile and to _unittest_ a module and optionally display tests coverage.
 - advanced editor with D2 syntax highlighter, folds, regions, identifier markup, macros, sync-edit, etc.
 - edition helpers: comment blocks, local identifier renaming, brace auto-closing, ddoc templates, etc.
-- Explorable list of symbols of the current module.
+- Tree of symbols in the current module.
 - static libraries manager that supports auto-registration from local DUB projects, from online DUB packages or from Coedit custom project format.
 - todo list based on the _todo comments_ located in a project or in the current source.
 - user-defined tools powered by a string interpolation system.
-- mini file browser, dfmt interface, search & replace, [discover more in the manual](http://bbasile.github.io/Coedit/).
+- integrated file browser, dfmt interface, search & replace, [discover more in the manual](http://bbasile.github.io/Coedit/).
 
 **Project information**
 ---
@@ -49,7 +49,7 @@ The _deb_ and the _rpm_ are for those who prefer the official setup system for t
 
 [**See this page**](http://bbasile.github.io/Coedit/setup.html) for more information about the setup.
 
-There is also 3rd part packages, maintained by volunteer, but the version that's available is not guaranteed to be the latest:
+There is also 3rd part packages, maintained by volunteers, but the version that's available is not guaranteed to be the latest:
 
 - :package: [ports for FreeBSD](http://www.freshports.org/editors/coedit/)
 - :package: [AUR package for ArchLinux](https://aur.archlinux.org/packages/coedit-bin/)
