@@ -9,6 +9,7 @@ title: Widgets - CE project editor
 ### Coedit project editor
 
 The widget is used to edit the properties of a project that has the CE (Coedit) format.
+It's no recommended to use this format anymore.
 
 ![](img/ce_project_editor.png)
 

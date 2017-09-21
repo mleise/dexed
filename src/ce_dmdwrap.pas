@@ -1369,7 +1369,6 @@ end;
 
 procedure TCustomProcOptions.setProcess(var process: TProcess);
 begin
-  //TODO-cNativeProjects: adapt TCustomProcOptions.setProcess to base/override system
   process.Parameters.Clear;
   process.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
   process.Executable := fExecutable;
