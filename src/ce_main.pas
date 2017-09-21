@@ -1409,7 +1409,6 @@ procedure TCEMainForm.InitDocking;
 var
   i: Integer;
   widg: TCEWidget;
-  aManager: TAnchorDockManager;
   topsite : TControl;
   topsplt : TAnchorDockSplitter;
 begin
@@ -1906,6 +1905,7 @@ begin
 
   if chang then
   begin
+    BringToFront;
     if projs.isEmpty then
       projs := '(no modified projects)'#10;
     if files.isEmpty then
