@@ -76,7 +76,7 @@ Note that the action _Run file unittest_ is based on the same internal function 
 ![](img/options_runnables.png)
 
 - **alwaysToFolder**: deprecated, checked meant **outputFolderCondition** set to [ifSaved, ifInProject], and [ifInProject] otherwise.
-- **compiler**: Select the [compiler](options_compilers_paths) used to produce the runnable binary. When GDC or LDC is selected their bridges based on DMD command line interface are used (GDMD and LDMD). This setting is also used when a DUB script is compiled (see [file menu](Run DUB single file package)).
+- **compiler**: Select the [compiler](options_compilers_paths) used to produce the runnable binary. When GDC or LDC is selected their bridges based on DMD command line interface are used (GDMD and LDMD). This setting is also used when a DUB script is compiled (see [Run DUB single file package](menu_file)).
 - **detectLibraries**: When checked the static libraries used by the runnable are detected from the [library manager](widgets_library_manager) by performing import analysis. When unchecked, all the library manager entries are passed and the compiler does the selection.
 - **detectMain**: When checked the `main()` function is detected automatically and the `-main` switch is set accordingly. When not checked `-main` is never passed. This options is useful with the **Run file unittests** action because it allows to test a module that's also a valid program.
 - **outputFolder**: Defines a folder where the runnable binary is output. If the value starts by a drive letter or a directory separator then the folder must exist, otherwise it's considered as a subfolder, relative to the runnable filename, which is created automatically.
