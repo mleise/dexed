@@ -13,7 +13,7 @@ This category exposes the DUB options that are passed to the build tool each tim
 ![](img/options_dub_build.png)
 
 - **combined**: If checked, tries to build the whole project in a single compiler run.
-- **compiler**: Selects [which compiler](options_compilers_paths) is used by DUB.
+- **compiler**: Selects [which compiler](options_compilers_paths) is used by DUB when a project is compiled. Note that the DUB scripts don't use this setting, instead the same preference set for the [runnable modules](features_runnables) is used.
 - **dependenciesCheck**: Defines how DUB checks the project dependencies, typically used to avoid too much network operations.
 - **forceRebuild**: Forces a full recompilation, even if DUB determines that this would not be necessary.
 - **linkMode**: Specifies the way the compiler and linker are invoked.

@@ -2980,7 +2980,7 @@ begin
   else
     fDoc.saveTempFile;
   fRunProc.Executable:= exeFullName('dub' + exeExt);
-  fRunProc.Parameters.Add(fDoc.fileName);
+  fRunProc.Parameters.Add('--single');
   if not outside then
   begin
 	  fRunProc.Options := [poStderrToOutPut, poUsePipes];
@@ -2998,6 +2998,7 @@ begin
   if fRunnablesOptions.compiler <> dmd then
     fRunProc.Parameters.add('--compiler=' +
       fCompilerSelector.getCompilerPath(fRunnablesOptions.compiler));
+  fRunProc.Parameters.Add(fDoc.fileName);
   fRunProc.execute;
 end;
 
