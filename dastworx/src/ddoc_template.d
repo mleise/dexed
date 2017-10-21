@@ -26,6 +26,7 @@ private:
     immutable int _caretline;
     immutable char c1;
     immutable char[2] c2;
+    bool _throws;
 
 public:
 
@@ -36,15 +37,28 @@ public:
         c2 = plusComment ? "++" : "**";
     }
 
+    override void visit(const(ThrowStatement) ts)
+    {
+        _throws = true;
+    }
+
+    override void visit(const(Catch) c)
+    {
+        _throws = false;
+    }
+
     override void visit(const(FunctionDeclaration) decl)
     {
+        _throws = false;
         if (decl.name.line == _caretline)
         {
-            writeln("/", c2, "\n ", c1, " <short description> \n ", c1, " \n ", c1, " <detailed description>\n ", c1);
+            decl.accept(this);
+            writeln("/", c2, "\n ", c1, " <short description> \n ", c1, " \n ", c1, " <detailed description>", c1);
 
-            if (decl.templateParameters || decl.parameters)
+            if ((decl.templateParameters && decl.templateParameters.templateParameterList && decl.templateParameters.templateParameterList.items.length) ||
+                (decl.parameters && decl.parameters.parameters.length))
             {
-                writeln(" ", c1, " Params:");
+                writeln(" ", c1, " \n ", c1, " Params:");
 
                 if (decl.templateParameters && decl.templateParameters.templateParameterList)
                 {
@@ -80,12 +94,16 @@ public:
                         writeln(" ", c1, " \n ", c1, " Returns: <return description>");
             }
 
+            if (_throws)
+            {
+                writeln(" ", c1, " \n ", c1, " Throws: <exception type as hint for catch>");
+            }
+
             writeln(" ", c1, "/");
 
         }
         else if (decl.name.line > _caretline)
             return;
-        decl.accept(this);
     }
 
     override void visit(const(TemplateDeclaration) decl)
@@ -124,28 +142,25 @@ public:
 
         if (_caretline == line)
         {
-            writeln("/", c2, "\n ", c1, " <short description> \n ", c1, " \n ", c1, " <detailed description>\n ", c1);
+            writeln("/", c2, "\n ", c1, " <short description> \n ", c1, " \n ", c1, " <detailed description>", c1);
 
-            if (decl.templateParameters)
+            if (decl.templateParameters && decl.templateParameters.templateParameterList &&
+                    decl.templateParameters.templateParameterList.items.length)
             {
-                writeln(" ", c1, " Params:");
+                writeln(" ", c1, " \n ", c1, " Params:");
 
-                if (decl.templateParameters && decl.templateParameters.templateParameterList)
+                foreach(const TemplateParameter p;  decl.templateParameters
+                                                        .templateParameterList.items)
                 {
-                    foreach(const TemplateParameter p;  decl.templateParameters
-                                                            .templateParameterList.items)
-                    {
-                        if (p.templateAliasParameter)
-                            writeln(" ", c1, "     ", p.templateAliasParameter.identifier.text, " = <description>");
-                        else if (p.templateTupleParameter)
-                            writeln(" ", c1, "     ", p.templateTupleParameter.identifier.text, " = <description>");
-                        else if (p.templateTypeParameter)
-                            writeln(" ", c1, "     ", p.templateTypeParameter.identifier.text, " = <description>");
-                        else if (p.templateValueParameter)
-                            writeln(" ", c1, "     ", p.templateValueParameter.identifier.text, " = <description>");
-                    }
+                    if (p.templateAliasParameter)
+                        writeln(" ", c1, "     ", p.templateAliasParameter.identifier.text, " = <description>");
+                    else if (p.templateTupleParameter)
+                        writeln(" ", c1, "     ", p.templateTupleParameter.identifier.text, " = <description>");
+                    else if (p.templateTypeParameter)
+                        writeln(" ", c1, "     ", p.templateTypeParameter.identifier.text, " = <description>");
+                    else if (p.templateValueParameter)
+                        writeln(" ", c1, "     ", p.templateValueParameter.identifier.text, " = <description>");
                 }
-
             }
             writeln(" ", c1, "/");
 
