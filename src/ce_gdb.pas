@@ -1754,9 +1754,9 @@ begin
   gdbCommand('break _d_switch_error');
   gdbCommand('-gdb-set mi-async on');
   if not fOptions.stopAllThreadsOnBreak then
-    gdbCommand('-gdb-set non-stop on')
+    gdbCommand('-gdb-set non-stop off')
   else
-    gdbCommand('-gdb-set non-stop off');
+    gdbCommand('-gdb-set non-stop on');
   fGdb.OnReadData := @gdboutJsonize;
   cpuViewer.TIObject := fInspState;
   cpuViewer.RefreshPropertyValues;
