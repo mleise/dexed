@@ -525,7 +525,7 @@ begin
         and (TJSONObject(prj.json).Find('targetType').AsString = 'sourceLibrary')
       then
       begin
-        if ovw and not List.items.findCaption(nme, row) then
+        if (ovw and not List.items.findCaption(nme, row)) or not ovw then
           row := List.Items.Add;
         if row.Data.isNil then
           row.Data := LibMan.libraries.Add;
@@ -558,7 +558,7 @@ begin
     prj.loadFromFile(dfn);
     if prj.filename.isNotEmpty and (prj.binaryKind = staticlib) then
     begin
-      if ovw and not List.items.findCaption(nme, row) then
+      if (ovw and not List.items.findCaption(nme, row)) or not ovw then
         row := List.Items.Add;
       if row.Data.isNil then
         row.Data := LibMan.libraries.Add;
