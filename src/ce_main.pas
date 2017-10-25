@@ -109,6 +109,7 @@ type
     actFileMetricsHalstead: TAction;
     actFileCloseAllOthers: TAction;
     actFileCloseAll: TAction;
+    actLayoutReset: TAction;
     actProjDscan: TAction;
     actProjGroupCompileCustomSync: TAction;
     actProjGroupClose: TAction;
@@ -275,6 +276,7 @@ type
     procedure actFileRunExecute(Sender: TObject);
     procedure actFileRunOutExecute(Sender: TObject);
     procedure actFileSaveCopyAsExecute(Sender: TObject);
+    procedure actLayoutResetExecute(Sender: TObject);
     procedure actNewGroupExecute(Sender: TObject);
     procedure actProjAddToGroupExecute(Sender: TObject);
     procedure actProjDscanExecute(Sender: TObject);
@@ -430,7 +432,8 @@ type
     procedure getCMdParams;
     procedure InitMRUs;
     procedure InitWidgets;
-    procedure InitDocking;
+    procedure InitDocking(reset: boolean = false);
+    procedure DefaultDocking;
     procedure InitOptionsMenu;
     procedure LoadSettings;
     procedure SaveSettings;
@@ -1405,36 +1408,69 @@ begin
   setSplitterWheelEvent;
 end;
 
-procedure TCEMainForm.InitDocking;
+procedure TCEMainForm.InitDocking(reset: boolean = false);
 var
   i: Integer;
   widg: TCEWidget;
   topsite : TControl;
   topsplt : TAnchorDockSplitter;
 begin
-  DockMaster.MakeDockSite(Self, [akBottom], admrpChild);
-  DockMaster.OnShowOptions := @ShowAnchorDockOptions;
-  DockMaster.HeaderStyle := adhsPoints;
-  DockMaster.HideHeaderCaptionFloatingControl := true;
 
-  // makes widget dockable
-  for i := 0 to fWidgList.Count-1 do
+  if not reset then
   begin
-    widg := fWidgList.widget[i];
-    if not widg.isDockable then continue;
-    DockMaster.MakeDockable(widg, true);
-    DockMaster.GetAnchorSite(widg).Header.HeaderPosition := adlhpTop;
-    widg.onDockingChanged:= @widgetDockingChanged;
+    DockMaster.MakeDockSite(Self, [akBottom], admrpChild);
+    DockMaster.OnShowOptions := @ShowAnchorDockOptions;
+    DockMaster.HeaderStyle := adhsPoints;
+    DockMaster.HideHeaderCaptionFloatingControl := true;
+    // makes widget dockable
+    for i := 0 to fWidgList.Count-1 do
+    begin
+      widg := fWidgList.widget[i];
+      if not widg.isDockable then continue;
+      DockMaster.MakeDockable(widg, true);
+      DockMaster.GetAnchorSite(widg).Header.HeaderPosition := adlhpTop;
+      widg.onDockingChanged:= @widgetDockingChanged;
+    end;
   end;
 
   // load existing or default docking
-  if FileExists(getCoeditDocPath + 'docking.xml') and LoadDocking() then
+  if not reset and FileExists(getCoeditDocPath + 'docking.xml') and LoadDocking() then
   begin end
   else
   begin
-    Height := 0;
+
+    if reset then
+    begin
+      for i := 0 to fWidgList.Count-1 do
+      begin
+        widg := fWidgList.widget[i];
+        if not widg.isDockable then
+          continue;
+        if not widg.Visible then
+          continue;
+        if widg = fEditWidg then
+          continue;
+        if DockMaster.GetAnchorSite(widg).isNotNil then
+          DockMaster.GetAnchorSite(widg).ManualFloat(widg.ClientRect, false);
+      end;
+    end;
+
+    if not reset then
+    begin
+      Height := 0;
+    end
+    else
+    begin
+      if WindowState = wsMaximized then
+        WindowState:= wsNormal;
+      Height := 600;
+      Width  := 800;
+    end;
+
     // center
-    DockMaster.ManualDock(DockMaster.GetAnchorSite(fEditWidg), DockMaster.GetSite(Self), alBottom);
+    if not reset then
+      DockMaster.ManualDock(DockMaster.GetAnchorSite(fEditWidg), DockMaster.GetSite(Self), alBottom);
+
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fMesgWidg), DockMaster.GetSite(fEditWidg), alBottom);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fLibMWidg), DockMaster.GetSite(fMesgWidg), alClient, fMesgWidg);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fTodolWidg), DockMaster.GetSite(fMesgWidg), alClient, fMesgWidg);
@@ -1486,6 +1522,11 @@ begin
     topsplt.MoveSplitter(-500);
     topsplt.OnCanOffset:= @LockTopWindow;
   end;
+end;
+
+procedure TCEMainForm.DefaultDocking;
+begin
+
 end;
 
 procedure TCEMainForm.LoadSettings;
@@ -2412,6 +2453,12 @@ begin
     free;
   end;
 end;
+
+procedure TCEMainForm.actLayoutResetExecute(Sender: TObject);
+begin
+  InitDocking(true);
+end;
+
 {$ENDREGION}
 
 {$REGION edit ------------------------------------------------------------------}
@@ -3205,6 +3252,10 @@ var
   itm: TMenuItem;
   i: integer;
 begin
+  itm := TMenuItem.Create(self);
+  itm.Action := actLayoutReset;
+  mnuLayout.Add(itm);
+
   itm := TMenuItem.Create(self);
   itm.Action := actLayoutSave;
   mnuLayout.Add(itm);
