@@ -376,7 +376,7 @@ procedure TCESearchWidget.actFindNextExecute(sender: TObject);
 begin
   if fDoc.isNil then exit;
   //
-  fSearchMru.Insert(0,fToFind);
+  fSearchMru.Insert(0, fToFind);
   cbToFind.Items.Assign(fSearchMru);
   //
   if not chkFromCur.Checked then
@@ -386,7 +386,7 @@ begin
     else
     begin
       if not fHasRestarted then
-        fDoc.CaretXY := Point(0,0);
+        fDoc.CaretXY := Point(1,1);
       fHasRestarted := true;
     end;
   end
@@ -395,7 +395,7 @@ begin
     if chkBack.Checked then
       fDoc.CaretX := fDoc.CaretX - 1
     else
-      fDoc.CaretX := fDoc.CaretX + fToFind.length;
+      fDoc.CaretX := fDoc.CaretX + 1;
   end;
   if fDoc.SearchReplace(fToFind, '', getOptions) = 0 then
     dlgOkInfo('the expression cannot be found')
