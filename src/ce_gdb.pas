@@ -1416,15 +1416,21 @@ begin
   fDoc := document;
   if fGdbState = gsNone then
     updateDebugeeOptionsEditor;
-  fSynchronizingBreakpoints:= true;
-  if fSynchronizedDocuments.IndexOf(document.fileName) = -1 then
-    for i:= 0 to fBreakPoints.count-1 do
+  if (fDoc.fileName <> '<new document>') then
   begin
-    b := fBreakPoints.item[i];
-    if b.filename = fDoc.fileName then
-      fDoc.addBreakpoint(b.line);
+    fSynchronizingBreakpoints:= true;
+    if fSynchronizedDocuments.IndexOf(document.fileName) = -1 then
+    begin
+      fSynchronizedDocuments.Add(document.fileName);
+      for i:= 0 to fBreakPoints.count-1 do
+      begin
+        b := fBreakPoints.item[i];
+        if b.filename = fDoc.fileName then
+          fDoc.addBreakpoint(b.line);
+      end;
+    end;
+    fSynchronizingBreakpoints:= false;
   end;
-  fSynchronizingBreakpoints:= false;
 end;
 
 procedure TCEGdbWidget.docChanged(document: TCESynMemo);
