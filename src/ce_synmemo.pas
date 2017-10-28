@@ -3259,7 +3259,7 @@ end;
 
 function TCESynMemo.findBreakPoint(line: integer): boolean;
 var
-  m: TSynEditMarkLine;
+  m: TSynEditMarkLine = nil;
   i: integer;
 begin
   result := false;
