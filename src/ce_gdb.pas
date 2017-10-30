@@ -1481,12 +1481,7 @@ var
   i: integer = 0;
 begin
   while not fCommandProcessed do
-  begin
     application.ProcessMessages;
-    i += 1;
-    if i = high(integer) then
-      i := 0;
-  end;
 end;
 
 procedure TCEGdbWidget.addBreakPoint(const fname: string; line: integer;
@@ -1514,6 +1509,7 @@ begin
   begin
     fSilentPause := true;
     gdbCommand('-exec-continue --all', @gdboutJsonize);
+    waitCommandProcessed;
     fSilentPause := false;
   end;
 end;
@@ -1541,6 +1537,7 @@ begin
   begin
     fSilentPause := true;
     gdbCommand('-exec-continue --all', @gdboutJsonize);
+    waitCommandProcessed;
     fSilentPause := false;
   end;
 end;
@@ -1759,10 +1756,10 @@ begin
   gdbCommand('break _d_arraybounds');
   gdbCommand('break _d_switch_error');
   gdbCommand('-gdb-set mi-async on');
-  if not fOptions.stopAllThreadsOnBreak then
-    gdbCommand('-gdb-set non-stop on')
+  if fOptions.stopAllThreadsOnBreak then
+    gdbCommand('-gdb-set non-stop off')
   else
-    gdbCommand('-gdb-set non-stop off');
+    gdbCommand('-gdb-set non-stop on');
   fGdb.OnReadData := @gdboutJsonize;
   cpuViewer.TIObject := fInspState;
   cpuViewer.RefreshPropertyValues;
@@ -2408,7 +2405,6 @@ procedure TCEGdbWidget.gdboutJsonize(sender: TObject);
 var
   str: string;
 begin
-  fCommandProcessed := true;
   if fMsg = nil then
     exit;
 
@@ -2417,6 +2413,8 @@ begin
   if fOptions.showRawMiOutput then
     for str in fLog do
       fMsg.message(str, nil, amcMisc, amkAuto);
+
+  fCommandProcessed := true;
 
   if flog.Text.isEmpty then
     exit;
