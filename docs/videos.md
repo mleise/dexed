@@ -6,7 +6,18 @@ title: Usage in video
 <script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
 {% endraw %}
 
-Picked from a dedecated [playlist](https://www.youtube.com/playlist?list=PLzk8A0LUvEOV-OMdz09jfOahwnKoA2na_), and with description.
+Picked from a dedicated [playlist](https://www.youtube.com/playlist?list=PLzk8A0LUvEOV-OMdz09jfOahwnKoA2na_), and with description.
+
+### Using dbeaengine in a runnable
+
+This video shows how the disassembler library [dbeaengine](https://github.com/BBasile/dbeaengine)
+can be used in a [runnable module](features_runnables) to check the DMD backend production.
+The disassembler is fetched from the online DUB registry, automatically compiled and setup in the [library manager](widgets_library_manager).
+It's then used to show a weakness of the DMD backend (a constant is not converted, leading to 2 conversions at runtime) and to check a workaround.
+
+{% raw %}
+<iframe width="560" height="315" src="https://www.youtube.com/embed/bLamoXcs8S4" frameborder="0" allowfullscreen></iframe>
+{% endraw %}
 
 ### Debug a runnable
 
