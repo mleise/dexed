@@ -5337,6 +5337,12 @@ object CEMainForm: TCEMainForm
       OnExecute = actProjDscanExecute
       OnUpdate = updateProjectBasedAction
     end
+    object actLayoutReset: TAction
+      Category = 'Misc'
+      Caption = 'Reset default layout'
+      ImageIndex = 31
+      OnExecute = actLayoutResetExecute
+    end
   end
   object imgList: TImageList
     left = 64
