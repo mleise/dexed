@@ -339,6 +339,8 @@ type
     procedure toggleCurLineBreakpoint;
     procedure insertDdocTemplate;
     procedure gotoLinePrompt;
+    procedure showWarningForLine(line: integer);
+    procedure showCurLineWarning;
     function implementMain: THasMain;
     procedure replaceUndoableContent(const value: string);
     procedure setDscannerOptions(dsEnabled: boolean; dsDelay: integer);
@@ -426,6 +428,7 @@ const
   ecNextWarning         = ecUserFirst + 26;
   ecPrevWarning         = ecUserFirst + 27;
   ecGotoLine            = ecUserFirst + 28;
+  ecShowCurlineWarning  = ecUserFirst + 29;
 
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
@@ -1158,6 +1161,7 @@ begin
     AddKey(ecPrevWarning, 0, [], 0, []);
     AddKey(ecNextWarning, 0, [], 0, []);
     AddKey(ecGotoLine, 0, [], 0, []);
+    AddKey(ecShowCurlineWarning, 0, [], 0, []);
   end;
 end;
 
@@ -1192,6 +1196,7 @@ begin
     'ecPrevWarning':        begin Int := ecPrevWarning; exit(true); end;
     'ecNextWarning':        begin Int := ecNextWarning; exit(true); end;
     'ecGotoLine':           begin Int := ecGotoLine; exit(true); end;
+    'ecShowCurlineWarning': begin Int := ecShowCurlineWarning; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1227,6 +1232,7 @@ begin
     ecPrevWarning:        begin Ident := 'ecPrevWarning'; exit(true); end;
     ecNextWarning:        begin Ident := 'ecNextWarning'; exit(true); end;
     ecGotoLine:           begin Ident := 'ecGotoLine'; exit(true); end;
+    ecShowCurlineWarning: begin Ident := 'ecShowCurlineWarning'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1305,6 +1311,8 @@ begin
       goToWarning(true);
     ecGotoLine:
       gotoLinePrompt;
+    ecShowCurlineWarning:
+      showCurLineWarning;
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -1774,6 +1782,33 @@ begin
       EnsureCursorPosVisible;
     end;
   end;
+end;
+
+procedure TCESynMemo.showWarningForLine(line: integer);
+var
+  s: string;
+  p: TPoint;
+  c: TPoint = (x: 0; y: 0);
+begin
+  s := getDscannerWarning(line);
+  if s.isNotEmpty then
+  begin
+    p.x := 0;
+    p.y := line;
+    p := RowColumnToPixels(p);
+    c := ClientToScreen(c);
+    p.Offset(c);
+    s := 'Warning(s):' + LineEnding + s;
+    fDDocWin.FontSize := Font.Size;
+    fDDocWin.HintRect := fDDocWin.CalcHintRect(0, s, nil);
+    fDDocWin.OffsetHintRect(p, Font.Size);
+    fDDocWin.ActivateHint(fDDocWin.HintRect, s);
+  end;
+end;
+
+procedure TCESynMemo.showCurLineWarning;
+begin
+  showWarningForLine(CaretY);
 end;
 
 procedure TCESynMemo.goToChangedArea(next: boolean);
@@ -3227,24 +3262,14 @@ end;
 procedure TCESynMemo.showHintEvent(Sender: TObject; HintInfo: PHintInfo);
 var
   p: TPoint;
-  s: string;
 begin
   if cursor <> crDefault then
     exit;
   p := ScreenToClient(mouse.CursorPos);
   if p.x > Gutter.MarksPart.Width then
     exit;
-
   p := self.PixelsToRowColumn(p);
-  s := getDscannerWarning(p.y);
-  if s.isNotEmpty then
-  begin
-    s := 'Warning(s):' + LineEnding + s;
-    fDDocWin.FontSize := Font.Size;
-    fDDocWin.HintRect := fDDocWin.CalcHintRect(0, s, nil);
-    fDDocWin.OffsetHintRect(mouse.CursorPos, Font.Size);
-    fDDocWin.ActivateHint(fDDocWin.HintRect, s);
-  end;
+  showWarningForLine(p.y);
 end;
 
 procedure TCESynMemo.removeDebugTimeMarks;
