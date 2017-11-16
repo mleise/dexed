@@ -3,9 +3,10 @@ maj=${ver:0:1}
 min1=${ver//_}
 min=${min1:1}
 dte=$(LC_TIME='en_EN.UTF-8' date -u +"%a %b %d %Y")
-specname=coedit-$CPU.spec
+arch=`uname -m`
+specname=coedit-$arch.spec
 
-buildroot=$HOME/rpmbuild/BUILDROOT/coedit-$maj-$min.$CPU
+buildroot=$HOME/rpmbuild/BUILDROOT/coedit-$maj-$min.$arch
 bindir=$buildroot/usr/bin
 pixdir=$buildroot/usr/share/pixmaps
 shcdir=$buildroot/usr/share/applications

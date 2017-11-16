@@ -4,8 +4,8 @@ min1=${ver//_}
 min=${min1:1}
 dte=$(LC_TIME='en_EN.UTF-8' date -u +"%a %b %d %Y")
 
-arch=""
-if [ $CPU = "x86_64" ]; then
+arch=`uname -m`
+if [ $arch = "x86_64" ]; then
     arch="amd64"
 else
     arch="i386"
