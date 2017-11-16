@@ -324,7 +324,6 @@ var
   f: string = '';
 begin
   inherited;
-  fSavedIndex := fProjectIndex;
   for i:= projectCount-1 downto 0 do
   begin
     p := item[i];
@@ -344,6 +343,9 @@ begin
       b := true;
     end;
   end;
+  if fProjectIndex > projectCount -1 then
+    fProjectIndex:= projectCount -1;
+  fSavedIndex := fProjectIndex;
   fModified := b;
   if b then
     dlgOkError('the following projects are missing and are removed from the group:' + f,
