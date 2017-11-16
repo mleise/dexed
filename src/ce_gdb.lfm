@@ -34,15 +34,15 @@ inherited CEGdbWidget: TCEGdbWidget
           Width = 517
           Align = alClient
           Caption = 'CPU'
-          ClientHeight = 149
-          ClientWidth = 513
+          ClientHeight = 161
+          ClientWidth = 515
           TabOrder = 0
           object cpuViewer: TTIPropertyGrid
             Left = 0
-            Height = 149
+            Height = 161
             Hint = 'cpu registers'
             Top = 0
-            Width = 513
+            Width = 515
             Align = alClient
             CheckboxForBoolean = True
             DefaultValueFont.Color = clWindowText
@@ -75,13 +75,13 @@ inherited CEGdbWidget: TCEGdbWidget
           OnChange = PageControl2Change
           object TabSheet3: TTabSheet
             Caption = 'Variables'
-            ClientHeight = 164
-            ClientWidth = 509
+            ClientHeight = 173
+            ClientWidth = 515
             object lstVariables: TListView
               Left = 2
-              Height = 138
-              Top = 24
-              Width = 505
+              Height = 139
+              Top = 32
+              Width = 511
               Align = alClient
               AutoWidthLastColumn = True
               BorderSpacing.Around = 2
@@ -89,11 +89,11 @@ inherited CEGdbWidget: TCEGdbWidget
                 item
                   AutoSize = True
                   Caption = 'name'
-                  Width = 46
+                  Width = 53
                 end              
                 item
                   Caption = 'value'
-                  Width = 455
+                  Width = 456
                 end>
               GridLines = True
               HideSelection = False
@@ -106,10 +106,10 @@ inherited CEGdbWidget: TCEGdbWidget
             end
             object varListFlt: TListViewFilterEdit
               Left = 2
-              Height = 20
+              Height = 28
               Hint = 'locate variables'
               Top = 2
-              Width = 505
+              Width = 511
               ButtonWidth = 24
               NumGlyphs = 1
               Align = alTop
@@ -121,8 +121,8 @@ inherited CEGdbWidget: TCEGdbWidget
           end
           object TabSheet4: TTabSheet
             Caption = 'Assembler'
-            ClientHeight = 164
-            ClientWidth = 509
+            ClientHeight = 173
+            ClientWidth = 515
             object lstAsm: TListView
               Left = 2
               Height = 160
@@ -136,7 +136,7 @@ inherited CEGdbWidget: TCEGdbWidget
                 item
                   AutoSize = True
                   Caption = 'address'
-                  Width = 59
+                  Width = 67
                 end              
                 item
                   Caption = 'instruction'
@@ -209,31 +209,34 @@ inherited CEGdbWidget: TCEGdbWidget
         TabOrder = 3
         object TabSheet1: TTabSheet
           Caption = 'Call stack'
-          ClientHeight = 164
-          ClientWidth = 509
+          ClientHeight = 173
+          ClientWidth = 515
           object lstCallStack: TListView
             Left = 0
-            Height = 164
+            Height = 173
             Hint = 'call stack'
             Top = 0
-            Width = 509
+            Width = 515
             Align = alClient
             AutoSort = False
             AutoWidthLastColumn = True
             Columns = <            
               item
-                AutoSize = True
                 Caption = 'function'
-                Width = 62
+                Width = 1
               end            
               item
                 AutoSize = True
                 Caption = 'address'
-                Width = 59
+                Width = 67
               end            
               item
                 Caption = 'filename'
-                Width = 384
+                Width = 100
+              end            
+              item
+                Caption = 'line'
+                Width = 345
               end>
             GridLines = True
             ReadOnly = True
@@ -245,8 +248,8 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object TabSheet2: TTabSheet
           Caption = 'Thread list'
-          ClientHeight = 164
-          ClientWidth = 509
+          ClientHeight = 173
+          ClientWidth = 515
           object lstThreads: TListView
             Left = 0
             Height = 164
@@ -260,32 +263,32 @@ inherited CEGdbWidget: TCEGdbWidget
               item
                 AutoSize = True
                 Caption = 'id'
-                Width = 23
+                Width = 28
               end            
               item
                 AutoSize = True
                 Caption = 'state'
-                Width = 42
+                Width = 49
               end            
               item
                 AutoSize = True
                 Caption = 'core'
-                Width = 38
+                Width = 44
               end            
               item
                 AutoSize = True
                 Caption = 'function'
-                Width = 62
+                Width = 69
               end            
               item
                 AutoSize = True
                 Caption = 'address'
-                Width = 59
+                Width = 67
               end            
               item
                 AutoSize = True
                 Caption = 'filename'
-                Width = 64
+                Width = 73
               end            
               item
                 Caption = 'line'
@@ -301,8 +304,8 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object TabSheet5: TTabSheet
           Caption = 'Debugee options'
-          ClientHeight = 164
-          ClientWidth = 509
+          ClientHeight = 173
+          ClientWidth = 515
           object dbgeeOptsEd: TTIPropertyGrid
             Left = 2
             Height = 160

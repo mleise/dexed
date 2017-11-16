@@ -896,6 +896,7 @@ begin
     litm.SubItems.Add(format('0x%.8X', [sitm.address]));
     {$ENDIF}
     litm.SubItems.Add(shortenPath(sitm.filename));
+    litm.SubItems.Add(sitm.line.ToString);
     litm.Data:=sitm;
   end;
 end;
