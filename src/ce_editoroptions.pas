@@ -689,6 +689,7 @@ begin
   if not fResetFontSize then
     anEditor.Font.Size := savedSize;
 
+  anEditor.completionMenu.TheForm.Font.Assign(font);
   anEditor.autoCloseCurlyBrace            := fAutoCloseCurlyBrace;
   anEditor.autoClosedPairs                := fAutoClosedPairs;
   anEditor.completionMenu.TheForm.Width   := fCompletionMenuWidth;
