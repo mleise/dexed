@@ -1478,8 +1478,6 @@ begin
 end;
 
 procedure TCEGdbWidget.waitCommandProcessed;
-var
-  i: integer = 0;
 begin
   while not fCommandProcessed do
     application.ProcessMessages;

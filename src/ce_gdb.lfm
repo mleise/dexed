@@ -219,16 +219,14 @@ inherited CEGdbWidget: TCEGdbWidget
             Width = 515
             Align = alClient
             AutoSort = False
-            AutoWidthLastColumn = True
             Columns = <            
               item
                 Caption = 'function'
-                Width = 1
+                Width = 200
               end            
               item
-                AutoSize = True
                 Caption = 'address'
-                Width = 67
+                Width = 40
               end            
               item
                 Caption = 'filename'
@@ -236,7 +234,7 @@ inherited CEGdbWidget: TCEGdbWidget
               end            
               item
                 Caption = 'line'
-                Width = 345
+                Width = 253
               end>
             GridLines = True
             ReadOnly = True
