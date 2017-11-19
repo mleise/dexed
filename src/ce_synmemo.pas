@@ -752,10 +752,10 @@ begin
   fMemo.MouseActions.Clear;
   fMemo.Keystrokes.Clear;
   fMemo.CaptureMouseButtons:=[];
+  fMemo.Options:=fMemo.Options+[eoNoCaret];
 
   fD2Hl:= TSynD2Syn.create(self);
   fTxtHl:= TSynTxtSyn.Create(self);
-
   fSource:= editor;
   updateFromSource();
 end;
@@ -770,16 +770,15 @@ begin
     fMemo.Color:= fSource.Color;
     fMemo.LineHighlightColor.Assign(fSource.LineHighlightColor);
     fMemo.SelectedColor.Assign(fSource.SelectedColor);
-    if fSource.Highlighter is TSynD2Syn then
+    if fMemo.Highlighter.isNil then
     begin
       fD2Hl.Assign(fSource.Highlighter);
-      fMemo.Highlighter := fD2Hl;
-    end
-    else
-    begin
       fTxtHl.Assign(fSource.Highlighter);
-      fMemo.Highlighter := fTxtHl;
     end;
+    if fSource.Highlighter is TSynD2Syn then
+      fMemo.Highlighter := fD2Hl
+    else
+      fMemo.Highlighter := fTxtHl;
   end;
 end;
 
@@ -800,6 +799,7 @@ begin
   else if value < 1 then
     value := 1;
   fMemo.CaretY := value;
+  fMemo.CaretX := 1;
   fMemo.SelectLine(true);
 end;
 {$ENDREGION}
