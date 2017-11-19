@@ -3578,7 +3578,6 @@ begin
     prc.Executable:=pth;
     prc.Options := [poUsePipes, poStderrToOutPut {$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
     prc.ShowWindow:= swoHIDE;
-    prc.Parameters.Add(fDoc.fileName);
     prc.Parameters.Add('-S');
     if not fDscanUnittests then
       prc.Parameters.Add('--skipTests');
