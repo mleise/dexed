@@ -34,15 +34,15 @@ inherited CEGdbWidget: TCEGdbWidget
           Width = 517
           Align = alClient
           Caption = 'CPU'
-          ClientHeight = 161
-          ClientWidth = 515
+          ClientHeight = 160
+          ClientWidth = 513
           TabOrder = 0
           object cpuViewer: TTIPropertyGrid
             Left = 0
-            Height = 161
+            Height = 160
             Hint = 'cpu registers'
             Top = 0
-            Width = 515
+            Width = 513
             Align = alClient
             CheckboxForBoolean = True
             DefaultValueFont.Color = clWindowText
@@ -75,13 +75,13 @@ inherited CEGdbWidget: TCEGdbWidget
           OnChange = PageControl2Change
           object TabSheet3: TTabSheet
             Caption = 'Variables'
-            ClientHeight = 173
-            ClientWidth = 515
+            ClientHeight = 169
+            ClientWidth = 513
             object lstVariables: TListView
               Left = 2
-              Height = 139
-              Top = 32
-              Width = 511
+              Height = 138
+              Top = 29
+              Width = 509
               Align = alClient
               AutoWidthLastColumn = True
               BorderSpacing.Around = 2
@@ -89,11 +89,11 @@ inherited CEGdbWidget: TCEGdbWidget
                 item
                   AutoSize = True
                   Caption = 'name'
-                  Width = 53
+                  Width = 47
                 end              
                 item
                   Caption = 'value'
-                  Width = 456
+                  Width = 460
                 end>
               GridLines = True
               HideSelection = False
@@ -106,10 +106,10 @@ inherited CEGdbWidget: TCEGdbWidget
             end
             object varListFlt: TListViewFilterEdit
               Left = 2
-              Height = 28
+              Height = 25
               Hint = 'locate variables'
               Top = 2
-              Width = 511
+              Width = 509
               ButtonWidth = 24
               NumGlyphs = 1
               Align = alTop
@@ -121,8 +121,8 @@ inherited CEGdbWidget: TCEGdbWidget
           end
           object TabSheet4: TTabSheet
             Caption = 'Assembler'
-            ClientHeight = 173
-            ClientWidth = 515
+            ClientHeight = 169
+            ClientWidth = 513
             object lstAsm: TListView
               Left = 2
               Height = 160
@@ -136,7 +136,7 @@ inherited CEGdbWidget: TCEGdbWidget
                 item
                   AutoSize = True
                   Caption = 'address'
-                  Width = 67
+                  Width = 61
                 end              
                 item
                   Caption = 'instruction'
@@ -209,14 +209,14 @@ inherited CEGdbWidget: TCEGdbWidget
         TabOrder = 3
         object TabSheet1: TTabSheet
           Caption = 'Call stack'
-          ClientHeight = 173
-          ClientWidth = 515
+          ClientHeight = 169
+          ClientWidth = 513
           object lstCallStack: TListView
             Left = 0
-            Height = 173
+            Height = 169
             Hint = 'call stack'
             Top = 0
-            Width = 515
+            Width = 513
             Align = alClient
             AutoSort = False
             Columns = <            
@@ -246,8 +246,8 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object TabSheet2: TTabSheet
           Caption = 'Thread list'
-          ClientHeight = 173
-          ClientWidth = 515
+          ClientHeight = 169
+          ClientWidth = 513
           object lstThreads: TListView
             Left = 0
             Height = 164
@@ -261,32 +261,32 @@ inherited CEGdbWidget: TCEGdbWidget
               item
                 AutoSize = True
                 Caption = 'id'
-                Width = 28
+                Width = 22
               end            
               item
                 AutoSize = True
                 Caption = 'state'
-                Width = 49
+                Width = 43
               end            
               item
                 AutoSize = True
                 Caption = 'core'
-                Width = 44
+                Width = 38
               end            
               item
                 AutoSize = True
                 Caption = 'function'
-                Width = 69
+                Width = 63
               end            
               item
                 AutoSize = True
                 Caption = 'address'
-                Width = 67
+                Width = 61
               end            
               item
                 AutoSize = True
                 Caption = 'filename'
-                Width = 73
+                Width = 67
               end            
               item
                 Caption = 'line'
@@ -302,8 +302,8 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object TabSheet5: TTabSheet
           Caption = 'Debugee options'
-          ClientHeight = 173
-          ClientWidth = 515
+          ClientHeight = 169
+          ClientWidth = 513
           object dbgeeOptsEd: TTIPropertyGrid
             Left = 2
             Height = 160
@@ -433,6 +433,17 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'CAMERA_ADD'
         scaledSeparator = False
       end
+      object btnEval: TCEToolButton[11]
+        Left = 345
+        Hint = 'evaluate either a variable from the list or a custom expression'
+        Top = 0
+        Caption = 'btnEval'
+        DropdownMenu = mnuEval
+        OnClick = btnEvalClick
+        Style = tbsDropDown
+        resourceName = 'DEBUGGER_INSPECT'
+        scaledSeparator = False
+      end
     end
   end
   object Splitter2: TSplitter[1]
@@ -497,6 +508,26 @@ inherited CEGdbWidget: TCEGdbWidget
     object mnuStepMachine: TMenuItem
       AutoCheck = True
       Caption = 'machine instruction'
+    end
+  end
+  object mnuEval: TPopupMenu[7]
+    left = 216
+    top = 168
+    object mnuEvalSelected: TMenuItem
+      AutoCheck = True
+      Caption = 'Evaluate selected variable'
+      Checked = True
+      OnClick = mnuEvalSelectedClick
+    end
+    object mnuEvalDeref: TMenuItem
+      AutoCheck = True
+      Caption = 'Evaluate dereference of selected variable'
+      OnClick = mnuEvalDerefClick
+    end
+    object mnuEvalCustom: TMenuItem
+      AutoCheck = True
+      Caption = 'Evaluate custom expression'
+      OnClick = mnuEvalCustomClick
     end
   end
 end

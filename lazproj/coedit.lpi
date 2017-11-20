@@ -13,7 +13,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="104">
+      <Resources Count="105">
         <Resource_0 FileName="../icons/window/layout_add.png" Type="RCDATA" ResourceName="LAYOUT_ADD"/>
         <Resource_1 FileName="../icons/window/layout.png" Type="RCDATA" ResourceName="LAYOUT"/>
         <Resource_2 FileName="../icons/window/application_go.png" Type="RCDATA" ResourceName="APPLICATION_GO"/>
@@ -118,6 +118,7 @@
         <Resource_101 FileName="../icons/other/warning.png" Type="RCDATA" ResourceName="WARNING"/>
         <Resource_102 FileName="../icons/other/break_reached.png" Type="RCDATA" ResourceName="BREAK_REACHED"/>
         <Resource_103 FileName="../icons/other/break_set.png" Type="RCDATA" ResourceName="BREAK_SET"/>
+        <Resource_104 FileName="../icons/other/debugger_inspect.png" Type="RCDATA" ResourceName="DEBUGGER_INSPECT"/>
       </Resources>
     </General>
     <i18n>

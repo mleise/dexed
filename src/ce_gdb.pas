@@ -372,9 +372,12 @@ type
     property projectByFile[const fname: string]: TCEDebugeeOption read getProjectByFile; default;
   end;
 
+  TGdbEvalKind = (gekSelectedVar, gekDerefSelectedVar, gekCustom);
+
   { TCEGdbWidget }
   TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger)
     btnContinue: TCEToolButton;
+    btnEval: TCEToolButton;
     btnVariables: TCEToolButton;
     btnNext: TCEToolButton;
     btnOver: TCEToolButton;
@@ -388,12 +391,16 @@ type
     Edit1: TComboBox;
     GroupBox3: TGroupBox;
     lstThreads: TListView;
+    mnuEvalDeref: TMenuItem;
+    mnuEvalSelected: TMenuItem;
+    mnuEvalCustom: TMenuItem;
     mnuNextMachine: TMenuItem;
     mnuStepMachine: TMenuItem;
     mnuStep: TPopupMenu;
     PageControl1: TPageControl;
     PageControl2: TPageControl;
     mnuNext: TPopupMenu;
+    mnuEval: TPopupMenu;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
@@ -419,6 +426,7 @@ type
     dbgeeOptsEd: TTIPropertyGrid;
     varListFlt: TListViewFilterEdit;
     procedure btnContClick(Sender: TObject);
+    procedure btnEvalClick(Sender: TObject);
     procedure btnVariablesClick(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
     procedure btnOverClick(Sender: TObject);
@@ -434,6 +442,9 @@ type
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure lstCallStackDblClick(Sender: TObject);
     procedure lstThreadsDblClick(Sender: TObject);
+    procedure mnuEvalDerefClick(Sender: TObject);
+    procedure mnuEvalCustomClick(Sender: TObject);
+    procedure mnuEvalSelectedClick(Sender: TObject);
     procedure mnuReadWClick(Sender: TObject);
     procedure mnuReadWriteWClick(Sender: TObject);
     procedure mnuSelProjClick(Sender: TObject);
@@ -444,6 +455,7 @@ type
   protected
     procedure setToolBarFlat(value: boolean); override;
   private
+    fEvalKind: TGdbEvalKind;
     fSynchronizedDocuments: TStringList;
     fSynchronizingBreakpoints: boolean;
     fSyms: ICESymStringExpander;
@@ -2525,6 +2537,27 @@ begin
   continueDebugging;
 end;
 
+procedure TCEGdbWidget.btnEvalClick(Sender: TObject);
+var
+  e: string = '';
+begin
+  if fGdb.isNil or not fGdb.Running then
+    exit;
+  case fEvalKind of
+    gekCustom:
+      if not InputQuery('Evaluate', 'Expression', e) then
+        e := '';
+    gekSelectedVar:
+      if lstVariables.ItemIndex <> -1 then
+        e := lstVariables.Items[lstVariables.ItemIndex].Caption;
+    gekDerefSelectedVar:
+      if lstVariables.ItemIndex <> -1 then
+        e := '*' + lstVariables.Items[lstVariables.ItemIndex].Caption;
+  end;
+  if not e.isBlank then
+    gdbCommand('-data-evaluate-expression "' + e + '"');
+end;
+
 procedure TCEGdbWidget.btnVariablesClick(Sender: TObject);
 begin
   infoVariables;
@@ -2644,6 +2677,27 @@ begin
   doc := fDocHandler.findDocument(nme);
   if doc.isNotNil then
     doc.CaretY:= lne;
+end;
+
+procedure TCEGdbWidget.mnuEvalDerefClick(Sender: TObject);
+begin
+  fEvalKind := gekDerefSelectedVar;
+  mnuEvalSelected.Checked:=false;
+  mnuEvalCustom.Checked:=false;
+end;
+
+procedure TCEGdbWidget.mnuEvalCustomClick(Sender: TObject);
+begin
+  fEvalKind := gekCustom;
+  mnuEvalSelected.Checked:=false;
+  mnuEvalDeref.Checked:=false;
+end;
+
+procedure TCEGdbWidget.mnuEvalSelectedClick(Sender: TObject);
+begin
+  fEvalKind := gekSelectedVar;
+  mnuEvalCustom.Checked:=false;
+  mnuEvalDeref.Checked:=false;
 end;
 
 procedure TCEGdbWidget.mnuReadWClick(Sender: TObject);
