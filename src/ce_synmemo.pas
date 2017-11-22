@@ -278,6 +278,7 @@ type
     //
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
     procedure removeDebugTimeMarks;
+    function  isGutterIconSet(line: integer; value: TGutterIcon): boolean;
     function  findBreakPoint(line: integer): boolean;
     procedure debugStart(debugger: ICEDebugger);
     procedure debugStop;
@@ -3251,12 +3252,17 @@ begin
 end;
 
 procedure TCESynMemo.removeBreakPoint(line: integer);
+var
+  break2step: boolean;
 begin
   if not findBreakPoint(line) then
     exit;
+  break2step := isGutterIconSet(line, giBreakReached);
   removeGutterIcon(line, giBreakSet);
   if assigned(fDebugger) then
     fDebugger.removeBreakPoint(fFilename, line);
+  if break2step then
+    addGutterIcon(line, giStep);
 end;
 
 procedure TCESynMemo.showHintEvent(Sender: TObject; HintInfo: PHintInfo);
@@ -3282,7 +3288,7 @@ begin
   DecPaintLock;
 end;
 
-function TCESynMemo.findBreakPoint(line: integer): boolean;
+function TCESynMemo.isGutterIconSet(line: integer; value: TGutterIcon): boolean;
 var
   m: TSynEditMarkLine = nil;
   i: integer;
@@ -3292,8 +3298,13 @@ begin
     m := marks.Line[line];
   if m.isNotNil then
     for i := 0 to m.count - 1 do
-      if m[i].ImageIndex = integer(giBreakSet) then
+      if (m[i].ImageIndex = integer(value)) then
         exit(true);
+end;
+
+function TCESynMemo.findBreakPoint(line: integer): boolean;
+begin
+  result := isGutterIconSet(line, giBreakSet);
 end;
 
 procedure TCESynMemo.gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
