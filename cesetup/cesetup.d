@@ -57,7 +57,7 @@ immutable Resource[] oldResources =
 
 struct Formater
 {
-    private enum width = 48;
+    private enum width = 54;
     private static __gshared char[] separator;
     
     static this()
@@ -78,7 +78,7 @@ struct Formater
         static if (A == 'L') 
             writeln("| ",  leftJustify(s, width, ' '), " |");
         else static if (A == 'C') 
-            writeln("| ",  center(s, width, ' '), " |");
+            writeln("| ",  center(s, width), " |");
         else static if (A == 'R') 
             writeln("| ",  rightJustify(s, width, ' '), " |");  
         else static assert(0, "invalid justification, L|C|R expected");      
@@ -164,7 +164,7 @@ void main(string[] args)
     }
 
     if (!uninstall) Formater.justify!'C'(format("Coedit %s - setup",
-        import("version.txt").split('_').join(" ")));
+        import("version.txt")[1..$].chomp));
     else Formater.justify!'C'("Coedit uninstaller");
     
     Formater.separate;

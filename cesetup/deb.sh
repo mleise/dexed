@@ -1,7 +1,5 @@
 ver=`cat version.txt`
-maj=${ver:0:1}
-min1=${ver//_}
-min=${min1:1}
+ver=${ver:1:100}
 dte=$(LC_TIME='en_EN.UTF-8' date -u +"%a %b %d %Y")
 
 arch=`uname -m`
@@ -11,7 +9,7 @@ else
     arch="i386"
 fi
 
-name=coedit-$maj-$min.$arch
+name=coedit-$ver.$arch
 
 basdir=$HOME/$name/
 cfgdir=$basdir/DEBIAN
@@ -42,7 +40,7 @@ Type=Application" > $shcdir/coedit.desktop
  
 cd $cfgdir 
 echo "Package: coedit
-Version: $maj$min
+Version: $ver
 Section: devel
 Priority: optional
 Date: $dte

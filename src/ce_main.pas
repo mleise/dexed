@@ -16,7 +16,7 @@ uses
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor,{$IFDEF UNIX} ce_gdb,{$ENDIF}
   ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange, ce_dastworx,
-  ce_halstead, ce_profileviewer;
+  ce_halstead, ce_profileviewer, ce_semver;
 
 type
 
@@ -1745,17 +1745,11 @@ var
   tgg: TJSONData = nil;
   url: TJSONData = nil;
   str: string;
-  mn0: byte = 0;
-  mj0: byte;
-  kd0: string;
-  mn1: byte = 0;
-  mj1: byte;
-  kd1: string;
-  can: boolean = false;
-  rng: TStringRange = (ptr:nil; pos:0; len: 0);
   cli: TFPHTTPClient;
   lst: TStringList = nil;
   res: TResourceStream = nil;
+  svo: TSemVer;
+  sva: TSemVer;
 begin
   result := '';
   cli := TFPHTTPClient.Create(nil);
@@ -1775,37 +1769,10 @@ begin
           lst := TstringList.Create;
           lst.LoadFromStream(res);
           str := lst.Text;
-          if str.length < 6 then
-            raise Exception.Create('');
-
-          rng.init(str);
-          mj0 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
-          rng.popWhile('_');
-          kd0 := rng.takeWhile(['a'..'z']).yield;
-          rng.popWhile('_');
-          mn0 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
-
+          sva.init(str, false);
           str := tgg.AsString;
-          rng.init(str);
-          mj1 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
-          rng.popWhile('_');
-          kd1 := rng.takeWhile(['a'..'z']).yield;
-          rng.popWhile('_');
-          mn1 := rng.takeWhile(['0'..'9']).yield.toIntNoExcept;
-
-          if mj1 > mj0 then
-            can := true
-          else if mj1 < mj0 then
-            can := false
-          else if kd0 = kd1 then
-            can := (mj1 = mj0) and (mn1 > mn0)
-          else if (kd0 = 'alpha') and (kd1 <> 'alpha') then
-            can := (mj1 = mj0) and (mn1 > mn0)
-          else if (kd0 = 'beta') and (kd1 <> 'alpha') and (kd1 <> 'beta') then
-            can := (mj1 = mj0) and (mn1 > mn0)
-          else if (kd0 = 'gold') and (kd1 = 'update') and (kd1 <> 'beta') then
-            can := (mj1 = mj0) and (mn1 > mn0);
-          if can then
+          svo.init(str, false);
+          if svo.valid and sva.valid and (svo > sva) then
             result := url.AsString;
         end;
       end;
