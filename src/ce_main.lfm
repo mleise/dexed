@@ -1513,6 +1513,9 @@ object CEMainForm: TCEMainForm
           000089898AFF000000000000000000000000FFFFFF00FFFFFF00
         }
       end
+      object MenuItem109: TMenuItem
+        Action = actFileNewClip
+      end
       object MenuItem24: TMenuItem
         Action = actFileNewRun
         Bitmap.Data = {
@@ -3510,6 +3513,42 @@ object CEMainForm: TCEMainForm
       end
       object MenuItem108: TMenuItem
         Action = actProjDscan
+        Bitmap.Data = {
+          36040000424D3604000000000000360000002800000010000000100000000100
+          2000000000000004000064000000640000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000033000000000000
+          00330000003300000000000000000000000000000000000000002178AD002178
+          AD002178AD002178AD002178AD002177AC00000000332270B3FF00000033008A
+          48FF008A4AFF00000033008E4E00008D4D0000A3620000A160002178AD002178
+          AD002178AD002178AD002177AD00000000331E6EAAFF6FF0FFFF00843CFF00E2
+          9BFF00E39CFF008647FF00000033008C4D0000A3620000A160002178AD002178
+          AD002178AD002177AC00000000331D6FA8FF6DEDFFFF008234FF00E096FF00DE
+          97FF00DE97FF00E29BFF008646FF0000003300A2610000A160002178AD002178
+          AD002177AC00000000331C6EA5FF51C7F9FF00822CFF00E394FF00E196FF007F
+          38FF007F38FF00E096FF00E19BFF008445FF0000003300A160002178AD002177
+          AC00000000331B6DA3FF6BE6FFFF4DD6FFFF52D8FFFF008536FF008334FF55D7
+          FFFF71E1FFFF007E32FF00DF95FF00E09AFF009C5BFF000000332077AC000000
+          00331B6DA3FF4EC1F0FF45D1FFFF45CEFFFF47D4FFFF31351CFF33C1DAFF48D0
+          FFFF47CFFFFF48C2D9FF009648FF00E095FF00E49CFF009F5DFF00000033196D
+          A3FF6FE2FFFF3ECCFFFF3FC9FFFF3FC9FFFF3FCEFFFF3FD3FFFF40CEFFFF3FCA
+          FFFF3FC8FFFF40CAFFFF73DCFFFF008231FF00883CFF00A457001C73A8FF9BF5
+          FFFF36C8FFFF39C4FFFF3BC4FFFF3BC6FFFF39CCFFFF643F30FF39CCFFFF3BC6
+          FFFF3BC4FFFF39C4FFFF38C7FFFF9EF2FFFF206FB1FF2473B5001E75AA00196D
+          A3FF78E0FFFF32C1FFFF34C0FFFF35C2FFFF34CAFFFF563529FF34CAFFFF35C2
+          FFFF34C0FFFF32C1FFFF78E0FFFF196DA4FF1F75AB002177AE002077AC001E74
+          A9001A6DA2FF7CDFFFFF2CBDFFFF2FBEFFFF2FC6FFFF492A1CFF2FC6FFFF2EBE
+          FFFF2CBDFFFF7CDFFFFF1A6DA2FF1E74A9002077AC002178AD002178AD002177
+          AC001E74A9001A6EA2FF7EDFFFFF29BBFFFF2AC0FFFF3C1808FF2AC0FFFF27BA
+          FFFF7DDEFFFF1A6DA2FF1E74A9002177AC002178AD002178AD002178AD002178
+          AD002177AC001E75AA001B6FA3FF52B8F1FF22B9FFFF22BAFFFF21B8FFFF81DD
+          FFFF1A6DA2FF1E74A9002177AC002178AD002178AD002178AD002178AD002178
+          AD002178AD002178AC001F75AA001B6FA3FF83DCFFFF16B2FFFF82DBFFFF1A6E
+          A2FF1E74A9002177AC002178AD002178AD002178AD002178AD002178AD002178
+          AD002178AD002178AD002177AC001E75AA00186EA4FFD0F9FFFF186EA3FF1E75
+          A9002177AC002178AD002178AD002178AD002178AD002178AD002178AD002178
+          AD002178AD002178AD002178AD002077AC001E75AA001B73A8FF1E75AA002077
+          AC002178AD002178AD002178AD002178AD002178AD002178AD00
+        }
       end
       object MenuItem40: TMenuItem
         Caption = '-'
@@ -4965,24 +5004,10 @@ object CEMainForm: TCEMainForm
     end
     object actFileNew: TAction
       Category = 'File'
-      Caption = 'new empty file'
+      Caption = 'New empty module'
       ImageIndex = 8
       OnExecute = actFileNewExecute
       ShortCut = 16462
-    end
-    object actFileNewRun: TAction
-      Category = 'File'
-      Caption = 'New runnable module'
-      ImageIndex = 22
-      OnExecute = actFileNewRunExecute
-      ShortCut = 49230
-    end
-    object actFileAddToProj: TAction
-      Category = 'File'
-      Caption = 'Add file to project'
-      ImageIndex = 7
-      OnExecute = actFileAddToProjExecute
-      OnUpdate = updateDocumentBasedAction
     end
     object actProjSave: TAction
       Category = 'Project'
@@ -5127,6 +5152,101 @@ object CEMainForm: TCEMainForm
       ImageIndex = 8
       OnExecute = actProjNewNativeExecute
     end
+    object actProjOpenGroup: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'Open projects group...'
+      ImageIndex = 9
+      OnExecute = actProjOpenGroupExecute
+    end
+    object actProjSaveGroup: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'Save projects group'
+      ImageIndex = 3
+      OnExecute = actProjSaveGroupExecute
+    end
+    object actProjSaveGroupAs: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'Save projects group as...'
+      ImageIndex = 2
+      OnExecute = actProjSaveGroupAsExecute
+    end
+    object actProjNewGroup: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'New projects group'
+      ImageIndex = 8
+      OnExecute = actProjNewGroupExecute
+    end
+    object actProjAddToGroup: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'Add current project to group'
+      ImageIndex = 7
+      OnExecute = actProjAddToGroupExecute
+      OnUpdate = updateProjectBasedAction
+    end
+    object actProjSelUngrouped: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'Activate the free standing project'
+      ImageIndex = 9
+      OnExecute = actProjSelUngroupedExecute
+      OnUpdate = updateProjectBasedAction
+    end
+    object actProjGroupCompile: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'Compile projects group in parallel'
+      ImageIndex = 21
+      OnExecute = actProjGroupCompileExecute
+    end
+    object actProjGroupCompileSync: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'Compile projects group sequentially'
+      ImageIndex = 21
+      OnExecute = actProjGroupCompileSyncExecute
+    end
+    object actProjGroupCompileCustomSync: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'compile projects group using wait points'
+      ImageIndex = 21
+      OnExecute = actProjGroupCompileCustomSyncExecute
+    end
+    object actProjGroupClose: TAction
+      Category = 'ProjectsGroup'
+      Caption = 'Close projects group'
+      ImageIndex = 27
+      OnExecute = actProjNewGroupExecute
+    end
+    object actProjDscan: TAction
+      Category = 'Project'
+      Caption = 'Verify project with Dscanner'
+      ImageIndex = 35
+      OnExecute = actProjDscanExecute
+      OnUpdate = updateProjectBasedAction
+    end
+    object actLayoutReset: TAction
+      Category = 'Misc'
+      Caption = 'Reset default layout'
+      ImageIndex = 31
+      OnExecute = actLayoutResetExecute
+    end
+    object actFileNewClip: TAction
+      Category = 'File'
+      Caption = 'New module from clipboard'
+      ImageIndex = 37
+      OnExecute = actFileNewClipExecute
+    end
+    object actFileNewRun: TAction
+      Category = 'File'
+      Caption = 'New runnable module'
+      ImageIndex = 22
+      OnExecute = actFileNewRunExecute
+      ShortCut = 49230
+    end
+    object actFileAddToProj: TAction
+      Category = 'File'
+      Caption = 'Add file to project'
+      ImageIndex = 7
+      OnExecute = actFileAddToProjExecute
+      OnUpdate = updateDocumentBasedAction
+    end
     object actFileCompile: TAction
       Category = 'File'
       Caption = 'Compile file'
@@ -5228,50 +5348,6 @@ object CEMainForm: TCEMainForm
       OnExecute = actFileDscannerExecute
       OnUpdate = updateDocumentBasedAction
     end
-    object actProjOpenGroup: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'Open projects group...'
-      ImageIndex = 9
-      OnExecute = actProjOpenGroupExecute
-    end
-    object actProjSaveGroup: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'Save projects group'
-      ImageIndex = 3
-      OnExecute = actProjSaveGroupExecute
-    end
-    object actProjSaveGroupAs: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'Save projects group as...'
-      ImageIndex = 2
-      OnExecute = actProjSaveGroupAsExecute
-    end
-    object actProjNewGroup: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'New projects group'
-      ImageIndex = 8
-      OnExecute = actProjNewGroupExecute
-    end
-    object actProjAddToGroup: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'Add current project to group'
-      ImageIndex = 7
-      OnExecute = actProjAddToGroupExecute
-      OnUpdate = updateProjectBasedAction
-    end
-    object actProjSelUngrouped: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'Activate the free standing project'
-      ImageIndex = 9
-      OnExecute = actProjSelUngroupedExecute
-      OnUpdate = updateProjectBasedAction
-    end
-    object actProjGroupCompile: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'Compile projects group in parallel'
-      ImageIndex = 21
-      OnExecute = actProjGroupCompileExecute
-    end
     object actFileRunDub: TAction
       Category = 'File'
       Caption = 'Run DUB single file package'
@@ -5291,24 +5367,6 @@ object CEMainForm: TCEMainForm
       Caption = 'New DUB script'
       ImageIndex = 36
       OnExecute = actFileNewDubScriptExecute
-    end
-    object actProjGroupCompileSync: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'Compile projects group sequentially'
-      ImageIndex = 21
-      OnExecute = actProjGroupCompileSyncExecute
-    end
-    object actProjGroupCompileCustomSync: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'compile projects group using wait points'
-      ImageIndex = 21
-      OnExecute = actProjGroupCompileCustomSyncExecute
-    end
-    object actProjGroupClose: TAction
-      Category = 'ProjectsGroup'
-      Caption = 'Close projects group'
-      ImageIndex = 27
-      OnExecute = actProjNewGroupExecute
     end
     object actFileMetricsHalstead: TAction
       Category = 'File'
@@ -5330,24 +5388,11 @@ object CEMainForm: TCEMainForm
       OnExecute = actFileCloseAllExecute
       OnUpdate = updateDocumentBasedAction
     end
-    object actProjDscan: TAction
-      Category = 'Project'
-      Caption = 'Verify project with Dscanner'
-      ImageIndex = 35
-      OnExecute = actProjDscanExecute
-      OnUpdate = updateProjectBasedAction
-    end
-    object actLayoutReset: TAction
-      Category = 'Misc'
-      Caption = 'Reset default layout'
-      ImageIndex = 31
-      OnExecute = actLayoutResetExecute
-    end
   end
   object imgList: TImageList
     left = 64
     Bitmap = {
-      4C69250000001000000010000000008F4E00008C4AB000965DFF00935AFF0093
+      4C69260000001000000010000000008F4E00008C4AB000965DFF00935AFF0093
       59FF009359FF009359FF009359FF009359FF00945AFF008743FF008945FF008A
       49A8FFFFFF00008F4E00008F4F00008E4E00008A47FF66E2D0FF62DDCAFF62DD
       C8FF62DDC8FF62DDC8FF62DDC8FF62DDC8FF62DDC9FF61E0CAFF62DEC8FF3ABA
@@ -6531,7 +6576,39 @@ object CEMainForm: TCEMainForm
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00
+      FF00FFFFFF00FFFFFF00FFFFFF00487BA500417AA700908B8700F4F2F0009993
+      8EFF99938EFF99938EFFF2F0EE00908B8700417AA700467BA7003D7AB200C68C
+      2700BD8A3100BB8A3300BB8A3300477AA3B03E77A4FF3E77A4FF99938EFFE5DD
+      D8FFE5DDD8FFE5DDD8FF99938EFF3E77A4FF3C77A6FF4179AAAF3879B700C48B
+      2A00BD8A3100BB8A3300BB8A330042759FFFADD2F4FF5997CBFFA7A19BFFD6CB
+      C5FFD6CBC5FFD6CBC5FFA7A19BFF5997CBFFA5D4FFFF3173B0FFC7892100BE89
+      2C00BB893100BB8A3200BB8A33003E729DFFD4E7F8FF5997CBFF7F95A7FF9993
+      8EFF99938EFF988E63FFBC7F14FFB97C12FFBA7C10FFBB7E14FFB87F1BFFB680
+      20FFB78326ACB9872E00BB8932003D709AFFC6DEF0FF5997CBFF5E9ACDFF5E9B
+      CFFF569BD9FFC17F10FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFECDCC4FFB58022A7B9872E003E6F9AFFB9D5EAFF5794C6FF5B97C8FF5B98
+      CAFF5298D5FFBE7D0FFFFFFFFFFFE7D8B1FFE7D8B1FFE7D7B0FFFFFFFFFFAC70
+      05FFFFFFFFFFECDCC4FFB78327AC3E6E99FFACCAE4FF5691C1FF5A93C3FF5994
+      C5FF5093CFFFBE7D0FFFFFFFFFFFEBDDBCFFEBDDBDFFEBDCBBFFFFFFFFFFCFAB
+      6DFFAC7005FFFFFFFFFFB58022FF3E6D97FF9FC1DDFF538EBDFF5791BFFF5691
+      C1FF4C90CAFFBE7D10FFFFFFFFFFEDE3C7FFEDE3C8FFEDE3C7FFF6F0E1FFFFFF
+      FFFFFFFFFFFFFFFFFFFFB47F1EFF3E6C97FF91B6D5FF528BBAFF558CBBFF548D
+      BDFF4A8BC6FFBF7E10FFFFFFFFFFF1E8CFFFF1E8D0FFF1E8D0FFF0E7CFFFF0E6
+      CDFFF0E7CDFFFFFFFFFFB47E1EFF3F6B97FF82ABCCFF5088B5FF528AB6FF518A
+      B8FF4788C0FFBF7E10FFFFFFFFFFF3ECD9FFF3ECD9FFF3ECDAFFF3ECD9FFF3EC
+      D9FFF3ECD8FFFFFFFFFFB47E1EFF3F6B95FF74A1C3FF4F86B1FF5187B2FF4F87
+      B4FF4585BCFFBF7E11FFFFFFFFFFF8F2E5FFF8F2E6FFF8F3E7FFF8F3E7FFF8F2
+      E6FFF8F2E5FFFFFFFFFFB47E1EFF3F6A95FF6594BBFF4C83AEFF4E83AEFF4C83
+      B0FF4180B8FFC07F12FFFFFFFFFFE5D5ACFFE6D6AFFFE6D6AFFFE6D6AFFFE6D6
+      AFFFE5D5ACFFFFFFFFFFB47E1EFF3F6A94FF568AB0FF4C82ABFF4D82ABFF4B82
+      ACFF407EB3FFC08013FFFFFFFFFFE6D6AEFFE6D6AFFFE6D7B0FFE6D7B0FFE6D6
+      AFFFE6D6AEFFFFFFFFFFB57F1FFF3B6088C0406893FF3F6893FF406893FF3E67
+      95FF33649BFFC38419FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFB68124FF000000230000003300000033000000330000
+      003300000033C28722ECB88222FFB57F20FFB57F1FFFB57F1FFFB57F1FFFB57F
+      1FFFB57F20FFB68124FFB7852CF2000000000000000000000000000000000000
+      0000000000000000002E00000033000000330000003300000033000000330000
+      0033000000330000003300000030
     }
   end
   object ApplicationProperties1: TApplicationProperties

@@ -109,6 +109,7 @@ type
     actFileMetricsHalstead: TAction;
     actFileCloseAllOthers: TAction;
     actFileCloseAll: TAction;
+    actFileNewClip: TAction;
     actLayoutReset: TAction;
     actProjDscan: TAction;
     actProjGroupCompileCustomSync: TAction;
@@ -162,6 +163,7 @@ type
     MenuItem106: TMenuItem;
     MenuItem107: TMenuItem;
     MenuItem108: TMenuItem;
+    MenuItem109: TMenuItem;
     MenuItem77: TMenuItem;
     mnuOpts: TMenuItem;
     mnuItemMruGroup: TMenuItem;
@@ -270,6 +272,7 @@ type
     procedure actFileCompileExecute(Sender: TObject);
     procedure actFileDscannerExecute(Sender: TObject);
     procedure actFileMetricsHalsteadExecute(Sender: TObject);
+    procedure actFileNewClipExecute(Sender: TObject);
     procedure actFileNewDubScriptExecute(Sender: TObject);
     procedure actFileRunDubExecute(Sender: TObject);
     procedure actFileRunDubOutExecute(Sender: TObject);
@@ -2956,6 +2959,13 @@ begin
   if fDoc.isNil or not fDoc.isDSource then
     exit;
   metrics.measure(fDoc);
+end;
+
+procedure TCEMainForm.actFileNewClipExecute(Sender: TObject);
+begin
+  newFile;
+  fDoc.setFocus;
+  fDoc.PasteFromClipboard;
 end;
 
 procedure TCEMainForm.actFileNewDubScriptExecute(Sender: TObject);
