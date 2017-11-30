@@ -3026,7 +3026,6 @@ begin
 	  fRunProc.ShowWindow := swoHIDE;
 	  fRunProc.OnReadData := @asyncprocOutput;
 	  fRunProc.OnTerminate:= @asyncprocTerminate;
-    fRunProc.XTermProgram:=consoleProgram;
     getprocInputHandler.addProcess(fRunProc);
   end
   else
@@ -3034,6 +3033,7 @@ begin
     {$IFNDEF WINDOWS}
     fRunProc.Options := fRunProc.Options + [poNewConsole];
     {$ENDIF}
+    fRunProc.XTermProgram:=consoleProgram;
   end;
   if fRunnablesOptions.compiler <> dmd then
     fRunProc.Parameters.add('--compiler=' +
