@@ -3260,9 +3260,11 @@ begin
   break2step := isGutterIconSet(line, giBreakReached);
   removeGutterIcon(line, giBreakSet);
   if assigned(fDebugger) then
+  begin
     fDebugger.removeBreakPoint(fFilename, line);
-  if break2step then
-    addGutterIcon(line, giStep);
+    if break2step and fDebugger.running then
+      addGutterIcon(line, giStep);
+  end;
 end;
 
 procedure TCESynMemo.showHintEvent(Sender: TObject; HintInfo: PHintInfo);
