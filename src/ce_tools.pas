@@ -209,6 +209,7 @@ begin
   fProcess.Executable := exeFullName(fSymStringExpander.expand(fExecutable));
   fProcess.ShowWindow := fShowWin;
   fProcess.CurrentDirectory := fSymStringExpander.expand(fWorkingDir);
+  fProcess.XTermProgram:=consoleProgram;
   for prm in fParameters do if not isStringDisabled(prm) then
     fProcess.Parameters.AddText(fSymStringExpander.expand(prm));
   if fQueryParams then

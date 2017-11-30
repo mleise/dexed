@@ -320,8 +320,10 @@ type
   procedure leadingSpacesToTabs(var value: string; width: integer);
 
 var
-  // supplementatl directories to find background tools
+  // additional directories to find background tools
   additionalPath: string;
+  // terminal used under posix
+  consoleProgram: string;
 
 
 implementation

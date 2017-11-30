@@ -569,6 +569,8 @@ type
     fSplitterScrollSpeed: byte;
     fAutoCheckUpdates: boolean;
     fShowBuildDuration: boolean;
+    function getConsoleProgram: string;
+    procedure setConsoleProgram(const value: string);
     function getAdditionalPATH: string;
     procedure setAdditionalPATH(const value: string);
     function getNativeProjecCompiler: DCompiler;
@@ -577,6 +579,7 @@ type
   published
     property additionalPATH: string read getAdditionalPATH write setAdditionalPath;
     property autoCheckUpdates: boolean read fAutoCheckUpdates write fAutoCheckUpdates;
+    property consoleProgram: string read getConsoleProgram write setConsoleProgram;
     property coverModuleTests: boolean read fCovModUt write fCovModUt;
     property floatingWidgetOnTop: boolean read fFloatingWidgetOnTop write fFloatingWidgetOnTop;
     property reloadLastDocuments: boolean read fReloadLastDocuments write fReloadLastDocuments;
@@ -813,6 +816,17 @@ end;
 function TCEApplicationOptionsBase.getAdditionalPATH: string;
 begin
   exit(ce_common.additionalPath);
+end;
+
+function TCEApplicationOptionsBase.getConsoleProgram: string;
+begin
+  result := ce_common.consoleProgram;
+end;
+
+procedure TCEApplicationOptionsBase.setConsoleProgram(const value: string);
+begin
+  if exeFullName(value).fileExists then
+    ce_common.consoleProgram:=value;
 end;
 
 procedure TCEApplicationOptionsBase.setAdditionalPath(const value: string);
@@ -2792,6 +2806,7 @@ begin
     {$IFNDEF WINDOWS}
     fRunProc.Options := fRunProc.Options + [poNewConsole];
     {$ENDIF}
+    fRunProc.XTermProgram:=consoleProgram;
   end;
   lst := TStringList.Create;
   try
@@ -3011,6 +3026,7 @@ begin
 	  fRunProc.ShowWindow := swoHIDE;
 	  fRunProc.OnReadData := @asyncprocOutput;
 	  fRunProc.OnTerminate:= @asyncprocTerminate;
+    fRunProc.XTermProgram:=consoleProgram;
     getprocInputHandler.addProcess(fRunProc);
   end
   else

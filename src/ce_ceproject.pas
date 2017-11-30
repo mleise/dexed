@@ -709,7 +709,6 @@ var
   nme: string;
   i, j: integer;
 begin
-  //
   for i := 0 to processInfo.simpleCommands.Count-1 do
   begin
     nme := fSymStringExpander.expand(processInfo.simpleCommands[i]);
@@ -723,6 +722,7 @@ begin
       prc.Options:= [poUsePipes, poStderrToOutPut];
       lst.Delete(0);
       prc.Parameters.Assign(lst);
+      prc.XTermProgram:=consoleProgram;
       prc.Execute;
       lst.Clear;
       processOutputToStrings(prc, lst);
@@ -844,6 +844,7 @@ begin
     ChDir(fRunnerOldCwd);
   //
   fRunner := TCEProcess.Create(nil);
+  fRunner.XTermProgram:=consoleProgram;
   currentConfiguration.runOptions.setProcess(fRunner);
   if runArgs.isNotEmpty then
   begin
@@ -872,7 +873,8 @@ begin
     SetCurrentDirUTF8(cwd);
     fRunner.CurrentDirectory := cwd;
   end;
-  if poUsePipes in fRunner.Options then begin
+  if poUsePipes in fRunner.Options then
+  begin
     fRunner.OnReadData := @runProcOutput;
     fRunner.OnTerminate := @runProcOutput;
     getprocInputHandler.addProcess(fRunner);

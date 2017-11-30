@@ -28,10 +28,12 @@ type
     fDepCheck: TDubDependencyCheck;
     fOther: string;
     fCompiler: DCompiler;
+    fShowConsole: boolean;
     procedure setLinkMode(value: TDubLinkMode);
     procedure setCompiler(value: DCompiler);
     function getCompiler: DCompiler;
   published
+    property showConsole: boolean read fShowConsole write fShowConsole default false;
     property compiler: DCompiler read getCompiler write setCompiler;
     property parallel: boolean read fParallel write fParallel;
     property forceRebuild: boolean read fForceRebuild write fForceRebuild;
@@ -647,10 +649,18 @@ begin
     end;
     chDir(fFilename.extractFilePath);
     fDubProc.Executable := 'dub' + exeExt;
-    fDubProc.Options := fDubProc.Options + [poStderrToOutPut, poUsePipes];
+    if not dubBuildOptions.showConsole then
+    begin
+      fDubProc.Options := fDubProc.Options + [poStderrToOutPut, poUsePipes];
+      fDubProc.OnReadData:= @dubProcOutput;
+      fDubProc.ShowWindow := swoHIDE;
+    end
+    else
+    begin
+      fDubProc.Options := fDubProc.Options + [poWaitOnExit, poNewConsole];
+    end;
     fDubProc.CurrentDirectory := fFilename.extractFilePath;
-    fDubProc.ShowWindow := swoHIDE;
-    fDubProc.OnReadData:= @dubProcOutput;
+    fDubProc.XTermProgram:=consoleProgram;
     if not run then
     begin
       fDubProc.Parameters.Add('build');
