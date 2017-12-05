@@ -1076,6 +1076,10 @@ begin
   if aMessage.isEmpty then
     exit;
   rng.init(aMessage);
+  {$IFDEF WINDOWS}
+  if (aMessage.length > 3) and (aMessage[2..3] = ':\') then
+    rng.popFrontN(3);
+  {$ENDIF}
   rng.popUntil(['(', ':'])^.popWhile(['(', ':']);
   lne := rng.takeUntil([',', ':', ')', ' ']).yield;
   if rng.front in [',', ':'] then
