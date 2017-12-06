@@ -4,9 +4,9 @@ import
     std.stdio, std.array, std.traits, std.conv, std.json, std.format,
     std.algorithm;
 import
-    iz.memory;
+    iz.memory, iz.containers;
 import
-    dparse.lexer, dparse.ast, dparse.parser;
+    dparse.lexer, dparse.ast, dparse.parser, dparse.formatter : Formatter;
 import
     common;
 
@@ -74,6 +74,8 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
         static JSONValue* jarray;
     }
 
+    static Array!(char) funcNameApp;
+    static Formatter!(typeof(&funcNameApp)) fmtVisitor;
     static uint utc;
 
     this(bool deep)
@@ -94,6 +96,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             json = parseJSON("[]");
             jarray = &json;
         }
+        fmtVisitor = construct!(typeof(fmtVisitor))(&funcNameApp);
     }
 
     static void addAstErrors(AstErrors errors)
@@ -156,10 +159,9 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
                 if (dt.parameters && dt.parameters.parameters &&
                     dt.parameters.parameters.length)
                 {
-                    import dparse.formatter : fmtNode = format;
-                    Appender!string app;
-                    fmtNode(&app, dt.parameters);
-                    pasStream.put(format("name='%s%s'\r", dt.name.text, app.data));
+                    funcNameApp.length = 0;
+                    fmtVisitor.format(dt.parameters);
+                    pasStream.put(format("name='%s%s'\r", dt.name.text, funcNameApp[]));
                 }
                 else pasStream.put(format("name='%s'\r", dt.name.text));
             }
@@ -187,9 +189,9 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
                     dt.parameters.parameters.length)
                 {
                     import dparse.formatter : fmtNode = format;
-                    Appender!string app;
-                    fmtNode(&app, dt.parameters);
-                    item["name"] = JSONValue(dt.name.text ~ app.data);
+                    funcNameApp.length = 0;
+                    fmtVisitor.format(dt.parameters);
+                    item["name"] = JSONValue(dt.name.text ~ app.funcNameApp[]);
                 }
                 else item["name"] = JSONValue(dt.name.text);
             }
