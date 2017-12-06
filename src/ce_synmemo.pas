@@ -743,7 +743,6 @@ begin
   parent := editor;
   width := 475;
   height := 275;
-  CaptureMouseButtons:=[];
 
   fMemo:= TSynEdit.Create(self);
   fMemo.Parent := self;
@@ -787,7 +786,7 @@ procedure TCEScrollMemo.SetVisible(Value: Boolean);
 var
   o: boolean;
 begin
-  o := IsVisible();
+  o := Visible;
   inherited;
   if (o <> value) and value then
     updateFromSource;
@@ -795,6 +794,8 @@ end;
 
 procedure TCEScrollMemo.goToLine(value: integer);
 begin
+  if fMemo.PaintLock <> 0 then
+    exit;
   if value > fMemo.Lines.Count then
     value := fMemo.Lines.Count
   else if value < 1 then
@@ -1011,6 +1012,7 @@ begin
   if not fFocusForInput then
     subjDocFocused(TCEMultiDocSubject(fMultiDocSubject), self);
   fFocusForInput := true;
+  fScrollMemo.Visible:=false;
 end;
 
 procedure TCESynMemo.DoExit;
