@@ -618,7 +618,7 @@ implementation
 {$R *.lfm}
 
 uses
-  SynMacroRecorder, ce_dcd;
+  SynMacroRecorder, ce_dcd, openssl, dynlibs;
 
 {$REGION TCERunnableOptions ----------------------------------------------------}
 constructor TCERunnableOptions.create(aOwner: TComponent);
@@ -1755,53 +1755,81 @@ begin
 end;
 
 function checkForUpdate: string;
+const
+  updURL = 'https://api.github.com/repos/BBasile/Coedit/releases/latest';
 var
   prs: TJSONParser = nil;
   dat: TJSONData = nil;
   tgg: TJSONData = nil;
   url: TJSONData = nil;
-  str: string;
-  cli: TFPHTTPClient;
+  str: string = '';
+  cli: TFPHTTPClient = nil;
   lst: TStringList = nil;
   res: TResourceStream = nil;
   svo: TSemVer;
   sva: TSemVer;
 begin
   result := '';
-  cli := TFPHTTPClient.Create(nil);
-  try
+
+  if openssl.IsSSLloaded then
+  begin
     try
-      cli.AddHeader('User-Agent','Mozilla/5.0 (compatible; fpweb)');
-      str := cli.Get('https://api.github.com/repos/BBasile/Coedit/releases/latest');
-      prs := TJSONParser.Create(str, [joUTF8, joIgnoreTrailingComma]);
-      dat := prs.Parse;
-      if dat.isNotNil then
-      begin
-        url := dat.FindPath('html_url');
-        tgg := dat.FindPath('tag_name');
-        if url.isNotNil and tgg.isNotNil then
-        begin
-          res:= TResourceStream.Create(HINSTANCE, 'VERSION', RT_RCDATA);
-          lst := TstringList.Create;
-          lst.LoadFromStream(res);
-          str := lst.Text;
-          sva.init(str, false);
-          str := tgg.AsString;
-          svo.init(str, false);
-          if svo.valid and sva.valid and (svo > sva) then
-            result := url.AsString;
-        end;
+      cli := TFPHTTPClient.Create(nil);
+      try
+        cli.AllowRedirect:=true;
+        cli.AddHeader('User-Agent','Mozilla/5.0 (compatible; fpweb)');
+        str := cli.Get(updURL);
+      finally
+        cli.free;
       end;
     except
-      dlgOkError('The latest release cannot be determined');
+      dlgOkError('The latest release cannot be determined (HTTP client)');
+    end;
+  end
+
+  else if not openssl.IsSSLloaded and exeFullName('curl').isNotEmpty then
+  begin
+    if not process.RunCommand('curl', [updURL], str) then
+    begin
+      dlgOkError('The latest release cannot be determined (CURL)');
+      exit;
+    end
+  end
+  else
+  begin
+    dlgOkInfo('No suitable tool can be used to determine the latest version.' +
+              'Install at least CURL as a command line tool, visible in the PATH.' +
+              'Newest OpenSSL versions (>= 1.1) are currently not supported');
+    exit;
+  end;
+
+  prs := TJSONParser.Create(str, [joUTF8, joIgnoreTrailingComma]);
+  try
+    dat := prs.Parse;
+    if dat.isNotNil then
+    begin
+      url := dat.FindPath('html_url');
+      tgg := dat.FindPath('tag_name');
+      if url.isNotNil and tgg.isNotNil and (tgg.AsString <> '3_update_5') then
+      begin
+        res:= TResourceStream.Create(HINSTANCE, 'VERSION', RT_RCDATA);
+        lst := TstringList.Create;
+        lst.LoadFromStream(res);
+        str := lst.Text;
+        sva.init(str, false);
+        str := tgg.AsString;
+        svo.init(str, false);
+        if svo.valid and sva.valid and (svo > sva) then
+          result := url.AsString;
+      end;
     end;
   finally
-    cli.free;
-    prs.free;
+    prs.Free;
     dat.free;
     lst.free;
     res.free;
   end;
+
 end;
 
 procedure TCEMainForm.DoFirstShow;
