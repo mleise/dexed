@@ -151,7 +151,22 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             pasStream.put("\ritem\r");
             pasStream.put(format("line=%d\r", dt.name.line));
             pasStream.put(format("col=%d\r", dt.name.column));
-            pasStream.put(format("name='%s'\r", dt.name.text));
+            static if (is(DT == FunctionDeclaration))
+            {
+                if (dt.parameters && dt.parameters.parameters &&
+                    dt.parameters.parameters.length)
+                {
+                    import dparse.formatter : fmtNode = format;
+                    Appender!string app;
+                    fmtNode(&app, dt.parameters);
+                    pasStream.put(format("name='%s%s'\r", dt.name.text, app.data));
+                }
+                else pasStream.put(format("name='%s'\r", dt.name.text));
+            }
+            else
+            {
+                pasStream.put(format("name='%s'\r", dt.name.text));
+            }
             pasStream.put("symType=" ~ symbolTypeStrings[st] ~ "\r");
             static if (dig) if (_deep)
             {
@@ -166,7 +181,22 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             JSONValue item = parseJSON("{}");
             item["line"] = JSONValue(dt.name.line);
             item["col"]  = JSONValue(dt.name.column);
-            item["name"] = JSONValue(dt.name.text);
+            static if (is(DT == FunctionDeclaration))
+            {
+                if (dt.parameters && dt.parameters.parameters &&
+                    dt.parameters.parameters.length)
+                {
+                    import dparse.formatter : fmtNode = format;
+                    Appender!string app;
+                    fmtNode(&app, dt.parameters);
+                    item["name"] = JSONValue(dt.name.text ~ app.data);
+                }
+                else item["name"] = JSONValue(dt.name.text);
+            }
+            else
+            {
+                item["name"] = JSONValue(dt.name.text);
+            }
             item["type"] = JSONValue(symbolTypeStrings[st]);
             static if (dig) if (_deep)
             {
