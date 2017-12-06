@@ -1,7 +1,7 @@
 object CEDiffViewer: TCEDiffViewer
-  Left = 534
+  Left = 1004
   Height = 441
-  Top = 292
+  Top = 279
   Width = 516
   Caption = 'External file modification'
   ClientHeight = 441
@@ -9,7 +9,7 @@ object CEDiffViewer: TCEDiffViewer
   LCLVersion = '1.6.4.0'
   inline editor: TSynEdit
     Left = 4
-    Height = 321
+    Height = 323
     Top = 76
     Width = 508
     Align = alClient
@@ -112,22 +112,23 @@ object CEDiffViewer: TCEDiffViewer
   end
   object Panel1: TPanel
     Left = 4
-    Height = 36
-    Top = 401
+    Height = 34
+    Top = 403
     Width = 508
     Align = alBottom
     BorderSpacing.Around = 4
     BevelOuter = bvLowered
-    ClientHeight = 36
+    ClientHeight = 34
     ClientWidth = 508
     TabOrder = 1
     object btnIgnore: TBitBtn
-      Left = 114
-      Height = 32
+      Left = 110
+      Height = 30
       Hint = 'Don''t show this dialog until more modifications are detected'
       Top = 2
       Width = 130
       Align = alRight
+      BorderSpacing.Left = 2
       BorderSpacing.Around = 1
       Caption = 'Never ask again'
       ModalResult = 5
@@ -136,12 +137,13 @@ object CEDiffViewer: TCEDiffViewer
       TabOrder = 0
     end
     object btnAccept: TBitBtn
-      Left = 245
-      Height = 32
+      Left = 243
+      Height = 30
       Hint = 'Load the new version'
       Top = 2
       Width = 130
       Align = alRight
+      BorderSpacing.Left = 2
       BorderSpacing.Around = 1
       Caption = 'Load new version'
       ModalResult = 1
@@ -151,11 +153,12 @@ object CEDiffViewer: TCEDiffViewer
     end
     object btnCancel: TBitBtn
       Left = 376
-      Height = 32
+      Height = 30
       Hint = 'Don''t reload the modifications for now'
       Top = 2
       Width = 130
       Align = alRight
+      BorderSpacing.Left = 2
       BorderSpacing.Around = 1
       Caption = 'Keep current'
       ModalResult = 2
