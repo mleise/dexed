@@ -234,7 +234,6 @@ type
     MenuItem73: TMenuItem;
     MenuItem74: TMenuItem;
     MenuItem75: TMenuItem;
-    MenuItem76: TMenuItem;
     MenuItem78: TMenuItem;
     MenuItem79: TMenuItem;
     MenuItem80: TMenuItem;

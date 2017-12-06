@@ -1,8 +1,8 @@
 object CEMainForm: TCEMainForm
   Left = 383
-  Height = 49
+  Height = 54
   Top = 609
-  Width = 745
+  Width = 687
   AllowDropFiles = True
   Caption = 'Coedit'
   Icon.Data = {
@@ -3025,9 +3025,6 @@ object CEMainForm: TCEMainForm
           77007B7977FF73716FFF6D6B69FF696665FF625F5EFF615E5D007E7C7A007B79
           77FF73716FFF6D6B69FF696665FF63605FFF6461600064616000
         }
-      end
-      object MenuItem76: TMenuItem
-        Caption = '-'
       end
     end
     object MenuItem14: TMenuItem
