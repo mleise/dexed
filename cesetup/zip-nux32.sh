@@ -4,7 +4,7 @@ cd nux32
 mkdir $fld/
 cp * $fld/
 zip -9 \
-../output/coedit.${ver//_}.linux32.zip \
+../output/coedit.${ver:1:100}.linux32.zip \
 $fld/dcd.license.txt $fld/coedit.license.txt \
 $fld/coedit $fld/dastworx \
 $fld/coedit.ico $fld/coedit.png \
