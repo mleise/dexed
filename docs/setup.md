@@ -20,6 +20,14 @@ Note that DMD is only required for the _ddemangle_ tool otherwise the software c
 
 For each platform Coedit can be setup using a setup program or by extracting the binaries.
 
+### Linux dependencies
+
+The software is based on the GTK2 toolkit.
+The runtime libraries must be setup (libgtk2, libglib, libgdk-pixbuf2, etc; they usually comes together, libc).
+You must also setup some theme engines (such as Adwaita, Clearlooks, Nimbus, Industrial, etc).
+
+Windows interface is based on native win32 controls.
+
 ### Setup program
 
 * Go to [the release page](https://github.com/BBasile/Coedit/releases),
