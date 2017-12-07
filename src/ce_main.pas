@@ -618,7 +618,7 @@ implementation
 {$R *.lfm}
 
 uses
-  SynMacroRecorder, ce_dcd, openssl, dynlibs;
+  SynMacroRecorder, ce_dcd, openssl;
 
 {$REGION TCERunnableOptions ----------------------------------------------------}
 constructor TCERunnableOptions.create(aOwner: TComponent);
