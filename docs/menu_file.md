@@ -8,9 +8,10 @@ title: Widgets - application options
 
 ### File menu - reference
 
-- **New empty file**: Adds a new, untyped, file to the source editor.
-- **New runnable module**: adds a new file with a `main()` function. See [runnables modules](features_runnables).
-- **New DUB script**: adds a new file with a `main()` function and an inline DUB description. The file can be executed as a script with **Run DUB single file package** or **Run DUB single file package outside**.
+- **New empty module**: Creates a new empty module.
+- **New runnable module**: Creates a new module with a `main()` function. See [runnables modules](features_runnables).
+- **New module from clipboard**: Creates a new module, immediatly filled with the clipboard content.
+- **New DUB script**: Creates a new module with a `main()` function and an embedded DUB receipt. The module can be executed as a script with **Run DUB single file package** or **Run DUB single file package outside**.
 - **Open file...**: Proposes to open a D source file from an open dialog.
 - **Open recent**: Displays the list of the most recently opened files.
 - **Close file**: Closes the current editor with an optional warning if its content is modified.

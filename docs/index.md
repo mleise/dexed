@@ -10,7 +10,7 @@ title: index
 
 ![](img/coedit_kde4_thumb.png)
 
-This documentation is based on version 3, update 4.
+This documentation is based on version 3.5.1
 
 #### First steps
 

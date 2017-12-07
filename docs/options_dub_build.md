@@ -19,6 +19,7 @@ This category exposes the DUB options that are passed to the build tool each tim
 - **linkMode**: Specifies the way the compiler and linker are invoked.
 - **other**: Displays a list that can be filled with more switches. One item per line.
 - **parallel**: If checked, tries to build using several CPU.
+- **showConsole**: If checked, the [consoleProgram set in the global options](options_application) is shown and used to execute DUB.
 
 See also [the official DUB command line reference](http://code.dlang.org/docs/commandline) for more detailed descriptions.
 

@@ -40,6 +40,7 @@ Options are detected after the first non white character of the script line.
 
 In general the program output is redirected to the [messages](widgets_messages).
 This is true unless the _Compile file and run outside_ or the _Run compiled file outside_ actions are used.
+Note that in this case the [consoleProgram global options](options_application) allows to define the terminal used.
 
 When the program is not run outside, the [process input widget](widgets_process_input) is used to pass input to the runnable.
 
