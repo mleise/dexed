@@ -175,10 +175,11 @@ begin
     fPaths.loadFromFile(fname);
   if not isCompilerValid(dmd) then
     autoDetectDMD;
-  if not isCompilerValid(gdc) then
-    autoDetectGDC;
-  if not isCompilerValid(ldc) then
-    autoDetectLDC;
+  // #148 / #210
+  // if not isCompilerValid(gdc) then
+  //  autoDetectGDC;
+  // if not isCompilerValid(ldc) then
+  //  autoDetectLDC;
   fPathsBackup.Assign(fPaths);
   dataToGui;
 
