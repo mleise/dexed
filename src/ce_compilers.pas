@@ -683,6 +683,14 @@ begin
   if '/usr/include/dmd/phobos'.dirExists then
     fPaths.DmdPhobosPath:='/usr/include/dmd/phobos';
   {$ENDIF}
+  {$IFDEF BSD}
+  if '%%LOCALBASE%%/bin/dmd'.fileExists then
+    fPaths.DmdExeName:='%%LOCALBASE%%/bin/dmd';
+  if '%%LOCALBASE%%/include/dmd/druntime/import'.dirExists then
+    fPaths.DmdRuntimePath:='%%LOCALBASE%%/include/dmd/druntime/import';
+  if '%%LOCALBASE%%/include/dmd/phobos'.dirExists then
+    fPaths.DmdPhobosPath:='%%LOCALBASE%%/include/dmd/phobos';
+  {$ENDIF}
   {$IFDEF DARWIN}
   if '/usr/local/bin/dmd'.fileExists then
     fPaths.DmdExeName:='/usr/local/bin/dmd';
