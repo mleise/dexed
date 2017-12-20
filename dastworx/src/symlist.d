@@ -154,14 +154,14 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             pasStream.put("\ritem\r");
             pasStream.put(format("line=%d\r", dt.name.line));
             pasStream.put(format("col=%d\r", dt.name.column));
-            static if (is(DT == FunctionDeclaration))
+            static if (is(DT == FunctionDeclaration) && false)
             {
                 if (dt.parameters && dt.parameters.parameters &&
                     dt.parameters.parameters.length)
                 {
                     funcNameApp.length = 0;
                     fmtVisitor.format(dt.parameters);
-                    pasStream.put(format("name='%s%s'\r", dt.name.text, funcNameApp[]));
+                    pasStream.put(format("name='%s%s'\r", dt.name.text, patchPascalString(funcNameApp[])));
                 }
                 else pasStream.put(format("name='%s'\r", dt.name.text));
             }
