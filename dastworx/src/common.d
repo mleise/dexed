@@ -195,6 +195,16 @@ private void fillBadVersions()
  */
 string patchPascalString(size_t lenLimit = 0)(string value)
 {
+    bool needed;
+    foreach(i; 0 .. value.length)
+        if (value[i] == '\'')
+    {
+        needed = true;
+        break;
+    }
+    if (!needed)
+        return value;
+
     Appender!string app;
     static if (lenLimit)
         const size_t len = value.length > 100 ? 100 : value.length;
