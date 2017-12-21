@@ -154,7 +154,7 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
             pasStream.put("\ritem\r");
             pasStream.put(format("line=%d\r", dt.name.line));
             pasStream.put(format("col=%d\r", dt.name.column));
-            static if (is(DT == FunctionDeclaration) && false)
+            static if (is(DT == FunctionDeclaration))
             {
                 if (dt.parameters && dt.parameters.parameters &&
                     dt.parameters.parameters.length)
