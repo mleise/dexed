@@ -838,7 +838,13 @@ begin
   try
     // auto folders & files
     if fJSON.findAny('mainSourceFile', item) then
-      fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, item.AsString)));
+    begin
+      pth := item.AsString;
+      if pth.fileExists then
+        fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, pth)))
+      else if expandFilenameEx(fBasePath, pth).fileExists then
+        fSrcs.Add(pth);
+    end;
     tryAddFromFolder(fBasePath + 'src');
     tryAddFromFolder(fBasePath + 'source');
     // custom folders
@@ -857,7 +863,13 @@ begin
     if conf.isNotNil then
     begin
       if conf.findAny('mainSourceFile', item) then
-        fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, item.AsString)));
+      begin
+        pth := item.AsString;
+        if pth.fileExists then
+          fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, pth)))
+        else if expandFilenameEx(fBasePath, pth).fileExists then
+          fSrcs.Add(pth);
+      end;
       // custom folders in current config
       if conf.findArray('sourcePaths', arr) then for i := 0 to arr.Count-1 do
       begin
