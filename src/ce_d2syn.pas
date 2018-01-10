@@ -166,10 +166,13 @@ end;
 
 procedure TSynD2SynRange.copyFrom(source: TSynD2SynRange);
 begin
-  nestedCommentsCount := source.nestedCommentsCount;
-  namedRegionCount := source.namedRegionCount;
-  rangeKinds := source.rangeKinds;
-  rString := source.rString;
+  if assigned(source) then
+  begin
+    nestedCommentsCount := source.nestedCommentsCount;
+    namedRegionCount := source.namedRegionCount;
+    rangeKinds := source.rangeKinds;
+    rString := source.rString;
+  end;
 end;
 
 constructor TSynD2Syn.create(aOwner: TComponent);
@@ -441,6 +444,9 @@ begin
       exit;
     end;
   end;
+
+  if not assigned(fCurrRange) then
+    fCurrRange := TSynD2SynRange.Create(nil);
 
   // line comments / region beg-end
   if (fCurrRange.rangeKinds = []) or (fCurrRange.rangeKinds = [rkAsm])

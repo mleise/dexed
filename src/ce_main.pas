@@ -18,9 +18,9 @@ uses
   ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange, ce_dastworx,
   ce_halstead, ce_profileviewer, ce_semver;
 
-{$IF lcl_fullversion<>1060400}
-  {$STOP 'LCL version is not compatible. 1.6.4 is needed for latest Coedit release'}
-{$ENDIF}
+//{$IF lcl_fullversion<>1060400}
+//  {$STOP 'LCL version is not compatible. 1.6.4 is needed for latest Coedit release'}
+//{$ENDIF}
 
 type
 

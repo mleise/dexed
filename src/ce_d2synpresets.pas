@@ -562,7 +562,7 @@ begin
   fPropEd.PropertyEditorHook.AddHandlerModified(@propEdModified);
   //
   fList.ItemIndex := 0;
-  lstBoxSelChange(nil);
+  //lstBoxSelChange(nil);
   EntitiesConnector.addObserver(self);
 end;
 
