@@ -99,6 +99,8 @@ type
     procedure propEdModified(sender: TObject);
     procedure updateList;
     procedure updateEditor;
+  protected
+    procedure SetVisible(Value: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -271,6 +273,24 @@ begin
   FrameEdges:=frEdges;
   Style:=stl;
   StyleMask:=stlMsk;
+end;
+
+procedure TCED2SynPresetsLoaderForm.SetVisible(Value: Boolean);
+var
+  firstTime: boolean;
+begin
+  inherited;
+  // extracted from the ctor : lazarus 1.8 regression
+  firstTime := fList.ItemIndex = -1;
+  if value and (firstTime or (fList.Items.Count >= 0)) then
+  begin
+    fEditor.Font.Assign(EditorOptions.font);
+    fEditor.Font.Size:=12;
+    fEditor.Font.Name:=EditorOptions.font.Name;
+    if firstTime then
+      fList.ItemIndex := 0;
+    lstBoxSelChange(nil);
+  end;
 end;
 
 constructor TCED2SynPresetsLoaderForm.Create(AOwner: TComponent);
@@ -512,6 +532,7 @@ begin
   fEditor.lines.Add('    int number = 0xDEADBEEF;');
   fEditor.lines.Add('    asm{ xor RAX, RAX; }');
   fEditor.lines.Add('    int error = 12G;');
+  fEditor.lines.Add('    alias fun = () => {};');
   fEditor.lines.Add('}');
   pnl := TPanel.Create(self);
   pnl.Parent := self;
@@ -562,7 +583,6 @@ begin
   fPropEd.PropertyEditorHook.AddHandlerModified(@propEdModified);
   //
   fList.ItemIndex := 0;
-  //lstBoxSelChange(nil);
   EntitiesConnector.addObserver(self);
 end;
 
