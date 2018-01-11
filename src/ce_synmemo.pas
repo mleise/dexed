@@ -249,6 +249,7 @@ type
     procedure dscannerTerminate(sender: TObject);
     procedure removeDscannerWarnings;
     function getDscannerWarning(line: integer): string;
+    function lineHasDscannerWarning(line: integer): boolean;
     procedure InitHintWins;
     function getIfTemp: boolean;
     procedure setDDocDelay(value: Integer);
@@ -2576,6 +2577,16 @@ begin
     if fDscannerResults[i]^.line = line then
       result += format(spec, [fDscannerResults[i]^.column, fDscannerResults[i]^.warning]);
 end;
+
+function TCESynMemo.lineHasDscannerWarning(line: integer): boolean;
+var
+  i: integer;
+begin
+  result := false;
+  for i := 0 to fDscannerResults.count-1 do
+    if fDscannerResults[i]^.line = line then
+      exit(true);
+end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION Coedit memo things ----------------------------------------------------}
@@ -3261,6 +3272,8 @@ begin
     exit;
   break2step := isGutterIconSet(line, giBreakReached);
   removeGutterIcon(line, giBreakSet);
+  if fDscannerEnabled and lineHasDscannerWarning(line) then
+    addGutterIcon(line, giWarn);
   if assigned(fDebugger) then
   begin
     fDebugger.removeBreakPoint(fFilename, line);
@@ -3273,8 +3286,8 @@ procedure TCESynMemo.showHintEvent(Sender: TObject; HintInfo: PHintInfo);
 var
   p: TPoint;
 begin
-  if cursor <> crDefault then
-    exit;
+  //if cursor <> crDefault then
+  //  exit;
   p := ScreenToClient(mouse.CursorPos);
   if p.x > Gutter.MarksPart.Width then
     exit;
