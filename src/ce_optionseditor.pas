@@ -284,7 +284,6 @@ begin
   begin
     nme := aEditor.GetPropInfo^.Name;
     len := nme.length;
-    // TODO-cbugfix: filtering does not work on sub components (see editor options, highlighterDlang)
     if (len > 2) and (nme[len - 2 .. len] = 'Tag') then
       aShow := false
     else if nme = 'Name' then
