@@ -19,6 +19,9 @@ Coedit is mostly programmed in Object Pascal, using the the [Lazarus development
 * `git clone https://github.com/BBasile/Coedit.git`
 * `git submodule update --init --recursive`, to clone the dependencies used by the background tool.
 
+The Lazarus LCL and the FreePascal FCL may require patches that fix bugs or regressions present in the latest Lazarus release and for which Coedit cannot include workarounds.
+Any `.patch` file located in the `patches/` folder should be applied. On linux you'll have to set the write permissions to `/usr/lib64/fpc` and `/usr/lib64/lazarus`.
+
 You're now ready to build Coedit. This can be done in the IDE or using the _lazbuild_ utility.
 
 * With _Lazarus_: 
