@@ -16,7 +16,7 @@ type
 
   TDubDependencyCheck = (dcStandard, dcOffline, dcNo);
 
-  TDubVerbosity = (vDefault, vQuiet, vVerbose, vVeryVerbose, vOnlyWarnAndError, vOnlyError);
+  TDubVerbosity = (default, quiet, verbose, veryVerbose, onlyWarnAndError, onlyError);
 
   (**
    * Stores the build options, always applied when a project is build
@@ -44,7 +44,7 @@ type
     property combined: boolean read fCombined write fCombined;
     property other: string read fOther write fOther;
     property dependenciesCheck: TDubDependencyCheck read fDepCheck write fDepCheck;
-    property verbosity: TDubVerbosity read fVerbosity write fVerbosity default vDefault;
+    property verbosity: TDubVerbosity read fVerbosity write fVerbosity default default;
   public
     procedure assign(source: TPersistent); override;
     procedure getOpts(options: TStrings);
@@ -230,11 +230,6 @@ end;
 procedure TCEDubBuildOptionsBase.getOpts(options: TStrings);
 const
   vb: array[TDubVerbosity] of string = (
-  '',           //vDefault,
-  '--vquiet',   //vQuiet,
-  '-v',         //vVerbose,
-  '--vverbose', //vVeryVerbose,
-  '-q',         //vOnlyWarnAndError,
   '--verror');  //vError
 begin
   if parallel then
@@ -251,7 +246,8 @@ begin
     dcNo: options.Add('--skip-registry=all');
     dcOffline: options.Add('--skip-registry=standard');
   end;
-  options.Add(vb[fVerbosity]);
+  if fVerbosity <> TDubVerbosity.default then
+    options.Add(vb[fVerbosity]);
   if other.isNotEmpty then
     CommandToList(other, options);
 end;
