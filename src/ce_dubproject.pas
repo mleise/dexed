@@ -18,6 +18,8 @@ type
 
   TDubVerbosity = (default, quiet, verbose, veryVerbose, onlyWarnAndError, onlyError);
 
+  TDubArchOverride = (auto, x86, x86_64);
+
   (**
    * Stores the build options, always applied when a project is build
    *)
@@ -29,6 +31,7 @@ type
     fCombined: boolean;
     fDepCheck: TDubDependencyCheck;
     fVerbosity: TDubVerbosity;
+    fArchOverride: TDubArchOverride;
     fOther: string;
     fCompiler: DCompiler;
     fShowConsole: boolean;
@@ -45,6 +48,7 @@ type
     property other: string read fOther write fOther;
     property dependenciesCheck: TDubDependencyCheck read fDepCheck write fDepCheck;
     property verbosity: TDubVerbosity read fVerbosity write fVerbosity default default;
+    property archOverride: TDubArchOverride read fArchOverride write fArchOverride default auto;
   public
     procedure assign(source: TPersistent); override;
     procedure getOpts(options: TStrings);
@@ -223,6 +227,7 @@ begin
     dependenciesCheck:=opts.dependenciesCheck;
     compiler:=opts.compiler;
     verbosity:=opts.verbosity;
+    archOverride:=opts.archOverride;
   end
   else inherited;
 end;
@@ -230,7 +235,17 @@ end;
 procedure TCEDubBuildOptionsBase.getOpts(options: TStrings);
 const
   vb: array[TDubVerbosity] of string = (
+  '',           //auto,
+  '--vquiet',   //quiet,
+  '-v',         //verbose,
+  '--vverbose', //veryVerbose,
+  '-q',         //onlyWarnAndError,
   '--verror');  //vError
+  ao: array [TDubArchOverride] of string = (
+  '',
+  '--arch=x86',
+  '--arch=x86_64'
+  );
 begin
   if parallel then
     options.Add('--parallel');
@@ -248,6 +263,8 @@ begin
   end;
   if fVerbosity <> TDubVerbosity.default then
     options.Add(vb[fVerbosity]);
+  if fArchOverride <> TDubArchOverride.auto then
+    options.Add(ao[fArchOverride]);
   if other.isNotEmpty then
     CommandToList(other, options);
 end;
