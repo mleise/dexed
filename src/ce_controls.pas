@@ -186,7 +186,7 @@ begin
   fHeader := TWinControl.Create(self);
   fHeader.Parent:= self;
   fHeader.Align := alTop;
-  fHeader.Height:= 32;
+  fHeader.Height:= ScaleY(32, 96);
 
   fSplittedPageIndex:=-1;
 
@@ -208,6 +208,7 @@ begin
   fMoveLeftBtn.ShowCaption:=false;
   fMoveLeftBtn.OnClick:=@btnMoveLeftClick;
   fMoveLeftBtn.Hint:='move current page to the left';
+  fMoveLeftBtn.AutoSize:=true;
 
   fMoveRightBtn:= TSpeedButton.Create(self);
   fMoveRightBtn.Parent := fHeader;
@@ -217,6 +218,7 @@ begin
   fMoveRightBtn.ShowCaption:=false;
   fMoveRightBtn.OnClick:=@btnMoveRightClick;
   fMoveRightBtn.Hint:='move current page to the right';
+  fMoveRightBtn.AutoSize:=true;
 
   fAddBtn:= TSpeedButton.Create(self);
   fAddBtn.Parent := fHeader;
@@ -226,6 +228,7 @@ begin
   fAddBtn.ShowCaption:=false;
   fAddBtn.OnClick:=@btnAddClick;
   fAddBtn.Hint:='add a new page';
+  fAddBtn.AutoSize:=true;
 
   fCloseBtn := TSpeedButton.Create(self);
   fCloseBtn.Parent := fHeader;
@@ -235,6 +238,7 @@ begin
   fCloseBtn.ShowCaption:=false;
   fCloseBtn.OnClick:=@btnCloseClick;
   fCloseBtn.Hint:='close current page';
+  fCloseBtn.AutoSize:=true;
 
   fSplitBtn := TSpeedButton.Create(self);
   fSplitBtn.Parent := fHeader;
@@ -244,6 +248,7 @@ begin
   fSplitBtn.ShowCaption:=false;
   fSplitBtn.OnClick:=@btnSplitClick;
   fSplitBtn.Hint:= 'pin or un-pin the page to the right';
+  fSplitBtn.AutoSize:=true;
 
   fContent := TPanel.Create(self);
   fContent.Parent := self;
@@ -252,6 +257,7 @@ begin
   fContent.BevelOuter:= bvNone;
   fContent.BorderStyle:=bsNone;
   fContent.BorderSpacing.Top:=3;
+  fContent.AutoSize:=true;
 
   fSplitter := TSplitter.Create(self);
   fSplitter.Parent := fContent;

@@ -9,16 +9,18 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
   inherited Back: TPanel
     Height = 537
     Width = 551
+    AutoSize = True
     ClientHeight = 537
     ClientWidth = 551
     inherited Content: TPanel
-      Height = 501
+      Height = 500
+      Top = 37
       Width = 551
-      ClientHeight = 501
+      ClientHeight = 500
       ClientWidth = 551
       object list: TListView[0]
         Left = 4
-        Height = 283
+        Height = 282
         Top = 214
         Width = 543
         Align = alClient
@@ -33,17 +35,17 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
           item
             AutoSize = True
             Caption = 'Num calls'
-            Width = 74
+            Width = 75
           end        
           item
             AutoSize = True
             Caption = 'Tree time'
-            Width = 72
+            Width = 71
           end        
           item
             AutoSize = True
             Caption = 'Func time'
-            Width = 75
+            Width = 73
           end        
           item
             AutoSize = True
@@ -53,7 +55,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
           item
             AutoSize = True
             Caption = 'function'
-            Width = 244
+            Width = 246
           end>
         HideSelection = False
         ReadOnly = True
@@ -127,11 +129,13 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
       end
     end
     inherited toolbar: TCEToolBar
+      Height = 31
       Width = 543
       object btnRefresh: TCEToolButton[0]
         Left = 57
         Hint = 'reload current trace log file or auto load from the current directory'
         Top = 0
+        AutoSize = True
         Caption = 'btnRefresh'
         OnClick = btnRefreshClick
         resourceName = 'ARROW_UPDATE'
@@ -141,6 +145,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         Left = 29
         Hint = 'open a trace log file'
         Top = 0
+        AutoSize = True
         Caption = 'btnOpen'
         OnClick = btnOpenClick
         resourceName = 'FOLDER'
@@ -150,14 +155,14 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         Left = 113
         Height = 28
         Top = 0
-        Width = 13
+        AutoSize = True
         Caption = 'button0'
         Style = tbsDivider
         scaledSeparator = False
       end
       object selPieSource: TComboBox[3]
-        Left = 126
-        Height = 36
+        Left = 118
+        Height = 31
         Hint = 'select the pie representation'
         Top = 0
         Width = 154
@@ -179,6 +184,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         Left = 85
         Hint = 'edit profile viewer options'
         Top = 0
+        AutoSize = True
         Caption = 'btnOpts'
         OnClick = btnOptsClick
         resourceName = 'WRENCH'
@@ -188,6 +194,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         Left = 1
         Hint = 'Try to load using the project output path'
         Top = 0
+        AutoSize = True
         Caption = 'btnProj'
         OnClick = btnProjClick
         resourceName = 'LIST'

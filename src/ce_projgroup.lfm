@@ -12,13 +12,14 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
     ClientHeight = 195
     ClientWidth = 328
     inherited Content: TPanel
-      Height = 159
+      Height = 161
+      Top = 34
       Width = 328
-      ClientHeight = 159
+      ClientHeight = 161
       ClientWidth = 328
       object lstProj: TListView[0]
         Left = 4
-        Height = 121
+        Height = 124
         Top = 4
         Width = 320
         Align = alClient
@@ -28,22 +29,22 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
           item
             AutoSize = True
             Caption = 'Name'
-            Width = 47
+            Width = 49
           end        
           item
             AutoSize = True
             Caption = 'Type'
-            Width = 39
+            Width = 40
           end        
           item
             AutoSize = True
             Caption = 'Async'
-            Width = 48
+            Width = 49
           end        
           item
             AutoSize = True
             Caption = 'Configuration'
-            Width = 182
+            Width = 180
           end>
         GridLines = True
         ReadOnly = True
@@ -55,43 +56,47 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
       object Panel2: TPanel[1]
         Left = 4
-        Height = 26
-        Top = 129
+        Height = 25
+        Top = 132
         Width = 320
         Align = alBottom
+        AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 26
+        ClientHeight = 25
         ClientWidth = 320
         TabOrder = 1
         object btnFreeFocus: TSpeedButton
-          Left = 264
-          Height = 26
+          Left = 312
+          Height = 25
           Hint = 'Put the focus on the ungrouped project'
           Top = 0
-          Width = 28
+          Width = 4
           Align = alRight
+          AutoSize = True
           Layout = blGlyphBottom
           Spacing = 0
           OnClick = btnFreeFocusClick
         end
         object StaticText1: TStaticText
           Left = 2
-          Height = 22
+          Height = 21
           Top = 2
-          Width = 260
+          Width = 308
           Align = alClient
+          AutoSize = True
           BorderSpacing.Around = 2
           BorderStyle = sbsSunken
           TabOrder = 0
         end
         object btnAddUnfocused: TSpeedButton
-          Left = 292
-          Height = 26
+          Left = 316
+          Height = 25
           Hint = 'Put the ungrouped project in the group'
           Top = 0
-          Width = 28
+          Width = 4
           Align = alRight
+          AutoSize = True
           Layout = blGlyphBottom
           Spacing = 0
           OnClick = btnAddUnfocusedClick
@@ -99,11 +104,13 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
     end
     inherited toolbar: TCEToolBar
+      Height = 28
       Width = 320
       object BtnAddProj: TCEToolButton[0]
         Left = 1
         Hint = 'add a project to the group'
         Top = 0
+        AutoSize = True
         Caption = 'BtnAddProj'
         OnClick = BtnAddProjClick
         resourceName = 'DOCUMENT_ADD'
@@ -113,6 +120,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         Left = 29
         Hint = 'remove the selected project from the group'
         Top = 0
+        AutoSize = True
         Caption = 'btnRemProj'
         OnClick = btnRemProjClick
         resourceName = 'DOCUMENT_DELETE'
@@ -122,6 +130,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         Left = 57
         Hint = 'move the selected project down'
         Top = 0
+        AutoSize = True
         Caption = 'btnMoveDown'
         OnClick = btnMoveDownClick
         resourceName = 'ARROW_DOWN'
@@ -131,15 +140,17 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         Left = 85
         Hint = 'move the selected project up'
         Top = 0
+        AutoSize = True
         Caption = 'btnMoveUp'
         OnClick = btnMoveUpClick
         resourceName = 'ARROW_UP'
         scaledSeparator = False
       end
       object btnAsync: TCEToolButton[4]
-        Left = 129
+        Left = 118
         Hint = 'async compilation mode'
         Top = 0
+        AutoSize = True
         Caption = 'btnAsync'
         OnClick = btnAsyncClick
         resourceName = 'ARROW_DIVIDE'
@@ -149,7 +160,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         Left = 113
         Height = 28
         Top = 0
-        Width = 16
+        AutoSize = True
         Caption = 'button0'
         Style = tbsDivider
         scaledSeparator = False

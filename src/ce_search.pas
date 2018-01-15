@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Menus, StdCtrls, actnList, Buttons, SynEdit, SynEditSearch, SynEditTypes,
   ce_common, ce_mru, ce_widget, ce_synmemo, ce_interfaces, ce_observer,
-  ce_writableComponent, ce_dialogs, ce_sharedres, SynEditTextBuffer;
+  ce_writableComponent, ce_dialogs, ce_sharedres, ce_dsgncontrols,
+  SynEditTextBuffer;
 
 type
 
@@ -61,6 +62,7 @@ type
     chkBack: TCheckBox;
     chkFromCur: TCheckBox;
     chkCaseSens: TCheckBox;
+    FlowPanel1: TFlowPanel;
     grpOpts: TGroupBox;
     imgList: TImageList;
     Panel1: TPanel;
@@ -68,7 +70,9 @@ type
     procedure btnAllScopeClick(Sender: TObject);
     procedure cbReplaceWthChange(Sender: TObject);
     procedure cbToFindChange(Sender: TObject);
+    procedure chkBackChange(Sender: TObject);
     procedure chkEnableRepChange(Sender: TObject);
+    procedure chkFromCurChange(Sender: TObject);
   private
     fDoc: TCESynMemo;
     fToFind: string;
@@ -534,10 +538,20 @@ begin
   updateImperative;
 end;
 
+procedure TCESearchWidget.chkBackChange(Sender: TObject);
+begin
+
+end;
+
 procedure TCESearchWidget.chkEnableRepChange(Sender: TObject);
 begin
   if Updating then exit;
   updateImperative;
+end;
+
+procedure TCESearchWidget.chkFromCurChange(Sender: TObject);
+begin
+
 end;
 
 procedure TCESearchWidget.cbReplaceWthChange(Sender: TObject);

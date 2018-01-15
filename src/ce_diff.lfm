@@ -6,11 +6,11 @@ object CEDiffViewer: TCEDiffViewer
   Caption = 'External file modification'
   ClientHeight = 441
   ClientWidth = 516
-  LCLVersion = '1.6.4.0'
+  LCLVersion = '1.8.0.6'
   inline editor: TSynEdit
     Left = 4
-    Height = 323
-    Top = 76
+    Height = 387
+    Top = 15
     Width = 508
     Align = alClient
     BorderSpacing.Around = 4
@@ -112,22 +112,24 @@ object CEDiffViewer: TCEDiffViewer
   end
   object Panel1: TPanel
     Left = 4
-    Height = 34
-    Top = 403
+    Height = 31
+    Top = 406
     Width = 508
     Align = alBottom
+    AutoSize = True
     BorderSpacing.Around = 4
     BevelOuter = bvLowered
-    ClientHeight = 34
+    ClientHeight = 31
     ClientWidth = 508
     TabOrder = 1
     object btnIgnore: TBitBtn
-      Left = 110
-      Height = 30
+      Left = 168
+      Height = 27
       Hint = 'Don''t show this dialog until more modifications are detected'
       Top = 2
-      Width = 130
+      Width = 116
       Align = alRight
+      AutoSize = True
       BorderSpacing.Left = 2
       BorderSpacing.Around = 1
       Caption = 'Never ask again'
@@ -137,12 +139,13 @@ object CEDiffViewer: TCEDiffViewer
       TabOrder = 0
     end
     object btnAccept: TBitBtn
-      Left = 243
-      Height = 30
+      Left = 287
+      Height = 27
       Hint = 'Load the new version'
       Top = 2
-      Width = 130
+      Width = 124
       Align = alRight
+      AutoSize = True
       BorderSpacing.Left = 2
       BorderSpacing.Around = 1
       Caption = 'Load new version'
@@ -152,12 +155,13 @@ object CEDiffViewer: TCEDiffViewer
       TabOrder = 1
     end
     object btnCancel: TBitBtn
-      Left = 376
-      Height = 30
+      Left = 414
+      Height = 27
       Hint = 'Don''t reload the modifications for now'
       Top = 2
-      Width = 130
+      Width = 92
       Align = alRight
+      AutoSize = True
       BorderSpacing.Left = 2
       BorderSpacing.Around = 1
       Caption = 'Keep current'
@@ -169,18 +173,19 @@ object CEDiffViewer: TCEDiffViewer
   end
   object Panel2: TPanel
     Left = 4
-    Height = 68
+    Height = 7
     Top = 4
     Width = 508
     Align = alTop
+    AutoSize = True
     BorderSpacing.Around = 4
     BevelOuter = bvLowered
-    ClientHeight = 68
+    ClientHeight = 7
     ClientWidth = 508
     TabOrder = 2
     object lbl: TLabel
       Left = 3
-      Height = 62
+      Height = 1
       Top = 3
       Width = 502
       Align = alClient

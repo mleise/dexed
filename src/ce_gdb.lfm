@@ -1,7 +1,7 @@
 inherited CEGdbWidget: TCEGdbWidget
-  Left = 1383
+  Left = 840
   Height = 668
-  Top = 333
+  Top = 219
   Width = 517
   Caption = 'GDB commander'
   ClientHeight = 668
@@ -10,36 +10,39 @@ inherited CEGdbWidget: TCEGdbWidget
     Height = 662
     Top = 6
     Width = 517
+    AutoSize = True
     ClientHeight = 662
     ClientWidth = 517
     inherited Content: TPanel
-      Height = 626
+      Height = 628
+      Top = 34
       Width = 517
-      ClientHeight = 626
+      ClientHeight = 628
       ClientWidth = 517
       object Panel1: TPanel[0]
         Left = 0
-        Height = 385
+        Height = 388
         Top = 205
         Width = 517
         Align = alClient
+        AutoSize = True
         BevelOuter = bvNone
-        ClientHeight = 385
+        ClientHeight = 388
         ClientWidth = 517
         TabOrder = 0
         object GroupBox3: TGroupBox
           Left = 0
-          Height = 179
+          Height = 182
           Top = 206
           Width = 517
           Align = alClient
           Caption = 'CPU'
-          ClientHeight = 160
+          ClientHeight = 163
           ClientWidth = 513
           TabOrder = 0
           object cpuViewer: TTIPropertyGrid
             Left = 0
-            Height = 160
+            Height = 163
             Hint = 'cpu registers'
             Top = 0
             Width = 513
@@ -155,30 +158,32 @@ inherited CEGdbWidget: TCEGdbWidget
       end
       object Panel3: TPanel[1]
         Left = 4
-        Height = 28
-        Top = 594
+        Height = 27
+        Top = 597
         Width = 509
         Align = alBottom
+        AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 28
+        ClientHeight = 27
         ClientWidth = 509
         TabOrder = 1
         object btnSendCom: TSpeedButton
-          Left = 480
-          Height = 26
+          Left = 504
+          Height = 25
           Top = 1
-          Width = 28
+          Width = 4
           Align = alRight
+          AutoSize = True
           BorderSpacing.Around = 1
           OnClick = btnSendComClick
         end
         object Edit1: TComboBox
           Left = 0
-          Height = 28
+          Height = 27
           Hint = 'enter a custom GDB command or the program input with ">"'
           Top = 0
-          Width = 479
+          Width = 503
           Align = alClient
           AutoComplete = True
           AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
@@ -250,10 +255,10 @@ inherited CEGdbWidget: TCEGdbWidget
           ClientWidth = 513
           object lstThreads: TListView
             Left = 0
-            Height = 164
+            Height = 169
             Hint = 'call stack'
             Top = 0
-            Width = 509
+            Width = 513
             Align = alClient
             AutoSort = False
             AutoWidthLastColumn = True
@@ -306,9 +311,9 @@ inherited CEGdbWidget: TCEGdbWidget
           ClientWidth = 513
           object dbgeeOptsEd: TTIPropertyGrid
             Left = 2
-            Height = 160
+            Height = 165
             Top = 2
-            Width = 505
+            Width = 509
             Align = alClient
             BorderSpacing.Around = 2
             CheckboxForBoolean = True
@@ -325,20 +330,23 @@ inherited CEGdbWidget: TCEGdbWidget
       end
     end
     inherited toolbar: TCEToolBar
+      Height = 28
       Width = 509
       object btnStack: TCEToolButton[0]
-        Left = 249
+        Left = 238
         Hint = 'view call stack'
         Top = 0
+        AutoSize = True
         Caption = 'btnStack'
         OnClick = btnStackClick
         resourceName = 'LIST'
         scaledSeparator = False
       end
       object btnReg: TCEToolButton[1]
-        Left = 221
+        Left = 210
         Hint = 'update CPU registers values'
         Top = 0
+        AutoSize = True
         Caption = 'btnReg'
         OnClick = btnRegClick
         resourceName = 'PROCESSOR'
@@ -348,7 +356,7 @@ inherited CEGdbWidget: TCEGdbWidget
         Left = 205
         Height = 28
         Top = 0
-        Width = 16
+        AutoSize = True
         Caption = 'button4'
         Style = tbsDivider
         scaledSeparator = False
@@ -357,6 +365,7 @@ inherited CEGdbWidget: TCEGdbWidget
         Left = 97
         Hint = 'pause debugging'
         Top = 0
+        AutoSize = True
         Caption = 'btnPause'
         OnClick = btnPauseClick
         resourceName = 'PAUSE'
@@ -366,6 +375,7 @@ inherited CEGdbWidget: TCEGdbWidget
         Left = 41
         Hint = 'stop debugging'
         Top = 0
+        AutoSize = True
         Caption = 'btnStop'
         OnClick = btnStopClick
         resourceName = 'STOP'
@@ -375,6 +385,7 @@ inherited CEGdbWidget: TCEGdbWidget
         Left = 69
         Hint = 'continue debugging'
         Top = 0
+        AutoSize = True
         Caption = 'btnContinue'
         OnClick = btnContClick
         resourceName = 'PLAY'
@@ -384,6 +395,7 @@ inherited CEGdbWidget: TCEGdbWidget
         Left = 125
         Hint = 'step to next instruction, including in calls'
         Top = 0
+        AutoSize = True
         Caption = 'btnNext'
         DropdownMenu = mnuNext
         OnClick = btnNextClick
@@ -395,6 +407,7 @@ inherited CEGdbWidget: TCEGdbWidget
         Left = 165
         Hint = 'step to the next instruction, excluding calls'
         Top = 0
+        AutoSize = True
         Caption = 'btnOver'
         DropdownMenu = mnuStep
         OnClick = btnOverClick
@@ -403,9 +416,10 @@ inherited CEGdbWidget: TCEGdbWidget
         scaledSeparator = False
       end
       object btnVariables: TCEToolButton[8]
-        Left = 277
+        Left = 266
         Hint = 'update variables list'
         Top = 0
+        AutoSize = True
         Caption = 'btnVariables'
         OnClick = btnVariablesClick
         resourceName = 'WATCH_WINDOW'
@@ -415,6 +429,7 @@ inherited CEGdbWidget: TCEGdbWidget
         Left = 1
         Hint = 'start debugging'
         Top = 0
+        AutoSize = True
         Caption = 'btnStart'
         DropdownMenu = mnuProjRunnable
         OnClick = btnStartClick
@@ -423,9 +438,10 @@ inherited CEGdbWidget: TCEGdbWidget
         scaledSeparator = False
       end
       object btnWatch: TCEToolButton[10]
-        Left = 305
+        Left = 294
         Hint = 'add a watchpoint for the variable selected in the list'
         Top = 0
+        AutoSize = True
         Caption = 'btnWatch'
         DropdownMenu = mnuWatch
         OnClick = btnWatchClick
@@ -434,9 +450,10 @@ inherited CEGdbWidget: TCEGdbWidget
         scaledSeparator = False
       end
       object btnEval: TCEToolButton[11]
-        Left = 345
+        Left = 334
         Hint = 'evaluate either a variable from the list or a custom expression'
         Top = 0
+        AutoSize = True
         Caption = 'btnEval'
         DropdownMenu = mnuEval
         OnClick = btnEvalClick

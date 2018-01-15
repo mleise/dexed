@@ -1,39 +1,41 @@
 object CompilersPathsEditor: TCompilersPathsEditor
-  Left = 749
-  Height = 869
-  Top = 128
+  Left = 1347
+  Height = 900
+  Top = 0
   Width = 460
   Caption = 'CompilersPathsEditor'
-  ClientHeight = 869
+  ClientHeight = 900
   ClientWidth = 460
-  LCLVersion = '1.6.4.0'
+  LCLVersion = '1.8.0.6'
   object ScrollBox1: TScrollBox
     Left = 0
-    Height = 869
+    Height = 900
     Top = 0
     Width = 460
-    HorzScrollBar.Page = 111
-    VertScrollBar.Page = 864
+    HorzScrollBar.Page = 116
+    VertScrollBar.Page = 897
     Align = alClient
-    ClientHeight = 865
-    ClientWidth = 456
+    AutoSize = True
+    ClientHeight = 898
+    ClientWidth = 458
     TabOrder = 0
     object grpDMD: TGroupBox
       Left = 0
-      Height = 160
-      Top = 64
-      Width = 456
+      Height = 169
+      Top = 52
+      Width = 458
       Align = alTop
+      AutoSize = True
       Caption = 'DMD'
-      ClientHeight = 130
-      ClientWidth = 452
+      ClientHeight = 150
+      ClientWidth = 454
       TabOrder = 0
       object selDMDexe: TFileNameEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the compiler'
-        Top = 19
-        Width = 448
+        Top = 23
+        Width = 450
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -47,10 +49,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selDMDrt: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of druntime sources'
-        Top = 60
-        Width = 448
+        Top = 73
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -63,10 +65,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selDMDstd: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of phobos sources'
-        Top = 101
-        Width = 448
+        Top = 123
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -79,51 +81,55 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object StaticText1: TStaticText
         Left = 0
-        Height = 17
+        Height = 21
         Top = 0
-        Width = 452
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'compiler'
         TabOrder = 3
       end
       object StaticText2: TStaticText
         Left = 0
-        Height = 17
-        Top = 41
-        Width = 452
+        Height = 21
+        Top = 50
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Runtime sources'
         TabOrder = 4
       end
       object StaticText3: TStaticText
         Left = 0
-        Height = 17
-        Top = 82
-        Width = 452
+        Height = 21
+        Top = 100
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Phobos sources'
         TabOrder = 5
       end
     end
     object grpGDC: TGroupBox
       Left = 0
-      Height = 160
-      Top = 224
-      Width = 456
+      Height = 169
+      Top = 221
+      Width = 458
       Align = alTop
+      AutoSize = True
       Caption = 'GDC'
-      ClientHeight = 130
-      ClientWidth = 452
+      ClientHeight = 150
+      ClientWidth = 454
       TabOrder = 1
       object selGDCexe: TFileNameEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the compiler'
-        Top = 19
-        Width = 448
+        Top = 23
+        Width = 450
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -137,10 +143,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selGDCrt: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of druntime sources'
-        Top = 60
-        Width = 448
+        Top = 73
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -153,10 +159,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selGDCstd: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of phobos sources'
-        Top = 101
-        Width = 448
+        Top = 123
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -169,51 +175,55 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object StaticText4: TStaticText
         Left = 0
-        Height = 17
+        Height = 21
         Top = 0
-        Width = 452
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'compiler'
         TabOrder = 3
       end
       object StaticText5: TStaticText
         Left = 0
-        Height = 17
-        Top = 41
-        Width = 452
+        Height = 21
+        Top = 50
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Runtime sources'
         TabOrder = 4
       end
       object StaticText6: TStaticText
         Left = 0
-        Height = 17
-        Top = 82
-        Width = 452
+        Height = 21
+        Top = 100
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Phobos sources'
         TabOrder = 5
       end
     end
     object grpLDC: TGroupBox
       Left = 0
-      Height = 160
-      Top = 384
-      Width = 456
+      Height = 169
+      Top = 390
+      Width = 458
       Align = alTop
+      AutoSize = True
       Caption = 'LDC'
-      ClientHeight = 130
-      ClientWidth = 452
+      ClientHeight = 150
+      ClientWidth = 454
       TabOrder = 2
       object selLDCexe: TFileNameEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the compiler'
-        Top = 19
-        Width = 448
+        Top = 23
+        Width = 450
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -227,10 +237,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selLDCrt: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of LDC runtime & phobos sources (can be a common folder)'
-        Top = 60
-        Width = 448
+        Top = 73
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -243,10 +253,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selLDCstd: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of phobos sources (can be empty)'
-        Top = 101
-        Width = 448
+        Top = 123
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -259,51 +269,55 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object StaticText7: TStaticText
         Left = 0
-        Height = 17
+        Height = 21
         Top = 0
-        Width = 452
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'compiler'
         TabOrder = 3
       end
       object StaticText8: TStaticText
         Left = 0
-        Height = 17
-        Top = 41
-        Width = 452
+        Height = 21
+        Top = 50
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Runtime sources'
         TabOrder = 4
       end
       object StaticText9: TStaticText
         Left = 0
-        Height = 17
-        Top = 82
-        Width = 452
+        Height = 21
+        Top = 100
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Phobos sources'
         TabOrder = 5
       end
     end
     object grpUSER1: TGroupBox
       Left = 0
-      Height = 160
-      Top = 544
-      Width = 456
+      Height = 169
+      Top = 559
+      Width = 458
       Align = alTop
+      AutoSize = True
       Caption = 'User 1'
-      ClientHeight = 130
-      ClientWidth = 452
+      ClientHeight = 150
+      ClientWidth = 454
       TabOrder = 3
       object selUSER1exe: TFileNameEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the compiler'
-        Top = 19
-        Width = 448
+        Top = 23
+        Width = 450
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -317,10 +331,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selUSER1rt: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of druntime sources'
-        Top = 60
-        Width = 448
+        Top = 73
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -333,10 +347,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selUSER1std: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of phobos sources'
-        Top = 101
-        Width = 448
+        Top = 123
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -349,51 +363,55 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object StaticText10: TStaticText
         Left = 0
-        Height = 17
+        Height = 21
         Top = 0
-        Width = 452
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'compiler'
         TabOrder = 3
       end
       object StaticText11: TStaticText
         Left = 0
-        Height = 17
-        Top = 41
-        Width = 452
+        Height = 21
+        Top = 50
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Runtime sources'
         TabOrder = 4
       end
       object StaticText12: TStaticText
         Left = 0
-        Height = 17
-        Top = 82
-        Width = 452
+        Height = 21
+        Top = 100
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Phobos sources'
         TabOrder = 5
       end
     end
     object grpUSER2: TGroupBox
       Left = 0
-      Height = 160
-      Top = 704
-      Width = 456
+      Height = 169
+      Top = 728
+      Width = 458
       Align = alTop
+      AutoSize = True
       Caption = 'User 2'
-      ClientHeight = 130
-      ClientWidth = 452
+      ClientHeight = 150
+      ClientWidth = 454
       TabOrder = 4
       object selUSER2exe: TFileNameEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the compiler'
-        Top = 19
-        Width = 448
+        Top = 23
+        Width = 450
         FilterIndex = 0
         HideDirectories = False
         ButtonWidth = 23
@@ -407,10 +425,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selUSER2rt: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of druntime sources'
-        Top = 60
-        Width = 448
+        Top = 73
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -423,10 +441,10 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object selUSER2std: TDirectoryEdit
         Left = 2
-        Height = 20
+        Height = 25
         Hint = 'select the root of phobos sources'
-        Top = 101
-        Width = 448
+        Top = 123
+        Width = 450
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -439,53 +457,57 @@ object CompilersPathsEditor: TCompilersPathsEditor
       end
       object StaticText13: TStaticText
         Left = 0
-        Height = 17
+        Height = 21
         Top = 0
-        Width = 452
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'compiler'
         TabOrder = 3
       end
       object StaticText14: TStaticText
         Left = 0
-        Height = 17
-        Top = 41
-        Width = 452
+        Height = 21
+        Top = 50
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Runtime sources'
         TabOrder = 4
       end
       object StaticText15: TStaticText
         Left = 0
-        Height = 17
-        Top = 82
-        Width = 452
+        Height = 21
+        Top = 100
+        Width = 454
         Align = alTop
         Alignment = taCenter
+        AutoSize = True
         Caption = 'Phobos sources'
         TabOrder = 5
       end
     end
     object GroupBox6: TGroupBox
       Left = 0
-      Height = 64
+      Height = 52
       Top = 0
-      Width = 456
+      Width = 458
       Align = alTop
+      AutoSize = True
       Caption = 'Default compiler for completion'
-      ClientHeight = 34
-      ClientWidth = 452
+      ClientHeight = 33
+      ClientWidth = 454
       TabOrder = 5
       object selDefault: TComboBox
-        Left = 2
-        Height = 30
+        Left = 4
+        Height = 25
         Hint = 'select which the compiler for which the library paths are used by the completion daemon'
-        Top = 2
-        Width = 448
+        Top = 4
+        Width = 446
         Align = alClient
-        BorderSpacing.Around = 2
+        BorderSpacing.Around = 4
         ItemHeight = 0
         ItemIndex = 0
         Items.Strings = (

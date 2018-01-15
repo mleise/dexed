@@ -9,16 +9,18 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
   inherited Back: TPanel
     Height = 297
     Width = 641
+    AutoSize = True
     ClientHeight = 297
     ClientWidth = 641
     inherited Content: TPanel
-      Height = 261
+      Height = 263
+      Top = 34
       Width = 641
-      ClientHeight = 261
+      ClientHeight = 263
       ClientWidth = 641
       object List: TListView[0]
         Left = 4
-        Height = 253
+        Height = 255
         Top = 4
         Width = 633
         Align = alClient
@@ -56,47 +58,53 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
     end
     inherited toolbar: TCEToolBar
+      Height = 28
       Width = 633
       object btnSelProj: TCEToolButton[0]
-        Left = 353
+        Left = 342
         Hint = 'set the project that compiles the selected entry'
         Top = 0
+        AutoSize = True
         Caption = 'button3'
         OnClick = btnSelProjClick
         resourceName = 'SCRIPT_BRICKS'
         scaledSeparator = False
       end
       object btnSelRoot: TCEToolButton[1]
-        Left = 325
+        Left = 314
         Hint = 'set the root of the library sources'
         Top = 0
+        AutoSize = True
         Caption = 'button4'
         OnClick = btnSelRootClick
         resourceName = 'FOLDER_ADD'
         scaledSeparator = False
       end
       object btnSelfoldOfFiles: TCEToolButton[2]
-        Left = 297
+        Left = 286
         Hint = 'select a folder containing several d sources (optional trick)'
         Top = 0
+        AutoSize = True
         Caption = 'button5'
         OnClick = btnSelfoldOfFilesClick
         resourceName = 'BRICKS'
         scaledSeparator = False
       end
       object btnSelFile: TCEToolButton[3]
-        Left = 269
+        Left = 258
         Hint = 'selected the static library file'
         Top = 0
+        AutoSize = True
         Caption = 'button6'
         OnClick = btnSelFileClick
         resourceName = 'FOLDER_BRICK'
         scaledSeparator = False
       end
       object btnEditAlias: TCEToolButton[4]
-        Left = 241
+        Left = 230
         Hint = 'set the entry alias'
         Top = 0
+        AutoSize = True
         Caption = 'button7'
         OnClick = btnEditAliasClick
         resourceName = 'BOOK_EDIT'
@@ -106,7 +114,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 225
         Height = 28
         Top = 0
-        Width = 16
+        AutoSize = True
         Caption = 'button8'
         Style = tbsDivider
         scaledSeparator = False
@@ -115,6 +123,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 197
         Hint = 'activate or dactivate the selected entry'
         Top = 0
+        AutoSize = True
         Caption = 'btnEnabled'
         OnClick = btnEnabledClick
         resourceName = 'BOOK'
@@ -124,6 +133,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 169
         Hint = 'setup a new entry using an online DUB package'
         Top = 0
+        AutoSize = True
         Caption = 'btnDubFetch'
         OnClick = btnDubFetchClick
         resourceName = 'DUB'
@@ -133,6 +143,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 141
         Hint = 'open the project that matches to the selected entry'
         Top = 0
+        AutoSize = True
         Caption = 'btnOpenProj'
         OnClick = btnOpenProjClick
         resourceName = 'BOOK_OPEN'
@@ -142,6 +153,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 113
         Hint = 'register a new entry using the active project'
         Top = 0
+        AutoSize = True
         Caption = 'btnReg'
         OnClick = btnRegClick
         resourceName = 'BOOK_LINK'
@@ -151,6 +163,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 85
         Hint = 'move entry up'
         Top = 0
+        AutoSize = True
         Caption = 'btnMoveUp'
         OnClick = btnMoveUpClick
         resourceName = 'ARROW_UP'
@@ -160,6 +173,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 57
         Hint = 'move entry down'
         Top = 0
+        AutoSize = True
         Caption = 'btnMoveDown'
         OnClick = btnMoveDownClick
         resourceName = 'ARROW_DOWN'
@@ -169,6 +183,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 29
         Hint = 'remove selected entry'
         Top = 0
+        AutoSize = True
         Caption = 'btnRemLib'
         OnClick = btnRemLibClick
         resourceName = 'BOOK_DELETE'
@@ -178,6 +193,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Left = 1
         Hint = 'add a new empty entry'
         Top = 0
+        AutoSize = True
         Caption = 'btnAddLib'
         OnClick = btnAddLibClick
         resourceName = 'BOOK_ADD'

@@ -52,6 +52,7 @@ begin
   inherited;
   propsEd.CheckboxForBoolean := true;
   propsEd.PropertyEditorHook.AddHandlerModified(@propsEdModified);
+  propsEd.DefaultItemHeight:= scaleY(22, 96);
   rebuildToolList;
   setReadOnly(CustomTools.readOnly);
 end;

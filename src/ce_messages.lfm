@@ -9,6 +9,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
   inherited Back: TPanel
     Height = 159
     Width = 844
+    AutoSize = True
     ClientHeight = 159
     ClientWidth = 844
     inherited Content: TPanel
@@ -49,101 +50,106 @@ inherited CEMessagesWidget: TCEMessagesWidget
       ShowCaptions = True
       Wrapable = False
       object button0: TCEToolButton[0]
-        Left = 554
+        Left = 530
         Height = 28
         Top = 0
-        Width = 5
+        AutoSize = True
         Caption = 'button0'
         Style = tbsDivider
         scaledSeparator = False
       end
       object btnSelMisc: TCEToolButton[1]
-        Left = 454
+        Left = 430
         Hint = 'filter the other messages'
         Top = 0
+        AutoSize = True
         Caption = 'Misc'
         scaledSeparator = False
       end
       object button2: TCEToolButton[2]
-        Left = 449
+        Left = 425
         Height = 28
         Top = 0
-        Width = 5
+        AutoSize = True
         Caption = 'button2'
         Style = tbsDivider
         scaledSeparator = False
       end
       object btnSelApp: TCEToolButton[3]
-        Left = 349
+        Left = 325
         Hint = 'filter the messages related to Coedit'
         Top = 0
+        AutoSize = True
         Caption = 'Application'
         scaledSeparator = False
       end
       object button4: TCEToolButton[4]
-        Left = 344
+        Left = 320
         Height = 28
         Top = 0
-        Width = 5
+        AutoSize = True
         Caption = 'button4'
         Style = tbsDivider
         scaledSeparator = False
       end
       object btnSelProj: TCEToolButton[5]
-        Left = 244
+        Left = 220
         Hint = 'filter the messages related to the active project'
         Top = 0
+        AutoSize = True
         Caption = 'Project'
         scaledSeparator = False
       end
       object button6: TCEToolButton[6]
-        Left = 239
+        Left = 215
         Height = 28
         Top = 0
-        Width = 5
+        AutoSize = True
         Caption = 'button6'
         Style = tbsDivider
         scaledSeparator = False
       end
       object btnSelEdit: TCEToolButton[7]
-        Left = 139
+        Left = 115
         Hint = 'filter the messages related to the active editor'
         Top = 0
+        AutoSize = True
         Caption = 'Editor'
         scaledSeparator = False
       end
       object button8: TCEToolButton[8]
-        Left = 134
+        Left = 110
         Height = 28
         Top = 0
-        Width = 5
+        AutoSize = True
         Caption = 'button8'
         Style = tbsDivider
         scaledSeparator = False
       end
       object btnSelAll: TCEToolButton[9]
-        Left = 34
+        Left = 10
         Hint = 'don''t filter the messages'
         Top = 0
+        AutoSize = True
         Caption = 'All'
         Down = True
         scaledSeparator = False
       end
       object button10: TCEToolButton[10]
-        Left = 29
+        Left = 5
         Height = 28
         Top = 0
-        Width = 5
+        AutoSize = True
         Caption = 'button10'
         Style = tbsDivider
         scaledSeparator = False
       end
       object TreeFilterEdit1: TTreeFilterEdit[11]
-        Left = 560
+        Left = 536
         Height = 26
         Hint = 'in the selected category, filter the messages that contain the text typed here'
         Top = 1
-        Width = 275
+        Width = 299
         OnAfterFilter = TreeFilterEdit1AfterFilter
         ButtonWidth = 23
         NumGlyphs = 1
@@ -159,8 +165,9 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Height = 28
         Hint = 'clear the messages that match to the selected category'
         Top = 0
-        Width = 28
+        Width = 4
         Align = alLeft
+        AutoSize = True
       end
     end
   end

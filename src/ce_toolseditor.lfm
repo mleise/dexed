@@ -9,47 +9,50 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
   inherited Back: TPanel
     Height = 280
     Width = 441
+    AutoSize = True
     ClientHeight = 280
     ClientWidth = 441
     inherited Content: TPanel
-      Height = 244
+      Height = 246
+      Top = 34
       Width = 441
-      ClientHeight = 244
+      ClientHeight = 246
       ClientWidth = 441
       object Panel2: TPanel[0]
         Left = 4
-        Height = 236
+        Height = 238
         Top = 4
         Width = 433
         Align = alClient
+        AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 236
+        ClientHeight = 238
         ClientWidth = 433
         TabOrder = 0
         object lstTools: TListBox
           Left = 0
-          Height = 236
+          Height = 238
           Top = 0
           Width = 160
           Align = alLeft
           ItemHeight = 0
           OnDblClick = lstToolsDblClick
           OnSelectionChange = lstToolsSelectionChange
-          ScrollWidth = 156
+          ScrollWidth = 158
           TabOrder = 0
           TopIndex = -1
         end
         object Splitter1: TSplitter
           Left = 160
-          Height = 236
+          Height = 238
           Top = 0
           Width = 5
           AutoSnap = False
         end
         object propsEd: TTIPropertyGrid
           Left = 165
-          Height = 236
+          Height = 238
           Top = 0
           Width = 268
           Align = alClient
@@ -66,11 +69,13 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
       end
     end
     inherited toolbar: TCEToolBar
+      Height = 28
       Width = 433
       object btnRun: TCEToolButton[0]
-        Left = 185
+        Left = 174
         Hint = 'execute selected tool'
         Top = 0
+        AutoSize = True
         Caption = 'btnRun'
         OnClick = btnRunClick
         resourceName = 'APPLICATION_FLASH'
@@ -80,7 +85,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         Left = 169
         Height = 28
         Top = 0
-        Width = 16
+        AutoSize = True
         Caption = 'button1'
         Style = tbsDivider
         scaledSeparator = False
@@ -89,6 +94,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         Left = 141
         Hint = 'clone selected tool'
         Top = 0
+        AutoSize = True
         Caption = 'btnClone'
         OnClick = btnCloneClick
         resourceName = 'APPLICATION_DOUBLE'
@@ -98,6 +104,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         Left = 113
         Hint = 'move selected tool up'
         Top = 0
+        AutoSize = True
         Caption = 'btnMoveUp'
         OnClick = btnMoveUpClick
         resourceName = 'ARROW_UP'
@@ -107,6 +114,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         Left = 85
         Hint = 'move selected tool down'
         Top = 0
+        AutoSize = True
         Caption = 'btnMoveDown'
         OnClick = btnMoveDownClick
         resourceName = 'ARROW_DOWN'
@@ -116,6 +124,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         Left = 57
         Hint = 'remove selected tool'
         Top = 0
+        AutoSize = True
         Caption = 'btnRemTool'
         OnClick = btnRemToolClick
         resourceName = 'APPLICATION_DELETE'
@@ -125,6 +134,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         Left = 29
         Hint = 'add a new empty tool'
         Top = 0
+        AutoSize = True
         Caption = 'btnAddTool'
         OnClick = BtnAddToolClick
         resourceName = 'APPLICATION_ADD'
@@ -134,6 +144,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         Left = 1
         Hint = 'enable or disable edition'
         Top = 0
+        AutoSize = True
         Caption = 'btnEdit'
         OnClick = btnEditClick
         resourceName = 'APPLICATION_EDIT'

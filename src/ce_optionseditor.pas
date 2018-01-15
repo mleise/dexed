@@ -73,6 +73,7 @@ begin
   fEdOptsSubj := TCEEditableOptionsSubject.create;
   inspector.CheckboxForBoolean := true;
   inspector.PropertyEditorHook.AddHandlerModified(@inspectorModified);
+  inspector.DefaultItemHeight:= scaleY(22, 96);
   //
   AssignPng(btnCancel, 'CANCEL');
   AssignPng(btnAccept, 'ACCEPT');

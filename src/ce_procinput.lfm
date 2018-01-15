@@ -1,7 +1,7 @@
 inherited CEProcInputWidget: TCEProcInputWidget
-  Left = 863
+  Left = 837
   Height = 107
-  Top = 397
+  Top = 298
   Width = 558
   Caption = 'Process input'
   ClientHeight = 107
@@ -18,10 +18,11 @@ inherited CEProcInputWidget: TCEProcInputWidget
       ClientWidth = 558
       object txtExeName: TStaticText[0]
         Left = 4
-        Height = 24
+        Height = 21
         Top = 4
         Width = 550
         Align = alTop
+        AutoSize = True
         BorderSpacing.Around = 4
         BorderStyle = sbsSunken
         Caption = 'no process'
@@ -30,21 +31,22 @@ inherited CEProcInputWidget: TCEProcInputWidget
       end
       object Panel1: TPanel[1]
         Left = 4
-        Height = 32
-        Top = 32
+        Height = 31
+        Top = 29
         Width = 550
         Align = alTop
+        AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 32
+        ClientHeight = 31
         ClientWidth = 550
         Enabled = False
         TabOrder = 1
         object txtInp: TEdit
           Left = 0
-          Height = 26
+          Height = 25
           Top = 3
-          Width = 449
+          Width = 530
           Align = alClient
           BorderSpacing.Top = 3
           BorderSpacing.Bottom = 3
@@ -52,32 +54,35 @@ inherited CEProcInputWidget: TCEProcInputWidget
           TabOrder = 0
         end
         object btnClose: TSpeedButton
-          Left = 484
-          Height = 28
+          Left = 538
+          Height = 27
           Hint = 'close standard input'
           Top = 2
-          Width = 31
+          Width = 4
           Align = alRight
+          AutoSize = True
           BorderSpacing.Around = 2
           OnClick = btnCloseClick
         end
         object btnKill: TSpeedButton
-          Left = 517
-          Height = 28
+          Left = 544
+          Height = 27
           Hint = 'kill process'
           Top = 2
-          Width = 31
+          Width = 4
           Align = alRight
+          AutoSize = True
           BorderSpacing.Around = 2
           OnClick = btnKillClick
         end
         object btnSend: TSpeedButton
-          Left = 451
-          Height = 28
+          Left = 532
+          Height = 27
           Hint = 'write content to standard input'
           Top = 2
-          Width = 31
+          Width = 4
           Align = alRight
+          AutoSize = True
           BorderSpacing.Around = 2
           OnClick = btnSendClick
         end

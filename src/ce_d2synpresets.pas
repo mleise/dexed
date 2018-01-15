@@ -280,6 +280,7 @@ var
   firstTime: boolean;
 begin
   inherited;
+  fPropEd.DefaultItemHeight:= scaleY(22, 96);
   // extracted from the ctor : lazarus 1.8 regression
   firstTime := fList.ItemIndex = -1;
   if value and (firstTime or (fList.Items.Count >= 0)) then
@@ -536,6 +537,7 @@ begin
   fEditor.lines.Add('}');
   pnl := TPanel.Create(self);
   pnl.Parent := self;
+  pnl.AutoSize := true;
   pnl.BevelOuter:= bvNone;
   pnl.BevelInner:= bvNone;
   pnl.Align:=alTop;
@@ -548,10 +550,12 @@ begin
   fList.Parent := pnl;
   fList.ReadOnly:=true;
   fList.OnSelect:= @lstBoxSelChange;
+  fList.AutoSize := true;
   updateList;
   //
   btn := TBitBtn.Create(self);
   btn.Parent := pnl;
+  btn.AutoSize := true;
   btn.Width:= 28;
   btn.Align:= alRight;
   btn.OnClick:=@btnAddClick;
@@ -560,6 +564,7 @@ begin
   //
   btn := TBitBtn.Create(self);
   btn.Parent := pnl;
+  btn.AutoSize := true;
   btn.Width:= 28;
   btn.Align:= alRight;
   btn.OnClick:=@btnDelClick;
@@ -568,6 +573,7 @@ begin
   //
   btn := TBitBtn.Create(self);
   btn.Parent := pnl;
+  btn.AutoSize := true;
   btn.Width:= 28;
   btn.Align:= alRight;
   btn.OnClick:=@btnCloneClick;

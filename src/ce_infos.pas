@@ -60,14 +60,14 @@ constructor TToolInfo.Construct(TheOwner: TComponent; kind: TToolInfoKind;
 begin
   Inherited create(TheOwner);
   Align  := alTop;
-  height := 26;
-  width := 200;
+  height :=  ScaleY(26, 96);
+  width := ScaleX(200, 96);
   //
   fLabel := TLabel.Create(self);
   fLabel.AutoSize:=false;
   fLabel.Parent := self;
   fLabel.Align:= alLeft;
-  fLabel.Width:= 70;
+  fLabel.Width:= ScaleX(70, 96);
   fLabel.BorderSpacing.Around := 2;
   fLabel.Hint:= description;
   fLabel.ShowHint:=true;
@@ -75,7 +75,7 @@ begin
   fIco := TSpeedButton.Create(self);
   fIco.Parent := self;
   fIco.Align:= alLeft;
-  fIco.Width:= 22;
+  fIco.Width:= ScaleX(22, 96);
   fIco.Flat:=true;
   fIco.BorderSpacing.Around := 2;
   fIco.OnClick:= @buttonClick;
@@ -88,7 +88,7 @@ begin
   fStatus.BorderSpacing.Around := 2;
   fStatus.BorderStyle := sbsSunken;
   fStatus.AutoSize:=false;
-  fStatus.Width:= 800;
+  fStatus.Width:= ScaleX(800, 96);
   fStatus.Hint:=description;
   fStatus.ShowHint:=true;
   //
@@ -251,7 +251,7 @@ begin
   itm.Parent := boxTools;
   itm.ReAlign;
   //
-  Height := boxTools.ControlCount * 30 + 150;
+  Height := boxTools.ControlCount * ScaleY(30, 96) + GroupBox1.Height + ScaleY(12, 96);
   Realign;
 end;
 

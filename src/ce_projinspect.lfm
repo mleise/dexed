@@ -12,23 +12,24 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
   inherited Back: TPanel
     Height = 258
     Width = 341
+    AutoSize = True
     ClientHeight = 258
     ClientWidth = 341
     inherited Content: TPanel
-      Height = 222
+      Height = 224
+      Top = 34
       Width = 341
-      ClientHeight = 222
+      ClientHeight = 224
       ClientWidth = 341
       PopupMenu = nil
       object Tree: TTreeView[0]
         Left = 2
-        Height = 218
+        Height = 220
         Top = 2
         Width = 337
         Align = alClient
         AutoExpand = True
         BorderSpacing.Around = 2
-        DefaultItemHeight = 16
         DragMode = dmAutomatic
         HideSelection = False
         Images = imgList
@@ -51,11 +52,13 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
       end
     end
     inherited toolbar: TCEToolBar
+      Height = 28
       Width = 333
       object btnRemFold: TCEToolButton[0]
         Left = 85
         Hint = 'remove the selected source parent folder from the project'
         Top = 0
+        AutoSize = True
         Caption = 'btnRemFold'
         OnClick = btnRemFoldClick
         resourceName = 'FOLDER_DELETE'
@@ -65,6 +68,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         Left = 57
         Hint = 'add a folder of sources to the project'
         Top = 0
+        AutoSize = True
         Caption = 'btnAddFold'
         OnClick = btnAddFoldClick
         resourceName = 'FOLDER_ADD'
@@ -74,6 +78,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         Left = 29
         Hint = 'remove selected source from the project'
         Top = 0
+        AutoSize = True
         Caption = 'btnRemFile'
         OnClick = btnRemFileClick
         resourceName = 'DOCUMENT_DELETE'
@@ -83,6 +88,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         Left = 1
         Hint = 'add a source to the project'
         Top = 0
+        AutoSize = True
         Caption = 'btnAddFile'
         OnClick = btnAddFileClick
         resourceName = 'DOCUMENT_ADD'
@@ -90,7 +96,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
       end
       object TreeFilterEdit1: TTreeFilterEdit[4]
         Left = 117
-        Height = 26
+        Height = 24
         Hint = 'filter the source names that contain the text typed here'
         Top = 2
         Width = 214

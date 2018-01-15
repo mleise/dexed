@@ -65,6 +65,7 @@ begin
   inherited;
   fPng := TPortableNetworkGraphic.Create;
   fDPng := TPortableNetworkGraphic.Create;
+  AutoSize := true;
 end;
 
 destructor TCEToolButton.Destroy;
@@ -201,6 +202,7 @@ begin
   EdgeOuter:= esNone;
   Flat := false;
   Transparent := true;
+  AutoSize := true;
 end;
 
 destructor TCEToolBar.Destroy;

@@ -1194,6 +1194,8 @@ begin
   TCEListViewCopyMenu.create(lstVariables);
   TCEListViewCopyMenu.create(lstThreads);
 
+  cpuViewer.DefaultItemHeight := scaleY(22, 96);
+
   updateMenu;
   AssignPng(btnSendCom, 'ACCEPT');
   updateButtonsState;

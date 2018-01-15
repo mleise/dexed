@@ -9,7 +9,7 @@ object CEWidget: TCEWidget
   ClientWidth = 332
   ShowHint = True
   ShowInTaskBar = stNever
-  LCLVersion = '1.6.4.0'
+  LCLVersion = '1.8.0.6'
   object Back: TPanel
     Left = 0
     Height = 121
@@ -27,6 +27,7 @@ object CEWidget: TCEWidget
       Top = 36
       Width = 332
       Align = alClient
+      AutoSize = True
       BevelOuter = bvNone
       PopupMenu = contextMenu
       TabOrder = 0
@@ -36,6 +37,7 @@ object CEWidget: TCEWidget
       Height = 30
       Top = 4
       Width = 324
+      AutoSize = True
       BorderSpacing.Left = 2
       BorderSpacing.Top = 2
       BorderSpacing.Right = 2

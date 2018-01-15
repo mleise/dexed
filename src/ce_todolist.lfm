@@ -9,16 +9,18 @@ inherited CETodoListWidget: TCETodoListWidget
   inherited Back: TPanel
     Height = 337
     Width = 584
+    AutoSize = True
     ClientHeight = 337
     ClientWidth = 584
     inherited Content: TPanel
-      Height = 301
+      Height = 303
+      Top = 34
       Width = 584
-      ClientHeight = 301
+      ClientHeight = 303
       ClientWidth = 584
       object lstItems: TListView[0]
         Left = 4
-        Height = 293
+        Height = 295
         Top = 4
         Width = 576
         Align = alClient
@@ -32,27 +34,26 @@ inherited CETodoListWidget: TCETodoListWidget
           item
             AutoSize = True
             Caption = 'category'
-            Width = 65
+            Width = 67
           end        
           item
             AutoSize = True
             Caption = 'assignee'
-            Width = 64
+            Width = 68
           end        
           item
             AutoSize = True
             Caption = 'status'
-            Width = 49
           end        
           item
             AutoSize = True
             Caption = 'priority'
-            Width = 55
+            Width = 57
           end        
           item
             AutoSize = True
             Caption = 'file'
-            Width = 286
+            Width = 278
           end>
         ReadOnly = True
         SortType = stText
@@ -61,11 +62,13 @@ inherited CETodoListWidget: TCETodoListWidget
       end
     end
     inherited toolbar: TCEToolBar
+      Height = 28
       Width = 576
       object btnGo: TCEToolButton[0]
         Left = 29
         Hint = 'go the TODO item definition'
         Top = 0
+        AutoSize = True
         Caption = 'btnGo'
         resourceName = 'ARROW_PEN'
         scaledSeparator = False
@@ -74,13 +77,14 @@ inherited CETodoListWidget: TCETodoListWidget
         Left = 1
         Hint = 'refresh the TODO items'
         Top = 0
+        AutoSize = True
         Caption = 'btnRefresh'
         resourceName = 'ARROW_UPDATE'
         scaledSeparator = False
       end
       object lstfilter: TListFilterEdit[2]
         Left = 61
-        Height = 26
+        Height = 24
         Hint = 'filter the TODO items that contain the text typed here'
         Top = 2
         Width = 513

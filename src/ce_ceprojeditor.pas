@@ -72,6 +72,7 @@ begin
   inspector.OnEditorFilter := @GridFilter;
   inspector.CheckboxForBoolean := true;
   inspector.PropertyEditorHook.AddHandlerModified(@inspectorModified);
+  inspector.DefaultItemHeight:= scaleY(22, 96);
   //
   EntitiesConnector.addObserver(self);
 end;

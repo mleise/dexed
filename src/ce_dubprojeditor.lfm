@@ -9,16 +9,18 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
   inherited Back: TPanel
     Height = 424
     Width = 407
+    AutoSize = True
     ClientHeight = 424
     ClientWidth = 407
     inherited Content: TPanel
-      Height = 388
+      Height = 390
+      Top = 34
       Width = 407
-      ClientHeight = 388
+      ClientHeight = 390
       ClientWidth = 407
       object propTree: TTreeView[0]
         Left = 4
-        Height = 352
+        Height = 351
         Top = 4
         Width = 399
         Align = alClient
@@ -35,31 +37,33 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
       end
       object Panel1: TPanel[1]
         Left = 2
-        Height = 26
-        Top = 360
+        Height = 29
+        Top = 359
         Width = 403
         Align = alBottom
+        AutoSize = True
         BorderSpacing.Around = 2
         BevelOuter = bvNone
-        ClientHeight = 26
+        ClientHeight = 29
         ClientWidth = 403
         TabOrder = 1
         object edProp: TEdit
           Left = 2
-          Height = 22
+          Height = 25
           Top = 2
-          Width = 371
+          Width = 395
           Align = alClient
           BorderSpacing.Around = 2
           TabOrder = 0
         end
         object btnAcceptProp: TSpeedButton
-          Left = 375
-          Height = 26
+          Left = 399
+          Height = 29
           Hint = 'accept property value'
           Top = 0
-          Width = 28
+          Width = 4
           Align = alRight
+          AutoSize = True
           Layout = blGlyphBottom
           OnClick = btnAcceptPropClick
           ShowCaption = False
@@ -67,11 +71,13 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
       end
     end
     inherited toolbar: TCEToolBar
+      Height = 28
       Width = 399
       object btnUpdate: TCEToolButton[0]
         Left = 85
         Hint = 'reload project'
         Top = 0
+        AutoSize = True
         Caption = 'btnUpdate'
         OnClick = btnRefreshClick
         resourceName = 'ARROW_UPDATE'
@@ -81,6 +87,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         Left = 29
         Hint = 'delete property'
         Top = 0
+        AutoSize = True
         Caption = 'btnDelProp'
         OnClick = btnDelPropClick
         resourceName = 'TEXTFIELD_DELETE'
@@ -90,6 +97,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         Left = 1
         Hint = 'add a property'
         Top = 0
+        AutoSize = True
         Caption = 'btnAddProp'
         OnClick = btnAddPropClick
         resourceName = 'TEXTFIELD_ADD'
@@ -97,7 +105,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
       end
       object fltEdit: TTreeFilterEdit[3]
         Left = 128
-        Height = 26
+        Height = 24
         Hint = 'filter properties'
         Top = 2
         Width = 269
@@ -114,6 +122,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         Left = 57
         Hint = 'clone selected object'
         Top = 0
+        AutoSize = True
         Caption = 'btnCloneObject'
         OnClick = btnCloneObjectClick
         resourceName = 'COPY'
@@ -123,7 +132,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         Left = 113
         Height = 28
         Top = 0
-        Width = 15
+        AutoSize = True
         Caption = 'button1'
         Style = tbsDivider
         scaledSeparator = False

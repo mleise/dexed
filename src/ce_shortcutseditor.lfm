@@ -1,26 +1,26 @@
 object CEShortcutEditor: TCEShortcutEditor
   Left = 0
-  Height = 463
+  Height = 432
   Top = 0
   Width = 424
-  ClientHeight = 463
+  ClientHeight = 432
   ClientWidth = 424
   TabOrder = 0
-  DesignLeft = 678
-  DesignTop = 216
+  DesignLeft = 1365
+  DesignTop = 176
   object Panel1: TPanel
     Left = 0
-    Height = 463
+    Height = 432
     Top = 0
     Width = 424
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 463
+    ClientHeight = 432
     ClientWidth = 424
     TabOrder = 0
     object fltItems: TTreeFilterEdit
       Left = 2
-      Height = 24
+      Height = 25
       Top = 2
       Width = 420
       OnFilterItem = fltItemsFilterItem
@@ -28,21 +28,19 @@ object CEShortcutEditor: TCEShortcutEditor
       NumGlyphs = 1
       Align = alTop
       BorderSpacing.Around = 2
-      AutoSize = False
       MaxLength = 0
       TabOrder = 0
       FilteredTreeview = tree
     end
     object tree: TTreeView
       Left = 2
-      Height = 403
-      Top = 30
+      Height = 347
+      Top = 31
       Width = 420
       Align = alClient
       AutoExpand = True
       BorderSpacing.Top = 2
       BorderSpacing.Around = 2
-      DefaultItemHeight = 16
       HideSelection = False
       ReadOnly = True
       ScrollBars = ssAutoBoth
@@ -53,31 +51,33 @@ object CEShortcutEditor: TCEShortcutEditor
     end
     object Panel2: TPanel
       Left = 2
-      Height = 26
-      Top = 435
+      Height = 50
+      Top = 380
       Width = 420
       Align = alBottom
+      AutoSize = True
       BorderSpacing.Around = 2
       BevelOuter = bvNone
-      ClientHeight = 26
+      ClientHeight = 50
       ClientWidth = 420
       TabOrder = 2
       object btnClear: TSpeedButton
         Left = 2
-        Height = 22
+        Height = 46
         Hint = 'clear shortcut'
         Top = 2
-        Width = 23
+        Width = 4
         Align = alLeft
+        AutoSize = True
         BorderSpacing.Around = 2
         Flat = True
         OnClick = btnClearClick
       end
       object propedit: TTIPropertyGrid
-        Left = 52
-        Height = 26
+        Left = 14
+        Height = 50
         Top = 0
-        Width = 368
+        Width = 406
         Align = alClient
         CheckboxForBoolean = False
         DefaultValueFont.Color = clWindowText
@@ -88,12 +88,13 @@ object CEShortcutEditor: TCEShortcutEditor
         ValueFont.Color = clMaroon
       end
       object btnEdit: TSpeedButton
-        Left = 27
-        Height = 22
+        Left = 8
+        Height = 46
         Hint = 'edit selected shortcut'
         Top = 2
-        Width = 23
+        Width = 4
         Align = alLeft
+        AutoSize = True
         BorderSpacing.Around = 2
         Flat = True
         OnClick = btnEditClick

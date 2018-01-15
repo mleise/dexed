@@ -190,6 +190,7 @@ begin
   EntitiesConnector.addObserver(self);
   propedit.TIObject := propvalue;
   propedit.PropertyEditorHook.AddHandlerModified(@propeditModified);
+  propedit.DefaultItemHeight:= scaleY(22, 96);
 end;
 
 destructor TCEShortcutEditor.destroy;

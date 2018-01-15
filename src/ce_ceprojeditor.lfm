@@ -1,35 +1,38 @@
 inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
   Left = 1467
-  Height = 273
+  Height = 315
   Top = 349
   Width = 445
   Caption = 'CE project editor'
-  ClientHeight = 273
+  ClientHeight = 315
   ClientWidth = 445
   inherited Back: TPanel
-    Height = 273
+    Height = 315
     Width = 445
-    ClientHeight = 273
+    AutoSize = True
+    ClientHeight = 315
     ClientWidth = 445
     inherited Content: TPanel
-      Height = 237
+      Height = 281
+      Top = 34
       Width = 445
-      ClientHeight = 237
+      ClientHeight = 281
       ClientWidth = 445
       object Panel2: TPanel[0]
         Left = 4
-        Height = 229
+        Height = 273
         Top = 4
         Width = 437
         Align = alClient
+        AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 229
+        ClientHeight = 273
         ClientWidth = 437
         TabOrder = 0
         object Tree: TTreeView
           Left = 0
-          Height = 229
+          Height = 273
           Hint = 'filter configuration elements'
           Top = 0
           Width = 160
@@ -63,14 +66,14 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         end
         object Splitter1: TSplitter
           Left = 160
-          Height = 229
+          Height = 273
           Top = 0
           Width = 5
           AutoSnap = False
         end
         object inspector: TTIPropertyGrid
           Left = 165
-          Height = 229
+          Height = 273
           Top = 0
           Width = 272
           Align = alClient
@@ -87,11 +90,13 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
       end
     end
     inherited toolbar: TCEToolBar
+      Height = 28
       Width = 437
       object btnSyncEdit: TCEToolButton[0]
         Left = 85
         Hint = 'activate or deactivate the synchronized edition'
         Top = 0
+        AutoSize = True
         Caption = 'btnSyncEdit'
         OnClick = btnSyncEditClick
         resourceName = 'LINK_BREAK'
@@ -101,6 +106,7 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         Left = 57
         Hint = 'clone the selected configuration'
         Top = 0
+        AutoSize = True
         Caption = 'btnCloneConf'
         OnClick = btnCloneCurrClick
         resourceName = 'COG_GO'
@@ -110,6 +116,7 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         Left = 29
         Hint = 'delete selected configuration'
         Top = 0
+        AutoSize = True
         Caption = 'btnDelConf'
         OnClick = btnDelConfClick
         resourceName = 'COG_DELETE'
@@ -119,6 +126,7 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         Left = 1
         Hint = 'add a new configuration'
         Top = 0
+        AutoSize = True
         Caption = 'btnAddConf'
         OnClick = btnAddConfClick
         resourceName = 'COG_ADD'
@@ -126,7 +134,7 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
       end
       object selConf: TComboBox[4]
         Left = 116
-        Height = 28
+        Height = 26
         Hint = 'select a configuration'
         Top = 1
         Width = 320
