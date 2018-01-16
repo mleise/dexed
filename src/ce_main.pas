@@ -1917,7 +1917,6 @@ const
               '- Project group modified:'#10' %s';
 begin
   canClose := false;
-  SaveLastDocsAndProj;
 
   if checkProjectLock(false) and
     (dlgOkCancel('A project is still being compiled, close anyway ?') <> mrOK) then
@@ -2010,6 +2009,7 @@ begin
     end;
   end;
 
+  SaveLastDocsAndProj;
   CanClose:= true;
   fProjectGroup.closeGroup;
   if assigned(fFreeProj) then
