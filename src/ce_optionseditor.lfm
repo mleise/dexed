@@ -2,41 +2,40 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
   Left = 594
   Height = 493
   Top = 257
-  Width = 559
+  Width = 575
   BorderIcons = [biSystemMenu, biMinimize, biMaximize]
   Caption = 'Options editor'
   ClientHeight = 493
-  ClientWidth = 559
+  ClientWidth = 575
   OnCloseQuery = FormCloseQuery
   inherited Back: TPanel
     Height = 493
-    Width = 559
+    Width = 575
     ClientHeight = 493
-    ClientWidth = 559
+    ClientWidth = 575
     inherited Content: TPanel
       Height = 457
-      Width = 559
+      Width = 575
       ClientHeight = 457
-      ClientWidth = 559
+      ClientWidth = 575
       object pnlBody: TPanel[0]
         Left = 4
-        Height = 415
+        Height = 431
         Top = 4
-        Width = 551
+        Width = 567
         Align = alClient
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 415
-        ClientWidth = 551
+        ClientHeight = 431
+        ClientWidth = 567
         TabOrder = 0
         object selCat: TTreeView
           Left = 0
-          Height = 415
+          Height = 431
           Top = 0
-          Width = 150
+          Width = 182
           Align = alLeft
           AutoExpand = True
-          DefaultItemHeight = 16
           HideSelection = False
           ReadOnly = True
           ScrollBars = ssAutoBoth
@@ -48,20 +47,20 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
           Options = [tvoAutoExpand, tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
         end
         object pnlEd: TPanel
-          Left = 156
-          Height = 415
+          Left = 188
+          Height = 431
           Top = 0
-          Width = 395
+          Width = 379
           Align = alClient
           BevelOuter = bvNone
-          ClientHeight = 415
-          ClientWidth = 395
+          ClientHeight = 431
+          ClientWidth = 379
           TabOrder = 1
           object inspector: TTIPropertyGrid
             Left = 0
-            Height = 415
+            Height = 431
             Top = 0
-            Width = 395
+            Width = 379
             Align = alClient
             CheckboxForBoolean = False
             DefaultValueFont.Color = clWindowText
@@ -76,49 +75,52 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
           end
         end
         object Splitter1: TSplitter
-          Left = 150
-          Height = 415
+          Left = 182
+          Height = 431
           Top = 0
           Width = 6
         end
       end
       object pnlFooter: TPanel[1]
         Left = 4
-        Height = 30
-        Top = 423
-        Width = 551
+        Height = 14
+        Top = 439
+        Width = 567
         Align = alBottom
+        AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvLowered
-        ClientHeight = 30
-        ClientWidth = 551
+        ClientHeight = 14
+        ClientWidth = 567
         TabOrder = 1
         object btnCancel: TSpeedButton
-          Left = 484
-          Height = 24
+          Left = 548
+          Height = 4
           Hint = 'cancel and revert the modifications of the category'
-          Top = 3
-          Width = 30
+          Top = 5
+          Width = 4
           Align = alRight
+          AutoSize = True
           BorderSpacing.Left = 2
-          BorderSpacing.Around = 2
+          BorderSpacing.Around = 4
           OnClick = btnCancelClick
         end
         object btnAccept: TSpeedButton
-          Left = 518
-          Height = 24
+          Left = 558
+          Height = 4
           Hint = 'accept the modifications of the category'
-          Top = 3
-          Width = 30
+          Top = 5
+          Width = 4
           Align = alRight
+          AutoSize = True
           BorderSpacing.Left = 2
-          BorderSpacing.Around = 2
+          BorderSpacing.Around = 4
           OnClick = btnAcceptClick
         end
       end
     end
     inherited toolbar: TCEToolBar
-      Width = 551
+      Width = 567
     end
   end
   inherited contextMenu: TPopupMenu

@@ -74,10 +74,13 @@ begin
   inspector.CheckboxForBoolean := true;
   inspector.PropertyEditorHook.AddHandlerModified(@inspectorModified);
   inspector.DefaultItemHeight:= scaleY(22, 96);
-  //
+  selCat.Width := ScaleX(180, 96);
+  width := ScaleX(600, 96);
+  inspector.SplitterX := inspector.width div 2 + ScaleX(20, 96);
+  inspector.PreferredSplitterX := inspector.SplitterX;
   AssignPng(btnCancel, 'CANCEL');
   AssignPng(btnAccept, 'ACCEPT');
-  //
+
   EntitiesConnector.addSingleService(self);
 end;
 
