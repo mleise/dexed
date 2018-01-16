@@ -1905,7 +1905,7 @@ var
   i: Integer;
   f: string = '';
   p: string = '';
-  g: string =  #9'no';
+  g: string = #9'no';
   c: boolean = false;
   d: TCESynMemo = nil;
   b: TTaskDialogBaseButtonItem = nil;
@@ -1967,15 +1967,22 @@ begin
       MainIcon := TTaskDialogIcon.tdiWarning;
       CommonButtons := [];
       Text := format(s, [f, p, g]);
+
       b := Buttons.Add;
-      b.Caption := 'Quit and loose modifications';
+      b.Caption := 'Quit';
       b.ModalResult := mrOK;
+
       b := Buttons.Add;
-      b.Caption := 'Do not quit for now';
+      b.Caption := 'Save and quit';
+      b.ModalResult := mrAll;
+
+      b := Buttons.Add;
+      b.Caption := 'Do no quit';
       b.ModalResult := mrCancel;
-      if Execute(self.WindowHandle) then
+
+      if Execute then
       begin
-        if ModalResult <> mrOk then
+        if ModalResult = mrCancel then
         begin
           for i := 0 to fMultidoc.documentCount-1 do
           begin
@@ -1983,6 +1990,19 @@ begin
             d.disableFileDateCheck := false;
           end;
           exit;
+        end
+        else if ModalResult = mrAll then
+        begin
+          for i := 0 to fMultidoc.documentCount-1 do
+            if fMultidoc.document[i].modified then
+              fMultidoc.document[i].save;
+          if assigned(fProject) and fProject.modified then
+            fProject.saveToFile(fProject.filename);
+          for i := 0 to fProjectGroup.projectCount-1 do
+            if fProjectGroup.projectModified(i) then
+              fProjectGroup.getProject(i).saveToFile(fProjectGroup.getProject(i).filename);
+          if fProjectGroup.groupModified then
+            fProjectGroup.saveGroup(fProjectGroup.groupFilename);
         end;
       end;
     finally
