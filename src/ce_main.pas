@@ -1903,17 +1903,18 @@ end;
 procedure TCEMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 var
   i: Integer;
-  files: string = '';
-  projs: string = '';
-  group: string =  #9'no';
-  chang: boolean = false;
-  d: TCESynMemo;
+  f: string = '';
+  p: string = '';
+  g: string =  #9'no';
+  c: boolean = false;
+  d: TCESynMemo = nil;
+  b: TTaskDialogBaseButtonItem = nil;
+
 const
   s: string = 'The following content is modified and changes will be lost'#10#10 +
               '- Modified files:'#10' %s '#10 +
               '- Modified projects:'#10' %s '#10 +
-              '- Project group modified:'#10' %s'#10#10 +
-              'Close without saving ?';
+              '- Project group modified:'#10' %s';
 begin
   canClose := false;
   SaveLastDocsAndProj;
@@ -1924,8 +1925,8 @@ begin
 
   if assigned(fFreeProj) and fFreeProj.modified then
   begin
-    projs += #9 + fFreeProj.filename + LineEnding;
-    chang := true;
+    p += #9 + fFreeProj.filename + LineEnding;
+    c := true;
   end;
 
   for i := 0 to fMultidoc.documentCount-1 do
@@ -1934,8 +1935,8 @@ begin
     d.disableFileDateCheck := true;
     if d.modified or (d.fileName = d.tempFilename) then
     begin
-      files += #9 + shortenPath(d.filename) + LineEnding;
-      chang := true;
+      f += #9 + shortenPath(d.filename) + LineEnding;
+      c := true;
     end;
   end;
 
@@ -1943,33 +1944,49 @@ begin
   begin
     if not fProjectGroup.projectModified(i) then
       continue;
-    projs += #9 + shortenPath(fProjectGroup.getProject(i).filename) + LineEnding;
-    chang := true;
+    p += #9 + shortenPath(fProjectGroup.getProject(i).filename) + LineEnding;
+    c := true;
   end;
 
   if fProjectGroup.groupModified then
   begin
-    group := #9'yes';
-    chang := true;
+    g := #9'yes';
+    c := true;
   end;
 
-  if chang then
+  if c then
   begin
     BringToFront;
-    if projs.isEmpty then
-      projs := '(no modified projects)'#10;
-    if files.isEmpty then
-      files := '(no modified files)'#10;
+    if p.isEmpty then
+      p := '(no modified projects)'#10;
+    if f.isEmpty then
+      f := '(no modified files)'#10;
 
-    if MessageDlg('Modified content', format(s, [files, projs, group]),
-      TMsgDlgType.mtConfirmation, [mbOk, mbCancel], '') <> mrOk then
-    begin
-      for i := 0 to fMultidoc.documentCount-1 do
+    with TTaskDialog.Create(nil) do
+    try
+      MainIcon := TTaskDialogIcon.tdiWarning;
+      CommonButtons := [];
+      Text := format(s, [f, p, g]);
+      b := Buttons.Add;
+      b.Caption := 'Quit and loose modifications';
+      b.ModalResult := mrOK;
+      b := Buttons.Add;
+      b.Caption := 'Do not quit for now';
+      b.ModalResult := mrCancel;
+      if Execute(self.WindowHandle) then
       begin
-        d := fMultidoc.getDocument(i);
-        d.disableFileDateCheck := false;
+        if ModalResult <> mrOk then
+        begin
+          for i := 0 to fMultidoc.documentCount-1 do
+          begin
+            d := fMultidoc.getDocument(i);
+            d.disableFileDateCheck := false;
+          end;
+          exit;
+        end;
       end;
-      exit;
+    finally
+      free;
     end;
   end;
 
