@@ -51,6 +51,7 @@ type
     fProjectIndex: integer;
     fItems: TCollection;
     fModified: boolean;
+    fSavedModified: boolean;
     fOnChanged: TNotifyEvent;
     fBasePath: string;
     fSavedIndex: integer;
@@ -79,6 +80,8 @@ type
     procedure openGroup(const fname: string);
     procedure saveGroup(const fname: string);
     procedure closeGroup;
+    procedure saveModified;
+    procedure restoreModified;
     function groupModified: boolean;
     function groupFilename: string;
     function projectCount: integer;
@@ -101,9 +104,6 @@ type
   (**
    * GUI for a project group
    *)
-
-  { TCEProjectGroupWidget }
-
   TCEProjectGroupWidget = class(TCEWidget, ICEProjectObserver)
     BtnAddProj: TCEToolButton;
     btnAddUnfocused: TSpeedButton;
@@ -258,12 +258,12 @@ function TProjectGroup.addItem(const fname: string): TProjectGroupItem;
 var
   it: TCollectionItem;
 begin
-  fModified := true;
   for it in fItems do
   begin
     if SameFileName(TProjectGroupItem(it).absoluteFilename, fname) then
       exit(TProjectGroupItem(it));
   end;
+  fModified := true;
   result := TProjectGroupItem(fItems.Add);
   result.fGroup := self;
   if fBasePath = '' then
@@ -363,10 +363,10 @@ procedure TProjectGroup.addProject(project: ICECommonProject);
 var
   it: TCollectionItem;
 begin
-  fModified := true;
   for it in fItems do
     if SameFileName(TProjectGroupItem(it).absoluteFilename, project.filename) then
       exit;
+  fModified := true;
   it := fItems.Add;
   if fBasePath = '' then
     TProjectGroupItem(it).fFilename := project.filename
@@ -425,6 +425,16 @@ begin
   doChanged;
 end;
 
+procedure TProjectGroup.saveModified;
+begin
+  fSavedModified := fModified;
+end;
+
+procedure TProjectGroup.restoreModified;
+begin
+  fModified := fSavedModified;
+end;
+
 function TProjectGroup.groupModified: boolean;
 var
   i: integer;
@@ -463,10 +473,17 @@ procedure TProjectGroupItem.lazyLoad;
 begin
   if fProj = nil then
   begin
+
+    //setActiveConfigurationIndex changes the project
+    //modified flag
+    projectGroup.saveModified;
+
     fProj := loadProject(absoluteFilename, true);
     fProj.inGroup(true);
     if fProj.getFormat = pfDUB then
       fProj.setActiveConfigurationIndex(fConfigIndex);
+
+    projectGroup.restoreModified;
   end;
 end;
 
