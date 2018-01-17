@@ -1932,7 +1932,7 @@ begin
   begin
     d := fMultidoc.getDocument(i);
     d.disableFileDateCheck := true;
-    if d.modified or (d.fileName = d.tempFilename) then
+    if d.modified or d.isTemporary then
     begin
       f += #9 + shortenPath(d.filename) + LineEnding;
       c := true;
@@ -1993,8 +1993,11 @@ begin
         else if ModalResult = mrAll then
         begin
           for i := 0 to fMultidoc.documentCount-1 do
-            if fMultidoc.document[i].modified then
-              fMultidoc.document[i].save;
+          begin
+            d := fMultidoc.document[i];
+            if d.modified and not d.isTemporary then
+              d.save;
+          end;
           if assigned(fProject) and fProject.modified then
             fProject.saveToFile(fProject.filename);
           for i := 0 to fProjectGroup.projectCount-1 do
