@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, LazFileUtils, SynEditKeyCmds, SynHighlighterLFM, Forms,
   StdCtrls, AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls,
-  Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,  LCLVersion,
+  Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
   {$IFDEF WINDOWS}Windows, {$ENDIF} XMLPropStorage, SynExportHTML, fphttpclient,
   fpjson, jsonparser, jsonscanner,
   ce_common, ce_ceproject, ce_synmemo, ce_writableComponent,
@@ -17,10 +17,6 @@ uses
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor,{$IFDEF UNIX} ce_gdb,{$ENDIF}
   ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange, ce_dastworx,
   ce_halstead, ce_profileviewer, ce_semver;
-
-//{$IF lcl_fullversion<>1060400}
-//  {$STOP 'LCL version is not compatible. 1.6.4 is needed for latest Coedit release'}
-//{$ENDIF}
 
 type
 
