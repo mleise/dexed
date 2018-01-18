@@ -18,10 +18,12 @@ type
     fScaledSeparator: boolean;
     fPng: TPortableNetworkGraphic;
     fDPng: TPortableNetworkGraphic;
+    function  findResourceWithSize(value: integer): boolean;
     procedure setResourceName(const value: string);
     procedure setScaledSeparator(value: boolean);
     procedure setToolBar(value: TToolbar);
   protected
+    procedure reloadPng;
     procedure Paint; override;
     procedure SetEnabled(Value: Boolean); override;
   published
@@ -33,22 +35,31 @@ type
     procedure toBitmap(value: TBitmap);
   end;
 
+  TToolBarScaling = (auto, force16, force24, force32);
+
   (**
    * Toolbar with design-time support for TCEToolbutton
    *)
   TCEToolBar = class(TToolBar)
   protected
     fDesignMenu: TPopupMenu;
+    fToolBarScaling: TToolBarScaling;
     procedure dsgnAdd(style: TToolButtonStyle);
     procedure dsgnAddButton(sender: TObject);
     procedure dsgnAddDivider(sender: TObject);
     procedure dsgnAddSeparator(sender: TObject);
     procedure dsgnAddDropdown(sender: TObject);
     procedure dsgnAddCheckbutton(sender: TObject);
+    procedure setScaling(value: TToolBarScaling);
+    procedure Loaded; override;
   public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
     procedure CMDesignHitTest(var Message: TCMDesignHitTest); message CM_DESIGNHITTEST;
+  published
+    property ButtonHeight stored false;
+    property ButtonWidth stored false;
+    property Scaling: TToolBarScaling read fToolBarScaling write setScaling stored false;
   end;
 
   procedure register;
@@ -82,38 +93,66 @@ begin
   FToolBar := value;
 end;
 
-procedure TCEToolButton.setResourceName(const value: string);
+function TCEToolButton.findResourceWithSize(value: integer): boolean;
 var
-  i,j:integer;
-  px: PRGBAQuad;
-  gr: byte;
+  n: string;
+begin
+  n := resourceName + IntToStr(value);
+  result := FindResource(HINSTANCE, PChar(n), PChar(RT_RCDATA)) <> 0;
+end;
+
+procedure TCEToolButton.reloadPng;
+var
+  i: integer;
+  j: integer;
+  p: PRGBAQuad;
+  g: byte;
+  n: string;
+  h: integer;
+begin
+  fPng.FreeImage;
+  fDPng.FreeImage;
+
+  n := resourceName;
+  h := FToolBar.ButtonHeight;
+
+  if n.IsEmpty then
+    exit;
+
+  if (h > 50) and findResourceWithSize(32) then
+    n += '32'
+  else if (h > 30) and findResourceWithSize(24) then
+    n += '24';
+
+  fPng.LoadFromResourceName(HINSTANCE, n);
+  fDPng.LoadFromResourceName(HINSTANCE, n);
+
+  if fDpng.PixelFormat = pf32bit then
+    for i:= 0 to fDPng.Height-1 do
+  begin
+    {$PUSH}{$HINTS OFF}{$WARNINGS OFF}{$R-}
+    p := PRGBAQuad(fDPng.ScanLine[i]);
+    {$POP}
+    for j:= 0 to fDPng.Width-1 do
+    begin
+      g := (p^.Red div 5) + (p^.Green div 100) * 70 + (p^.Blue div 11);
+      p^.Green:=g;
+      p^.Blue:=g;
+      p^.Red:=g;
+      p += 1;
+    end;
+  end;
+end;
+
+procedure TCEToolButton.setResourceName(const value: string);
 begin
   if fResourceName = value then
     exit;
-  fResourceName:=value;
+  fResourceName := value;
   if csDesigning in ComponentState then
     exit;
   if Style in [tbsButton, tbsDropDown] then
-  begin
-    fPng.FreeImage;
-    fPng.LoadFromResourceName(HINSTANCE, fResourceName);
-    fDPng.FreeImage;
-    fDPng.LoadFromResourceName(HINSTANCE, fResourceName);
-    if fDpng.PixelFormat = pf32bit then for i:= 0 to fDPng.Height-1 do
-    begin
-      {$PUSH}{$HINTS OFF}{$WARNINGS OFF}{$R-}
-      px := PRGBAQuad(fDPng.ScanLine[i]);
-      {$POP}
-      for j:= 0 to fDPng.Width-1 do
-      begin
-        gr := (px^.Red div 5) + (px^.Green div 100) * 70 + (px^.Blue div 11);
-        px^.Green:=gr;
-        px^.Blue:=gr;
-        px^.Red:=gr;
-        px += 1;
-      end;
-    end;
-  end;
+    reloadPng;
   if assigned(fToolBar) then
     FToolBar.Repaint;
 end;
@@ -195,14 +234,10 @@ begin
   borderSpacing.Top := 2;
   borderSpacing.Right := 2;
   borderSpacing.Bottom := 0;
-  height := 30;
-  ButtonHeight := 28;
-  ButtonWidth := 28;
   EdgeInner:= esNone;
   EdgeOuter:= esNone;
   Flat := false;
   Transparent := true;
-  AutoSize := true;
 end;
 
 destructor TCEToolBar.Destroy;
@@ -210,6 +245,45 @@ begin
   if csDesigning in ComponentState then
     fDesignMenu.Free;
   inherited;
+end;
+
+procedure TCEToolBar.Loaded;
+begin
+  inherited;
+  setScaling(auto);
+end;
+
+procedure TCEToolBar.setScaling(value: TToolBarScaling);
+var
+  i: integer;
+begin
+  fToolBarScaling := value;
+  if ((fToolBarScaling = TToolBarScaling.auto) and (ScaleY(16, 96) >= 32)) or
+     (fToolBarScaling = TToolBarScaling.force32) then
+  begin
+    height := 60;
+    ButtonHeight := 56;
+    ButtonWidth := 56;
+  end else
+  if ((fToolBarScaling = TToolBarScaling.auto) and (ScaleY(16, 96) >= 24)) or
+     (fToolBarScaling = TToolBarScaling.force24) then
+  begin
+    height := 44;
+    ButtonHeight := 42;
+    ButtonWidth := 42;
+  end
+  else
+  begin
+    height :=  30;
+    ButtonHeight := 28;
+    ButtonWidth := 28;
+  end;
+
+  for i := 0 to ControlCount-1 do
+    if Controls[i] is TCEToolButton then
+      TCEToolButton(Controls[i]).reloadPng;
+
+  Repaint;
 end;
 
 procedure TCEToolBar.CMDesignHitTest(var Message: TCMDesignHitTest);

@@ -358,6 +358,7 @@ begin
   // allow empty name if owner is nil
   fSyms := TSymbolList.create(nil);
   //
+  TreeFilterEdit1.BorderSpacing.Left:= ScaleX(30,96);
   fOptions := TCESymbolListOptions.Create(self);
   fOptions.Name:= 'symbolListOptions';
   fname := getCoeditDocPath + OptsFname;

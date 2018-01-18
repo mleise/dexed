@@ -13,7 +13,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="105">
+      <Resources Count="107">
         <Resource_0 FileName="../icons/window/layout_add.png" Type="RCDATA" ResourceName="LAYOUT_ADD"/>
         <Resource_1 FileName="../icons/window/layout.png" Type="RCDATA" ResourceName="LAYOUT"/>
         <Resource_2 FileName="../icons/window/application_go.png" Type="RCDATA" ResourceName="APPLICATION_GO"/>
@@ -119,6 +119,8 @@
         <Resource_102 FileName="../icons/other/break_reached.png" Type="RCDATA" ResourceName="BREAK_REACHED"/>
         <Resource_103 FileName="../icons/other/break_set.png" Type="RCDATA" ResourceName="BREAK_SET"/>
         <Resource_104 FileName="../icons/other/debugger_inspect.png" Type="RCDATA" ResourceName="DEBUGGER_INSPECT"/>
+        <Resource_105 FileName="../icons/arrow/arrow_update32.png" Type="RCDATA" ResourceName="ARROW_UPDATE32"/>
+        <Resource_106 FileName="../icons/arrow/arrow_update24.png" Type="RCDATA" ResourceName="ARROW_UPDATE24"/>
       </Resources>
     </General>
     <i18n>
@@ -165,6 +167,10 @@
               <IgnoredMessages idx5024="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dDEBUG"/>
+            <OtherDefines Count="2">
+              <Define0 Value="RELEASE"/>
+              <Define1 Value="GTK_REMOVE_CLIPBOARD_NULL"/>
+            </OtherDefines>
           </Other>
         </CompilerOptions>
       </Item2>

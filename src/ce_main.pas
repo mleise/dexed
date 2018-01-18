@@ -16,7 +16,7 @@ uses
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor,{$IFDEF UNIX} ce_gdb,{$ENDIF}
   ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange, ce_dastworx,
-  ce_halstead, ce_profileviewer, ce_semver;
+  ce_halstead, ce_profileviewer, ce_semver, ce_dsgncontrols;
 
 type
 
@@ -563,6 +563,7 @@ type
     fSplitterScrollSpeed: byte;
     fAutoCheckUpdates: boolean;
     fShowBuildDuration: boolean;
+    fToolBarScaling: TToolBarScaling;
     function getConsoleProgram: string;
     procedure setConsoleProgram(const value: string);
     function getAdditionalPATH: string;
@@ -586,6 +587,7 @@ type
     property flatLook: boolean read fFlatLook write fFlatLook;
     property splitterScrollSpeed: byte read fSplitterScrollSpeed write setSplitterScsrollSpeed;
     property showBuildDuration: boolean read fShowBuildDuration write fShowBuildDuration default false;
+    property toolBarScaling: TToolBarScaling read fToolBarScaling write fToolBarScaling stored false;
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
   end;
@@ -875,6 +877,7 @@ begin
     fAutoCheckUpdates:= fBackup.fAutoCheckUpdates;
     CEMainForm.fDscanUnittests := fDscanUnittests;
     nativeProjectCompiler:= fBackup.nativeProjectCompiler;
+    fToolBarScaling:= fBackup.fToolBarScaling;
   end
   else inherited;
 end;
@@ -893,7 +896,10 @@ begin
     CEMainForm.fDscanUnittests := fDscanUnittests;
     DcdWrapper.port:=fDcdPort;
     for i := 0 to CEMainForm.fWidgList.Count-1 do
+    begin
       CEMainForm.fWidgList.widget[i].toolbarFlat:=fFlatLook;
+      CEMainForm.fWidgList.widget[i].toolbar.Scaling:= fToolBarScaling;
+    end;
   end
   else if target = fBackup then
   begin
@@ -907,6 +913,7 @@ begin
     fBackup.fAutoSaveProjectFiles:= fAutoSaveProjectFiles;
     fBackup.fDscanUnittests:= fDscanUnittests;
     fBackup.fFlatLook:= fFlatLook;
+    fBackup.fToolBarScaling:= fToolBarScaling;
     fBackup.fAutoCheckUpdates:= fAutoCheckUpdates;
     fBackup.fShowBuildDuration:= fShowBuildDuration;
     fBackup.nativeProjectCompiler:= nativeProjectCompiler;

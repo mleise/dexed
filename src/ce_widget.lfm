@@ -23,8 +23,8 @@ object CEWidget: TCEWidget
     TabOrder = 0
     object Content: TPanel
       Left = 0
-      Height = 85
-      Top = 36
+      Height = 83
+      Top = 38
       Width = 332
       Align = alClient
       AutoSize = True
@@ -34,10 +34,8 @@ object CEWidget: TCEWidget
     end
     object toolbar: TCEToolBar
       Left = 4
-      Height = 30
       Top = 4
       Width = 324
-      AutoSize = True
       BorderSpacing.Left = 2
       BorderSpacing.Top = 2
       BorderSpacing.Right = 2
