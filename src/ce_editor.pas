@@ -300,6 +300,8 @@ end;
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEEditorWidget.create(aOwner: TComponent);
+var
+  s: TIconScaledSize;
 begin
   inherited;
   toolbarVisible:=false;
@@ -315,11 +317,36 @@ begin
   pageControl.OnDragDrop:= @ddHandler.DragDrop;
   pageControl.OnDragOver:= @ddHandler.DragOver;
   pageControl.onButtonClick:= @PageControlButtonClick;
-  AssignPng(pageControl.moveLeftButton, 'GO_PREVIOUS');
-  AssignPng(pageControl.moveRightButton, 'GO_NEXT');
-  AssignPng(pageControl.addButton, 'DOCUMENT_ADD');
-  AssignPng(pageControl.closeButton, 'DOCUMENT_DELETE');
-  AssignPng(pageControl.splitButton, 'SPLITTER');
+
+  s := GetIconScaledSize;
+
+  case s of
+    iss16:
+    begin
+      AssignPng(pageControl.moveLeftButton, 'GO_PREVIOUS');
+      AssignPng(pageControl.moveRightButton, 'GO_NEXT');
+      AssignPng(pageControl.addButton, 'DOCUMENT_ADD');
+      AssignPng(pageControl.closeButton, 'DOCUMENT_DELETE');
+      AssignPng(pageControl.splitButton, 'SPLITTER');
+    end;
+    iss24:
+    begin
+      AssignPng(pageControl.moveLeftButton, 'GO_PREVIOUS24');
+      AssignPng(pageControl.moveRightButton, 'GO_NEXT24');
+      AssignPng(pageControl.addButton, 'DOCUMENT_ADD24');
+      AssignPng(pageControl.closeButton, 'DOCUMENT_DELETE24');
+      AssignPng(pageControl.splitButton, 'SPLITTER24');
+    end;
+    iss32:
+    begin
+      AssignPng(pageControl.moveLeftButton, 'GO_PREVIOUS32');
+      AssignPng(pageControl.moveRightButton, 'GO_NEXT32');
+      AssignPng(pageControl.addButton, 'DOCUMENT_ADD32');
+      AssignPng(pageControl.closeButton, 'DOCUMENT_DELETE32');
+      AssignPng(pageControl.splitButton, 'SPLITTER32');
+    end;
+  end;
+
 
   fTokList := TLexTokenList.Create;
   //

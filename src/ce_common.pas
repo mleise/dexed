@@ -16,7 +16,7 @@ uses
   forms, ComCtrls,
   {$ENDIF}
   LazFileUtils, process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils,
-  fpjson;
+  fpjson, graphics;
 
 const
   exeExt = {$IFDEF WINDOWS} '.exe' {$ELSE} ''   {$ENDIF};
@@ -121,6 +121,13 @@ type
   public
     procedure assign(value: TPersistent); override;
   end;
+
+  TIconScaledSize = (iss16, iss24, iss32);
+
+  (**
+   * Indicates the ideal icon size depending on the system DPI settings
+   *)
+  function GetIconScaledSize: TIconScaledSize;
 
   (**
    * Save a component with a readable aspect.
@@ -328,6 +335,17 @@ var
 
 implementation
 
+function GetIconScaledSize: TIconScaledSize;
+var
+  h : integer;
+begin
+  result := TIconScaledSize.iss16;
+  h := ScaleY(16, 96);
+  if h >= 24 then
+    result := TIconScaledSize.iss24;
+  if h >= 32 then
+    result := TIconScaledSize.iss32;
+end;
 
 class function TStringHash.hash(const key: string; maxBucketsPow2: longword): longword;
 var

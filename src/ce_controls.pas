@@ -203,7 +203,7 @@ begin
   fMoveLeftBtn:= TSpeedButton.Create(self);
   fMoveLeftBtn.Parent := fHeader;
   fMoveLeftBtn.Align:= alRight;
-  fMoveLeftBtn.Width:= 28;
+  fMoveLeftBtn.Width:= ScaleX(28,96);
   fMoveLeftBtn.BorderSpacing.Around:= 2;
   fMoveLeftBtn.ShowCaption:=false;
   fMoveLeftBtn.OnClick:=@btnMoveLeftClick;
@@ -213,7 +213,7 @@ begin
   fMoveRightBtn:= TSpeedButton.Create(self);
   fMoveRightBtn.Parent := fHeader;
   fMoveRightBtn.Align:= alRight;
-  fMoveRightBtn.Width:= 28;
+  fMoveRightBtn.Width:= ScaleX(28,96);
   fMoveRightBtn.BorderSpacing.Around:= 2;
   fMoveRightBtn.ShowCaption:=false;
   fMoveRightBtn.OnClick:=@btnMoveRightClick;
@@ -223,7 +223,7 @@ begin
   fAddBtn:= TSpeedButton.Create(self);
   fAddBtn.Parent := fHeader;
   fAddBtn.Align:= alRight;
-  fAddBtn.Width:= 28;
+  fAddBtn.Width:= ScaleX(28,96);
   fAddBtn.BorderSpacing.Around:= 2;
   fAddBtn.ShowCaption:=false;
   fAddBtn.OnClick:=@btnAddClick;
@@ -233,7 +233,7 @@ begin
   fCloseBtn := TSpeedButton.Create(self);
   fCloseBtn.Parent := fHeader;
   fCloseBtn.Align:= alRight;
-  fCloseBtn.Width:= 28;
+  fCloseBtn.Width:= ScaleX(28,96);
   fCloseBtn.BorderSpacing.Around:= 2;
   fCloseBtn.ShowCaption:=false;
   fCloseBtn.OnClick:=@btnCloseClick;
@@ -243,7 +243,7 @@ begin
   fSplitBtn := TSpeedButton.Create(self);
   fSplitBtn.Parent := fHeader;
   fSplitBtn.Align:= alRight;
-  fSplitBtn.Width:= 28;
+  fSplitBtn.Width:= ScaleX(28,96);
   fSplitBtn.BorderSpacing.Around:= 2;
   fSplitBtn.ShowCaption:=false;
   fSplitBtn.OnClick:=@btnSplitClick;
