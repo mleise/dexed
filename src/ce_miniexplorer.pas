@@ -65,7 +65,6 @@ type
     btnEdit: TCEToolButton;
     btnRemFav: TCEToolButton;
     btnShellOpen: TCEToolButton;
-    imgList: TImageList;
     lstFilter: TListFilterEdit;
     lstFiles: TListView;
     lstFav: TListView;
@@ -91,6 +90,7 @@ type
     fDblClick: TExplorerDoubleClick;
     fContextExpand: boolean;
     fEditableOptions: TCEMiniExplorerEditableOptions;
+    fImages: TImageList;
     procedure lstFavDblClick(Sender: TObject);
     procedure updateFavorites;
     procedure treeSetRoots;
@@ -248,37 +248,81 @@ var
   fname: string;
 begin
   inherited;
-  //
+
+  fImages := TImageList.Create(self);
+  case GetIconScaledSize of
+    iss16:
+    begin
+      fImages.Width := 16;
+      fImages.Height := 16;
+      Tree.Indent := 16;
+      fImages.AddResourceName(HINSTANCE, 'DOCUMENT');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER_STAR');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER_ADD');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER_DELETE');
+      AssignPng(lstFilter.Glyph, 'FILTER_CLEAR');
+    end;
+    iss24:
+    begin
+      fImages.Width := 24;
+      fImages.Height := 24;
+      Tree.Indent := 24;
+      fImages.AddResourceName(HINSTANCE, 'DOCUMENT24');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER24');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER_STAR24');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER_ADD24');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER_DELETE24');
+      AssignPng(lstFilter.Glyph, 'FILTER_CLEAR24');
+    end;
+    iss32:
+    begin
+      fImages.Width := 24;
+      fImages.Height := 24;
+      Tree.Indent := 24;
+      fImages.AddResourceName(HINSTANCE, 'DOCUMENT32');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER32');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER_STAR32');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER_ADD32');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER_DELETE32');
+      AssignPng(lstFilter.Glyph, 'FILTER_CLEAR32');
+    end;
+  end;
+  lstFav.SmallImages := fImages;
+  tree.Images := fImages;
+  lstFiles.SmallImages := fImages;
+
   fEditableOptions:= TCEMiniExplorerEditableOptions.create(self);
-  //
+
   fFavorites := TStringList.Create;
   fFavorites.onChange := @favStringsChange;
   lstFiles.OnDeletion := @lstDeletion;
   lstFav.OnDeletion := @lstDeletion;
   lstFav.OnSelectItem := @lstFavSelect;
   lstFav.OnDblClick := @lstFavDblClick;
-  //
+
   Tree.OnClick := @treeClick;
   Tree.OnChange := @treeChanged;
   Tree.OnDeletion := @treeDeletion;
   Tree.OnSelectionChanged := @treeSelectionChanged;
   Tree.OnExpanding := @treeExpanding;
-  //
+
   lstFilter.FilteredListbox := nil;
   lstFilter.onChange := @lstFilterChange;
   lstFilter.BorderSpacing.Left := ScaleX(116, 96);
-  //
+
   treeSetRoots;
-  //
+
   fname := getCoeditDocPath + OptsFname;
-  if fname.fileExists then with TCEMiniExplorerOptions.create(nil) do
+  if fname.fileExists then
+    with TCEMiniExplorerOptions.create(nil) do
   try
     loadFromFile(fname);
     assignTo(self);
   finally
     free;
   end;
-  //
+
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
 end;

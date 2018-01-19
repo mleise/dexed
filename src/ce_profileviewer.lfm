@@ -162,10 +162,10 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
       end
       object selPieSource: TComboBox[3]
         Left = 118
-        Height = 31
+        Height = 33
         Hint = 'select the pie representation'
         Top = 0
-        Width = 154
+        Width = 282
         BorderSpacing.InnerBorder = 3
         ItemHeight = 0
         ItemIndex = 0

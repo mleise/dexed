@@ -102,16 +102,31 @@ begin
   toolbarVisible:=false;
   fDmtWrapper := TCEDmtWrapper.Create(self);
   fBackup := TStringList.Create;
-  //
+
   fname := getCoeditDocPath + optFname;
   if fname.fileExists then
     fDmtWrapper.loadFromFile(fname);
-  //
+
   btnCancel.OnClick := @doCancel;
   btnApply.OnClick  := @doApply;
-  AssignPng(btnCancel, 'CANCEL');
-  AssignPng(btnApply, 'ACCEPT');
-  //
+  case GetIconScaledSize of
+    iss16:
+    begin
+      AssignPng(btnCancel, 'CANCEL');
+      AssignPng(btnApply, 'ACCEPT');
+    end;
+    iss24:
+    begin
+      AssignPng(btnCancel, 'CANCEL24');
+      AssignPng(btnApply, 'ACCEPT24');
+    end;
+    iss32:
+    begin
+      AssignPng(btnCancel, 'CANCEL32');
+      AssignPng(btnApply, 'ACCEPT32');
+    end;
+  end;
+
   dfmtOptionEditor.TIObject := fDmtWrapper;
 end;
 

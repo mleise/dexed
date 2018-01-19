@@ -205,12 +205,19 @@ var
   fname: string;
 begin
   inherited;
-  //
+
+  Case GetIconScaledSize of
+    iss16: AssignPng(lstfilter.Glyph, 'FILTER_CLEAR');
+    iss24: AssignPng(lstfilter.Glyph, 'FILTER_CLEAR24');
+    iss32: AssignPng(lstfilter.Glyph, 'FILTER_CLEAR32');
+  end;
+  lstfilter.BorderSpacing.Left := scaleX(58, 96);
+
   columns:= [TTodoColumn.filename .. TTodoColumn.line];
   fOptions := TCETodoOptions.Create(self);
   fOptions.autoRefresh := True;
   fOptions.Name := 'todolistOptions';
-  //
+
   fTodos := TTodoItems.Create(self);
   lstItems.OnDblClick := @handleListClick;
   btnRefresh.OnClick := @btnRefreshClick;
@@ -221,14 +228,14 @@ begin
   mnuAutoRefresh.Checked := True;
   lstfilter.OnChange := @filterItems;
   btnGo.OnClick := @handleListClick;
-  //
+
   fname := getCoeditDocPath + OptFname;
   if fname.fileExists then
   begin
     fOptions.loadFromFile(fname);
     fOptions.AssignTo(self);
   end;
-  //
+
   EntitiesConnector.addObserver(self);
 end;
 

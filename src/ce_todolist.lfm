@@ -70,7 +70,7 @@ inherited CETodoListWidget: TCETodoListWidget
         Top = 0
         AutoSize = True
         Caption = 'btnGo'
-        resourceName = 'ARROW_PEN'
+        resourceName = 'PENCIL_GO'
         scaledSeparator = False
       end
       object btnRefresh: TCEToolButton[1]

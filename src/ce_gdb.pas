@@ -1196,8 +1196,25 @@ begin
 
   cpuViewer.DefaultItemHeight := scaleY(22, 96);
 
+  Case GetIconScaledSize of
+    iss16:
+    begin
+      AssignPng(btnSendCom, 'ACCEPT');
+      AssignPng(varListFlt.Glyph, 'FILTER_CLEAR');
+    end;
+    iss24:
+    begin
+      AssignPng(btnSendCom, 'ACCEPT24');
+      AssignPng(varListFlt.Glyph, 'FILTER_CLEAR24');
+    end;
+    iss32:
+    begin
+      AssignPng(btnSendCom, 'ACCEPT32');
+      AssignPng(varListFlt.Glyph, 'FILTER_CLEAR32');
+    end;
+  end;
+
   updateMenu;
-  AssignPng(btnSendCom, 'ACCEPT');
   updateButtonsState;
 end;
 

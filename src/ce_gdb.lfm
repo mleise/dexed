@@ -21,28 +21,28 @@ inherited CEGdbWidget: TCEGdbWidget
       ClientWidth = 517
       object Panel1: TPanel[0]
         Left = 0
-        Height = 388
+        Height = 386
         Top = 205
         Width = 517
         Align = alClient
         AutoSize = True
         BevelOuter = bvNone
-        ClientHeight = 388
+        ClientHeight = 386
         ClientWidth = 517
         TabOrder = 0
         object GroupBox3: TGroupBox
           Left = 0
-          Height = 182
+          Height = 180
           Top = 206
           Width = 517
           Align = alClient
           Caption = 'CPU'
-          ClientHeight = 163
+          ClientHeight = 161
           ClientWidth = 513
           TabOrder = 0
           object cpuViewer: TTIPropertyGrid
             Left = 0
-            Height = 163
+            Height = 161
             Hint = 'cpu registers'
             Top = 0
             Width = 513
@@ -78,13 +78,13 @@ inherited CEGdbWidget: TCEGdbWidget
           OnChange = PageControl2Change
           object TabSheet3: TTabSheet
             Caption = 'Variables'
-            ClientHeight = 169
-            ClientWidth = 513
+            ClientHeight = 165
+            ClientWidth = 511
             object lstVariables: TListView
               Left = 2
-              Height = 138
-              Top = 29
-              Width = 509
+              Height = 132
+              Top = 31
+              Width = 507
               Align = alClient
               AutoWidthLastColumn = True
               BorderSpacing.Around = 2
@@ -96,7 +96,7 @@ inherited CEGdbWidget: TCEGdbWidget
                 end              
                 item
                   Caption = 'value'
-                  Width = 460
+                  Width = 458
                 end>
               GridLines = True
               HideSelection = False
@@ -109,10 +109,10 @@ inherited CEGdbWidget: TCEGdbWidget
             end
             object varListFlt: TListViewFilterEdit
               Left = 2
-              Height = 25
+              Height = 27
               Hint = 'locate variables'
               Top = 2
-              Width = 509
+              Width = 507
               ButtonWidth = 24
               NumGlyphs = 1
               Align = alTop
@@ -124,13 +124,13 @@ inherited CEGdbWidget: TCEGdbWidget
           end
           object TabSheet4: TTabSheet
             Caption = 'Assembler'
-            ClientHeight = 169
-            ClientWidth = 513
+            ClientHeight = 165
+            ClientWidth = 511
             object lstAsm: TListView
               Left = 2
-              Height = 160
+              Height = 161
               Top = 2
-              Width = 505
+              Width = 507
               Align = alClient
               AutoSort = False
               AutoWidthLastColumn = True
@@ -143,7 +143,7 @@ inherited CEGdbWidget: TCEGdbWidget
                 end              
                 item
                   Caption = 'instruction'
-                  Width = 442
+                  Width = 444
                 end>
               GridLines = True
               HideSelection = False
@@ -158,19 +158,19 @@ inherited CEGdbWidget: TCEGdbWidget
       end
       object Panel3: TPanel[1]
         Left = 4
-        Height = 27
-        Top = 597
+        Height = 29
+        Top = 595
         Width = 509
         Align = alBottom
         AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 27
+        ClientHeight = 29
         ClientWidth = 509
         TabOrder = 1
         object btnSendCom: TSpeedButton
           Left = 504
-          Height = 25
+          Height = 27
           Top = 1
           Width = 4
           Align = alRight
@@ -180,7 +180,7 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object Edit1: TComboBox
           Left = 0
-          Height = 27
+          Height = 29
           Hint = 'enter a custom GDB command or the program input with ">"'
           Top = 0
           Width = 503
@@ -214,14 +214,14 @@ inherited CEGdbWidget: TCEGdbWidget
         TabOrder = 3
         object TabSheet1: TTabSheet
           Caption = 'Call stack'
-          ClientHeight = 169
-          ClientWidth = 513
+          ClientHeight = 165
+          ClientWidth = 511
           object lstCallStack: TListView
             Left = 0
-            Height = 169
+            Height = 165
             Hint = 'call stack'
             Top = 0
-            Width = 513
+            Width = 511
             Align = alClient
             AutoSort = False
             Columns = <            
@@ -251,8 +251,8 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object TabSheet2: TTabSheet
           Caption = 'Thread list'
-          ClientHeight = 169
-          ClientWidth = 513
+          ClientHeight = 165
+          ClientWidth = 511
           object lstThreads: TListView
             Left = 0
             Height = 169
@@ -307,8 +307,8 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object TabSheet5: TTabSheet
           Caption = 'Debugee options'
-          ClientHeight = 169
-          ClientWidth = 513
+          ClientHeight = 165
+          ClientWidth = 511
           object dbgeeOptsEd: TTIPropertyGrid
             Left = 2
             Height = 165

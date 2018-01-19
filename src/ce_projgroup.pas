@@ -513,8 +513,24 @@ end;
 constructor TCEProjectGroupWidget.create(aOwner: TCOmponent);
 begin
   inherited;
-  AssignPng(btnFreeFocus, 'PENCIL');
-  AssignPng(btnAddUnfocused, 'DOCUMENT_ADD');
+  case GetIconScaledSize of
+    iss16:
+    begin
+      AssignPng(btnFreeFocus, 'PENCIL');
+      AssignPng(btnAddUnfocused, 'DOCUMENT_ADD');
+    end;
+    iss24:
+    begin
+      AssignPng(btnFreeFocus, 'PENCIL24');
+      AssignPng(btnAddUnfocused, 'DOCUMENT_ADD24');
+    end;
+    iss32:
+    begin
+      AssignPng(btnFreeFocus, 'PENCIL32');
+      AssignPng(btnAddUnfocused, 'DOCUMENT_ADD32');
+    end;
+  end;
+
   projectGroup.onChanged:= @handleChanged;
   fProjSubj:= TCEProjectSubject.Create;
 end;

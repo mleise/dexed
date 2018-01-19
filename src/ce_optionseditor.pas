@@ -73,13 +73,29 @@ begin
   fEdOptsSubj := TCEEditableOptionsSubject.create;
   inspector.CheckboxForBoolean := true;
   inspector.PropertyEditorHook.AddHandlerModified(@inspectorModified);
-  inspector.DefaultItemHeight:= scaleY(22, 96);
+  inspector.DefaultItemHeight := scaleY(22, 96);
   selCat.Width := ScaleX(180, 96);
   width := ScaleX(600, 96);
   inspector.SplitterX := inspector.width div 2 + ScaleX(20, 96);
   inspector.PreferredSplitterX := inspector.SplitterX;
-  AssignPng(btnCancel, 'CANCEL');
-  AssignPng(btnAccept, 'ACCEPT');
+
+  case GetIconScaledSize of
+    iss16:
+    begin
+      AssignPng(btnCancel, 'CANCEL');
+      AssignPng(btnAccept, 'ACCEPT');
+    end;
+    iss24:
+    begin
+      AssignPng(btnCancel, 'CANCEL24');
+      AssignPng(btnAccept, 'ACCEPT24');
+    end;
+    iss32:
+    begin
+      AssignPng(btnCancel, 'CANCEL32');
+      AssignPng(btnAccept, 'ACCEPT32');
+    end;
+  end;
 
   EntitiesConnector.addSingleService(self);
 end;

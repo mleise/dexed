@@ -65,7 +65,7 @@ implementation
 constructor TCEProjectConfigurationWidget.create(aOwner: TComponent);
 begin
   inherited;
-  //
+
   fSynchroItem := TStringList.Create;
   fSynchroValue := TStringList.Create;
   Tree.Selected := Tree.Items.GetLastNode;
@@ -73,7 +73,8 @@ begin
   inspector.CheckboxForBoolean := true;
   inspector.PropertyEditorHook.AddHandlerModified(@inspectorModified);
   inspector.DefaultItemHeight:= scaleY(22, 96);
-  //
+  selConf.BorderSpacing.Left:= scaleX(114, 96);
+
   EntitiesConnector.addObserver(self);
 end;
 

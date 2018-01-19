@@ -19,7 +19,6 @@ type
     btnAddFold: TCEToolButton;
     btnRemFile: TCEToolButton;
     btnRemFold: TCEToolButton;
-    imgList: TImageList;
     Tree: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure btnAddFileClick(Sender: TObject);
@@ -44,6 +43,7 @@ type
     fFileNode, fConfNode: TTreeNode;
     fLastFileOrFolder: string;
     fSymStringExpander: ICESymStringExpander;
+    fImages: TImageList;
     procedure actUpdate(sender: TObject);
     procedure DetectNewDubSources(const document: TCESynMemo);
     procedure TreeDblClick(sender: TObject);
@@ -93,10 +93,51 @@ begin
 
   inherited;
 
+  fImages := TImageList.Create(self);
+  case GetIconScaledSize of
+    iss16:
+    begin
+      fImages.Width := 16;
+      fImages.Height := 16;
+      Tree.Indent := 16;
+      fImages.AddResourceName(HINSTANCE, 'DOCUMENT_ALL');
+      fImages.AddResourceName(HINSTANCE, 'WRENCH');
+      fImages.AddResourceName(HINSTANCE, 'PAGE_TEXT');
+      fImages.AddResourceName(HINSTANCE, 'COG');
+      fImages.AddResourceName(HINSTANCE, 'COG_GO');
+      AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR');
+    end;
+    iss24:
+    begin
+      fImages.Width := 24;
+      fImages.Height := 24;
+      Tree.Indent := 24;
+      fImages.AddResourceName(HINSTANCE, 'DOCUMENT_ALL24');
+      fImages.AddResourceName(HINSTANCE, 'WRENCH24');
+      fImages.AddResourceName(HINSTANCE, 'PAGE_TEXT24');
+      fImages.AddResourceName(HINSTANCE, 'COG24');
+      fImages.AddResourceName(HINSTANCE, 'COG_GO24');
+      AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR24');
+    end;
+    iss32:
+    begin
+      fImages.Width := 24;
+      fImages.Height := 24;
+      Tree.Indent := 24;
+      fImages.AddResourceName(HINSTANCE, 'DOCUMENT_ALL32');
+      fImages.AddResourceName(HINSTANCE, 'WRENCH32');
+      fImages.AddResourceName(HINSTANCE, 'PAGE_TEXT32');
+      fImages.AddResourceName(HINSTANCE, 'COG32');
+      fImages.AddResourceName(HINSTANCE, 'COG_GO32');
+      AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR32');
+    end;
+  end;
+
   Tree.OnDblClick := @TreeDblClick;
   fFileNode := Tree.Items[0];
   fConfNode := Tree.Items[1];
 
+  Tree.Images := fImages;
   Tree.PopupMenu := contextMenu;
   TreeFilterEdit1.BorderSpacing.Left := ScaleX(114, 96);
 
@@ -542,8 +583,8 @@ begin
     itm := Tree.Items.AddChild(fConfNode, conf);
     if i = j then
     begin
-      itm.ImageIndex := 7;
-      itm.SelectedIndex:= 7;
+      itm.ImageIndex := 4;
+      itm.SelectedIndex:= 4;
     end
     else
     begin

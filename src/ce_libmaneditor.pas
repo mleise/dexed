@@ -203,11 +203,14 @@ var
   bno: TBitBtn;
   bww: TBitBtn;
   bsv: TSpeedButton;
+  ics: TIconScaledSize;
 begin
   inherited;
 
-  width  := 400;
-  height := 34;
+  ics := GetIconScaledSize;
+
+  width  := ScaleX(400,96);
+  height := ScaleY(34,96);
   BorderStyle:= bsToolWindow;
   caption := 'Select or type the DUB package name';
   Position:= poMainFormCenter;
@@ -221,11 +224,12 @@ begin
   cbb.ShowHint:=true;
   cbb.OnSelect:= @updateHint;
   cbb.OnCloseUp:=@updateHint;
+  cbb.AutoSize:=true;
 
   bsv := TSpeedButton.Create(self);
   bsv.Parent := self;
   bsv.Align := alRight;
-  bsv.Width:= 28;
+  bsv.AutoSize:= true;
   bsv.BorderSpacing.Around := 4;
   bsv.ShowHint := true;
   bsv.Hint := 'get latest tag, by default get master';
@@ -235,43 +239,61 @@ begin
   bsv.Layout:= blGlyphTop;
   bsv.Spacing:= 2;
   bsv.Down:=fGetLatestTag;
-  AssignPng(bsv, 'TAG_PURPLE');
+  case ics of
+    iss16: AssignPng(bsv, 'TAG_PURPLE');
+    iss24: AssignPng(bsv, 'TAG_PURPLE24');
+    iss32: AssignPng(bsv, 'TAG_PURPLE32');
+  end;
+
 
   bww := TBitBtn.Create(self);
   bww.Parent := self;
   bww.Align := alRight;
-  bww.Width:= 28;
+  bww.AutoSize:=true;
   bww.BorderSpacing.Around := 4;
   bww.ShowHint := true;
   bww.Hint := 'get the package list';
   bww.OnClick:= @getList;
   bww.Layout:= blGlyphTop;
   bww.Spacing:= 2;
-  AssignPng(bww, 'ARROW_UPDATE');
+  case ics of
+    iss16: AssignPng(bww, 'ARROW_UPDATE');
+    iss24: AssignPng(bww, 'ARROW_UPDATE24');
+    iss32: AssignPng(bww, 'ARROW_UPDATE32');
+  end;
 
   bok := TBitBtn.Create(self);
   bok.Parent := self;
   bok.ModalResult:= mrOk;
   bok.Align := alRight;
-  bok.Width := 28;
+  bok.AutoSize:=true;
   bok.BorderSpacing.Around := 4;
   bok.Hint := 'try to fetch, compile and auto-register';
   bok.ShowHint := true;
   bok.Layout:= blGlyphTop;
   bok.Spacing:= 2;
-  AssignPng(bok, 'ACCEPT');
+  case ics of
+    iss16: AssignPng(bok, 'ACCEPT');
+    iss24: AssignPng(bok, 'ACCEPT24');
+    iss32: AssignPng(bok, 'ACCEPT32');
+  end;
 
   bno := TBitBtn.Create(self);
   bno.Parent := self;
   bno.ModalResult:= mrCancel;
   bno.Align := alRight;
-  bno.Width:= 28;
+  bno.AutoSize:=true;
   bno.BorderSpacing.Around := 4;
   bno.Hint := 'cancel and do nothing';
   bno.ShowHint := true;
   bno.Layout:= blGlyphTop;
   bno.Spacing:= 2;
-  AssignPng(bno, 'CANCEL');
+  case ics of
+    iss16: AssignPng(bno, 'CANCEL');
+    iss24: AssignPng(bno, 'CANCEL24');
+    iss32: AssignPng(bno, 'CANCEL32');
+  end;
+
 
   fillList;
 end;

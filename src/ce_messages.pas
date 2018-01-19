@@ -345,7 +345,7 @@ begin
   fMaxMessCnt := 500;
   fAutoSelect := true;
   fCtxt := amcAll;
-  //
+
   fActAutoSel := TAction.Create(self);
   fActAutoSel.Caption := 'Auto select message category';
   fActAutoSel.AutoCheck := true;
@@ -368,25 +368,31 @@ begin
   fActDemangle := TAction.Create(self);
   fActDemangle.OnExecute := @actDemangleExecute;
   fActDemangle.caption := 'Demangle selection';
-  //
+
   inherited;
-  //
+
+  Case GetIconScaledSize of
+    iss16: AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR');
+    iss24: AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR24');
+    iss32: AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR32');
+  end;
+
   fMsgColors[amkBub]  := $FCE7D2;
   fMsgColors[amkWarn] := $B3FFFF;
   fMsgColors[amkErr]  := $BDBDFF;
   fMsgColors[amkInf]  := $FFD0A8;
   fMsgColors[amkHint] := $C2FFC2;
-  //
+
   updaterByLoopInterval := 12;
   fOptions := TCEMessagesOptions.Create(Self);
   fOptions.assign(self);
   fOptions.Name:= 'messageOptions';
   fOptionsBackup := TCEMessagesOptions.Create(Self);
-  //
+
   List.PopupMenu := contextMenu;
   List.OnDeletion := @ListDeletion;
   List.OnDblClick := @handleMessageClick;
-  //
+
   btnSelProj.OnClick  := @selCtxtClick;
   btnSelMisc.OnClick  := @selCtxtClick;
   btnSelEdit.OnClick  := @selCtxtClick;
@@ -397,18 +403,18 @@ begin
   fBtns[amcEdit]:= btnSelEdit;
   fBtns[amcMisc]:= btnSelMisc;
   fBtns[amcProj]:= btnSelProj;
-  //
+
   btnClearCat.OnClick := @actClearCurCatExecute;
-  //
+
   fEditorMessagePos := TCEEditorMessagePos.Create;
-  //
+
   fname := getCoeditDocPath + optname;
   if fname.fileExists then
   begin
     fOptions.loadFromFile(fname);
     fOptions.AssignTo(self);
   end;
-  //
+
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
 end;

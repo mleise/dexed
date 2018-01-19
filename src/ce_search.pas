@@ -229,10 +229,10 @@ begin
   fActReplaceAll := TAction.Create(self);
   fActReplaceAll.Caption := 'Replace all';
   fActReplaceAll.OnExecute := @actReplaceAllExecute;
-  //
+
   fSearchMru := TCEMruList.Create;
   fReplaceMru:= TCEMruList.Create;
-  //
+
   fname := getCoeditDocPath + OptsFname;
   if fname.fileExists then with TCESearchOptions.create(nil) do
   try
@@ -241,14 +241,39 @@ begin
   finally
     free;
   end;
-  //
+
   btnFind.Action := fActFindNext;
   btnReplace.Action := fActReplaceNext;
   btnReplaceAll.Action := fActReplaceAll;
   btnFindAll.Action := fActFindAll;
-  AssignPng(btnAllScope, 'DOCUMENT');
+  case GetIconScaledSize of
+    iss16:
+    begin
+      AssignPng(btnAllScope, 'DOCUMENT');
+      AssignPng(btnFind, 'FIND');
+      AssignPng(btnFindAll, 'FIND');
+      AssignPng(btnReplace, 'TEXT_REPLACE');
+      AssignPng(btnReplaceAll, 'TEXT_REPLACE');
+    end;
+    iss24:
+    begin
+      AssignPng(btnAllScope, 'DOCUMENT24');
+      AssignPng(btnFind, 'FIND24');
+      AssignPng(btnFindAll, 'FIND24');
+      AssignPng(btnReplace, 'TEXT_REPLACE24');
+      AssignPng(btnReplaceAll, 'TEXT_REPLACE24');
+    end;
+    iss32:
+    begin
+      AssignPng(btnAllScope, 'DOCUMENT32');
+      AssignPng(btnFind, 'FIND32');
+      AssignPng(btnFindAll, 'FIND32');
+      AssignPng(btnReplace, 'TEXT_REPLACE32');
+      AssignPng(btnReplaceAll, 'TEXT_REPLACE32');
+    end;
+  end;
   updateImperative;
-  //
+
   EntitiesConnector.addObserver(self);
 end;
 
@@ -261,7 +286,7 @@ begin
   finally
     free;
   end;
-  //
+
   EntitiesConnector.removeObserver(self);
   fSearchMru.Free;
   fReplaceMru.Free;
@@ -567,12 +592,20 @@ begin
   fAllInProj := not fAllInProj;
   if fAllInProj then
   begin
-    AssignPng(btnAllScope, 'DOCUMENT_ALL');
+    case GetIconScaledSize of
+      iss16: AssignPng(btnAllScope, 'DOCUMENT_ALL');
+      iss24: AssignPng(btnAllScope, 'DOCUMENT_ALL24');
+      iss32: AssignPng(btnAllScope, 'DOCUMENT_ALL32');
+    end;
     btnAllScope.Hint := 'all project sources';
   end
   else
   begin
-    AssignPng(btnAllScope, 'DOCUMENT');
+    case GetIconScaledSize of
+      iss16: AssignPng(btnAllScope, 'DOCUMENT');
+      iss24: AssignPng(btnAllScope, 'DOCUMENT24');
+      iss32: AssignPng(btnAllScope, 'DOCUMENT32');
+    end;
     btnAllScope.Hint := 'selected source';
   end;
   updateImperative;
