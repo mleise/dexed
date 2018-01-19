@@ -2107,6 +2107,7 @@ var
   signame: string;
   brkreason: TCEDebugBreakReason;
   // FPU
+  fpustr: string;
   fFpuExtended: extended;
   fFpuRaw: array[0..9] of Byte absolute fFpuExtended;
 begin
@@ -2274,16 +2275,21 @@ begin
         end;
         stOffset..stOffset+7:
         begin
-          fFpuRaw[9] := StrToInt('$' + val.AsString[3..4]);
-          fFpuRaw[8] := StrToInt('$' + val.AsString[5..6]);
-          fFpuRaw[7] := StrToInt('$' + val.AsString[7..8]);
-          fFpuRaw[6] := StrToInt('$' + val.AsString[9..10]);
-          fFpuRaw[5] := StrToInt('$' + val.AsString[11..12]);
-          fFpuRaw[4] := StrToInt('$' + val.AsString[13..14]);
-          fFpuRaw[3] := StrToInt('$' + val.AsString[15..16]);
-          fFpuRaw[2] := StrToInt('$' + val.AsString[17..18]);
-          fFpuRaw[1] := StrToInt('$' + val.AsString[19..20]);
-          fFpuRaw[0] := StrToInt('$' + val.AsString[21..22]);
+          fpustr := val.AsString;
+          fpustr := fpustr[3..fpustr.length];
+          if fpustr.length < 20 then
+          while fpustr.length < 20 do
+            fpustr += '0';
+          fFpuRaw[9] := StrToInt('$' + fpustr[1..2]);
+          fFpuRaw[8] := StrToInt('$' + fpustr[3..4]);
+          fFpuRaw[7] := StrToInt('$' + fpustr[5..6]);
+          fFpuRaw[6] := StrToInt('$' + fpustr[7..8]);
+          fFpuRaw[5] := StrToInt('$' + fpustr[9..10]);
+          fFpuRaw[4] := StrToInt('$' + fpustr[11..12]);
+          fFpuRaw[3] := StrToInt('$' + fpustr[13..14]);
+          fFpuRaw[2] := StrToInt('$' + fpustr[15..16]);
+          fFpuRaw[1] := StrToInt('$' + fpustr[17..18]);
+          fFpuRaw[0] := StrToInt('$' + fpustr[19..20]);
           fInspState.FPU.setInspectableRegister
             (TFpuRegister(number - stOffset), fFpuExtended);
         end;
