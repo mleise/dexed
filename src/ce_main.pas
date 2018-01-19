@@ -184,7 +184,7 @@ type
     MenuItem29: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem30: TMenuItem;
-    MenuItem31: TMenuItem;
+    mnuProjNew: TMenuItem;
     MenuItem32: TMenuItem;
     MenuItem33: TMenuItem;
     MenuItem34: TMenuItem;
@@ -342,6 +342,7 @@ type
 
   private
 
+    fImages: TImageList;
     fOptionCategories: TCEEditableOptionsSubject;
     fRunnablesOptions: TCEEditableRunnableOptions;
     fSymStringExpander: ICESymStringExpander;
@@ -426,6 +427,7 @@ type
     procedure scedSendDone;
 
     //Init - Fina
+    procedure InitImages;
     procedure getCMdParams;
     procedure InitMRUs;
     procedure InitWidgets;
@@ -1175,6 +1177,7 @@ begin
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
 
+  InitImages;
   InitMRUs;
   InitWidgets;
   InitDocking;
@@ -1299,6 +1302,117 @@ begin
   fProjMru.OnChange := @mruChange;
   fFileMru.OnChange := @mruChange;
   fPrjGrpMru.OnChange := @mruChange;
+end;
+
+procedure TCEMainForm.InitImages;
+var
+  c: TIconScaledSize;
+  z: array[TIconScaledSize] of integer = (16, 24, 32);
+  i: integer;
+
+function loadIcon(value: string): integer;
+const
+  s: array[TIconScaledSize] of string = ('', '24', '32');
+begin
+  result := fImages.AddResourceName(HINSTANCE, value + s[c]);
+end;
+
+begin
+  c := GetIconScaledSize;
+
+  fImages := TImageList.Create(self);
+  fImages.Width:= z[c];
+  fImages.Height:= z[c];
+  Actions.Images := fImages;
+  mainMenu.Images := fImages;
+
+  i := loadIcon('CROSS');
+  actFileClose.ImageIndex:= i;
+  actFileCloseAll.ImageIndex:= i;
+  actFileCloseAllOthers.ImageIndex:= i;
+  actProjClose.ImageIndex:= i;
+  actProjGroupClose.ImageIndex:=i;
+
+  i := loadIcon('ERROR_CHECKING');
+  actFileDscanner.ImageIndex := i;
+  actProjDscan.ImageIndex:= i;
+  actFileMetricsHalstead.ImageIndex:=i;
+
+  i := loadIcon('DISK');
+  actFileSave.ImageIndex:= i;
+  actProjSave.ImageIndex:= i;
+  actProjSaveGroup.ImageIndex:=i;
+
+  i := loadIcon('DISK_PEN');
+  actFileSaveAs.ImageIndex:= i;
+  actFileSaveCopyAs.ImageIndex:= i;
+  actProjSaveAs.ImageIndex:= i;
+  actProjSaveGroupAs.ImageIndex:= i;
+
+  i := loadIcon('DISK_MULTIPLE');
+  actFileSaveAll.ImageIndex := i;
+
+  i := loadIcon('FOLDER_VERTICAL_DOCUMENT');
+  actFileOpen.ImageIndex:= i;
+  actProjOpen.ImageIndex:= i;
+  actProjOpenGroup.ImageIndex:= i;
+  mnuItemMruFile.ImageIndex:= i;
+  mnuItemMruGroup.ImageIndex:= i;
+  mnuItemMruProj.ImageIndex:= i;
+
+  i := loadIcon('SCRIPT_GEAR');
+  actFileNewRun.ImageIndex:= i;
+  actFileCompAndRun.ImageIndex:= i;
+  actFileCompAndRunWithArgs.ImageIndex:= i;
+  actFileCompileAndRunOut.ImageIndex:= i;
+  actFileCompile.ImageIndex:= i;
+  actFileRun.ImageIndex:= i;
+  actFileRunOut.ImageIndex:= i;
+  actFileUnittest.ImageIndex:= i;
+
+  i := loadIcon('DOCUMENT');
+  actFileNew.ImageIndex:= i;
+  mnuProjNew.ImageIndex:= i;
+  actProjNewNative.ImageIndex:= i;
+  actProjNewDubJson.ImageIndex:= i;
+  actProjNewGroup.ImageIndex:= i;
+
+  i := loadIcon('DUB');
+  actFileNewDubScript.ImageIndex:= i;
+  actFileRunDub.ImageIndex:= i;
+  actFileRunDubOut.ImageIndex:= i;
+
+  i := loadIcon('FOLDERS_EXPLORER');
+  actFileOpenContFold.ImageIndex:= i;
+  actProjOpenContFold.ImageIndex:= i;
+
+  i := loadIcon('CUT');
+  actEdCut.ImageIndex:= i;
+  i := loadIcon('COPY');
+  actEdCopy.ImageIndex:= i;
+  i := loadIcon('PASTE');
+  actEdPaste.ImageIndex:= i;
+  actFileNewClip.ImageIndex:= i;
+  i := loadIcon('ARROW_UNDO');
+  actEdUndo.ImageIndex:= i;
+  i := loadIcon('ARROW_REDO');
+  actEdRedo.ImageIndex:= i;
+  i := loadIcon('FIND');
+  actEdFind.ImageIndex:= i;
+  actEdFindNext.ImageIndex:= i;
+
+  i := loadIcon('SYSTEM_RUN');
+  actProjCompile.ImageIndex:= i;
+  actProjCompileAndRun.ImageIndex:= i;
+  actProjCompAndRunWithArgs.ImageIndex:= i;
+  actProjGroupCompile.ImageIndex:= i;
+  actProjGroupCompileCustomSync.ImageIndex:= i;
+  actProjGroupCompileSync.ImageIndex:= i;
+
+  i := loadIcon('FLASH');
+  actProjRun.ImageIndex:= i;
+  actProjRunWithArgs.ImageIndex:= i;
+
 end;
 
 procedure TCEMainForm.InitWidgets;

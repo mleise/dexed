@@ -13,7 +13,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="333">
+      <Resources Count="354">
         <Resource_0 FileName="..\icons\arrow\arrow_up.png" Type="RCDATA" ResourceName="ARROW_UP"/>
         <Resource_1 FileName="..\icons\arrow\arrow_down.png" Type="RCDATA" ResourceName="ARROW_DOWN"/>
         <Resource_2 FileName="..\icons\arrow\arrow_divide.png" Type="RCDATA" ResourceName="ARROW_DIVIDE"/>
@@ -347,6 +347,27 @@
         <Resource_330 FileName="..\icons\window\watch_window24.png" Type="RCDATA" ResourceName="WATCH_WINDOW24"/>
         <Resource_331 FileName="..\icons\window\watch_window32.png" Type="RCDATA" ResourceName="WATCH_WINDOW32"/>
         <Resource_332 FileName="..\cesetup\version.txt" Type="RCDATA" ResourceName="VERSION"/>
+        <Resource_333 FileName="../icons/other/evaluate_formula.png" Type="RCDATA" ResourceName="EVALUATE_FORMULA"/>
+        <Resource_334 FileName="../icons/other/evaluate_formula24.png" Type="RCDATA" ResourceName="EVALUATE_FORMULA24"/>
+        <Resource_335 FileName="../icons/other/evaluate_formula32.png" Type="RCDATA" ResourceName="EVALUATE_FORMULA32"/>
+        <Resource_336 FileName="../icons/folder/folders_explorer.png" Type="RCDATA" ResourceName="FOLDERS_EXPLORER"/>
+        <Resource_337 FileName="../icons/folder/folders_explorer24.png" Type="RCDATA" ResourceName="FOLDERS_EXPLORER24"/>
+        <Resource_338 FileName="../icons/folder/folders_explorer32.png" Type="RCDATA" ResourceName="FOLDERS_EXPLORER32"/>
+        <Resource_339 FileName="../icons/folder/folder_vertical_document.png" Type="RCDATA" ResourceName="FOLDER_VERTICAL_DOCUMENT"/>
+        <Resource_340 FileName="../icons/folder/folder_vertical_document24.png" Type="RCDATA" ResourceName="FOLDER_VERTICAL_DOCUMENT24"/>
+        <Resource_341 FileName="../icons/folder/folder_vertical_document32.png" Type="RCDATA" ResourceName="FOLDER_VERTICAL_DOCUMENT32"/>
+        <Resource_342 FileName="../icons/other/error_checking.png" Type="RCDATA" ResourceName="ERROR_CHECKING"/>
+        <Resource_343 FileName="../icons/other/error_checking24.png" Type="RCDATA" ResourceName="ERROR_CHECKING24"/>
+        <Resource_344 FileName="../icons/other/error_checking32.png" Type="RCDATA" ResourceName="ERROR_CHECKING32"/>
+        <Resource_345 FileName="../icons/file/script_lightning.png" Type="RCDATA" ResourceName="SCRIPT_LIGHTNING"/>
+        <Resource_346 FileName="../icons/file/script_lightning24.png" Type="RCDATA" ResourceName="SCRIPT_LIGHTNING24"/>
+        <Resource_347 FileName="../icons/file/script_lightning32.png" Type="RCDATA" ResourceName="SCRIPT_LIGHTNING32"/>
+        <Resource_348 FileName="../icons/cog/system_run.png" Type="RCDATA" ResourceName="SYSTEM_RUN"/>
+        <Resource_349 FileName="../icons/cog/system_run24.png" Type="RCDATA" ResourceName="SYSTEM_RUN24"/>
+        <Resource_350 FileName="../icons/cog/system_run32.png" Type="RCDATA" ResourceName="SYSTEM_RUN32"/>
+        <Resource_351 FileName="../icons/other/cross.png" Type="RCDATA" ResourceName="CROSS"/>
+        <Resource_352 FileName="../icons/other/cross24.png" Type="RCDATA" ResourceName="CROSS24"/>
+        <Resource_353 FileName="../icons/other/cross32.png" Type="RCDATA" ResourceName="CROSS32"/>
       </Resources>
     </General>
     <i18n>

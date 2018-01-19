@@ -98,16 +98,31 @@ begin
 end;
 
 procedure TCELibManEditorWidget.updateButtonsState;
+var
+  i: TIconScaledSize;
 begin
   btnReg.Enabled := (fProj <> nil) and (fProj.binaryKind = staticlib) and
     fProj.Filename.fileExists;
   btnOpenProj.Enabled := List.Selected.isNotNil and
     List.Selected.SubItems[2].fileExists;
+  i := GetIconScaledSize;
   if List.Selected.isNotNil and itemForRow(List.Selected).isNotNil and
     itemForRow(List.Selected).enabled then
-      btnEnabled.resourceName := 'BOOK'
+  begin
+    case i of
+      iss16: btnEnabled.resourceName := 'BOOK';
+      iss24: btnEnabled.resourceName := 'BOOK24';
+      iss32: btnEnabled.resourceName := 'BOOK32';
+    end;
+  end
   else
-    btnEnabled.resourceName := 'BOOK_GREY';
+  begin
+    case i of
+      iss16: btnEnabled.resourceName := 'BOOK_GREY';
+      iss24: btnEnabled.resourceName := 'BOOK_GREY24';
+      iss32: btnEnabled.resourceName := 'BOOK_GREY32';
+    end;
+  end;
 end;
 
 function TCELibManEditorWidget.isAliasRegistered(const anAlias: string): boolean;
