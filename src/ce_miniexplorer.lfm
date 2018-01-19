@@ -16,6 +16,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
     inherited Content: TPanel
       Left = 4
       Height = 558
+      Top = 36
       Width = 335
       BorderSpacing.Around = 4
       ClientHeight = 558

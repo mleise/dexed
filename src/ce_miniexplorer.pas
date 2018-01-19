@@ -266,6 +266,7 @@ begin
   //
   lstFilter.FilteredListbox := nil;
   lstFilter.onChange := @lstFilterChange;
+  lstFilter.BorderSpacing.Left := ScaleX(116, 96);
   //
   treeSetRoots;
   //

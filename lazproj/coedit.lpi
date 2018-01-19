@@ -13,7 +13,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="282">
+      <Resources Count="294">
         <Resource_0 FileName="../icons/arrow/arrow_divide.png" Type="RCDATA" ResourceName="ARROW_DIVIDE"/>
         <Resource_1 FileName="../icons/arrow/arrow_divide24.png" Type="RCDATA" ResourceName="ARROW_DIVIDE24"/>
         <Resource_2 FileName="../icons/arrow/arrow_divide32.png" Type="RCDATA" ResourceName="ARROW_DIVIDE32"/>
@@ -296,6 +296,18 @@
         <Resource_279 FileName="../icons/window/watch_window24.png" Type="RCDATA" ResourceName="WATCH_WINDOW24"/>
         <Resource_280 FileName="../icons/window/watch_window32.png" Type="RCDATA" ResourceName="WATCH_WINDOW32"/>
         <Resource_281 FileName="../cesetup/version.txt" Type="RCDATA" ResourceName="VERSION"/>
+        <Resource_282 FileName="../icons/other/cancel24.png" Type="RCDATA" ResourceName="CANCEL24"/>
+        <Resource_283 FileName="../icons/other/cancel32.png" Type="RCDATA" ResourceName="CANCEL32"/>
+        <Resource_284 FileName="../icons/other/warn_red.png" Type="RCDATA" ResourceName="WARN_RED"/>
+        <Resource_285 FileName="../icons/other/warn_red24.png" Type="RCDATA" ResourceName="WARN_RED24"/>
+        <Resource_286 FileName="../icons/other/warn_red32.png" Type="RCDATA" ResourceName="WARN_RED32"/>
+        <Resource_287 FileName="../icons/file/document.png" Type="RCDATA" ResourceName="DOCUMENT"/>
+        <Resource_288 FileName="../icons/file/document24.png" Type="RCDATA" ResourceName="DOCUMENT24"/>
+        <Resource_289 FileName="../icons/file/document32.png" Type="RCDATA" ResourceName="DOCUMENT32"/>
+        <Resource_290 FileName="../icons/other/clean24.png" Type="RCDATA" ResourceName="CLEAN24"/>
+        <Resource_291 FileName="../icons/other/clean32.png" Type="RCDATA" ResourceName="CLEAN32"/>
+        <Resource_292 FileName="../icons/other/stop24.png" Type="RCDATA" ResourceName="STOP24"/>
+        <Resource_293 FileName="../icons/other/stop32.png" Type="RCDATA" ResourceName="STOP32"/>
       </Resources>
     </General>
     <i18n>

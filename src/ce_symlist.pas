@@ -107,7 +107,6 @@ type
 
   TCESymbolListWidget = class(TCEWidget, ICEDocumentObserver, ICEEditableOptions)
     btnRefresh: TCEToolButton;
-    imgList: TImageList;
     Tree: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure btnRefreshClick(Sender: TObject);
@@ -117,6 +116,7 @@ type
     procedure TreeFilterEdit1MouseEnter(Sender: TObject);
     procedure TreeKeyPress(Sender: TObject; var Key: char);
   private
+    fImages: TImageList;
     fHasToolExe: boolean;
     fToolExeName: string;
     fOptions: TCESymbolListOptions;
@@ -299,7 +299,7 @@ begin
   if Dest is TCESymbolListWidget then
   begin
     widg := TCESymbolListWidget(Dest);
-    //
+
     widg.updaterByDelayDuration := fAutoRefreshDelay;
     widg.fRefreshOnFocus        := fRefreshOnFocus;
     widg.fRefreshOnChange       := fRefreshOnChange;
@@ -310,7 +310,7 @@ begin
     widg.fSortSymbols           := fSortSymbols;
     widg.fSmartExpander         := fSmartExpander;
     widg.fDeep                  := fDeep;
-    //
+
     widg.fActAutoRefresh.Checked    := fAutoRefresh;
     widg.fActRefreshOnChange.Checked:= fRefreshOnChange;
     widg.fActRefreshOnFocus.Checked := fRefreshOnFocus;
@@ -323,12 +323,13 @@ end;
 constructor TCESymbolListWidget.create(aOwner: TComponent);
 var
   fname: string;
+  i: integer;
 begin
   fAutoRefresh := false;
   fRefreshOnFocus := true;
   fRefreshOnChange := false;
   checkIfHasToolExe;
-  //
+
   fActCopyIdent := TAction.Create(self);
   fActCopyIdent.OnExecute:=@actCopyIdentExecute;
   fActCopyIdent.Caption := 'Copy identifier';
@@ -353,11 +354,65 @@ begin
   fActSelectInSource := TAction.Create(self);
   fActSelectInSource.OnExecute := @TreeDblClick;
   fActSelectInSource.Caption := 'Select in source';
-  //
+
   inherited;
+
   // allow empty name if owner is nil
   fSyms := TSymbolList.create(nil);
-  //
+
+  fImages := TImageList.Create(self);
+  case GetIconScaledSize of
+    iss16:
+    begin
+      Tree.DefaultItemHeight:= 20;
+      fImages.Width:= 16;
+      fImages.Height:= 16;
+      fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_BLUE');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_ORANGE');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_PINK');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_PURPLE');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_RED');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_YELLOW');
+      fImages.AddResourceName(HINSTANCE, 'WARNING');
+      fImages.AddResourceName(HINSTANCE, 'WARN_RED');
+    end;
+    iss24:
+    begin
+      Tree.DefaultItemHeight:= 28;
+      fImages.Width:= 24;
+      fImages.Height:= 24;
+      fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK24');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_BLUE24');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN24');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_ORANGE24');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_PINK24');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_PURPLE24');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_RED24');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_YELLOW24');
+      fImages.AddResourceName(HINSTANCE, 'WARNING24');
+      fImages.AddResourceName(HINSTANCE, 'WARN_RED24');
+    end;
+    iss32:
+    begin
+      Tree.DefaultItemHeight:= 36;
+      fImages.Width:= 32;
+      fImages.Height:= 32;
+      fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK32');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_BLUE32');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN32');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_ORANGE32');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_PINK32');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_PURPLE32');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_RED32');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_YELLOW32');
+      fImages.AddResourceName(HINSTANCE, 'WARNING32');
+      fImages.AddResourceName(HINSTANCE, 'WARN_RED32');
+    end;
+  end;
+  Tree.Images := fImages;
+
   TreeFilterEdit1.BorderSpacing.Left:= ScaleX(30,96);
   fOptions := TCESymbolListOptions.Create(self);
   fOptions.Name:= 'symbolListOptions';
@@ -365,7 +420,7 @@ begin
   if fname.fileExists then
     fOptions.loadFromFile(fname);
   fOptions.AssignTo(self);
-  //
+
   ndAlias   := Tree.Items[0];
   ndClass   := Tree.Items[1];
   ndEnum    := Tree.Items[2];
@@ -380,23 +435,23 @@ begin
   ndVar     := Tree.Items[11];
   ndWarn    := Tree.Items[12];
   ndErr     := Tree.Items[13];
-  //
+
   Tree.OnDblClick := @TreeDblClick;
   Tree.PopupMenu := contextMenu;
-  //
+
   EntitiesConnector.addObserver(self);
 end;
 
 destructor TCESymbolListWidget.destroy;
 begin
   EntitiesConnector.removeObserver(self);
-  //
+
   killProcess(fToolProc);
   fSyms.Free;
-  //
+
   fOptions.saveToFile(getCoeditDocPath + OptsFname);
   fOptions.Free;
-  //
+
   inherited;
 end;
 

@@ -328,6 +328,26 @@ begin
       AssignPng(pageControl.addButton, 'DOCUMENT_ADD');
       AssignPng(pageControl.closeButton, 'DOCUMENT_DELETE');
       AssignPng(pageControl.splitButton, 'SPLITTER');
+
+      AssignPng(mnuedCopy.Bitmap, 'COPY');
+      AssignPng(mnuedCut.Bitmap, 'CUT');
+      AssignPng(mnuedPaste.Bitmap, 'PASTE');
+      AssignPng(mnuedUndo.Bitmap, 'ARROW_UNDO');
+      AssignPng(mnuedRedo.Bitmap, 'ARROW_REDO');
+      AssignPng(mnuedJum2Decl.Bitmap, 'ARROW_SHOE');
+      AssignPng(mnuedCopy.Bitmap, 'COPY');
+      AssignPng(mnuedNext.Bitmap, 'GO_NEXT');
+      AssignPng(mnuedPrev.Bitmap, 'GO_PREVIOUS');
+      AssignPng(mnuedRename.Bitmap, 'PENCIL');
+      AssignPng(mnuedUpcase.Bitmap, 'CASE');
+      AssignPng(mnuedLowcase.Bitmap, 'CASE');
+      AssignPng(mnuedNextCarea.Bitmap, 'GO_NEXT');
+      AssignPng(mnuedPrevCarea.Bitmap, 'GO_PREVIOUS');
+      AssignPng(mnuedSortLines.Bitmap, 'SORT_AZ');
+      AssignPng(mnuedNextProtGrp.Bitmap, 'GO_NEXT');
+      AssignPng(mnuedPrevProtGrp.Bitmap, 'GO_PREVIOUS');
+      AssignPng(mnuedNextWarn.Bitmap, 'GO_NEXT');
+      AssignPng(mnuedPrevWarn.Bitmap, 'GO_PREVIOUS');
     end;
     iss24:
     begin
@@ -336,6 +356,26 @@ begin
       AssignPng(pageControl.addButton, 'DOCUMENT_ADD24');
       AssignPng(pageControl.closeButton, 'DOCUMENT_DELETE24');
       AssignPng(pageControl.splitButton, 'SPLITTER24');
+
+      AssignPng(mnuedCopy.Bitmap, 'COPY24');
+      AssignPng(mnuedCut.Bitmap, 'CUT24');
+      AssignPng(mnuedPaste.Bitmap, 'PASTE24');
+      AssignPng(mnuedUndo.Bitmap, 'ARROW_UNDO24');
+      AssignPng(mnuedRedo.Bitmap, 'ARROW_REDO24');
+      //AssignPng(mnuedJum2Decl.Bitmap, 'ARROW_SHOE24');
+      AssignPng(mnuedCopy.Bitmap, 'COPY24');
+      AssignPng(mnuedNext.Bitmap, 'GO_NEXT24');
+      AssignPng(mnuedPrev.Bitmap, 'GO_PREVIOUS24');
+      AssignPng(mnuedRename.Bitmap, 'PENCIL24');
+      AssignPng(mnuedUpcase.Bitmap, 'CASE24');
+      AssignPng(mnuedLowcase.Bitmap, 'CASE24');
+      AssignPng(mnuedNextCarea.Bitmap, 'GO_NEXT24');
+      AssignPng(mnuedPrevCarea.Bitmap, 'GO_PREVIOUS24');
+      AssignPng(mnuedSortLines.Bitmap, 'SORT_AZ24');
+      AssignPng(mnuedNextProtGrp.Bitmap, 'GO_NEXT24');
+      AssignPng(mnuedPrevProtGrp.Bitmap, 'GO_PREVIOUS24');
+      AssignPng(mnuedNextWarn.Bitmap, 'GO_NEXT24');
+      AssignPng(mnuedPrevWarn.Bitmap, 'GO_PREVIOUS24');
     end;
     iss32:
     begin
@@ -344,35 +384,34 @@ begin
       AssignPng(pageControl.addButton, 'DOCUMENT_ADD32');
       AssignPng(pageControl.closeButton, 'DOCUMENT_DELETE32');
       AssignPng(pageControl.splitButton, 'SPLITTER32');
+
+      AssignPng(mnuedCopy.Bitmap, 'COPY32');
+      AssignPng(mnuedCut.Bitmap, 'CUT32');
+      AssignPng(mnuedPaste.Bitmap, 'PASTE32');
+      AssignPng(mnuedUndo.Bitmap, 'ARROW_UNDO32');
+      AssignPng(mnuedRedo.Bitmap, 'ARROW_REDO32');
+      //AssignPng(mnuedJum2Decl.Bitmap, 'ARROW_SHOE32');
+      AssignPng(mnuedCopy.Bitmap, 'COPY32');
+      AssignPng(mnuedNext.Bitmap, 'GO_NEXT32');
+      AssignPng(mnuedPrev.Bitmap, 'GO_PREVIOUS32');
+      AssignPng(mnuedRename.Bitmap, 'PENCIL32');
+      AssignPng(mnuedUpcase.Bitmap, 'CASE32');
+      AssignPng(mnuedLowcase.Bitmap, 'CASE32');
+      AssignPng(mnuedNextCarea.Bitmap, 'GO_NEXT32');
+      AssignPng(mnuedPrevCarea.Bitmap, 'GO_PREVIOUS32');
+      AssignPng(mnuedSortLines.Bitmap, 'SORT_AZ32');
+      AssignPng(mnuedNextProtGrp.Bitmap, 'GO_NEXT32');
+      AssignPng(mnuedPrevProtGrp.Bitmap, 'GO_PREVIOUS32');
+      AssignPng(mnuedNextWarn.Bitmap, 'GO_NEXT32');
+      AssignPng(mnuedPrevWarn.Bitmap, 'GO_PREVIOUS32');
     end;
   end;
 
-
   fTokList := TLexTokenList.Create;
-  //
-  AssignPng(mnuedCopy.Bitmap, 'COPY');
-  AssignPng(mnuedCut.Bitmap, 'CUT');
-  AssignPng(mnuedPaste.Bitmap, 'PASTE');
-  AssignPng(mnuedUndo.Bitmap, 'ARROW_UNDO');
-  AssignPng(mnuedRedo.Bitmap, 'ARROW_REDO');
-  AssignPng(mnuedJum2Decl.Bitmap, 'ARROW_SHOE');
-  AssignPng(mnuedCopy.Bitmap, 'COPY');
-  AssignPng(mnuedNext.Bitmap, 'GO_NEXT');
-  AssignPng(mnuedPrev.Bitmap, 'GO_PREVIOUS');
-  AssignPng(mnuedRename.Bitmap, 'PENCIL');
-  AssignPng(mnuedUpcase.Bitmap, 'CASE');
-  AssignPng(mnuedLowcase.Bitmap, 'CASE');
-  AssignPng(mnuedNextCarea.Bitmap, 'GO_NEXT');
-  AssignPng(mnuedPrevCarea.Bitmap, 'GO_PREVIOUS');
-  AssignPng(mnuedSortLines.Bitmap, 'SORT_AZ');
-  AssignPng(mnuedNextProtGrp.Bitmap, 'GO_NEXT');
-  AssignPng(mnuedPrevProtGrp.Bitmap, 'GO_PREVIOUS');
-  AssignPng(mnuedNextWarn.Bitmap, 'GO_NEXT');
-  AssignPng(mnuedPrevWarn.Bitmap, 'GO_PREVIOUS');
-  //
+
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
-  //
+
   fOptions:= TCEPagesOptions.construct(self);
 end;
 

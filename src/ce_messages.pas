@@ -63,20 +63,19 @@ type
   { TCEMessagesWidget }
 
   TCEMessagesWidget = class(TCEWidget, ICEEditableOptions, ICEDocumentObserver, ICEProjectObserver, ICEMessagesDisplay)
+    btnClearCat: TCEToolButton;
     btnSelAll: TCEToolButton;
     btnSelApp: TCEToolButton;
     btnSelEdit: TCEToolButton;
     btnSelMisc: TCEToolButton;
     btnSelProj: TCEToolButton;
-    button0: TCEToolButton;
-    button10: TCEToolButton;
+    sep: TCEToolButton;
     button2: TCEToolButton;
     button4: TCEToolButton;
     button6: TCEToolButton;
     button8: TCEToolButton;
     imgList: TImageList;
     List: TTreeView;
-    btnClearCat: TSpeedButton;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure ListCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode;
       State: TCustomDrawState; var DefaultDraw: Boolean);
@@ -399,10 +398,7 @@ begin
   fBtns[amcMisc]:= btnSelMisc;
   fBtns[amcProj]:= btnSelProj;
   //
-  // reminder: a toolbar button can be used here because it would have the
-  // same size as the buttons used to select the categories.
   btnClearCat.OnClick := @actClearCurCatExecute;
-  AssignPng(btnClearCat, 'CLEAN');
   //
   fEditorMessagePos := TCEEditorMessagePos.Create;
   //
@@ -428,7 +424,6 @@ end;
 procedure TCEMessagesWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolBarFlat(value);
-  btnClearCat.Flat := value;
   TreeFilterEdit1.Flat:=value;
 end;
 

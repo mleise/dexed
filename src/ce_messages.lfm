@@ -49,17 +49,17 @@ inherited CEMessagesWidget: TCEMessagesWidget
       ButtonWidth = 100
       ShowCaptions = True
       Wrapable = False
-      object button0: TCEToolButton[0]
-        Left = 530
+      object sep: TCEToolButton[0]
+        Left = 935
         Height = 28
+        Hint = 'Clean filtered messages'
         Top = 0
         AutoSize = True
-        Caption = 'button0'
         Style = tbsDivider
         scaledSeparator = False
       end
       object btnSelMisc: TCEToolButton[1]
-        Left = 430
+        Left = 835
         Hint = 'filter the other messages'
         Top = 0
         AutoSize = True
@@ -67,7 +67,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         scaledSeparator = False
       end
       object button2: TCEToolButton[2]
-        Left = 425
+        Left = 521
         Height = 28
         Top = 0
         AutoSize = True
@@ -76,7 +76,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         scaledSeparator = False
       end
       object btnSelApp: TCEToolButton[3]
-        Left = 325
+        Left = 421
         Hint = 'filter the messages related to Coedit'
         Top = 0
         AutoSize = True
@@ -84,7 +84,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         scaledSeparator = False
       end
       object button4: TCEToolButton[4]
-        Left = 320
+        Left = 416
         Height = 28
         Top = 0
         AutoSize = True
@@ -93,7 +93,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         scaledSeparator = False
       end
       object btnSelProj: TCEToolButton[5]
-        Left = 220
+        Left = 316
         Hint = 'filter the messages related to the active project'
         Top = 0
         AutoSize = True
@@ -101,7 +101,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         scaledSeparator = False
       end
       object button6: TCEToolButton[6]
-        Left = 215
+        Left = 311
         Height = 28
         Top = 0
         AutoSize = True
@@ -110,7 +110,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         scaledSeparator = False
       end
       object btnSelEdit: TCEToolButton[7]
-        Left = 115
+        Left = 211
         Hint = 'filter the messages related to the active editor'
         Top = 0
         AutoSize = True
@@ -118,7 +118,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         scaledSeparator = False
       end
       object button8: TCEToolButton[8]
-        Left = 110
+        Left = 206
         Height = 28
         Top = 0
         AutoSize = True
@@ -127,7 +127,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         scaledSeparator = False
       end
       object btnSelAll: TCEToolButton[9]
-        Left = 10
+        Left = 106
         Hint = 'don''t filter the messages'
         Top = 0
         AutoSize = True
@@ -135,16 +135,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Down = True
         scaledSeparator = False
       end
-      object button10: TCEToolButton[10]
-        Left = 5
-        Height = 28
-        Top = 0
-        AutoSize = True
-        Caption = 'button10'
-        Style = tbsDivider
-        scaledSeparator = False
-      end
-      object TreeFilterEdit1: TTreeFilterEdit[11]
+      object TreeFilterEdit1: TTreeFilterEdit[10]
         Left = 536
         Height = 26
         Hint = 'in the selected category, filter the messages that contain the text typed here'
@@ -160,14 +151,19 @@ inherited CEMessagesWidget: TCEMessagesWidget
         TabOrder = 0
         OnButtonClick = TreeFilterEdit1ButtonClick
       end
-      object btnClearCat: TSpeedButton[12]
+      object btnClearCat: TCEToolButton[11]
         Left = 1
-        Height = 28
-        Hint = 'clear the messages that match to the selected category'
         Top = 0
-        Width = 4
-        Align = alLeft
-        AutoSize = True
+        resourceName = 'CLEAN'
+        scaledSeparator = False
+      end
+      object button0: TCEToolButton[12]
+        Left = 101
+        Height = 28
+        Top = 0
+        Caption = 'button0'
+        Style = tbsDivider
+        scaledSeparator = False
       end
     end
   end

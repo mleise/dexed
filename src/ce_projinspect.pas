@@ -78,7 +78,7 @@ implementation
 constructor TCEProjectInspectWidget.create(aOwner: TComponent);
 begin
   fSymStringExpander:= getSymStringExpander;
-  //
+
   fActOpenFile := TAction.Create(self);
   fActOpenFile.Caption := 'Open file in editor';
   fActOpenFile.OnExecute := @actOpenFileExecute;
@@ -90,15 +90,16 @@ begin
   fActBuildConf.Caption := 'Build configuration';
   fActBuildConf.OnExecute := @actBuildExecute;
   fActBuildConf.OnUpdate := @actUpdate;
-  //
+
   inherited;
-  //
+
   Tree.OnDblClick := @TreeDblClick;
   fFileNode := Tree.Items[0];
   fConfNode := Tree.Items[1];
-  //
+
   Tree.PopupMenu := contextMenu;
-  //
+  TreeFilterEdit1.BorderSpacing.Left := ScaleX(114, 96);
+
   EntitiesConnector.addObserver(self);
 end;
 

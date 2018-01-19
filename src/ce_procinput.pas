@@ -66,9 +66,28 @@ begin
     fMru.LoadFromFile(fname);
   if fMru.Count = 0 then
     fMru.Insert(0, '(your input here)');
-  AssignPng(btnClose, 'PENCIL_DELETE');
-  AssignPng(btnSend, 'PENCIL_GO');
-  AssignPng(btnKill, 'CANCEL');
+
+  case GetIconScaledSize of
+    iss16:
+    begin
+      AssignPng(btnClose, 'PENCIL_DELETE');
+      AssignPng(btnSend, 'PENCIL_GO');
+      AssignPng(btnKill, 'CANCEL');
+    end;
+    iss24:
+    begin
+      AssignPng(btnClose, 'PENCIL_DELETE24');
+      AssignPng(btnSend, 'PENCIL_GO24');
+      AssignPng(btnKill, 'CANCEL24');
+    end;
+    iss32:
+    begin
+      AssignPng(btnClose, 'PENCIL_DELETE32');
+      AssignPng(btnSend, 'PENCIL_GO32');
+      AssignPng(btnKill, 'CANCEL32');
+    end;
+  end;
+
   toolbarVisible:=false;
 end;
 
