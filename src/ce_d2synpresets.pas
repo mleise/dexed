@@ -4,8 +4,8 @@ unit ce_d2synpresets;
 interface
 
 uses
-  Classes, SysUtils, SynEditMiscClasses, Graphics, Controls, StdCtrls, ExtCtrls,
-  SynEditHighlighter, SynEditTypes, SynEdit, RTTIGrids, Buttons,
+  Classes, SysUtils, SynEditMiscClasses, Graphics, Forms, Controls, StdCtrls,
+  ExtCtrls, SynEditHighlighter, SynEditTypes, SynEdit, RTTIGrids, Buttons,
   ce_interfaces, ce_common, ce_writableComponent, ce_d2syn, ce_observer,
   ce_editoroptions, ce_sharedres, ce_txtsyn;
 
@@ -299,6 +299,7 @@ var
   fname: string;
   pnl: TPanel;
   btn: TBitBtn;
+  isc: TIconScaledSize;
 begin
   inherited;
   fBackup:= TCED2SynPreset.Create(nil);
@@ -509,10 +510,10 @@ begin
       selection.Foreground := clNone;
     end;
   end;
-  //
+
   fEditor := TSynEdit.Create(self);
   fEditor.Parent:= self;
-  fEditor.Height:= 200;
+  fEditor.Height:= ScaleY(200,96);
   fEditor.Align:= alTop;
   fEditor.ReadOnly:=true;
   fEditor.Font.Assign(EditorOptions.font);
@@ -543,7 +544,7 @@ begin
   pnl.Align:=alTop;
   pnl.BorderSpacing.Around:= 2;
   pnl.Height:=30;
-  //
+
   fList := TComboBox.Create(self);
   fList.Align:= alClient;
   fList.BorderSpacing.Around:= 2;
@@ -552,34 +553,49 @@ begin
   fList.OnSelect:= @lstBoxSelChange;
   fList.AutoSize := true;
   updateList;
-  //
+
+  //TODO-cbugfix: always iss16 is returned at this point (order of init problem ?)
+  isc := GetIconScaledSize;
+
   btn := TBitBtn.Create(self);
   btn.Parent := pnl;
   btn.AutoSize := true;
-  btn.Width:= 28;
+  btn.Width:= ScaleX(28,96);
   btn.Align:= alRight;
   btn.OnClick:=@btnAddClick;
   btn.Hint:='add preset';
-  AssignPng(btn, 'DOCUMENT_ADD');
-  //
+  case isc of
+    iss16: AssignPng(btn, 'DOCUMENT_ADD');
+    iss24: AssignPng(btn, 'DOCUMENT_ADD24');
+    iss32: AssignPng(btn, 'DOCUMENT_ADD32');
+  end;
+
   btn := TBitBtn.Create(self);
   btn.Parent := pnl;
   btn.AutoSize := true;
-  btn.Width:= 28;
+  btn.Width:= ScaleX(28,96);
   btn.Align:= alRight;
   btn.OnClick:=@btnDelClick;
   btn.Hint:='delete preset';
-  AssignPng(btn, 'DOCUMENT_DELETE');
-  //
+  case isc of
+    iss16: AssignPng(btn, 'DOCUMENT_DELETE');
+    iss24: AssignPng(btn, 'DOCUMENT_DELETE24');
+    iss32: AssignPng(btn, 'DOCUMENT_DELETE32');
+  end;
+
   btn := TBitBtn.Create(self);
   btn.Parent := pnl;
   btn.AutoSize := true;
-  btn.Width:= 28;
+  btn.Width:= ScaleX(28,96);
   btn.Align:= alRight;
   btn.OnClick:=@btnCloneClick;
   btn.Hint:='clone preset';
-  AssignPng(btn, 'DOCUMENT_PLUS');
-  //
+  case isc of
+    iss16: AssignPng(btn, 'DOCUMENT_PLUS');
+    iss24: AssignPng(btn, 'DOCUMENT_PLUS24');
+    iss32: AssignPng(btn, 'DOCUMENT_PLUS32');
+  end;
+
   fPropEd := TTIPropertyGrid.Create(self);
   fPropEd.Parent := self;
   fPropEd.Align:= alClient;
@@ -587,7 +603,8 @@ begin
   fPropEd.OnModified:=@propEdModified;
   fPropEd.CheckboxForBoolean:=true;
   fPropEd.PropertyEditorHook.AddHandlerModified(@propEdModified);
-  //
+  fPropEd.DefaultItemHeight:=ScaleY(22, 96);
+
   fList.ItemIndex := 0;
   EntitiesConnector.addObserver(self);
 end;

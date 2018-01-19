@@ -5,7 +5,7 @@ unit ce_infos;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, strutils,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
   {$IFDEF WINDOWS}Windows,{$ENDIF}
   StdCtrls, ExtCtrls, Buttons, Menus,ce_widget, ce_common, ce_sharedres,
   ce_interfaces;

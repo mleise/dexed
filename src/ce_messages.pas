@@ -74,7 +74,6 @@ type
     button4: TCEToolButton;
     button6: TCEToolButton;
     button8: TCEToolButton;
-    imgList: TImageList;
     List: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure ListCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode;
@@ -83,6 +82,7 @@ type
     procedure TreeFilterEdit1AfterFilter(Sender: TObject);
     procedure TreeFilterEdit1ButtonClick(Sender: TObject);
   private
+    fImages: TImageList;
     fEditorMessagePos: TCEEditorMessagePos;
     fMsgColors: array[TCEAppMessageKind] of TColor;
     fProjCompile: boolean;
@@ -259,6 +259,7 @@ begin
   {$IFDEF WINDOWS}
   fFont.name := 'Consolas';
   {$ENDIF}
+  fFont.Size := ScaleY(11,96);
   fAutoSelect :=true;
   fMaxCount := 1000;
   fMsgColors[amkBub] := $FCE7D2;
@@ -371,11 +372,44 @@ begin
 
   inherited;
 
+  fImages:= TImageList.Create(self);
   Case GetIconScaledSize of
-    iss16: AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR');
-    iss24: AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR24');
-    iss32: AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR32');
+    iss16:
+    begin
+      fImages.Width:=16;
+      fImages.Height:=16;
+      AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR');
+      fImages.AddResourceName(HINSTANCE, 'BALLOON');
+      fImages.AddResourceName(HINSTANCE, 'INFORMATION');
+      fImages.AddResourceName(HINSTANCE, 'LIGHTBULB_OFF');
+      fImages.AddResourceName(HINSTANCE, 'WARNING');
+      fImages.AddResourceName(HINSTANCE, 'EXCLAMATION');
+    end;
+    iss24:
+    begin
+      fImages.Width:=24;
+      fImages.Height:=24;
+      AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR24');
+      fImages.AddResourceName(HINSTANCE, 'BALLOON24');
+      fImages.AddResourceName(HINSTANCE, 'INFORMATION24');
+      fImages.AddResourceName(HINSTANCE, 'LIGHTBULB_OFF24');
+      fImages.AddResourceName(HINSTANCE, 'WARNING24');
+      fImages.AddResourceName(HINSTANCE, 'EXCLAMATION24');
+    end;
+    iss32:
+    begin
+      fImages.Width:=32;
+      fImages.Height:=32;
+      AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR32');
+      fImages.AddResourceName(HINSTANCE, 'BALLOON32');
+      fImages.AddResourceName(HINSTANCE, 'INFORMATION32');
+      fImages.AddResourceName(HINSTANCE, 'LIGHTBULB_OFF32');
+      fImages.AddResourceName(HINSTANCE, 'WARNING32');
+      fImages.AddResourceName(HINSTANCE, 'EXCLAMATION32');
+    end;
   end;
+  List.Images := fImages;
+  List.DefaultItemHeight:= ScaleY(22,96);
 
   fMsgColors[amkBub]  := $FCE7D2;
   fMsgColors[amkWarn] := $B3FFFF;

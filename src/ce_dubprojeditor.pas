@@ -45,7 +45,6 @@ type
     btnUpdate: TCEToolButton;
     edProp: TEdit;
     fltEdit: TTreeFilterEdit;
-    imgList: TImageList;
     MenuItem1: TMenuItem;
     Panel1: TPanel;
     propTree: TTreeView;
@@ -59,6 +58,7 @@ type
   private
     fSelectedNode: TTreeNode;
     fProj: TCEDubProject;
+    fImages: TImageList;
     procedure updateEditor;
     procedure updateValueEditor;
     procedure setJsonValueFromEditor;
@@ -137,13 +137,13 @@ var
 begin
   inherited create(nil);
   fJson := json;
-  width := 280;
-  height := 130;
+  width := ScaleX(280,96);
+  height := ScaleY(130,96);
   fEvent := event;
   caption := 'add a DUB property';
   Position := poMainFormCenter;
   ShowHint:=true;
-  //
+
   fSelType := TRadioGroup.Create(self);
   fSelType.Parent := self;
   fSelType.Items.AddStrings(['array', 'object', 'value']);
@@ -153,13 +153,14 @@ begin
   fSelType.ItemIndex:=2;
   fSelType.Hint:= 'type of the property to add';
   fSelType.OnSelectionChanged:= @selTypeChanged;
-  //
+  fSelType.AutoSize:= true;
+
   layout := TPanel.Create(self);
   layout.Parent := self;
   layout.Align := alBottom;
-  layout.Height := 32;
+  layout.Height := ScaleY(32,96);
   layout.BevelOuter:= bvNone;
-  //
+
   fEdName := TComboBox.Create(self);
   fEdName.Parent := layout;
   fEdName.Align:=alClient;
@@ -171,16 +172,23 @@ begin
   fEdName.AutoComplete := true;
   fEdName.OnChange := @setSelFromProposal;
   fEdName.OnSelect:= @setSelFromProposal;
-  //
+  fEdName.AutoSize:= true;
+
   fBtnValidate := TBitBtn.Create(self);
   fBtnValidate.Parent := layout;
   fBtnValidate.Align:=alRight;
   fBtnValidate.BorderSpacing.Around:=4;
-  fBtnValidate.Width:= 26;
+  fBtnValidate.Width:= ScaleX(26,96);
   fBtnValidate.OnClick:=@doValidate;
   fBtnValidate.Hint:='accept and add a property';
-  AssignPng(fBtnValidate, 'ACCEPT');
-  //
+  fBtnValidate.AutoSize:=true;
+
+  case GetIconScaledSize of
+    iss16: AssignPng(fBtnValidate, 'ACCEPT');
+    iss24: AssignPng(fBtnValidate, 'ACCEPT24');
+    iss32:AssignPng(fBtnValidate, 'ACCEPT32');
+  end;
+
   selTypeChanged(nil);
 end;
 
@@ -237,7 +245,42 @@ constructor TCEDubProjectEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
   setToolBarVisible(true);
-  AssignPng(btnAcceptProp, 'ACCEPT');
+
+  fImages := TImageList.Create(self);
+  case GetIconScaledSize of
+    iss16:
+    begin
+      fImages.height := 16;
+      fImages.width := 16;
+      fImages.AddResourceName(HINSTANCE, 'JSON_OBJECT');
+      fImages.AddResourceName(HINSTANCE, 'JSON_ARRAY');
+      fImages.AddResourceName(HINSTANCE, 'JSON_VALUE');
+      AssignPng(btnAcceptProp, 'ACCEPT');
+      AssignPng(fltEdit.Glyph, 'FILTER_CLEAR');
+    end;
+    iss24:
+    begin
+      fImages.height := 24;
+      fImages.width := 24;
+      fImages.AddResourceName(HINSTANCE, 'JSON_OBJECT24');
+      fImages.AddResourceName(HINSTANCE, 'JSON_ARRAY24');
+      fImages.AddResourceName(HINSTANCE, 'JSON_VALUE24');
+      AssignPng(btnAcceptProp, 'ACCEPT24');
+      AssignPng(fltEdit.Glyph, 'FILTER_CLEAR24');
+    end;
+    iss32:
+    begin
+      fImages.height := 32;
+      fImages.width := 32;
+      fImages.AddResourceName(HINSTANCE, 'JSON_OBJECT32');
+      fImages.AddResourceName(HINSTANCE, 'JSON_ARRAY32');
+      fImages.AddResourceName(HINSTANCE, 'JSON_VALUE32');
+      AssignPng(btnAcceptProp, 'ACCEPT32');
+      AssignPng(fltEdit.Glyph, 'FILTER_CLEAR32');
+    end;
+  end;
+
+  propTree.Images := fImages;
 end;
 
 procedure TCEDubProjectEditorWidget.SetVisible(value: boolean);
@@ -563,34 +606,34 @@ procedure TCEDubProjectEditorWidget.updateEditor;
     node.Data:= data;
     if data.JSONType = jtObject then for i := 0 to data.Count-1 do
     begin
-      node.ImageIndex:=7;
-      node.SelectedIndex:=7;
-      node.StateIndex:=7;
+      node.ImageIndex:=0;
+      node.SelectedIndex:=0;
+      node.StateIndex:=0;
       c := node.TreeNodes.AddChildObject(node, TJSONObject(data).Names[i],
         TJSONObject(data).Items[i]);
       case TJSONObject(data).Items[i].JSONType of
         jtObject, jtArray:
           addPropsFrom(c, TJSONObject(data).Items[i]);
         else begin
-          c.ImageIndex:=9;
-          c.SelectedIndex:=9;
-          c.StateIndex:=9;
+          c.ImageIndex:=2;
+          c.SelectedIndex:=2;
+          c.StateIndex:=2;
         end;
       end;
     end else if data.JSONType = jtArray then for i := 0 to data.Count-1 do
     begin
-      node.ImageIndex:=8;
-      node.SelectedIndex:=8;
-      node.StateIndex:=8;
+      node.ImageIndex:=1;
+      node.SelectedIndex:=1;
+      node.StateIndex:=1;
       c := node.TreeNodes.AddChildObject(node, format('item %d',[i]),
         TJSONArray(data).Items[i]);
       case TJSONArray(data).Items[i].JSONType of
         jtObject, jtArray:
           addPropsFrom(c, TJSONArray(data).Items[i]);
         else begin
-          c.ImageIndex:=9;
-          c.SelectedIndex:=9;
-          c.StateIndex:=9;
+          c.ImageIndex:=2;
+          c.SelectedIndex:=2;
+          c.StateIndex:=2;
         end;
       end;
     end;

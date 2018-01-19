@@ -166,7 +166,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         AutoSize = True
         Caption = 'btnMoveUp'
         OnClick = btnMoveUpClick
-        resourceName = 'GO_UP'
+        resourceName = 'ARROW_UP'
         scaledSeparator = False
       end
       object btnMoveDown: TCEToolButton[11]
@@ -176,7 +176,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         AutoSize = True
         Caption = 'btnMoveDown'
         OnClick = btnMoveDownClick
-        resourceName = 'GO_DOWN'
+        resourceName = 'ARROW_DOWN'
         scaledSeparator = False
       end
       object btnRemLib: TCEToolButton[12]

@@ -41,7 +41,6 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
           OnSelectionChange = lstToolsSelectionChange
           ScrollWidth = 158
           TabOrder = 0
-          TopIndex = -1
         end
         object Splitter1: TSplitter
           Left = 160
@@ -107,7 +106,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         AutoSize = True
         Caption = 'btnMoveUp'
         OnClick = btnMoveUpClick
-        resourceName = 'GO_UP'
+        resourceName = 'ARROW_UP'
         scaledSeparator = False
       end
       object btnMoveDown: TCEToolButton[4]
@@ -117,7 +116,7 @@ inherited CEToolsEditorWidget: TCEToolsEditorWidget
         AutoSize = True
         Caption = 'btnMoveDown'
         OnClick = btnMoveDownClick
-        resourceName = 'GO_DOWN'
+        resourceName = 'ARROW_DOWN'
         scaledSeparator = False
       end
       object btnRemTool: TCEToolButton[5]

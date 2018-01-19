@@ -323,7 +323,6 @@ end;
 constructor TCESymbolListWidget.create(aOwner: TComponent);
 var
   fname: string;
-  i: integer;
 begin
   fAutoRefresh := false;
   fRefreshOnFocus := true;
@@ -376,7 +375,7 @@ begin
       fImages.AddResourceName(HINSTANCE, 'BULLET_RED');
       fImages.AddResourceName(HINSTANCE, 'BULLET_YELLOW');
       fImages.AddResourceName(HINSTANCE, 'WARNING');
-      fImages.AddResourceName(HINSTANCE, 'WARN_RED');
+      fImages.AddResourceName(HINSTANCE, 'EXCLAMATION');
       AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR');
     end;
     iss24:
@@ -393,7 +392,7 @@ begin
       fImages.AddResourceName(HINSTANCE, 'BULLET_RED24');
       fImages.AddResourceName(HINSTANCE, 'BULLET_YELLOW24');
       fImages.AddResourceName(HINSTANCE, 'WARNING24');
-      fImages.AddResourceName(HINSTANCE, 'WARN_RED24');
+      fImages.AddResourceName(HINSTANCE, 'EXCLAMATION24');
       AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR24');
     end;
     iss32:
@@ -410,7 +409,7 @@ begin
       fImages.AddResourceName(HINSTANCE, 'BULLET_RED32');
       fImages.AddResourceName(HINSTANCE, 'BULLET_YELLOW32');
       fImages.AddResourceName(HINSTANCE, 'WARNING32');
-      fImages.AddResourceName(HINSTANCE, 'WARN_RED32');
+      fImages.AddResourceName(HINSTANCE, 'EXCLAMATION32');
       AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR32');
     end;
   end;
