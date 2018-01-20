@@ -1413,6 +1413,14 @@ begin
   actProjRun.ImageIndex:= i;
   actProjRunWithArgs.ImageIndex:= i;
 
+  i := loadIcon('LAYOUT');
+  mnuLayout.ImageIndex:= i;
+
+  i := LoadIcon('INDENT_MORE');
+  actEdIndent.ImageIndex:= i;
+
+  i := LoadIcon('INDENT_LESS');
+  actEdUnIndent.ImageIndex:= i;
 end;
 
 procedure TCEMainForm.InitWidgets;
@@ -1420,6 +1428,7 @@ var
   widg: TCEWidget;
   act: TAction;
   itm: TMenuItem;
+  idx: integer;
 begin
   fWidgList   := TCEWidgetList.Create;
   fMesgWidg   := TCEMessagesWidget.create(self);
@@ -1468,6 +1477,12 @@ begin
 
   fWidgList.sort(@CompareWidgCaption);
 
+  case GetIconScaledSize of
+    iss16: idx := fImages.AddResourceName(HINSTANCE, 'APPLICATION');
+    iss24: idx := fImages.AddResourceName(HINSTANCE, 'APPLICATION24');
+    iss32: idx := fImages.AddResourceName(HINSTANCE, 'APPLICATION32');
+  end;
+
   for widg in fWidgList do
   begin
     act := TAction.Create(self);
@@ -1475,7 +1490,7 @@ begin
     act.Caption := widg.Caption;
     act.OnExecute := @widgetShowFromAction;
     act.Tag := ptrInt(widg);
-    act.ImageIndex := 25;
+    act.ImageIndex := idx;
     act.OnUpdate:= @updateWidgetMenuEntry;
     itm := TMenuItem.Create(self);
     itm.Action := act;

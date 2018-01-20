@@ -1195,6 +1195,7 @@ begin
   TCEListViewCopyMenu.create(lstThreads);
 
   cpuViewer.DefaultItemHeight := scaleY(22, 96);
+  dbgeeOptsEd.DefaultItemHeight:= cpuViewer.DefaultItemHeight;
 
   Case GetIconScaledSize of
     iss16:
@@ -1247,7 +1248,6 @@ var
   mnu: ICEMainMenu;
   itm: TMenuItem;
   bmp: TBitmap;
-  i: integer;
 begin
   mnu := getMainMenu;
   if not assigned(mnu) then
@@ -1270,8 +1270,7 @@ begin
   fMenu.Add(itm);
   btnStart.toBitmap(bmp);
   itm.Bitmap.Assign(bmp);
-  i := fMenu.GetImageList.Add(bmp, nil);
-  itm.ImageIndex:= i;
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
   itm := TMenuItem.Create(fMenu);
   itm.ShortCut:=fOptions.shortcuts.stop;
@@ -1281,8 +1280,7 @@ begin
   fMenu.Add(itm);
   btnStop.toBitmap(bmp);
   itm.Bitmap.Assign(bmp);
-  i := fMenu.GetImageList.Add(bmp, nil);
-  itm.ImageIndex:= i;
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
   itm := TMenuItem.Create(fMenu);
   itm.ShortCut:=fOptions.shortcuts.pause;
@@ -1292,8 +1290,7 @@ begin
   fMenu.Add(itm);
   btnPause.toBitmap(bmp);
   itm.Bitmap.Assign(bmp);
-  i := fMenu.GetImageList.Add(bmp, nil);
-  itm.ImageIndex:= i;
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
   itm := TMenuItem.Create(fMenu);
   itm.ShortCut:=fOptions.shortcuts.continue;
@@ -1303,8 +1300,7 @@ begin
   fMenu.Add(itm);
   btnContinue.toBitmap(bmp);
   itm.Bitmap.Assign(bmp);
-  i := fMenu.GetImageList.Add(bmp, nil);
-  itm.ImageIndex:= i;
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
   itm := TMenuItem.Create(fMenu);
   itm.ShortCut:=fOptions.shortcuts.step;
@@ -1314,8 +1310,7 @@ begin
   fMenu.Add(itm);
   btnNext.toBitmap(bmp);
   itm.Bitmap.Assign(bmp);
-  i := fMenu.GetImageList.Add(bmp, nil);
-  itm.ImageIndex:= i;
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
   itm := TMenuItem.Create(fMenu);
   itm.ShortCut:=fOptions.shortcuts.stepOver;
@@ -1325,8 +1320,7 @@ begin
   fMenu.Add(itm);
   btnOver.toBitmap(bmp);
   itm.Bitmap.Assign(bmp);
-  i := fMenu.GetImageList.Add(bmp, nil);
-  itm.ImageIndex:= i;
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
   itm := TMenuItem.Create(fMenu);
   itm.Caption:= '-';
@@ -1341,8 +1335,7 @@ begin
   fMenu.Add(itm);
   btnReg.toBitmap(bmp);
   itm.Bitmap.Assign(bmp);
-  i := fMenu.GetImageList.Add(bmp, nil);
-  itm.ImageIndex:= i;
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
   itm := TMenuItem.Create(fMenu);
   itm.ShortCut:=fOptions.shortcuts.updateStack;
@@ -1352,8 +1345,7 @@ begin
   fMenu.Add(itm);
   btnStack.toBitmap(bmp);
   itm.Bitmap.Assign(bmp);
-  i := fMenu.GetImageList.Add(bmp, nil);
-  itm.ImageIndex:= i;
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
   itm := TMenuItem.Create(fMenu);
   itm.ShortCut:=fOptions.shortcuts.updateVariables;
@@ -1363,8 +1355,7 @@ begin
   fMenu.Add(itm);
   btnVariables.toBitmap(bmp);
   itm.Bitmap.Assign(bmp);
-  i := fMenu.GetImageList.Add(bmp, nil);
-  itm.ImageIndex:= i;
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
   bmp.Free;
 end;

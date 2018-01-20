@@ -811,6 +811,8 @@ end;
 
 {$REGION Standard Obj and Comp -------------------------------------------------}
 constructor TCESynMemo.Create(aOwner: TComponent);
+var
+  z: TIconScaledSize;
 begin
   inherited;
 
@@ -902,14 +904,48 @@ begin
   fModified := false;
   TextBuffer.AddNotifyHandler(senrUndoRedoAdded, @changeNotify);
 
+  Gutter.MarksPart.AutoSize:=false;
+  Gutter.MarksPart.Width := ScaleX(20,96);
   fImages := TImageList.Create(self);
-  fImages.AddResourceName(HINSTANCE, 'BREAK_SET');
-  fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN');
-  fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK');
-  fImages.AddResourceName(HINSTANCE, 'BREAK_REACHED');
-  fImages.AddResourceName(HINSTANCE, 'STEP');
-  fImages.AddResourceName(HINSTANCE, 'CAMERA_GO');
-  fImages.AddResourceName(HINSTANCE, 'WARNING');
+  z := GetIconScaledSize;
+  case z of
+    iss16:
+    begin
+      fImages.Width:= 16;
+      fImages.Height:= 16;
+      fImages.AddResourceName(HINSTANCE, 'BREAK_SET');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK');
+      fImages.AddResourceName(HINSTANCE, 'BREAK_REACHED');
+      fImages.AddResourceName(HINSTANCE, 'STEP');
+      fImages.AddResourceName(HINSTANCE, 'CAMERA_GO');
+      fImages.AddResourceName(HINSTANCE, 'WARNING');
+    end;
+    iss24:
+    begin
+      fImages.Width:= 24;
+      fImages.Height:= 24;
+      fImages.AddResourceName(HINSTANCE, 'BREAK_SET24');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN24');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK24');
+      fImages.AddResourceName(HINSTANCE, 'BREAK_REACHED24');
+      fImages.AddResourceName(HINSTANCE, 'STEP24');
+      fImages.AddResourceName(HINSTANCE, 'CAMERA_GO24');
+      fImages.AddResourceName(HINSTANCE, 'WARNING24');
+    end;
+    iss32:
+    begin
+      fImages.Width:= 32;
+      fImages.Height:= 32;
+      fImages.AddResourceName(HINSTANCE, 'BREAK_SET32');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_GREEN32');
+      fImages.AddResourceName(HINSTANCE, 'BULLET_BLACK32');
+      fImages.AddResourceName(HINSTANCE, 'BREAK_REACHED32');
+      fImages.AddResourceName(HINSTANCE, 'STEP32');
+      fImages.AddResourceName(HINSTANCE, 'CAMERA_GO32');
+      fImages.AddResourceName(HINSTANCE, 'WARNING32');
+    end;
+  end;
 
   fPositions := TCESynMemoPositions.create(self);
   fMultiDocSubject := TCEMultiDocSubject.create;

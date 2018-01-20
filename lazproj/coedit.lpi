@@ -13,7 +13,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="354">
+      <Resources Count="364">
         <Resource_0 FileName="..\icons\arrow\arrow_up.png" Type="RCDATA" ResourceName="ARROW_UP"/>
         <Resource_1 FileName="..\icons\arrow\arrow_down.png" Type="RCDATA" ResourceName="ARROW_DOWN"/>
         <Resource_2 FileName="..\icons\arrow\arrow_divide.png" Type="RCDATA" ResourceName="ARROW_DIVIDE"/>
@@ -368,6 +368,16 @@
         <Resource_351 FileName="../icons/other/cross.png" Type="RCDATA" ResourceName="CROSS"/>
         <Resource_352 FileName="../icons/other/cross24.png" Type="RCDATA" ResourceName="CROSS24"/>
         <Resource_353 FileName="../icons/other/cross32.png" Type="RCDATA" ResourceName="CROSS32"/>
+        <Resource_354 FileName="../icons/other/break_reached32.png" Type="RCDATA" ResourceName="BREAK_REACHED32"/>
+        <Resource_355 FileName="../icons/other/break_reached24.png" Type="RCDATA" ResourceName="BREAK_REACHED24"/>
+        <Resource_356 FileName="../icons/other/break_set32.png" Type="RCDATA" ResourceName="BREAK_SET32"/>
+        <Resource_357 FileName="../icons/other/break_set24.png" Type="RCDATA" ResourceName="BREAK_SET24"/>
+        <Resource_358 FileName="../icons/other/indent_more.png" Type="RCDATA" ResourceName="INDENT_MORE"/>
+        <Resource_359 FileName="../icons/other/indent_more24.png" Type="RCDATA" ResourceName="INDENT_MORE24"/>
+        <Resource_360 FileName="../icons/other/indent_more32.png" Type="RCDATA" ResourceName="INDENT_MORE32"/>
+        <Resource_361 FileName="../icons/other/indent_less32.png" Type="RCDATA" ResourceName="INDENT_LESS32"/>
+        <Resource_362 FileName="../icons/other/indent_less24.png" Type="RCDATA" ResourceName="INDENT_LESS24"/>
+        <Resource_363 FileName="../icons/other/indent_less.png" Type="RCDATA" ResourceName="INDENT_LESS"/>
       </Resources>
     </General>
     <i18n>

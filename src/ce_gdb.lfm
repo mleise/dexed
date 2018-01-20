@@ -37,15 +37,15 @@ inherited CEGdbWidget: TCEGdbWidget
           Width = 517
           Align = alClient
           Caption = 'CPU'
-          ClientHeight = 162
-          ClientWidth = 515
+          ClientHeight = 161
+          ClientWidth = 513
           TabOrder = 0
           object cpuViewer: TTIPropertyGrid
             Left = 0
-            Height = 162
+            Height = 161
             Hint = 'cpu registers'
             Top = 0
-            Width = 515
+            Width = 513
             Align = alClient
             CheckboxForBoolean = True
             DefaultValueFont.Color = clWindowText
@@ -82,8 +82,8 @@ inherited CEGdbWidget: TCEGdbWidget
             ClientWidth = 511
             object lstVariables: TListView
               Left = 2
-              Height = 136
-              Top = 27
+              Height = 132
+              Top = 31
               Width = 507
               Align = alClient
               AutoWidthLastColumn = True
@@ -109,7 +109,7 @@ inherited CEGdbWidget: TCEGdbWidget
             end
             object varListFlt: TListViewFilterEdit
               Left = 2
-              Height = 23
+              Height = 27
               Hint = 'locate variables'
               Top = 2
               Width = 507
@@ -311,9 +311,9 @@ inherited CEGdbWidget: TCEGdbWidget
           ClientWidth = 511
           object dbgeeOptsEd: TTIPropertyGrid
             Left = 2
-            Height = 165
+            Height = 161
             Top = 2
-            Width = 509
+            Width = 507
             Align = alClient
             BorderSpacing.Around = 2
             CheckboxForBoolean = True

@@ -61,13 +61,13 @@ begin
   Inherited create(TheOwner);
   Align  := alTop;
   height :=  ScaleY(26, 96);
-  width := ScaleX(200, 96);
+  width := ScaleX(220, 96);
   //
   fLabel := TLabel.Create(self);
   fLabel.AutoSize:=false;
   fLabel.Parent := self;
   fLabel.Align:= alLeft;
-  fLabel.Width:= ScaleX(70, 96);
+  fLabel.Width:= ScaleX(90, 96);
   fLabel.BorderSpacing.Around := 2;
   fLabel.Hint:= description;
   fLabel.ShowHint:=true;
@@ -251,7 +251,7 @@ begin
   itm.Parent := boxTools;
   itm.ReAlign;
   //
-  Height := boxTools.ControlCount * ScaleY(30, 96) + GroupBox1.Height + ScaleY(12, 96);
+  Height := boxTools.ControlCount * ScaleY(30, 96) + GroupBox1.Height + ScaleY(20, 96);
   Realign;
 end;
 
