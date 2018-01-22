@@ -869,7 +869,6 @@ begin
   fSyncEdit := TSynPluginSyncroEdit.Create(self);
   fSyncEdit.Editor := self;
   fSyncEdit.CaseSensitive := true;
-  AssignPng(fSyncEdit.GutterGlyph, 'LINK_EDIT');
 
   fCompletion := TSyncompletion.create(nil);
   fCompletion.ShowSizeDrag := true;
@@ -920,6 +919,7 @@ begin
       fImages.AddResourceName(HINSTANCE, 'STEP');
       fImages.AddResourceName(HINSTANCE, 'CAMERA_GO');
       fImages.AddResourceName(HINSTANCE, 'WARNING');
+      AssignPng(fSyncEdit.GutterGlyph, 'LINK_EDIT');
     end;
     iss24:
     begin
@@ -932,6 +932,7 @@ begin
       fImages.AddResourceName(HINSTANCE, 'STEP24');
       fImages.AddResourceName(HINSTANCE, 'CAMERA_GO24');
       fImages.AddResourceName(HINSTANCE, 'WARNING24');
+      AssignPng(fSyncEdit.GutterGlyph, 'LINK_EDIT24');
     end;
     iss32:
     begin
@@ -944,6 +945,7 @@ begin
       fImages.AddResourceName(HINSTANCE, 'STEP32');
       fImages.AddResourceName(HINSTANCE, 'CAMERA_GO32');
       fImages.AddResourceName(HINSTANCE, 'WARNING32');
+      AssignPng(fSyncEdit.GutterGlyph, 'LINK_EDIT32');
     end;
   end;
 

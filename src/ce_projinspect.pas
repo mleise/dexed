@@ -121,9 +121,9 @@ begin
     end;
     iss32:
     begin
-      fImages.Width := 24;
-      fImages.Height := 24;
-      Tree.Indent := 24;
+      fImages.Width := 32;
+      fImages.Height := 32;
+      Tree.Indent := 32;
       fImages.AddResourceName(HINSTANCE, 'DOCUMENT_ALL32');
       fImages.AddResourceName(HINSTANCE, 'WRENCH32');
       fImages.AddResourceName(HINSTANCE, 'PAGE_TEXT32');

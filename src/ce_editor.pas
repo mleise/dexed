@@ -306,7 +306,7 @@ begin
   inherited;
   toolbarVisible:=false;
   fDetectModuleName:=true;
-  //
+
   pageControl := TCEPageControl.Create(self);
   pageControl.Parent := Content;
   pageControl.align := alClient;
@@ -406,6 +406,12 @@ begin
       AssignPng(mnuedPrevWarn.Bitmap, 'GO_PREVIOUS32');
     end;
   end;
+
+  editorStatus.Panels[0].Width := ScaleX(115, 96);
+  editorStatus.Panels[1].Width := ScaleX(85, 96);
+  editorStatus.Panels[2].Width := ScaleX(125, 96);
+  editorStatus.Panels[3].Width := ScaleX(105, 96);
+  editorStatus.Panels[4].Width := ScaleX(2000, 96);
 
   fTokList := TLexTokenList.Create;
 
