@@ -76,7 +76,9 @@ type
     fBackup: TShortCutCollection;
     fHasChanged: boolean;
     propvalue: TEditableShortcut;
+    fHasScaled: boolean;
     //
+    procedure updateScaling;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -185,12 +187,9 @@ begin
   fObservers := TCEEditableShortCutSubject.create;
   fShortcuts := TShortCutCollection.create(self);
   fBackup := TShortCutCollection.create(self);
-  AssignPng(btnClear, 'CLEAN');
-  AssignPng(btnEdit, 'KEYBOARD_PENCIL');
   EntitiesConnector.addObserver(self);
   propedit.TIObject := propvalue;
   propedit.PropertyEditorHook.AddHandlerModified(@propeditModified);
-  propedit.DefaultItemHeight:= scaleY(22, 96);
 end;
 
 destructor TCEShortcutEditor.destroy;
@@ -198,6 +197,36 @@ begin
   propvalue.Free;
   fObservers.Free;
   inherited;
+end;
+
+procedure TCEShortcutEditor.updateScaling;
+begin
+  if fHasScaled then
+    exit;
+  fHasScaled := true;
+  case GetIconScaledSize of
+    iss16:
+    begin
+      AssignPng(btnClear, 'CLEAN');
+      AssignPng(btnEdit, 'SHORTCUTS');
+      AssignPng(fltItems.Glyph, 'FILTER_CLEAR')
+    end;
+    iss24:
+    begin
+      AssignPng(btnClear, 'CLEAN24');
+      AssignPng(btnEdit, 'SHORTCUTS24');
+      AssignPng(fltItems.Glyph, 'FILTER_CLEAR24')
+    end;
+    iss32:
+    begin
+      AssignPng(btnClear, 'CLEAN32');
+      AssignPng(btnEdit, 'SHORTCUTS32');
+      AssignPng(fltItems.Glyph, 'FILTER_CLEAR32')
+    end;
+  end;
+  panel2.Height:=scaleY(30, 96);
+  propedit.DefaultItemHeight:= scaleY(26, 96);
+  propedit.BuildPropertyList();
 end;
 
 function TCEShortcutEditor.anItemIsSelected: boolean;
@@ -221,6 +250,7 @@ end;
 
 function TCEShortcutEditor.optionedWantContainer: TPersistent;
 begin
+  updateScaling;
   receiveShortcuts;
   exit(self);
 end;

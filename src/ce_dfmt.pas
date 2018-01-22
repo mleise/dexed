@@ -128,6 +128,7 @@ begin
   end;
 
   dfmtOptionEditor.TIObject := fDmtWrapper;
+  dfmtOptionEditor.DefaultItemHeight:=scaleY(24,96);
 end;
 
 destructor TCEDfmtWidget.destroy;

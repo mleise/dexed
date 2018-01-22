@@ -1,26 +1,28 @@
 object CEShortcutEditor: TCEShortcutEditor
   Left = 0
-  Height = 432
+  Height = 449
   Top = 0
   Width = 424
-  ClientHeight = 432
+  AutoSize = True
+  ClientHeight = 449
   ClientWidth = 424
   TabOrder = 0
   DesignLeft = 1365
   DesignTop = 176
   object Panel1: TPanel
     Left = 0
-    Height = 432
+    Height = 449
     Top = 0
     Width = 424
     Align = alClient
+    AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 432
+    ClientHeight = 449
     ClientWidth = 424
     TabOrder = 0
     object fltItems: TTreeFilterEdit
       Left = 2
-      Height = 25
+      Height = 27
       Top = 2
       Width = 420
       OnFilterItem = fltItemsFilterItem
@@ -34,8 +36,8 @@ object CEShortcutEditor: TCEShortcutEditor
     end
     object tree: TTreeView
       Left = 2
-      Height = 347
-      Top = 31
+      Height = 373
+      Top = 33
       Width = 420
       Align = alClient
       AutoExpand = True
@@ -51,19 +53,18 @@ object CEShortcutEditor: TCEShortcutEditor
     end
     object Panel2: TPanel
       Left = 2
-      Height = 50
-      Top = 380
+      Height = 39
+      Top = 408
       Width = 420
       Align = alBottom
-      AutoSize = True
       BorderSpacing.Around = 2
       BevelOuter = bvNone
-      ClientHeight = 50
+      ClientHeight = 39
       ClientWidth = 420
       TabOrder = 2
       object btnClear: TSpeedButton
         Left = 2
-        Height = 46
+        Height = 35
         Hint = 'clear shortcut'
         Top = 2
         Width = 4
@@ -75,7 +76,7 @@ object CEShortcutEditor: TCEShortcutEditor
       end
       object propedit: TTIPropertyGrid
         Left = 14
-        Height = 50
+        Height = 39
         Top = 0
         Width = 406
         Align = alClient
@@ -85,11 +86,13 @@ object CEShortcutEditor: TCEShortcutEditor
         Indent = 10
         NameFont.Color = clWindowText
         OnModified = propeditModified
+        PreferredSplitterX = 200
+        SplitterX = 200
         ValueFont.Color = clMaroon
       end
       object btnEdit: TSpeedButton
         Left = 8
-        Height = 46
+        Height = 35
         Hint = 'edit selected shortcut'
         Top = 2
         Width = 4

@@ -76,8 +76,6 @@ begin
   inspector.DefaultItemHeight := scaleY(22, 96);
   selCat.Width := ScaleX(180, 96);
   width := ScaleX(600, 96);
-  inspector.SplitterX := inspector.width div 2 + ScaleX(20, 96);
-  inspector.PreferredSplitterX := inspector.SplitterX;
 
   case GetIconScaledSize of
     iss16:
@@ -110,7 +108,12 @@ end;
 procedure TCEOptionEditorWidget.UpdateShowing;
 begin
   inherited;
-  if Visible then updateCategories;
+  if Visible then
+  begin
+    updateCategories;
+    inspector.SplitterX := inspector.width div 2;
+    inspector.PreferredSplitterX := inspector.SplitterX;
+  end;
 end;
 {$ENDREGION}
 

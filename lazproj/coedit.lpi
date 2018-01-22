@@ -13,7 +13,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="364">
+      <Resources Count="373">
         <Resource_0 FileName="..\icons\arrow\arrow_up.png" Type="RCDATA" ResourceName="ARROW_UP"/>
         <Resource_1 FileName="..\icons\arrow\arrow_down.png" Type="RCDATA" ResourceName="ARROW_DOWN"/>
         <Resource_2 FileName="..\icons\arrow\arrow_divide.png" Type="RCDATA" ResourceName="ARROW_DIVIDE"/>
@@ -378,6 +378,15 @@
         <Resource_361 FileName="../icons/other/indent_less.png" Type="RCDATA" ResourceName="INDENT_LESS"/>
         <Resource_362 FileName="../icons/book/book_grey32.png" Type="RCDATA" ResourceName="BOOK_GREY32"/>
         <Resource_363 FileName="../icons/book/book_grey24.png" Type="RCDATA" ResourceName="BOOK_GREY24"/>
+        <Resource_364 FileName="../icons/other/shortcuts.png" Type="RCDATA" ResourceName="SHORTCUTS"/>
+        <Resource_365 FileName="../icons/other/shortcuts24.png" Type="RCDATA" ResourceName="SHORTCUTS24"/>
+        <Resource_366 FileName="../icons/other/shortcuts32.png" Type="RCDATA" ResourceName="SHORTCUTS32"/>
+        <Resource_367 FileName="../icons/other/html_go.png" Type="RCDATA" ResourceName="HTML_GO"/>
+        <Resource_368 FileName="../icons/other/html_go24.png" Type="RCDATA" ResourceName="HTML_GO24"/>
+        <Resource_369 FileName="../icons/other/html_go32.png" Type="RCDATA" ResourceName="HTML_GO32"/>
+        <Resource_370 FileName="../icons/folder/move_to_folder.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER"/>
+        <Resource_371 FileName="../icons/folder/move_to_folder24.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER24"/>
+        <Resource_372 FileName="../icons/folder/move_to_folder32.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER32"/>
       </Resources>
     </General>
     <i18n>

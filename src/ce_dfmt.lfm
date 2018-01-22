@@ -17,6 +17,7 @@ inherited CEDfmtWidget: TCEDfmtWidget
     ClientWidth = 450
     inherited Content: TPanel
       Height = 321
+      Top = 36
       Width = 450
       ClientHeight = 321
       ClientWidth = 450
@@ -59,6 +60,7 @@ inherited CEDfmtWidget: TCEDfmtWidget
           AutoSize = True
           BorderSpacing.Left = 2
           BorderSpacing.Around = 2
+          Flat = True
         end
         object btnApply: TSpeedButton
           Left = 435
@@ -70,6 +72,7 @@ inherited CEDfmtWidget: TCEDfmtWidget
           AutoSize = True
           BorderSpacing.Left = 2
           BorderSpacing.Around = 2
+          Flat = True
         end
       end
     end

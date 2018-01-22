@@ -145,7 +145,6 @@ type
     actEdUnIndent: TAction;
     Actions: TActionList;
     ApplicationProperties1: TApplicationProperties;
-    imgList: TImageList;
     mainMenu: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
@@ -1421,6 +1420,12 @@ begin
 
   i := LoadIcon('INDENT_LESS');
   actEdUnIndent.ImageIndex:= i;
+
+  i := LoadIcon('HTML_GO');
+  actFileHtmlExport.ImageIndex:=i;
+
+  i := LoadIcon('MOVE_TO_FOLDER');
+  actFileAddToProj.ImageIndex:=i;
 end;
 
 procedure TCEMainForm.InitWidgets;

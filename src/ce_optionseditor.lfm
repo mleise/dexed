@@ -1,37 +1,38 @@
 inherited CEOptionEditorWidget: TCEOptionEditorWidget
   Left = 594
-  Height = 493
+  Height = 514
   Top = 257
-  Width = 575
+  Width = 637
   BorderIcons = [biSystemMenu, biMinimize, biMaximize]
   Caption = 'Options editor'
-  ClientHeight = 493
-  ClientWidth = 575
+  ClientHeight = 514
+  ClientWidth = 637
   OnCloseQuery = FormCloseQuery
   inherited Back: TPanel
-    Height = 493
-    Width = 575
-    ClientHeight = 493
-    ClientWidth = 575
+    Height = 514
+    Width = 637
+    ClientHeight = 514
+    ClientWidth = 637
     inherited Content: TPanel
-      Height = 457
-      Width = 575
-      ClientHeight = 457
-      ClientWidth = 575
+      Height = 478
+      Top = 36
+      Width = 637
+      ClientHeight = 478
+      ClientWidth = 637
       object pnlBody: TPanel[0]
         Left = 4
-        Height = 431
+        Height = 452
         Top = 4
-        Width = 567
+        Width = 629
         Align = alClient
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 431
-        ClientWidth = 567
+        ClientHeight = 452
+        ClientWidth = 629
         TabOrder = 0
         object selCat: TTreeView
           Left = 0
-          Height = 431
+          Height = 452
           Top = 0
           Width = 182
           Align = alLeft
@@ -48,19 +49,19 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
         end
         object pnlEd: TPanel
           Left = 188
-          Height = 431
+          Height = 452
           Top = 0
-          Width = 379
+          Width = 441
           Align = alClient
           BevelOuter = bvNone
-          ClientHeight = 431
-          ClientWidth = 379
+          ClientHeight = 452
+          ClientWidth = 441
           TabOrder = 1
           object inspector: TTIPropertyGrid
             Left = 0
-            Height = 431
+            Height = 452
             Top = 0
-            Width = 379
+            Width = 441
             Align = alClient
             CheckboxForBoolean = False
             DefaultValueFont.Color = clWindowText
@@ -76,7 +77,7 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
         end
         object Splitter1: TSplitter
           Left = 182
-          Height = 431
+          Height = 452
           Top = 0
           Width = 6
         end
@@ -84,17 +85,17 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
       object pnlFooter: TPanel[1]
         Left = 4
         Height = 14
-        Top = 439
-        Width = 567
+        Top = 460
+        Width = 629
         Align = alBottom
         AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvLowered
         ClientHeight = 14
-        ClientWidth = 567
+        ClientWidth = 629
         TabOrder = 1
         object btnCancel: TSpeedButton
-          Left = 548
+          Left = 610
           Height = 4
           Hint = 'cancel and revert the modifications of the category'
           Top = 5
@@ -103,10 +104,11 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
           AutoSize = True
           BorderSpacing.Left = 2
           BorderSpacing.Around = 4
+          Flat = True
           OnClick = btnCancelClick
         end
         object btnAccept: TSpeedButton
-          Left = 558
+          Left = 620
           Height = 4
           Hint = 'accept the modifications of the category'
           Top = 5
@@ -115,12 +117,13 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
           AutoSize = True
           BorderSpacing.Left = 2
           BorderSpacing.Around = 4
+          Flat = True
           OnClick = btnAcceptClick
         end
       end
     end
     inherited toolbar: TCEToolBar
-      Width = 567
+      Width = 629
     end
   end
   inherited contextMenu: TPopupMenu

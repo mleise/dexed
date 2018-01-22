@@ -101,6 +101,10 @@ type
     procedure updateEditor;
   protected
     procedure SetVisible(Value: Boolean); override;
+  private
+    fCloneBtn: TBitBtn;
+    fAddBtn: TBitBtn;
+    fDelBtn: TBitBtn;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -288,9 +292,30 @@ begin
     fEditor.Font.Assign(EditorOptions.font);
     fEditor.Font.Size:=12;
     fEditor.Font.Name:=EditorOptions.font.Name;
+    fEditor.Height:= scaleY(160,96);
     if firstTime then
       fList.ItemIndex := 0;
     lstBoxSelChange(nil);
+    case GetIconScaledSize of
+      iss16:
+      begin
+        AssignPng(fAddBtn, 'DOCUMENT_ADD');
+        AssignPng(fDelBtn, 'DOCUMENT_DELETE');
+        AssignPng(fCloneBtn, 'DOCUMENT_PLUS');
+      end;
+      iss24:
+      begin
+        AssignPng(fAddBtn, 'DOCUMENT_ADD24');
+        AssignPng(fDelBtn, 'DOCUMENT_DELETE24');
+        AssignPng(fCloneBtn, 'DOCUMENT_PLUS24');
+      end;
+      iss32:
+      begin
+        AssignPng(fAddBtn, 'DOCUMENT_ADD32');
+        AssignPng(fDelBtn, 'DOCUMENT_DELETE32');
+        AssignPng(fCloneBtn, 'DOCUMENT_PLUS32');
+      end;
+    end;
   end;
 end;
 
@@ -554,47 +579,29 @@ begin
   fList.AutoSize := true;
   updateList;
 
-  //TODO-cbugfix: always iss16 is returned at this point (order of init problem ?)
-  isc := GetIconScaledSize;
+  fAddBtn := TBitBtn.Create(self);
+  fAddBtn.Parent := pnl;
+  fAddBtn.AutoSize := true;
+  fAddBtn.Width:= ScaleX(28,96);
+  fAddBtn.Align:= alRight;
+  fAddBtn.OnClick:=@btnAddClick;
+  fAddBtn.Hint:='add preset';
 
-  btn := TBitBtn.Create(self);
-  btn.Parent := pnl;
-  btn.AutoSize := true;
-  btn.Width:= ScaleX(28,96);
-  btn.Align:= alRight;
-  btn.OnClick:=@btnAddClick;
-  btn.Hint:='add preset';
-  case isc of
-    iss16: AssignPng(btn, 'DOCUMENT_ADD');
-    iss24: AssignPng(btn, 'DOCUMENT_ADD24');
-    iss32: AssignPng(btn, 'DOCUMENT_ADD32');
-  end;
+  fDelBtn := TBitBtn.Create(self);
+  fDelBtn.Parent := pnl;
+  fDelBtn.AutoSize := true;
+  fDelBtn.Width:= ScaleX(28,96);
+  fDelBtn.Align:= alRight;
+  fDelBtn.OnClick:=@btnDelClick;
+  fDelBtn.Hint:='delete preset';
 
-  btn := TBitBtn.Create(self);
-  btn.Parent := pnl;
-  btn.AutoSize := true;
-  btn.Width:= ScaleX(28,96);
-  btn.Align:= alRight;
-  btn.OnClick:=@btnDelClick;
-  btn.Hint:='delete preset';
-  case isc of
-    iss16: AssignPng(btn, 'DOCUMENT_DELETE');
-    iss24: AssignPng(btn, 'DOCUMENT_DELETE24');
-    iss32: AssignPng(btn, 'DOCUMENT_DELETE32');
-  end;
-
-  btn := TBitBtn.Create(self);
-  btn.Parent := pnl;
-  btn.AutoSize := true;
-  btn.Width:= ScaleX(28,96);
-  btn.Align:= alRight;
-  btn.OnClick:=@btnCloneClick;
-  btn.Hint:='clone preset';
-  case isc of
-    iss16: AssignPng(btn, 'DOCUMENT_PLUS');
-    iss24: AssignPng(btn, 'DOCUMENT_PLUS24');
-    iss32: AssignPng(btn, 'DOCUMENT_PLUS32');
-  end;
+  fCloneBtn := TBitBtn.Create(self);
+  fCloneBtn.Parent := pnl;
+  fCloneBtn.AutoSize := true;
+  fCloneBtn.Width:= ScaleX(28,96);
+  fCloneBtn.Align:= alRight;
+  fCloneBtn.OnClick:=@btnCloneClick;
+  fCloneBtn.Hint:='clone preset';
 
   fPropEd := TTIPropertyGrid.Create(self);
   fPropEd.Parent := self;
@@ -603,7 +610,6 @@ begin
   fPropEd.OnModified:=@propEdModified;
   fPropEd.CheckboxForBoolean:=true;
   fPropEd.PropertyEditorHook.AddHandlerModified(@propEdModified);
-  fPropEd.DefaultItemHeight:=ScaleY(22, 96);
 
   fList.ItemIndex := 0;
   EntitiesConnector.addObserver(self);
