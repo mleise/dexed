@@ -61,6 +61,7 @@ type
     destructor destroy; override;
     //
     class procedure relaunch; static;
+    class function noDcdPassedAsArg: boolean; static;
     //
     procedure addImportFolders(const folders: TStrings);
     procedure addImportFolder(const folder: string);
@@ -99,7 +100,8 @@ begin
   if fname.fileExists then
     loadFromFile(fname);
   //
-  fAvailable := exeInSysPath(clientName) and exeInSysPath(serverName);
+  fAvailable := exeInSysPath(clientName) and exeInSysPath(serverName)
+    and not noDcdPassedAsArg();
   if not fAvailable then
     exit;
   //
@@ -136,6 +138,19 @@ begin
   updateServerlistening;
   //
   EntitiesConnector.addObserver(self);
+end;
+
+class function TCEDcdWrapper.noDcdPassedAsArg(): boolean;
+var
+  i: integer;
+begin
+  result := false;
+  for i := 1 to argc-1 do
+    if ParamStr(i) = '-nodcd' then
+  begin
+    result :=true;
+    break;
+  end;
 end;
 
 class procedure TCEDcdWrapper.relaunch;

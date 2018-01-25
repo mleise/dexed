@@ -399,7 +399,6 @@ type
     procedure widgetDockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
     procedure mnuOptsItemClick(sender: TObject);
 
-
     // ICEMainMenu
     function singleServiceName: string;
     function mnuAdd: TMenuItem;
