@@ -769,12 +769,12 @@ function getCatNode(node: TTreeNode; stype: TSymbolType ): TTreeNode;
       _interface: begin result.ImageIndex:=5; result.SelectedIndex:=5; end;
       _mixin    : begin result.ImageIndex:=6; result.SelectedIndex:=6; end;
       _struct   : begin result.ImageIndex:=7; result.SelectedIndex:=7; end;
-      _template : begin result.ImageIndex:=8; result.SelectedIndex:=8; end;
-      _union    : begin result.ImageIndex:=0; result.SelectedIndex:=0; end;
-      _unittest : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
-      _variable : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
-      _warning  : begin result.ImageIndex:=9; result.SelectedIndex:=9; end;
-      _error    : begin result.ImageIndex:=10; result.SelectedIndex:=10; end;
+      _template : begin result.ImageIndex:=0; result.SelectedIndex:=0; end;
+      _union    : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
+      _unittest : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
+      _variable : begin result.ImageIndex:=3; result.SelectedIndex:=3; end;
+      _warning  : begin result.ImageIndex:=8; result.SelectedIndex:=8; end;
+      _error    : begin result.ImageIndex:=9; result.SelectedIndex:=9; end;
     end;
   end;
   //
