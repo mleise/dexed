@@ -12,8 +12,8 @@ title: Build Coedit
 
 Coedit is mostly programmed in Object Pascal, using the the [Lazarus development platform](http://www.lazarus-ide.org/).
 
-* [Download](http://lazarus.freepascal.org/index.php?page=downloads) and setup the latest Lazarus version (>= 1.6.4) and  FPC + FPC sources (>= 3.0.2) for your platform.
-    * Windows: the three packages are bundled in an installer. Even on Windows 64 bit, the 32 version must be setup.
+* [Download](http://lazarus.freepascal.org/index.php?page=downloads) and setup the latest Lazarus version (>= 1.8.0) and  FPC + FPC sources (>= 3.0.4) for your platform.
+    * Windows: the three packages are bundled in an installer.
     * Linux: the three packages must be downloaded and setup individually. It's recommended to download the packages from _SourceForge_ and not from the official repository of the distribution because they don't always propose the latest version.
 * `cd <user dir where to clone>`
 * `git clone https://github.com/BBasile/Coedit.git`
@@ -24,15 +24,16 @@ Any `.patch` file located in the `patches/` folder should be applied. On linux y
 
 You're now ready to build Coedit. This can be done in the IDE or using the _lazbuild_ utility.
 
-* With _Lazarus_: 
-    * start Lazarus,
-    * in the **project** menu, click *open...* and select the file **Coedit.lpi**, which is located in the sub-folder **lazproj**.
-    * in the menu **Execute** click **Create**.
-
-* With _lazbuild_: 
+* If you don't plan to develop the project, use _lazbuild_:
     * open a console.
     * `cd` to the repository location, sub folder **lazproj**.
     * type `lazbuild -B coedit.lpi` and <kbd>ENTER</kbd>. note that the path to _lazbuild_ may have to be specified.
+
+* If you plan to help developing you'd better get started with _Lazarus_, which is less conveniant:
+    * start Lazarus.
+    * setup `lazproj/cedsgncontrols.lpk` with Lazarus package manager (requires to rebuild Lazarus).
+    * in the **project** menu, click *open...* and select the file **Coedit.lpi**, which is located in the sub-folder **lazproj**.
+    * in the menu **Execute** click **Create**.
 
 After what Coedit should be build. The executable is output to the _bin_ folder.
 
