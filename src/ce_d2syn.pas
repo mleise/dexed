@@ -495,10 +495,10 @@ begin
     else
       fCurrRange.rangeKinds += [rkBlockCom1];
     readLine(reader, fTokStop);
-    if (fTokKind = tkCommt) and (fkComments1 in fFoldKinds) then
-      StartCodeFoldBlock(nil)
-    else if (fTokKind = tkDDocs) and (fkDDoc in fFoldKinds) then
-      StartCodeFoldBlock(nil);
+    if (fTokKind = tkCommt) then
+      StartCodeFoldBlock(nil, fkComments1 in fFoldKinds)
+    else if (fTokKind = tkDDocs) then
+      StartCodeFoldBlock(nil, fkDDoc in fFoldKinds);
     exit;
   end else readerReset;
   if (rkBlockCom1 in fCurrRange.rangeKinds) or (rkBlockDoc1 in fCurrRange.rangeKinds) then
@@ -507,10 +507,10 @@ begin
       else fTokKind := tkCommt;
     if readUntil(reader, fTokStop, '*/') then
     begin
-      if (fTokKind = tkCommt) and (fkComments1 in fFoldKinds) then
-        EndCodeFoldBlock()
-      else if (fTokKind = tkDDocs) and (fkDDoc in fFoldKinds) then
-        EndCodeFoldBlock();
+      if (fTokKind = tkCommt) then
+        EndCodeFoldBlock(fkComments1 in fFoldKinds)
+      else if (fTokKind = tkDDocs) then
+        EndCodeFoldBlock(fkDDoc in fFoldKinds);
       fCurrRange.rangeKinds -= [rkBlockDoc1, rkBlockCom1];
       exit;
     end;
@@ -556,10 +556,10 @@ begin
         fCurrRange.rangeKinds += [rkBlockDoc2]
       else
         fCurrRange.rangeKinds += [rkBlockCom2];
-      if (fTokKind = tkCommt) and (fkComments2 in fFoldKinds) then
-        StartCodeFoldBlock(nil)
-      else if (fTokKind = tkDDocs) and (fkDDoc in fFoldKinds) then
-        StartCodeFoldBlock(nil);
+      if (fTokKind = tkCommt) then
+        StartCodeFoldBlock(nil, fkComments2 in fFoldKinds)
+      else if (fTokKind = tkDDocs) then
+        StartCodeFoldBlock(nil, fkDDoc in fFoldKinds);
     end;
     exit;
   end else readerReset;
@@ -590,10 +590,10 @@ begin
     end;
     if fCurrRange.nestedCommentsCount = 0 then
     begin
-      if (fTokKind = tkCommt) and (fkComments2 in fFoldKinds) then
-        EndCodeFoldBlock()
-      else if (fTokKind = tkDDocs) and (fkDDoc in fFoldKinds) then
-        EndCodeFoldBlock();
+      if (fTokKind = tkCommt) then
+        EndCodeFoldBlock(fkComments2 in fFoldKinds)
+      else if (fTokKind = tkDDocs) then
+        EndCodeFoldBlock(fkDDoc in fFoldKinds);
       fCurrRange.rangeKinds -= [rkBlockDoc2, rkBlockCom2];
     end;
     exit;
@@ -635,8 +635,7 @@ begin
       end;
     end;
     fCurrRange.rangeKinds += [rkString1];
-    if fkStrings in fFoldKinds then
-      StartCodeFoldBlock(nil);
+    StartCodeFoldBlock(nil, fkStrings in fFoldKinds);
     exit;
   end else _notRawStrng: readerReset;
   if rkString1 in fCurrRange.rangeKinds then
@@ -660,8 +659,7 @@ begin
         fCurrRange.rangeKinds -= [rkString1];
         readDelim(reader, fTokStop, stringPostfixes);
         fCurrRange.rString := false;
-        if fkStrings in fFoldKinds then
-          EndCodeFoldBlock(fkStrings in fFoldKinds);
+        EndCodeFoldBlock(fkStrings in fFoldKinds);
         exit;
       end
       else break;
@@ -681,8 +679,7 @@ begin
     end;
     fCurrRange.rangeKinds += [rkString2];
     readLine(reader, fTokStop);
-    if fkStrings in fFoldKinds then
-      StartCodeFoldBlock(nil);
+    StartCodeFoldBlock(nil, fkStrings in fFoldKinds);
     exit;
   end else readerReset;
   if rkString2 in fCurrRange.rangeKinds then
@@ -691,8 +688,7 @@ begin
     if readUntil(reader, fTokStop, '`') then
     begin
       fCurrRange.rangeKinds -= [rkString2];
-      if fkStrings in fFoldKinds then
-        EndCodeFoldBlock();
+      EndCodeFoldBlock(fkStrings in fFoldKinds);
       readDelim(reader, fTokStop, stringPostfixes);
       exit;
     end;
@@ -838,12 +834,10 @@ begin
   begin
     fTokKind := tkSymbl;
     case reader^ of
-      '{': if fkBrackets in fFoldKinds then
-        StartCodeFoldBlock(nil);
+      '{': StartCodeFoldBlock(nil, fkBrackets in fFoldKinds);
       '}':
       begin
-        if fkBrackets in fFoldKinds then
-          EndCodeFoldBlock();
+        EndCodeFoldBlock(fkBrackets in fFoldKinds);
         if (reader^ = '}') and (rkAsm in fCurrRange.rangeKinds) then
           fCurrRange.rangeKinds -= [rkAsm]; ;
         if (reader+1)^ in stringPostfixes then
