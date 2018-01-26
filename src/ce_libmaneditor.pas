@@ -225,7 +225,7 @@ begin
   ics := GetIconScaledSize;
 
   width  := ScaleX(400,96);
-  height := ScaleY(34,96);
+  height := ScaleY(40,96);
   BorderStyle:= bsToolWindow;
   caption := 'Select or type the DUB package name';
   Position:= poMainFormCenter;
@@ -329,7 +329,8 @@ begin
   cli := TFPHTTPClient.Create(nil);
   try
     try
-      pge := cli.Get('https://code.dlang.org/api/packages/search');
+      //TODO: use HTTPS when FCL-WEB will allow it again.
+      pge := cli.Get('http://code.dlang.org/api/packages/search');
     except
       pge := '[]';
     end;
@@ -390,7 +391,8 @@ begin
       with TFPHTTPClient.Create(nil) do
       try
         try
-          result := Get('https://code.dlang.org/api/packages/' + packageName + '/latest');
+          //TODO: use HTTPS when FCL-WEB will allow it again.
+          result := Get('http://code.dlang.org/api/packages/' + packageName + '/latest');
         except
           result := 'master';
         end;
