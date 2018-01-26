@@ -6,6 +6,8 @@ title: Build Coedit
 <script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
 {% endraw %}
 
+{% include header.html %}
+
 ### Build
 
 #### Coedit
