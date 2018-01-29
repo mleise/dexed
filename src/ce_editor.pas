@@ -282,13 +282,11 @@ end;
 
 procedure TCEPagesOptions.scedSendItem(const category, identifier: string; aShortcut: TShortcut);
 begin
-  if fShCount = 4 then
-    fShCount := 0;
-  case fShCount of
-    0: fNextPage := aShortcut;
-    1: fPrevPage := aShortcut;
-    2: fMoveLeft := aShortcut;
-    3: fMoveRight:= aShortcut;
+  case identifier of
+    'Select next page': fNextPage := aShortcut;
+    'Select previous page': fPrevPage := aShortcut;
+    'Move page left': fMoveLeft := aShortcut;
+    'Move page right': fMoveRight:= aShortcut;
   end;
 end;
 
