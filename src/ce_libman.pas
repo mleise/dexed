@@ -601,17 +601,23 @@ begin
     // add the library files and the import paths for the selection
     if not sel.IsEmpty then with sel.Iterator do
     begin
-      while true do if data.hasValidLibFile then
+      while true do
       begin
-        if not data.enabled then
-          fMsgs.message(format(deactivatedMessage, [data.libAlias]),
-            nil, amcAutoCompile, amkWarn)
-        else
+        itm := Data;
+        if itm.isNil then
+          break;
+        if itm.hasValidLibFile then
         begin
-          libs.Add(Data.libFile);
-          paths.Add('-I' + Data.libSourcePath);
+          if not itm.enabled then
+            fMsgs.message(format(deactivatedMessage, [itm.libAlias]),
+              nil, amcAutoCompile, amkWarn)
+          else
+          begin
+            libs.Add(itm.libFile);
+            paths.Add('-I' + itm.libSourcePath);
+          end;
         end;
-        if not Next then
+        if not next then
           break;
       end;
       free;
