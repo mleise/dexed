@@ -1955,7 +1955,7 @@ begin
       if fDscannerResults.item[i]^.line <= caretY then
         break;
     end;
-    if j < fDscannerResults.count then
+    if (j <> -1) and (j < fDscannerResults.count) then
     begin
       CaretY:= fDscannerResults.item[j]^.line;
       EnsureCursorPosVisible;
