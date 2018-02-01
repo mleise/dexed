@@ -587,7 +587,7 @@ type
     property flatLook: boolean read fFlatLook write fFlatLook;
     property splitterScrollSpeed: byte read fSplitterScrollSpeed write setSplitterScsrollSpeed;
     property showBuildDuration: boolean read fShowBuildDuration write fShowBuildDuration default false;
-    property toolBarScaling: TToolBarScaling read fToolBarScaling write fToolBarScaling stored false;
+    // property toolBarScaling: TToolBarScaling read fToolBarScaling write fToolBarScaling stored false;
     // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
   end;
