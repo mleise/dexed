@@ -86,6 +86,12 @@ type
     function startsWith(const value: string): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
     // indicates wether the range starts with value.
     function startsWith(var value: TStringRange): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+    // indicates wether the range ends with value.
+    function endsWith(const value: string): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+
+
+    // read-only position
+    function position: integer;
   end;
 
 implementation
@@ -120,6 +126,11 @@ begin
   ptr := @str[1];
   pos := 0;
   len := length(str);
+end;
+
+function TStringRange.position: integer;
+begin
+  Result := pos;
 end;
 
 function TStringRange.init(const pchr: PChar; length: integer): PStringRange;
@@ -318,6 +329,14 @@ begin
   end;
   pos := p0;
   value.pos := p1;
+end;
+
+function TStringRange.endsWith(const value: string): boolean;
+begin
+  if empty then
+    Result := false
+  else
+    Result := ptr[pos .. length(value)-1] = value;
 end;
 
 end.
