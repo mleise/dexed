@@ -15,7 +15,7 @@ type
   TSemVer = record
   strict private
     fAdditional: string;
-    fMajor, fMinor, fPatch: byte;
+    fMajor, fMinor, fPatch: word;
     fValid: boolean;
   public
     // Initializes with the semVer text.
@@ -32,16 +32,18 @@ type
     function isRc: boolean;
 
     // The major version.
-    property major: byte read fMajor;
+    property major: word read fMajor;
     // The minor version.
-    property minor: byte read fMinor;
+    property minor: word read fMinor;
     // The patch.
-    property patch: byte read fPatch;
+    property patch: word read fPatch;
     // The additional labels.
     property additional: string read fAdditional;
     // Indicates if the init has succeeded.
     property valid: boolean read fValid;
   end;
+
+  PSemVer = ^TSemVer;
 
   operator > (constref lhs, rhs: TSemVer): boolean;
   operator = (constref lhs, rhs: TSemVer): boolean;
@@ -165,6 +167,16 @@ begin
   assert(v2.major = 1);
   assert(v2.minor = 22);
   assert(v2.patch = 33);
+
+  v1.init('v0.0.2060');
+  assert(v1.major = 0);
+  assert(v1.minor = 0);
+  assert(v1.patch = 2060);
+
+  v2 := v1;
+  assert(v2.major = 0);
+  assert(v2.minor = 0);
+  assert(v2.patch = 2060);
   {$ENDIF}
 end.
 
