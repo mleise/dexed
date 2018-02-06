@@ -323,8 +323,6 @@ constructor TCED2SynPresetsLoaderForm.Create(AOwner: TComponent);
 var
   fname: string;
   pnl: TPanel;
-  btn: TBitBtn;
-  isc: TIconScaledSize;
 begin
   inherited;
   fBackup:= TCED2SynPreset.Create(nil);

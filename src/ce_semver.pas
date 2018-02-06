@@ -177,6 +177,11 @@ begin
   assert(v2.major = 0);
   assert(v2.minor = 0);
   assert(v2.patch = 2060);
+
+  v1.init('v0.6.0');
+  assert(v1.major = 0);
+  assert(v1.minor = 6);
+  assert(v1.patch = 0);
   {$ENDIF}
 end.
 

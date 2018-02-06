@@ -58,6 +58,7 @@ type
     // resets the range.
     function reset: PStringRange; {$IFNDEF DEBUG}inline;{$ENDIF}
 
+
     // advances the range while the front is in value, returns a copy.
     function takeWhile(value: TSysCharSet): TStringRange; overload; {$IFNDEF DEBUG}inline;{$ENDIF}
     // advances the range while the front is equal to value, returns a copy.
@@ -95,6 +96,12 @@ type
   end;
 
 implementation
+
+{$IFDEF DEBUG}
+var
+  t1: string;
+  r1: TStringRange;
+{$ENDIF}
 
 class function TStringRange.create(const str: string): TStringRange;
 begin
@@ -339,5 +346,16 @@ begin
     Result := ptr[pos .. length(value)-1] = value;
 end;
 
+{$IFDEF DEBUG}
+begin
+  t1 := '~>0.6.0';
+  r1.init(t1);
+  assert(r1.takeUntil(['0'..'9']).yield = '~>');
+  assert(r1.takeUntil(#0).yield = '0.6.0');
+  t1 := '>=0.8.0-alpha.1';
+  r1.init(t1);
+  assert(r1.takeUntil(['0'..'9']).yield = '>=');
+  assert(r1.takeUntil(#0).yield = '0.8.0-alpha.1');
+{$ENDIF}
 end.
 

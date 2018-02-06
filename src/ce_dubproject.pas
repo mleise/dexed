@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, fpjson, jsonparser, jsonscanner, process, strutils,
   LazFileUtils, RegExpr,
   ce_common, ce_interfaces, ce_observer, ce_dialogs, ce_processes,
-  ce_writableComponent, ce_compilers;
+  ce_writableComponent, ce_compilers, ce_semver, ce_stringrange;
 
 type
 
@@ -19,6 +19,26 @@ type
   TDubVerbosity = (default, quiet, verbose, veryVerbose, onlyWarnAndError, onlyError);
 
   TDubArchOverride = (auto, x86, x86_64);
+
+  PDubLocalPackage = ^TDubLocalPackage;
+
+  TDubLocalPackage = record
+    name : string;
+    versions: array of TSemVer;
+    procedure addVersion(const value: string);
+    function findVersion(constref value: TSemVer): boolean;
+  end;
+
+  TDubLocalPackages = class
+  strict private
+    fRoot: string;
+    fLocalPackages: array of TDubLocalPackage;
+  public
+    procedure update;
+    function find(const name: string; out package: PDubLocalPackage): boolean;
+    function fetch(constref version: TSemVer): PDubLocalPackage;
+    function getPackageePath(package: PDubLocalPackage): string;
+  end;
 
   (**
    * Stores the build options, always applied when a project is build
@@ -95,7 +115,7 @@ type
     fSaveAsUtf8: boolean;
     fCompiled: boolean;
     fMsgs: ICEMessagesDisplay;
-    //
+    fLocalPackages: TDubLocalPackages;
     procedure doModified;
     procedure updateFields;
     procedure updatePackageNameFromJson;
@@ -190,6 +210,125 @@ const
   );
 
   DubDefaultConfigName = '(default config)';
+
+{$REGION TDubLocalPackages -----------------------------------------------------}
+procedure TDubLocalPackage.addVersion(const value: string);
+var
+  v: TSemVer;
+  i: integer;
+begin
+  if value = 'vmaster' then
+    v.init('v0.0.0-master')
+  else try
+    v.init(value);
+  except
+    exit;
+  end;
+  for i:= 0 to high(versions) do
+  begin
+    if versions[i] = v then
+      exit;
+  end;
+  setLength(versions, length(versions) + 1);
+  versions[high(versions)] := v;
+end;
+
+function TDubLocalPackage.findVersion(constref value: TSemVer): boolean;
+var
+  i: integer;
+begin
+  result := false;
+  for i:= 0 to high(versions) do
+    if versions[i] = value then
+      exit(true);
+end;
+
+procedure TDubLocalPackages.update;
+var
+  p: TStringList;
+  s: string;
+  n: string;
+  v: string = '';
+  i: integer;
+  j: integer = 0;
+  d: PDubLocalPackage = nil;
+  h: TStringRange = (ptr: nil; pos: 0; len: 0);
+begin
+  setLength(fLocalPackages, 0);
+  {$IFDEF WINDOWS}
+  fRoot := GetEnvironmentVariable('APPDATA') + '\dub\packages\';
+  {$ELSE}
+  fRoot := GetEnvironmentVariable('HOME') + '/.dub/packages/';
+  {$ENDIF}
+  if not fRoot.dirExists then
+    exit;
+
+  p := TStringList.Create;
+  try
+    listFolders(p, fRoot);
+    for i := 0 to p.Count-1 do
+    begin
+      j := 0;
+      s := p[i];
+      h.init(s);
+      while true do
+      begin
+        h.popUntil('-');
+        if h.empty then
+          break;
+        if (h.popFront^.front in ['0'..'9']) or
+            h.endsWith('master') then
+        begin
+          j := h.position;
+          break;
+        end;
+      end;
+      if (j = 0) then
+        continue;
+
+      n := s[1..j-1];
+      n := n.extractFileName;
+      if not find(n, d) then
+      begin
+        setLength(fLocalPackages, length(fLocalPackages) + 1);
+        d := @fLocalPackages[high(fLocalPackages)];
+        d^.name := n;
+      end;
+      v := 'v' + s[j+1 .. length(s)];
+      d^.addVersion(v);
+
+    end;
+  finally
+    p.Free;
+  end;
+end;
+
+function TDubLocalPackages.find(const name: string; out package: PDubLocalPackage): boolean;
+var
+  i: integer;
+begin
+  result := false;
+  package:= nil;
+  for i := 0 to high(fLocalPackages) do
+    if fLocalPackages[i].name = name then
+  begin
+    result := true;
+    package := @fLocalPackages[i];
+    break;
+  end;
+end;
+
+function TDubLocalPackages.fetch(constref version: TSemVer): PDubLocalPackage;
+begin
+  result := nil;
+end;
+
+function TDubLocalPackages.getPackageePath(package: PDubLocalPackage): string;
+begin
+  result := fRoot + package^.name;
+end;
+
+{$ENDREGION}
 
 {$REGION Options ---------------------------------------------------------------}
 procedure TCEDubBuildOptionsBase.setLinkMode(value: TDubLinkMode);
@@ -336,12 +475,15 @@ begin
   fImportPaths := TStringList.Create;
   fImportPaths.Sorted:=true;
   fImportPaths.Duplicates:=dupIgnore;
-  //
+
   json.Add('name', '');
   endModification;
   subjProjNew(fProjectSubject, self);
   doModified;
   fModified:=false;
+
+  fLocalPackages := TDubLocalPackages.Create;
+  fLocalPackages.update;
 end;
 
 destructor TCEDubProject.destroy;
@@ -349,12 +491,13 @@ begin
   killProcess(fDubProc);
   subjProjClosing(fProjectSubject, self);
   fProjectSubject.free;
-  //
+
   fJSON.Free;
   fBuildTypes.Free;
   fConfigs.Free;
   fSrcs.Free;
   fImportPaths.Free;
+  fLocalPackages.Free;
   inherited;
 end;
 {$ENDREGION --------------------------------------------------------------------}
@@ -1019,55 +1162,65 @@ procedure TCEDubProject.updateImportPathsFromJson;
   // see TCEDcdWrapper.projChanged()
   procedure addDepsFrom(obj: TJSONObject);
   var
-    folds: TStringList;
     deps: TJSONObject;
-    pth: string;
-    str: string;
-    i,j,k: integer;
+    pck: PDubLocalPackage;
+    j: TJSONData;
+    p: string;
+    s: string;
+    v: string;
+    n: string;
+    o: string;
+    z: string;
+    r: TStringRange = (ptr: nil; pos: 0; len: 0);
+    q: TSemVer;
+    i: integer;
   begin
     if obj.findObject('dependencies', deps) then
     begin
       {$IFDEF WINDOWS}
-      pth := GetEnvironmentVariable('APPDATA') + '\dub\packages\';
+      z := GetEnvironmentVariable('APPDATA') + '\dub\packages\';
       {$ELSE}
-      pth := GetEnvironmentVariable('HOME') + '/.dub/packages/';
+      z := GetEnvironmentVariable('HOME') + '/.dub/packages/';
       {$ENDIF}
-      folds := TStringList.Create;
-      listFolders(folds, pth);
-      try
-        // remove semver from folder names
-        for i := 0 to folds.Count-1 do
+      for i := 0 to deps.Count-1 do
+      begin
+        n := deps.Names[i];
+        s := z + n;
+        if fLocalPackages.find(n, pck) then
         begin
-          str := folds[i];
-          k := -1;
-          for j := 1 to length(str) do
-            if str[j] = '-' then
-              k := j;
-          if k <> -1 then
-            folds[i] := str[1..k-1] + '=' + str[k .. length(str)];
-        end;
-        // add as import if names match
-        for i := 0 to deps.Count-1 do
-        begin
-          str := pth + deps.Names[i];
-          if folds.IndexOfName(str) <> -1 then
+          j := deps.Items[i];
+          if j.JSONType <> TJSONtype.jtString then
+            continue;
+
+          v := j.AsString;
+          r.init(v);
+          o := r.takeUntil(['0'..'9']).yield;
+          p := r.takeUntil(#0).yield;
+          if p = 'master' then
+            q.init('v0.0.0-master')
+          else
+            q.init('v' + p);
+
+          if fLocalPackages.find(n, pck) and
+            pck^.findVersion(q) then
           begin
-            if (str + folds.Values[str] + DirectorySeparator + 'source').dirExists then
-              fImportPaths.Add(str + DirectorySeparator + 'source')
-            else if (str + folds.Values[str] + DirectorySeparator + 'src').dirExists then
-              fImportPaths.Add(str + DirectorySeparator + 'src');
+            p :=  s + '-' + p + DirectorySeparator + n + DirectorySeparator;
+            if (p + 'source').dirExists then
+              fImportPaths.Add(p + 'source')
+            else if (p + 'src').dirExists then
+              fImportPaths.Add(p + 'src');
           end;
         end;
-      finally
-        folds.Free;
       end;
     end;
   end;
+
 var
   conf: TJSONObject;
 begin
-  if fJSON.isNil then exit;
-  //
+  if fJSON.isNil then
+    exit;
+
   addFrom(fJSON);
   addDepsFrom(fJSON);
   conf := getCurrentCustomConfig;
