@@ -67,6 +67,7 @@ type
     fOther: string;
     fCompiler: DCompiler;
     fShowConsole: boolean;
+    fAutoFetch: boolean;
     procedure setLinkMode(value: TDubLinkMode);
     procedure setCompiler(value: DCompiler);
     function getCompiler: DCompiler;
@@ -81,6 +82,7 @@ type
     property dependenciesCheck: TDubDependencyCheck read fDepCheck write fDepCheck;
     property verbosity: TDubVerbosity read fVerbosity write fVerbosity default default;
     property archOverride: TDubArchOverride read fArchOverride write fArchOverride default auto;
+    property autoFetch: boolean read fAutoFetch write fAutoFetch default false;
   public
     procedure assign(source: TPersistent); override;
     procedure getOpts(options: TStrings);
@@ -478,6 +480,7 @@ begin
     compiler:=opts.compiler;
     verbosity:=opts.verbosity;
     archOverride:=opts.archOverride;
+    autoFetch:=opts.autoFetch;
   end
   else inherited;
 end;
@@ -1254,6 +1257,7 @@ begin
 end;
 
 procedure TCEDubProject.updateImportPathsFromJson;
+
   procedure addFrom(obj: TJSONObject);
   var
     arr: TJSONArray;
@@ -1269,6 +1273,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
         fImportPaths.Add(expandFilenameEx(fBasePath, pth));
     end;
   end;
+
   // note: dependencies are added as import to allow DCD completion
   // see TCEDcdWrapper.projChanged()
   procedure addDepsFrom(obj: TJSONObject);
@@ -1298,22 +1303,73 @@ procedure TCEDubProject.updateImportPathsFromJson;
       begin
         n := deps.Names[i];
         s := z + n;
+
+        // Try to fetch if not present at all
+        if not fLocalPackages.find(n, pck) and dubBuildOptions.autoFetch then
+        begin
+          with TProcess.Create(nil) do
+          try
+            Executable := exeFullName('dub' + exeExt);
+            Options := Options + [poUsePipes];
+            ShowWindow:= swoHIDE;
+            Parameters.Add('fetch');
+            Parameters.Add(n);
+            Execute;
+            if ExitStatus = 0 then
+              fLocalPackages.update();
+          finally
+            free;
+          end;
+        end;
+
         if fLocalPackages.find(n, pck) then
         begin
+
           j := deps.Items[i];
           if j.JSONType <> TJSONtype.jtString then
             continue;
 
+          //split version operator and version number
           v := j.AsString;
           r.init(v);
           o := r.takeUntil(['0'..'9']).yield;
           p := r.takeUntil(#0).yield;
-          if p = 'master' then
+          if p = '*' then
+          begin
+            o := '>=';
+            p := '0.0.0';
+          end
+          else if p = 'master' then
             q.init('v0.0.0-master')
           else
             q.init('v' + p);
 
+          // Finds a match for the version in the local packages list.
           u := fLocalPackages.find(n, o, q, pck);
+
+          // Try to fetch the right version if no match
+          if not assigned(u) and dubBuildOptions.autoFetch then
+          begin
+            with TProcess.Create(nil) do
+            try
+              Executable := exeFullName('dub' + exeExt);
+              Options := Options + [poUsePipes];
+              ShowWindow:= swoHIDE;
+              Parameters.Add('fetch');
+              Parameters.Add(n);
+              Parameters.Add('--version=' + p);
+              Execute;
+              if ExitStatus = 0 then
+              begin
+                fLocalPackages.update();
+                u := fLocalPackages.find(n, o, q, pck);
+              end;
+            finally
+              free;
+            end;
+          end;
+
+          // Set the imports, used in particular by DCD
           if assigned(u) then
           begin
             p :=  s + '-' + u^.asString + DirectorySeparator + n + DirectorySeparator;
