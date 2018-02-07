@@ -31,14 +31,17 @@ type
     // Indicates wether the version is a release candidate ("v1.0.0-rc", "v1.0.0-rc.1").
     function isRc: boolean;
 
+    // Rebuild and Returns the SemVer string.
+    function asString: string;
+
     // The major version.
-    property major: word read fMajor;
+    property major: word read fMajor write fMajor;
     // The minor version.
-    property minor: word read fMinor;
+    property minor: word read fMinor write fMinor;
     // The patch.
-    property patch: word read fPatch;
+    property patch: word read fPatch write fPatch;
     // The additional labels.
-    property additional: string read fAdditional;
+    property additional: string read fAdditional write fAdditional;
     // Indicates if the init has succeeded.
     property valid: boolean read fValid;
   end;
@@ -46,6 +49,7 @@ type
   PSemVer = ^TSemVer;
 
   operator > (constref lhs, rhs: TSemVer): boolean;
+  operator < (constref lhs, rhs: TSemVer): boolean;
   operator = (constref lhs, rhs: TSemVer): boolean;
 
 implementation
@@ -56,11 +60,17 @@ var v1, v2: TSemVer;
 
 procedure TSemVer.init(const text: string; throw: boolean = true);
 
-  procedure error(const message: string);
+  procedure resetFields();
   begin
     fMajor := 0;
     fMinor := 0;
     fPatch := 0;
+    fAdditional := '';
+  end;
+
+  procedure error(const message: string);
+  begin
+    resetFields();
     fAdditional := '';
     fValid := false;
     raise Exception.Create(message);
@@ -69,6 +79,7 @@ procedure TSemVer.init(const text: string; throw: boolean = true);
 var
   r: TStringRange = (ptr:nil; pos:0; len: 0);
 begin
+  resetFields();
   if throw and (text.length < 6) then
     error('Invalid semVer format, at least 6 characters expected');
   r.init(text);
@@ -107,6 +118,13 @@ begin
   result := (additional = 'rc') or (additional.StartsWith('rc.'));
 end;
 
+function TSemVer.asString: string;
+begin
+  result := format('%d.%d.%d', [fMajor, fMinor, fPatch]);
+  if fAdditional <> '' then
+    result += '-' + fAdditional;
+end;
+
 operator > (constref lhs, rhs: TSemVer): boolean;
 begin
   result := (lhs.major > rhs.major) or
@@ -115,6 +133,11 @@ begin
               and (lhs.patch > rhs.patch)) or
             ((lhs.major = rhs.major) and (lhs.minor = rhs.minor)
               and (lhs.patch = rhs.patch) and (lhs.additional > rhs.additional));
+end;
+
+operator < (constref lhs, rhs: TSemVer): boolean;
+begin
+  result := rhs > lhs;
 end;
 
 operator = (constref lhs, rhs: TSemVer): boolean;
@@ -133,24 +156,29 @@ begin
   v1.init('v2.0.0');
   v2.init('v1.0.0');
   assert(v1 > v2);
+  assert(v2 < v1);
 
   v1.init('v1.1.0');
   v2.init('v1.0.0');
   assert(v1 > v2);
+  assert(v2 < v1);
 
   v1.init('v1.1.1');
   v2.init('v1.1.0');
   assert(v1 > v2);
+  assert(v2 < v1);
 
   v1.init('v1.1.1');
   v2.init('v1.0.1');
   assert(v1 > v2);
+  assert(v2 < v1);
 
   v1.init('v1.1.1-alpha.2');
   v2.init('v1.1.1-alpha.1');
   assert(v1 > v2);
   assert(v1.isAlpha);
   assert(v2.isAlpha);
+  assert(v2.asString = '1.1.1-alpha.1');
 
   v1.init('v1.1.1-beta.1');
   v2.init('v1.1.1-alpha.8');
@@ -167,6 +195,7 @@ begin
   assert(v2.major = 1);
   assert(v2.minor = 22);
   assert(v2.patch = 33);
+  assert(v2.asString = '1.22.33');
 
   v1.init('v0.0.2060');
   assert(v1.major = 0);

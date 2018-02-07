@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, fpjson, jsonparser, jsonscanner, process, strutils,
-  LazFileUtils, RegExpr,
+  LazFileUtils, RegExpr, fgl,
   ce_common, ce_interfaces, ce_observer, ce_dialogs, ce_processes,
   ce_writableComponent, ce_compilers, ce_semver, ce_stringrange;
 
@@ -22,11 +22,20 @@ type
 
   PDubLocalPackage = ^TDubLocalPackage;
 
-  TDubLocalPackage = record
-    name : string;
-    versions: array of TSemVer;
+  TSemVerList = specialize TFPGList<PSemVer>;
+
+  TDubLocalPackage = class
+  strict private
+    fName : string;
+    fVersions: TSemVerList;
+  public
+    constructor create;
+    destructor destroy; override;
     procedure addVersion(const value: string);
-    function findVersion(constref value: TSemVer): boolean;
+    function findVersion(constref value: TSemVer): PSemVer;
+    function highestInInterval(constref lo, hi: TSemVer): PSemVer;
+    function highest: PSemVer;
+    property name: string read fName write fName;
   end;
 
   TDubLocalPackages = class
@@ -34,8 +43,11 @@ type
     fRoot: string;
     fLocalPackages: array of TDubLocalPackage;
   public
+    destructor destroy; override;
     procedure update;
-    function find(const name: string; out package: PDubLocalPackage): boolean;
+    function find(const name: string; out package: PDubLocalPackage): boolean; overload;
+    function find(const name, op: string; constref opVer: TSemVer;
+      out package: PDubLocalPackage): PSemver; overload;
     function fetch(constref version: TSemVer): PDubLocalPackage;
     function getPackageePath(package: PDubLocalPackage): string;
   end;
@@ -212,35 +224,86 @@ const
   DubDefaultConfigName = '(default config)';
 
 {$REGION TDubLocalPackages -----------------------------------------------------}
-procedure TDubLocalPackage.addVersion(const value: string);
-var
-  v: TSemVer;
-  i: integer;
+constructor TDubLocalPackage.create;
 begin
-  if value = 'vmaster' then
-    v.init('v0.0.0-master')
-  else try
-    v.init(value);
-  except
-    exit;
-  end;
-  for i:= 0 to high(versions) do
-  begin
-    if versions[i] = v then
-      exit;
-  end;
-  setLength(versions, length(versions) + 1);
-  versions[high(versions)] := v;
+  fVersions := TSemVerList.create;
 end;
 
-function TDubLocalPackage.findVersion(constref value: TSemVer): boolean;
+destructor TDubLocalPackage.destroy;
 var
   i: integer;
 begin
-  result := false;
-  for i:= 0 to high(versions) do
-    if versions[i] = value then
-      exit(true);
+  for i := 0 to fVersions.Count-1 do
+    dispose(fVersions.Items[i]);
+  fVersions.Free;
+  inherited;
+end;
+
+procedure TDubLocalPackage.addVersion(const value: string);
+var
+  v: PSemVer;
+  i: integer;
+begin
+  v := new(PSemVer);
+  if value = 'vmaster' then
+    v^.init('v0.0.0-master')
+  else try
+    v^.init(value);
+  except
+    dispose(v);
+    exit;
+  end;
+  for i := 0 to fVersions.Count-1 do
+  begin
+    if fVersions[i]^ = v^ then
+      exit;
+    if (i < fVersions.Count-1) and (fVersions[i+1]^ > v^) and (fVersions[i]^ < v^ ) then
+    begin
+      fVersions.Insert(i, v);
+      exit;
+    end;
+  end;
+  fVersions.Add(v);
+end;
+
+function TDubLocalPackage.highest: PSemVer;
+begin
+  result := fVersions.Last;
+end;
+
+function TDubLocalPackage.highestInInterval(constref lo, hi: TSemVer): PSemVer;
+var
+  i: integer;
+begin
+  result := nil;
+  for i := 0 to fVersions.Count-1 do
+  begin
+    if fVersions[i]^ < lo then
+      continue;
+    if fVersions[i]^ < hi then
+      result := fVersions[i];
+    if (fVersions[i]^ > hi) then
+      break;
+  end;
+end;
+
+function TDubLocalPackage.findVersion(constref value: TSemVer): PSemVer;
+var
+  i: integer;
+begin
+  result := nil;
+  for i:= 0 to fVersions.Count-1 do
+    if fVersions.Items[i]^ = value then
+      exit(fVersions.Items[i]);
+end;
+
+destructor TDubLocalPackages.destroy;
+var
+  i: integer;
+begin
+  for i:= 0 to high(fLocalPackages) do
+    fLocalPackages[i].Free;
+  inherited;
 end;
 
 procedure TDubLocalPackages.update;
@@ -291,6 +354,7 @@ begin
       if not find(n, d) then
       begin
         setLength(fLocalPackages, length(fLocalPackages) + 1);
+        fLocalPackages[high(fLocalPackages)] := TDubLocalPackage.create;
         d := @fLocalPackages[high(fLocalPackages)];
         d^.name := n;
       end;
@@ -318,6 +382,54 @@ begin
   end;
 end;
 
+function TDubLocalPackages.find(const name, op: string; constref opVer: TSemVer;
+  out package: PDubLocalPackage): PSemVer;
+var
+  hi: TSemVer;
+begin
+  result := nil;
+  if op = '=' then
+  begin
+    if find(name, package) then
+      result := package^.findVersion(opVer);
+  end
+  else if op = '>=' then
+  begin
+    if find(name, package) then
+    begin
+      result := package^.highest;
+      if result^ < opVer then
+        result := nil;
+    end;
+  end
+  else if op = '>' then
+  begin
+    if find(name, package) then
+    begin
+      result := package^.highest;
+      if (result^ < opVer) or (result^ = opVer) then
+        result := nil;
+    end;
+  end
+  else if op = '~>' then
+  begin
+    if find(name, package) then
+    begin
+      hi := opVer;
+      hi.minor := hi.minor + 1;
+      hi.patch := 0;
+      hi.additional :='';
+      result := package^.highestInInterval(opVer, hi);
+      result := result;
+    end;
+  end
+  else
+  begin
+    if find(name, package) then
+      result := package^.highest;
+  end;
+end;
+
 function TDubLocalPackages.fetch(constref version: TSemVer): PDubLocalPackage;
 begin
   result := nil;
@@ -325,9 +437,8 @@ end;
 
 function TDubLocalPackages.getPackageePath(package: PDubLocalPackage): string;
 begin
-  result := fRoot + package^.name;
+  result := fRoot + package^.Name;
 end;
-
 {$ENDREGION}
 
 {$REGION Options ---------------------------------------------------------------}
@@ -1173,6 +1284,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
     z: string;
     r: TStringRange = (ptr: nil; pos: 0; len: 0);
     q: TSemVer;
+    u: PSemVer;
     i: integer;
   begin
     if obj.findObject('dependencies', deps) then
@@ -1201,10 +1313,10 @@ procedure TCEDubProject.updateImportPathsFromJson;
           else
             q.init('v' + p);
 
-          if fLocalPackages.find(n, pck) and
-            pck^.findVersion(q) then
+          u := fLocalPackages.find(n, o, q, pck);
+          if assigned(u) then
           begin
-            p :=  s + '-' + p + DirectorySeparator + n + DirectorySeparator;
+            p :=  s + '-' + u^.asString + DirectorySeparator + n + DirectorySeparator;
             if (p + 'source').dirExists then
               fImportPaths.Add(p + 'source')
             else if (p + 'src').dirExists then
