@@ -4,3 +4,6 @@
 [submodule "etc/iz"]
 	path = etc/iz
 	url = https://www.github.com/BBasile/iz.git
+[submodule "etc/stdx-allocator"]
+	path = etc/stdx-allocator
+	url = https://github.com/dlang-community/stdx-allocator.git

@@ -8,6 +8,11 @@ cd ../etc/libdparse/src/
 dparse=$(find `pwd` -type f -name \*.d)
 cd ../../../dastworx
 
+#stdx-alloc sources
+cd ../etc/stdx-allocator/source/
+stdxalloc=$(find `pwd` -type f -name \*.d)
+cd ../../../dastworx
+
 #dast sources
 cd src/
 dast=$(find `pwd` -type f -name \*.d)
@@ -16,9 +21,9 @@ cd ../
 echo building...
 
 #build
-dmd ${dast[@]} ${dparse[@]} ${iz[@]} \
+dmd ${dast[@]} ${dparse[@]} ${iz[@]} ${stdxalloc[@]} \
 -O -release -inline -boundscheck=off \
--Isrc -I../etc/iz/import -I../etc/libdparse/src \
+-Isrc -I../etc/iz/import -I../etc/libdparse/src -I../etc/stdx-allocator/source \
 -of../bin/dastworx
 
 #cleanup
