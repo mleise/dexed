@@ -1339,7 +1339,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
             o := '>=';
             p := '0.0.0';
           end
-          else if p = 'master' then
+          else if (p = 'master') or (v = '~master') then
             q.init('v0.0.0-master')
           else
             q.init('v' + p);
