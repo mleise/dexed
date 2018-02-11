@@ -11,10 +11,12 @@ object CurrentProject: TCENativeProject
       pathsOptions.extraSources.Strings = (
         '../etc/iz/import/*'
         '../etc/libdparse/src/*'
+        '../etc/stdx-allocator/source/*'
       )
       pathsOptions.importModulePaths.Strings = (
         '../etc/iz/import'
         '../etc/libdparse/src'
+        '../etc/stdx-allocator/source'
       )
       runOptions.options = [poUsePipes, poStderrToOutPut]
     end  
@@ -27,10 +29,12 @@ object CurrentProject: TCENativeProject
       pathsOptions.extraSources.Strings = (
         '../etc/iz/import/*'
         '../etc/libdparse/src/*'
+        '../etc/stdx-allocator/source/*'
       )
       pathsOptions.importModulePaths.Strings = (
         '../etc/iz/import'
         '../etc/libdparse/src'
+        '../etc/stdx-allocator/source'
       )
       runOptions.options = [poUsePipes, poStderrToOutPut]
     end>
