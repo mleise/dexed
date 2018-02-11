@@ -590,10 +590,13 @@ begin
         for j:= itm.dependencies.Count-1 downto 0 do
         begin
           dep := libraryByAlias[itm.dependencies[j]];
-          if dep.isNotNil and not sel.contains(dep) then
-            sel.insert(dep)
-            //auto update: item removed, detect on usage that it has disapeared
+          if dep.isNotNil then
+          begin
+            if not sel.contains(dep) then
+              sel.insert(dep)
+          end
           else
+            //auto update: item removed, detect on usage that it has disapeared
             itm.dependencies.Delete(j);
         end;
       end;
