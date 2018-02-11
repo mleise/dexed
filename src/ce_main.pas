@@ -2955,13 +2955,17 @@ begin
     else
     begin
       srt := TStringList.Create;
-      srt.Sorted:=true;
-      //NOTE: when not sorted linking can fail. This is a recent regression (~2.078)
-      //when detectLibraries is true, sorting is automatic *.a, -Ipath, *.a, -Ipath etc
-      srt.Duplicates := TDuplicates.dupIgnore;
-      LibMan.getLibFiles(nil, srt);
-      LibMan.getLibSourcePath(nil, srt);
-      dmdproc.Parameters.AddStrings(srt);
+      try
+        srt.Sorted:=true;
+        //NOTE: when not sorted linking can fail. This is a recent regression (~2.078)
+        //when detectLibraries is true, sorting is automatic *.a, -Ipath, *.a, -Ipath etc
+        srt.Duplicates := TDuplicates.dupIgnore;
+        LibMan.getLibFiles(nil, srt);
+        LibMan.getLibSourcePath(nil, srt);
+        dmdproc.Parameters.AddStrings(srt);
+      finally
+        srt.Free;
+      end;
     end;
     deleteDups(dmdproc.Parameters);
     dmdproc.Execute;
