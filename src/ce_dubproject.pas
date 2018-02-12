@@ -1276,7 +1276,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
 
   // note: dependencies are added as import to allow DCD completion
   // see TCEDcdWrapper.projChanged()
-  procedure addDepsFrom(obj: TJSONObject);
+  procedure addDepsFrom(obj: TJSONObject; const suffix: string = '');
   var
     deps: TJSONObject;
     pck: PDubLocalPackage;
@@ -1292,7 +1292,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
     u: PSemVer;
     i: integer;
   begin
-    if obj.findObject('dependencies', deps) then
+    if obj.findObject('dependencies' + suffix, deps) then
     begin
       {$IFDEF WINDOWS}
       z := GetEnvironmentVariable('APPDATA') + '\dub\packages\';
@@ -1391,11 +1391,36 @@ begin
 
   addFrom(fJSON);
   addDepsFrom(fJSON);
+  {$IFDEF WINDOWS}
+  addDepsFrom(fJSON, '-windows');
+  {$ENDIF}
+  {$IFDEF LINUX}
+  addDepsFrom(fJSON, '-linux');
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  addDepsFrom(fJSON, '-osx');
+  {$ENDIF}
+  {$IFDEF UNIX}
+  addDepsFrom(fJSON, '-posix');
+  {$ENDIF}
+
   conf := getCurrentCustomConfig;
   if conf.isNotNil then
   begin
     addFrom(conf);
     addDepsFrom(conf);
+    {$IFDEF WINDOWS}
+    addDepsFrom(conf, '-windows');
+    {$ENDIF}
+    {$IFDEF LINUX}
+    addDepsFrom(conf, '-linux');
+    {$ENDIF}
+    {$IFDEF DARWIN}
+    addDepsFrom(conf, '-osx');
+    {$ENDIF}
+    {$IFDEF UNIX}
+    addDepsFrom(conf, '-posix');
+    {$ENDIF}
   end;
 end;
 
