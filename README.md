@@ -2,9 +2,9 @@
   <img src="https://github.com/BBasile/Coedit/raw/master/logo/coedit.png?raw=true" width="15%" height="15%" alt="CE"/>
 </p>
 
-Coedit is an IDE for the [D programming language](http://dlang.org), its compilers, tools and libraries.
+Coedit is an IDE for the [D programming language](https://dlang.org), its compilers, tools and libraries.
 
-[![](http://bbasile.github.io/Coedit/img/coedit_kde4_thumb.png)](http://bbasile.github.io/Coedit/img/coedit_kde4.png)
+[![](https://bbasile.github.io/Coedit/img/coedit_kde4_thumb.png)](https://bbasile.github.io/Coedit/img/coedit_kde4.png)
 
 **Overview**
 ---
@@ -21,39 +21,39 @@ Coedit is an IDE for the [D programming language](http://dlang.org), its compile
 - static libraries manager that supports auto-registration from local DUB projects, from online DUB packages or from Coedit custom project format.
 - todo list based on the _todo comments_ located in a project or in the current source.
 - user-defined tools powered by a string interpolation system.
-- integrated file browser, dfmt interface, search & replace, [discover more in the manual](http://bbasile.github.io/Coedit/).
+- integrated file browser, dfmt interface, search & replace, [discover more in the manual](https://bbasile.github.io/Coedit/).
 
 **Project information**
 ---
 
-- latest release: version 3.6.2, Wed 7 Feb 2018.
+- latest release: version 3.6.3, Mon 12 Feb 2018.
 - licensed under the terms of the Boost software license.
 - Development can be supported with [Paypal donations](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AQDJVC39PJF7J).
 
-**Download version 3.6.2**
+**Download version 3.6.3**
 ---
 Download the zipped binaries or the zip that contains the setup program for you platform:
 
-- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.2/coedit.3.6.2.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.2/coedit.3.6.2.linux64.zip)
-- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.2/coedit.3.6.2.win32.setup.zip)
-- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.2/coedit.3.6.2.win32.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.2/coedit-3.6.2-0.x86_64.rpm)
-- :package: [deb for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.2/coedit-3.6.2.amd64.deb)
+- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.3/coedit.3.6.3.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.3/coedit.3.6.3.linux64.zip)
+- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.3/coedit.3.6.3.win32.setup.zip)
+- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.3/coedit.3.6.3.win32.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.3/coedit-3.6.3-0.x86_64.rpm)
+- :package: [deb for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.3/coedit-3.6.3.amd64.deb)
 
-The _zip_ allow to move freely the files.
-The _setup.zip_ install to predefined locations so that the software can be run without additional intervention.
-The _deb_ and the _rpm_ are for those who prefer the official setup system for their linux systems.
-Linux i386 version must be [built manually](http://bbasile.github.io/Coedit/build.html).
+The _zip_ archives allow to move freely the files.
+The _setup.zip_ archives contains a command line program which installs to predefined locations so that the software can be run without additional intervention.
+The _deb_ and the _rpm_ packages are for those who prefer the official setup system for their linux systems.
+Linux i386 version must be [built manually](https://bbasile.github.io/Coedit/build.html).
 
-[**See this page**](http://bbasile.github.io/Coedit/setup.html) for more information about the setup.
+[**See this page**](https://bbasile.github.io/Coedit/setup.html) for more information about the setup.
 
-There is also 3rd part packages, maintained by volunteers, but the version that's available is not guaranteed to be the latest:
+There is also 3rd part packages, maintained by volunteers, but the available versions are not guaranteed to be the latest:
 
-- :package: [ports for FreeBSD](http://www.freshports.org/editors/coedit/)
+- :package: [port for FreeBSD](https://www.freshports.org/editors/coedit/)
 - :package: [AUR package for ArchLinux](https://aur.archlinux.org/packages/coedit-bin/)
 
 **Build**
 ---
 
-Follow the procedure described [**here**](http://bbasile.github.io/Coedit/build.html).
+Follow the procedure described [**here**](https://bbasile.github.io/Coedit/build.html).
