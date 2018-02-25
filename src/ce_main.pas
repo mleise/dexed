@@ -289,6 +289,8 @@ type
     procedure actSetRunnableSwExecute(Sender: TObject);
     procedure ApplicationProperties1Activate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormResize(Sender: TObject);
+    procedure FormWindowStateChange(Sender: TObject);
     procedure updateDocumentBasedAction(sender: TObject);
     procedure updateProjectBasedAction(sender: TObject);
     procedure updateDocEditBasedAction(sender: TObject);
@@ -442,6 +444,7 @@ type
     // widget interfaces subroutines
     procedure updateWidgetMenuEntry(sender: TObject);
     procedure widgetShowFromAction(sender: TObject);
+    procedure snapTopSplitterToMenu;
 
     // run & exec sub routines
     function runnableExename: string;
@@ -1561,8 +1564,7 @@ procedure TCEMainForm.InitDocking(reset: boolean = false);
 var
   i: Integer;
   widg: TCEWidget;
-  topsite : TControl;
-  topsplt : TAnchorDockSplitter;
+  topsplt: TAnchorDockSplitter;
 begin
 
   if not reset then
@@ -1655,21 +1657,6 @@ begin
         DockMaster.GetAnchorSite(widg).Close;
     end;
     WindowState:= wsMaximized;
-  end;
-
-  // lock space between the menu and the widgets
-  if GetDockSplitterOrParent(DockMaster.GetSite(fEditWidg), akTop, topsite) then
-  begin
-    if topsite is TAnchorDockHostSite then
-      if TAnchorDockHostSite(topsite).BoundSplitter.isNotNil then
-      begin
-        TAnchorDockHostSite(topsite).BoundSplitter.MoveSplitter(-500);
-        TAnchorDockHostSite(topsite).BoundSplitter.OnCanOffset:= @LockTopWindow;
-      end;
-  end else if GetDockSplitter(DockMaster.GetSite(fEditWidg), akTop, topsplt) then
-  begin
-    topsplt.MoveSplitter(-500);
-    topsplt.OnCanOffset:= @LockTopWindow;
   end;
 end;
 
@@ -1999,6 +1986,16 @@ begin
   // saving doesnt work when csDestroying in comp.state (i.e in destroy)
   if CloseAction = caFree then
     SaveDocking;
+end;
+
+procedure TCEMainForm.FormResize(Sender: TObject);
+begin
+  snapTopSplitterToMenu;
+end;
+
+procedure TCEMainForm.FormWindowStateChange(Sender: TObject);
+begin
+  snapTopSplitterToMenu;
 end;
 
 destructor TCEMainForm.destroy;
@@ -3512,6 +3509,30 @@ begin
     // OK on linux (LCL 1.6.0), initially observed on win & LCL 1.4.2
     if TForm(widg.Parent).Visible then if not onTop then
       TForm(widg.Parent).SendToBack;
+  end;
+end;
+
+procedure TCEMainForm.snapTopSplitterToMenu;
+var
+  topsplt: TAnchorDockSplitter;
+  topsite: TControl;
+begin
+  if GetDockSplitterOrParent(DockMaster.GetSite(fEditWidg), akTop, topsite) then
+  begin
+    if topsite is TAnchorDockHostSite and
+      TAnchorDockHostSite(topsite).BoundSplitter.isNotNil and
+      (TAnchorDockHostSite(topsite).BoundSplitter.Top > 0) then
+    begin
+      TAnchorDockHostSite(topsite).BoundSplitter.OnCanOffset:=nil;
+      TAnchorDockHostSite(topsite).BoundSplitter.MoveSplitter(-3000);
+      TAnchorDockHostSite(topsite).BoundSplitter.OnCanOffset:= @LockTopWindow;
+    end;
+  end else if GetDockSplitter(DockMaster.GetSite(fEditWidg), akTop, topsplt) and
+    (topsplt.top > 0) then
+  begin
+    topsplt.OnCanOffset := nil;
+    topsplt.MoveSplitter(-3000);
+    topsplt.OnCanOffset:= @LockTopWindow;
   end;
 end;
 {$ENDREGION}
