@@ -2800,7 +2800,7 @@ begin
   if inph.isNotNil then
     (inph as ICEProcInputHandler).removeProcess(proc);
   if (proc.ExitStatus <> 0) then
-    fMsgs.message(format('error: the process (%s) has returned the signal %d',
+    fMsgs.message(format('error: the process (%s) has returned the code %d',
       [proc.Executable, proc.ExitStatus]), fDoc, amcEdit, amkErr);
 end;
 
@@ -2972,7 +2972,7 @@ begin
         fDoc, amcEdit, amkInf);
     end
     else begin
-      fMsgs.message(format('error: the process (%s) has returned the signal %d',
+      fMsgs.message(format('error: the process (%s) has returned the code %d',
         [dmdproc.Executable, dmdproc.ExitStatus]), fDoc, amcEdit, amkErr);
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' has not been compiled',
         fDoc, amcEdit, amkErr);
