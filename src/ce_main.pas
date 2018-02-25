@@ -430,7 +430,6 @@ type
     procedure InitMRUs;
     procedure InitWidgets;
     procedure InitDocking(reset: boolean = false);
-    procedure DefaultDocking;
     procedure InitOptionsMenu;
     procedure LoadSettings;
     procedure SaveSettings;
@@ -1672,11 +1671,6 @@ begin
     topsplt.MoveSplitter(-500);
     topsplt.OnCanOffset:= @LockTopWindow;
   end;
-end;
-
-procedure TCEMainForm.DefaultDocking;
-begin
-
 end;
 
 procedure TCEMainForm.LoadSettings;
