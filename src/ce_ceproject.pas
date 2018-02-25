@@ -906,10 +906,10 @@ begin
   begin
     getprocInputHandler.removeProcess(TProcess(sender));
     SetCurrentDirUTF8(fRunnerOldCwd);
-    //
+
     if (proc.ExitStatus <> 0) then
-      fMsgs.message(format('error: the process (%s) has returned the code %d',
-        [proc.Executable, proc.ExitStatus]), self as ICECommonProject, amcProj, amkErr);
+      fMsgs.message(format('error: the process (%s) has returned the status %s',
+        [proc.Executable, prettyReturnStatus(proc)]), self as ICECommonProject, amcProj, amkErr);
   end;
 end;
 

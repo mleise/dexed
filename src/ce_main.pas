@@ -2800,8 +2800,8 @@ begin
   if inph.isNotNil then
     (inph as ICEProcInputHandler).removeProcess(proc);
   if (proc.ExitStatus <> 0) then
-    fMsgs.message(format('error: the process (%s) has returned the code %d',
-      [proc.Executable, proc.ExitStatus]), fDoc, amcEdit, amkErr);
+    fMsgs.message(format('error: the process (%s) has returned the status %s',
+      [proc.Executable, prettyReturnStatus(proc)]), fDoc, amcEdit, amkErr);
 end;
 
 procedure TCEMainForm.actSetRunnableSwExecute(Sender: TObject);
@@ -2972,8 +2972,8 @@ begin
         fDoc, amcEdit, amkInf);
     end
     else begin
-      fMsgs.message(format('error: the process (%s) has returned the code %d',
-        [dmdproc.Executable, dmdproc.ExitStatus]), fDoc, amcEdit, amkErr);
+      fMsgs.message(format('error: the process (%s) has returned the status %s',
+        [dmdproc.Executable, prettyReturnStatus(dmdproc)]), fDoc, amcEdit, amkErr);
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' has not been compiled',
         fDoc, amcEdit, amkErr);
     end;

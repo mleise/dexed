@@ -80,6 +80,8 @@ type
 
   procedure killProcess(var proc: TCEProcess);
 
+  function prettyReturnStatus(proc: TProcess): string;
+
 implementation
 
 procedure killProcess(var proc: TCEProcess);
@@ -90,6 +92,59 @@ begin
     proc.Terminate(0);
   proc.Free;
   proc := nil;
+end;
+
+function prettyReturnStatus(proc: TProcess): string;
+{$IFDEF UNIX}
+var
+  s: integer;
+{$ENDIF}
+begin
+  result := '';
+  {$IFDEF UNIX}
+  if proc.ExitStatus and $80 > 0 then
+  begin
+    s := proc.ExitStatus - 128;
+    if s > 0 then case s of
+      1: result := '1 (SIGHUP)';
+      2: result := '2 (SIGINT)';
+      3: result := '3 (SIGQUIT)';
+      4: result := '4 (SIGILL)';
+      5: result := '4 (SIGTRAP)';
+      6: result := '6 (SIGABRT)';
+      7: result := '7 (SIGEMT)';
+      8: result := '8 (SIGFPE)';
+      9: result := '9 (SIGKILL)';
+      10: result := '10 (SIGBUS)';
+      11: result := '11 (SIGSEGV)';
+      12: result := '12 (SIGSYS)';
+      13: result := '13 (SIGPIPE)';
+      14: result := '14 (SIGALRM)';
+      15: result := '15 (SIGTERM)';
+      16: result := '16 (SIGUSR1)';
+      17: result := '17 (SIGUSR2)';
+      18: result := '18 (SIGCHLD)';
+      19: result := '19 (SIGPWR)';
+      20: result := '20 (SIGWINCH)';
+      21: result := '21 (SIGURG)';
+      22: result := '22 (SIGPOLL)';
+      23: result := '23 (SIGSTOP)';
+      24: result := '24 (SIGTSTP)';
+      25: result := '25 (SIGCONT)';
+      26: result := '26 (SIGTTIN)';
+      27: result := '27 (SIGTTOU)';
+      28: result := '28 (SIGVTALRM)';
+      29: result := '29 (SIGPROF)';
+      30: result := '30 (SIGXCPU)';
+      31: result := '31 (SIGXFSZ)';
+      32: result := '32 (SIGWAITING)';
+      33: result := '33 (SIGLWP)';
+      34: result := '34 (SIGAIO)';
+    end;
+  end;
+  {$ENDIF}
+  if result = '' then
+    result := intToStr(proc.ExitStatus);
 end;
 
 constructor TCEProcess.create(aOwner: TComponent);

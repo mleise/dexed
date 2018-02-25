@@ -261,10 +261,21 @@ begin
       lst.Free;
     end;
   end;
-  if (not fProcess.Running) and fNextToolAlias.isNotEmpty then
+  if (not fProcess.Running) then
   begin
-    nxt := fToolItems.findTool(fNextToolAlias);
-    if nxt.isNotNil then nxt.execute(self);
+    if fProcess.ExitStatus > 0 then
+    begin
+      fMsgs.message(format('error: the tool (%s) has returned the status %s',
+        [fProcess.Executable, prettyReturnStatus(fProcess)]), nil, amcMisc, amkErr);
+      ce_processes.killProcess(fProcess);
+      exit;
+    end;
+    if fNextToolAlias.isNotEmpty then
+    begin
+      nxt := fToolItems.findTool(fNextToolAlias);
+      if nxt.isNotNil then
+        nxt.execute(self);
+    end;
   end;
 end;
 {$ENDREGION --------------------------------------------------------------------}
@@ -277,15 +288,16 @@ begin
   inherited;
   fTools := TCEToolItems.Create(TCEToolItem);
   fname := getCoeditDocPath + toolsFname;
-  if fname.fileExists then loadFromFile(fname);
-  //
+  if fname.fileExists then
+    loadFromFile(fname);
+
   EntitiesConnector.addObserver(self);
 end;
 
 destructor TCETools.destroy;
 begin
   EntitiesConnector.removeObserver(self);
-  //
+
   ForceDirectoriesUTF8(getCoeditDocPath);
   saveToFile(getCoeditDocPath + toolsFname);
   fTools.Free;

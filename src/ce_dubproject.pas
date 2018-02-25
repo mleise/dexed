@@ -895,8 +895,12 @@ begin
     fMsgs.message(prjname + ' has been successfully compiled',
       self as ICECommonProject, amcProj, amkInf)
   else
+  begin
     fMsgs.message(prjname + ' has not been compiled',
       self as ICECommonProject, amcProj, amkWarn);
+    fMsgs.message(format('error: DUB has returned the status %s',
+      [prettyReturnStatus(fDubProc)]), self as ICECommonProject, amcProj, amkErr);
+  end;
   subjProjCompiled(fProjectSubject, self as ICECommonProject, fCompiled);
   SetCurrentDirUTF8(fPreCompilePath);
 end;
