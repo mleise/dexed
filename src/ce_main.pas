@@ -2890,6 +2890,7 @@ begin
   dmdproc := TCEProcess.Create(nil);
   try
     fMsgs.message('compiling ' + shortenPath(fDoc.fileName, 25), fDoc, amcEdit, amkInf);
+    fMsgs.message(usingCompilerInfo(fRunnablesOptions.compiler), fDoc, amcEdit, amkInf);
     if fDoc.fileName.fileExists then
       fDoc.save
     else

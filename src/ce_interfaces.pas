@@ -363,6 +363,11 @@ type
     procedure getCompilerImports(value: DCompiler; paths: TStrings);
   end;
 
+  // Returns a string indicating the which compiler will be used.
+  function usingCompilerInfo(value: DCompiler): string;
+
+type
+
   (**
    * Single service that provides access to the main menu.
    *)
@@ -590,5 +595,14 @@ begin
   exit(EntitiesConnector.getSingleService('ICEMainMenu') as ICEMainMenu);
 end;
 {$ENDREGION}
+
+function usingCompilerInfo(value: DCompiler): string;
+const
+  c2id: array[DCompiler] of string = ('dmd', 'gdc', 'gdmd', 'ldc', 'ldmd',
+    'user1', 'user2');
+begin
+  result := format('using %s (%s)',
+    [getCompilerSelector.getCompilerPath(value), c2id[value]]);
+end;
 
 end.

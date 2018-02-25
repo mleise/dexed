@@ -818,6 +818,7 @@ begin
   fCompilProc := TCEProcess.Create(nil);
   subjProjCompiling(fProjectSubject, self as ICECommonProject);
   fMsgs.message('compiling ' + prjname, self as ICECommonProject, amcProj, amkInf);
+  fMsgs.message(usingCompilerInfo(CEProjectCompiler), self as ICECommonProject, amcProj, amkInf);
   // this doesn't work under linux, so the previous ChDir.
   if prjpath.dirExists then
     fCompilProc.CurrentDirectory := prjpath;
