@@ -2939,6 +2939,8 @@ begin
       dmdproc.Parameters.Add('-unittest');
       if fCovModUt then
         dmdproc.Parameters.Add('-cov');
+      // NOTE: see #258, allows to test easily a module when hacking phobos.
+      dmdproc.Parameters.Add('-version=StdUnittest');
     end
     else dmdproc.Parameters.Add('-version=runnable_module');
 
