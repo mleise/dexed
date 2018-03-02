@@ -110,6 +110,9 @@ var
   n: string;
   h: integer;
 begin
+  if csDesigning in ComponentState then
+    exit;
+
   fPng.FreeImage;
   fDPng.FreeImage;
 
