@@ -1688,13 +1688,10 @@ begin
 end;
 
 procedure TCESynMemo.ShowPhobosDoc;
-  procedure errorMessage;
-  begin
-    dlgOkError('html documentation cannot be found for "' + Identifier + '"');
-  end;
 var
   str: string;
   pth: string;
+  rac: string;
   idt: string = '';
   pos: integer;
   len: integer;
@@ -1703,11 +1700,31 @@ var
   rng: TStringRange = (ptr:nil; pos:0; len: 0);
   i: integer;
   linelen: integer;
+  procedure errorMessage(const msg: string);
+  begin
+    // parameter for doc racine is a folder
+    if rac[rac.length] in ['/','\'] then
+      rac += 'index.html'
+    else if rac.dirExists then
+      rac += DirectorySeparator + 'index.html'
+    else
+      rac += '/' + 'index.html';
+
+    if dlgYesNo(format('%s.%sOpen the documentation index anyway ?',
+      [msg, LineEnding])) = mrYes then
+        OpenURL(rac);
+  end;
 begin
+  if fPhobosDocRoot.dirExists then
+    rac := 'file://' + fPhobosDocRoot
+  else
+    rac := fPhobosDocRoot;
+  if rac.isEmpty then
+    rac := 'https://dlang.org/phobos/index.html';
   DcdWrapper.getDeclFromCursor(str, pos);
   if not str.fileExists then
   begin
-    errorMessage;
+    errorMessage('The source where the symbol is declared is not existing');
     exit;
   end;
   // verify that the decl is in phobos
@@ -1716,7 +1733,8 @@ begin
   begin
     if pth.extractFilePath = pth then
     begin
-      errorMessage;
+      errorMessage('The source where the symbol is declared does not seem' +
+        ' to be part of Phobos or the D runtime');
       exit;
     end;
     pth := pth.extractFilePath;
@@ -1753,7 +1771,10 @@ begin
   while true do
   begin
     if rng.empty then
+    begin
+      errorMessage('Failed to determine the matching HTML file');
       exit;
+    end;
     rng.popUntil(DirectorySeparator);
     if not rng.empty then
       rng.popFront;
@@ -1761,10 +1782,7 @@ begin
       or rng.startsWith('etc' + DirectorySeparator) then
         break;
   end;
-  if fPhobosDocRoot.dirExists then
-    pth := 'file://' + fPhobosDocRoot
-  else
-    pth := fPhobosDocRoot;
+  pth := rac;
   while not rng.empty do
   begin
     pth += rng.takeUntil([DirectorySeparator, '.']).yield;
