@@ -2690,6 +2690,7 @@ var
   p: integer;
   tk1: PLexToken = nil;
   tk2: PLexToken = nil;
+  r: TStringRange = (ptr:nil; pos:0; len: 0);
 begin
   result := #0;
   p := SelStart;
@@ -2701,7 +2702,20 @@ begin
       tk2 := fLexToks[i+1];
       if (tk1^.offset < p) and (tk1^.kind in [ltkComment, ltkIllegal])
         and (tk1^.Data[1] in ['*','+']) and (tk2^.offset > p) then
-          exit(tk1^.Data[1])
+      begin
+        r.init(tk1^.Data);
+        r.popUntil(#10)^.popFront^.yield;
+        if not r.empty then
+          r.popWhile([' ', #9]);
+        if not r.empty then
+        begin
+          if r.front in ['*','+'] then
+            exit(r.front)
+          else
+            exit(#0);
+        end
+        else exit(tk1^.Data[1])
+      end
       else if (tk1^.offset > p) then
         exit;
     end
