@@ -9,7 +9,7 @@ uses
   TATools, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus, ComCtrls,
   StdCtrls, TALegend, math,
   ce_widget, ce_common, ce_stringrange, ce_dsgncontrols, ce_ddemangle,
-  ce_interfaces, ce_observer, ce_writableComponent;
+  ce_interfaces, ce_observer, ce_writableComponent, ce_controls;
 
 type
 
@@ -197,6 +197,7 @@ begin
   updatePie;
   list.OnCompare:=@listCompare;
   selPieSourceSelect(nil);
+  list.PopupMenu := TCEListViewCopyMenu.create(list);
 end;
 
 destructor TCEProfileViewerWidget.destroy;

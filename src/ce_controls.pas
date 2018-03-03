@@ -830,12 +830,15 @@ var
   s: string = '';
   c: integer;
   i: integer;
+  f: integer = 0;
 begin
+  while fList.Column[f].Caption = '' do
+    f += 1;
   c := fList.Items.Count - 1;
-  for i:= 0 to fList.ColumnCount-1 do
+  for i:= f to fList.ColumnCount-1 do
     s += '| ' + fList.Column[i].Caption;
   s += LineEnding;
-  for i:= 0 to fList.ColumnCount-1 do
+  for i:= f to fList.ColumnCount-1 do
     s += '| ---';
   s += LineEnding;
   for i := 0 to c do
