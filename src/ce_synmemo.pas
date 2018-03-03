@@ -2704,7 +2704,7 @@ begin
         and (tk1^.Data[1] in ['*','+']) and (tk2^.offset > p) then
       begin
         r.init(tk1^.Data);
-        r.popUntil(#10)^.popFront^.yield;
+        r.popUntil(#10)^.popFront;
         if not r.empty then
           r.popWhile([' ', #9]);
         if not r.empty then
