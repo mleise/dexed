@@ -82,7 +82,6 @@ type
     procedure ListCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode;
       State: TCustomDrawState; var DefaultDraw: Boolean);
     procedure ListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure toolbarClick(Sender: TObject);
     procedure TreeFilterEdit1AfterFilter(Sender: TObject);
     procedure TreeFilterEdit1ButtonClick(Sender: TObject);
   private
@@ -498,11 +497,6 @@ begin
     VK_RETURN:
       handleMessageClick(nil);
   end;
-end;
-
-procedure TCEMessagesWidget.toolbarClick(Sender: TObject);
-begin
-
 end;
 
 procedure TCEMessagesWidget.TreeFilterEdit1AfterFilter(Sender: TObject);

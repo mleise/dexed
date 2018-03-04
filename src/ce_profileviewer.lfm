@@ -13,14 +13,14 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
     ClientHeight = 537
     ClientWidth = 551
     inherited Content: TPanel
-      Height = 500
-      Top = 37
+      Height = 501
+      Top = 36
       Width = 551
-      ClientHeight = 500
+      ClientHeight = 501
       ClientWidth = 551
       object list: TListView[0]
         Left = 4
-        Height = 282
+        Height = 283
         Top = 214
         Width = 543
         Align = alClient
@@ -85,12 +85,16 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
           AxisList = <          
             item
               Marks.Clipped = False
+              Marks.LabelBrush.Style = bsClear
               Minors = <>
+              Title.LabelBrush.Style = bsClear
             end          
             item
               Alignment = calBottom
               Marks.Clipped = False
+              Marks.LabelBrush.Style = bsClear
               Minors = <>
+              Title.LabelBrush.Style = bsClear
             end>
           AxisVisible = False
           Foot.Brush.Color = clBtnFace
@@ -129,7 +133,6 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Height = 31
       Width = 543
       object btnRefresh: TCEToolButton[0]
         Left = 57

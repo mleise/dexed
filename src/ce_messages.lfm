@@ -46,7 +46,6 @@ inherited CEMessagesWidget: TCEMessagesWidget
       Width = 836
       ShowCaptions = True
       Wrapable = False
-      OnClick = toolbarClick
       object sep: TCEToolButton[0]
         Left = 327
         Height = 28
