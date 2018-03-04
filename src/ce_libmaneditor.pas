@@ -91,6 +91,15 @@ const
   notav: string = '< n/a >';
   enableStr: array [boolean] of string = ('false','true');
 
+
+function YesOrNoAddProjSourceFolder: TModalResult;
+begin
+  result :=
+  dlgYesNo('The registered project is not a library '+
+    'however it is possible to make its sources accessible for unittesting and executing runnable modules. ' +
+    'If you click `YES` this will be done, otherwise the new entry will only be used for the completions.');
+end;
+
 constructor TCELibManEditorWidget.Create(aOwner: TComponent);
 begin
   inherited;
@@ -101,8 +110,7 @@ procedure TCELibManEditorWidget.updateButtonsState;
 var
   i: TIconScaledSize;
 begin
-  btnReg.Enabled := (fProj <> nil) and (fProj.binaryKind = staticlib) and
-    fProj.Filename.fileExists;
+  btnReg.Enabled := (fProj <> nil) and fProj.Filename.fileExists;
   btnOpenProj.Enabled := List.Selected.isNotNil and
     List.Selected.SubItems[2].fileExists;
   i := GetIconScaledSize;
@@ -595,7 +603,7 @@ begin
   prj := TCEDubProject.create(nil);
   try
     prj.loadFromFile(dfn);
-    if prj.filename.isNotEmpty and (prj.binaryKind = staticlib) then
+    if prj.filename.isNotEmpty then
     begin
       if (ovw and not List.items.findCaption(nme, row)) or not ovw then
         row := List.Items.Add;
@@ -603,7 +611,15 @@ begin
         row.Data := LibMan.libraries.Add;
       row.Caption := nme;
       row.SubItems.Clear;
-      row.SubItems.Add(prj.outputFilename);
+      if prj.binaryKind = staticlib then
+        row.SubItems.Add(prj.outputFilename)
+      else
+      begin
+        if YesOrNoAddProjSourceFolder() = mrYes then
+          row.SubItems.add(projectSourcePath(prj))
+        else
+          row.SubItems.Add('');
+      end;
       row.SubItems.Add(projectSourcePath(prj as ICECommonProject));
       row.SubItems.Add(prj.filename);
       row.SubItems.Add(enableStr[true]);
@@ -695,6 +711,7 @@ var
   root: string;
   lalias: string;
   row: TListItem;
+  itf: ICEMessagesDisplay;
 begin
   if fProj = nil then
     exit;
@@ -708,6 +725,8 @@ begin
     exit;
   end;
 
+  itf := getMessageDisplay;
+
   str := TStringList.Create;
   try
     root := projectSourcePath(fProj);
@@ -720,15 +739,28 @@ begin
     row := List.Items.Add;
     row.Data := LibMan.libraries.Add;
     row.Caption := lalias;
-    if fname.extractFileExt <> libExt then
-      row.SubItems.add(fname + libExt)
+    if (fname.extractFileExt <> libExt) then
+    begin
+      if (fname + libExt).fileExists then
+      begin
+        row.SubItems.add(fname + libExt);
+        if not row.SubItems[0].fileExists then
+          itf.message('warning, the library file does not exist, maybe the project not been already compiled ?',
+            nil, amcMisc, amkWarn);
+      end
+      else
+      begin
+        if YesOrNoAddProjSourceFolder() = mrYes then
+          row.SubItems.add(projectSourcePath(fProj))
+        else
+          row.SubItems.add('');
+      end;
+    end
     else
       row.SubItems.add(fname);
     row.SubItems.add(root);
     row.SubItems.add(fProj.filename);
     row.SubItems.add(enableStr[true]);
-    if not row.SubItems[0].fileExists then
-      dlgOkInfo('the library file does not exist, maybe the project not been already compiled ?');
     row.Selected:= true;
     row.MakeVisible(false);
     SetFocus;

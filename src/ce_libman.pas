@@ -479,11 +479,14 @@ procedure TLibraryManager.getLibFiles(aliases, list: TStrings);
   procedure add(lib: TLibraryItem);
   var
     j: integer;
+    e: string;
+    f: string;
+    x: string;
     dir: string;
     lst: TstringList;
   begin
     // as a trick a folder can be set as source, this allows to pass
-    // multiple sources in an automated way.
+    // multiple sources | static libs in an automated way.
     if lib.libFile.dirExists then
     begin
       lst := TStringList.Create;
@@ -491,12 +494,20 @@ procedure TLibraryManager.getLibFiles(aliases, list: TStrings);
         dir := lib.libFile;
         if lib.libFile[dir.length] = DirectorySeparator then
           dir := dir[1..dir.length-1];
-        listFiles(lst, dir);
+        listFiles(lst, dir, true);
         for j:= 0 to lst.Count-1 do
         begin
-          if lst[j].extractFileExt = libExt then
-            if list.IndexOf(lst[j]) = -1 then
-              list.Add(lst[j]);
+          f := lst[j];
+          x := f.extractFileName;
+          // The libman allows registration of projects thate not libs and using
+          // a folder of sources instead of the *.a / *.lib file.
+          // Following DUB conventions here are filtered out named supposed to
+          // contain the __Dmain() func, which is not wanted for runnables mods.
+          if (x = 'app.d') or (x = 'main.d') then
+            continue;
+          e := f.extractFileExt;
+          if ((e = libExt) or (e = '.d')) and (list.IndexOf(f) = -1) then
+            list.Add(f);
         end;
       finally
         lst.Free;

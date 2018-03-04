@@ -13,14 +13,14 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
     ClientHeight = 297
     ClientWidth = 641
     inherited Content: TPanel
-      Height = 263
-      Top = 34
+      Height = 261
+      Top = 36
       Width = 641
-      ClientHeight = 263
+      ClientHeight = 261
       ClientWidth = 641
       object List: TListView[0]
         Left = 4
-        Height = 255
+        Height = 253
         Top = 4
         Width = 633
         Align = alClient
@@ -58,7 +58,6 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Height = 28
       Width = 633
       object btnSelProj: TCEToolButton[0]
         Left = 342
