@@ -250,8 +250,7 @@ begin
     'mandatory, the reference D compiler');
   itm.Parent := boxTools;
   itm.ReAlign;
-  //
-  Height := boxTools.ControlCount * ScaleY(30, 96) + GroupBox1.Height + ScaleY(20, 96);
+
   Realign;
 end;
 
