@@ -95,11 +95,11 @@ begin
 end;
 
 function prettyReturnStatus(proc: TProcess): string;
-{$IFDEF UNIX}
 var
   s: integer;
+  {$IFDEF UNIX}
   u: integer;
-{$ENDIF}
+  {$ENDIF}
 begin
   result := '';
   s := proc.ExitStatus;
@@ -153,7 +153,7 @@ begin
   end;
   {$ENDIF}
   if result = '' then
-    result := intToStr(s) + ' (indeterminate meaning)';
+    result := intToStr(s) + ' (undeterminated meaning)';
 end;
 
 constructor TCEProcess.create(aOwner: TComponent);
