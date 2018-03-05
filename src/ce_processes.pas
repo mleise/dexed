@@ -98,14 +98,23 @@ function prettyReturnStatus(proc: TProcess): string;
 {$IFDEF UNIX}
 var
   s: integer;
+  u: integer;
 {$ENDIF}
 begin
   result := '';
+  s := proc.ExitStatus;
   {$IFDEF UNIX}
-  if proc.ExitStatus and $80 > 0 then
+  if s > 255 then
   begin
-    s := proc.ExitStatus - 128;
-    if s > 0 then case s of
+    u := s div 256;
+    result := intToStr(u) + ' (Program-defined exit status)';
+  end
+  else if s > 127 then
+  begin
+    u := s - 128;
+    if s > 128 then
+    case u of
+      0: result := '128 (Invalid argument to exit)';
       1: result := '1 (SIGHUP)';
       2: result := '2 (SIGINT)';
       3: result := '3 (SIGQUIT)';
@@ -144,7 +153,7 @@ begin
   end;
   {$ENDIF}
   if result = '' then
-    result := intToStr(proc.ExitStatus);
+    result := intToStr(s) + ' (indeterminate meaning)';
 end;
 
 constructor TCEProcess.create(aOwner: TComponent);
