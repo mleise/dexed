@@ -2697,17 +2697,11 @@ begin
 end;
 
 procedure TCEMainForm.actEdFindExecute(Sender: TObject);
-var
-  win: TAnchorDockHostSite;
   str: string;
 begin
   if fDoc.isNil then
       exit;
-  win := DockMaster.GetAnchorSite(fFindWidg);
-  if win.isNil then
-    exit;
-  win.Show;
-  win.BringToFront;
+  fFindWidg.showWidget;
 
   if fDoc.SelAvail then
     str := fDoc.SelText
