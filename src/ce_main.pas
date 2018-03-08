@@ -2697,6 +2697,7 @@ begin
 end;
 
 procedure TCEMainForm.actEdFindExecute(Sender: TObject);
+var
   str: string;
 begin
   if fDoc.isNil then

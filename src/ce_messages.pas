@@ -64,7 +64,6 @@ type
 
   TCEMessagesWidget = class(TCEWidget, ICEEditableOptions, ICEDocumentObserver, ICEProjectObserver, ICEMessagesDisplay)
     btnClearCat: TCEToolButton;
-    btnOpts: TCEToolButton;
     sepCat: TCEToolButton;
     btnSelAll: TCEToolButton;
     btnSelApp: TCEToolButton;
@@ -78,7 +77,6 @@ type
     button8: TCEToolButton;
     List: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
-    procedure btnOptsClick(Sender: TObject);
     procedure ListCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode;
       State: TCustomDrawState; var DefaultDraw: Boolean);
     procedure ListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -616,11 +614,6 @@ begin
   x += list.Images.Width + 5;
   Sender.Canvas.TextOut(x, rc.Top, node.Text);
   DefaultDraw := false;
-end;
-
-procedure TCEMessagesWidget.btnOptsClick(Sender: TObject);
-begin
-  getOptionsEditor.showOptionEditor(self as ICEEditableOptions);
 end;
 {$ENDREGION}
 
