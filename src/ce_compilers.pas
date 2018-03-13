@@ -73,6 +73,8 @@ type
     property modified: boolean read fModified write fModified;
   end;
 
+  { TCompilersPathsEditor }
+
   TCompilersPathsEditor = class(TForm, ICEEditableOptions, ICECompilerSelector, ICEProjectObserver)
     selDefault: TComboBox;
     selDMDrt: TDirectoryEdit;
@@ -117,6 +119,9 @@ type
     fPaths: TCompilersPaths;
     fPathsBackup: TCompilersPaths;
     fProj: ICECommonProject;
+    procedure editedExe(sender: TObject);
+    procedure editedRt(sender: TObject);
+    procedure editedStd(sender: TObject);
     procedure selectedExe(sender: TObject; var value: string);
     procedure selectedRt(sender: TObject; var value: string);
     procedure selectedStd(sender: TObject; var value: string);
@@ -190,18 +195,33 @@ begin
   selLDCexe.OnAcceptFileName:= @selectedExe;
   selUSER1exe.OnAcceptFileName:= @selectedExe;
   selUSER2exe.OnAcceptFileName:= @selectedExe;
+  selDMDexe.OnEditingDone:= @editedExe;
+  selGDCexe.OnEditingDone:= @editedExe;
+  selLDCexe.OnEditingDone:= @editedExe;
+  selUSER1exe.OnEditingDone:= @editedExe;
+  selUSER2exe.OnEditingDone:= @editedExe;
 
   selDMDrt.OnAcceptDirectory:= @selectedRt;
   selGDCrt.OnAcceptDirectory:= @selectedRt;
   selLDCrt.OnAcceptDirectory:= @selectedRt;
   selUSER1rt.OnAcceptDirectory:= @selectedRt;
   selUSER2rt.OnAcceptDirectory:= @selectedRt;
+  selDMDrt.OnEditingDone:= @editedRt;
+  selGDCrt.OnEditingDone:= @editedRt;
+  selLDCrt.OnEditingDone:= @editedRt;
+  selUSER1rt.OnEditingDone:= @editedRt;
+  selUSER2rt.OnEditingDone:= @editedRt;
 
   selDMDstd.OnAcceptDirectory:= @selectedStd;
   selGDCstd.OnAcceptDirectory:= @selectedStd;
   selLDCstd.OnAcceptDirectory:= @selectedStd;
   selUSER1std.OnAcceptDirectory:= @selectedStd;
   selUSER2std.OnAcceptDirectory:= @selectedStd;
+  selDMDstd.OnEditingDone:= @editedStd;
+  selGDCstd.OnEditingDone:= @editedStd;
+  selLDCstd.OnEditingDone:= @editedStd;
+  selUSER1std.OnEditingDone:= @editedStd;
+  selUSER2std.OnEditingDone:= @editedStd;
 
   selDefault.OnSelect:= @selectedDefault;
 
@@ -618,6 +638,23 @@ begin
     fPaths.User2ExeName:=value;
 end;
 
+procedure TCompilersPathsEditor.editedExe(sender: TObject);
+var
+  ctrl: TWinControl;
+begin
+  ctrl := TWinControl(sender);
+  if ctrl.Parent = grpDMD then
+    fPaths.DmdExeName:=selDMDexe.FileName
+  else if ctrl.Parent = grpGDC then
+    fPaths.GDCExeName:=selGDCexe.FileName
+  else if ctrl.Parent = grpLDC then
+    fPaths.LdcExeName:=selLDCexe.FileName
+  else if ctrl.Parent = grpUSER1 then
+    fPaths.User1ExeName:=selUSER1exe.FileName
+  else if ctrl.Parent = grpUSER2 then
+    fPaths.User2ExeName:=selUSER2exe.FileName;
+end;
+
 procedure TCompilersPathsEditor.selectedRt(sender: TObject; var value: string);
 var
   ctrl: TWinControl;
@@ -635,6 +672,23 @@ begin
     fPaths.User2RuntimePath:=value;
 end;
 
+procedure TCompilersPathsEditor.editedRt(sender: TObject);
+var
+  ctrl: TWinControl;
+begin
+  ctrl := TWinControl(sender);
+  if ctrl.Parent = grpDMD then
+    fPaths.DmdRuntimePath:=selDMDrt.Directory
+  else if ctrl.Parent = grpGDC then
+    fPaths.GDCRuntimePath:=selGDCrt.Directory
+  else if ctrl.Parent = grpLDC then
+    fPaths.LdcRuntimePath:=selLDCrt.Directory
+  else if ctrl.Parent = grpUSER1 then
+    fPaths.User1RuntimePath:=selUSER1rt.Directory
+  else if ctrl.Parent = grpUSER2 then
+    fPaths.User2RuntimePath:=selUSER2rt.Directory;
+end;
+
 procedure TCompilersPathsEditor.selectedStd(sender: TObject; var value: string);
 var
   ctrl: TWinControl;
@@ -650,6 +704,23 @@ begin
     fPaths.User1PhobosPath:=value
   else if ctrl.Parent = grpUSER2 then
     fPaths.User2PhobosPath:=value;
+end;
+
+procedure TCompilersPathsEditor.editedStd(sender: TObject);
+var
+  ctrl: TWinControl;
+begin
+  ctrl := TWinControl(sender);
+  if ctrl.Parent = grpDMD then
+    fPaths.DmdPhobosPath:=selDMDstd.Directory
+  else if ctrl.Parent = grpGDC then
+    fPaths.GDCPhobosPath:=selGDCstd.Directory
+  else if ctrl.Parent = grpLDC then
+    fPaths.LdcPhobosPath:=selLDCstd.Directory
+  else if ctrl.Parent = grpUSER1 then
+    fPaths.User1PhobosPath:=selUSER1std.Directory
+  else if ctrl.Parent = grpUSER2 then
+    fPaths.User2PhobosPath:=selUSER2std.Directory;
 end;
 
 procedure TCompilersPathsEditor.selectedDefault(sender: TObject);
