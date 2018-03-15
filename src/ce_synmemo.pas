@@ -2999,7 +2999,7 @@ begin
       begin
         lines.SaveToFile(tempFilename);
         fDiffDialogWillClose := true;
-        With TCEDiffViewer.construct(fTempFileName, fFilename) do
+        With TCEDiffViewer.construct(self, fTempFileName, fFilename) do
         try
           mr := ShowModal;
           case mr of

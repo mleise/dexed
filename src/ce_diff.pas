@@ -21,13 +21,13 @@ type
     Panel2: TPanel;
   private
   public
-    constructor construct(const fname1, fname2: string);
+    constructor construct(ed: TSynEdit; const fname1, fname2: string);
   end;
 
 implementation
 {$R *.lfm}
 
-constructor TCEDiffViewer.construct(const fname1, fname2: string);
+constructor TCEDiffViewer.construct(ed: TSynEdit; const fname1, fname2: string);
 var
   p: TProcess;
   r: TStringList;
@@ -35,6 +35,9 @@ begin
   inherited create(nil);
 
   editor.Gutter.LineNumberPart.Visible:=false;
+
+  if ed.isNotNil then
+    editor.Font.Assign(ed.Font);
 
   p := TProcess.Create(self);
   try
