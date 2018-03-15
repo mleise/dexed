@@ -1100,7 +1100,7 @@ begin
     fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, fname)))
   end
   else if patchPlateformPath(expandFilenameEx(fBasePath, fname)).fileExists then
-    fSrcs.Add(fname);
+    fSrcs.Add(patchPlateformPath(fname));
 end;
 procedure tryAddFromFolder(const pth: string);
 var
@@ -1112,7 +1112,7 @@ begin
     listFiles(lst, pth, true);
     for abs in lst do
       if isDlangCompilable(abs.extractFileExt) then
-        fSrcs.Add(ExtractRelativepath(fBasePath, abs));
+        fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, abs)));
   end;
 end;
 var
@@ -1131,7 +1131,7 @@ begin
       if pth.fileExists then
         fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, pth)))
       else if expandFilenameEx(fBasePath, pth).fileExists then
-        fSrcs.Add(pth);
+        fSrcs.Add(patchPlateformPath(pth));
     end;
     tryAddFromFolder(fBasePath + 'src');
     tryAddFromFolder(fBasePath + 'source');
@@ -1156,7 +1156,7 @@ begin
         if pth.fileExists then
           fSrcs.Add(patchPlateformPath(ExtractRelativepath(fBasePath, pth)))
         else if expandFilenameEx(fBasePath, pth).fileExists then
-          fSrcs.Add(pth);
+          fSrcs.Add(patchPlateformPath(pth));
       end;
       // custom folders in current config
       if conf.findArray('sourcePaths', arr) then for i := 0 to arr.Count-1 do
