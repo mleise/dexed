@@ -2374,6 +2374,7 @@ object CEMainForm: TCEMainForm
       Category = 'Edit'
       Caption = 'Apply code formatting'
       OnExecute = actEdFormatExecute
+      OnUpdate = updateDocumentBasedAction
     end
   end
   object ApplicationProperties1: TApplicationProperties
