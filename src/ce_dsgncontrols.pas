@@ -189,7 +189,7 @@ var
   x, y: integer;
 begin
   inherited;
-  if (fResourceName <> '') and (style in [tbsButton, tbsDropDown]) then
+  if (fResourceName <> '') and (style in [tbsButton, tbsDropDown, tbsCheck]) then
   begin
     rc := ClientRect;
     if Style = tbsDropDown then

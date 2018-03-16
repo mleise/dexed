@@ -8,9 +8,16 @@ uses
   Classes, SysUtils, TreeFilterEdit, Forms, Controls, Graphics, actnlist,
   Dialogs, ExtCtrls, ComCtrls, Menus, Buttons, lcltype, ce_ceproject, ce_interfaces,
   ce_common, ce_widget, ce_observer, ce_dialogs, ce_sharedres, ce_dsgncontrols,
-  ce_dubproject, ce_synmemo;
+  ce_dubproject, ce_synmemo, ce_stringrange, ce_writableComponent;
 
 type
+
+  TCEProjectInspectorOptions = class(TWritableLfmTextComponent)
+  private
+    fFileListAsTree: boolean;
+  published
+    property fileListAsTree: boolean read fFileListAsTree write fFileListAsTree;
+  end;
 
   { TCEProjectInspectWidget }
 
@@ -19,12 +26,14 @@ type
     btnAddFold: TCEToolButton;
     btnRemFile: TCEToolButton;
     btnRemFold: TCEToolButton;
+    btnTree: TCEToolButton;
     Tree: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure btnAddFileClick(Sender: TObject);
     procedure btnAddFoldClick(Sender: TObject);
     procedure btnRemFileClick(Sender: TObject);
     procedure btnRemFoldClick(Sender: TObject);
+    procedure btnTreeClick(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const fnames: array of String);
     procedure TreeClick(Sender: TObject);
     procedure TreeDeletion(Sender: TObject; Node: TTreeNode);
@@ -44,6 +53,7 @@ type
     fLastFileOrFolder: string;
     fSymStringExpander: ICESymStringExpander;
     fImages: TImageList;
+    fFileListAsTree: boolean;
     procedure actUpdate(sender: TObject);
     procedure DetectNewDubSources(const document: TCESynMemo);
     procedure TreeDblClick(sender: TObject);
@@ -57,6 +67,7 @@ type
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
     procedure updateButtons;
+    procedure setFileListAsTree(value: boolean);
     //
     procedure docNew(document: TCESynMemo);
     procedure docFocused(document: TCESynMemo);
@@ -69,13 +80,18 @@ type
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
+    property fileListAsTree: boolean read fFileListAsTree write setFileListAsTree;
   end;
 
 implementation
 {$R *.lfm}
 
+const optFname = 'projinspect.txt';
+
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEProjectInspectWidget.create(aOwner: TComponent);
+var
+  fname: string;
 begin
   fSymStringExpander:= getSymStringExpander;
 
@@ -105,6 +121,7 @@ begin
       fImages.AddResourceName(HINSTANCE, 'PAGE_TEXT');
       fImages.AddResourceName(HINSTANCE, 'COG');
       fImages.AddResourceName(HINSTANCE, 'COG_GO');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER');
       AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR');
     end;
     iss24:
@@ -117,6 +134,7 @@ begin
       fImages.AddResourceName(HINSTANCE, 'PAGE_TEXT24');
       fImages.AddResourceName(HINSTANCE, 'COG24');
       fImages.AddResourceName(HINSTANCE, 'COG_GO24');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER24');
       AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR24');
     end;
     iss32:
@@ -129,6 +147,7 @@ begin
       fImages.AddResourceName(HINSTANCE, 'PAGE_TEXT32');
       fImages.AddResourceName(HINSTANCE, 'COG32');
       fImages.AddResourceName(HINSTANCE, 'COG_GO32');
+      fImages.AddResourceName(HINSTANCE, 'FOLDER32');
       AssignPng(TreeFilterEdit1.Glyph, 'FILTER_CLEAR32');
     end;
   end;
@@ -139,13 +158,33 @@ begin
 
   Tree.Images := fImages;
   Tree.PopupMenu := contextMenu;
-  TreeFilterEdit1.BorderSpacing.Left := ScaleX(114, 96);
+  TreeFilterEdit1.BorderSpacing.Left := ScaleX(142, 96);
+
+  fname := getCoeditDocPath + optFname;
+  if fname.fileExists then
+  begin
+    with TCEProjectInspectorOptions.Create(nil) do
+    try
+      loadFromFile(fname);
+      self.setFileListAsTree(fileListAsTree);
+      btnTree.Down:=fileListAsTree;
+    finally
+      free;
+    end;
+  end;
 
   EntitiesConnector.addObserver(self);
 end;
 
 destructor TCEProjectInspectWidget.destroy;
 begin
+  with TCEProjectInspectorOptions.Create(nil) do
+  try
+    fileListAsTree:= self.fileListAsTree;
+    saveToFile(getCoeditDocPath + optFname);
+  finally
+    free;
+  end;
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
@@ -281,6 +320,14 @@ begin
   btnAddFold.Enabled:= ce;
 end;
 
+procedure TCEProjectInspectWidget.setFileListAsTree(value: boolean);
+begin
+  if fFileListAsTree = value then
+    exit;
+  fFileListAsTree:=value;
+  updateImperative;
+end;
+
 {$ENDREGION}
 
 {$REGION Inspector things -------------------------------------------------------}
@@ -335,7 +382,7 @@ begin
   if not assigned(fProject) or Tree.Selected.isNil then
     exit;
 
-  if Tree.Selected.Parent = fFileNode then
+  if Tree.Selected.Parent <> fConfNode then
   begin
     if Tree.Selected.Data.isNotNil then
     begin
@@ -344,7 +391,7 @@ begin
         getMultiDocHandler.openDocument(fname);
     end;
   end
-  else if Tree.Selected.Parent = fConfNode then
+  else
   begin
     i := Tree.Selected.Index;
     fProject.setActiveConfigurationIndex(i);
@@ -471,6 +518,11 @@ begin
   proj.endUpdate;
 end;
 
+procedure TCEProjectInspectWidget.btnTreeClick(Sender: TObject);
+begin
+  setFileListAsTree(btnTree.Down);
+end;
+
 procedure TCEProjectInspectWidget.btnRemFileClick(Sender: TObject);
 var
   fname: string;
@@ -555,8 +607,11 @@ procedure TCEProjectInspectWidget.updateImperative;
 var
   conf: string;
   itm: TTreeNode;
+  chd: TTreeNode;
   i,j: integer;
   sel: string = '';
+  fld: string;
+  rng: TStringRange = (ptr:nil; pos:0; len:0);
 begin
   if Tree.Selected.isNotNil then
     sel := Tree.Selected.GetTextPath;
@@ -567,13 +622,47 @@ begin
     exit;
 
   Tree.BeginUpdate;
-  for i := 0 to fProject.sourcesCount-1 do
+
+  if not fFileListAsTree then
+    for i := 0 to fProject.sourcesCount-1 do
   begin
     itm := Tree.Items.AddChild(fFileNode, fProject.sourceRelative(i));
     itm.Data:= NewStr(fProject.sourceAbsolute(i));
     itm.ImageIndex := 2;
     itm.SelectedIndex := 2;
+  end
+  else
+  for i := 0 to fProject.sourcesCount-1 do
+  begin
+    fld := '';
+    rng.init(fProject.sourceRelative(i));
+    itm := fFileNode;
+    while not rng.empty do
+    begin
+      chd := nil;
+      fld := rng.takeUntil(['/','\']).yield;
+      chd := itm.FindNode(fld);
+      if chd.isNil then
+        chd := Tree.Items.AddChild(itm, fld);
+      itm := chd;
+      // reached fname
+      if rng.empty then
+      begin
+        itm.Data:= NewStr(fProject.sourceAbsolute(i));
+        itm.ImageIndex := 2;
+        itm.SelectedIndex := 2;
+      end
+      // next folder or fname
+      else
+      begin
+        rng.popWhile(['/','\']);
+        itm.ImageIndex := 5;
+        itm.SelectedIndex := 5;
+      end;
+    end;
   end;
+
+
   j := fProject.getActiveConfigurationIndex;
   for i := 0 to fProject.configurationCount-1 do
   begin

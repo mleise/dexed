@@ -1,32 +1,32 @@
 inherited CEProjectInspectWidget: TCEProjectInspectWidget
-  Left = 1571
+  Left = 1443
   Height = 258
-  Top = 91
-  Width = 341
+  Top = 213
+  Width = 376
   ActiveControl = Tree
   AllowDropFiles = True
   Caption = 'Project inspector'
   ClientHeight = 258
-  ClientWidth = 341
+  ClientWidth = 376
   OnDropFiles = FormDropFiles
   inherited Back: TPanel
     Height = 258
-    Width = 341
+    Width = 376
     AutoSize = True
     ClientHeight = 258
-    ClientWidth = 341
+    ClientWidth = 376
     inherited Content: TPanel
-      Height = 224
-      Top = 34
-      Width = 341
-      ClientHeight = 224
-      ClientWidth = 341
+      Height = 222
+      Top = 36
+      Width = 376
+      ClientHeight = 222
+      ClientWidth = 376
       PopupMenu = nil
       object Tree: TTreeView[0]
         Left = 2
-        Height = 220
+        Height = 218
         Top = 2
-        Width = 337
+        Width = 372
         Align = alClient
         AutoExpand = True
         BorderSpacing.Around = 2
@@ -51,10 +51,9 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Height = 28
-      Width = 333
+      Width = 368
       object btnRemFold: TCEToolButton[0]
-        Left = 85
+        Left = 113
         Hint = 'remove the selected source parent folder from the project'
         Top = 0
         AutoSize = True
@@ -64,7 +63,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         scaledSeparator = False
       end
       object btnAddFold: TCEToolButton[1]
-        Left = 57
+        Left = 85
         Hint = 'add a folder of sources to the project'
         Top = 0
         AutoSize = True
@@ -74,7 +73,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         scaledSeparator = False
       end
       object btnRemFile: TCEToolButton[2]
-        Left = 29
+        Left = 57
         Hint = 'remove selected source from the project'
         Top = 0
         AutoSize = True
@@ -84,7 +83,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         scaledSeparator = False
       end
       object btnAddFile: TCEToolButton[3]
-        Left = 1
+        Left = 29
         Hint = 'add a source to the project'
         Top = 0
         AutoSize = True
@@ -94,21 +93,32 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         scaledSeparator = False
       end
       object TreeFilterEdit1: TTreeFilterEdit[4]
-        Left = 117
-        Height = 24
+        Left = 145
+        Height = 26
         Hint = 'filter the source names that contain the text typed here'
         Top = 2
-        Width = 214
+        Width = 221
         ButtonWidth = 28
         NumGlyphs = 1
         Align = alClient
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Left = 114
+        BorderSpacing.Left = 142
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 0
         FilteredTreeview = Tree
         ExpandAllInitially = True
+      end
+      object btnTree: TCEToolButton[5]
+        Left = 1
+        Hint = 'display the file list as a tree'
+        Top = 0
+        AutoSize = True
+        Caption = 'btnTree'
+        OnClick = btnTreeClick
+        Style = tbsCheck
+        resourceName = 'FOLDERS_EXPLORER'
+        scaledSeparator = False
       end
     end
   end
