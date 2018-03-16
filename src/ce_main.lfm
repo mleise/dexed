@@ -1599,6 +1599,9 @@ object CEMainForm: TCEMainForm
       object MenuItem21: TMenuItem
         Caption = '-'
       end
+      object MenuItem31: TMenuItem
+        Action = actEdFormat
+      end
       object MenuItem54: TMenuItem
         Action = actEdIndent
       end
@@ -2366,6 +2369,11 @@ object CEMainForm: TCEMainForm
       Caption = 'Close all the files'
       OnExecute = actFileCloseAllExecute
       OnUpdate = updateDocumentBasedAction
+    end
+    object actEdFormat: TAction
+      Category = 'Edit'
+      Caption = 'Apply code formatting'
+      OnExecute = actEdFormatExecute
     end
   end
   object ApplicationProperties1: TApplicationProperties

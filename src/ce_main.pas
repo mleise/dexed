@@ -105,6 +105,7 @@ type
     actFileCloseAllOthers: TAction;
     actFileCloseAll: TAction;
     actFileNewClip: TAction;
+    actEdFormat: TAction;
     actLayoutReset: TAction;
     actProjDscan: TAction;
     actProjGroupCompileCustomSync: TAction;
@@ -158,6 +159,7 @@ type
     MenuItem107: TMenuItem;
     MenuItem108: TMenuItem;
     MenuItem109: TMenuItem;
+    MenuItem31: TMenuItem;
     MenuItem77: TMenuItem;
     mnuOpts: TMenuItem;
     mnuItemMruGroup: TMenuItem;
@@ -260,6 +262,7 @@ type
     MenuItem7: TMenuItem;
     MenuItem8: TMenuItem;
     MenuItem9: TMenuItem;
+    procedure actEdFormatExecute(Sender: TObject);
     procedure actFileCloseAllExecute(Sender: TObject);
     procedure actFileCloseAllOthersExecute(Sender: TObject);
     procedure actFileCompileExecute(Sender: TObject);
@@ -3133,6 +3136,13 @@ begin
     exit;
   for i := fMultidoc.documentCount-1 downto 0 do
     fMultidoc.closeDocument(i);
+end;
+
+procedure TCEMainForm.actEdFormatExecute(Sender: TObject);
+begin
+  if fDoc.isNil then
+    exit;
+  getCodeFormatting.formatCurrent();
 end;
 
 procedure TCEMainForm.actFileDscannerExecute(Sender: TObject);

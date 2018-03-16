@@ -379,6 +379,16 @@ type
   end;
 
 
+
+  (**
+   * Single service for DFMT
+   *)
+  ICECodeFormatting = interface(ICESingleService)
+    // formats the focused editor
+    procedure formatCurrent();
+  end;
+
+
   TDCDCompletionKind = (
     dckClass,
     dckInterface,
@@ -440,6 +450,7 @@ type
   function getOptionsEditor: ICEOptionsEditor; inline;
   function getCompilerSelector: ICECompilerSelector; inline;
   function getMainMenu: ICEMainMenu; inline;
+  function getCodeFormatting: ICECodeFormatting; inline;
 
 implementation
 
@@ -593,6 +604,11 @@ end;
 function getMainMenu: ICEMainMenu;
 begin
   exit(EntitiesConnector.getSingleService('ICEMainMenu') as ICEMainMenu);
+end;
+
+function getCodeFormatting: ICECodeFormatting; inline;
+begin
+  exit(EntitiesConnector.getSingleService('ICECodeFormatting') as ICECodeFormatting);
 end;
 {$ENDREGION}
 

@@ -63,7 +63,7 @@ type
 
   { TCEDfmtWidget }
 
-  TCEDfmtWidget = class(TCEWidget, ICEDocumentObserver)
+  TCEDfmtWidget = class(TCEWidget, ICEDocumentObserver, ICECodeFormatting)
     btnApply: TSpeedButton;
     btnCancel: TSpeedButton;
     pnlFooter: TPanel;
@@ -85,6 +85,8 @@ type
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
+    function singleServiceName: string;
+    procedure formatCurrent();
   end;
 
 implementation
@@ -129,6 +131,8 @@ begin
 
   dfmtOptionEditor.TIObject := fDmtWrapper;
   dfmtOptionEditor.DefaultItemHeight:=scaleY(24,96);
+
+  EntitiesConnector.addSingleService(self);
 end;
 
 destructor TCEDfmtWidget.destroy;
@@ -280,6 +284,16 @@ begin
   str.Add('--compact_labeled_statements=' + falsetrue[compactLabeledStatements]);
   if (majv = 0) and (minv > 4) then
     str.Add('--template_constraint_style=' + cts[fConstraints]);
+end;
+
+function TCEDfmtWidget.singleServiceName: string;
+begin
+  exit('ICECodeFormatting');
+end;
+
+procedure TCEDfmtWidget.formatCurrent();
+begin
+  doApply(self);
 end;
 
 procedure TCEDfmtWidget.doApply(sender: TObject);
