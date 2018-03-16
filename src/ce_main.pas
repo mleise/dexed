@@ -1128,20 +1128,25 @@ end;
 
 procedure TCEPersistentMainShortcuts.assignTo(target: TPersistent);
 var
-  itm: TCEPersistentShortcut;
-  i,j: Integer;
+  m: TCEPersistentShortcut;
+  a: TAction;
+  i: integer;
+  j: integer;
 begin
   if target = CEMainForm then
     for i:= 0 to fCol.Count-1 do
+  begin
+    m := TCEPersistentShortcut(fCol.Items[i]);
+    for j := 0 to CEMainForm.Actions.ActionCount-1 do
     begin
-      itm := TCEPersistentShortcut(fCol.Items[i]);
-      for j := 0 to CEMainForm.Actions.ActionCount-1 do
-        if CEMainForm.Actions.Actions[i].Name = itm.actionName then
-        begin
-          TAction(CEMainForm.Actions.Actions[i]).Shortcut := itm.shortcut;
-          break;
-        end;
-    end
+      a := TAction(CEMainForm.Actions.Actions[j]);
+      if a.Name = m.actionName then
+      begin
+        a.shortcut := m.shortcut;
+        break;
+      end;
+    end;
+  end
   else inherited;
 end;
 {$ENDREGION}
