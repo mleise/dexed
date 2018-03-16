@@ -87,6 +87,7 @@ implementation
 {$R *.lfm}
 
 const optFname = 'projinspect.txt';
+const filterAlign: array[boolean] of integer = (34, 142);
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEProjectInspectWidget.create(aOwner: TComponent);
@@ -158,7 +159,7 @@ begin
 
   Tree.Images := fImages;
   Tree.PopupMenu := contextMenu;
-  TreeFilterEdit1.BorderSpacing.Left := ScaleX(142, 96);
+  TreeFilterEdit1.BorderSpacing.Left := ScaleX(filterAlign[false], 96);
 
   fname := getCoeditDocPath + optFname;
   if fname.fileExists then
@@ -314,10 +315,11 @@ var
   ce: boolean;
 begin
   ce := fProject.getFormat = pfCE;
-  btnRemFile.Enabled:= ce;
-  btnRemFold.Enabled:= ce;
-  btnAddFile.Enabled:= ce;
-  btnAddFold.Enabled:= ce;
+  btnRemFile.Visible:= ce;
+  btnRemFold.Visible:= ce;
+  btnAddFile.Visible:= ce;
+  btnAddFold.Visible:= ce;
+  TreeFilterEdit1.BorderSpacing.Left := ScaleX(filterAlign[ce], 96);
 end;
 
 procedure TCEProjectInspectWidget.setFileListAsTree(value: boolean);
