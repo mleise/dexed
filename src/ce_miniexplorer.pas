@@ -327,7 +327,9 @@ begin
   treeFolders.StateImages := fImages;
 
   lstFiles.SmallImages := fImages;
+  {$IFNDEF WINDOWS}
   lstFiles.StateImages := fImages;
+  {$ENDIF}
   lstFiles.OnEnter:=@lstFilesEnter;
 
   fEditableOptions:= TCEMiniExplorerEditableOptions.create(self);
