@@ -26,23 +26,23 @@ Coedit is an IDE for the [D programming language](https://dlang.org), its compil
 **Project information**
 ---
 
-- latest release: version 3.6.4, Tue 8 Mar 2018.
+- latest release: version 3.6.5, Sat 17 Mar 2018.
 - licensed under the terms of the Boost software license.
 - Development can be supported with [Paypal donations](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AQDJVC39PJF7J).
 
-**Download version 3.6.4**
+**Download version 3.6.5**
 ---
 Download the zipped binaries or the zip that contains the setup program for you platform:
 
-- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.4/coedit.3.6.4.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.4/coedit.3.6.4.linux64.zip)
-- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.4/coedit.3.6.4.win32.setup.zip)
-- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.4/coedit.3.6.4.win32.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.4/coedit-3.6.4-0.x86_64.rpm)
-- :package: [deb for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.4/coedit-3.6.4.amd64.deb)
+- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.5/coedit.3.6.5.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.5/coedit.3.6.5.linux64.zip)
+- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.5/coedit.3.6.5.win32.setup.zip)
+- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.5/coedit.3.6.5.win32.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.5/coedit-3.6.5-0.x86_64.rpm)
+- :package: [deb for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.5/coedit-3.6.5.amd64.deb)
 
 The _zip_ archives allow to move freely the files.
-The _setup.zip_ archives contains a command line program which installs to predefined locations so that the software can be run without additional intervention.
+The _setup.zip_ archives contains a command line program that installs to predefined locations so that the software can be run without additional intervention.
 The _deb_ and the _rpm_ packages are for those who prefer the official setup system for their linux systems.
 Linux i386 version must be [built manually](https://bbasile.github.io/Coedit/build.html).
 
