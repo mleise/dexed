@@ -28,15 +28,15 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         Align = alTop
         Columns = <        
           item
-            Width = 333
+            Width = 520
           end>
         ReadOnly = True
         ScrollBars = ssAutoBoth
         ShowColumnHeaders = False
         TabOrder = 0
         ViewStyle = vsReport
+        OnClick = lstFavClick
         OnDeletion = lstFavDeletion
-        OnEdited = lstFavEdited
         OnEnter = lstFavEnter
       end
       object Splitter1: TSplitter[1]
@@ -100,6 +100,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
           SortType = stText
           TabOrder = 2
           OnDblClick = lstFilesDblClick
+          OnFileAdded = lstFilesFileAdded
           ObjectTypes = [otNonFolders, otHidden]
           ShellTreeView = treeFolders
         end
@@ -185,7 +186,6 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         TabOrder = 0
         OnButtonClick = lstFilterButtonClick
         OnKeyUp = lstFilterKeyUp
-        TextHint = '(filter)'
       end
     end
   end

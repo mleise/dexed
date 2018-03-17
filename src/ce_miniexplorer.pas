@@ -86,12 +86,12 @@ type
     procedure btnShellOpenClick(Sender: TObject);
     procedure btnAddFavClick(Sender: TObject);
     procedure btnRemFavClick(Sender: TObject);
+    procedure lstFavClick(Sender: TObject);
     procedure lstFavDeletion(Sender: TObject; Item: TListItem);
-    procedure lstFavEdited(Sender: TObject; Item: TListItem; var AValue: string);
     procedure lstFavEnter(Sender: TObject);
     procedure lstFilesDblClick(Sender: TObject);
     procedure lstFilesEnter(Sender: TObject);
-    procedure lstFilesStartDrag(Sender: TObject; var DragObject: TDragObject);
+    procedure lstFilesFileAdded(Sender: TObject; Item: TListItem);
     procedure lstFilterButtonClick(Sender: TObject);
     procedure lstFilterKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TreeEnter(Sender: TObject);
@@ -118,19 +118,19 @@ type
     procedure shellOpenSelected;
     procedure mnuDriveItemClick(sender: TObject);
     procedure mnuDriveSelect(sender: TObject);
-    //
+
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
     procedure projClosing(project: ICECommonProject);
     procedure projFocused(project: ICECommonProject);
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
-    //
+
     procedure docNew(document: TCESynMemo);
     procedure docFocused(document: TCESynMemo);
     procedure docChanged(document: TCESynMemo);
     procedure docClosing(document: TCESynMemo);
-    //
+
     function singleServiceName: string;
     procedure browse(const location: string);
     function currentLocation: string;
@@ -310,9 +310,9 @@ begin
     end;
     iss32:
     begin
-      fImages.Width := 24;
-      fImages.Height := 24;
-      treeFolders.Indent := 24;
+      fImages.Width := 32;
+      fImages.Height := 32;
+      treeFolders.Indent := 32;
       fImages.AddResourceName(HINSTANCE, 'DOCUMENT32');
       fImages.AddResourceName(HINSTANCE, 'FOLDER32');
       fImages.AddResourceName(HINSTANCE, 'FOLDER_STAR32');
@@ -469,11 +469,6 @@ begin
   d := PString(Item.Data)^;
   if d.dirExists then
     browse(d)
-  else if dlgYesNo('The favorite folder `' + d + '` does not exist. ' +
-    'Remove from the list ?') = mrYes then
-  begin
-    fFavorites.Delete(item.Index);
-  end;
 end;
 
 procedure TCEMiniExplorerWidget.btnRemFavClick(Sender: TObject);
@@ -488,15 +483,25 @@ begin
   lstFiles.Clear;
 end;
 
+procedure TCEMiniExplorerWidget.lstFavClick(Sender: TObject);
+var
+  d: string;
+begin
+  if lstFav.Selected.isNil or lstFav.Selected.Data.isNil then
+     exit;
+  d := PString(lstFav.Selected.Data)^;
+  if not d.dirExists and (dlgYesNo('The favorite folder `' + d +
+    '` does not exist. ' + 'Remove from the list ?') = mrYes) then
+  begin
+    fFavorites.Delete(lstFav.Selected.Index);
+    lstFiles.Clear;
+  end;
+end;
+
 procedure TCEMiniExplorerWidget.lstFavDeletion(Sender: TObject; Item: TListItem);
 begin
   if Item.isNotNil and item.Data.isNotNil then
     dispose(PString(item.Data));
-end;
-
-procedure TCEMiniExplorerWidget.lstFavEdited(Sender: TObject; Item: TListItem;
-  var AValue: string);
-begin
 end;
 
 procedure TCEMiniExplorerWidget.lstFavEnter(Sender: TObject);
@@ -606,10 +611,10 @@ begin
   fLastListOrTree := lstFiles;
 end;
 
-procedure TCEMiniExplorerWidget.lstFilesStartDrag(Sender: TObject;
-  var DragObject: TDragObject);
+procedure TCEMiniExplorerWidget.lstFilesFileAdded(Sender: TObject;
+  Item: TListItem);
 begin
-
+  Item.ImageIndex:=0;
 end;
 
 procedure TCEMiniExplorerWidget.lstFilterButtonClick(Sender: TObject);
@@ -739,11 +744,11 @@ end;
 procedure TCEMiniExplorerWidget.browse(const location: string);
 begin
   if location.EndsWith('\') or location.EndsWith('/') then
-    treeFolders.Root := location[1..location.length]
-  else if location.fileExists then
-    treeFolders.Root := location.extractFileDir
+    treeFolders.Root := location[1..location.length - 1]
   else if location.dirExists then
-    treeFolders.Root := location;
+    treeFolders.Root := location
+  else if location.fileExists then
+    treeFolders.Root := location.extractFileDir;
   fLastFold:=treeFolders.Root;
 end;
 
