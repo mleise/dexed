@@ -1,31 +1,30 @@
 inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
-  Left = 1558
-  Height = 598
-  Top = 110
-  Width = 343
+  Left = 1367
+  Height = 654
+  Top = 3
+  Width = 530
   ActiveControl = lstFav
   Caption = 'Mini explorer'
-  ClientHeight = 598
-  ClientWidth = 343
+  ClientHeight = 654
+  ClientWidth = 530
   inherited Back: TPanel
-    Height = 598
-    Width = 343
+    Height = 654
+    Width = 530
     AutoSize = True
-    ClientHeight = 598
-    ClientWidth = 343
+    ClientHeight = 654
+    ClientWidth = 530
     inherited Content: TPanel
       Left = 4
-      Height = 558
-      Top = 36
-      Width = 335
+      Height = 612
+      Width = 522
       BorderSpacing.Around = 4
-      ClientHeight = 558
-      ClientWidth = 335
+      ClientHeight = 612
+      ClientWidth = 522
       object lstFav: TListView[0]
         Left = 0
         Height = 131
         Top = 0
-        Width = 335
+        Width = 522
         Align = alTop
         Columns = <        
           item
@@ -36,6 +35,8 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         ShowColumnHeaders = False
         TabOrder = 0
         ViewStyle = vsReport
+        OnDeletion = lstFavDeletion
+        OnEdited = lstFavEdited
         OnEnter = lstFavEnter
       end
       object Splitter1: TSplitter[1]
@@ -43,71 +44,71 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         Left = 0
         Height = 6
         Top = 131
-        Width = 335
+        Width = 522
         Align = alTop
         ResizeAnchor = akTop
       end
       object Panel2: TPanel[2]
         Left = 0
-        Height = 421
+        Height = 475
         Top = 137
-        Width = 335
+        Width = 522
         Align = alClient
         AutoSize = True
         BevelOuter = bvNone
-        ClientHeight = 421
-        ClientWidth = 335
+        ClientHeight = 475
+        ClientWidth = 522
         TabOrder = 2
-        object Tree: TTreeView
-          Left = 0
-          Height = 171
-          Top = 0
-          Width = 335
-          Align = alTop
-          ReadOnly = True
-          ScrollBars = ssAutoBoth
-          TabOrder = 0
-          OnEnter = TreeEnter
-          Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
-          TreeLinePenStyle = psClear
-        end
         object Splitter2: TSplitter
           Cursor = crVSplit
           Left = 0
           Height = 6
-          Top = 171
-          Width = 335
+          Top = 218
+          Width = 522
           Align = alTop
           ResizeAnchor = akTop
         end
-        object lstFiles: TListView
+        object treeFolders: TShellTreeView
           Left = 0
-          Height = 244
-          Top = 177
-          Width = 335
+          Height = 218
+          Top = 0
+          Width = 522
+          Align = alTop
+          FileSortType = fstAlphabet
+          ReadOnly = True
+          ScrollBars = ssAutoBoth
+          TabOrder = 1
+          OnChange = treeFoldersChange
+          OnDblClick = treeFoldersDblClick
+          OnEnter = TreeEnter
+          OnGetImageIndex = treeFoldersGetImageIndex
+          OnGetSelectedIndex = treeFoldersGetSelectedIndex
+          Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+          ObjectTypes = [otFolders]
+          ShellListView = lstFiles
+        end
+        object lstFiles: TShellListView
+          Left = 0
+          Height = 251
+          Top = 224
+          Width = 522
           Align = alClient
-          AutoSort = False
-          Columns = <          
-            item
-              Width = 333
-            end>
+          Color = clDefault
           DragMode = dmAutomatic
           ReadOnly = True
           ScrollBars = ssAutoBoth
-          ShowColumnHeaders = False
+          SortType = stText
           TabOrder = 2
-          ViewStyle = vsReport
           OnDblClick = lstFilesDblClick
-          OnEnter = lstFilesEnter
-          OnStartDrag = lstFilesStartDrag
+          ObjectTypes = [otNonFolders, otHidden]
+          ShellTreeView = treeFolders
         end
       end
     end
     inherited toolbar: TCEToolBar
-      Height = 28
-      Width = 335
+      Width = 522
       object btnEdit: TCEToolButton[0]
-        Left = 85
+        Left = 153
         Hint = 'open the selected file in an editor or as a new project'
         Top = 0
         AutoSize = True
@@ -117,7 +118,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         scaledSeparator = False
       end
       object btnShellOpen: TCEToolButton[1]
-        Left = 57
+        Left = 125
         Hint = 'open the selected folder or the selected file using the shell'
         Top = 0
         AutoSize = True
@@ -127,7 +128,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         scaledSeparator = False
       end
       object btnRemFav: TCEToolButton[2]
-        Left = 29
+        Left = 97
         Hint = 'remove selected favorite folder'
         Top = 0
         AutoSize = True
@@ -137,7 +138,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         scaledSeparator = False
       end
       object btnAddFav: TCEToolButton[3]
-        Left = 1
+        Left = 69
         Hint = 'add selected folder to the favorites'
         Top = 0
         AutoSize = True
@@ -146,25 +147,54 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         resourceName = 'FOLDER_ADD'
         scaledSeparator = False
       end
-      object lstFilter: TListFilterEdit[4]
-        Left = 119
+      object btnDrive: TCEToolButton[4]
+        Left = 1
+        Hint = 'select a drive or a custom folder'
+        Top = 0
+        AutoSize = True
+        Caption = 'btnDrive'
+        DropdownMenu = mnuDrives
+        OnClick = btnDriveClick
+        Style = tbsDropDown
+        resourceName = 'FOLDER_GO'
+        scaledSeparator = False
+      end
+      object btnParentFolder: TCEToolButton[5]
+        Left = 41
+        Hint = 'select parent folder'
+        Top = 0
+        AutoSize = True
+        Caption = 'btnParentFolder'
+        OnClick = btnParentFolderClick
+        resourceName = 'GO_PREVIOUS'
+        scaledSeparator = False
+      end
+      object lstFilter: TListViewFilterEdit[6]
+        Left = 183
         Height = 24
-        Hint = 'filter the file names that contain the text typed here'
         Top = 2
-        Width = 214
-        ButtonWidth = 28
+        Width = 337
+        ButtonWidth = 23
         NumGlyphs = 1
+        Flat = True
         Align = alClient
-        Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Left = 116
+        BorderSpacing.Left = 180
+        BorderSpacing.Bottom = 2
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 0
+        OnButtonClick = lstFilterButtonClick
+        OnKeyUp = lstFilterKeyUp
+        TextHint = '(filter)'
       end
     end
   end
   inherited contextMenu: TPopupMenu
-    left = 72
-    top = 56
+    left = 40
+    top = 48
+  end
+  object mnuDrives: TPopupMenu[2]
+    left = 8
+    top = 48
   end
 end

@@ -5,7 +5,7 @@ unit ce_lcldragdrop;
 interface
 
 uses
-  Classes, SysUtils, Controls, ComCtrls,
+  Classes, SysUtils, Controls, ComCtrls, ShellCtrls,
   ce_common, ce_ceproject, ce_dubproject, ce_interfaces,
   ce_dialogs, ce_projutils;
 
@@ -89,17 +89,17 @@ end;
 
 function TDDHandler.getFilename(src: TObject): string;
 var
-  lst: TListView;
+  lst: TShellListView;
   trv: TTreeView;
 begin
   result := '';
   if src.isNil then exit;
   // from mini-explorer
-  if src is TListView then
+  if src is TShellListView then
   begin
-    lst := TListView(src);
-    if lst.Selected.isNotNil and lst.Selected.Data.isNotNil then
-      result := PString(lst.Selected.Data)^;
+    lst := TShellListView(src);
+    if lst.Selected.isNotNil then
+      result := lst.GetPathFromItem(lst.Selected);
   end
   // from CE/DUB project inspector
   else if src is TTreeView then

@@ -5,10 +5,11 @@ unit ce_miniexplorer;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, ListFilterEdit, Forms, Controls, Graphics,
-  ExtCtrls, Menus, ComCtrls, Buttons, lcltype, strutils, ce_widget, ce_sharedres,
-  ce_common, ce_interfaces, ce_observer, ce_writableComponent, ce_dubproject,
-  ce_ceproject, EditBtn, ce_dialogs, ce_synmemo, ce_projutils, ce_dsgncontrols;
+  Classes, SysUtils, FileUtil, ListViewFilterEdit, Forms, strutils ,
+  Controls, Graphics, ExtCtrls, Menus, ComCtrls, Buttons, lcltype, dialogs,
+  ce_widget, ce_sharedres, ce_common, ce_interfaces, ce_observer,
+  ce_writableComponent, ce_dubproject, ce_ceproject, EditBtn, ShellCtrls,
+  ce_dialogs, ce_synmemo, ce_projutils, ce_dsgncontrols;
 
 type
 
@@ -20,6 +21,7 @@ type
   private
     fDblClick: TExplorerDoubleClick;
     fContextExpand: boolean;
+    fShowHidden: boolean;
     fExplorer: TCEMiniExplorerWidget;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
@@ -30,6 +32,7 @@ type
   published
     property doubleClick: TExplorerDoubleClick read fDblClick write fDblClick;
     property contextExpand: boolean read fContextExpand write fContextExpand;
+    property showHidden: boolean read fShowHidden write fShowHidden default true;
   public
     constructor create(miniexpl: TCEMiniExplorerWidget);
     destructor destroy; override;
@@ -43,6 +46,7 @@ type
     fLastFolder: string;
     fDblClick: TExplorerDoubleClick;
     fContextExpand: boolean;
+    fShowHidden: boolean;
     procedure setFavoriteFolders(value: TStringList);
   published
     property splitter1Position: integer read fSplitter1Position write fSplitter1Position;
@@ -51,6 +55,7 @@ type
     property favoriteFolders: TStringList read fFavoriteFolders write setFavoriteFolders;
     property doubleClick: TExplorerDoubleClick read fDblClick write fDblClick;
     property contextExpand: boolean read fContextExpand write fContextExpand;
+    property showHidden: boolean read fShowHidden write fShowHidden default true;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -62,25 +67,38 @@ type
 
   TCEMiniExplorerWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEExplorer)
     btnAddFav: TCEToolButton;
+    btnDrive: TCEToolButton;
     btnEdit: TCEToolButton;
+    btnParentFolder: TCEToolButton;
     btnRemFav: TCEToolButton;
     btnShellOpen: TCEToolButton;
-    lstFilter: TListFilterEdit;
-    lstFiles: TListView;
+    lstFilter: TListViewFilterEdit;
     lstFav: TListView;
     Panel2: TPanel;
+    lstFiles: TShellListView;
+    mnuDrives: TPopupMenu;
+    treeFolders: TShellTreeView;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
-    Tree: TTreeView;
+    procedure btnDriveClick(Sender: TObject);
     procedure btnEditClick(Sender: TObject);
+    procedure btnParentFolderClick(Sender: TObject);
     procedure btnShellOpenClick(Sender: TObject);
     procedure btnAddFavClick(Sender: TObject);
     procedure btnRemFavClick(Sender: TObject);
+    procedure lstFavDeletion(Sender: TObject; Item: TListItem);
+    procedure lstFavEdited(Sender: TObject; Item: TListItem; var AValue: string);
     procedure lstFavEnter(Sender: TObject);
     procedure lstFilesDblClick(Sender: TObject);
     procedure lstFilesEnter(Sender: TObject);
     procedure lstFilesStartDrag(Sender: TObject; var DragObject: TDragObject);
+    procedure lstFilterButtonClick(Sender: TObject);
+    procedure lstFilterKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TreeEnter(Sender: TObject);
+    procedure treeFoldersChange(Sender: TObject; Node: TTreeNode);
+    procedure treeFoldersDblClick(Sender: TObject);
+    procedure treeFoldersGetImageIndex(Sender: TObject; Node: TTreeNode);
+    procedure treeFoldersGetSelectedIndex(Sender: TObject; Node: TTreeNode);
   private
     fProj: ICECommonProject;
     fFreeProj: ICECommonProject;
@@ -91,22 +109,15 @@ type
     fContextExpand: boolean;
     fEditableOptions: TCEMiniExplorerEditableOptions;
     fImages: TImageList;
+    procedure filterFiles;
     procedure lstFavDblClick(Sender: TObject);
     procedure updateFavorites;
     procedure treeSetRoots;
-    procedure lstFilesFromTree;
-    procedure treeScanSubFolders(aRoot: TTreeNode);
-    procedure treeClick(sender: TObject);
-    procedure treeChanged(Sender: TObject; Node: TTreeNode);
-    procedure treeExpanding(Sender: TObject; Node: TTreeNode; var allow: boolean);
-    procedure treeDeletion(Sender: TObject; Item: TTreeNode);
-    procedure treeSelectionChanged(sender: TObject);
     procedure favStringsChange(sender: TObject);
-    procedure fillLstFiles(const aList: TStrings);
-    procedure lstDeletion(Sender: TObject; Item: TListItem);
     procedure lstFavSelect(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure shellOpenSelected;
-    procedure lstFilterChange(sender: TObject);
+    procedure mnuDriveItemClick(sender: TObject);
+    procedure mnuDriveSelect(sender: TObject);
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -128,8 +139,6 @@ type
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
-    //
-    procedure expandPath(aPath: string);
   end;
 
 implementation
@@ -143,6 +152,7 @@ const
 constructor TCEMiniExplorerEditableOptions.create(miniexpl: TCEMiniExplorerWidget);
 begin
   fExplorer := miniexpl;
+  fShowHidden:=true;
   EntitiesConnector.addObserver(self);
 end;
 
@@ -156,6 +166,17 @@ procedure TCEMiniExplorerEditableOptions.apply;
 begin
   fExplorer.fContextExpand:= fContextExpand;
   fExplorer.fDblClick:= fDblClick;
+  if fShowHidden then
+  begin
+    fExplorer.treeFolders.ObjectTypes := fExplorer.treeFolders.ObjectTypes + [otHidden];
+    fExplorer.lstFiles.ObjectTypes := fExplorer.lstFiles.ObjectTypes + [otHidden];
+  end
+  else
+  begin
+    fExplorer.treeFolders.ObjectTypes := fExplorer.treeFolders.ObjectTypes - [otHidden];
+    fExplorer.lstFiles.ObjectTypes := fExplorer.lstFiles.ObjectTypes - [otHidden];
+  end;
+  fExplorer.treeFolders.Refresh;
 end;
 
 function TCEMiniExplorerEditableOptions.optionedWantCategory(): string;
@@ -189,6 +210,7 @@ constructor TCEMiniExplorerOptions.create(aOwner: TComponent);
 begin
   inherited;
   fFavoriteFolders := TStringList.Create;
+  fShowHidden:=true;
 end;
 
 destructor TCEMiniExplorerOptions.destroy;
@@ -210,6 +232,7 @@ begin
     fSplitter2Position := widg.Splitter2.GetSplitterPosition;
     fDblClick:= widg.fDblClick;
     fContextExpand:=widg.fContextExpand;
+    fShowHidden:= otHidden in widg.lstFiles.ObjectTypes;
   end
   else inherited;
 end;
@@ -230,8 +253,18 @@ begin
     widg.fContextExpand := fContextExpand;
     widg.fEditableOptions.fContextExpand := fContextExpand;
     widg.updateFavorites;
-    if widg.fLastFold.dirExists then
-      widg.expandPath(fLastFolder);
+    if fShowHidden then
+    begin
+      widg.treeFolders.ObjectTypes := widg.treeFolders.ObjectTypes + [otHidden];
+      widg.lstFiles.ObjectTypes := widg.lstFiles.ObjectTypes + [otHidden];
+    end
+    else
+    begin
+      widg.treeFolders.ObjectTypes := widg.treeFolders.ObjectTypes - [otHidden];
+      widg.lstFiles.ObjectTypes := widg.lstFiles.ObjectTypes -[otHidden];
+    end;
+   if widg.fLastFold.dirExists then
+      widg.browse(fLastFolder);
   end
   else inherited;
 end;
@@ -255,7 +288,7 @@ begin
     begin
       fImages.Width := 16;
       fImages.Height := 16;
-      Tree.Indent := 16;
+      treeFolders.Indent := 16;
       fImages.AddResourceName(HINSTANCE, 'DOCUMENT');
       fImages.AddResourceName(HINSTANCE, 'FOLDER');
       fImages.AddResourceName(HINSTANCE, 'FOLDER_STAR');
@@ -267,7 +300,7 @@ begin
     begin
       fImages.Width := 24;
       fImages.Height := 24;
-      Tree.Indent := 24;
+      treeFolders.Indent := 24;
       fImages.AddResourceName(HINSTANCE, 'DOCUMENT24');
       fImages.AddResourceName(HINSTANCE, 'FOLDER24');
       fImages.AddResourceName(HINSTANCE, 'FOLDER_STAR24');
@@ -279,7 +312,7 @@ begin
     begin
       fImages.Width := 24;
       fImages.Height := 24;
-      Tree.Indent := 24;
+      treeFolders.Indent := 24;
       fImages.AddResourceName(HINSTANCE, 'DOCUMENT32');
       fImages.AddResourceName(HINSTANCE, 'FOLDER32');
       fImages.AddResourceName(HINSTANCE, 'FOLDER_STAR32');
@@ -289,27 +322,22 @@ begin
     end;
   end;
   lstFav.SmallImages := fImages;
-  tree.Images := fImages;
+
+  treeFolders.Images := fImages;
+  treeFolders.StateImages := fImages;
+
   lstFiles.SmallImages := fImages;
+  lstFiles.StateImages := fImages;
+  lstFiles.OnEnter:=@lstFilesEnter;
 
   fEditableOptions:= TCEMiniExplorerEditableOptions.create(self);
 
   fFavorites := TStringList.Create;
   fFavorites.onChange := @favStringsChange;
-  lstFiles.OnDeletion := @lstDeletion;
-  lstFav.OnDeletion := @lstDeletion;
   lstFav.OnSelectItem := @lstFavSelect;
   lstFav.OnDblClick := @lstFavDblClick;
 
-  Tree.OnClick := @treeClick;
-  Tree.OnChange := @treeChanged;
-  Tree.OnDeletion := @treeDeletion;
-  Tree.OnSelectionChanged := @treeSelectionChanged;
-  Tree.OnExpanding := @treeExpanding;
-
-  lstFilter.FilteredListbox := nil;
-  lstFilter.onChange := @lstFilterChange;
-  lstFilter.BorderSpacing.Left := ScaleX(116, 96);
+  lstFilter.BorderSpacing.Left := ScaleX(182, 96);
 
   treeSetRoots;
 
@@ -337,16 +365,10 @@ begin
   finally
     free;
   end;
-  //
+
   fEditableOptions.Free;
   fFavorites.Free;
   inherited;
-end;
-
-procedure TCEMiniExplorerWidget.lstDeletion(Sender: TObject; Item: TListItem);
-begin
-  if Item.Data.isNotNil then
-    DisposeStr(PString(Item.Data));
 end;
 
 procedure TCEMiniExplorerWidget.setToolBarFlat(value: boolean);
@@ -383,7 +405,7 @@ begin
   else if fFreeProj = project then
     fFreeProj := nil;
   if visible and project.fileName.fileExists and fContextExpand then
-    expandPath(project.fileName.extractFilePath);
+    browse(project.fileName);
 end;
 
 procedure TCEMiniExplorerWidget.projCompiling(project: ICECommonProject);
@@ -403,7 +425,7 @@ end;
 procedure TCEMiniExplorerWidget.docFocused(document: TCESynMemo);
 begin
   if visible and document.fileName.fileExists and fContextExpand then
-    expandPath(document.fileName.extractFilePath);
+    browse(document.fileName);
 end;
 
 procedure TCEMiniExplorerWidget.docChanged(document: TCESynMemo);
@@ -440,18 +462,17 @@ end;
 
 procedure TCEMiniExplorerWidget.lstFavSelect(Sender: TObject; Item: TListItem; Selected: Boolean);
 var
-  lst: TStringList;
+  d: string;
 begin
-  if not Selected then exit;
-  //
-  fLastFold := PString(Item.Data)^;
-  lst := TStringList.Create;
-  try
-    lstFiles.Items.Clear;
-    listFiles(lst, fLastFold);
-    fillLstFiles(lst);
-  finally
-    lst.Free;
+  if not Selected or Item.Data.isNil then
+     exit;
+  d := PString(Item.Data)^;
+  if d.dirExists then
+    browse(d)
+  else if dlgYesNo('The favorite folder `' + d + '` does not exist. ' +
+    'Remove from the list ?') = mrYes then
+  begin
+    fFavorites.Delete(item.Index);
   end;
 end;
 
@@ -459,10 +480,23 @@ procedure TCEMiniExplorerWidget.btnRemFavClick(Sender: TObject);
 var
   i: Integer;
 begin
-  if lstFav.Selected.isNil then exit;
+  if lstFav.Selected.isNil then
+     exit;
   i := fFavorites.IndexOf(PString(lstFav.Selected.Data)^);
-  if i <> -1 then fFavorites.Delete(i);
+  if i <> -1 then
+     fFavorites.Delete(i);
   lstFiles.Clear;
+end;
+
+procedure TCEMiniExplorerWidget.lstFavDeletion(Sender: TObject; Item: TListItem);
+begin
+  if Item.isNotNil and item.Data.isNotNil then
+    dispose(PString(item.Data));
+end;
+
+procedure TCEMiniExplorerWidget.lstFavEdited(Sender: TObject; Item: TListItem;
+  var AValue: string);
+begin
 end;
 
 procedure TCEMiniExplorerWidget.lstFavEnter(Sender: TObject);
@@ -472,45 +506,45 @@ end;
 
 procedure TCEMiniExplorerWidget.btnAddFavClick(Sender: TObject);
 begin
-  if Tree.Selected.isNil then exit;
-  fFavorites.Add(PString(Tree.Selected.Data)^);
+  if treeFolders.Selected.isNil then
+    exit;
+  fFavorites.Add(treeFolders.GetPathFromNode(treeFolders.Selected).extractFileDir);
 end;
 
 procedure TCEMiniExplorerWidget.lstFavDblClick(Sender: TObject);
 begin
-  if lstFav.Selected.isNil then exit;
-  lstFiles.Items.Clear;
-  expandPath(lstFav.Selected.Caption);
-  tree.MakeSelectionVisible;
+  if lstFav.Selected.isNil then
+     exit;
+  treeFolders.Root := lstFav.Selected.Caption;
 end;
-{$ENDREGION}
 
-{$REGION Files -----------------------------------------------------------------}
-procedure TCEMiniExplorerWidget.fillLstFiles(const aList: TStrings);
+procedure TCEMiniExplorerWidget.filterFiles;
 var
-  itm: TListItem;
-  fname, itemText: string;
-  dat: PString;
-  noFilter: boolean;
+  s: string;
+  i: integer;
 begin
-  noFilter := lstFilter.Filter = '';
-  lstFiles.Clear;
+
+  // getting the full list is not possible once no item anymore
+  // e.g after filtering failed
+  treeFolders.BeginUpdate;
+  s := treeFolders.Root;
+  treeFolders.Root:= '';
+  treeFolders.Root:= s;
+  treeFolders.EndUpdate;
+
+  if lstFilter.filter.isEmpty then
+    exit;
+
   lstFiles.BeginUpdate;
-  for fname in aList do
-  begin
-    itemText := fname.extractFileName;
-    if noFilter or AnsiContainsText(itemText,lstFilter.Filter) then
-    begin
-      itm := lstFiles.Items.Add;
-      itm.Caption := itemText;
-      dat := NewStr(fname);
-      itm.Data := dat;
-      itm.ImageIndex := 0;
-    end;
-  end;
+  for i:= lstFiles.Items.Count-1 downto 0 do
+    if not AnsicontainsText(lstfiles.Items[i].Caption,lstFilter.Filter) then
+      lstfiles.Items.Delete(i);
   lstFiles.EndUpdate;
 end;
 
+{$ENDREGION}
+
+{$REGION Files -----------------------------------------------------------------}
 procedure TCEMiniExplorerWidget.btnShellOpenClick(Sender: TObject);
 begin
   shellOpenSelected;
@@ -521,13 +555,11 @@ var
   fname: string;
   fmt: TCEProjectFileFormat;
 begin
-  if lstFiles.Selected.isNil then exit;
-  if lstFiles.Selected.Data.isNil then exit;
-  fname := PString(lstFiles.Selected.Data)^;
-  if not fname.fileExists then exit;
-  {$IFNDEF WINDOWS}
-  fname := fname[2..fname.length];
-  {$ENDIF}
+  if lstFiles.Selected.isNil then
+    exit;
+  fname := lstFiles.GetPathFromItem(lstFiles.Selected);
+  if not fname.fileExists then
+    exit;
   fmt := projectFormat(fname);
   if fmt in [pffCe, pffDub] then
   begin
@@ -545,6 +577,20 @@ begin
     fProj.activate;
   end
   else getMultiDocHandler.openDocument(fname);
+end;
+
+procedure TCEMiniExplorerWidget.btnDriveClick(Sender: TObject);
+begin
+  mnuDriveSelect(nil);
+end;
+
+procedure TCEMiniExplorerWidget.btnParentFolderClick(Sender: TObject);
+var
+  p: string;
+begin
+  p := treeFolders.Root.extractFileDir;
+  if p.dirExists then
+    treeFolders.Root := p;
 end;
 
 procedure TCEMiniExplorerWidget.lstFilesDblClick(Sender: TObject);
@@ -566,191 +612,121 @@ begin
 
 end;
 
+procedure TCEMiniExplorerWidget.lstFilterButtonClick(Sender: TObject);
+var
+  s: string;
+begin
+  s := treeFolders.Root;
+  treeFolders.Root:= '';
+  treeFolders.Root:= s;
+end;
+
+procedure TCEMiniExplorerWidget.lstFilterKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  filterFiles;
+end;
+
 procedure TCEMiniExplorerWidget.shellOpenSelected;
 var
   fname: string = '';
 begin
   if fLastListOrTree = lstFiles then
   begin
-    if lstFiles.Selected.isNil then exit;
-    if lstFiles.Selected.data.isNil then exit;
-    fname := PString(lstFiles.Selected.Data)^;
-  end else if fLastListOrTree = Tree then
+    if lstFiles.Selected.isNil then
+       exit;
+    fname := lstFiles.GetPathFromItem(lstFiles.Selected);
+  end else if fLastListOrTree = treeFolders then
   begin
-    if tree.Selected.isNil then exit;
-    if tree.Selected.Data.isNil then exit;
-    fname := PString(tree.Selected.Data)^;
+    if treeFolders.Selected.isNil then
+       exit;
+    fname := treeFolders.GetPathFromNode(treeFolders.Selected).extractFileDir;
   end
   else if fLastListOrTree = lstFav then
   begin
-    if lstFav.Selected.isNil then exit;
-    if lstFav.Selected.Data.isNil then exit;
+    if lstFav.Selected.isNil or lstFav.Selected.Data.isNil then
+       exit;
     fname := PString(lstFav.Selected.Data)^;
   end;
   if (fname.fileExists or fname.dirExists) and not shellOpen(fname) then
     getMessageDisplay.message((format('the shell failed to open "%s"',
     [shortenPath(fname, 25)])), nil, amcMisc, amkErr);
 end;
-
-procedure TCEMiniExplorerWidget.lstFilterChange(sender: TObject);
-begin
-  lstFilesFromTree;
-end;
 {$ENDREGION}
 
 {$REGION Tree ------------------------------------------------------------------}
 procedure TCEMiniExplorerWidget.TreeEnter(Sender: TObject);
 begin
-  fLastListOrTree := Tree;
+  fLastListOrTree := treeFolders;
 end;
 
-procedure TCEMiniExplorerWidget.treeDeletion(Sender: TObject; Item: TTreeNode);
+procedure TCEMiniExplorerWidget.treeFoldersChange(Sender: TObject;
+  Node: TTreeNode);
 begin
-  if Item.Data.isNotNil then
-    DisposeStr(PString(Item.Data));
+  if treeFolders.Selected.isNil then
+     exit;
+  fLastFold := treeFolders.Path.extractFileDir; // trailing path sep
+end;
+
+procedure TCEMiniExplorerWidget.treeFoldersDblClick(Sender: TObject);
+begin
+  if treeFolders.Selected.isNil then
+     exit;
+  treeFolders.Root := treeFolders.GetPathFromNode(treeFolders.Selected)
+    .extractFileDir; // trailing path sep
+end;
+
+procedure TCEMiniExplorerWidget.treeFoldersGetImageIndex(Sender: TObject;
+  Node: TTreeNode);
+begin
+  Node.ImageIndex:=1;
+  Node.SelectedIndex:=1;
+end;
+
+procedure TCEMiniExplorerWidget.treeFoldersGetSelectedIndex(Sender: TObject;
+  Node: TTreeNode);
+begin
+  Node.ImageIndex:=1;
 end;
 
 procedure TCEMiniExplorerWidget.treeSetRoots;
 var
-  drv: string;
-  itm: TTreeNode;
-  lst: TStringList;
+  m: TMenuItem;
+  d: TStringList;
+  i: integer;
 begin
-  Tree.Items.Clear;
-  lst := TStringList.Create;
+  d := TStringList.Create;
   try
-    listDrives(lst);
-    for drv in lst do
+    listDrives(d);
+    for i := 0 to d.Count-1 do
     begin
-      itm := Tree.Items.Add(nil, drv);
-      itm.Data := NewStr(drv[1..drv.length-1]);
-      treeScanSubFolders(itm);
+      m := TMenuItem.Create(self);
+      m.Caption := d[i];
+      m.OnClick := @mnuDriveItemClick;
+      mnuDrives.Items.Add(m);
+      if i = 0 then
+        treeFolders.Root:= m.Caption;
     end;
+    m := Tmenuitem.Create(self);
+    m.Caption:= 'Select a custom location...';
+    m.OnClick:=@mnuDriveSelect;
+    mnuDrives.Items.Add(m);
   finally
-    lst.Free;
+    d.Free;
   end;
 end;
 
-procedure TCEMiniExplorerWidget.lstFilesFromTree;
+procedure TCEMiniExplorerWidget.mnuDriveItemClick(sender: TObject);
+begin
+  treeFolders.Root := TMenuItem(sender).Caption;
+end;
+
+procedure TCEMiniExplorerWidget.mnuDriveSelect(sender: TObject);
 var
-  lst: TStringList;
-  pth: string;
+  d: string;
 begin
-  if Tree.Selected.isNil then exit;
-  //
-  lst := TStringList.Create;
-  try
-    pth := PString(Tree.Selected.Data)^;
-    fLastFold := pth;
-    listFiles(lst, pth);
-    lst.Sort;
-    fillLstFiles(lst);
-  finally
-    lst.Free;
-  end;
-end;
-
-procedure TCEMiniExplorerWidget.treeScanSubFolders(aRoot: TTreeNode);
-var
-  lst: TStringList;
-  fold: string;
-  itm: TTreeNode;
-begin
-  aRoot.DeleteChildren; // delete the fake item...
-  lst := TStringList.Create;
-  try
-    listFolders(lst, PString(aRoot.Data)^ + directorySeparator);
-    lst.Sort;
-    for fold in lst do
-    begin
-      itm := Tree.Items.AddChild(aRoot, fold.extractFileName);
-      itm.Data := NewStr(fold);
-      itm.ImageIndex := 1;
-      itm.SelectedIndex := 1;
-      //
-      if hasFolder(fold) then
-        Tree.Items.AddChild(itm, ''); //...created here to show the expander glyph
-    end;
-  finally
-    lst.Free;
-  end;
-end;
-
-procedure TCEMiniExplorerWidget.treeExpanding(Sender: TObject; Node: TTreeNode; var allow: boolean);
-begin
-  if Node.isNotNil then
-    treeScanSubFolders(Node);
-  allow := true;
-end;
-
-procedure TCEMiniExplorerWidget.treeChanged(Sender: TObject; Node: TTreeNode);
-begin
-  if Node.isNil then exit;
-  Node.DeleteChildren;
-  treeScanSubFolders(Node);
-  lstFilesFromTree;
-end;
-
-procedure TCEMiniExplorerWidget.treeSelectionChanged(sender: TObject);
-begin
-  lstFilesFromTree;
-end;
-
-procedure TCEMiniExplorerWidget.treeClick(sender: TObject);
-begin
-  if Tree.Selected.isNil then exit;
-  if Tree.Selected.Expanded then exit;
-  treeScanSubFolders(Tree.Selected);
-end;
-
-procedure TCEMiniExplorerWidget.expandPath(aPath: string);
-var
-  i: NativeInt;
-  node : TTreeNode;
-function dig(const aRoot: TTreenode): boolean;
-var
-  i: NativeInt;
-  str: string;
-begin
-  result := false;
-  {$IFNDEF WINDOWS}
-  if (aPath.length >= 2) and (aPath[2] <> '/') then
-    aPath := '/' + aPath;
-  {$ENDIF}
-  for i := 0 to aRoot.Count-1 do
-  begin
-    if aRoot.Items[i].Data.isNil then
-      continue;
-    str := PString(aRoot.Items[i].Data)^;
-    if SameText(LeftStr(aPath, str.length), str) then
-    begin
-      result := true;
-      Tree.Selected := aRoot.Items[i];
-      Tree.Selected.Expand(false);
-      //
-      if str = aPath then
-        break
-      else if dig(Tree.Selected) then
-      begin
-        Tree.Selected.MakeVisible;
-        break;
-      end;
-    end;
-  end;
-end;
-begin
-  for i := 0 to Tree.Items.Count-1 do
-  begin
-    node := Tree.Items[i];
-    if node.Level = 0 then
-    begin
-      node.Selected := true;
-      node.Expand(false);
-    end;
-    if dig(node) then break;
-  end;
-  fLastListOrTree := Tree;
-  showWidget;
+  if SelectDirectory('Select the new tree root', '', d) then
+    treeFolders.Root:=d;
 end;
 {$ENDREGION}
 
@@ -762,15 +738,18 @@ end;
 
 procedure TCEMiniExplorerWidget.browse(const location: string);
 begin
-  expandPath(location);
+  if location.EndsWith('\') or location.EndsWith('/') then
+    treeFolders.Root := location[1..location.length]
+  else if location.fileExists then
+    treeFolders.Root := location.extractFileDir
+  else if location.dirExists then
+    treeFolders.Root := location;
+  fLastFold:=treeFolders.Root;
 end;
 
 function TCEMiniExplorerWidget.currentLocation: string;
 begin
-  if Tree.Selected.isNil then
-    result := ''
-  else
-    result := PString(tree.Selected.Data)^;
+  result := treeFolders.path.extractFilePath;
 end;
 {$ENDREGION}
 
