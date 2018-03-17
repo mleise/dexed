@@ -5,7 +5,7 @@ unit ce_dcd;
 interface
 
 uses
-  Classes, SysUtils, process, forms, strutils,
+  Classes, SysUtils, process, forms, strutils, LazFileUtils,
   {$IFDEF WINDOWS}
   windows,
   {$ENDIF}
@@ -589,7 +589,7 @@ begin
       if i = -1 then
         exit;
       loc := str[i+1..str.length];
-      fname := str[1..i-1];
+      fname := TrimFilename(str[1..i-1]);
       loc := ReplaceStr(loc, LineEnding, '');
       position := strToIntDef(loc, -1);
     end;

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, lcltype, Graphics, SynEditKeyCmds,
-  ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder, dialogs,
+  ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder, dialogs, LazFileUtils,
   SynPluginSyncroEdit, SynEdit, SynHighlighterMulti, ce_dialogs,
   ce_widget, ce_interfaces, ce_synmemo, ce_dlang, ce_common, ce_dcd, ce_observer,
   ce_sharedres, ce_controls, ce_writableComponent, ce_dsgncontrols;
@@ -561,7 +561,7 @@ begin
   for i := 0 to PageControl.PageCount-1 do
   begin
     result := getDocument(i);
-    if SameFileName(result.fileName, fname) then
+    if SameFileName(result.fileName, TrimFilename(fname)) then
       exit;
   end;
   result := nil;
@@ -579,7 +579,7 @@ begin
     exit;
   end;
   doc := TCESynMemo.Create(nil);
-  fDoc.loadFromFile(fname);
+  fDoc.loadFromFile(TrimFilename(fname));
   if assigned(fProj) and (fProj.filename = fDoc.fileName) then
   begin
     if fProj.getFormat = pfCE then
