@@ -2500,8 +2500,8 @@ procedure TCEMainForm.actProjOpenContFoldExecute(Sender: TObject);
 begin
   if not assigned(fProject) or not fProject.filename.fileExists then
     exit;
-  DockMaster.GetAnchorSite(fExplWidg).Show;
   getExplorer.browse(fProject.filename.extractFilePath);
+  fExplWidg.showWidget;
 end;
 
 procedure TCEMainForm.actFileNewExecute(Sender: TObject);
@@ -3305,8 +3305,8 @@ procedure TCEMainForm.actFileOpenContFoldExecute(Sender: TObject);
 begin
   if fDoc.isNil or not fDoc.fileName.fileExists then
     exit;
-  DockMaster.GetAnchorSite(fExplWidg).Show;
   getExplorer.browse(fDoc.fileName.extractFilePath);
+  fExplWidg.showWidget;
 end;
 
 procedure TCEMainForm.actProjCompileExecute(Sender: TObject);

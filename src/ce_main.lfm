@@ -2380,7 +2380,7 @@ object CEMainForm: TCEMainForm
   object ApplicationProperties1: TApplicationProperties
     OnActivate = ApplicationProperties1Activate
     OnException = ApplicationProperties1Exception
-    left = 72
+    left = 64
     top = 1
   end
 end
