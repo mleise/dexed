@@ -2935,6 +2935,7 @@ begin
             dmdproc.Parameters.Add('-main');
       end;
     end;
+    dmdproc.Parameters.Add('-version=single_module');
     if unittest then
     begin
       if not fRunnablesOptions.detectMain then
@@ -2944,8 +2945,15 @@ begin
         dmdproc.Parameters.Add('-cov');
       // NOTE: see #258, allows to test easily a module when hacking phobos.
       dmdproc.Parameters.Add('-version=StdUnittest');
+      dmdproc.Parameters.Add('-version=test_single_module');
     end
-    else dmdproc.Parameters.Add('-version=runnable_module');
+    else
+    begin
+      // back compat, see https://github.com/BBasile/Coedit/issues/276
+      dmdproc.Parameters.Add('-version=runnable_module');
+
+      dmdproc.Parameters.Add('-version=run_single_module');
+    end;
 
     if fRunnablesOptions.detectLibraries then
       LibMan.getLibsForSource(fDoc.Lines, dmdproc.Parameters, dmdproc.Parameters)
