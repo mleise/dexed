@@ -1293,6 +1293,7 @@ begin
     begin
       SelectLine(false);
       ExecuteCommand(ecCopy, #0, nil);
+      SelEnd:=SelStart;
     end;
     ecPaste: patchClipboardIndentation;
     ecCompletionMenu:
