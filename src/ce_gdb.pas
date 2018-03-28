@@ -251,7 +251,7 @@ type
   TCEDebugShortcuts = class(TPersistent)
   private
     fStart, fStop, fPause, fContinue, fStep, fStepOver, fStack, fRegs,
-      fVariables: TShortCut;
+      fVariables, fRepeatCustomEval: TShortCut;
   published
     property start: TShortCut read fStart write fStart;
     property stop: TShortCut read fStop write fStop;
@@ -262,6 +262,7 @@ type
     property updateStack: TShortCut read fStack write fStack;
     property updateRegisters: TShortCut read fRegs write fRegs;
     property updateVariables: TShortCut read fVariables write fVariables;
+    property repeatCustomEval: TShortCut read fRepeatCustomEval write fRepeatCustomEval;
   public
     procedure assign(source: TPersistent); override;
   end;
@@ -275,6 +276,7 @@ type
     fAutoGetRegisters: boolean;
     fAutoGetVariables: boolean;
     fCommandsHistory: TStringList;
+    fCustomEvalHistory: TStringList;
     fIgnoredSignals: TStringList;
     fShowGdbOutput: boolean;
     fShowOutput: boolean;
@@ -285,6 +287,7 @@ type
     fStopAllThreadsOnBreak: boolean;
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
+    procedure setCustomEvalHistory(value: TStringList);
     procedure setShortcuts(value: TCEDebugShortcuts);
     procedure cleanInvalidHistoryEntries;
   published
@@ -296,6 +299,7 @@ type
     property autoGetVariables: boolean read fAutoGetVariables write fAutoGetVariables;
     property autoGetThreads: boolean read fAutoGetThreads write fAutoGetThreads;
     property commandsHistory: TStringList read fCommandsHistory write setCommandsHistory;
+    property customEvalHistory: TStringList read fCustomEvalHistory write setCustomEvalHistory;
     property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
     property keepRedirectedStreams: boolean read fKeepRedirectedStreams write fKeepRedirectedStreams default false;
     property shortcuts: TCEDebugShortcuts read fShortcuts write setShortcuts;
@@ -487,6 +491,7 @@ type
     fLastFunction: string;
     fLastOffset: string;
     fLastLine: string;
+    fLastEvalStuff: string;
     fCommandProcessed: boolean;
     fDebugeeOptions: TCEDebugeeOptions;
     procedure continueDebugging;
@@ -512,6 +517,7 @@ type
     procedure infoVariables;
     procedure infoThreads;
     procedure infoAsm(const fname: string);
+    procedure evalStuff(const stuff: string);
     procedure sendCustomCommand;
     procedure setGpr(reg: TCpuRegister; val: TCpuGprValue);
     procedure setFpr(reg: TFpuRegister; val: extended);
@@ -623,6 +629,7 @@ begin
     fStack    := src.fStack;
     fRegs     := src.fRegs;
     fVariables:= src.fVariables;
+    fRepeatCustomEval:=src.fRepeatCustomEval;
   end
   else inherited;
 end;
@@ -645,12 +652,16 @@ begin
   fCommandsHistory.Duplicates:= dupIgnore;
   fCommandsHistory.Sorted:=true;
   fShortcuts := TCEDebugShortcuts.Create;
+  fCustomEvalHistory := TstringList.Create;
+  fCustomEvalHistory.Duplicates:= dupIgnore;
+  fCustomEvalHistory.Sorted:=true;
 end;
 
 destructor TCEDebugOptionsBase.destroy;
 begin
   fIgnoredSignals.Free;
   fCommandsHistory.Free;
+  fCustomEvalHistory.Free;
   fShortcuts.Free;
   inherited;
 end;
@@ -682,6 +693,11 @@ end;
 procedure TCEDebugOptionsBase.setCommandsHistory(value: TStringList);
 begin
   fCommandsHistory.Assign(value);
+end;
+
+procedure TCEDebugOptionsBase.setCustomEvalHistory(value: TStringList);
+begin
+  fCustomEvalHistory.Assign(value);
 end;
 
 procedure TCEDebugOptionsBase.setShortcuts(value: TCEDebugShortcuts);
@@ -1357,6 +1373,16 @@ begin
   itm.Bitmap.Assign(bmp);
   itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
 
+  itm := TMenuItem.Create(fMenu);
+  itm.ShortCut:=fOptions.shortcuts.repeatCustomEval;
+  itm.Caption:='Repeat last evaluation command';
+  itm.OnClick:= @executeFromShortcut;
+  itm.Tag:=9;
+  fMenu.Add(itm);
+  btnEval.toBitmap(bmp);
+  itm.Bitmap.Assign(bmp);
+  itm.ImageIndex:= fMenu.GetImageList.Add(bmp, nil);
+
   bmp.Free;
 end;
 
@@ -1387,6 +1413,7 @@ begin
     6: begin showWidget; btnReg.Click; end;
     7: begin showWidget; btnStack.Click; end;
     8: begin showWidget; btnVariables.Click; end;
+    9: evalStuff(fLastEvalStuff);
   end;
 end;
 {$ENDREGION}
@@ -2533,6 +2560,12 @@ begin
   gdbCommand(cmd, @gdboutJsonize);
 end;
 
+procedure TCEGdbWidget.evalStuff(const stuff: string);
+begin
+  fLastEvalStuff := stuff;
+  gdbCommand('-data-evaluate-expression "' + stuff + '"');
+end;
+
 procedure TCEGdbWidget.continueDebugging;
 begin
   gdbCommand('-exec-continue --all', @gdboutJsonize);
@@ -2561,8 +2594,13 @@ begin
     exit;
   case fEvalKind of
     gekCustom:
-      if not InputQuery('Evaluate', 'Expression', e) then
-        e := '';
+    begin
+      if fOptions.customEvalHistory.Count = 0 then
+        fOptions.customEvalHistory.Add('<enter a custom expression to evaluate>');
+      e := InputComboEx('Evaluate', 'Expression', fOptions.customEvalHistory, true);
+      if not e.isBlank then
+        fOptions.customEvalHistory.Add(e);
+    end;
     gekSelectedVar:
       if lstVariables.ItemIndex <> -1 then
         e := lstVariables.Items[lstVariables.ItemIndex].Caption;
@@ -2571,7 +2609,7 @@ begin
         e := '*' + lstVariables.Items[lstVariables.ItemIndex].Caption;
   end;
   if not e.isBlank then
-    gdbCommand('-data-evaluate-expression "' + e + '"');
+    evalStuff(e);
 end;
 
 procedure TCEGdbWidget.btnVariablesClick(Sender: TObject);

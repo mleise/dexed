@@ -14,38 +14,38 @@ inherited CEGdbWidget: TCEGdbWidget
     ClientHeight = 662
     ClientWidth = 517
     inherited Content: TPanel
-      Height = 628
-      Top = 34
+      Height = 626
+      Top = 36
       Width = 517
-      ClientHeight = 628
+      ClientHeight = 626
       ClientWidth = 517
       object Panel1: TPanel[0]
         Left = 0
-        Height = 386
+        Height = 384
         Top = 205
         Width = 517
         Align = alClient
         AutoSize = True
         BevelOuter = bvNone
-        ClientHeight = 386
+        ClientHeight = 384
         ClientWidth = 517
         TabOrder = 0
         object GroupBox3: TGroupBox
           Left = 0
-          Height = 180
+          Height = 178
           Top = 206
           Width = 517
           Align = alClient
           Caption = 'CPU'
-          ClientHeight = 161
-          ClientWidth = 513
+          ClientHeight = 160
+          ClientWidth = 515
           TabOrder = 0
           object cpuViewer: TTIPropertyGrid
             Left = 0
-            Height = 161
+            Height = 160
             Hint = 'cpu registers'
             Top = 0
-            Width = 513
+            Width = 515
             Align = alClient
             CheckboxForBoolean = True
             DefaultValueFont.Color = clWindowText
@@ -82,8 +82,8 @@ inherited CEGdbWidget: TCEGdbWidget
             ClientWidth = 511
             object lstVariables: TListView
               Left = 2
-              Height = 132
-              Top = 31
+              Height = 136
+              Top = 27
               Width = 507
               Align = alClient
               AutoWidthLastColumn = True
@@ -109,7 +109,7 @@ inherited CEGdbWidget: TCEGdbWidget
             end
             object varListFlt: TListViewFilterEdit
               Left = 2
-              Height = 27
+              Height = 23
               Hint = 'locate variables'
               Top = 2
               Width = 507
@@ -159,7 +159,7 @@ inherited CEGdbWidget: TCEGdbWidget
       object Panel3: TPanel[1]
         Left = 4
         Height = 29
-        Top = 595
+        Top = 593
         Width = 509
         Align = alBottom
         AutoSize = True
@@ -330,7 +330,6 @@ inherited CEGdbWidget: TCEGdbWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Height = 28
       Width = 509
       object btnStack: TCEToolButton[0]
         Left = 238
