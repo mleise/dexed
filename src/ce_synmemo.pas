@@ -1284,6 +1284,16 @@ procedure TCESynMemo.DoOnProcessCommand(var Command: TSynEditorCommand;
 begin
   inherited;
   case Command of
+    ecCut: if not SelAvail then
+    begin
+      SelectLine(false);
+      ExecuteCommand(ecCut, #0, nil);
+    end;
+    ecCopy: if not SelAvail then
+    begin
+      SelectLine(false);
+      ExecuteCommand(ecCopy, #0, nil);
+    end;
     ecPaste: patchClipboardIndentation;
     ecCompletionMenu:
     begin
