@@ -7,7 +7,7 @@ import
 import
     dparse.ast, dparse.lexer, dparse.parser, dparse.rollback_allocator;
 import
-    iz.memory, iz.containers;
+    iz.memory, iz.containers, iz.sugar;
 version(unittest){} else import
     common;
 
@@ -183,11 +183,9 @@ private final class HalsteadMetric: ASTVisitor
         inFunctionCallChain.length++;
         inFunctionCallChain[$-1] = true;
 
-        if (expr.templateArguments)
-        {
-            if (expr.templateArguments.templateSingleArgument)
-                addOperandFromToken(expr.templateArguments.templateSingleArgument.token);
-        }
+        if (const TemplateSingleArgument tsi = safeAccess(expr)
+            .templateArguments.templateSingleArgument)
+                addOperandFromToken(tsi.token);
 
         expr.accept(this);
 

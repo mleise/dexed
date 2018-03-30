@@ -3,7 +3,7 @@ module ddoc_template;
 import
     std.stdio;
 import
-    iz.memory;
+    iz.memory, iz.sugar;
 import
     dparse.ast, dparse.lexer, dparse.parser, dparse.rollback_allocator;
 
@@ -55,15 +55,15 @@ public:
             decl.accept(this);
             writeln("/", c2, "\n ", c1, " <short description> \n ", c1, " \n ", c1, " <detailed description>", c1);
 
-            if ((decl.templateParameters && decl.templateParameters.templateParameterList && decl.templateParameters.templateParameterList.items.length) ||
+            const TemplateParameterList tpl = safeAccess(decl).templateParameters.templateParameterList;
+            if ((tpl && tpl.items.length) ||
                 (decl.parameters && decl.parameters.parameters.length))
             {
                 writeln(" ", c1, " \n ", c1, " Params:");
 
-                if (decl.templateParameters && decl.templateParameters.templateParameterList)
+                if (tpl)
                 {
-                    foreach(const TemplateParameter p;  decl.templateParameters
-                                                            .templateParameterList.items)
+                    foreach(const TemplateParameter p;  tpl.items)
                     {
                         if (p.templateAliasParameter)
                             writeln(" ", c1, "     ", p.templateAliasParameter.identifier.text, " = <description>");
@@ -87,11 +87,10 @@ public:
                 }
             }
 
-            if (decl.returnType)
+            if (const Type2 tp2 = safeAccess(decl).returnType.type2)
             {
-                if (decl.returnType.type2 && decl.returnType.type2
-                    && decl.returnType.type2.builtinType != tok!"void")
-                        writeln(" ", c1, " \n ", c1, " Returns: <return description>");
+                if (tp2.builtinType != tok!"void")
+                    writeln(" ", c1, " \n ", c1, " Returns: <return description>");
             }
 
             if (_throws)
@@ -144,13 +143,12 @@ public:
         {
             writeln("/", c2, "\n ", c1, " <short description> \n ", c1, " \n ", c1, " <detailed description>", c1);
 
-            if (decl.templateParameters && decl.templateParameters.templateParameterList &&
-                    decl.templateParameters.templateParameterList.items.length)
+            const TemplateParameterList tpl = safeAccess(decl).templateParameters.templateParameterList;
+            if (tpl && tpl.items.length)
             {
                 writeln(" ", c1, " \n ", c1, " Params:");
 
-                foreach(const TemplateParameter p;  decl.templateParameters
-                                                        .templateParameterList.items)
+                foreach(const TemplateParameter p;  tpl.items)
                 {
                     if (p.templateAliasParameter)
                         writeln(" ", c1, "     ", p.templateAliasParameter.identifier.text, " = <description>");

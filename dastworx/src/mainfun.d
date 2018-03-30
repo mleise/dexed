@@ -3,7 +3,7 @@ module mainfun;
 import
     std.stdio, std.algorithm;
 import
-    iz.memory;
+    iz.memory, iz.sugar;
 import
     dparse.lexer, dparse.ast, dparse.parser;
 import
@@ -36,10 +36,9 @@ private final class MainFunctionDetector: ASTVisitor
     override void visit(const ConditionalDeclaration decl)
     {
         bool acc = true;
-        if (decl.compileCondition)
+        if (const VersionCondition vc = safeAccess(decl).compileCondition.versionCondition)
         {
-            const ver = decl.compileCondition.versionCondition;
-            if (ver && ver.token.text in badVersions)
+            if (vc.token.text in badVersions())
                 acc = false;
         }
         if (acc)
