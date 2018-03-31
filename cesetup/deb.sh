@@ -1,6 +1,7 @@
 ver=`cat version.txt`
 ver=${ver:1:100}
 dte=$(LC_TIME='en_EN.UTF-8' date -u +"%a %b %d %Y")
+cp_trgt=$(pwd)/output
 
 arch=`uname -m`
 if [ $arch = "x86_64" ]; then
@@ -51,3 +52,5 @@ Description: IDE for the D programming language" > control
 
 cd $HOME
 dpkg-deb --build $name
+rm $HOME/$name -r -f
+mv $HOME/$name.deb $cp_trgt/$name.deb

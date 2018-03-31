@@ -4,6 +4,7 @@ ver=${ver:1:100}
 dte=$(LC_TIME='en_EN.UTF-8' date -u +"%a %b %d %Y")
 arch=`uname -m`
 specname=coedit-$arch.spec
+cp_trgt=$(pwd)/output
 
 semver_regex() {
   local VERSION="([0-9]+)[.]([0-9]+)[.]([0-9]+)"
@@ -31,7 +32,8 @@ if [ $lbl == '_' ]; then
     lbl='0'
 fi
 
-buildroot=$HOME/rpmbuild/BUILDROOT/coedit-$maj.$min.$pch-$lbl.$arch
+name_and_ver=coedit-$maj.$min.$pch-$lbl.$arch
+buildroot=$HOME/rpmbuild/BUILDROOT/$name_and_ver
 bindir=$buildroot/usr/bin
 pixdir=$buildroot/usr/share/pixmaps
 shcdir=$buildroot/usr/share/applications
@@ -80,3 +82,4 @@ Coedit is an IDE for the DMD D compiler.
 ">$specname
 
 rpmbuild -ba $specname
+mv $HOME/rpmbuild/RPMS/$arch/$name_and_ver.rpm $cp_trgt/$name_and_ver.rpm
