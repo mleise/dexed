@@ -694,6 +694,7 @@ procedure TCEMiniExplorerWidget.treeFoldersGetSelectedIndex(Sender: TObject;
   Node: TTreeNode);
 begin
   Node.ImageIndex:=1;
+  Node.SelectedIndex:=1;
 end;
 
 procedure TCEMiniExplorerWidget.treeSetRoots;
@@ -752,6 +753,9 @@ begin
   else if location.fileExists then
     treeFolders.Root := location.extractFileDir;
   fLastFold:=treeFolders.Root;
+  fLastListOrTree := treeFolders;
+  if treeFolders.Items.Count > 0 then
+    treeFolders.Items.Item[0].Selected:=true;
 end;
 
 function TCEMiniExplorerWidget.currentLocation: string;
