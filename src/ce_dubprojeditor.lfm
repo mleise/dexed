@@ -13,14 +13,14 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
     ClientHeight = 424
     ClientWidth = 407
     inherited Content: TPanel
-      Height = 390
-      Top = 34
+      Height = 388
+      Top = 36
       Width = 407
-      ClientHeight = 390
+      ClientHeight = 388
       ClientWidth = 407
       object propTree: TTreeView[0]
         Left = 4
-        Height = 353
+        Height = 351
         Top = 4
         Width = 399
         Align = alClient
@@ -37,7 +37,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
       object Panel1: TPanel[1]
         Left = 2
         Height = 27
-        Top = 361
+        Top = 359
         Width = 403
         Align = alBottom
         AutoSize = True
@@ -70,14 +70,13 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Height = 28
       Width = 399
-      object btnUpdate: TCEToolButton[0]
+      object btnReload: TCEToolButton[0]
         Left = 85
-        Hint = 'reload project'
+        Hint = 'reload the project, useful to fetch new dependencies or detect new source files'
         Top = 0
         AutoSize = True
-        Caption = 'btnUpdate'
+        Caption = 'btnReload'
         OnClick = btnRefreshClick
         resourceName = 'ARROW_UPDATE'
         scaledSeparator = False
@@ -104,7 +103,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
       end
       object fltEdit: TTreeFilterEdit[3]
         Left = 128
-        Height = 24
+        Height = 26
         Hint = 'filter properties'
         Top = 2
         Width = 269

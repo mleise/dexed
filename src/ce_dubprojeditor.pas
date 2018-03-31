@@ -42,7 +42,7 @@ type
     btnAddProp: TCEToolButton;
     btnCloneObject: TCEToolButton;
     btnDelProp: TCEToolButton;
-    btnUpdate: TCEToolButton;
+    btnReload: TCEToolButton;
     edProp: TEdit;
     fltEdit: TTreeFilterEdit;
     MenuItem1: TMenuItem;
@@ -476,10 +476,19 @@ begin
 end;
 
 procedure TCEDubProjectEditorWidget.btnRefreshClick(Sender: TObject);
+var
+  f: string;
 begin
-  if fProj.isNil or not fProj.filename.fileExists then
+  if assigned(fProj) then
+  begin
+    f := fProj.filename;
+    if not f.fileExists then
       exit;
-  fProj.loadFromFile(fProj.filename);
+    if fProj.modified and
+      (dlgYesNo('The project seems to be modified, save before reloading') = mrYes) then
+        fProj.saveToFile(f);
+    fProj.loadFromFile(f);
+  end;
 end;
 
 procedure TCEDubProjectEditorWidget.btnCloneObjectClick(Sender: TObject);

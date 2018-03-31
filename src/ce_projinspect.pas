@@ -24,6 +24,7 @@ type
   TCEProjectInspectWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver)
     btnAddFile: TCEToolButton;
     btnAddFold: TCEToolButton;
+    btnReload: TCEToolButton;
     btnRemFile: TCEToolButton;
     btnRemFold: TCEToolButton;
     btnTree: TCEToolButton;
@@ -34,6 +35,7 @@ type
     procedure btnRemFileClick(Sender: TObject);
     procedure btnRemFoldClick(Sender: TObject);
     procedure btnTreeClick(Sender: TObject);
+    procedure btnReloadClick(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const fnames: array of String);
     procedure TreeClick(Sender: TObject);
     procedure TreeDeletion(Sender: TObject; Node: TTreeNode);
@@ -87,7 +89,7 @@ implementation
 {$R *.lfm}
 
 const optFname = 'projinspect.txt';
-const filterAlign: array[boolean] of integer = (34, 142);
+const filterAlign: array[boolean] of integer = (66, 174);
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEProjectInspectWidget.create(aOwner: TComponent);
@@ -523,6 +525,22 @@ end;
 procedure TCEProjectInspectWidget.btnTreeClick(Sender: TObject);
 begin
   setFileListAsTree(btnTree.Down);
+end;
+
+procedure TCEProjectInspectWidget.btnReloadClick(Sender: TObject);
+var
+  f: string;
+begin
+  if assigned(fProject) then
+  begin
+    f := fProject.filename;
+    if not f.fileExists then
+      exit;
+    if fProject.modified and
+      (dlgYesNo('The project seems to be modified, save before reloading') = mrYes) then
+        fProject.saveToFile(f);
+    fProject.loadFromFile(f);
+  end;
 end;
 
 procedure TCEProjectInspectWidget.btnRemFileClick(Sender: TObject);

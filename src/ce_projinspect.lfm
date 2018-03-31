@@ -53,9 +53,9 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
     inherited toolbar: TCEToolBar
       Width = 368
       object btnRemFold: TCEToolButton[0]
-        Left = 113
+        Left = 1
         Hint = 'remove the selected source parent folder from the project'
-        Top = 0
+        Top = 28
         AutoSize = True
         Caption = 'btnRemFold'
         OnClick = btnRemFoldClick
@@ -63,7 +63,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         scaledSeparator = False
       end
       object btnAddFold: TCEToolButton[1]
-        Left = 85
+        Left = 113
         Hint = 'add a folder of sources to the project'
         Top = 0
         AutoSize = True
@@ -73,7 +73,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         scaledSeparator = False
       end
       object btnRemFile: TCEToolButton[2]
-        Left = 57
+        Left = 85
         Hint = 'remove selected source from the project'
         Top = 0
         AutoSize = True
@@ -83,7 +83,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         scaledSeparator = False
       end
       object btnAddFile: TCEToolButton[3]
-        Left = 29
+        Left = 57
         Hint = 'add a source to the project'
         Top = 0
         AutoSize = True
@@ -110,7 +110,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         ExpandAllInitially = True
       end
       object btnTree: TCEToolButton[5]
-        Left = 1
+        Left = 29
         Hint = 'display the file list as a tree'
         Top = 0
         AutoSize = True
@@ -118,6 +118,16 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         OnClick = btnTreeClick
         Style = tbsCheck
         resourceName = 'FOLDERS_EXPLORER'
+        scaledSeparator = False
+      end
+      object btnReload: TCEToolButton[6]
+        Left = 1
+        Hint = 'reload the project, useful to fetch new dependencies or detect new source files'
+        Top = 0
+        AutoSize = True
+        Caption = 'btnReload'
+        OnClick = btnReloadClick
+        resourceName = 'ARROW_UPDATE'
         scaledSeparator = False
       end
     end
