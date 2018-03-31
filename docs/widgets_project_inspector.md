@@ -18,7 +18,12 @@ The project inspector is used to
 
 ![](img/project_inspector.png)
 
-The toolbar buttons are only activated for CE projects.
+The following toolbar buttons are always available:
+
+- <img src="{%include icurl%}arrow/arrow_update.png" class="tlbric"/>: Updates the list of sources files and auto fetch DUB dependencies when applicable.
+- <img src="{%include icurl%}folder/folders_explorer.png" class="tlbric"/>: Sets if the sources are displayed in a tree rather than in a single node.
+
+The following toolbar buttons are only visible for CE projects:
 
 - <img src="{%include icurl%}file/document_add.png" class="tlbric"/>: Adds a D source to the project from a dialog. The new source is not directly opened in the editor. To add a file that is already edited, rather use **"Add file to project"** from the **File** menu.
 - <img src="{%include icurl%}file/document_delete.png" class="tlbric"/>: Removes from the project the source that's selected in the tree.

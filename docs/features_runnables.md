@@ -24,7 +24,7 @@ A runnable is useful to quickly test an idea, learn how to use new libraries, or
 By default runnables don't need any setting however the shebang line can be used when specific compiler options are required.
 Two typical scenarios:
 
-- the runnable will be debugged so DWARF information must be generated with `-g`.
+- the runnable will be debugged so DWARF informations must be generated with `-g`.
 - the runnable must be linked with a C static library so the linker flag `-L-lthelib` must be specified.
 
 Coedit doesn't handle the program specified after the She-Bang, which means that all the following script lines are valid:
@@ -55,11 +55,11 @@ To be runnable, a module must verify:
 The _Compile file and run outside_ action can be used to execute in an external console.
 It must be used if the runnable outputs thousands of lines, to display properly UTF8 characters or if it has a GUI.
 
-The version identifier **runnable_module** is automatically defined when a runnable is compiled.
+The version identifier **single_module** and **run_single_module** are automatically defined when a runnable is compiled.
 It can be used to adjust the source according to the execution context, for example:
 
 ```d
-version(runnable_module)
+version(single_module)
 {
     stdout.writeln("to output stream");
 }
@@ -68,6 +68,8 @@ else
     myFile.writeln("to a file");
 }
 ```
+
+When the action _Run file unittests_ is used, **single_module** and **test_single_module** are defined.
 
 The executable produced is deleted after each run unless the file has been saved explicitly out of the initial temporary folder.
 Note that the action _Run file unittest_ is based on the same internal function excepted that the `-main` and `-unittest` switches are automatically added to the switch list (menu **File**, action **Set runnable switches**).

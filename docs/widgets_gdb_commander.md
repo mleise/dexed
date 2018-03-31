@@ -93,6 +93,7 @@ The text following the symbol is written to the input stream, with an implicit n
 - **autoGetThreads**: Sets if the thread list is automatically updated when the execution breaks.
 - **autoGetVariables**: Sets if the list of the local variables is automatically updated when the execution breaks.
 - **commandHistory**: Container that stores the custom GDB commands.
+- **customEvalHistory**: Container that stores the custom expression that have been evaluated.
 - **ignoredSignals**: Sets the signals that won't break the execution.
 - **keepRedirectedStream**: Sets if the files that contain the inferior I/O history are kept on the disk. These files stands in the target directory with the extensions _.inferiorin_ and _.inferiorout_.
 - **shortcuts**: Allows to define a shortcut for each button in the toolbar.
