@@ -46,7 +46,6 @@ type
     procedure assignTo(target: TPersistent); override;
   end;
 
-  { TCESearchWidget }
   TCESearchWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver)
     btnAllScope: TBitBtn;
     btnFind: TBitBtn;
@@ -91,26 +90,27 @@ type
     procedure actReplaceAllExecute(sender: TObject);
     procedure replaceEvent(Sender: TObject; const ASearch, AReplace:
       string; Line, Column: integer; var ReplaceAction: TSynReplaceAction);
-    //
+
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
     procedure projClosing(project: ICECommonProject);
     procedure projFocused(project: ICECommonProject);
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
-    //
+
     procedure docNew(document: TCESynMemo);
     procedure docClosing(document: TCESynMemo);
     procedure docFocused(document: TCESynMemo);
     procedure docChanged(document: TCESynMemo);
-    //
-    procedure findAll(const filename: string; lines: TStrings);
+
+    function findAll(const filename: string; lines: TStrings;
+        showNoResult: boolean = true): integer;
   protected
     procedure updateImperative; override;
   public
     constructor Create(aOwner: TComponent); override;
     destructor Destroy; override;
-    //
+
     procedure actFindNextExecute(sender: TObject);
     procedure actReplaceNextExecute(sender: TObject);
     procedure actFindAllExecute(sender: TObject);
@@ -330,35 +330,44 @@ end;
 procedure TCESearchWidget.actFindAllExecute(sender: TObject);
 var
   i: integer;
-  lst: TSynEditStringList;
-  fnm: string;
+  c: TSynEditStringList;
+  f: string;
+  s: integer = 0;
+  m: ICEMessagesDisplay;
 begin
   if fDoc.isNil and not fAllInProj then
     exit;
   if (fProj = nil) and fAllInProj then
     exit;
-  //
+
   fSearchMru.Insert(0,fToFind);
   cbToFind.Items.Assign(fSearchMru);
-  //
+
   if fAllInProj then
   begin
-    lst := TSynEditStringList.Create;
+    c := TSynEditStringList.Create;
     try
       for i := 0 to fProj.sourcesCount-1 do
       begin
-        fnm := fProj.sourceAbsolute(i);
-        lst.LoadFromFile(fnm);
-        findAll(fnm, lst);
+        f := fProj.sourceAbsolute(i);
+        c.LoadFromFile(f);
+        s += findAll(f, c, false);
+      end;
+      if s = 0 then
+      begin
+        m := getMessageDisplay;
+        m.message(format('0 result for the pattern <%s>', [fToFind]),
+          nil, amcMisc, amkInf);
       end;
     finally
-      lst.Free;
+      c.Free;
     end;
   end
-  else findAll(fDoc.fileName, fDoc.Lines);
+  else findAll(fDoc.fileName, fDoc.Lines, true);
 end;
 
-procedure TCESearchWidget.findAll(const filename: string; lines: TStrings);
+function TCESearchWidget.findAll(const filename: string; lines: TStrings;
+  showNoResult: boolean = true): integer;
 var
   search: TSynEditSearch;
   options: TSynSearchOptions;
@@ -370,6 +379,7 @@ var
   i: integer;
   res: array of TPoint = nil;
 begin
+  result := 0;
   search := TSynEditSearch.Create;
   try
     options := getOptions;
@@ -386,10 +396,14 @@ begin
       res[high(res)].Y := startf.Y;
       start := stopf;
     end;
+    result := length(res);
     msgs := getMessageDisplay;
-    msg := format('%d result(s) for the pattern <%s> in %s',
-      [length(res), fToFind, filename]);
-    msgs.message(msg, nil, amcMisc, amkInf);
+    if (not showNoResult and (result > 0)) or showNoResult then
+    begin
+      msg := format('%d result(s) for the pattern <%s> in %s',
+        [length(res), fToFind, filename]);
+      msgs.message(msg, nil, amcMisc, amkInf);
+    end;
     fmt := fileName + '(%d,%d): "%s"';
     for i := 0 to high(res) do
     begin
