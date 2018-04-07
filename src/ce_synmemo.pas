@@ -9,7 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
-  md5,
+  md5, Spin,
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs, ce_dastworx,
@@ -316,6 +316,8 @@ type
     procedure save;
     procedure saveTempFile;
     //
+    function indentationMode: TIndentationMode;
+    procedure forceIndentation(m: TIndentationMode; w: integer);
     procedure addBreakPoint(line: integer);
     procedure removeBreakPoint(line: integer);
     procedure curlyBraceCloseAndIndent;
@@ -396,6 +398,14 @@ type
     constructor construct(editor: TCESynMemo);
   end;
 
+  TMixedIndetationDialog = class(TForm)
+  private
+    class var fSpacesPerTab: integer;
+    procedure spinSpacesPerTabChange(sender: TObject);
+  public
+    constructor construct();
+  end;
+
   procedure SetDefaultCoeditKeystrokes(ed: TSynEdit);
 
   function CustomStringToCommand(const Ident: string; var Int: Longint): Boolean;
@@ -470,13 +480,13 @@ begin
   Font.Size:= FontSize;
   result := inherited CalcHintRect(MaxWidth, AHint, AData);
 end;
-
 {$REGION TSortDialog -----------------------------------------------------------}
 constructor TSortDialog.construct(editor: TCESynMemo);
 var
   pnl: TPanel;
 begin
   inherited Create(nil);
+  BorderStyle:= bsToolWindow;
   fEditor := editor;
 
   width := 150;
@@ -557,6 +567,64 @@ end;
 procedure TSortDialog.chkDescClick(sender: TObject);
 begin
   fDescending := TCheckBox(sender).checked;
+end;
+{$ENDREGION}
+
+{$REGION TMixedIndetationDialog}
+constructor TMixedIndetationDialog.construct();
+begin
+  inherited create(nil);
+  BorderStyle:= bsToolWindow;
+  caption := 'Indentation converter';
+  Position:= TPosition.poMainFormCenter;
+  fSpacesPerTab := 4;
+  with TButton.Create(self) do
+  begin
+    Align:= alBottom;
+    parent := self;
+    caption := 'Do nothing';
+    AutoSize:= true;
+    ModalResult:= 1;
+    BorderSpacing.Around:=4;
+  end;
+  with TSpinEdit.Create(self) do
+  begin
+    value := fSpacesPerTab;
+    Align:= alTop;
+    parent := self;
+    Caption := 'Spaces per TAB';
+    MinValue:= 1;
+    MaxValue:= 8;
+    BorderSpacing.Around:=4;
+    OnChange:= @spinSpacesPerTabChange;
+    hint := 'defines how many spaces per TAB will be used';
+    ShowHint:=true;
+  end;
+  with TButton.Create(self) do
+  begin
+    Align:= alTop;
+    parent := self;
+    caption := 'Always use tabs';
+    AutoSize:= true;
+    ModalResult:= 10;
+    BorderSpacing.Around:=4;
+  end;
+  with TButton.Create(self) do
+  begin
+    Align:= alTop;
+    parent := self;
+    caption := 'Always use spaces';
+    AutoSize:= true;
+    ModalResult:= 11;
+    BorderSpacing.Around:=4;
+  end;
+  width := ScaleX(280, 96);
+  height := ScaleY(150, 96);
+end;
+
+procedure TMixedIndetationDialog.spinSpacesPerTabChange(sender: TObject);
+begin
+  self.fSpacesPerTab:= TSpinEdit(sender).Value;
 end;
 {$ENDREGION}
 
@@ -1371,6 +1439,93 @@ begin
   begin
     fOverrideColMode := false;
     Options := Options - [eoScrollPastEol];
+  end;
+end;
+
+function TCESynMemo.indentationMode: TIndentationMode;
+  function checkLine(index: integer): TIndentationMode;
+  var
+    u: string;
+  begin
+    result := imNone;
+    u := Lines[index];
+    if (u.length > 0) and (u[1] = #9) then
+      result := imTabs
+    else if (u.length > 1) and (u[1..2] = '  ') then
+      result := imSpaces;
+  end;
+var
+  i: integer;
+  t: integer = 0;
+  s: integer = 0;
+begin
+  for i:= 0 to lines.count-1 do
+  begin
+    result := checkLine(i);
+    t += byte(result = imTabs);
+    s += byte(result = imSpaces);
+  end;
+  if (t <> 0) and (s <> 0) then
+    result := imMixed
+  else if t = 0 then
+    result := imSpaces
+  else if s = 0 then
+    result := imTabs
+  else
+    result := imNone;
+end;
+
+procedure TCESynMemo.forceIndentation(m: TIndentationMode; w: integer);
+var
+  s: string;
+  i: integer;
+  p: integer;
+  c: integer;
+  b: string;
+begin
+  for i:= 0 to lines.Count-1 do
+  begin
+    c := 0;
+    p := 1;
+    s := lines.Strings[i];
+    case m of
+      imTabs:
+      begin
+        while p <= s.length do
+        begin
+          if s[p] = ' ' then
+            c+=1
+          else break;
+          p += 1;
+        end;
+        if c >= w then
+        begin
+          setLength(b, c div w);
+          FillChar(b[1], b.length, #9);
+          s := b + s[c+1 .. s.length];
+          lines[i] := s;
+          fModified:=true;
+        end;
+      end;
+      imSpaces:
+      begin
+        while p <= s.length do
+        begin
+          if s[p] = #9 then
+            c+=1
+          else break;
+          p += 1;
+        end;
+        if c > 0 then
+        begin
+          setLength(b, c * w);
+          FillChar(b[1], b.length, ' ');
+          s := b + s[c+1 .. s.length];
+          lines[i] := s;
+          fModified:=true;
+        end;
+      end;
+    end;
   end;
 end;
 
@@ -2853,12 +3008,34 @@ begin
     loadCache;
     fCacheLoaded := true;
   end;
-  if detectIndentMode then
-  begin
-    case indentationMode(lines) of
-      imTabs: Options:= Options - [eoTabsToSpaces];
-      imSpaces: Options:= Options + [eoTabsToSpaces];
-    end;
+  case indentationMode() of
+    imTabs:
+      if detectIndentMode then
+        Options:= Options - [eoTabsToSpaces];
+    imSpaces:
+      if detectIndentMode then
+        Options:= Options + [eoTabsToSpaces];
+    imMixed:
+      if (isDSource or alwaysAdvancedFeatures) and
+        (dlgYesNo('Mixed indentation style detected, ' +
+        'do you wish to convert to a single mode ?') = mrYes) then
+      with TMixedIndetationDialog.construct() do
+      try
+      case ShowModal of
+        10:
+        begin
+          forceIndentation(imTabs, TMixedIndetationDialog.fSpacesPerTab);
+          Options:= Options - [eoTabsToSpaces];
+        end;
+        11:
+        begin
+          forceIndentation(imSpaces, TMixedIndetationDialog.fSpacesPerTab);
+          Options:= Options + [eoTabsToSpaces];
+        end;
+      end;
+      finally
+        free;
+      end;
   end;
   subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
   fCanDscan := true;
