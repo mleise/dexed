@@ -1446,12 +1446,13 @@ function TCESynMemo.indentationMode: TIndentationMode;
   function checkLine(index: integer): TIndentationMode;
   var
     u: string;
+    b: array[0..15] of char = '                ';
   begin
     result := imNone;
     u := Lines[index];
     if (u.length > 0) and (u[1] = #9) then
       result := imTabs
-    else if (u.length > 1) and (u[1..2] = '  ') then
+    else if (u.length >= self.TabWidth) and u.StartsWith(b[0..TabWidth-1]) then
       result := imSpaces;
   end;
 var
@@ -1476,51 +1477,56 @@ begin
 end;
 
 procedure TCESynMemo.forceIndentation(m: TIndentationMode; w: integer);
+type
+  TIndentComposition = record
+    numS: integer;
+    numT: integer;
+  end;
 var
   s: string;
   i: integer;
   p: integer;
-  c: integer;
   b: string;
+  c: TIndentComposition;
+  u: char;
 begin
+  assert(w > 0);
   for i:= 0 to lines.Count-1 do
   begin
-    c := 0;
     p := 1;
+    c.numS := 0;
+    c.numT := 0;
     s := lines.Strings[i];
+    while p <= s.length do
+    begin
+      u := s[p];
+      if u = ' ' then
+        c.numS += 1
+      else if u = #9 then
+        c.numT += 1
+      else break;
+      p += 1;
+    end;
+    if p <> 1 then
     case m of
       imTabs:
       begin
-        while p <= s.length do
+        setLength(b, (c.numS div w) + c.numT);
+        if b <> '' then
         begin
-          if s[p] = ' ' then
-            c+=1
-          else break;
-          p += 1;
-        end;
-        if c >= w then
-        begin
-          setLength(b, c div w);
           FillChar(b[1], b.length, #9);
-          s := b + s[c+1 .. s.length];
+          s := b + s[p .. s.length];
           lines[i] := s;
           fModified:=true;
         end;
       end;
       imSpaces:
       begin
-        while p <= s.length do
+        setLength(b, c.numT * w + c.numS);
+        if b <> '' then
         begin
-          if s[p] = #9 then
-            c+=1
-          else break;
-          p += 1;
-        end;
-        if c > 0 then
-        begin
-          setLength(b, c * w);
           FillChar(b[1], b.length, ' ');
-          s := b + s[c+1 .. s.length];
+          s := b + s[p .. s.length];
           lines[i] := s;
           fModified:=true;
         end;
