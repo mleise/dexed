@@ -760,7 +760,7 @@ end;
 
 function TCEMiniExplorerWidget.currentLocation: string;
 begin
-  result := treeFolders.path.extractFilePath;
+  result := treeFolders.Root;
 end;
 {$ENDREGION}
 

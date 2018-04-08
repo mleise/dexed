@@ -13,7 +13,7 @@ type
   (**
    * Enumerates the symbol kinds, used to index an associative array.
    *)
-  TCESymbol = ( ENV_USER, ENV_HOME, ENV_TEMP, CAF, CAP,
+  TCESymbol = ( ENV_USER, ENV_HOME, ENV_TEMP, CAF, CAP, MEP,
                 CFF, CFP, CFR, CI, CL, CPF, CPP, CPO, CPOP, CPR, CPN, CPFS, CPCD,
                 CPV, CS);
 const
@@ -32,6 +32,7 @@ type
     fProjInterface: ICECommonProject;
     fDoc: TCESynMemo;
     fNeedUpdate: boolean;
+    fExp: ICEExplorer;
     fSymbols: array[TCESymbol] of string;
     procedure updateSymbols;
     //
@@ -177,15 +178,22 @@ var
 const
   na = '``';
 begin
-  if not fNeedUpdate then exit;
+  //if not fNeedUpdate then
+  //  exit;
   fNeedUpdate := false;
-  //
+
   hasNativeProj := fProj.isNotNil;
   hasProjItf := fProjInterface <> nil;
   hasDoc := fDoc.isNotNil;
-  //
+  if not assigned(fExp) then
+    fExp := getExplorer;
+
   for e := FirstVariableSymbol to high(TCESymbol) do
     fSymbols[e] := na;
+
+  if assigned(fExp) then
+    fSymbols[MEP] := fExp.currentLocation;
+
   // document
   if hasDoc then
   begin
@@ -282,6 +290,7 @@ begin
           //
           'CAF', 'CoeditApplicationFile': Result += fSymbols[CAF];
           'CAP', 'CoeditApplicationPath': Result += fSymbols[CAP];
+          'MEP', 'MiniExplorerPath': Result += fSymbols[MEP];
           //
           'CFF', 'CurrentFileFile'      : Result += fSymbols[CFF];
           'CFR', 'CurrentFileRunnable'  : Result += fSymbols[CFR];
