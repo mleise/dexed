@@ -572,6 +572,8 @@ end;
 
 {$REGION TMixedIndetationDialog}
 constructor TMixedIndetationDialog.construct();
+var
+  pn: TPanel;
 begin
   inherited create(nil);
   BorderStyle:= bsToolWindow;
@@ -587,18 +589,34 @@ begin
     ModalResult:= 1;
     BorderSpacing.Around:=4;
   end;
+  pn := TPanel.Create(self);
+  pn.Align:= alTop;
+  pn.parent := self;
+  pn.Caption:='';
+  pn.AutoSize:=true;
+  pn.BevelInner:= bvNone;
+  pn.BevelOuter:= bvNone;
+  pn.BorderSpacing.Around:=4;
+  pn.ParentColor:=true;
   with TSpinEdit.Create(self) do
   begin
     value := fSpacesPerTab;
-    Align:= alTop;
-    parent := self;
-    Caption := 'Spaces per TAB';
+    Align:= alLeft;
+    parent := pn;
     MinValue:= 1;
     MaxValue:= 8;
-    BorderSpacing.Around:=4;
     OnChange:= @spinSpacesPerTabChange;
     hint := 'defines how many spaces per TAB will be used';
     ShowHint:=true;
+  end;
+  with TLabel.Create(self) do
+  begin
+    parent := pn;
+    AutoSize:=true;
+    Caption:= 'Spaces per TAB';
+    Align:= alClient;
+    Layout:= TTextLayout.tlCenter;
+    BorderSpacing.Left:= 4;
   end;
   with TButton.Create(self) do
   begin
