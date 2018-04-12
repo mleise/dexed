@@ -1,0 +1,9 @@
+inherited CETermWidget: TCETermWidget
+  Caption = 'Terminal'
+  inherited Back: TPanel
+    inherited Content: TPanel
+      Height = 85
+      Top = 36
+    end
+  end
+end

@@ -403,7 +403,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="..\src;..\etc\fcl-json\src"/>
+            <OtherUnitFiles Value="..\src;..\etc\terminal"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -433,10 +433,6 @@
               <IgnoredMessages idx5024="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dDEBUG"/>
-            <OtherDefines Count="2">
-              <Define0 Value="RELEASE"/>
-              <Define1 Value="GTK_REMOVE_CLIPBOARD_NULL"/>
-            </OtherDefines>
           </Other>
         </CompilerOptions>
       </Item2>
@@ -449,7 +445,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="..\src;..\etc\fcl-json\src"/>
+            <OtherUnitFiles Value="..\src;..\etc\terminal"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -519,7 +515,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="59">
+    <Units Count="60">
       <Unit0>
         <Filename Value="coedit.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -826,6 +822,13 @@
         <Filename Value="..\src\ce_semver.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit58>
+      <Unit59>
+        <Filename Value="..\src\ce_term.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CETermWidget"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit59>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -836,7 +839,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\src"/>
+      <OtherUnitFiles Value="..\src;..\etc\terminal"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
