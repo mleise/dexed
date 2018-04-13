@@ -383,9 +383,10 @@ type
     fDubProjWidg: TCEDubProjectEditorWidget;
     fPrjGrpWidg: TCEProjectGroupWidget;
     {$IFDEF UNIX}
+    fTermWWidg: TCETermWidget;
     fGdbWidg: TCEGdbWidget;
     {$ENDIF}
-    fTermWWidg: TCETermWidget;
+
     fDfmtWidg: TCEDfmtWidget;
     fProfWidg: TCEProfileViewerWidget;
     fCompStart: TDateTime;
@@ -1463,8 +1464,8 @@ begin
   fDfmtWidg   := TCEDfmtWidget.create(self);
   fPrjGrpWidg := TCEProjectGroupWidget.create(self);
   fProfWidg   := TCEProfileViewerWidget.create(self);
-  fTermWWidg  := TCETermWidget.create(self);
   {$IFDEF UNIX}
+  fTermWWidg  := TCETermWidget.create(self);
   fGdbWidg    := TCEGdbWidget.create(self);
   {$ENDIF}
 
@@ -1487,8 +1488,8 @@ begin
   fWidgList.addWidget(@fDfmtWidg);
   fWidgList.addWidget(@fPrjGrpWidg);
   fWidgList.addWidget(@fProfWidg);
-  fWidgList.addWidget(@fTermWWidg);
   {$IFDEF UNIX}
+  fWidgList.addWidget(@fTermWWidg);
   fWidgList.addWidget(@fGdbWidg);
   {$ENDIF}
 
