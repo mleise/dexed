@@ -36,6 +36,7 @@ type
     fSelAttribs: TSynSelectedColor;
     fd2syn: TPersistent;
     fName: string;
+    fIsHardcoded: boolean;
     procedure setBracketMatchColor(value: TSynSelectedColor);
     procedure setCurrLineAttribs(value: TSynSelectedColor);
     procedure setFoldedColor(value: TSynSelectedColor);
@@ -54,6 +55,7 @@ type
     property identifierMatch: TSynSelectedColor read fIdentifierMarkup write setIdentifierMarkup stored true;
     property mouseLink: TSynSelectedColor read fMouseLinkAttribs write setMouseLinkColor stored true;
     property selection: TSynSelectedColor read fSelAttribs write setSelCol stored true;
+    property isHardCoded: boolean read fIsHardcoded stored false;
   public
     constructor Create(ACollection: TCollection); override;
     destructor destroy; override;
@@ -73,6 +75,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function addPreset: TCED2SynPreset;
+    function insertPreset(index: integer): TCED2SynPreset;
     function count: integer;
     property preset[index: integer]: TCED2SynPreset read getPreset ; default;
   end;
@@ -254,6 +257,11 @@ begin
   exit(TCED2SynPreset(fCollection.Add));
 end;
 
+function TCED2SynPresets.insertPreset(index: integer): TCED2SynPreset;
+begin
+  exit(TCED2SynPreset(fCollection.Insert(index)));
+end;
+
 function TCED2SynPresets.count: integer;
 begin
   exit(fCollection.Count);
@@ -323,258 +331,273 @@ constructor TCED2SynPresetsLoaderForm.Create(AOwner: TComponent);
 var
   fname: string;
   pnl: TPanel;
+  i: integer;
+const
+  h: array[0..5] of string = ('bright', 'dark', 'Mustard', 'Mars bright',
+    'Mars dark', 'Soft dust');
 begin
   inherited;
   fBackup:= TCED2SynPreset.Create(nil);
   fPresets:= TCED2SynPresets.Create(self);
   fname := getCoeditDocPath + optfname;
   if fname.fileExists then
-    fPresets.loadFromFile(fname)
-  else
+    fPresets.loadFromFile(fname);
+
+  //TODO-cmaintenance: remove this the second version following 3.6.7
+  for i:= 5 downto 0 do
   begin
-    with fPresets.addPreset do
-    begin
-      fName :='bright';
-      fBackground := clWhite;
-      getHl.whites.define(clNone);
-      getHl.numbers.define($000079F2);
-      getHl.symbols.define(clMaroon);
-      getHl.identifiers.define(clBlack);
-      getHl.comments.define(clGreen,[fsItalic]);
-      getHl.strings.define(clBlue);
-      getHl.keywords.define(clNavy,[fsBold]);
-      getHl.ddoc.define(clTeal);
-      getHl.inlineAsm.define(clGray,[fsBold]);
-      getHl.special.define(clNavy,[fsBold]);
-      getHl.errors.define(clBlack,[],clNone,clRed,slsWaved,sfeBottom,[]);
-      getHl.attributes.define(clNavy,[fsBold]);
-      //
-      folding.Background := clNone;
-      folding.Foreground := clDkGray;
-      folding.FrameColor := clDkGray;
-      //
-      mouseLink.Style := [fsUnderline, fsBold];
-      mouseLink.StyleMask := [];
-      mouseLink.Foreground := clNone;
-      mouseLink.Background := clNone;
-      //
-      bracketMatch.Foreground := clRed;
-      bracketMatch.Background := clNone;
-      //
-      identifierMatch.Foreground:= clNone;
-      identifierMatch.Background:= clSilver;
-      identifierMatch.BackAlpha:=70;
-      identifierMatch.BackPriority:= 10;
-      //
-      selection.Background:= 15984598;
-      selection.Foreground:= clNone;
-      //
-      currentLine.Background:= 15789545;
-      currentLine.Foreground:= clNone;
-      //
-      getHl.types.Background:=clNone;
-      getHl.types.Foreground:=clBlack;
-      getHl.types.Style:=[fsBold];
-      getHl.phobosStyleType := True;
-    end;
-    with fPresets.addPreset do
-    begin
-      fName :='dark';
-      getHl.whites.FrameEdges := sfeNone;
-      getHl.numbers.Foreground := 16761218;
-      getHl.numbers.FrameEdges := sfeNone;
-      getHl.numbers.Style := [];
-      getHl.symbols.Foreground := clYellow;
-      getHl.symbols.FrameEdges := sfeNone;
-      getHl.identifiers.Foreground := 14807024;
-      getHl.identifiers.FrameEdges := sfeNone;
-      getHl.comments.Foreground := 13092807;
-      getHl.comments.FrameEdges := sfeNone;
-      getHl.strings.Foreground := 5157104;
-      getHl.strings.FrameEdges := sfeNone;
-      getHl.keywords.Foreground := 9684887;
-      getHl.keywords.FrameEdges := sfeNone;
-      getHl.ddoc.Foreground := 14671730;
-      getHl.ddoc.FrameEdges := sfeNone;
-      getHl.inlineAsm.Foreground := 15500491;
-      getHl.inlineAsm.FrameEdges := sfeNone;
-      getHl.special.Foreground := 9684887;
-      getHl.special.FrameEdges := sfeNone;
-      getHl.errors.Foreground := 14807024;
-      getHl.attributes.Foreground := 9684887;
-      getHl.attributes.FrameEdges := sfeNone;
-      getHl.types.Background:=clNone;
-      getHl.types.Foreground:=14807024;
-      getHl.types.Style:=[fsBold];
-      background := 4210752;
-      bracketMatch.Background := clNone;
-      bracketMatch.Foreground := clFuchsia;
-      currentLine.Background := 6184542;
-      currentLine.Foreground := clNone;
-      folding.Background := 7303023;
-      folding.Foreground := clYellow;
-      identifierMatch.Background := 7697781;
-      identifierMatch.BackPriority:= 2;
-      identifierMatch.Foreground := clNone;
-      selection.Background := 10132122;
-      selection.Foreground := clNone;
-      selection.BackPriority:= 2;
-      getHl.phobosStyleType := True;
-    end;
-    with fPresets.addPreset do
-    begin
-      fName :='Mustard';
-      getHl.whites.FrameEdges := sfeNone;
-      getHl.numbers.FrameEdges := sfeNone;
-      getHl.symbols.Foreground := 3487083;
-      getHl.symbols.FrameEdges := sfeNone;
-      getHl.identifiers.Foreground := 1975089;
-      getHl.identifiers.FrameEdges := sfeNone;
-      getHl.comments.Foreground := 5206404;
-      getHl.comments.FrameEdges := sfeNone;
-      getHl.strings.Foreground := 6056852;
-      getHl.strings.FrameEdges := sfeNone;
-      getHl.keywords.Foreground := 3226202;
-      getHl.keywords.FrameEdges := sfeNone;
-      getHl.ddoc.Foreground := 6259092;
-      getHl.ddoc.FrameEdges := sfeNone;
-      getHl.inlineAsm.Foreground := 3379344;
-      getHl.inlineAsm.FrameEdges := sfeNone;
-      getHl.special.Foreground := 3226202;
-      getHl.special.FrameEdges := sfeNone;
-      getHl.errors.Foreground := 1975089;
-      getHl.attributes.Foreground := 3226202;
-      getHl.attributes.FrameEdges := sfeNone;
-      getHl.types.Background:=clNone;
-      getHl.types.Foreground:=1975089;
-      getHl.types.Style:=[fsBold];
-      background := 9818842;
-      currentLine.Background := 9030871;
-      currentLine.Foreground := clNone;
-      folding.Background := clNone;
-      folding.Foreground := clYellow;
-      folding.FrameColor := clYellow;
-      identifierMatch.Background := 10278890;
-      identifierMatch.BackPriority:= 2;
-      identifierMatch.Foreground := clNone;
-      selection.Background := 8448232;
-      selection.Foreground := clNone;
-      selection.BackPriority := 1;
-      getHl.phobosStyleType := True;
-    end;
-    with fPresets.addPreset do
-    begin
-      name := 'Mars bright';
-      getHl.identifiers.Foreground := clBlack;
-      getHl.identifiers.FrameEdges := sfeNone;
-      getHl.numbers.Foreground := 7763655;
-      getHl.comments.Foreground := clMedGray;
-      getHl.strings.Foreground := 3750276;
-      getHl.keywords.Foreground := 2631874;
-      getHl.ddoc.Foreground := 7105644;
-      getHl.special.Foreground := 2631874;
-      getHl.attributes.Foreground := 2631874;
-      getHl.types.Background:=clNone;
-      getHl.types.Foreground:=clBlack;
-      getHl.types.Style:=[fsBold];
-      background := 16579836;
-      bracketMatch.Background := 12698077;
-      bracketMatch.Foreground := clNone;
-      currentLine.Background := 15263976;
-      currentLine.Foreground := clNone;
-      folding.Background := clNone;
-      folding.Foreground := clNone;
-      folding.FrameColor := clBlack;
-      identifierMatch.Background := clNone;
-      identifierMatch.Foreground := clNone;
-      identifierMatch.FrameColor := clGray;
-      identifierMatch.BackPriority := 10;
-      mouseLink.Background := clNone;
-      mouseLink.Foreground := clNone;
-      mouseLink.FrameColor := 3166415;
-      mouseLink.FrameEdges := sfeBottom;
-      selection.Background := $C3E1E1;
-      selection.Foreground := clNone;
-      selection.BackPriority := 10;
-      getHl.phobosStyleType := True;
-    end;
-    with fPresets.addPreset do
-    begin
-      name := 'Mars dark';
-      getHl.numbers.Foreground := 7763655;
-      getHl.symbols.Foreground := 5460961;
-      getHl.identifiers.Foreground := clCream;
-      getHl.comments.Foreground := 5095359;
-      getHl.strings.Foreground := 10790107;
-      getHl.keywords.Foreground := 4539883;
-      getHl.ddoc.Foreground := 10540501;
-      getHl.inlineAsm.Foreground := 12303291;
-      getHl.special.Foreground := 2631874;
-      getHl.errors.Foreground := clCream;
-      getHl.attributes.Foreground := 2631874;
-      getHl.types.Background:=clNone;
-      getHl.types.Foreground:=clCream;
-      getHl.types.Style:=[fsBold];
-      background := 5263440;
-      bracketMatch.Background := 9276865;
-      bracketMatch.Foreground := clNone;
-      currentLine.Background := 4013373;
-      currentLine.Foreground := clNone;
-      folding.Background := clNone;
-      folding.Foreground := clNone;
-      folding.FrameColor := clBlack;
-      identifierMatch.Background := 6381928;
-      identifierMatch.Foreground := clNone;
-      identifierMatch.BackPriority := 10;
-      mouseLink.Background := clNone;
-      mouseLink.Foreground := clNone;
-      mouseLink.FrameColor := clRed;
-      mouseLink.FrameEdges := sfeBottom;
-      selection.Background := 12837345;
-      selection.Foreground := clNone;
-      getHl.phobosStyleType := True;
-    end;
-    with fPresets.addPreset do
-    begin
-      name := 'Soft dust';
-      getHl.phobosStyleType := True;
-      getHl.foldKinds := [fkBrackets, fkRegion];
-      getHl.whites.FrameEdges := sfeNone;
-      getHl.numbers.Foreground := 8618785;
-      getHl.numbers.FrameEdges := sfeNone;
-      getHl.symbols.Foreground := 5120546;
-      getHl.symbols.FrameEdges := sfeNone;
-      getHl.identifiers.FrameEdges := sfeNone;
-      getHl.comments.FrameEdges := sfeNone;
-      getHl.comments.Style := [];
-      getHl.strings.Foreground := 7171346;
-      getHl.strings.FrameEdges := sfeNone;
-      getHl.keywords.Foreground := 6498601;
-      getHl.keywords.FrameEdges := sfeNone;
-      getHl.ddoc.Foreground := clGreen;
-      getHl.ddoc.FrameEdges := sfeNone;
-      getHl.ddoc.Style := [fsBold];
-      getHl.inlineAsm.FrameEdges := sfeNone;
-      getHl.special.FrameEdges := sfeNone;
-      getHl.attributes.FrameEdges := sfeNone;
-      background := 15395049;
-      bracketMatch.Background := clNone;
-      bracketMatch.Foreground := clRed;
-      currentLine.Background := 14801617;
-      currentLine.Foreground := clNone;
-      folding.Background := clNone;
-      folding.Foreground := clGray;
-      folding.FrameColor := clGray;
-      identifierMatch.Background := clSilver;
-      identifierMatch.Foreground := clNone;
-      identifierMatch.BackPriority := 10;
-      identifierMatch.BackAlpha := 70;
-      mouseLink.Background := clNone;
-      mouseLink.Foreground := clNone;
-      mouseLink.Style := [fsBold, fsUnderline];
-      selection.Background := $9DAABC;
-      selection.Foreground := clNone;
-    end;
+    if (i < fPresets.count) and (fPresets[i].name = h[i]) then
+      fPresets.fCollection.Delete(i);
+  end;
+
+  with fPresets.insertPreset(0) do
+  begin
+    fIsHardcoded := true;
+    fName :='bright';
+    fBackground := clWhite;
+    getHl.whites.define(clNone);
+    getHl.numbers.define($000079F2);
+    getHl.symbols.define(clMaroon);
+    getHl.identifiers.define(clBlack);
+    getHl.comments.define(clGreen,[fsItalic]);
+    getHl.strings.define(clBlue);
+    getHl.keywords.define(clNavy,[fsBold]);
+    getHl.ddoc.define(clTeal);
+    getHl.inlineAsm.define(clGray,[fsBold]);
+    getHl.special.define(clNavy,[fsBold]);
+    getHl.errors.define(clBlack,[],clNone,clRed,slsWaved,sfeBottom,[]);
+    getHl.attributes.define(clNavy,[fsBold]);
+    //
+    folding.Background := clNone;
+    folding.Foreground := clDkGray;
+    folding.FrameColor := clDkGray;
+    //
+    mouseLink.Style := [fsUnderline, fsBold];
+    mouseLink.StyleMask := [];
+    mouseLink.Foreground := clNone;
+    mouseLink.Background := clNone;
+    //
+    bracketMatch.Foreground := clRed;
+    bracketMatch.Background := clNone;
+    //
+    identifierMatch.Foreground:= clNone;
+    identifierMatch.Background:= clSilver;
+    identifierMatch.BackAlpha:=70;
+    identifierMatch.BackPriority:= 10;
+    //
+    selection.Background:= 15984598;
+    selection.Foreground:= clNone;
+    //
+    currentLine.Background:= 15789545;
+    currentLine.Foreground:= clNone;
+    //
+    getHl.types.Background:=clNone;
+    getHl.types.Foreground:=clBlack;
+    getHl.types.Style:=[fsBold];
+    getHl.phobosStyleType := True;
+  end;
+  with fPresets.insertPreset(1) do
+  begin
+    fIsHardcoded := true;
+    fName :='dark';
+    getHl.whites.FrameEdges := sfeNone;
+    getHl.numbers.Foreground := 16761218;
+    getHl.numbers.FrameEdges := sfeNone;
+    getHl.numbers.Style := [];
+    getHl.symbols.Foreground := clYellow;
+    getHl.symbols.FrameEdges := sfeNone;
+    getHl.identifiers.Foreground := 14807024;
+    getHl.identifiers.FrameEdges := sfeNone;
+    getHl.comments.Foreground := 13092807;
+    getHl.comments.FrameEdges := sfeNone;
+    getHl.strings.Foreground := 5157104;
+    getHl.strings.FrameEdges := sfeNone;
+    getHl.keywords.Foreground := 9684887;
+    getHl.keywords.FrameEdges := sfeNone;
+    getHl.ddoc.Foreground := 14671730;
+    getHl.ddoc.FrameEdges := sfeNone;
+    getHl.inlineAsm.Foreground := 15500491;
+    getHl.inlineAsm.FrameEdges := sfeNone;
+    getHl.special.Foreground := 9684887;
+    getHl.special.FrameEdges := sfeNone;
+    getHl.errors.Foreground := 14807024;
+    getHl.attributes.Foreground := 9684887;
+    getHl.attributes.FrameEdges := sfeNone;
+    getHl.types.Background:=clNone;
+    getHl.types.Foreground:=14807024;
+    getHl.types.Style:=[fsBold];
+    background := 4210752;
+    bracketMatch.Background := clNone;
+    bracketMatch.Foreground := clFuchsia;
+    currentLine.Background := 6184542;
+    currentLine.Foreground := clNone;
+    folding.Background := 7303023;
+    folding.Foreground := clYellow;
+    identifierMatch.Background := 7697781;
+    identifierMatch.BackPriority:= 2;
+    identifierMatch.Foreground := clNone;
+    selection.Background := 10132122;
+    selection.Foreground := clNone;
+    selection.BackPriority:= 2;
+    getHl.phobosStyleType := True;
+  end;
+  with fPresets.insertPreset(2) do
+  begin
+    fIsHardcoded := true;
+    fName :='Mustard';
+    getHl.whites.FrameEdges := sfeNone;
+    getHl.numbers.FrameEdges := sfeNone;
+    getHl.symbols.Foreground := 3487083;
+    getHl.symbols.FrameEdges := sfeNone;
+    getHl.identifiers.Foreground := 1975089;
+    getHl.identifiers.FrameEdges := sfeNone;
+    getHl.comments.Foreground := 5206404;
+    getHl.comments.FrameEdges := sfeNone;
+    getHl.strings.Foreground := 6056852;
+    getHl.strings.FrameEdges := sfeNone;
+    getHl.keywords.Foreground := 3226202;
+    getHl.keywords.FrameEdges := sfeNone;
+    getHl.ddoc.Foreground := 6259092;
+    getHl.ddoc.FrameEdges := sfeNone;
+    getHl.inlineAsm.Foreground := 3379344;
+    getHl.inlineAsm.FrameEdges := sfeNone;
+    getHl.special.Foreground := 3226202;
+    getHl.special.FrameEdges := sfeNone;
+    getHl.errors.Foreground := 1975089;
+    getHl.attributes.Foreground := 3226202;
+    getHl.attributes.FrameEdges := sfeNone;
+    getHl.types.Background:=clNone;
+    getHl.types.Foreground:=1975089;
+    getHl.types.Style:=[fsBold];
+    background := 9818842;
+    currentLine.Background := 9030871;
+    currentLine.Foreground := clNone;
+    folding.Background := clNone;
+    folding.Foreground := clYellow;
+    folding.FrameColor := clYellow;
+    identifierMatch.Background := 10278890;
+    identifierMatch.BackPriority:= 2;
+    identifierMatch.Foreground := clNone;
+    selection.Background := 8448232;
+    selection.Foreground := clNone;
+    selection.BackPriority := 1;
+    getHl.phobosStyleType := True;
+  end;
+  with fPresets.insertPreset(3) do
+  begin
+    fIsHardcoded := true;
+    name := 'Mars bright';
+    getHl.identifiers.Foreground := clBlack;
+    getHl.identifiers.FrameEdges := sfeNone;
+    getHl.numbers.Foreground := 7763655;
+    getHl.comments.Foreground := clMedGray;
+    getHl.strings.Foreground := 3750276;
+    getHl.keywords.Foreground := 2631874;
+    getHl.ddoc.Foreground := 7105644;
+    getHl.special.Foreground := 2631874;
+    getHl.attributes.Foreground := 2631874;
+    getHl.types.Background:=clNone;
+    getHl.types.Foreground:=clBlack;
+    getHl.types.Style:=[fsBold];
+    background := 16579836;
+    bracketMatch.Background := 12698077;
+    bracketMatch.Foreground := clNone;
+    currentLine.Background := 15263976;
+    currentLine.Foreground := clNone;
+    folding.Background := clNone;
+    folding.Foreground := clNone;
+    folding.FrameColor := clBlack;
+    identifierMatch.Background := clNone;
+    identifierMatch.Foreground := clNone;
+    identifierMatch.FrameColor := clGray;
+    identifierMatch.BackPriority := 10;
+    mouseLink.Background := clNone;
+    mouseLink.Foreground := clNone;
+    mouseLink.FrameColor := 3166415;
+    mouseLink.FrameEdges := sfeBottom;
+    selection.Background := $C3E1E1;
+    selection.Foreground := clNone;
+    selection.BackPriority := 10;
+    getHl.phobosStyleType := True;
+  end;
+  with fPresets.insertPreset(4) do
+  begin
+    fIsHardcoded := true;
+    name := 'Mars dark';
+    getHl.numbers.Foreground := 7763655;
+    getHl.symbols.Foreground := 5460961;
+    getHl.identifiers.Foreground := clCream;
+    getHl.comments.Foreground := 5095359;
+    getHl.strings.Foreground := 10790107;
+    getHl.keywords.Foreground := 4539883;
+    getHl.ddoc.Foreground := 10540501;
+    getHl.inlineAsm.Foreground := 12303291;
+    getHl.special.Foreground := 2631874;
+    getHl.errors.Foreground := clCream;
+    getHl.attributes.Foreground := 2631874;
+    getHl.types.Background:=clNone;
+    getHl.types.Foreground:=clCream;
+    getHl.types.Style:=[fsBold];
+    background := 5263440;
+    bracketMatch.Background := 9276865;
+    bracketMatch.Foreground := clNone;
+    currentLine.Background := 4013373;
+    currentLine.Foreground := clNone;
+    folding.Background := clNone;
+    folding.Foreground := clNone;
+    folding.FrameColor := clBlack;
+    identifierMatch.Background := 6381928;
+    identifierMatch.Foreground := clNone;
+    identifierMatch.BackPriority := 10;
+    mouseLink.Background := clNone;
+    mouseLink.Foreground := clNone;
+    mouseLink.FrameColor := clRed;
+    mouseLink.FrameEdges := sfeBottom;
+    selection.Background := 12837345;
+    selection.Foreground := clNone;
+    getHl.phobosStyleType := True;
+  end;
+  with fPresets.insertPreset(5) do
+  begin
+    fIsHardcoded := true;
+    name := 'Soft dust';
+    getHl.phobosStyleType := True;
+    getHl.foldKinds := [fkBrackets, fkRegion];
+    getHl.whites.FrameEdges := sfeNone;
+    getHl.numbers.Foreground := 8618785;
+    getHl.numbers.FrameEdges := sfeNone;
+    getHl.symbols.Foreground := 5120546;
+    getHl.symbols.FrameEdges := sfeNone;
+    getHl.identifiers.FrameEdges := sfeNone;
+    getHl.comments.FrameEdges := sfeNone;
+    getHl.comments.Style := [];
+    getHl.strings.Foreground := 7171346;
+    getHl.strings.FrameEdges := sfeNone;
+    getHl.keywords.Foreground := 6498601;
+    getHl.keywords.FrameEdges := sfeNone;
+    getHl.ddoc.Foreground := clGreen;
+    getHl.ddoc.FrameEdges := sfeNone;
+    getHl.ddoc.Style := [fsBold];
+    getHl.inlineAsm.FrameEdges := sfeNone;
+    getHl.special.FrameEdges := sfeNone;
+    getHl.attributes.FrameEdges := sfeNone;
+    background := 15395049;
+    bracketMatch.Background := clNone;
+    bracketMatch.Foreground := clRed;
+    currentLine.Background := 14801617;
+    currentLine.Foreground := clNone;
+    folding.Background := clNone;
+    folding.Foreground := clGray;
+    folding.FrameColor := clGray;
+    identifierMatch.Background := clSilver;
+    identifierMatch.Foreground := clNone;
+    identifierMatch.BackPriority := 10;
+    identifierMatch.BackAlpha := 70;
+    mouseLink.Background := clNone;
+    mouseLink.Foreground := clNone;
+    mouseLink.Style := [fsBold, fsUnderline];
+    selection.Background := $9DAABC;
+    selection.Foreground := clNone;
   end;
 
   fEditor := TSynEdit.Create(self);
@@ -657,7 +680,12 @@ begin
 end;
 
 destructor TCED2SynPresetsLoaderForm.Destroy;
+var
+  i: integer;
 begin
+  for i:= fPresets.count-1 downto 0 do
+    if fPresets.preset[i].isHardCoded then
+      fPresets.fCollection.Delete(i);
   fPresets.saveToFile(getCoeditDocPath + optfname);
   fBackup.Free;
   EntitiesConnector.removeObserver(self);
@@ -722,8 +750,17 @@ begin
 end;
 
 procedure TCED2SynPresetsLoaderForm.btnDelClick(sender: TObject);
+var
+  o: integer;
 begin
+  if (fPresets.preset[fList.ItemIndex].isHardCoded) then
+    exit;
+  o := fList.ItemIndex;
+  fPropEd.TIObject := nil;
   fPresets.fCollection.Delete(fList.ItemIndex);
+  if o >= fPresets.count then
+    o -= 1 ;
+  fList.ItemIndex:=o;
   updateList;
   lstBoxSelChange(nil);
 end;
