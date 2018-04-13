@@ -335,11 +335,13 @@ end;
 
 destructor TTerminal.destroy;
 begin
+  {$ifdef windows}
   if assigned(fTermProcess) then
   begin
     fTermProcess.Terminate(0);
     fTermProcess.Free;
   end;
+  {$endif}
   inherited;
 end;
 
