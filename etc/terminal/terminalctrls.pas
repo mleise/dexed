@@ -106,7 +106,7 @@ uses
 type
 
   TGtk2WSTerminal = class(TWSCustomControl)
-  protected
+  private
     class procedure SetCallbacks(const AGtkWidget: PGtkWidget;
       const AWidgetInfo: PWidgetInfo); virtual;
   published
@@ -266,23 +266,7 @@ begin
 end;
 
 procedure TTerminal.Paint;
-const
-  s = 'linux@user:~$ bash terminal';
-var
-  w: integer = 0;
-  h: integer = 0;
 begin
-  if not (csDesigning in ComponentState) then
-    exit;
-
-  Canvas.Pen.Style := psDash;
-  Canvas.Pen.Color := clWhite;
-  Canvas.Brush.Color := clBlack;
-  Canvas.Font.Color := clWhite;
-  Canvas.FillRect(ClientRect);
-  Canvas.Rectangle(ClientRect);
-  Canvas.GetTextSize(s, w, h);
-  Canvas.TextOut((Width -  w) div 2, (Height -  h) div 2, s);
 end;
 
 procedure TTerminal.setBackgroundColor(value: TColor);

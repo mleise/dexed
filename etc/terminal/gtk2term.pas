@@ -82,7 +82,8 @@ var
   vte_terminal_feed: procedure(terminal: PVteTerminal; data: PChar;
     length: PtrInt); cdecl;
 
-  vte_terminal_feed_child: procedure(terminal: PVteTerminal; data: PChar; length: PtrInt); cdecl;
+  vte_terminal_feed_child: procedure(terminal: PVteTerminal; data: PChar;
+    length: PtrInt); cdecl;
 
   vte_get_user_shell: function(): PChar;
 
@@ -107,16 +108,26 @@ begin
   if Lib = 0 then
     Exit(Loaded);
 
-  @vte_terminal_new := GetProcAddress(Lib, 'vte_terminal_new');
-  @vte_terminal_fork_command_full := GetProcAddress(Lib, 'vte_terminal_fork_command_full');
-  @vte_terminal_set_color_background := GetProcAddress(Lib, 'vte_terminal_set_color_background');
-  @vte_terminal_set_color_foreground := GetProcAddress(Lib, 'vte_terminal_set_color_foreground');
-  @vte_terminal_set_color_highlight := GetProcAddress(Lib, 'vte_terminal_set_color_highlight');
-  @vte_terminal_set_color_highlight_foreground := GetProcAddress(Lib, 'vte_terminal_set_color_highlight_foreground');
-  @vte_terminal_set_font := GetProcAddress(Lib, 'vte_terminal_set_font');
-  @vte_terminal_feed := GetProcAddress(Lib, 'vte_terminal_feed');
-  @vte_terminal_feed_child := GetProcAddress(Lib, 'vte_terminal_feed_child');
-  @vte_get_user_shell := GetProcAddress(Lib, 'vte_get_user_shell');
+  @vte_terminal_new := GetProcAddress(Lib,
+    'vte_terminal_new');
+  @vte_terminal_fork_command_full := GetProcAddress(Lib,
+    'vte_terminal_fork_command_full');
+  @vte_terminal_set_color_background := GetProcAddress(Lib,
+    'vte_terminal_set_color_background');
+  @vte_terminal_set_color_foreground := GetProcAddress(Lib,
+    'vte_terminal_set_color_foreground');
+  @vte_terminal_set_color_highlight := GetProcAddress(Lib,
+    'vte_terminal_set_color_highlight');
+  @vte_terminal_set_color_highlight_foreground := GetProcAddress(Lib,
+    'vte_terminal_set_color_highlight_foreground');
+  @vte_terminal_set_font := GetProcAddress(Lib,
+    'vte_terminal_set_font');
+  @vte_terminal_feed := GetProcAddress(Lib,
+    'vte_terminal_feed');
+  @vte_terminal_feed_child := GetProcAddress(Lib,
+    'vte_terminal_feed_child');
+  @vte_get_user_shell := GetProcAddress(Lib,
+    'vte_get_user_shell');
 
   // assume all or none
   Loaded := @vte_terminal_new <> nil;

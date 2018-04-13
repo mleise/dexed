@@ -133,6 +133,7 @@ begin
   w.fTerm.selectedColor:= selectedColor;
   w.fTerm.Font.BeginUpdate;
   w.fTerm.Font.Assign(fFont);
+  // force the change: assigning does always trigger TTerminal.FontChanged.
   w.fTerm.Font.Size := w.fTerm.Font.Size +1;
   w.fTerm.Font.Size := w.fTerm.Font.Size -1;
   w.fTerm.Font.endUpdate;
