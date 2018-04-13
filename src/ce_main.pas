@@ -16,7 +16,7 @@ uses
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor,{$IFDEF UNIX} ce_gdb,{$ENDIF}
   ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange, ce_dastworx,
-  ce_halstead, ce_profileviewer, ce_semver, ce_dsgncontrols;
+  ce_halstead, ce_profileviewer, ce_semver, ce_dsgncontrols, ce_term;
 
 type
 
@@ -384,6 +384,7 @@ type
     fPrjGrpWidg: TCEProjectGroupWidget;
     {$IFDEF UNIX}
     fGdbWidg: TCEGdbWidget;
+    fTermWWidg: TCETermWidget;
     {$ENDIF}
     fDfmtWidg: TCEDfmtWidget;
     fProfWidg: TCEProfileViewerWidget;
@@ -1464,6 +1465,7 @@ begin
   fProfWidg   := TCEProfileViewerWidget.create(self);
   {$IFDEF UNIX}
   fGdbWidg    := TCEGdbWidget.create(self);
+  fTermWWidg  := TCETermWidget.create(self);
   {$ENDIF}
 
   getMessageDisplay(fMsgs);
@@ -1487,6 +1489,7 @@ begin
   fWidgList.addWidget(@fProfWidg);
   {$IFDEF UNIX}
   fWidgList.addWidget(@fGdbWidg);
+  fWidgList.addWidget(@fTermWWidg);
   {$ENDIF}
 
   fWidgList.sort(@CompareWidgCaption);
