@@ -18,7 +18,9 @@ type
   TTerminal = class(TCustomControl)
   private
     FInfo: Pointer;
+    {$ifdef hasgtk2term}
     fTerminalHanlde: PVteTerminal;
+    {$endif}
     fOnTerminate: TNotifyEvent;
     fOnTerminalVisibleChanged: TNotifyEvent;
     fBackgroundColor: TColor;
@@ -246,12 +248,14 @@ begin
   {$endif}
 end;
 
+{$ifdef hasgtk2term}
 function RegisterTerminal: Boolean;
 begin
   Result := TerminalAvailable;
   if Result then
     RegisterWSComponent(TTerminal, TGtk2WSTerminal);
 end;
+{$endif}
 
 constructor TTerminal.Create(AOwner: TComponent);
 begin
@@ -270,8 +274,10 @@ begin
 end;
 
 procedure TTerminal.setBackgroundColor(value: TColor);
+{$ifdef hasgtk2term}
 var
   c: TGDKColor;
+{$endif}
 begin
   fBackgroundColor:=value;
   {$ifdef hasgtk2term}
@@ -284,8 +290,10 @@ begin
 end;
 
 procedure TTerminal.setForegroundColor(value: TColor);
+{$ifdef hasgtk2term}
 var
   c: TGDKColor;
+{$endif}
 begin
   fForegroundColor:=value;
   {$ifdef hasgtk2term}
@@ -298,8 +306,10 @@ begin
 end;
 
 procedure TTerminal.setSelectedColor(value: TColor);
+{$ifdef hasgtk2term}
 var
   c: TGDKColor;
+{$endif}
 begin
   fSelectedColor:=value;
   {$ifdef hasgtk2term}
