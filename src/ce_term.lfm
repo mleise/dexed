@@ -1,9 +1,24 @@
 inherited CETermWidget: TCETermWidget
+  Left = 1018
+  Height = 296
+  Width = 674
   Caption = 'Terminal'
+  ClientHeight = 296
+  ClientWidth = 674
+  OnClick = FormResize
+  OnResize = FormResize
   inherited Back: TPanel
+    Height = 296
+    Width = 674
+    ClientHeight = 296
+    ClientWidth = 674
     inherited Content: TPanel
-      Height = 85
+      Height = 260
       Top = 36
+      Width = 674
+    end
+    inherited toolbar: TCEToolBar
+      Width = 666
     end
   end
 end

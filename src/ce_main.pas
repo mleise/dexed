@@ -384,8 +384,8 @@ type
     fPrjGrpWidg: TCEProjectGroupWidget;
     {$IFDEF UNIX}
     fGdbWidg: TCEGdbWidget;
-    fTermWWidg: TCETermWidget;
     {$ENDIF}
+    fTermWWidg: TCETermWidget;
     fDfmtWidg: TCEDfmtWidget;
     fProfWidg: TCEProfileViewerWidget;
     fCompStart: TDateTime;
@@ -1463,9 +1463,9 @@ begin
   fDfmtWidg   := TCEDfmtWidget.create(self);
   fPrjGrpWidg := TCEProjectGroupWidget.create(self);
   fProfWidg   := TCEProfileViewerWidget.create(self);
+  fTermWWidg  := TCETermWidget.create(self);
   {$IFDEF UNIX}
   fGdbWidg    := TCEGdbWidget.create(self);
-  fTermWWidg  := TCETermWidget.create(self);
   {$ENDIF}
 
   getMessageDisplay(fMsgs);
@@ -1487,9 +1487,9 @@ begin
   fWidgList.addWidget(@fDfmtWidg);
   fWidgList.addWidget(@fPrjGrpWidg);
   fWidgList.addWidget(@fProfWidg);
+  fWidgList.addWidget(@fTermWWidg);
   {$IFDEF UNIX}
   fWidgList.addWidget(@fGdbWidg);
-  fWidgList.addWidget(@fTermWWidg);
   {$ENDIF}
 
   fWidgList.sort(@CompareWidgCaption);

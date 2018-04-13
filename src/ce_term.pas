@@ -51,6 +51,7 @@ type
   { TCETermWidget }
 
   TCETermWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver)
+    procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
     fTerm: TTerminal;
@@ -67,6 +68,11 @@ type
     procedure projFocused(project: ICECommonProject);
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
+
+    procedure dockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
+
+  protected
+    procedure DoFirstShow; override;
 
   public
     constructor create(aOwner: TComponent); override;
@@ -184,11 +190,13 @@ var
   f: string;
 begin
   inherited;
+  toolbarVisible:=false;
   fTerm := TTerminal.Create(self);
   fTerm.Align:= alClient;
   fTerm.BorderSpacing.Around:=4;
   fterm.Parent := self;
   fTerm.OnTerminalVisibleChanged:=@FormShow;
+  self.onDockingChanged:=@dockingChanged;
 
   fOpts:= TCETerminalOptions.Create(self);
 
@@ -204,6 +212,28 @@ begin
   fOpts.saveToFile(getCoeditDocPath + optFname);
   EntitiesConnector.removeObserver(fOpts);
   inherited;
+end;
+
+procedure TCETermWidget.dockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
+begin
+  {$IFDEF WINDOWS}
+  fTerm.Restart;
+  {$ENDIF}
+end;
+
+procedure TCETermWidget.DoFirstShow;
+begin
+  inherited;
+  {$IFDEF WINDOWS}
+  fTerm.Restart;
+  {$ENDIF}
+end;
+
+procedure TCETermWidget.FormResize(Sender: TObject);
+begin
+  {$IFDEF WINDOWS}
+  fTerm.Reparent;
+  {$ENDIF}
 end;
 
 procedure TCETermWidget.FormShow(Sender: TObject);

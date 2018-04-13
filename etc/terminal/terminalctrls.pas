@@ -11,7 +11,9 @@ unit TerminalCtrls;
 interface
 
 uses
-  Gtk2Term, Classes, SysUtils, Controls, Graphics;
+  Gtk2Term, Classes, SysUtils, Controls,
+  {$ifdef windows} windows, AsyncProcess,{$endif}
+  Graphics, dialogs;
 
 type
 
@@ -20,6 +22,11 @@ type
     FInfo: Pointer;
     {$ifdef hasgtk2term}
     fTerminalHanlde: PVteTerminal;
+    {$endif}
+    {$ifdef windows}
+    fTermProgram: string;
+    fTermProcess: TAsyncProcess;
+    fTermWnd: HWND;
     {$endif}
     fOnTerminate: TNotifyEvent;
     fOnTerminalVisibleChanged: TNotifyEvent;
@@ -37,10 +44,15 @@ type
     procedure FontChanged(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor destroy; override;
     procedure Restart;
+    procedure Reparent;
     // Sends a command, as it would be manually typed. Line feed is automatically added.
     procedure Command(const data: string);
   published
+    {$ifdef windows}
+    property terminalProgram: string read fTermProgram write fTermProgram;
+    {$endif}
     // Background color
     property backgroundColor: TColor read fBackgroundColor write setBackgroundColor default clBlack;
     // Font color
@@ -203,6 +215,30 @@ begin
     fOnTerminalVisibleChanged(Self);
 end;
 
+{$ifdef windows}
+function ReparentTerminalClbck(wnd: HWND; userp: LPARAM):WINBOOL; stdcall;
+var
+  h: DWORD = 0;
+begin
+  result := true;
+  with TTerminal(userp) do
+  begin
+    GetWindowThreadProcessId(wnd, h);
+    if (fTermWnd = 0) and (h = fTermProcess.ProcessID) then
+    begin
+      fTermWnd := wnd;
+      windows.SetParent(fTermWnd, Handle);
+      SetWindowLongPtr(fTermWnd, GWL_STYLE, WS_MAXIMIZE or WS_VISIBLE);
+    end;
+    if (fTermWnd <> 0) then
+    begin
+      SetWindowPos(fTermWnd, HWND_TOP, 0, 0, width, height, SWP_SHOWWINDOW);
+      result := false;
+    end;
+  end;
+end;
+{$endif}
+
 procedure TTerminal.Restart;
 {$ifdef hasgtk2term}
 var
@@ -228,6 +264,29 @@ begin
   gtk_widget_show_all(Info.CoreWidget);
   g_signal_connect(Info.ClientWidget, 'child-exited', G_CALLBACK(@TerminalExit), nil);
   g_signal_connect(Info.ClientWidget, 'contents-changed', G_CALLBACK(@TerminalRefresh), nil);
+  {$endif}
+
+  {$ifdef Windows}
+  if assigned(fTermProcess) then
+  begin
+    fTermProcess.Terminate(0);
+    fTermProcess.Free;
+  end;
+  fTermProcess := TAsyncProcess.Create(nil);
+  fTermprocess.Executable:= fTermProgram;
+  fTermProcess.Execute;
+  sleep(10);
+  Reparent();
+  {$endif}
+end;
+
+procedure TTerminal.Reparent;
+begin
+  {$ifdef windows}
+  if assigned(fTermProcess) then
+  begin
+    EnumWindows(@ReparentTerminalClbck, LPARAM(self));
+  end;
   {$endif}
 end;
 
@@ -267,6 +326,21 @@ begin
   fSelectedColor:= clWhite;
   Font.Height:=11;
   Font.Name:='Monospace';
+
+  {$ifdef windows}
+  fTermProgram := 'cmd.exe';
+  //Restart;
+  {$endif}
+end;
+
+destructor TTerminal.destroy;
+begin
+  if assigned(fTermProcess) then
+  begin
+    fTermProcess.Terminate(0);
+    fTermProcess.Free;
+  end;
+  inherited;
 end;
 
 procedure TTerminal.Paint;
