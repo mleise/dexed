@@ -2857,21 +2857,23 @@ end;
 function TCESynMemo.lexInDdoc: char;
 var
   i: integer;
-  p: integer;
+  p: TPoint;
   tk1: PLexToken = nil;
   tk2: PLexToken = nil;
   r: TStringRange = (ptr:nil; pos:0; len: 0);
 begin
+  // note: never use SelStart here. SelStart is updated too early
+  // and matches to the future position, e.g the one after auto-indentation.
   result := #0;
-  p := SelStart;
+  p := CaretXY;
   for i := 0 to fLexToks.Count-1 do
   begin
     tk1 := fLexToks[i];
     if (i <> fLexToks.Count-1) then
     begin
       tk2 := fLexToks[i+1];
-      if (tk1^.offset < p) and (tk1^.kind in [ltkComment, ltkIllegal])
-        and (tk1^.Data[1] in ['*','+']) and (tk2^.offset > p) then
+      if (tk1^.position < p) and (tk1^.kind in [ltkComment, ltkIllegal])
+        and (p <= tk2^.position) and (tk1^.Data[1] in ['*','+']) then
       begin
         r.init(tk1^.Data);
         r.popUntil(#10)^.popFront;
@@ -2886,10 +2888,10 @@ begin
         end
         else exit(tk1^.Data[1])
       end
-      else if (tk1^.offset > p) then
+      else if (tk1^.position > p) then
         exit;
     end
-    else if (tk1^.offset < p) and (tk1^.kind in [ltkComment, ltkIllegal])
+    else if (tk1^.position < p) and (tk1^.kind in [ltkComment, ltkIllegal])
       and (tk1^.Data[1] in ['*','+']) then
         exit(tk1^.Data[1]);
   end;
