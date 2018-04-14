@@ -13,7 +13,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="373">
+      <Resources Count="376">
         <Resource_0 FileName="..\icons\arrow\arrow_up.png" Type="RCDATA" ResourceName="ARROW_UP"/>
         <Resource_1 FileName="..\icons\arrow\arrow_down.png" Type="RCDATA" ResourceName="ARROW_DOWN"/>
         <Resource_2 FileName="..\icons\arrow\arrow_divide.png" Type="RCDATA" ResourceName="ARROW_DIVIDE"/>
@@ -387,6 +387,9 @@
         <Resource_370 FileName="../icons/folder/move_to_folder.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER"/>
         <Resource_371 FileName="../icons/folder/move_to_folder24.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER24"/>
         <Resource_372 FileName="../icons/folder/move_to_folder32.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER32"/>
+        <Resource_373 FileName="../icons/other/check_boxes_series.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES"/>
+        <Resource_374 FileName="../icons/other/check_boxes_series24.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES24"/>
+        <Resource_375 FileName="../icons/other/check_boxes_series32.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES32"/>
       </Resources>
     </General>
     <i18n>

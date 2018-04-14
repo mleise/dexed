@@ -106,6 +106,7 @@ type
     actFileCloseAll: TAction;
     actFileNewClip: TAction;
     actEdFormat: TAction;
+    actProjTest: TAction;
     actLayoutReset: TAction;
     actProjDscan: TAction;
     actProjGroupCompileCustomSync: TAction;
@@ -159,7 +160,11 @@ type
     MenuItem107: TMenuItem;
     MenuItem108: TMenuItem;
     MenuItem109: TMenuItem;
+    MenuItem110: TMenuItem;
+    MenuItem111: TMenuItem;
+    MenuItem112: TMenuItem;
     MenuItem31: TMenuItem;
+    MenuItem76: TMenuItem;
     MenuItem77: TMenuItem;
     mnuOpts: TMenuItem;
     mnuItemMruGroup: TMenuItem;
@@ -289,6 +294,7 @@ type
     procedure actProjSaveGroupAsExecute(Sender: TObject);
     procedure actProjSaveGroupExecute(Sender: TObject);
     procedure actProjSelUngroupedExecute(Sender: TObject);
+    procedure actProjTestExecute(Sender: TObject);
     procedure actSetRunnableSwExecute(Sender: TObject);
     procedure ApplicationProperties1Activate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -1422,6 +1428,9 @@ begin
   i := loadIcon('FLASH');
   actProjRun.ImageIndex:= i;
   actProjRunWithArgs.ImageIndex:= i;
+
+  i := loadIcon('CHECK_BOXES_SERIES');
+  actProjTest.ImageIndex:=i;
 
   i := loadIcon('LAYOUT');
   mnuLayout.ImageIndex:= i;
@@ -3801,6 +3810,15 @@ begin
   if not assigned(fProject) then
     exit;
   dlgOkInfo(fProject.getCommandLine, 'Compilation command line');
+end;
+
+procedure TCEMainForm.actProjTestExecute(Sender: TObject);
+begin
+  if not assigned(fProject) then
+    exit;
+  if checkProjectLock then
+      exit;
+  fProject.test;
 end;
 
 procedure TCEMainForm.actProjDscanExecute(Sender: TObject);

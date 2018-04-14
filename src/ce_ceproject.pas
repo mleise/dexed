@@ -124,6 +124,7 @@ type
     procedure run(const runArgs: string = '');
     function compiled: Boolean;
     procedure compile;
+    procedure test;
     function targetUpToDate: boolean;
     procedure checkMissingFiles;
     //
@@ -1096,6 +1097,10 @@ begin
   result := currentConfiguration.pathsOptions.importModulePaths[index];
   if fBasePath.dirExists then
     result := expandFilenameEx(fBasePath, result);
+end;
+
+procedure TCENativeProject.test;
+begin
 end;
 
 function isValidNativeProject(const filename: string): boolean;

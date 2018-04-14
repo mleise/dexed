@@ -1807,6 +1807,12 @@ object CEMainForm: TCEMainForm
       object MenuItem49: TMenuItem
         Action = actProjRunWithArgs
       end
+      object MenuItem76: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem110: TMenuItem
+        Action = actProjTest
+      end
     end
     object MenuItem100: TMenuItem
       Caption = 'Projects group'
@@ -1954,6 +1960,12 @@ object CEMainForm: TCEMainForm
       end
       object MenuItem46: TMenuItem
         Action = actProjRunWithArgs
+      end
+      object MenuItem111: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem112: TMenuItem
+        Action = actProjTest
       end
     end
     object mnuOpts: TMenuItem
@@ -2375,6 +2387,12 @@ object CEMainForm: TCEMainForm
       Caption = 'Apply code formatting'
       OnExecute = actEdFormatExecute
       OnUpdate = updateDocumentBasedAction
+    end
+    object actProjTest: TAction
+      Category = 'Project'
+      Caption = 'Test project'
+      OnExecute = actProjTestExecute
+      OnUpdate = updateProjectBasedAction
     end
   end
   object ApplicationProperties1: TApplicationProperties

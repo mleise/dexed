@@ -104,6 +104,8 @@ type
     destructor destroy; override;
   end;
 
+  TDubCommand = (dcBuild, dcRun, dcTest);
+
   TCEDubProject = class(TComponent, ICECommonProject)
   private
     fIsSdl: boolean;
@@ -130,6 +132,7 @@ type
     fCompiled: boolean;
     fMsgs: ICEMessagesDisplay;
     fLocalPackages: TDubLocalPackages;
+    fNextTerminatedCommand: TDubCommand;
     procedure doModified;
     procedure updateFields;
     procedure updatePackageNameFromJson;
@@ -142,7 +145,7 @@ type
     procedure dubProcOutput(proc: TObject);
     procedure dubProcTerminated(proc: TObject);
     function getCurrentCustomConfig: TJSONObject;
-    procedure compileOrRun(run: boolean; const runArgs: string = '');
+    procedure executeDub(command: TDubCommand; const runArgs: string = '');
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -182,6 +185,7 @@ type
     procedure compile;
     function compiled: boolean;
     procedure run(const runArgs: string = '');
+    procedure test;
     function targetUpToDate: boolean;
     //
     property json: TJSONObject read fJSON;
@@ -224,6 +228,10 @@ const
   );
 
   DubDefaultConfigName = '(default config)';
+
+  dubCmd2Arg: array[TDubCommand] of string = ('build', 'run', 'test');
+  dubCmd2PreMsg: array[TDubCommand] of string = ('compiling ', 'running ', 'testing ');
+  dubCmd2PostMsg: array[TDubCommand] of string = ('compiled', 'executed', 'tested');
 
 {$REGION TDubLocalPackages -----------------------------------------------------}
 constructor TDubLocalPackage.create;
@@ -886,55 +894,63 @@ end;
 
 procedure TCEDubProject.dubProcTerminated(proc: TObject);
 var
-  prjname: string;
+  n: string;
+  i: ICECommonProject;
 begin
+  i := self as ICECommonProject;
   dubProcOutput(proc);
-  prjname := shortenPath(filename);
-  fCompiled := fDubProc.ExitStatus = 0;
-  if fCompiled then
-    fMsgs.message(prjname + ' has been successfully compiled',
-      self as ICECommonProject, amcProj, amkInf)
+  n := shortenPath(filename);
+  if fNextTerminatedCommand = dcBuild then
+    fCompiled := fDubProc.ExitStatus = 0;
+  // note: fCompiled is also used to indicate if there's something produced
+  // so the 'or' RHS is there for fNextTerminatedCommand <> dcBuild;
+  if fCompiled or (fDubProc.ExitStatus = 0) then
+  begin
+    fMsgs.message(n + ' has been successfully ' +
+      dubCmd2PostMsg[fNextTerminatedCommand], i, amcProj, amkInf)
+  end
   else
   begin
-    fMsgs.message(prjname + ' has not been compiled',
-      self as ICECommonProject, amcProj, amkWarn);
+    fMsgs.message(n + ' has not been successfully ' +
+      dubCmd2PostMsg[fNextTerminatedCommand], i, amcProj, amkWarn);
     fMsgs.message(format('error: DUB has returned the status %s',
-      [prettyReturnStatus(fDubProc)]), self as ICECommonProject, amcProj, amkErr);
+      [prettyReturnStatus(fDubProc)]), i, amcProj, amkErr);
   end;
-  subjProjCompiled(fProjectSubject, self as ICECommonProject, fCompiled);
+  subjProjCompiled(fProjectSubject, i, fCompiled);
   SetCurrentDirUTF8(fPreCompilePath);
 end;
 
-procedure TCEDubProject.compileOrRun(run: boolean; const runArgs: string = '');
+procedure TCEDubProject.executeDub(command: TDubCommand; const runArgs: string = '');
 var
   olddir: string;
   prjname: string;
   rargs: TStringList;
+  prj: ICECommonProject;
 begin
+  prj := self as ICECommonProject;;
   if fDubProc.isNotNil and fDubProc.Active then
   begin
-    fMsgs.message('the project is already being compiled',
-      self as ICECommonProject, amcProj, amkWarn);
+    fMsgs.message('the project is already being processed by DUB', prj, amcProj, amkWarn);
     exit;
   end;
   killProcess(fDubProc);
   fCompiled := false;
   if not fFilename.fileExists then
   begin
-    dlgOkInfo('The DUB project must be saved before being compiled or run !');
+    dlgOkInfo('The project must be saved before being ' +
+      dubCmd2PreMsg[command] + 'by DUB !');
     exit;
   end;
-  fMsgs.clearByData(Self as ICECommonProject);
+  fNextTerminatedCommand := command;
+  fMsgs.clearByData(prj);
   prjname := shortenPath(fFilename);
   fDubProc:= TCEProcess.Create(nil);
   olddir  := GetCurrentDir;
   try
-    if not run then
-    begin
-      subjProjCompiling(fProjectSubject, self as ICECommonProject);
-      fMsgs.message('compiling ' + prjname, self as ICECommonProject, amcProj, amkInf);
-      if modified then saveToFile(fFilename);
-    end;
+    subjProjCompiling(fProjectSubject, prj);
+    fMsgs.message(dubCmd2PreMsg[command] + prjname, prj, amcProj, amkInf);
+    if modified then
+      saveToFile(fFilename);
     chDir(fFilename.extractFilePath);
     fDubProc.Executable := 'dub' + exeExt;
     if not dubBuildOptions.showConsole then
@@ -949,22 +965,14 @@ begin
     end;
     fDubProc.CurrentDirectory := fFilename.extractFilePath;
     fDubProc.XTermProgram:=consoleProgram;
-    if not run then
-    begin
-      fDubProc.Parameters.Add('build');
-      fDubProc.OnTerminate:= @dubProcTerminated;
-    end
-    else
-    begin
-      fDubProc.Parameters.Add('run');
-      fDubProc.OnTerminate:= @dubProcOutput;
-    end;
+    fDubProc.Parameters.Add(dubCmd2Arg[command]);
+    fDubProc.OnTerminate:= @dubProcTerminated;
     fDubProc.Parameters.Add('--build=' + fBuildTypes[fBuiltTypeIx]);
     if (fConfigs.Count <> 1) and (fConfigs[0] <> DubDefaultConfigName) then
       fDubProc.Parameters.Add('--config=' + fConfigs[fConfigIx]);
     fDubProc.Parameters.Add('--compiler=' + DubCompilerFilename);
     dubBuildOptions.getOpts(fDubProc.Parameters);
-    if run and runArgs.isNotEmpty then
+    if (command <> dcBuild) and runArgs.isNotEmpty then
     begin
       fDubProc.Parameters.Add('--');
       rargs := TStringList.Create;
@@ -984,7 +992,7 @@ end;
 procedure TCEDubProject.compile;
 begin
   fPreCompilePath := GetCurrentDirUTF8;
-  compileOrRun(false);
+  executeDub(dcBuild);
 end;
 
 function TCEDubProject.compiled: boolean;
@@ -994,7 +1002,12 @@ end;
 
 procedure TCEDubProject.run(const runArgs: string = '');
 begin
-  compileOrRun(true, runArgs);
+  executeDub(dcRun, runArgs);
+end;
+
+procedure TCEDubProject.test;
+begin
+  executeDub(dcTest);
 end;
 
 function TCEDubProject.targetUpToDate: boolean;

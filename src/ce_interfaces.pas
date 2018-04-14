@@ -90,6 +90,8 @@ type
       function compiled: boolean;
       // tries to execute the project output.
       procedure run(const runArgs: string = '');
+      // test the project (only for DUB)
+      procedure test;
       // returns true if the target has not to be recompiled
       function targetUpToDate: boolean;
 
