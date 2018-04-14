@@ -51,11 +51,11 @@ type
   { TCETermWidget }
 
   TCETermWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver)
-    procedure FormResize(Sender: TObject);
-    procedure FormShow(Sender: TObject);
+    procedure ContentPaint(Sender: TObject);
   private
     fTerm: TTerminal;
     fOpts: TCETerminalOptions;
+    fFirst: boolean;
 
     procedure docNew(document: TCESynMemo);
     procedure docFocused(document: TCESynMemo);
@@ -69,10 +69,7 @@ type
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
 
-    procedure dockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
-
   protected
-    procedure DoFirstShow; override;
 
   public
     constructor create(aOwner: TComponent); override;
@@ -118,7 +115,11 @@ begin
     fForegroundColor:=s.fForegroundColor;
     fSelectedColor:=s.fSelectedColor;
     followEditors:=s.fFollowEditors;
+    fFont.BeginUpdate;
+    fFont.Height:=fFont.Height+1;
+    fFont.Height:=fFont.Height-1;
     fFont.Assign(s.font);
+    fFont.EndUpdate;
   end
   else inherited;
 end;
@@ -195,8 +196,6 @@ begin
   fTerm.Align:= alClient;
   fTerm.BorderSpacing.Around:=4;
   fterm.Parent := self;
-  fTerm.OnTerminalVisibleChanged:=@FormShow;
-  self.onDockingChanged:=@dockingChanged;
 
   fOpts:= TCETerminalOptions.Create(self);
 
@@ -214,29 +213,7 @@ begin
   inherited;
 end;
 
-procedure TCETermWidget.dockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
-begin
-  {$IFDEF WINDOWS}
-  fTerm.Restart;
-  {$ENDIF}
-end;
-
-procedure TCETermWidget.DoFirstShow;
-begin
-  inherited;
-  {$IFDEF WINDOWS}
-  fTerm.Restart;
-  {$ENDIF}
-end;
-
-procedure TCETermWidget.FormResize(Sender: TObject);
-begin
-  {$IFDEF WINDOWS}
-  fTerm.Reparent;
-  {$ENDIF}
-end;
-
-procedure TCETermWidget.FormShow(Sender: TObject);
+procedure TCETermWidget.ContentPaint(Sender: TObject);
 begin
   fOpts.applyChanges;
 end;
