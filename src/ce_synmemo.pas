@@ -1495,60 +1495,21 @@ begin
 end;
 
 procedure TCESynMemo.forceIndentation(m: TIndentationMode; w: integer);
-type
-  TIndentComposition = record
-    numS: integer;
-    numT: integer;
-  end;
 var
-  s: string;
   i: integer;
-  p: integer;
-  b: string;
-  c: TIndentComposition;
-  u: char;
 begin
   assert(w > 0);
   for i:= 0 to lines.Count-1 do
-  begin
-    p := 1;
-    c.numS := 0;
-    c.numT := 0;
-    s := lines.Strings[i];
-    while p <= s.length do
+  case m of
+    imTabs:
     begin
-      u := s[p];
-      if u = ' ' then
-        c.numS += 1
-      else if u = #9 then
-        c.numT += 1
-      else break;
-      p += 1;
+      lines[i] := leadingSpacesToTabs(lines[i], TabWidth);
+      fModified:=true;
     end;
-    if p <> 1 then
-    case m of
-      imTabs:
-      begin
-        setLength(b, (c.numS div w) + c.numT);
-        if b <> '' then
-        begin
-          FillChar(b[1], b.length, #9);
-          s := b + s[p .. s.length];
-          lines[i] := s;
-          fModified:=true;
-        end;
-      end;
-      imSpaces:
-      begin
-        setLength(b, c.numT * w + c.numS);
-        if b <> '' then
-        begin
-          FillChar(b[1], b.length, ' ');
-          s := b + s[p .. s.length];
-          lines[i] := s;
-          fModified:=true;
-        end;
-      end;
+    imSpaces:
+    begin
+      lines[i] := leadingTabsToSpaces(lines[i], TabWidth);
+      fModified:=true;
     end;
   end;
 end;
@@ -3252,7 +3213,6 @@ end;
 procedure TCESynMemo.patchClipboardIndentation;
 var
   lst: TStringList;
-  lne: string;
   i: integer;
 begin
   //TODO: Check for changes made to option eoSpacesToTabs
@@ -3264,17 +3224,7 @@ begin
   try
     for i := 0 to lst.count-1 do
     begin
-      lne := lst[i];
-      //if eoTabsToSpaces in Options then
-      //begin
-        leadingTabsToSpaces(lne, TabWidth);
-        lst[i] := lne;
-      //end
-      {else if eoSpacesToTabs in Options then
-      begin
-        //leadingSpacesToTabs(lne, TabWidth);
-        //lst[i] := lne;
-      end}
+      lst[i] := leadingTabsToSpaces(lst[i], TabWidth);
     end;
     clipboard.asText := lst.strictText;
   finally

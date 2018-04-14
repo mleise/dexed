@@ -30,6 +30,14 @@ type
 
   THasMain = (mainNo, mainYes, mainDefaultBehavior);
 
+  // desscibes leading whites of a line
+  TIndentComposition = record
+    // num spaces
+    numS: integer;
+    // num tabs
+    numT: integer;
+  end;
+
   // function used as string hasher in fcl-stl
   TStringHash = class
     class function hash(const key: string; maxBucketsPow2: longword): longword;
@@ -312,9 +320,11 @@ type
 
   procedure tryRaiseFromStdErr(proc: TProcess);
 
-  procedure leadingTabsToSpaces(var value: string; width: integer);
+  // Converts all leading whites to spaces. Tabs takes width * spaces.
+  function leadingTabsToSpaces(const value: string; width: integer): string;
 
-  procedure leadingSpacesToTabs(var value: string; width: integer);
+  // Converts all leading whites to tabs. Fails if width doesn't fivide number of spaces.
+  function leadingSpacesToTabs(const value: string; width: integer): string;
 
 var
   // additional directories to find background tools
@@ -1397,56 +1407,113 @@ begin
   end;
 end;
 
-procedure leadingTabsToSpaces(var value: string; width: integer);
+function leadingTabsToSpaces(const value: string; width: integer): string;
 var
-  m: integer;
-  s: string;
+  p: integer;
+  b: string;
+  c: TIndentComposition;
+  u: char;
 begin
-  if value.length = 0 then
-    exit;
+  assert(width > 0);
 
-  m := 1;
-  while true do
+  p := 1;
+  c.numS := 0;
+  c.numT := 0;
+  while p < value.length do
   begin
-    if value[m] <> #9 then
+    u := value[p];
+    if u = ' ' then
+      c.numS += 1
+    else if u = #9 then
+      c.numT += 1
+    else
       break;
-    if m = value.length then
-      break;
-    m += 1;
+    p += 1;
   end;
-
-  width *= (m - 1);
-  setLength(s, width);
-  if s.length <> 0 then
-    fillChar(s[1], width, ' ');
-
-  value := s + value[m..value.length];
+  if p <> 1 then
+  begin
+    setLength(b, c.numT * width + c.numS);
+    FillChar(b[1], b.length, ' ');
+    result := b + value[p .. value.length];
+  end
+  else result := value;
 end;
 
-procedure leadingSpacesToTabs(var value: string; width: integer);
+function leadingSpacesToTabs(const value: string; width: integer): string;
 var
-  m: integer;
-  t: string;
+  p: integer;
+  c: TIndentComposition;
+  i: integer;
 begin
-  if value.length = 0 then
+  assert(width > 0);
+
+  result := '';
+  if value = '' then
     exit;
 
-  m := 1;
+  p := 1;
   while true do
   begin
-    if value[m] <> ' ' then
+
+    if p > value.length then
       break;
-    if m = value.length then
+    if not (value[p] in [#9, ' ']) then
       break;
-    m += 1;
+
+    c.numS := 0;
+    c.numT := 0;
+
+    while (p < value.length) and (value[p] = ' ') do
+    begin
+      c.numS += 1;
+      p += 1;
+    end;
+    c.numT := c.numS div width;
+    c.numS -= c.numT * width;
+
+    for i := 0 to c.numT-1 do
+      result += #9;
+    for i := 0 to c.numS-1 do
+      result += ' ';
+
+    c.numT := 0;
+    while (p < value.length) and (value[p] = #9) do
+    begin
+      c.numT += 1;
+      p += 1;
+    end;
+
+    for i := 0 to c.numT-1 do
+      result += #9;
+
+    if p >= value.length then
+      break;
+
   end;
-
-  width := (m - 1) div width;
-  setLength(t, width);
-  if t.length <> 0 then
-    fillChar(t[1], width, #9);
-
-  value := t + value[m..value.length];
+  result += value[p .. value.length];
 end;
 
+{$IFDEF DEBUG}
+initialization
+
+  assert(leadingTabsToSpaces('', 2)      = '');
+  assert(leadingTabsToSpaces(' start', 2)      = ' start');
+  assert(leadingTabsToSpaces('start', 2)      = 'start');
+  assert(leadingTabsToSpaces('start ', 2)      = 'start ');
+  assert(leadingTabsToSpaces('start '#9, 2)      = 'start '#9);
+  assert(leadingTabsToSpaces('  '#9'  '#9'start', 2)  = '        start');
+  assert(leadingTabsToSpaces('  '#9#9'start', 2)      = '      start');
+  assert(leadingTabsToSpaces(#9' ', 4)      = '     ');
+
+  assert(leadingSpacesToTabs('', 2)      = '');
+  assert(leadingSpacesToTabs('start', 2)      = 'start');
+  assert(leadingSpacesToTabs('start ', 2)      = 'start ');
+  assert(leadingSpacesToTabs('start '#9, 2)      = 'start '#9);
+  assert(leadingSpacesToTabs('  '#9'  '#9'start', 2)  = #9#9#9#9'start');
+  assert(leadingSpacesToTabs('  '#9#9'start', 2)      = #9#9#9'start');
+  assert(leadingSpacesToTabs(#9' ', 4)      = #9' ');
+  assert(leadingSpacesToTabs(' '#9, 4)      = ' '#9);
+  assert(leadingSpacesToTabs(#9'   ' , 2)   = #9#9' ');
+
+{$ENDIF}
 end.
