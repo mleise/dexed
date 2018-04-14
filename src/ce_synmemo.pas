@@ -1372,8 +1372,9 @@ begin
   case Command of
     ecCut: if not SelAvail then
     begin
-      SelectLine(false);
+      SelectLine(true);
       ExecuteCommand(ecCut, #0, nil);
+      Clipboard.AsText := TrimLeft(Clipboard.AsText);
     end;
     ecCopy: if not SelAvail then
     begin
