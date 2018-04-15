@@ -19,6 +19,7 @@ type
     fSelectedColor: TColor;
     fFollowEditors: boolean;
     fFollowProjects: boolean;
+    fScrollbackLines: longword;
     fFont: TFont;
     procedure setFont(value: TFont);
   public
@@ -32,6 +33,7 @@ type
     property font: TFont read fFont write setFont;
     property followEditors: boolean read fFollowEditors write fFollowEditors;
     property followProjects: boolean read fFollowProjects write fFollowProjects;
+    property scrollbackLines: longword read fScrollbackLines write fScrollbackLines default 512;
   end;
 
   // Editable and reversible Terminal options
@@ -92,6 +94,7 @@ begin
   fSelectedColor:= clBlack;
   fFont.Name:= 'Monospace';
   fFont.Size:= 12;
+  fScrollbackLines:=512;
 end;
 
 destructor TCETerminalOptionsBase.destroy;
@@ -121,6 +124,7 @@ begin
     fFont.Height:=fFont.Height-1;
     fFont.Assign(s.font);
     fFont.EndUpdate;
+    fScrollbackLines := s.fScrollbackLines;
   end
   else inherited;
 end;
@@ -145,6 +149,7 @@ begin
   w.fTerm.Font.Size := w.fTerm.Font.Size +1;
   w.fTerm.Font.Size := w.fTerm.Font.Size -1;
   w.fTerm.Font.endUpdate;
+  w.fTerm.scrollbackLines:=fScrollbackLines;
 end;
 
 function TCETerminalOptions.optionedWantCategory(): string;

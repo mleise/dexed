@@ -33,9 +33,11 @@ type
     fBackgroundColor: TColor;
     fForegroundColor: TColor;
     fSelectedColor: TColor;
+    fScrollbackLines: LongWord;
     procedure setBackgroundColor(value: TColor);
     procedure setForegroundColor(value: TColor);
     procedure setSelectedColor(value: TColor);
+    procedure setScrollBackLines(value: LongWord);
   protected
     // Only used at design-time.
     procedure Paint; override;
@@ -53,6 +55,7 @@ type
     {$ifdef windows}
     property terminalProgram: string read fTermProgram write fTermProgram;
     {$endif}
+    property scrollbackLines: LongWord read fScrollbackLines write setScrollBackLines default 512;
     // Background color
     property backgroundColor: TColor read fBackgroundColor write setBackgroundColor default clBlack;
     // Font color
@@ -326,6 +329,7 @@ begin
   fSelectedColor:= clWhite;
   Font.Height:=11;
   Font.Name:='Monospace';
+  fScrollbackLines:=512;
 
   {$ifdef windows}
   fTermProgram := 'cmd.exe';
@@ -347,6 +351,16 @@ end;
 
 procedure TTerminal.Paint;
 begin
+end;
+
+procedure TTerminal.setScrollBackLines(value: LongWord);
+var
+  v: TGValue;
+begin
+  fScrollbackLines:=value;
+  v.g_type:= 1;
+  v.data[0].v_uint := fScrollbackLines;
+  g_object_set_property(PGObject(PWidgetInfo(FInfo).ClientWidget), 'scrollback-lines', @v);
 end;
 
 procedure TTerminal.setBackgroundColor(value: TColor);
