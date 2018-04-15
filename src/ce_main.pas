@@ -1586,7 +1586,6 @@ var
   i: Integer;
   w: TCEWidget;
   s: TAnchorDockSplitter;
-  c: TControl;
 begin
 
   if not reset then
@@ -1649,6 +1648,9 @@ begin
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fMesgWidg), DockMaster.GetSite(fEditWidg), alBottom);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fLibMWidg), DockMaster.GetSite(fMesgWidg), alClient, fMesgWidg);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fTodolWidg), DockMaster.GetSite(fMesgWidg), alClient, fMesgWidg);
+    {$IFDEF LINUX}
+    DockMaster.ManualDock(DockMaster.GetAnchorSite(fTermWWidg), DockMaster.GetSite(fMesgWidg), alClient, fMesgWidg);
+    {$ENDIF}
     fMesgWidg.showWidget;
     // left
     DockMaster.GetAnchorSite(fSymlWidg).Width := 120;
