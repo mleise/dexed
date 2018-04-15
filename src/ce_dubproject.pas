@@ -133,6 +133,7 @@ type
     fMsgs: ICEMessagesDisplay;
     fLocalPackages: TDubLocalPackages;
     fNextTerminatedCommand: TDubCommand;
+    fAsProjectItf: ICECommonProject;
     procedure doModified;
     procedure updateFields;
     procedure updatePackageNameFromJson;
@@ -585,6 +586,7 @@ end;
 constructor TCEDubProject.create(aOwner: TComponent);
 begin
   inherited;
+  fAsProjectItf := self as ICECommonProject;
   fSaveAsUtf8 := true;
   fJSON := TJSONObject.Create();
   fProjectSubject := TCEProjectSubject.Create;
@@ -627,7 +629,7 @@ end;
 {$REGION ICECommonProject: project props ---------------------------------------}
 procedure TCEDubProject.activate;
 begin
-  subjProjFocused(fProjectSubject, self as ICECommonProject);
+  subjProjFocused(fProjectSubject, fAsProjectItf);
 end;
 
 function TCEDubProject.inGroup: boolean;
@@ -886,7 +888,7 @@ begin
   try
     fDubProc.getFullLines(lst);
     for str in lst do
-      fMsgs.message(str, self as ICECommonProject, amcProj, amkAuto);
+      fMsgs.message(str, fAsProjectItf, amcProj, amkAuto);
   finally
     lst.Free;
   end;
@@ -895,9 +897,7 @@ end;
 procedure TCEDubProject.dubProcTerminated(proc: TObject);
 var
   n: string;
-  i: ICECommonProject;
 begin
-  i := self as ICECommonProject;
   dubProcOutput(proc);
   n := shortenPath(filename);
   if fNextTerminatedCommand = dcBuild then
@@ -907,16 +907,16 @@ begin
   if fCompiled or (fDubProc.ExitStatus = 0) then
   begin
     fMsgs.message(n + ' has been successfully ' +
-      dubCmd2PostMsg[fNextTerminatedCommand], i, amcProj, amkInf)
+      dubCmd2PostMsg[fNextTerminatedCommand], fAsProjectItf, amcProj, amkInf)
   end
   else
   begin
     fMsgs.message(n + ' has not been successfully ' +
-      dubCmd2PostMsg[fNextTerminatedCommand], i, amcProj, amkWarn);
+      dubCmd2PostMsg[fNextTerminatedCommand], fAsProjectItf, amcProj, amkWarn);
     fMsgs.message(format('error: DUB has returned the status %s',
-      [prettyReturnStatus(fDubProc)]), i, amcProj, amkErr);
+      [prettyReturnStatus(fDubProc)]), fAsProjectItf, amcProj, amkErr);
   end;
-  subjProjCompiled(fProjectSubject, i, fCompiled);
+  subjProjCompiled(fProjectSubject, fAsProjectItf, fCompiled);
   SetCurrentDirUTF8(fPreCompilePath);
 end;
 
@@ -925,12 +925,10 @@ var
   olddir: string;
   prjname: string;
   rargs: TStringList;
-  prj: ICECommonProject;
 begin
-  prj := self as ICECommonProject;;
   if fDubProc.isNotNil and fDubProc.Active then
   begin
-    fMsgs.message('the project is already being processed by DUB', prj, amcProj, amkWarn);
+    fMsgs.message('the project is already being processed by DUB', fAsProjectItf, amcProj, amkWarn);
     exit;
   end;
   killProcess(fDubProc);
@@ -942,13 +940,13 @@ begin
     exit;
   end;
   fNextTerminatedCommand := command;
-  fMsgs.clearByData(prj);
+  fMsgs.clearByData(fAsProjectItf);
   prjname := shortenPath(fFilename);
   fDubProc:= TCEProcess.Create(nil);
   olddir  := GetCurrentDir;
   try
-    subjProjCompiling(fProjectSubject, prj);
-    fMsgs.message(dubCmd2PreMsg[command] + prjname, prj, amcProj, amkInf);
+    subjProjCompiling(fProjectSubject, fAsProjectItf);
+    fMsgs.message(dubCmd2PreMsg[command] + prjname, fAsProjectItf, amcProj, amkInf);
     if modified then
       saveToFile(fFilename);
     chDir(fFilename.extractFilePath);
@@ -1509,7 +1507,7 @@ begin
   fModificationCount := 0;
   fModified:=true;
   updateFields;
-  subjProjChanged(fProjectSubject, self as ICECommonProject);
+  subjProjChanged(fProjectSubject, fAsProjectItf);
 end;
 {$ENDREGION}
 

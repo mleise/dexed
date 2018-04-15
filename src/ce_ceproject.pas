@@ -50,6 +50,7 @@ type
     fCompiled: boolean;
     fSymStringExpander: ICESymStringExpander;
     fMsgs: ICEMessagesDisplay;
+    fAsProjectItf: ICECommonProject;
     procedure updateOutFilename;
     procedure doChanged(modified: boolean = true);
     procedure getBaseConfig;
@@ -152,6 +153,7 @@ var
 constructor TCENativeProject.create(aOwner: TComponent);
 begin
   inherited create(aOwner);
+  fAsProjectItf := self as ICECommonProject;
   fSymStringExpander := getSymStringExpander;
   fMsgs:= getMessageDisplay;
   //
@@ -201,7 +203,7 @@ end;
 
 procedure TCENativeProject.activate;
 begin
-  subjProjFocused(fProjectSubject, self as ICECommonProject);
+  subjProjFocused(fProjectSubject, fAsProjectItf);
 end;
 
 function TCENativeProject.getFormat: TCEProjectFormat;
@@ -731,7 +733,7 @@ begin
         sleep(1);
       com := prc.ExitStatus = 0;
       for j := 0 to lst.Count -1 do
-        fMsgs.message(lst[j], self as ICECommonProject, amcProj, amkAuto);
+        fMsgs.message(lst[j], fAsProjectItf, amcProj, amkAuto);
     finally
       prc.Free;
       lst.Free;
@@ -783,7 +785,7 @@ begin
   if fCompilProc.isNotNil and fCompilProc.Active then
   begin
     fMsgs.message('the project is already being compiled',
-      self as ICECommonProject, amcProj, amkWarn);
+      fAsProjectItf, amcProj, amkWarn);
     exit;
   end;
   killProcess(fCompilProc);
@@ -792,11 +794,11 @@ begin
   if config.isNil then
   begin
     fMsgs.message('unexpected project error: no active configuration',
-      self as ICECommonProject, amcProj, amkErr);
+      fAsProjectItf, amcProj, amkErr);
     exit;
   end;
   //
-  fMsgs.clearByData(self as ICECommonProject);
+  fMsgs.clearByData(fAsProjectItf);
   subjProjCompiling(fProjectSubject, Self);
   //
   prjpath := fFileName.extractFilePath;
@@ -805,7 +807,7 @@ begin
   //
   if not runPrePostProcess(config.preBuildProcess) then
     fMsgs.message('warning: pre-compilation process or commands not properly executed',
-      self as ICECommonProject, amcProj, amkWarn);
+      fAsProjectItf, amcProj, amkWarn);
   //
   SetCurrentDirUTF8(prjpath);
   //
@@ -817,9 +819,9 @@ begin
   //
   prjname := shortenPath(filename, 25);
   fCompilProc := TCEProcess.Create(nil);
-  subjProjCompiling(fProjectSubject, self as ICECommonProject);
-  fMsgs.message('compiling ' + prjname, self as ICECommonProject, amcProj, amkInf);
-  fMsgs.message(usingCompilerInfo(CEProjectCompiler), self as ICECommonProject, amcProj, amkInf);
+  subjProjCompiling(fProjectSubject, fAsProjectItf);
+  fMsgs.message('compiling ' + prjname, fAsProjectItf, amcProj, amkInf);
+  fMsgs.message(usingCompilerInfo(CEProjectCompiler), fAsProjectItf, amcProj, amkInf);
   // this doesn't work under linux, so the previous ChDir.
   if prjpath.dirExists then
     fCompilProc.CurrentDirectory := prjpath;
@@ -863,7 +865,7 @@ begin
   if not outputFilename.fileExists then
   begin
     fMsgs.message('output executable missing: ' + shortenPath(outputFilename, 25),
-      self as ICECommonProject, amcProj, amkErr);
+      fAsProjectItf, amcProj, amkErr);
     exit;
   end;
   //
@@ -897,7 +899,7 @@ begin
     else
       processOutputToStrings(TProcess(sender), lst);
     for str in lst do
-      fMsgs.message(str, self as ICECommonProject, amcProj, amkBub);
+      fMsgs.message(str, fAsProjectItf, amcProj, amkBub);
   finally
     lst.Free;
   end;
@@ -910,7 +912,7 @@ begin
 
     if (proc.ExitStatus <> 0) then
       fMsgs.message(format('error: the process (%s) has returned the status %s',
-        [proc.Executable, prettyReturnStatus(proc)]), self as ICECommonProject, amcProj, amkErr);
+        [proc.Executable, prettyReturnStatus(proc)]), fAsProjectItf, amcProj, amkErr);
   end;
 end;
 
@@ -923,7 +925,7 @@ begin
   try
     fCompilProc.getFullLines(lst);
     for str in lst do
-      fMsgs.message(str, self as ICECommonProject, amcProj, amkAuto);
+      fMsgs.message(str, fAsProjectItf, amcProj, amkAuto);
   finally
     lst.Free;
   end;
@@ -939,15 +941,15 @@ begin
   updateOutFilename;
   if fCompiled then
     fMsgs.message(prjname + ' has been successfully compiled',
-      self as ICECommonProject, amcProj, amkInf)
+      fAsProjectItf, amcProj, amkInf)
   else
     fMsgs.message(prjname + ' has not been compiled',
-      self as ICECommonProject, amcProj, amkWarn);
+      fAsProjectItf, amcProj, amkWarn);
   //
   if not runPrePostProcess(getCurrConf.postBuildProcess) then
     fMsgs.message( 'warning: post-compilation process or commands not properly executed',
-      self as ICECommonProject, amcProj, amkWarn);
-  subjProjCompiled(fProjectSubject, self as ICECommonProject, fCompiled);
+      fAsProjectItf, amcProj, amkWarn);
+  subjProjCompiled(fProjectSubject, fAsProjectItf, fCompiled);
   //
   SetCurrentDirUTF8(fPreCompilePath);
 end;
