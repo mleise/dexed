@@ -75,7 +75,7 @@ begin
   prc := TProcess.Create(nil);
   try
     prc.Executable := str;
-    prc.Parameters.Add(files);
+    prc.Parameters.Add('-f' + files);
     prc.Parameters.Add('-i');
     prc.Options := [poUsePipes {$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
     prc.ShowWindow := swoHIDE;
@@ -138,10 +138,10 @@ begin
   prc := TProcess.Create(nil);
   try
     prc.Executable := str;
-    prc.Parameters.Add('-K');
     prc.Parameters.Add('-l' + caretLine.ToString);
     if plusComment then
       prc.Parameters.Add('-o');
+    prc.Parameters.Add('-K');
     prc.Options := [poUsePipes {$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
     prc.ShowWindow := swoHIDE;
     prc.Execute;

@@ -456,7 +456,7 @@ begin
     end;
   end
   else str := fDoc.fileName;
-  fToolProc.Parameters.Add(str);
+  fToolProc.Parameters.Add('-f' + str);
   fToolProc.Parameters.Add('-t');
   //
   fToolProc.Execute;

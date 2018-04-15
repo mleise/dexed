@@ -3,116 +3,116 @@ module dastworx;
 import
     core.memory;
 import
-    std.array, std.getopt, std.stdio, std.path, std.algorithm, std.functional;
+    std.array, std.getopt, std.stdio, std.path, std.algorithm, std.functional,
+    std.file, std.typecons;
 import
-    iz.memory;
+    iz.memory, iz.options;
 import
     dparse.lexer, dparse.parser, dparse.ast, dparse.rollback_allocator;
 import
     common, todos, symlist, imports, mainfun, halstead, ddoc_template;
 
 
-private __gshared int caretLine;
-private __gshared bool option1;
-private __gshared static Appender!(ubyte[]) source;
-private __gshared string[] files;
-
-// -o : deep visit the symbols
-alias deepSymList = option1;
-// -o : outputs /++ +/ ddoc instead of /** */
-alias plusComment = option1;
-
-static this()
-{
-    GC.disable;
-    source.reserve(1024^^2);
-}
-
 void main(string[] args)
 {
-    version(devel)
+    foreach(ref buffer; stdin.byChunk(4096))
+        Launcher.source.put(buffer);
+    handleArguments!(Yes.Throw, Launcher)(args[1..$]);
+}
+
+struct Launcher
+{
+    static this()
+    {
+        GC.disable;
+        source.reserve(1024^^2);
+    }
+
+    __gshared @Argument("-l") int caretLine;
+    __gshared @Argument("-o") bool option1;
+
+    __gshared static Appender!(ubyte[]) source;
+    __gshared string[] files;
+
+    // -o : deep visit the symbols
+    alias deepSymList = option1;
+    // -o : outputs /++ +/ ddoc instead of /** */
+    alias plusComment = option1;
+
+    /// Writes the list of files to process
+    @Argument("-f")
+    static void setFiles(string value)
+    {
+        files = value
+            .splitter(pathSeparator)
+            .filter!exists
+            .array;
+    }
+
+    /// Writes the symbol list
+    @Argument("-s", "", ArgFlags(ArgFlag.stopper))
+    static void handleSymListOption()
     {
         mixin(logCall);
-        File f = File(__FILE__, "r");
-        foreach(ref buffer; f.byChunk(4096))
-            source.put(buffer);
-        f.close;
-    }
-    else
-    {
-        // get the source to process.
-        // even when files are passed, the std input has to be closed by the IDE
-        foreach(ref buffer; stdin.byChunk(4096))
-            source.put(buffer);
-        if (!source.data.length && args.length > 1)
+
+        static struct ErrorHandler
         {
-            import std.file: exists;
-            files = args[1].splitter(pathSeparator).filter!exists.array;
-            version(devel) writeln(files);
+            static Appender!(AstErrors) _errors;
+
+            void handleErrors(string fname, size_t line, size_t col, string message, bool err)
+            {
+                _errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
+            }
+        }
+
+        ErrorHandler eh;
+        RollbackAllocator alloc;
+        StringCache cache = StringCache(StringCache.defaultBucketCount);
+        LexerConfig config = LexerConfig("", StringBehavior.source);
+
+        source.data
+            .getTokensForParser(config, &cache)
+            .parseModule("", &alloc, &eh.handleErrors)
+            .listSymbols(eh._errors.data, deepSymList);
+    }
+
+    /// Writes the list of todo comments
+    @Argument("-t", "", ArgFlags(ArgFlag.stopper))
+    static void handleTodosOption()
+    {
+        mixin(logCall);
+        if (files.length)
+            getTodos(files);
+    }
+
+    /// Writes the import list
+    @Argument("-i", "", ArgFlags(ArgFlag.stopper))
+    static void handleImportsOption()
+    {
+        mixin(logCall);
+        if (files.length)
+        {
+            listFilesImports(files);
+        }
+        else
+        {
+            RollbackAllocator alloc;
+            StringCache cache = StringCache(StringCache.defaultBucketCount);
+            LexerConfig config = LexerConfig("", StringBehavior.source);
+
+            source.data
+                .getTokensForParser(config, &cache)
+                .parseModule("", &alloc, toDelegate(&ignoreErrors))
+                .listImports();
         }
     }
 
-    // options for the work
-    getopt(args, std.getopt.config.passThrough,
-        "o", &option1,
-        "l", &caretLine
-    );
-
-    // launch directly a work
-    getopt(args, std.getopt.config.passThrough,
-        "i", &handleImportsOption,
-        "m", &handleMainfunOption,
-        "s", &handleSymListOption,
-        "t", &handleTodosOption,
-        "H", &handleHalsteadOption,
-        "K", &handleDdocTemplateOption,
-    );
-}
-
-/// Handles the "-s" option: create the symbol list in the output
-void handleSymListOption()
-{
-    mixin(logCall);
-
-    static struct ErrorHandler
+    /// Writes if a main() is present in the module
+    @Argument("-m", "", ArgFlags(ArgFlag.stopper))
+    static void handleMainfunOption()
     {
-        static Appender!(AstErrors) _errors;
+        mixin(logCall);
 
-        void handleErrors(string fname, size_t line, size_t col, string message, bool err)
-        {
-            _errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
-        }
-    }
-
-    ErrorHandler eh;
-    RollbackAllocator alloc;
-    StringCache cache = StringCache(StringCache.defaultBucketCount);
-    LexerConfig config = LexerConfig("", StringBehavior.source);
-
-    source.data
-        .getTokensForParser(config, &cache)
-        .parseModule("", &alloc, &eh.handleErrors)
-        .listSymbols(eh._errors.data, deepSymList);
-}
-
-/// Handles the "-t" option: create the list of todo comments in the output
-void handleTodosOption()
-{
-    mixin(logCall);
-    if (files.length)
-        getTodos(files);
-}
-
-/// Handles the "-i" option: create the import list in the output
-void handleImportsOption()
-{
-    mixin(logCall);
-    if (files.length)
-    {
-        listFilesImports(files);
-    }
-    else
-    {
         RollbackAllocator alloc;
         StringCache cache = StringCache(StringCache.defaultBucketCount);
         LexerConfig config = LexerConfig("", StringBehavior.source);
@@ -120,63 +120,39 @@ void handleImportsOption()
         source.data
             .getTokensForParser(config, &cache)
             .parseModule("", &alloc, toDelegate(&ignoreErrors))
-            .listImports();
+            .detectMainFun();
     }
-}
 
-/// Handles the "-m" option: writes if a main() is present in the module
-void handleMainfunOption()
-{
-    mixin(logCall);
+    /// Writes the halstead metrics
+    @Argument("-H", "", ArgFlags(ArgFlag.stopper))
+    static void handleHalsteadOption()
+    {
+        mixin(logCall);
 
-    RollbackAllocator alloc;
-    StringCache cache = StringCache(StringCache.defaultBucketCount);
-    LexerConfig config = LexerConfig("", StringBehavior.source);
+        RollbackAllocator alloc;
+        StringCache cache = StringCache(StringCache.defaultBucketCount);
+        LexerConfig config = LexerConfig("", StringBehavior.source);
 
-    source.data
-        .getTokensForParser(config, &cache)
-        .parseModule("", &alloc, toDelegate(&ignoreErrors))
-        .detectMainFun();
-}
+        source.data
+            .getTokensForParser(config, &cache)
+            .parseModule("", &alloc, toDelegate(&ignoreErrors))
+            .performHalsteadMetrics;
+    }
 
-/// Handles the "-H" option: write the halstead metrics
-void handleHalsteadOption()
-{
-    mixin(logCall);
+    /// Writes the ddoc template for a given declaration
+    @Argument("-K", "", ArgFlags(ArgFlag.stopper))
+    static void handleDdocTemplateOption()
+    {
+        mixin(logCall);
 
-    RollbackAllocator alloc;
-    StringCache cache = StringCache(StringCache.defaultBucketCount);
-    LexerConfig config = LexerConfig("", StringBehavior.source);
+        RollbackAllocator alloc;
+        StringCache cache = StringCache(StringCache.defaultBucketCount);
+        LexerConfig config = LexerConfig("", StringBehavior.source);
 
-    source.data
-        .getTokensForParser(config, &cache)
-        .parseModule("", &alloc, toDelegate(&ignoreErrors))
-        .performHalsteadMetrics;
-}
-
-/// Handles the "-D" option: write the ddoc template for a given declaration
-void handleDdocTemplateOption()
-{
-    mixin(logCall);
-
-    RollbackAllocator alloc;
-    StringCache cache = StringCache(StringCache.defaultBucketCount);
-    LexerConfig config = LexerConfig("", StringBehavior.source);
-
-    source.data
-        .getTokensForParser(config, &cache)
-        .parseModule("", &alloc, toDelegate(&ignoreErrors))
-        .getDdocTemplate(caretLine, plusComment);
-}
-
-version(devel)
-{
-    version(none) import std.compiler;
-    version(all) import std.uri;
-    version(WatchOS) import std.math;
-    mixin(q{import std.c.time;});
-    // TODO: something
-    // NOTE: there was a bug here...
-    // FIXME-cmain-aMrFreeze-p8: there's an infinite recursion whith the option -x
+        source.data
+            .getTokensForParser(config, &cache)
+            .parseModule("", &alloc, toDelegate(&ignoreErrors))
+            .getDdocTemplate(caretLine, plusComment);
+    }
 }
 
