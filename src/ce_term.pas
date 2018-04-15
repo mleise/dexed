@@ -56,6 +56,7 @@ type
     fTerm: TTerminal;
     fOpts: TCETerminalOptions;
     fFirst: boolean;
+    fLastCd: string;
 
     procedure docNew(document: TCESynMemo);
     procedure docFocused(document: TCESynMemo);
@@ -223,9 +224,15 @@ begin
 end;
 
 procedure TCETermWidget.docFocused(document: TCESynMemo);
+var
+  s: string;
 begin
-  if fOpts.followEditors and document.fileName.fileExists then
-    fTerm.Command('cd ' + document.fileName.extractFileDir);
+  s := document.fileName.extractFileDir;
+  if fOpts.followEditors and s.fileExists and not SameText(s, fLastCd) then
+  begin
+    fLastCd := s;
+    fTerm.Command('cd ' + s);
+  end;
 end;
 
 procedure TCETermWidget.docChanged(document: TCESynMemo);
@@ -249,9 +256,15 @@ begin
 end;
 
 procedure TCETermWidget.projFocused(project: ICECommonProject);
+var
+  s: string;
 begin
-  if fOpts.followProjects and project.fileName.fileExists then
-    fTerm.Command('cd ' + project.fileName.extractFileDir);
+  s := project.fileName.extractFileDir;
+  if fOpts.followProjects and s.dirExists and not SameText(s, fLastCd) then
+  begin
+    fLastCd := s;
+    fTerm.Command('cd ' + s);
+  end;
 end;
 
 procedure TCETermWidget.projCompiling(project: ICECommonProject);
