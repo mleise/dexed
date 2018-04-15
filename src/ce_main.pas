@@ -1584,8 +1584,9 @@ end;
 procedure TCEMainForm.InitDocking(reset: boolean = false);
 var
   i: Integer;
-  widg: TCEWidget;
-  topsplt: TAnchorDockSplitter;
+  w: TCEWidget;
+  s: TAnchorDockSplitter;
+  c: TControl;
 begin
 
   if not reset then
@@ -1597,33 +1598,35 @@ begin
     // makes widget dockable
     for i := 0 to fWidgList.Count-1 do
     begin
-      widg := fWidgList.widget[i];
-      if not widg.isDockable then continue;
-      DockMaster.MakeDockable(widg, true);
-      DockMaster.GetAnchorSite(widg).Header.HeaderPosition := adlhpTop;
-      widg.onDockingChanged:= @widgetDockingChanged;
+      w := fWidgList.widget[i];
+      if not w.isDockable then
+        continue;
+      DockMaster.MakeDockable(w, true);
+      DockMaster.GetAnchorSite(w).Header.HeaderPosition := adlhpTop;
+      w.onDockingChanged:= @widgetDockingChanged;
     end;
   end;
 
   // load existing or default docking
-  if not reset and FileExists(getCoeditDocPath + 'docking.xml') and LoadDocking() then
-  begin end
+  if not reset and FileExists(getCoeditDocPath + 'docking.xml') then
+  begin
+    // load later (https://bugs.freepascal.org/view.php?id=29475)
+  end
   else
   begin
-
     if reset then
     begin
       for i := 0 to fWidgList.Count-1 do
       begin
-        widg := fWidgList.widget[i];
-        if not widg.isDockable then
+        w := fWidgList.widget[i];
+        if not w.isDockable then
           continue;
-        if not widg.Visible then
+        if not w.Visible then
           continue;
-        if widg = fEditWidg then
+        if w = fEditWidg then
           continue;
-        if DockMaster.GetAnchorSite(widg).isNotNil then
-          DockMaster.GetAnchorSite(widg).ManualFloat(widg.ClientRect, false);
+        if DockMaster.GetAnchorSite(w).isNotNil then
+          DockMaster.GetAnchorSite(w).ManualFloat(w.ClientRect, false);
       end;
     end;
 
@@ -1654,10 +1657,10 @@ begin
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fFindWidg), DockMaster.GetAnchorSite(fSymlWidg), alBottom, fSymlWidg);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fPrInpWidg), DockMaster.GetAnchorSite(fFindWidg), alTop, fFindWidg);
     DockMaster.ManualDock(DockMaster.GetAnchorSite(fExplWidg), DockMaster.GetSite(fSymlWidg), alClient, fSymlWidg);
-    if GetDockSplitter(DockMaster.GetSite(fPrInpWidg), akTop, topsplt) then
+    if GetDockSplitter(DockMaster.GetSite(fPrInpWidg), akTop, s) then
     begin
-      topsplt.MoveSplitter(50);
-      topsplt := nil;
+      s.MoveSplitter(50);
+      s := nil;
     end;
     fSymlWidg.showWidget;
     // right
@@ -1670,12 +1673,12 @@ begin
     // close remaining and header to top
     for i := 0 to fWidgList.Count-1 do
     begin
-      widg := fWidgList.widget[i];
-      if not widg.isDockable then
+      w := fWidgList.widget[i];
+      if not w.isDockable then
         continue;
-      DockMaster.GetAnchorSite(widg).Header.HeaderPosition := adlhpTop;
-      if not DockMaster.GetAnchorSite(widg).HasParent then
-        DockMaster.GetAnchorSite(widg).Close;
+      DockMaster.GetAnchorSite(w).Header.HeaderPosition := adlhpTop;
+      if not DockMaster.GetAnchorSite(w).HasParent then
+        DockMaster.GetAnchorSite(w).Close;
     end;
     WindowState:= wsMaximized;
   end;
@@ -1989,6 +1992,11 @@ begin
     if fInfoWidg.hasMissingTools then
       fInfoWidg.showWidget;
   end;
+
+  // see https://bugs.freepascal.org/view.php?id=29475
+  // reloading must be done here otherwise there are "jumps"
+  if FileExists(getCoeditDocPath + 'docking.xml') then
+    LoadDocking();
 
   if fAppliOpts.autoCheckUpdates then
   begin
