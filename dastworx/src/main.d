@@ -31,7 +31,7 @@ struct Launcher
     __gshared @Argument("-l") int caretLine;
     __gshared @Argument("-o") bool option1;
 
-    __gshared static Appender!(ubyte[]) source;
+    __gshared Appender!(ubyte[]) source;
     __gshared string[] files;
 
     // -o : deep visit the symbols
@@ -55,25 +55,21 @@ struct Launcher
     {
         mixin(logCall);
 
-        static struct ErrorHandler
-        {
-            static Appender!(AstErrors) _errors;
+        Appender!(AstErrors) errors;
 
-            void handleErrors(string fname, size_t line, size_t col, string message, bool err)
-            {
-                _errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
-            }
+        void handleErrors(string fname, size_t line, size_t col, string message, bool err)
+        {
+            errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
         }
 
-        ErrorHandler eh;
         RollbackAllocator alloc;
         StringCache cache = StringCache(StringCache.defaultBucketCount);
         LexerConfig config = LexerConfig("", StringBehavior.source);
 
         source.data
             .getTokensForParser(config, &cache)
-            .parseModule("", &alloc, &eh.handleErrors)
-            .listSymbols(eh._errors.data, deepSymList);
+            .parseModule("", &alloc, &handleErrors)
+            .listSymbols(errors.data, deepSymList);
     }
 
     /// Writes the list of todo comments
