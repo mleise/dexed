@@ -9,7 +9,7 @@ uses
   StdCtrls, AnchorDocking, AnchorDockStorage, AnchorDockOptionsDlg, Controls,
   Graphics, strutils, Dialogs, Menus, ActnList, ExtCtrls, process,
   {$IFDEF WINDOWS}Windows, {$ENDIF} XMLPropStorage, SynExportHTML, fphttpclient,
-  fpjson, jsonparser, jsonscanner,
+  fpjson, jsonparser, jsonscanner, LCLIntf,
   ce_common, ce_ceproject, ce_synmemo, ce_writableComponent,
   ce_widget, ce_messages, ce_interfaces, ce_editor, ce_projinspect, ce_ceprojeditor,
   ce_search, ce_miniexplorer, ce_libman, ce_libmaneditor, ce_todolist, ce_observer,
@@ -2007,7 +2007,7 @@ begin
     begin
       if dlgYesNo('An new release is available, do you wish to visit the release page ?' +
         lineEnding + '(' + url +')') = mrYes then
-          openUrl(url);
+          OpenURL(url);
     end;
   end;
 end;
