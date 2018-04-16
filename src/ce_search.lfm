@@ -63,14 +63,14 @@ inherited CESearchWidget: TCESearchWidget
         AutoSize = True
         BorderSpacing.Around = 4
         Caption = 'Options'
-        ClientHeight = 68
-        ClientWidth = 410
+        ClientHeight = 69
+        ClientWidth = 412
         TabOrder = 4
         object FlowPanel1: TFlowPanel
           Left = 0
-          Height = 68
+          Height = 69
           Top = 0
-          Width = 410
+          Width = 412
           Align = alClient
           AutoSize = True
           BevelOuter = bvNone
@@ -129,40 +129,38 @@ inherited CESearchWidget: TCESearchWidget
             TabOrder = 1
           end
           object chkCaseSens: TCheckBox
-            Left = 100
+            Left = 0
             Height = 22
-            Top = 0
+            Top = 46
             Width = 117
             Anchors = []
             Caption = 'case sensitive'
             TabOrder = 2
           end
           object chkFromCur: TCheckBox
-            Left = 100
+            Left = 117
             Height = 22
-            Top = 23
+            Top = 0
             Width = 99
             Anchors = []
             Caption = 'from cursor'
             Checked = True
-            OnChange = chkFromCurChange
             State = cbChecked
             TabOrder = 3
           end
           object chkBack: TCheckBox
-            Left = 217
+            Left = 117
             Height = 22
-            Top = 0
+            Top = 23
             Width = 87
             Anchors = []
             Caption = 'backward'
-            OnChange = chkBackChange
             TabOrder = 4
           end
           object chkWWord: TCheckBox
-            Left = 217
+            Left = 117
             Height = 22
-            Top = 23
+            Top = 46
             Width = 99
             Anchors = []
             Caption = 'whole word'

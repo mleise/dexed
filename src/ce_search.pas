@@ -46,6 +46,8 @@ type
     procedure assignTo(target: TPersistent); override;
   end;
 
+  TSearchScope = (scDoc, scProj, scOpened);
+
   TCESearchWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver)
     btnAllScope: TBitBtn;
     btnFind: TBitBtn;
@@ -69,9 +71,7 @@ type
     procedure btnAllScopeClick(Sender: TObject);
     procedure cbReplaceWthChange(Sender: TObject);
     procedure cbToFindChange(Sender: TObject);
-    procedure chkBackChange(Sender: TObject);
     procedure chkEnableRepChange(Sender: TObject);
-    procedure chkFromCurChange(Sender: TObject);
   private
     fDoc: TCESynMemo;
     fToFind: string;
@@ -85,7 +85,7 @@ type
     fHasSearched: boolean;
     fHasRestarted: boolean;
     fProj: ICECommonProject;
-    fAllInProj: boolean;
+    fFindScope: TSearchScope;
     function getOptions: TSynSearchOptions;
     procedure actReplaceAllExecute(sender: TObject);
     procedure replaceEvent(Sender: TObject; const ASearch, AReplace:
@@ -121,6 +121,7 @@ implementation
 
 const
   OptsFname = 'search.txt';
+  FindScopeStr: array[TSearchScope] of string = ('Document', 'Project', 'Opened docs');
 
 {$REGION TCESearchOptions ------------------------------------------------------}
 constructor TCESearchOptions.create(aOwner: TComponent);
@@ -272,6 +273,7 @@ begin
       AssignPng(btnReplaceAll, 'TEXT_REPLACE32');
     end;
   end;
+  btnAllScope.Caption:= FindScopeStr[fFindScope];
   updateImperative;
 
   EntitiesConnector.addObserver(self);
@@ -334,36 +336,63 @@ var
   f: string;
   s: integer = 0;
   m: ICEMessagesDisplay;
+  h: ICEMultiDocHandler;
 begin
-  if fDoc.isNil and not fAllInProj then
-    exit;
-  if (fProj = nil) and fAllInProj then
-    exit;
+  if (fDoc.isNil and (fFindScope <> scProj)) or
+     ((fProj = nil) and (fFindScope = scProj)) then
+      exit;
 
   fSearchMru.Insert(0,fToFind);
   cbToFind.Items.Assign(fSearchMru);
 
-  if fAllInProj then
-  begin
-    c := TSynEditStringList.Create;
-    try
-      for i := 0 to fProj.sourcesCount-1 do
-      begin
-        f := fProj.sourceAbsolute(i);
-        c.LoadFromFile(f);
-        s += findAll(f, c, false);
-      end;
-      if s = 0 then
-      begin
-        m := getMessageDisplay;
-        m.message(format('0 result for the pattern <%s>', [fToFind]),
-          nil, amcMisc, amkInf);
-      end;
-    finally
-      c.Free;
+  case fFindScope of
+    scDoc:
+    begin
+      findAll(fDoc.fileName, fDoc.Lines, true);
     end;
-  end
-  else findAll(fDoc.fileName, fDoc.Lines, true);
+
+    scProj:
+    begin
+      c := TSynEditStringList.Create;
+      try
+        for i := 0 to fProj.sourcesCount-1 do
+        begin
+          f := fProj.sourceAbsolute(i);
+          c.LoadFromFile(f);
+          s += findAll(f, c, false);
+        end;
+        if s = 0 then
+        begin
+          m := getMessageDisplay;
+          m.message(format('0 result for the pattern <%s>', [fToFind]),
+            nil, amcMisc, amkInf);
+        end;
+      finally
+        c.Free;
+      end;
+    end;
+
+    scOpened:
+    begin
+      c := TSynEditStringList.Create;
+      h := getMultiDocHandler;
+      try
+        for i := 0 to h.documentCount-1 do
+        begin
+          f := h.getDocument(i).fileName;
+          s += findAll(f, h.getDocument(i).Lines, false);
+        end;
+        if s = 0 then
+        begin
+          m := getMessageDisplay;
+          m.message(format('0 result for the pattern <%s>', [fToFind]),
+            nil, amcMisc, amkInf);
+        end;
+      finally
+        c.Free;
+      end;
+    end;
+  end;
 end;
 
 function TCESearchWidget.findAll(const filename: string; lines: TStrings;
@@ -417,11 +446,12 @@ end;
 
 procedure TCESearchWidget.actFindNextExecute(sender: TObject);
 begin
-  if fDoc.isNil then exit;
-  //
+  if fDoc.isNil then
+    exit;
+
   fSearchMru.Insert(0, fToFind);
   cbToFind.Items.Assign(fSearchMru);
-  //
+
   if not chkFromCur.Checked then
   begin
     if chkBack.Checked then
@@ -453,13 +483,14 @@ end;
 
 procedure TCESearchWidget.actReplaceNextExecute(sender: TObject);
 begin
-  if fDoc.isNil then exit;
-  //
+  if fDoc.isNil then
+    exit;
+
   fSearchMru.Insert(0, fToFind);
   fReplaceMru.Insert(0, fReplaceWth);
   cbToFind.Items.Assign(fSearchMru);
   cbReplaceWth.Items.Assign(fReplaceMru);
-  //
+
   if chkPrompt.Checked then
     fDoc.OnReplaceText := @replaceEvent;
   if not chkFromCur.Checked then
@@ -486,11 +517,13 @@ procedure TCESearchWidget.actReplaceAllExecute(sender: TObject);
 var
   opts: TSynSearchOptions;
 begin
-  if fDoc.isNil then exit;
+  if fDoc.isNil then
+    exit;
+
   cbReplaceWth.Items.Assign(fReplaceMru);
   opts := getOptions + [ssoReplace];
   opts -= [ssoBackwards];
-  //
+
   fSearchMru.Insert(0, fToFind);
   fReplaceMru.Insert(0, fReplaceWth);
   if chkPrompt.Checked then fDoc.OnReplaceText := @replaceEvent;
@@ -577,20 +610,10 @@ begin
   updateImperative;
 end;
 
-procedure TCESearchWidget.chkBackChange(Sender: TObject);
-begin
-
-end;
-
 procedure TCESearchWidget.chkEnableRepChange(Sender: TObject);
 begin
   if Updating then exit;
   updateImperative;
-end;
-
-procedure TCESearchWidget.chkFromCurChange(Sender: TObject);
-begin
-
 end;
 
 procedure TCESearchWidget.cbReplaceWthChange(Sender: TObject);
@@ -603,15 +626,23 @@ end;
 
 procedure TCESearchWidget.btnAllScopeClick(Sender: TObject);
 begin
-  fAllInProj := not fAllInProj;
-  if fAllInProj then
+  case fFindScope of
+    scDoc: fFindScope := scProj;
+    scProj: fFindScope := scOpened;
+    scOpened: fFindScope := scDoc;
+  end;
+  btnAllScope.Caption:= FindScopeStr[fFindScope];
+  if fFindScope <> scDoc then
   begin
     case GetIconScaledSize of
       iss16: AssignPng(btnAllScope, 'DOCUMENT_ALL');
       iss24: AssignPng(btnAllScope, 'DOCUMENT_ALL24');
       iss32: AssignPng(btnAllScope, 'DOCUMENT_ALL32');
     end;
-    btnAllScope.Hint := 'all project sources';
+    if fFindScope = scProj then
+      btnAllScope.Hint := 'find in all the project sources'
+    else
+      btnAllScope.Hint := 'find in all the documents currently opened';
   end
   else
   begin
@@ -620,7 +651,7 @@ begin
       iss24: AssignPng(btnAllScope, 'DOCUMENT24');
       iss32: AssignPng(btnAllScope, 'DOCUMENT32');
     end;
-    btnAllScope.Hint := 'selected source';
+    btnAllScope.Hint := 'find in the selected source';
   end;
   updateImperative;
 end;
@@ -630,14 +661,15 @@ var
   canAll: boolean;
   hasTxt: boolean;
 begin
-  canAll := ((fDoc.isNotNil and not fAllInProj) or (fAllInProj and (fProj <> nil)));
+  canAll := ((fDoc.isNotNil and (fFindScope <> scProj)) or
+            ((fFindScope = scProj) and (fProj <> nil)));
   hasTxt := fToFind.isNotEmpty and not fToFind.isBlank;
   btnFind.Enabled := fDoc.isNotNil and hasTxt;
   btnFindAll.Enabled := canAll and hasTxt;
   btnReplace.Enabled := fDoc.isNotNil and chkEnableRep.Checked and fToFind.isNotEmpty;
   btnReplaceAll.Enabled := btnReplace.Enabled;
   cbReplaceWth.Enabled := fDoc.isNotNil and chkEnableRep.Checked;
-  cbToFind.Enabled := canAll or fDoc.isNotNil;
+  cbToFind.Enabled := canAll;
 end;
 {$ENDREGION}
 
