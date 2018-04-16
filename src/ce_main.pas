@@ -163,6 +163,10 @@ type
     MenuItem110: TMenuItem;
     MenuItem111: TMenuItem;
     MenuItem112: TMenuItem;
+    MenuItem113: TMenuItem;
+    mnuItemAbout: TMenuItem;
+    mnuItemCheckUpd: TMenuItem;
+    mnuItemManual: TMenuItem;
     MenuItem31: TMenuItem;
     MenuItem76: TMenuItem;
     MenuItem77: TMenuItem;
@@ -300,6 +304,9 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormResize(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
+    procedure mnuItemAboutClick(Sender: TObject);
+    procedure mnuItemCheckUpdClick(Sender: TObject);
+    procedure mnuItemManualClick(Sender: TObject);
     procedure updateDocumentBasedAction(sender: TObject);
     procedure updateProjectBasedAction(sender: TObject);
     procedure updateDocEditBasedAction(sender: TObject);
@@ -1376,6 +1383,9 @@ begin
   mnuItemMruGroup.ImageIndex:= i;
   mnuItemMruProj.ImageIndex:= i;
 
+  i := loadIcon('INFORMATION');
+  mnuItemAbout.ImageIndex:= i;
+
   i := loadIcon('SCRIPT_GEAR');
   actFileNewRun.ImageIndex:= i;
   actFileCompAndRun.ImageIndex:= i;
@@ -2027,6 +2037,30 @@ end;
 procedure TCEMainForm.FormWindowStateChange(Sender: TObject);
 begin
   snapTopSplitterToMenu;
+end;
+
+procedure TCEMainForm.mnuItemAboutClick(Sender: TObject);
+begin
+  fInfoWidg.showWidget;
+end;
+
+procedure TCEMainForm.mnuItemCheckUpdClick(Sender: TObject);
+var
+  url: string;
+begin
+  url := checkForUpdate;
+  if url <> '' then
+  begin
+    if dlgYesNo('An new release is available, do you wish to visit the release page ?' +
+      lineEnding + '(' + url +')') = mrYes then
+        OpenURL(url);
+  end
+  else dlgOkInfo('No new release available or no connectivity');
+end;
+
+procedure TCEMainForm.mnuItemManualClick(Sender: TObject);
+begin
+  OpenURL('https://bbasile.github.io/Coedit/');
 end;
 
 destructor TCEMainForm.destroy;
