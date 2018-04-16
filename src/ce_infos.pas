@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
   {$IFDEF WINDOWS}Windows,{$ENDIF}
   StdCtrls, ExtCtrls, Buttons, Menus,ce_widget, ce_common, ce_sharedres,
-  ce_interfaces;
+  ce_interfaces, ce_dsgncontrols;
 
 type
 
@@ -41,6 +41,7 @@ type
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     Label1: TLabel;
+    Label2: TLabel;
   private
     procedure RefreshAllStatus;
     function findCriticalyMissingTool: boolean;
@@ -189,6 +190,7 @@ begin
   toolbarVisible:=false;
   fIsModal := true;
   fIsDockable := false;
+  Label1.Font.Size:= scaleY(15, 96);
   //
   with TResourceStream.Create(HINSTANCE, 'VERSION', RT_RCDATA) do
   try
