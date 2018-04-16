@@ -354,6 +354,7 @@ begin
 end;
 
 procedure TTerminal.setScrollBackLines(value: LongWord);
+{$ifdef hasgtk2term}
 var
   v: TGValue;
 begin
@@ -361,6 +362,9 @@ begin
   v.g_type:= 1;
   v.data[0].v_uint := fScrollbackLines;
   g_object_set_property(PGObject(PWidgetInfo(FInfo).ClientWidget), 'scrollback-lines', @v);
+{$else}
+begin
+{$endif}
 end;
 
 procedure TTerminal.setBackgroundColor(value: TColor);
