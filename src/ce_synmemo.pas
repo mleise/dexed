@@ -9,7 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
-  md5, Spin, LCLIntf,
+  md5, Spin, LCLIntf, LazFileUtils,
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs, ce_dastworx,
@@ -2987,7 +2987,6 @@ begin
   Lines.LoadFromFile(fname);
   fFilename := fname;
   FileAge(fFilename, fFileDate);
-  ReadOnly := FileIsReadOnly(fFilename);
 
   fModified := false;
   if Showing then
@@ -3033,13 +3032,12 @@ procedure TCESynMemo.saveToFile(const fname: string);
 var
   ext: string;
 begin
-  ext := fname.extractFilePath;
-  if FileIsReadOnly(ext) then
+  if fname.fileExists and not FileIsWritable(fname) then
   begin
-    getMessageDisplay.message('No write access in: ' + ext, self, amcEdit, amkWarn);
+    getMessageDisplay.message('The file is read-only, save your changes in a copy',
+      self, amcEdit, amkWarn);
     exit;
   end;
-  ReadOnly := false;
   Lines.SaveToFile(fname);
   fFilename := fname;
   ext := fname.extractFileExt;
@@ -3060,8 +3058,12 @@ end;
 
 procedure TCESynMemo.save;
 begin
-  if readOnly then
+  if fFilename.fileExists and not FileIsWritable(fFilename) then
+  begin
+    getMessageDisplay.message('The file is read-only, save your changes in a copy',
+      self, amcEdit, amkWarn);
     exit;
+  end;
   Lines.SaveToFile(fFilename);
   FileAge(fFilename, fFileDate);
   fModified := false;
