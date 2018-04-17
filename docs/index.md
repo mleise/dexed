@@ -10,7 +10,7 @@ title: index
 
 ![](img/coedit_kde4_thumb.png)
 
-This documentation is based on version 3.6.6.
+This documentation is based on version 3.6.7.
 Screenshots can be outdated but descriptions are up to date.
 
 #### First steps
@@ -60,6 +60,7 @@ _Full description of Coedit options. May redirect to a specific widget page._
 * [Shortcuts editor](options_shortcuts_editor)
 * [Static macros](widgets_editor)
 * [Symbol list](widgets_symbol_list)
+* [Terminal](widgets_terminal)
 * [Todo list](widgets_todo_list)
 
 #### Widgets
@@ -83,6 +84,7 @@ _Description of each widget._
 * [Process input](widgets_process_input)
 * [Search](widgets_search)
 * [Symbol list](widgets_symbol_list)
+* [Terminal](widgets_terminal)
 * [Todo list](widgets_todo_list)
 
 {% raw %}
