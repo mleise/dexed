@@ -209,7 +209,7 @@ begin
   fTxtSyn.Assign(TxtSyn);
   //
   fDDocDelay:=200;
-  fAutoDotDelay:=20;
+  fAutoDotDelay:=100;
   fCurrLineAttribs := TSynSelectedColor.Create;
   fSelAttribs := TSynSelectedColor.Create;
   fFoldedColor := TSynSelectedColor.Create;
