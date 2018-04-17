@@ -3,6 +3,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
   Height = 195
   Top = 273
   Width = 328
+  ActiveControl = lstProj
   Caption = 'Project group'
   ClientHeight = 195
   ClientWidth = 328
@@ -12,14 +13,14 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
     ClientHeight = 195
     ClientWidth = 328
     inherited Content: TPanel
-      Height = 161
-      Top = 34
+      Height = 159
+      Top = 36
       Width = 328
-      ClientHeight = 161
+      ClientHeight = 159
       ClientWidth = 328
       object lstProj: TListView[0]
         Left = 4
-        Height = 126
+        Height = 140
         Top = 4
         Width = 320
         Align = alClient
@@ -29,25 +30,27 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
           item
             AutoSize = True
             Caption = 'Name'
-            Width = 49
+            Width = 47
           end        
           item
             AutoSize = True
             Caption = 'Type'
-            Width = 40
+            Width = 41
           end        
           item
             AutoSize = True
             Caption = 'Async'
-            Width = 49
+            Width = 47
           end        
           item
             AutoSize = True
             Caption = 'Configuration'
-            Width = 180
+            Width = 89
           end>
         GridLines = True
+        HideSelection = False
         ReadOnly = True
+        RowSelect = True
         ScrollBars = ssAutoBoth
         TabOrder = 0
         ViewStyle = vsReport
@@ -56,19 +59,19 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
       object Panel2: TPanel[1]
         Left = 4
-        Height = 23
-        Top = 134
+        Height = 7
+        Top = 148
         Width = 320
         Align = alBottom
         AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 23
+        ClientHeight = 7
         ClientWidth = 320
         TabOrder = 1
         object btnFreeFocus: TSpeedButton
           Left = 312
-          Height = 23
+          Height = 7
           Hint = 'Put the focus on the ungrouped project'
           Top = 0
           Width = 4
@@ -80,7 +83,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         end
         object StaticText1: TStaticText
           Left = 2
-          Height = 19
+          Height = 3
           Top = 2
           Width = 308
           Align = alClient
@@ -91,7 +94,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         end
         object btnAddUnfocused: TSpeedButton
           Left = 316
-          Height = 23
+          Height = 7
           Hint = 'Put the ungrouped project in the group'
           Top = 0
           Width = 4
@@ -104,7 +107,6 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Height = 28
       Width = 320
       object BtnAddProj: TCEToolButton[0]
         Left = 1
