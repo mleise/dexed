@@ -65,7 +65,7 @@ Release: $lbl
 Summary: IDE for the D programming language
 License: Boost
 URL: www.github.com/BBasile/Coedit
-Requires: gtk2, glibc, cairo, libX11
+Requires: gtk2, glibc, cairo, libX11, vte
 
 %description
 Coedit is an IDE for the DMD D compiler.
