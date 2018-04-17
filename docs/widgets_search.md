@@ -10,9 +10,9 @@ The _find and replace_ widget allows to find and replace text patterns in the fo
 
 ![](img/search.png)
 
-- **first field**: The pattern to find.
-- **second field**: The pattern used as replacement, only active when **"replace with"** is checked.
-- **whole word**: Only searches for the whole pattern.
+- **first field**: The pattern, the exact string or the substring to find.
+- **second field**: The string used as replacement, only active when **"replace with"** is checked.
+- **whole word**: Only searches for the whole string.
 - **backward**: Searches from the current position to the top.
 - **from cursor**: When not checked the operation always starts from the top of the document.
 - **case sensitive**: When unchecked the characters case is ignored.
@@ -24,7 +24,7 @@ The _Find all_ results are displayed in the [messages widget](widgets_messages),
 
 ![](img/find_all_results.png)
 
-The scope of _Find all_ can be set either to the current editor or to the whole project by clicking the icon at the right.
+The scope of _Find all_ can be set either to the current editor, to the whole project or to the opened documents by clicking the icon at the right.
 
 Notes:
 

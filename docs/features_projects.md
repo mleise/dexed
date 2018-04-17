@@ -47,6 +47,7 @@ The widget used to edit the properties is the [CE project editor](widgets_ce_pro
 - **"Compile and run project..."**: Ditto. Before the execution of the binary an input query dialog lets you pass options to the process.
 - **"Run project"**: Executes the project output when the binary produced is executable.
 - **"Run project..."**: Ditto. Before the execution, an input query dialog lets you specify switches and arguments to the process.
+- **"Test project"**: Only for DUB projects. Invoke `dub test` using the configuration selected in the [project inspector](widgets_project_inspector).
 
 #### Other build tools
 

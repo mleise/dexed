@@ -34,7 +34,7 @@ Commonly used keys are:
 - **followEditors**: When checked the current directory is automatically set to the folder containing a document when it gains the focus.
 - **followProjects**: When checked the current directory is automatically set to the folder containing a project when it gains the focus.
 - **font**: Allows to customize the font name and its size. The color is not handled here.
-- **foregroundCOlor**: The font color.
+- **foregroundColor**: The font color.
 - **scrollbackLines**: The max count of previous lines that are stored.
 - **selectedColor**: The bacground when some text is selected. Selected text color is then simply inverted.
 
