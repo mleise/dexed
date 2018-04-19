@@ -1471,7 +1471,7 @@ function TCESynMemo.indentationMode: TIndentationMode;
     u := Lines[index];
     if (u.length > 0) and (u[1] = #9) then
       result := imTabs
-    else if (u.length >= self.TabWidth) and u.StartsWith(b[0..TabWidth-1]) then
+    else if (u.length >= TabWidth) and u.StartsWith(b[0..TabWidth-1]) then
       result := imSpaces;
   end;
 var
@@ -1500,6 +1500,7 @@ var
   i: integer;
 begin
   assert(w > 0);
+  lines.BeginUpdate;
   for i:= 0 to lines.Count-1 do
   case m of
     imTabs:
@@ -1513,6 +1514,7 @@ begin
       fModified:=true;
     end;
   end;
+  lines.EndUpdate;
 end;
 
 procedure TCESynMemo.insertLeadingDDocSymbol(c: char);
