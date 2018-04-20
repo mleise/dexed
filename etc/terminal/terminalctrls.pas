@@ -359,6 +359,8 @@ var
   v: TGValue;
 begin
   fScrollbackLines:=value;
+  if not assigned(FInFo) then
+    exit;
   v.g_type:= 1;
   v.data[0].v_uint := fScrollbackLines;
   g_object_set_property(PGObject(PWidgetInfo(FInfo).ClientWidget), 'scrollback-lines', @v);
