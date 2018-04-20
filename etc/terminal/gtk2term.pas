@@ -97,14 +97,17 @@ var
 
 function Gtk2TermLoad: Boolean;
 const
-  vte = 'libvte.so';
+  vten1 = 'libvte.so';
+  vten2 = 'libvte.so.9';
 var
   Lib: TLibHandle;
 begin
   if Initialized then
     Exit(Loaded);
   Initialized := True;
-  Lib := LoadLibrary(vte);
+  Lib := LoadLibrary(vten2);
+  if Lib = 0 then
+    Lib := LoadLibrary(vten1);
   if Lib = 0 then
     Exit(Loaded);
 
