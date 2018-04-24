@@ -55,7 +55,7 @@ type
     {$ifdef windows}
     property terminalProgram: string read fTermProgram write fTermProgram;
     {$endif}
-    property scrollbackLines: LongWord read fScrollbackLines write setScrollBackLines default 512;
+    property scrollbackLines: LongWord read fScrollbackLines write setScrollBackLines default 4096;
     // Background color
     property backgroundColor: TColor read fBackgroundColor write setBackgroundColor default clBlack;
     // Font color
@@ -329,7 +329,7 @@ begin
   fSelectedColor:= clWhite;
   Font.Height:=11;
   Font.Name:='Monospace';
-  fScrollbackLines:=512;
+  fScrollbackLines:=4096;
 
   {$ifdef windows}
   fTermProgram := 'cmd.exe';
@@ -361,7 +361,7 @@ begin
   fScrollbackLines:=value;
   if not assigned(FInFo) then
     exit;
-  v.g_type:= 1;
+  v.g_type:= G_TYPE_UINT;
   v.data[0].v_uint := fScrollbackLines;
   g_object_set_property(PGObject(PWidgetInfo(FInfo).ClientWidget), 'scrollback-lines', @v);
 {$else}
