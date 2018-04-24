@@ -70,6 +70,9 @@ var
   vte_terminal_set_color_foreground: procedure(terminal: PVteTerminal;
     const background: PGdkColor); cdecl;
 
+  vte_terminal_set_color_bold: procedure(terminal: PVteTerminal;
+    const background: PGdkColor); cdecl;
+
   vte_terminal_set_color_highlight: procedure(terminal: PVteTerminal;
     const background: PGdkColor); cdecl;
 
@@ -119,6 +122,8 @@ begin
     'vte_terminal_set_color_background');
   @vte_terminal_set_color_foreground := GetProcAddress(Lib,
     'vte_terminal_set_color_foreground');
+  @vte_terminal_set_color_bold := GetProcAddress(Lib,
+    'vte_terminal_set_color_bold');
   @vte_terminal_set_color_highlight := GetProcAddress(Lib,
     'vte_terminal_set_color_highlight');
   @vte_terminal_set_color_highlight_foreground := GetProcAddress(Lib,

@@ -393,10 +393,12 @@ var
 begin
   fForegroundColor:=value;
   {$ifdef hasgtk2term}
-  if assigned(fTerminalHanlde) and assigned(vte_terminal_set_color_foreground) then
+  if assigned(fTerminalHanlde) and assigned(vte_terminal_set_color_foreground) and
+    assigned(vte_terminal_set_color_bold) then
   begin
     c := TColortoTGDKColor(fForegroundColor);
     vte_terminal_set_color_foreground(fTerminalHanlde, @c);
+    vte_terminal_set_color_bold(fTerminalHanlde, @c);
   end;
   {$endif}
 end;
