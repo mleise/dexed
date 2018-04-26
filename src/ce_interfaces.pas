@@ -236,6 +236,20 @@ type
     amcAutoCompile  // same as amcAutoEdit or amcAutoProj but set by the ICEMessagesDisplay according to what's being compiled.
   );
 
+  TLifetimeStatus = (
+    lfsLoading,  // IDE is not ready yet, other services might be nil
+    lfsLoaded,   // IDE is 100% working
+    lfsExiting  // IDE is quiting, other services will be nil
+  );
+
+  (**
+   * Single service providing information about the IDE liftetime
+   *)
+  ICELifetimeManager = interface(ICESingleService)
+    function getLifetimeStatus: TLifetimeStatus;
+    function asObject: TObject;
+  end;
+
   (**
    * Single service provided by the messages widget.
    *)
@@ -453,6 +467,7 @@ type
   function getCompilerSelector: ICECompilerSelector; inline;
   function getMainMenu: ICEMainMenu; inline;
   function getCodeFormatting: ICECodeFormatting; inline;
+  function getLifeTimeManager: ICELifetimeManager; inline;
 
 implementation
 
@@ -611,6 +626,11 @@ end;
 function getCodeFormatting: ICECodeFormatting; inline;
 begin
   exit(EntitiesConnector.getSingleService('ICECodeFormatting') as ICECodeFormatting);
+end;
+
+function getLifeTimeManager: ICELifetimeManager; inline;
+begin
+  exit(EntitiesConnector.getSingleService('ICELifetimeManager') as ICELifetimeManager);
 end;
 {$ENDREGION}
 

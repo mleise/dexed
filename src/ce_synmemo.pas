@@ -166,9 +166,13 @@ type
     procedure goToLine(value: integer);
   end;
 
+  { TCESynMemo }
+
   TCESynMemo = class(TSynEdit, ICEDebugObserver)
   private
     //fIndentGuideMarkup: TSynEditMarkupFoldColors;
+    fLifeTimeManager: TObject;
+    fIdentDialShown: boolean;
     fScrollMemo: TCEScrollMemo;
     fFilename: string;
     fDastWorxExename: string;
@@ -288,6 +292,7 @@ type
     procedure debugQueryBreakPoint(const line: integer; out fname: string; out kind: TBreakPointKind);
     procedure debugBreak(const fname: string; line: integer; reason: TCEDebugBreakReason);
     function breakPointsCount: integer;
+    procedure tryToPatchMixedIndentation;
   protected
     procedure DoEnter; override;
     procedure DoExit; override;
@@ -899,10 +904,15 @@ end;
 constructor TCESynMemo.Create(aOwner: TComponent);
 var
   z: TIconScaledSize;
+  i: ICELifetimeManager;
 begin
   inherited;
 
   fScrollMemo := TCEScrollMemo.construct(self);
+
+  i := getLifeTimeManager();
+  if (i <> nil) then
+    fLifeTimeManager := i.asObject;
 
   OnShowHint:= @showHintEvent;
   OnStatusChange:= @handleStatusChanged;
@@ -1120,9 +1130,9 @@ end;
 procedure TCESynMemo.setFocus;
 begin
   inherited;
-  //checkFileDate;
   highlightCurrentIdentifier;
   subjDocFocused(TCEMultiDocSubject(fMultiDocSubject), self);
+  tryToPatchMixedIndentation;
 end;
 
 procedure TCESynMemo.showPage;
@@ -2997,35 +3007,7 @@ begin
     loadCache;
     fCacheLoaded := true;
   end;
-  case indentationMode() of
-    imTabs:
-      if detectIndentMode then
-        Options:= Options - [eoTabsToSpaces];
-    imSpaces:
-      if detectIndentMode then
-        Options:= Options + [eoTabsToSpaces];
-    imMixed:
-      if (isDSource or alwaysAdvancedFeatures) and
-        (dlgYesNo('Mixed indentation style detected, ' +
-        'do you wish to convert to a single mode ?') = mrYes) then
-      with TMixedIndetationDialog.construct() do
-      try
-      case ShowModal of
-        10:
-        begin
-          forceIndentation(imTabs, TMixedIndetationDialog.fSpacesPerTab);
-          Options:= Options - [eoTabsToSpaces];
-        end;
-        11:
-        begin
-          forceIndentation(imSpaces, TMixedIndetationDialog.fSpacesPerTab);
-          Options:= Options + [eoTabsToSpaces];
-        end;
-      end;
-      finally
-        free;
-      end;
-  end;
+
   subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
   fCanDscan := true;
 end;
@@ -3492,6 +3474,45 @@ begin
   result := 0;
   for i := 0 to marks.count-1 do
     result += byte(marks[i].ImageIndex = integer(giBreakSet));
+end;
+
+procedure TCESynMemo.tryToPatchMixedIndentation;
+begin
+  if fLifeTimeManager.isNotNil and not fIdentDialShown and
+    ((fLifeTimeManager as ICELifetimeManager).getLifetimeStatus = lfsLoaded)
+      then
+  begin
+    fIdentDialShown := true;
+    case indentationMode() of
+      imTabs:
+        if detectIndentMode then
+          Options:= Options - [eoTabsToSpaces];
+      imSpaces:
+        if detectIndentMode then
+          Options:= Options + [eoTabsToSpaces];
+      imMixed:
+        if (isDSource or alwaysAdvancedFeatures) and
+          (dlgYesNo('Mixed indentation style detected, ' +
+          'do you wish to convert to a single mode ?') = mrYes) then
+        with TMixedIndetationDialog.construct() do
+        try
+        case ShowModal of
+          10:
+          begin
+            forceIndentation(imTabs, TMixedIndetationDialog.fSpacesPerTab);
+            Options:= Options - [eoTabsToSpaces];
+          end;
+          11:
+          begin
+            forceIndentation(imSpaces, TMixedIndetationDialog.fSpacesPerTab);
+            Options:= Options + [eoTabsToSpaces];
+          end;
+        end;
+        finally
+          free;
+        end;
+    end;
+  end;
 end;
 
 procedure TCESynMemo.addBreakPoint(line: integer);

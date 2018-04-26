@@ -22,6 +22,17 @@ type
 
   TCEApplicationOptions = class;
 
+  TCELifetimeProvider = class(ICELifetimeManager)
+  strict private
+    fStatus: TLifetimeStatus;
+    function singleServiceName: string;
+    function getLifetimeStatus: TLifetimeStatus;
+    function asObject: TObject;
+  public
+    constructor create;
+    property lifetimeStatus: TLifetimeStatus read fStatus write fStatus;
+  end;
+
   TAsyncWait = (awNo, awYes, awCustom);
 
   TRunnableToFolderCondition = (
@@ -415,6 +426,7 @@ type
     fAppliOpts: TCEApplicationOptions;
     fProjActionsLock: boolean;
     fCompilerSelector: ICECompilerSelector;
+    fLifeTimeStatusProvider: TCELifetimeProvider;
     procedure updateFloatingWidgetOnTop(onTop: boolean);
     procedure widgetDockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
     procedure mnuOptsItemClick(sender: TObject);
@@ -1105,6 +1117,28 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION Lifetime}
+constructor TCELifetimeProvider.create;
+begin
+  EntitiesConnector.addSingleService(self);
+end;
+
+function TCELifetimeProvider.singleServiceName: string;
+begin
+  result := 'ICELifetimeManager';
+end;
+
+function TCELifetimeProvider.getLifetimeStatus: TLifetimeStatus;
+begin
+  result := fStatus;
+end;
+
+function TCELifetimeProvider.asObject: TObject;
+begin
+  result := self;
+end;
+{$ENDREGION}
+
 {$REGION Actions shortcuts -----------------------------------------------------}
 constructor TCEPersistentMainShortcuts.create(aOwner: TComponent);
 begin
@@ -1194,6 +1228,10 @@ end;
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEMainForm.create(aOwner: TComponent);
 begin
+  fLifeTimeStatusProvider := TCELifetimeProvider.create;
+  fLifeTimeStatusProvider.lifetimeStatus:=lfsLoading;
+
+
   inherited create(aOwner);
 
   // provide defaults, necessary because not handled by docking.xml
@@ -2025,6 +2063,8 @@ begin
           OpenURL(url);
     end;
   end;
+
+  fLifeTimeStatusProvider.lifetimeStatus := lfsLoaded;
 end;
 
 procedure TCEMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -2081,6 +2121,7 @@ begin
   fOptionCategories.Free;
   EntitiesConnector.removeObserver(self);
   inherited;
+  fLifeTimeStatusProvider.free;
 end;
 
 procedure TCEMainForm.UpdateDockCaption(Exclude: TControl = nil);
@@ -2208,7 +2249,7 @@ begin
       free;
     end;
   end;
-
+  fLifeTimeStatusProvider.lifetimeStatus:=lfsExiting;
   SaveLastDocsAndProj;
   CanClose:= true;
   fProjectGroup.closeGroup;
