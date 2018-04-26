@@ -1149,8 +1149,6 @@ begin
 end;
 
 procedure TCESynMemo.setFocus;
-var
-  p: TPoint;
 begin
   inherited;
   highlightCurrentIdentifier;
@@ -1164,9 +1162,6 @@ begin
 end;
 
 procedure TCESynMemo.DoEnter;
-var
-  i: integer;
-  p: TPoint;
 begin
   inherited;
   checkFileDate;
