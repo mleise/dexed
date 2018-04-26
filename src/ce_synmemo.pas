@@ -2448,7 +2448,7 @@ const
 begin
   s := LineText;
   p := PhysicalToLogicalPos(CaretXY);
-  if (p.x = 1) and not right then
+  if (p.x <= 1) and not right then
   begin
     ExecuteCommand(ecLeft, #0, nil);
     exit;
