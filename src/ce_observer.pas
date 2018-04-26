@@ -5,7 +5,7 @@ unit ce_observer;
 interface
 
 uses
-  Classes, SysUtils, Contnrs;
+  Classes, SysUtils, Contnrs, ce_common;
 
 type
 
@@ -19,8 +19,7 @@ type
     function singleServiceName: string;
   end;
 
-  //TServiceList = class(specialize TStringHashMap<TObject>)
-  //end;
+  TServiceList = class(specialize TStringHashMap<TObject>);
 
   (**
    * Manages the connections between the observers and their subjects in the
@@ -30,7 +29,7 @@ type
   private
     fObservers: TObjectList;
     fSubjects: TObjectList;
-    fServices: TObjectList;
+    fServices: TServiceList;
     fUpdatesCount: Integer;
     procedure tryUpdate;
     procedure updateEntities;
@@ -110,7 +109,7 @@ constructor TCEEntitiesConnector.Create;
 begin
   fObservers := TObjectList.Create(False);
   fSubjects := TObjectList.Create(False);
-  fServices := TObjectList.Create(False);
+  fServices := TServiceList.Create();
 end;
 
 destructor TCEEntitiesConnector.Destroy;
@@ -203,11 +202,9 @@ end;
 
 procedure TCEEntitiesConnector.addSingleService(provider: TObject);
 begin
-  if fServices.IndexOf(provider) <> -1 then
-    exit;
   if not (provider is ICESingleService) then
     exit;
-  fServices.Add(provider);
+  fServices.insert((provider as ICESingleService).singleServiceName, provider);
 end;
 
 function TCEEntitiesConnector.getSingleService(const serviceName: string): TObject;
@@ -216,12 +213,8 @@ var
   serv: ICESingleService;
 begin
   Result := nil;
-  for i := 0 to fServices.Count - 1 do
-  begin
-    serv := fServices[i] as ICESingleService;
-    if serv.singleServiceName = serviceName then
-      exit(fServices[i]);
-  end;
+  if not fServices.GetValue(serviceName, result) then
+    result := nil;
 end;
 {$ENDREGION}
 
