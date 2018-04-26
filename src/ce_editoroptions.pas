@@ -738,6 +738,10 @@ begin
   anEditor.closeCompletionChars:=cs;
 
   for i := 0 to anEditor.Keystrokes.Count-1 do
+    anEditor.Keystrokes.Items[i].ShortCut:=0;
+
+  anEditor.Keystrokes.BeginUpdate;
+  for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
     kst := anEditor.Keystrokes.Items[i];
     for j := 0 to fShortCuts.Count-1 do
@@ -746,22 +750,20 @@ begin
       shc := TCEPersistentShortcut(fShortCuts.Items[j]);
       if shc.actionName = EditorCommandToCodeString(kst.Command) then
       begin
-        try
-          for k := 0 to i-1 do
-            if anEditor.Keystrokes.Items[k].shortCut = shc.shortcut then
-              if shc.shortCut <> 0 then
-                dup := true;
-          if not dup then
-            kst.shortCut := shc.shortcut;
-        except
-          kst.shortCut := 0;
-          shc.shortcut := 0;
-          // in case of conflict synedit raises an exception.
+        for k := j + 1 to fShortCuts.Count-1 do
+          if (TCEPersistentShortcut(fShortCuts.Items[k]).shortcut = shc.shortcut) and
+            (shc.shortCut <> 0) and (k <> j) then
+        begin
+          dup := true;
+          break;
         end;
-        break;
+        if not dup then
+          kst.shortCut := shc.shortcut;
       end;
+      break;
     end;
   end;
+  anEditor.Keystrokes.EndUpdate;
 end;
 {$ENDREGION}
 
