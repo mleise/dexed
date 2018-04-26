@@ -280,6 +280,7 @@ type
     procedure addGutterIcon(line: integer; value: TGutterIcon);
     procedure removeGutterIcon(line: integer; value: TGutterIcon);
     procedure patchClipboardIndentation;
+    procedure gotoWordEdge(right: boolean);
     //
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
     procedure removeDebugTimeMarks;
@@ -446,7 +447,10 @@ const
   ecPrevWarning         = ecUserFirst + 27;
   ecGotoLine            = ecUserFirst + 28;
   ecShowCurlineWarning  = ecUserFirst + 29;
-
+  ecLeftWordEdge        = ecUserFirst + 30;
+  ecRightWordEdge       = ecUserFirst + 31;
+  ecSelLeftWordEdge     = ecUserFirst + 32;
+  ecSelRightWordEdge    = ecUserFirst + 33;
 var
   D2Syn: TSynD2Syn;     // used as model to set the options when no editor exists.
   TxtSyn: TSynTxtSyn;   // used as model to set the options when no editor exists.
@@ -1300,6 +1304,10 @@ begin
     AddKey(ecNextWarning, 0, [], 0, []);
     AddKey(ecGotoLine, 0, [], 0, []);
     AddKey(ecShowCurlineWarning, 0, [], 0, []);
+    AddKey(ecLeftWordEdge, 0, [], 0, []);
+    AddKey(ecRightWordEdge, 0, [], 0, []);
+    AddKey(ecSelLeftWordEdge, 0, [], 0, []);
+    AddKey(ecSelRightWordEdge, 0, [], 0, []);
   end;
 end;
 
@@ -1335,6 +1343,10 @@ begin
     'ecNextWarning':        begin Int := ecNextWarning; exit(true); end;
     'ecGotoLine':           begin Int := ecGotoLine; exit(true); end;
     'ecShowCurlineWarning': begin Int := ecShowCurlineWarning; exit(true); end;
+    'ecLeftWordEdge':       begin Int := ecLeftWordEdge; exit(true); end;
+    'ecRightWordEdge':      begin Int := ecRightWordEdge; exit(true); end;
+    'ecSelLeftWordEdge':    begin Int := ecSelLeftWordEdge; exit(true); end;
+    'ecSelRightWordEdge':   begin Int := ecSelRightWordEdge; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1371,6 +1383,10 @@ begin
     ecNextWarning:        begin Ident := 'ecNextWarning'; exit(true); end;
     ecGotoLine:           begin Ident := 'ecGotoLine'; exit(true); end;
     ecShowCurlineWarning: begin Ident := 'ecShowCurlineWarning'; exit(true); end;
+    ecLeftWordEdge:       begin Ident := 'ecLeftWordEdge'; exit(true); end;
+    ecRightWordEdge:      begin Ident := 'ecRightWordEdge'; exit(true); end;
+    ecSelLeftWordEdge:    begin Ident := 'ecSelLeftWordEdge'; exit(true); end;
+    ecSelRightWordEdge:   begin Ident := 'ecSelRightWordEdge'; exit(true); end;
     else exit(false);
   end;
 end;
@@ -1378,6 +1394,26 @@ end;
 procedure TCESynMemo.DoOnProcessCommand(var Command: TSynEditorCommand;
   var AChar: TUTF8Char; Data: pointer);
 begin
+  FBlockSelection.AutoExtend := False;
+  FBlockSelection.StickyAutoExtend := False;
+  case Command of
+    5: Command := ecLeftWordEdge;
+    6: Command := ecRightWordEdge;
+    105:
+    begin
+      Command := ecSelLeftWordEdge;
+      FBlockSelection.ActiveSelectionMode := smNormal;
+      FBlockSelection.AutoExtend := true;
+      FBlockSelection.StickyAutoExtend := True;
+    end;
+    106:
+    begin
+      Command := ecSelRightWordEdge;
+      FBlockSelection.ActiveSelectionMode := smNormal;
+      FBlockSelection.AutoExtend := true;
+      FBlockSelection.StickyAutoExtend := True;
+    end;
+  end;
   inherited;
   case Command of
     ecCut: if not SelAvail then
@@ -1463,6 +1499,10 @@ begin
       gotoLinePrompt;
     ecShowCurlineWarning:
       showCurLineWarning;
+    ecLeftWordEdge, ecSelLeftWordEdge:
+      gotoWordEdge(false);
+    ecRightWordEdge, ecSelRightWordEdge:
+      gotoWordEdge(true);
   end;
   if fOverrideColMode and not SelAvail then
   begin
@@ -2394,6 +2434,51 @@ begin
     end;
   finally
     d.Free;
+  end;
+end;
+
+procedure TCESynMemo.gotoWordEdge(right: boolean);
+var
+  s: string;
+  c: char;
+  p: TPoint;
+const
+  w: TSysCharSet = [' ', #9];
+  i: TSysCharSet = ['a'..'z', 'A'..'Z', '0'..'9', '_'];
+begin
+  s := LineText;
+  p := PhysicalToLogicalPos(CaretXY);
+  if (p.x = 1) and not right then
+  begin
+    ExecuteCommand(ecLeft, #0, nil);
+    exit;
+  end;
+  if (p.x > s.length-1) and right then
+  begin
+    ExecuteCommand(ecRight, #0, nil);
+    exit;
+  end;
+  if right then
+    c := s[p.x]
+  else
+    c := s[p.x-1];
+  if not right then
+  begin
+    if c in w then
+      ExecuteCommand(ecWordEndLeft, #0, nil)
+    else if c in i then
+      ExecuteCommand(ecWordLeft, #0, nil)
+    else
+      ExecuteCommand(ecLeft, #0, nil);
+  end
+  else
+  begin
+    if c in w then
+      ExecuteCommand(ecWordRight, #0, nil)
+    else if c in i then
+      ExecuteCommand(ecWordEndRight, #0, nil)
+    else
+      ExecuteCommand(ecRight, #0, nil);
   end;
 end;
 {$ENDREGION}
