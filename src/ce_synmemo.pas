@@ -2814,6 +2814,9 @@ procedure TCESynMemo.handleStatusChanged(Sender: TObject; Changes: TSynStatusCha
 begin
   if scOptions in Changes then
   begin
+    // note: eoAutoHideCursor is buggy when eoAlwaysVisibleCaret is not also set
+    if eoAutoHideCursor in Options2 then
+      Options2 := Options2 + [eoAlwaysVisibleCaret];
     if fSmartDdocNewline and not (eoAutoIndent in Options) then
       Options := Options + [eoAutoIndent];
     if Beautifier.isNotNil and (Beautifier is TSynBeautifier) then
