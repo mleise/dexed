@@ -281,6 +281,8 @@ type
     procedure removeGutterIcon(line: integer; value: TGutterIcon);
     procedure patchClipboardIndentation;
     procedure gotoWordEdge(right: boolean);
+    procedure handleModalBeginning(sender: TObject);
+    procedure handleModalFinsihed(sender: TObject);
     //
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
     procedure removeDebugTimeMarks;
@@ -1066,6 +1068,9 @@ begin
   fAutoCloseCurlyBrace:= autoCloseOnNewLineLexically;
   fAutoClosedPairs:= [autoCloseSquareBracket];
 
+  application.AddOnActivateHandler(@handleModalFinsihed);
+  application.AddOnDeactivateHandler(@handleModalBeginning);
+
   fDastWorxExename:= exeFullName('dastworx' + exeExt);
 
   fDebugger := EntitiesConnector.getSingleService('ICEDebugger') as ICEDebugger;
@@ -1131,7 +1136,21 @@ begin
     Font.Size := fDefaultFontSize;
 end;
 
+procedure TCESynMemo.handleModalFinsihed(sender: TObject);
+begin
+  cursor := crIBeam;
+  UpdateCursor;
+end;
+
+procedure TCESynMemo.handleModalBeginning(sender: TObject);
+begin
+  cursor := crDefault;
+  UpdateCursor;
+end;
+
 procedure TCESynMemo.setFocus;
+var
+  p: TPoint;
 begin
   inherited;
   highlightCurrentIdentifier;
@@ -1145,6 +1164,9 @@ begin
 end;
 
 procedure TCESynMemo.DoEnter;
+var
+  i: integer;
+  p: TPoint;
 begin
   inherited;
   checkFileDate;
