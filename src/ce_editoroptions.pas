@@ -737,9 +737,6 @@ begin
     include(cs, c);
   anEditor.closeCompletionChars:=cs;
 
-  for i := 0 to anEditor.Keystrokes.Count-1 do
-    anEditor.Keystrokes.Items[i].ShortCut:=0;
-
   anEditor.Keystrokes.BeginUpdate;
   for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
