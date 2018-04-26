@@ -1195,6 +1195,11 @@ end;
 constructor TCEMainForm.create(aOwner: TComponent);
 begin
   inherited create(aOwner);
+
+  // provide defaults, necessary because not handled by docking.xml
+  width := (Screen.Width div 3) * 2;
+  height := (Screen.Height div 3) * 2;
+
   fOptionCategories := TCEEditableOptionsSubject.create;
 
   EntitiesConnector.addObserver(self);
