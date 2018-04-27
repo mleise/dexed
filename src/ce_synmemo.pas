@@ -3229,7 +3229,6 @@ var
   curMd5: TMDDigest;
   str: TStringList;
   txt: string;
-  i: integer;
 begin
   if fDiffDialogWillClose or fDisableFileDateCheck then
     exit;

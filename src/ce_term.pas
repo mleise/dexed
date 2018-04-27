@@ -57,7 +57,6 @@ type
   private
     fTerm: TTerminal;
     fOpts: TCETerminalOptions;
-    fFirst: boolean;
     fLastCd: string;
 
     procedure docNew(document: TCESynMemo);

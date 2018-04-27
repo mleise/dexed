@@ -208,9 +208,6 @@ begin
 end;
 
 function TCEEntitiesConnector.getSingleService(const serviceName: string): TObject;
-var
-  i: Integer;
-  serv: ICESingleService;
 begin
   Result := nil;
   if not fServices.GetValue(serviceName, result) then
