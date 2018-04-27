@@ -1137,8 +1137,9 @@ end;
 procedure TCESynMemo.handleModalBeginning(sender: TObject);
 begin
   // AV can happens in TCustomSynEdit.UpdateCursor
-  if assigned(FTextArea) then
-    cursor := crDefault;
+  if assigned(FTextArea) and
+    (cursor = crNone) and (eoAutoHideCursor in Options2) then
+      cursor := crDefault;
 end;
 
 procedure TCESynMemo.setFocus;
