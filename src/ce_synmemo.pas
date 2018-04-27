@@ -282,7 +282,6 @@ type
     procedure patchClipboardIndentation;
     procedure gotoWordEdge(right: boolean);
     procedure handleModalBeginning(sender: TObject);
-    procedure handleModalFinsihed(sender: TObject);
     //
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
     procedure removeDebugTimeMarks;
@@ -1068,7 +1067,6 @@ begin
   fAutoCloseCurlyBrace:= autoCloseOnNewLineLexically;
   fAutoClosedPairs:= [autoCloseSquareBracket];
 
-  application.AddOnActivateHandler(@handleModalFinsihed);
   application.AddOnDeactivateHandler(@handleModalBeginning);
 
   fDastWorxExename:= exeFullName('dastworx' + exeExt);
@@ -1134,11 +1132,6 @@ begin
   fDefaultFontSize:= value;
   if Font.Size = old then
     Font.Size := fDefaultFontSize;
-end;
-
-procedure TCESynMemo.handleModalFinsihed(sender: TObject);
-begin
-  cursor := crIBeam;
 end;
 
 procedure TCESynMemo.handleModalBeginning(sender: TObject);
