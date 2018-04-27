@@ -6,7 +6,7 @@ object CEDiffViewer: TCEDiffViewer
   Caption = 'External file modification'
   ClientHeight = 441
   ClientWidth = 516
-  LCLVersion = '1.8.0.6'
+  Visible = False
   inline editor: TSynEdit
     Left = 4
     Height = 385
@@ -139,7 +139,7 @@ object CEDiffViewer: TCEDiffViewer
       TabOrder = 0
     end
     object btnAccept: TBitBtn
-      Left = 283
+      Left = 380
       Height = 29
       Hint = 'Load the new version'
       Top = 2
@@ -155,7 +155,7 @@ object CEDiffViewer: TCEDiffViewer
       TabOrder = 1
     end
     object btnCancel: TBitBtn
-      Left = 412
+      Left = 283
       Height = 29
       Hint = 'Don''t reload the modifications for now'
       Top = 2

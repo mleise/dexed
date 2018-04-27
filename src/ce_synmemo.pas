@@ -3236,6 +3236,7 @@ var
   curMd5: TMDDigest;
   str: TStringList;
   txt: string;
+  i: integer;
 begin
   if fDiffDialogWillClose or fDisableFileDateCheck then
     exit;
@@ -3268,6 +3269,7 @@ begin
             mrOK:
             begin
               replaceUndoableContent(str.strictText);
+              fModified := false;
               fFileDate := newDate;
             end;
             mrIgnore: fFileDate := newDate;
