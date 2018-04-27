@@ -406,7 +406,7 @@ type
     constructor construct(editor: TCESynMemo);
   end;
 
-  TMixedIndetationDialog = class(TForm)
+  TMixedIndentationDialog = class(TForm)
   private
     class var fSpacesPerTab: integer;
     procedure spinSpacesPerTabChange(sender: TObject);
@@ -581,8 +581,8 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TMixedIndetationDialog}
-constructor TMixedIndetationDialog.construct();
+{$REGION TMixedIndentationDialog}
+constructor TMixedIndentationDialog.construct();
 var
   pn: TPanel;
 begin
@@ -651,7 +651,7 @@ begin
   height := ScaleY(150, 96);
 end;
 
-procedure TMixedIndetationDialog.spinSpacesPerTabChange(sender: TObject);
+procedure TMixedIndentationDialog.spinSpacesPerTabChange(sender: TObject);
 begin
   self.fSpacesPerTab:= TSpinEdit(sender).Value;
 end;
@@ -3596,17 +3596,17 @@ begin
         if (isDSource or alwaysAdvancedFeatures) and
           (dlgYesNo('Mixed indentation style detected, ' +
           'do you wish to convert to a single mode ?') = mrYes) then
-        with TMixedIndetationDialog.construct() do
+        with TMixedIndentationDialog.construct() do
         try
         case ShowModal of
           10:
           begin
-            forceIndentation(imTabs, TMixedIndetationDialog.fSpacesPerTab);
+            forceIndentation(imTabs, TMixedIndentationDialog.fSpacesPerTab);
             Options:= Options - [eoTabsToSpaces];
           end;
           11:
           begin
-            forceIndentation(imSpaces, TMixedIndetationDialog.fSpacesPerTab);
+            forceIndentation(imSpaces, TMixedIndentationDialog.fSpacesPerTab);
             Options:= Options + [eoTabsToSpaces];
           end;
         end;
