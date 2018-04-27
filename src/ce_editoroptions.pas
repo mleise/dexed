@@ -669,7 +669,7 @@ end;
 
 procedure TCEEditorOptions.applyChangeToEditor(anEditor: TCESynMemo);
 var
-  i, j, k: Integer;
+  i, j: Integer;
   shc: TCEPersistentShortcut;
   kst: TSynEditKeyStroke;
   dup: boolean;
@@ -737,7 +737,13 @@ begin
     include(cs, c);
   anEditor.closeCompletionChars:=cs;
 
-  anEditor.Keystrokes.BeginUpdate;
+  for i := 0 to anEditor.Keystrokes.Count-1 do
+  begin
+    kst := anEditor.Keystrokes.Items[i];
+    kst.ShortCut:= 0;
+    kst.ShortCut2:= 0;
+  end;
+
   for i := 0 to anEditor.Keystrokes.Count-1 do
   begin
     kst := anEditor.Keystrokes.Items[i];
@@ -747,20 +753,16 @@ begin
       shc := TCEPersistentShortcut(fShortCuts.Items[j]);
       if shc.actionName = EditorCommandToCodeString(kst.Command) then
       begin
-        for k := j + 1 to fShortCuts.Count-1 do
-          if (TCEPersistentShortcut(fShortCuts.Items[k]).shortcut = shc.shortcut) and
-            (shc.shortCut <> 0) and (k <> j) then
-        begin
-          dup := true;
-          break;
-        end;
         if not dup then
+        try
           kst.shortCut := shc.shortcut;
+        except
+          kst.shortCut := 0;
+        end;
+        break;
       end;
-      break;
     end;
   end;
-  anEditor.Keystrokes.EndUpdate;
 end;
 {$ENDREGION}
 
