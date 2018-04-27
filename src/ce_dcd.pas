@@ -573,7 +573,7 @@ begin
   fClient.Parameters.Clear;
   fClient.Parameters.Add('-l');
   fClient.Parameters.Add('-c');
-  fClient.Parameters.Add(intToStr(fDoc.SelStart - 1));
+  fClient.Parameters.Add(intToStr(fDoc.SelStart));
   fClient.Execute;
   writeSourceToInput;
   //
