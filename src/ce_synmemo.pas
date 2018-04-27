@@ -1139,13 +1139,11 @@ end;
 procedure TCESynMemo.handleModalFinsihed(sender: TObject);
 begin
   cursor := crIBeam;
-  UpdateCursor;
 end;
 
 procedure TCESynMemo.handleModalBeginning(sender: TObject);
 begin
   cursor := crDefault;
-  UpdateCursor;
 end;
 
 procedure TCESynMemo.setFocus;
