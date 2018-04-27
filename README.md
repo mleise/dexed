@@ -9,7 +9,7 @@ Coedit is an IDE for the [D programming language](https://dlang.org), its compil
 **Overview**
 ---
 
-- available for _Linux_, _FreeBSD_ or _Windows_.
+- available for _Linux_ or _Windows_.
 - supports all the D compilers (DMD-GDC-LDC).
 - supports the DUB projects (JSON or SDL) and also Coedit own project format.
 - support the DUB scripts (aka _single file packages_) and Coedit own script format (aka _runnable modules_).
@@ -29,32 +29,32 @@ Coedit is an IDE for the [D programming language](https://dlang.org), its compil
 **Project information**
 ---
 
-- latest release: version 3.6.8, Fri 20 Apr 2018.
+- latest release: version 3.6.9, Fri 27 Apr 2018.
 - licensed under the terms of the Boost software license.
 - Development can be supported with [Paypal donations](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AQDJVC39PJF7J).
 
-**Download version 3.6.8**
+**Download version 3.6.9**
 ---
 
 Download the zipped binaries or the zip that contains the setup program for you platform:
 
-- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.8/coedit.3.6.8.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.8/coedit.3.6.8.linux64.zip)
-- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.8/coedit.3.6.8.win32.setup.zip)
-- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.8/coedit.3.6.8.win32.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.8/coedit-3.6.8-0.x86_64.rpm)
-- :package: [deb for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.8/coedit-3.6.8.amd64.deb)
+- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.9/coedit.3.6.9.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.9/coedit.3.6.9.linux64.zip)
+- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.9/coedit.3.6.9.win32.setup.zip)
+- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.9/coedit.3.6.9.win32.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.9/coedit-3.6.9-0.x86_64.rpm)
+- :package: [deb for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.9/coedit-3.6.9.amd64.deb)
 
 The _zip_ archives allow to move freely the files.
 The _setup.zip_ archives contains a command line program that installs to predefined locations so that the software can be run without additional intervention.
 The _deb_ and the _rpm_ packages are for those who prefer the official setup system for their linux systems.
-Linux i386 version must be [built manually](https://bbasile.github.io/Coedit/build.html).
+Linux 32 bits version must be [built manually](https://bbasile.github.io/Coedit/build.html).
 
 [**See this page**](https://bbasile.github.io/Coedit/setup.html) for more information about the setup.
 
-There is also 3rd part packages, maintained by volunteers, but the available versions are not guaranteed to be the latest:
+Download 3rd part packages, maintained by volunteers, but the available versions are not guaranteed to be the latest:
 
-- :package: [port for FreeBSD](https://www.freshports.org/editors/coedit/)
+- :package: [port for FreeBSD](https://www.freshports.org/editors/coedit/), __considered outdated__.
 - :package: [AUR package for ArchLinux](https://aur.archlinux.org/packages/coedit-bin/)
 
 **Build**

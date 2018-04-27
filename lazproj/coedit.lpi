@@ -436,6 +436,10 @@
               <IgnoredMessages idx5024="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dDEBUG"/>
+            <OtherDefines Count="2">
+              <Define0 Value="RELEASE"/>
+              <Define1 Value="GTK_REMOVE_CLIPBOARD_NULL"/>
+            </OtherDefines>
           </Other>
         </CompilerOptions>
       </Item2>
