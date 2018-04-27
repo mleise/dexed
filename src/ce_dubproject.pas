@@ -1306,6 +1306,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
     q: TSemVer;
     u: PSemVer;
     i: integer;
+    c: TJSONObject;
   begin
     if obj.findObject('dependencies' + suffix, deps) then
     begin
@@ -1317,8 +1318,19 @@ procedure TCEDubProject.updateImportPathsFromJson;
       for i := 0 to deps.Count-1 do
       begin
         n := deps.Names[i];
-        s := z + n;
 
+        // local path specified
+        if deps.findObject(n, c) and c.findAny('path', j) then
+        begin
+          s := expandFilenameEx(fBasePath, j.AsString);
+          if (s + 'source').dirExists then
+            fImportPaths.Add(s)
+          else if (s + 'src').dirExists then
+            fImportPaths.Add(s);
+          continue;
+        end;
+
+        s := z + n;
         // Try to fetch if not present at all
         if not fLocalPackages.find(n, pck) and dubBuildOptions.autoFetch then
         begin
