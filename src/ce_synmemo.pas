@@ -1953,7 +1953,7 @@ begin
     end;
     pth := pth.extractFilePath;
     setLength(pth,pth.length-1);
-    if (pth.extractFilename = 'phobos') or (pth.extractFilename = 'core')
+    if (pth.extractFilename = 'std') or (pth.extractFilename = 'core')
       or (pth.extractFilename = 'etc') then
         break;
   end;
