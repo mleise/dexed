@@ -1137,8 +1137,9 @@ end;
 procedure TCESynMemo.handleModalBeginning(sender: TObject);
 begin
   // AV can happens in TCustomSynEdit.UpdateCursor
-  if assigned(FTextArea) and (eoAutoHideCursor in Options2) then
-    MouseMove([], 0, 0);
+  if (self <> nil) and (Pcardinal(@FTextArea)^ <> $f0f0f0f0) and (Pcardinal(@FTextArea)^ <> $0f0f0f0f)
+    and assigned(FTextArea) and (eoAutoHideCursor in Options2) then
+      MouseMove([], 0, 0);
 end;
 
 procedure TCESynMemo.setFocus;
@@ -1146,7 +1147,6 @@ begin
   inherited;
   highlightCurrentIdentifier;
   subjDocFocused(TCEMultiDocSubject(fMultiDocSubject), self);
-  tryToPatchMixedIndentation;
 end;
 
 procedure TCESynMemo.showPage;
@@ -1162,6 +1162,7 @@ begin
     subjDocFocused(TCEMultiDocSubject(fMultiDocSubject), self);
   fFocusForInput := true;
   fScrollMemo.Visible:=false;
+  tryToPatchMixedIndentation;
 end;
 
 procedure TCESynMemo.DoExit;
@@ -3588,8 +3589,8 @@ begin
           Options:= Options + [eoTabsToSpaces];
       imMixed:
         if (isDSource or alwaysAdvancedFeatures) and
-          (dlgYesNo('Mixed indentation style detected, ' +
-          'do you wish to convert to a single mode ?') = mrYes) then
+          (dlgYesNo('Mixed indentation style detected in, "' + fFilename +
+          '", do you wish to convert to a single mode ?') = mrYes) then
         with TMixedIndentationDialog.construct() do
         try
         case ShowModal of
