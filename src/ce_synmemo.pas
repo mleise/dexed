@@ -1079,6 +1079,7 @@ end;
 
 destructor TCESynMemo.destroy;
 begin
+  application.RemoveOnDeactivateHandler(@handleModalBeginning);
   saveCache;
 
   //fIndentGuideMarkup.Free;
