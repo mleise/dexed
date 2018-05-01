@@ -12,7 +12,7 @@ uses
 
 type
 
-  TToolInfoKind = (tikRunning, tikFindable, tikOptional);
+  TToolInfoKind = (tikRunning, tikFindable, tikOptional, tikCompiler);
 
   TToolInfo = class(TWinControl)
   private
@@ -118,6 +118,7 @@ end;
 procedure TToolInfo.refreshStatus;
 var
   pth: string;
+  cmp: DCompiler;
 begin
   if fLabel.isNil or fStatus.isNil then exit;
   //
@@ -152,6 +153,24 @@ begin
         fStatus.Caption:= ' the tool is available';
         AssignPng(fIco, 'BULLET_GREEN');
         fPresent := true;
+      end;
+    end;
+    tikCompiler:
+    begin
+      case fToolName of
+        'ldc2' : cmp := DCompiler.ldc;
+        'gdc'  : cmp := DCompiler.gdc;
+        'dmd'  : cmp := DCompiler.dmd;
+      end;
+      if getCompilerSelector.isCompilerValid(cmp) then
+      begin
+        fStatus.Caption:= ' the paths for this compiler look valid';
+        AssignPng(fIco, 'BULLET_GREEN');
+      end
+      else
+      begin
+        fStatus.Caption:= ' the paths for this compiler dont look valid';
+        AssignPng(fIco, 'BULLET_YELLOW');
       end;
     end;
     tikRunning:
@@ -219,12 +238,12 @@ begin
     'optional, the D source code formater, needed by the Dfmt commander widget');
   itm.Parent := boxTools;
   itm.ReAlign;
-  itm := TToolInfo.Construct(self, tikOptional, 'gdc',
-    'optional, the GDC D compiler');
+  itm := TToolInfo.Construct(self, tikCompiler, 'gdc',
+    'optional, the GDC D compiler, setup in "Options - Compilers paths"');
   itm.Parent := boxTools;
   itm.ReAlign;
-  itm := TToolInfo.Construct(self, tikOptional, 'ldc2',
-    'optional, the LDC D compiler');
+  itm := TToolInfo.Construct(self, tikCompiler, 'ldc2',
+    'optional, the LDC D compiler, setup in "Options - Compilers paths"');
   itm.Parent := boxTools;
   itm.ReAlign;
   itm := TToolInfo.Construct(self, tikFindable, 'ddemangle',
@@ -248,8 +267,8 @@ begin
     'the D package manager, mandatory to compile project in DUB format');
   itm.Parent := boxTools;
   itm.ReAlign;
-  itm := TToolInfo.Construct(self, tikFindable, 'dmd',
-    'mandatory, the reference D compiler');
+  itm := TToolInfo.Construct(self, tikCompiler, 'dmd',
+    'the reference D compiler, setup in "Options - Compilers paths"');
   itm.Parent := boxTools;
   itm.ReAlign;
 

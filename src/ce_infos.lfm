@@ -9,34 +9,34 @@ inherited CEInfoWidget: TCEInfoWidget
   ClientHeight = 147
   ClientWidth = 296
   inherited Back: TPanel
-    Height = 303
-    Width = 287
+    Height = 147
+    Width = 296
     AutoSize = True
-    ClientHeight = 303
-    ClientWidth = 287
+    ClientHeight = 147
+    ClientWidth = 296
     inherited Content: TPanel
-      Height = 267
+      Height = 111
       Top = 36
-      Width = 287
-      ClientHeight = 267
-      ClientWidth = 287
+      Width = 296
+      ClientHeight = 111
+      ClientWidth = 296
       object GroupBox1: TGroupBox[0]
         Left = 4
-        Height = 78
+        Height = 77
         Top = 4
-        Width = 279
+        Width = 288
         Align = alTop
         AutoSize = True
         BorderSpacing.Around = 4
         Caption = 'about'
         ClientHeight = 59
-        ClientWidth = 275
+        ClientWidth = 286
         TabOrder = 0
         object Label1: TLabel
           Left = 8
           Height = 1
           Top = 8
-          Width = 259
+          Width = 270
           Align = alTop
           Alignment = taCenter
           BorderSpacing.Around = 8
@@ -49,7 +49,7 @@ inherited CEInfoWidget: TCEInfoWidget
           Left = 8
           Height = 34
           Top = 17
-          Width = 259
+          Width = 270
           Align = alClient
           Alignment = taCenter
           BorderSpacing.Around = 8
@@ -62,21 +62,21 @@ inherited CEInfoWidget: TCEInfoWidget
       end
       object GroupBox2: TGroupBox[1]
         Left = 4
-        Height = 177
-        Top = 86
-        Width = 279
+        Height = 22
+        Top = 85
+        Width = 288
         Align = alClient
         AutoSize = True
         BorderSpacing.Around = 4
         Caption = 'tools status'
-        ClientHeight = 158
-        ClientWidth = 275
+        ClientHeight = 4
+        ClientWidth = 286
         TabOrder = 1
         object boxTools: TScrollBox
           Left = 4
-          Height = 150
-          Top = 4
-          Width = 267
+          Height = 1
+          Top = 2
+          Width = 278
           HorzScrollBar.Page = 1
           VertScrollBar.Page = 1
           Align = alClient
@@ -88,7 +88,7 @@ inherited CEInfoWidget: TCEInfoWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Width = 279
+      Width = 288
     end
   end
 end
