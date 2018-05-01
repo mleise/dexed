@@ -258,7 +258,11 @@ end;
 procedure TCEShortcutEditor.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
-    oeeSelectCat: receiveShortcuts;
+    oeeSelectCat:
+    begin
+      receiveShortcuts;
+      fltItems.Text:='';
+    end;
     oeeCancel:
     begin
       fShortcuts.assign(fBackup);
