@@ -837,9 +837,11 @@ begin
   inherited create(editor);
   visible := false;
 
-  parent := editor;
-  width := 475;
-  height := 275;
+  BevelOuter:= bvNone;
+  BevelInner:= bvNone;
+  parent := Application.MainForm;
+  width := scaleX(475, 96);
+  height := scaleY(275, 96);
 
   fMemo:= TSynEdit.Create(self);
   fMemo.Parent := self;
@@ -3501,7 +3503,7 @@ begin
     begin;
       fScrollMemo.Visible:=true;
       fScrollMemo.goToLine(trunc((lines.Count / Height) * Y));
-      fScrollMemo.left := width - 40 - fScrollMemo.Width;
+      fScrollMemo.left := mouse.CursorPos.x - fScrollMemo.Width - 10;
       fScrollMemo.Top:= Y - 5;
     end
     else
