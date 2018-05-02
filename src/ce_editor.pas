@@ -9,7 +9,7 @@ uses
   ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder, dialogs, LazFileUtils,
   SynPluginSyncroEdit, SynEdit, SynHighlighterMulti, ce_dialogs,
   ce_widget, ce_interfaces, ce_synmemo, ce_dlang, ce_common, ce_dcd, ce_observer,
-  ce_sharedres, ce_controls, ce_writableComponent, ce_dsgncontrols;
+  ce_sharedres, ce_controls, ce_writableComponent, ce_dsgncontrols, LMessages;
 
 type
 
@@ -93,6 +93,7 @@ type
     macRecorder: TSynMacroRecorder;
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
+    procedure FormShortCut(var Msg: TLMKey; var Handled: Boolean);
     procedure mnuedDdocTmpClick(Sender: TObject);
     procedure mnuedGotolineClick(Sender: TObject);
     procedure mnuedNextWarnClick(Sender: TObject);
@@ -672,8 +673,6 @@ begin
 end;
 
 procedure TCEEditorWidget.memoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  sh: TShortCut;
 begin
   case Key of
     VK_CLEAR,VK_RETURN,VK_BACK :
@@ -681,26 +680,6 @@ begin
     VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT:
       if Shift = [] then
         updateImperative;
-    else begin
-      // note: keys conflict can lead to a lose of focus, i.e shortcut
-      // to select next page cant be repeated.
-      sh := KeyToShortCut(Key, shift);
-      if sh = fOptions.fNextPage then
-      begin
-        pageControl.pageIndex:= (pageControl.pageIndex + 1) mod pageControl.pageCount;
-      end
-      else if sh = fOptions.fPrevPage then
-      begin
-        if pageControl.pageIndex - 1 < 0 then
-          pageControl.pageIndex:= pageControl.pageCount - 1
-        else
-          pageControl.pageIndex:= pageControl.pageIndex - 1;
-      end
-      else if sh = fOptions.fMoveLeft then
-        pageControl.movePageLeft
-      else if sh = fOptions.fMoveRight then
-        pageControl.movePageRight;
-    end;
   end;
   if fKeyChanged then
     beginDelayedUpdate;
@@ -990,6 +969,37 @@ procedure TCEEditorWidget.mnuedDdocTmpClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.insertDdocTemplate;
+end;
+
+procedure TCEEditorWidget.FormShortCut(var Msg: TLMKey; var Handled: Boolean);
+var
+  sh: TShortCut;
+begin
+  Handled := false;
+  sh := KeyToShortCut(Msg.CharCode, KeyDataToShiftState(Msg.KeyData));
+  if sh = fOptions.fNextPage then
+  begin
+    pageControl.pageIndex:= (pageControl.pageIndex + 1) mod pageControl.pageCount;
+    Handled := true;
+  end
+  else if sh = fOptions.fPrevPage then
+  begin
+    if pageControl.pageIndex - 1 < 0 then
+      pageControl.pageIndex:= pageControl.pageCount - 1
+    else
+      pageControl.pageIndex:= pageControl.pageIndex - 1;
+    Handled := true;
+  end
+  else if sh = fOptions.fMoveLeft then
+  begin
+    pageControl.movePageLeft;
+    Handled := true;
+  end
+  else if sh = fOptions.fMoveRight then
+  begin
+    pageControl.movePageRight;
+    Handled := true;
+  end;
 end;
 
 procedure TCEEditorWidget.mnuedGotolineClick(Sender: TObject);

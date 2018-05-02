@@ -6,6 +6,7 @@ inherited CEEditorWidget: TCEEditorWidget
   Caption = 'Source editor'
   ClientHeight = 434
   ClientWidth = 465
+  OnShortCut = FormShortCut
   inherited Back: TPanel
     Height = 434
     Width = 465
@@ -13,13 +14,14 @@ inherited CEEditorWidget: TCEEditorWidget
     ClientWidth = 465
     inherited Content: TPanel
       Height = 398
+      Top = 36
       Width = 465
       ClientHeight = 398
       ClientWidth = 465
       object editorStatus: TStatusBar[0]
         Left = 0
-        Height = 21
-        Top = 375
+        Height = 19
+        Top = 377
         Width = 465
         BorderSpacing.Bottom = 2
         Panels = <        
