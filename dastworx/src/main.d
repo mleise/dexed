@@ -4,7 +4,7 @@ import
     core.memory;
 import
     std.array, std.getopt, std.stdio, std.path, std.algorithm, std.functional,
-    std.file, std.typecons;
+    std.file;
 import
     iz.memory, iz.options;
 import
@@ -17,7 +17,7 @@ void main(string[] args)
 {
     foreach(ref buffer; stdin.byChunk(4096))
         Launcher.source.put(buffer);
-    handleArguments!(Yes.Throw, Launcher)(args[1..$]);
+    handleArguments!(CantThrow, Launcher)(args[1..$]);
 }
 
 struct Launcher
