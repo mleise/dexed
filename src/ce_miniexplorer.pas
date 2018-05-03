@@ -9,7 +9,7 @@ uses
   Controls, Graphics, ExtCtrls, Menus, ComCtrls, Buttons, lcltype, dialogs,
   ce_widget, ce_sharedres, ce_common, ce_interfaces, ce_observer,
   ce_writableComponent, ce_dubproject, ce_ceproject, EditBtn, ShellCtrls,
-  ce_dialogs, ce_synmemo, ce_projutils, ce_dsgncontrols;
+  ce_dialogs, ce_synmemo, ce_projutils, ce_dsgncontrols, ce_stringrange;
 
 type
 
@@ -89,6 +89,7 @@ type
     procedure lstFavClick(Sender: TObject);
     procedure lstFavDeletion(Sender: TObject; Item: TListItem);
     procedure lstFavEnter(Sender: TObject);
+    procedure lstFilesColumnClick(Sender: TObject; Column: TListColumn);
     procedure lstFilesDblClick(Sender: TObject);
     procedure lstFilesEnter(Sender: TObject);
     procedure lstFilesFileAdded(Sender: TObject; Item: TListItem);
@@ -109,6 +110,8 @@ type
     fContextExpand: boolean;
     fEditableOptions: TCEMiniExplorerEditableOptions;
     fImages: TImageList;
+    fFileListSortedColumnIndex: integer;
+    fFileListSortDirection: TSortDirection;
     procedure filterFiles;
     procedure lstFavDblClick(Sender: TObject);
     procedure updateFavorites;
@@ -118,6 +121,8 @@ type
     procedure shellOpenSelected;
     procedure mnuDriveItemClick(sender: TObject);
     procedure mnuDriveSelect(sender: TObject);
+    procedure compareFileList(Sender: TObject; Item1, Item2: TListItem; Data: Integer;
+      var Compare: Integer);
 
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -281,6 +286,10 @@ var
   fname: string;
 begin
   inherited;
+
+  lstFiles.OnCompare := @compareFileList;
+  fFileListSortDirection := sdAscending;
+  fFileListSortedColumnIndex:=-1;
 
   fImages := TImageList.Create(self);
   case GetIconScaledSize of
@@ -511,6 +520,21 @@ begin
   fLastListOrTree := lstFav;
 end;
 
+procedure TCEMiniExplorerWidget.lstFilesColumnClick(Sender: TObject;Column: TListColumn);
+begin
+  if Column.isNotNil then
+  begin
+    if Column.Index = fFileListSortedColumnIndex then
+    begin
+      if fFileListSortDirection = sdAscending then
+        fFileListSortDirection := sdDescending
+      else
+        fFileListSortDirection := sdAscending;
+    end;
+    fFileListSortedColumnIndex := Column.Index;
+  end;
+end;
+
 procedure TCEMiniExplorerWidget.btnAddFavClick(Sender: TObject);
 begin
   if treeFolders.Selected.isNil then
@@ -549,6 +573,83 @@ begin
   lstFiles.EndUpdate;
 end;
 
+procedure TCEMiniExplorerWidget.compareFileList(Sender: TObject; Item1, Item2: TListItem;
+  Data: Integer; var Compare: Integer);
+var
+  s1, s2: integer;
+  u1, u2: string;
+  r1: TStringRange = (ptr:nil; pos:0; len: 0);
+  r2: TStringRange = (ptr:nil; pos:0; len: 0);
+begin
+  case fFileListSortedColumnIndex of
+    0:
+    begin
+      if fFileListSortDirection = sdAscending then
+        Compare := CompareStr(Item1.Caption, Item2.Caption)
+      else
+        Compare := CompareStr(Item2.Caption, Item1.Caption);
+    end;
+    2:
+    begin
+      if fFileListSortDirection = sdAscending then
+        Compare := CompareStr(Item1.SubItems[1], Item2.SubItems[1])
+      else
+        Compare := CompareStr(Item2.SubItems[1], Item1.SubItems[1])
+    end;
+    1:
+    begin
+      if fFileListSortDirection = sdAscending then
+      begin
+        r1.init(Item1.SubItems[0]);
+        r2.init(Item2.SubItems[0]);
+      end
+      else
+      begin
+        r1.init(Item2.SubItems[0]);
+        r2.init(Item1.SubItems[0]);
+      end;
+
+      s1 := r1.takeUntil(' ').yield.toIntNoExcept();
+      u1 := r1.popFront^.takeUntil(#0).yield;
+
+      s2 := r2.takeUntil(' ').yield.toIntNoExcept();
+      u2 := r2.popFront^.takeUntil(#0).yield;
+
+      if u1 = u2 then
+        Compare := s1 - s2
+      else if u1 = 'bytes' then
+        Compare := -1
+      else if u1 = 'kB' then
+      begin
+        if u2 = 'bytes' then
+          Compare := 1
+        else
+          Compare := -1;
+      end
+      else if u1 = 'MB' then
+      begin
+        if (u2 = 'bytes') or (u2 = 'kB') then
+          Compare := 1
+        else
+          Compare := -1;
+      end
+      else if u1 = 'GB' then
+      begin
+        if (u2 = 'bytes') or (u2 = 'kB') or (u2 = 'MB') then
+          Compare := 1
+        else
+          Compare := -1;
+      end
+      else if u1 = 'TB' then
+      begin
+        if u2 <> 'PB' then
+          Compare := 1
+        else
+          Compare := -1;
+      end;
+    end;
+  end;
+end;
 {$ENDREGION}
 
 {$REGION Files -----------------------------------------------------------------}

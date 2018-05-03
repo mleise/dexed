@@ -99,6 +99,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
           ScrollBars = ssAutoBoth
           SortType = stText
           TabOrder = 2
+          OnColumnClick = lstFilesColumnClick
           OnDblClick = lstFilesDblClick
           OnFileAdded = lstFilesFileAdded
           ObjectTypes = [otNonFolders, otHidden]
