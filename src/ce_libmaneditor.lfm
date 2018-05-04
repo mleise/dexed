@@ -120,7 +120,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object btnEnabled: TCEToolButton[6]
         Left = 197
-        Hint = 'activate or dactivate the selected entry'
+        Hint = 'activate or deactivate the selected entry'
         Top = 0
         AutoSize = True
         Caption = 'btnEnabled'
