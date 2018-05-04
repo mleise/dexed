@@ -240,7 +240,7 @@ begin
   fIdentiMatchOpts := [caseSensitive];
   //
   fAutoCloseCurlyBrace:= autoCloseOnNewLineLexically;
-  fAutoClosedPairs:= [autoCloseSquareBracket];
+  fAutoClosedPairs:= [];
   //
   fCompletionMenuWidth:= 320;
   fCompletionMenuLines:= 15;
