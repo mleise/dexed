@@ -234,6 +234,59 @@ const
   dubCmd2PreMsg: array[TDubCommand] of string = ('compiling ', 'running ', 'testing ');
   dubCmd2PostMsg: array[TDubCommand] of string = ('compiled', 'executed', 'tested');
 
+procedure getPackagesLocations(loc: TStringList);
+var
+  p: string;
+  j: TJSONParser;
+  m: TMemoryStream;
+  a: TJSONArray;
+  o: TJSONObject = nil;
+  d: TJSONData;
+  r: TJSONData;
+  i: integer;
+begin
+  {$IFDEF WINDOWS}
+  p := GetEnvironmentVariable('APPDATA') + '\dub\packages\';
+  {$ELSE}
+  p := GetEnvironmentVariable('HOME') + '/.dub/packages/';
+  {$ENDIF}
+  if p.dirExists then
+    loc.Add(p);
+  p += 'local-packages.json';
+  if not p.fileExists then
+    exit;
+
+  m := TMemoryStream.Create;
+  try
+    m.LoadFromFile(p);
+    j := TJSONParser.Create(m, [joIgnoreTrailingComma, joUTF8]);
+    try
+      r := j.Parse;
+    finally
+      j.Free;
+    end;
+    if r.JSONType = jtArray then
+    begin
+      a := TJSONArray(r);
+      for i := 0 to a.Count-1 do
+      begin
+        o := a.Objects[i];
+        if not o.findAny('path', d) then
+          continue;
+        p := d.AsString;
+        if (p.length <> 0) and (p[p.length] <> DirectorySeparator) then
+          p += DirectorySeparator;
+        if DirectoryExistsUTF8(p) then
+          loc.Add(p);
+      end;
+    end;
+  finally
+    m.Free;
+    if r.isNotNil then
+      r.Free;
+  end;
+end;
+
 {$REGION TDubLocalPackages -----------------------------------------------------}
 constructor TDubLocalPackage.create;
 begin
@@ -320,62 +373,67 @@ end;
 procedure TDubLocalPackages.update;
 var
   p: TStringList;
+  r: TStringList;
   s: string;
   n: string;
   v: string = '';
   i: integer;
   j: integer = 0;
+  k: integer;
   d: PDubLocalPackage = nil;
   h: TStringRange = (ptr: nil; pos: 0; len: 0);
 begin
   setLength(fLocalPackages, 0);
-  {$IFDEF WINDOWS}
-  fRoot := GetEnvironmentVariable('APPDATA') + '\dub\packages\';
-  {$ELSE}
-  fRoot := GetEnvironmentVariable('HOME') + '/.dub/packages/';
-  {$ENDIF}
-  if not fRoot.dirExists then
-    exit;
+  r := TStringList.Create;
+  getPackagesLocations(r);
 
-  p := TStringList.Create;
-  try
-    listFolders(p, fRoot);
-    for i := 0 to p.Count-1 do
-    begin
-      j := 0;
-      s := p[i];
-      h.init(s);
-      while true do
+  try for k := 0 to r.Count -1 do
+  begin
+    fRoot := r[k];
+    p := TStringList.Create;
+    try
+      listFolders(p, fRoot);
+      for i := 0 to p.Count-1 do
       begin
-        h.popUntil('-');
-        if h.empty then
-          break;
-        if (h.popFront^.front in ['0'..'9']) or
-            h.endsWith('master') then
+        j := 0;
+        s := p[i];
+        h.init(s);
+        while true do
         begin
-          j := h.position;
-          break;
+          h.popUntil('-');
+          if h.empty then
+            break;
+          if (h.popFront^.front in ['0'..'9']) or
+              h.endsWith('master') then
+          begin
+            j := h.position;
+            break;
+          end;
         end;
-      end;
-      if (j = 0) then
-        continue;
+        if (j = 0) then
+          continue;
 
-      n := s[1..j-1];
-      n := n.extractFileName;
-      if not find(n, d) then
-      begin
-        setLength(fLocalPackages, length(fLocalPackages) + 1);
-        fLocalPackages[high(fLocalPackages)] := TDubLocalPackage.create;
-        d := @fLocalPackages[high(fLocalPackages)];
-        d^.name := n;
-      end;
-      v := 'v' + s[j+1 .. length(s)];
-      d^.addVersion(v);
+        n := s[1..j-1];
+        n := n.extractFileName;
+        if not find(n, d) then
+        begin
+          setLength(fLocalPackages, length(fLocalPackages) + 1);
+          fLocalPackages[high(fLocalPackages)] := TDubLocalPackage.create;
+          d := @fLocalPackages[high(fLocalPackages)];
+          d^.name := n;
+        end;
+        v := 'v' + s[j+1 .. length(s)];
+        d^.addVersion(v);
 
+      end;
+    finally
+      p.Free;
     end;
-  finally
-    p.Free;
   end;
+  finally
+    r.Free;
+  end;
+
 end;
 
 function TDubLocalPackages.find(const name: string; out package: PDubLocalPackage): boolean;
@@ -1301,21 +1359,21 @@ procedure TCEDubProject.updateImportPathsFromJson;
     v: string;
     n: string;
     o: string;
-    z: string;
     r: TStringRange = (ptr: nil; pos: 0; len: 0);
     q: TSemVer;
     u: PSemVer;
     i: integer;
+    k: integer;
     c: TJSONObject;
+    b: TStringList;
   begin
     if obj.findObject('dependencies' + suffix, deps) then
     begin
-      {$IFDEF WINDOWS}
-      z := GetEnvironmentVariable('APPDATA') + '\dub\packages\';
-      {$ELSE}
-      z := GetEnvironmentVariable('HOME') + '/.dub/packages/';
-      {$ENDIF}
-      for i := 0 to deps.Count-1 do
+
+      b := TStringList.Create;
+      getPackagesLocations(b);
+
+      try for i := 0 to deps.Count-1 do
       begin
         n := deps.Names[i];
 
@@ -1330,7 +1388,6 @@ procedure TCEDubProject.updateImportPathsFromJson;
           continue;
         end;
 
-        s := z + n;
         // Try to fetch if not present at all
         if not fLocalPackages.find(n, pck) and dubBuildOptions.autoFetch then
         begin
@@ -1399,13 +1456,26 @@ procedure TCEDubProject.updateImportPathsFromJson;
           // Set the imports, used in particular by DCD
           if assigned(u) then
           begin
-            p :=  s + '-' + u^.asString + DirectorySeparator + n + DirectorySeparator;
-            if (p + 'source').dirExists then
-              fImportPaths.Add(p + 'source')
-            else if (p + 'src').dirExists then
-              fImportPaths.Add(p + 'src');
+            for k := 0 to b.Count-1 do
+            begin
+              s := b[k] + n;
+              p :=  s + '-' + u^.asString + DirectorySeparator + n + DirectorySeparator;
+              if (p + 'source').dirExists then
+              begin
+                fImportPaths.Add(p + 'source')  ;
+                break;
+              end
+              else if (p + 'src').dirExists then
+              begin
+                fImportPaths.Add(p + 'src');
+                break;
+              end;
+            end;
           end;
         end;
+      end;
+      finally
+        b.Free;
       end;
     end;
   end;
