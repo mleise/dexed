@@ -9,7 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
-  md5, Spin, LCLIntf, LazFileUtils,
+  md5, Spin, LCLIntf, LazFileUtils, LMessages,
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs, ce_dastworx,
@@ -281,7 +281,6 @@ type
     procedure removeGutterIcon(line: integer; value: TGutterIcon);
     procedure patchClipboardIndentation;
     procedure gotoWordEdge(right: boolean);
-    procedure handleModalBeginning(sender: TObject);
     //
     procedure gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
     procedure removeDebugTimeMarks;
@@ -302,6 +301,7 @@ type
       Data: pointer); override;
     procedure MouseLeave; override;
     procedure SetVisible(Value: Boolean); override;
+    procedure WMKillFocus(var Message: TLMKillFocus); message LM_KILLFOCUS;
     procedure SetHighlighter(const Value: TSynCustomHighlighter); override;
     procedure UTF8KeyPress(var Key: TUTF8Char); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
@@ -1077,6 +1077,12 @@ begin
   EntitiesConnector.addObserver(self);
 end;
 
+procedure TCESynMemo.WMKillFocus(var Message: TLMKillFocus);
+begin
+  if eoAutoHideCursor in options2 then
+    inherited MouseMove([], 0, 0);
+end;
+
 destructor TCESynMemo.destroy;
 begin
   saveCache;
@@ -1134,14 +1140,6 @@ begin
     Font.Size := fDefaultFontSize;
 end;
 
-procedure TCESynMemo.handleModalBeginning(sender: TObject);
-begin
-  // AV can happens in TCustomSynEdit.UpdateCursor
-  if (self <> nil) and (Pcardinal(@FTextArea)^ <> $f0f0f0f0) and (Pcardinal(@FTextArea)^ <> $0f0f0f0f)
-    and assigned(FTextArea) and (eoAutoHideCursor in Options2) then
-      MouseMove([], 0, 0);
-end;
-
 procedure TCESynMemo.setFocus;
 begin
   inherited;
@@ -1181,8 +1179,6 @@ begin
   inherited;
   if Value then
   begin
-    application.AddOnDeactivateHandler(@handleModalBeginning);
-    application.AddOnModalBeginHandler(@handleModalBeginning);
     setFocus;
     if not fCacheLoaded then
       loadCache;
@@ -1195,8 +1191,6 @@ begin
     fScrollMemo.Visible:=false;
     if fCompletion.IsActive then
       fCompletion.Deactivate;
-    application.RemoveOnDeactivateHandler(@handleModalBeginning);
-    application.RemoveOnModalBeginHandler(@handleModalBeginning);
   end;
 end;
 {$ENDREGION --------------------------------------------------------------------}
