@@ -19,7 +19,7 @@ The page exposes unsorted options. In the future some of them might be moved to 
 - **autoSaveProjectFiles**: If checked the sources are automatically saved before compilation.
 - **consoleProgram**: Allows to set the terminal emulator used to execute programs. By default XTerm is used and an error can occur if it's not setup. The setting is used by the [runnable modules](features_runnables), the [custom tools](widgets_custom_tools) and the project launcher. Under Windows this option is not used.
 - **coverModuleTests**: If checked then the coverage by the tests is measured and displayed in the messages after executing the action __File/Run file unittests__.
-- **dcdPort**: Sets the port used by the [completion daemon](features_dcd) server. `0` means the default value.
+- **dcdPort**: Sets the port used by the [completion daemon](features_dcd) server. Under Windows `0` means the default value. Under GNU/Linux `0` means that a UNIX domain socket is used and any other number means that a TCP socket is used. This setting requires a restart.
 - **dscanUnittests**: If checked the content of the `unittest` blocks are analyzed when using the action __File/Verify with Dscanner__. Do not activate if the results of the static analysis tend to generate irrelevant messages in the tests.
 - **flatLook**: Doesn't draw the buttons shape unless they're hovered by the mouse.
 - **floatingWidgetOnTop**: Keeps the widgets that are not docked on top of the application window.
