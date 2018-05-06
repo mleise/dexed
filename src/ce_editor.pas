@@ -673,7 +673,6 @@ begin
   if fDoc.isNil then exit;
   fDoc.hideCallTips;
   fDoc.hideDDocs;
-  fDOc.Visible:=false;
 end;
 
 procedure TCEEditorWidget.memoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
