@@ -1069,8 +1069,6 @@ begin
   fAutoCloseCurlyBrace:= autoCloseOnNewLineLexically;
   fAutoClosedPairs:= [autoCloseSquareBracket];
 
-  application.AddOnDeactivateHandler(@handleModalBeginning);
-
   fDastWorxExename:= exeFullName('dastworx' + exeExt);
 
   fDebugger := EntitiesConnector.getSingleService('ICEDebugger') as ICEDebugger;
@@ -1081,7 +1079,6 @@ end;
 
 destructor TCESynMemo.destroy;
 begin
-  application.RemoveOnDeactivateHandler(@handleModalBeginning);
   saveCache;
 
   //fIndentGuideMarkup.Free;
@@ -1184,6 +1181,8 @@ begin
   inherited;
   if Value then
   begin
+    application.AddOnDeactivateHandler(@handleModalBeginning);
+    application.AddOnModalBeginHandler(@handleModalBeginning);
     setFocus;
     if not fCacheLoaded then
       loadCache;
@@ -1196,6 +1195,8 @@ begin
     fScrollMemo.Visible:=false;
     if fCompletion.IsActive then
       fCompletion.Deactivate;
+    application.RemoveOnDeactivateHandler(@handleModalBeginning);
+    application.RemoveOnModalBeginHandler(@handleModalBeginning);
   end;
 end;
 {$ENDREGION --------------------------------------------------------------------}

@@ -94,6 +94,7 @@ type
     editorStatus: TStatusBar;
     mnuEditor: TPopupMenu;
     procedure FormShortCut(var Msg: TLMKey; var Handled: Boolean);
+    procedure FormShow(Sender: TObject);
     procedure mnuedDdocTmpClick(Sender: TObject);
     procedure mnuedGotolineClick(Sender: TObject);
     procedure mnuedNextWarnClick(Sender: TObject);
@@ -474,6 +475,7 @@ begin
   document.OnCommandProcessed:= @memoCmdProcessed;
   //
   fDoc := document;
+  fDoc.Visible:=true;
   fDoc.setFocus;
   focusedEditorChanged;
   updateImperative;
@@ -497,6 +499,7 @@ begin
       updatePageCaption(pageControl.currentPage);
   if document = fDoc then exit;
   fDoc := document;
+  fDoc.Visible:=true;
   focusedEditorChanged;
   updateImperative;
 end;
@@ -670,6 +673,7 @@ begin
   if fDoc.isNil then exit;
   fDoc.hideCallTips;
   fDoc.hideDDocs;
+  fDOc.Visible:=false;
 end;
 
 procedure TCEEditorWidget.memoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1000,6 +1004,12 @@ begin
     pageControl.movePageRight;
     Handled := true;
   end;
+end;
+
+procedure TCEEditorWidget.FormShow(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.Visible:=true;
 end;
 
 procedure TCEEditorWidget.mnuedGotolineClick(Sender: TObject);
