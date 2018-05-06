@@ -29,19 +29,22 @@ type
     fInputSource: string;
     fImportCache: TStringHashSet;
     fPortNum: Word;
+    fCurrentSessionPortNum: Word;
     fServerWasRunning: boolean;
     fClient, fServer: TProcess;
     fAvailable: boolean;
     fServerListening: boolean;
     fDoc: TCESynMemo;
     fProj: ICECommonProject;
+    fPortAsProcParam: string;
     procedure killServer;
-    procedure terminateClient; inline;
-    procedure waitClient; inline;
+    procedure terminateClient; {$IFNDEF DEBUG}inline;{$ENDIF}
+    procedure waitClient; {$IFNDEF DEBUG}inline;{$ENDIF}
     procedure updateServerlistening;
-    procedure writeSourceToInput; inline;
+    procedure writeSourceToInput; {$IFNDEF DEBUG}inline;{$ENDIF}
     function checkDcdSocket: boolean;
     function getIfLaunched: boolean;
+    procedure tryAddTcpParams; {$IFNDEF DEBUG}inline;{$ENDIF}
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -95,21 +98,23 @@ var
   i: integer = 0;
 begin
   inherited;
-  //
+
   fname := getCoeditDocPath + optsname;
   if fname.fileExists then
     loadFromFile(fname);
-  //
+  fCurrentSessionPortNum := fPortNum;
+  fPortAsProcParam := '-p' + intToStr(fCurrentSessionPortNum);
+
   fAvailable := exeInSysPath(clientName) and exeInSysPath(serverName)
     and not noDcdPassedAsArg();
   if not fAvailable then
     exit;
-  //
+
   fClient := TProcess.Create(self);
   fClient.Executable := exeFullName(clientName);
   fClient.Options := [poUsePipes{$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
   fClient.ShowWindow := swoHIDE;
-  //
+
   fServerWasRunning := AppIsRunning((serverName));
   if not fServerWasRunning then
   begin
@@ -119,8 +124,11 @@ begin
     {$IFNDEF DEBUG}
     fServer.ShowWindow := swoHIDE;
     {$ENDIF}
-    if fPortNum <> 0 then
-      fServer.Parameters.Add('-p' + intToStr(port));
+    if fCurrentSessionPortNum <> 0 then
+    begin
+      fServer.Parameters.Add('--tcp');
+      fServer.Parameters.Add(fPortAsProcParam);
+    end;
   end;
   fTempLines := TStringList.Create;
   fImportCache := TStringHashSet.Create;
@@ -136,7 +144,7 @@ begin
     end;
   end;
   updateServerlistening;
-  //
+
   EntitiesConnector.addObserver(self);
 end;
 
@@ -284,31 +292,32 @@ end;
 function TCEDcdWrapper.checkDcdSocket: boolean;
 var
   str: string;
-  {$IFDEF WINDOWS}
   prt: word = 9166;
   prc: TProcess;
   lst: TStringList;
-  {$ENDIF}
 begin
   sleep(100);
   // nix/osx: the file might exists from a previous session that crashed
   // however the 100 ms might be enough for DCD to initializes
-  {$IFDEF LINUX}
-  str := sysutils.GetEnvironmentVariable('XDG_RUNTIME_DIR');
-  if (str + DirectorySeparator + 'dcd.socket').fileExists then
-    exit(true);
-  str := sysutils.GetEnvironmentVariable('UID');
-  if ('/tmp/dcd-' + str + '.socket').fileExists then
-    exit(true);
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  str := sysutils.GetEnvironmentVariable('UID');
-  if ('/var/tmp/dcd-' + str + '.socket').fileExists then
-    exit(true);
-  {$ENDIF}
-  {$IFDEF WINDOWS}
+  if fCurrentSessionPortNum = 0 then
+  begin
+    {$IFDEF LINUX}
+    str := sysutils.GetEnvironmentVariable('XDG_RUNTIME_DIR');
+    if (str + DirectorySeparator + 'dcd.socket').fileExists then
+      exit(true);
+    str := sysutils.GetEnvironmentVariable('UID');
+    if ('/tmp/dcd-' + str + '.socket').fileExists then
+      exit(true);
+    {$ENDIF}
+    {$IFDEF DARWIN}
+    str := sysutils.GetEnvironmentVariable('UID');
+    if ('/var/tmp/dcd-' + str + '.socket').fileExists then
+      exit(true);
+    {$ENDIF}
+  end;
   result := false;
-  if port <> 0 then prt := port;
+  if port <> 0 then
+    prt := port;
   prc := TProcess.Create(nil);
   try
     prc.Options:= [poUsePipes, poNoConsole];
@@ -323,7 +332,7 @@ begin
       for str in lst do
       if AnsiContainsText(str, '127.0.0.1:' + intToStr(prt))
       and AnsiContainsText(str, 'TCP')
-      and AnsiContainsText(str, 'LISTENING') then
+      and AnsiContainsText(str, 'LISTEN') then
       begin
         result := true;
         break;
@@ -335,16 +344,24 @@ begin
     prc.Free;
   end;
   exit(result);
-  {$ENDIF}
-  exit(false);
+end;
+
+procedure TCEDcdWrapper.tryAddTcpParams;
+begin
+  if fCurrentSessionPortNum <> 0 then
+  begin
+    fClient.Parameters.Add('--tcp');
+    fClient.Parameters.Add(fPortAsProcParam);
+  end;
 end;
 
 procedure TCEDcdWrapper.killServer;
 begin
-  if not fAvailable then exit;
-  if not fServerListening then exit;
-  //
+  if not fAvailable or not fServerListening then
+    exit;
+
   fClient.Parameters.Clear;
+  tryAddTcpParams;
   fClient.Parameters.Add('--shutdown');
   fClient.Execute;
   while fServer.Running or fClient.Running do
@@ -366,13 +383,12 @@ end;
 
 procedure TCEDcdWrapper.addImportFolder(const folder: string);
 begin
-  if not fAvailable then exit;
-  if not fServerListening then exit;
-  //
-  if fImportCache.contains(folder) then
+  if not fAvailable or not fServerListening or fImportCache.contains(folder) then
     exit;
+
   fImportCache.insert(folder);
   fClient.Parameters.Clear;
+  tryAddTcpParams;
   fClient.Parameters.Add('-I' + folder);
   fClient.Execute;
   while fClient.Running do ;
@@ -380,40 +396,43 @@ end;
 
 procedure TCEDcdWrapper.addImportFolders(const folders: TStrings);
 var
-  imp: string;
+  i: string;
+  c: integer;
 begin
-  if not fAvailable then exit;
-  if not fServerListening then exit;
-  //
+  if not fAvailable or not fServerListening then
+    exit;
+
   fClient.Parameters.Clear;
-  for imp in folders do
+  tryAddTcpParams;
+  c := folders.Count;
+  for i in folders do
   begin
-    if fImportCache.contains(imp) then
+    if fImportCache.contains(i) then
       continue;
-    fImportCache.insert(imp);
-    fClient.Parameters.Add('-I' + imp);
+    fImportCache.insert(i);
+    fClient.Parameters.Add('-I' + i);
+    dec(c);
   end;
-  if fClient.Parameters.Count <> 0 then
+  if c = 0 then
   begin
     fClient.Execute;
+    while fClient.Running do ;
   end;
-  while fClient.Running do ;
 end;
 
 procedure TCEDcdWrapper.getCallTip(out tips: string);
 begin
-  if not fAvailable then exit;
-  if not fServerListening then exit;
-  if fDoc = nil then exit;
-  //
+  if not fAvailable or not fServerListening or fDoc.isNil then
+    exit;
+
   terminateClient;
-  //
   fClient.Parameters.Clear;
+  tryAddTcpParams;
   fClient.Parameters.Add('-c');
   fClient.Parameters.Add(intToStr(fDoc.SelStart - 1));
   fClient.Execute;
   writeSourceToInput;
-  //
+
   fTempLines.Clear;
   processOutputToStrings(fClient, fTempLines);
   while fClient.Running do ;
@@ -423,7 +442,7 @@ begin
     exit;
   end;
   if not (fTempLines[0] = 'calltips') then exit;
-  //
+
   fTempLines.Delete(0);
   tips := fTempLines.Text;
   {$IFDEF WINDOWS}
@@ -454,18 +473,17 @@ var
   item: string;
   kindObj: TObject = nil;
 begin
-  if not fAvailable then exit;
-  if not fServerListening then exit;
-  if fDoc = nil then exit;
-  //
+  if not fAvailable or not fServerListening or fDoc.isNil then
+    exit;
+
   terminateClient;
-  //
   fClient.Parameters.Clear;
+  tryAddTcpParams;
   fClient.Parameters.Add('-c');
   fClient.Parameters.Add(intToStr(fDoc.SelStart - 1));
   fClient.Execute;
   writeSourceToInput;
-  //
+
   fTempLines.Clear;
   processOutputToStrings(fClient, fTempLines);
   while fClient.Running do ;
@@ -475,7 +493,7 @@ begin
     exit;
   end;
   if not (fTempLines[0] = 'identifiers') then exit;
-  //
+
   list.Clear;
   for i := 1 to fTempLines.Count-1 do
   begin
@@ -514,22 +532,21 @@ var
   len: Integer;
   str: string;
 begin
-  if not fAvailable then exit;
-  if not fServerListening then exit;
-  if fDoc = nil then exit;
-  //
+  if not fAvailable or not fServerListening or fDoc.isNil then
+    exit;
+
   i := fDoc.MouseBytePosition;
   if i = 0 then exit;
-  //
+
   terminateClient;
-  //
   fClient.Parameters.Clear;
+  tryAddTcpParams;
   fClient.Parameters.Add('-d');
   fClient.Parameters.Add('-c');
   fClient.Parameters.Add(intToStr(i - 1));
   fClient.Execute;
   writeSourceToInput;
-  //
+
   comment := '';
   fTempLines.Clear;
   processOutputToStrings(fClient, fTempLines);
@@ -564,19 +581,18 @@ var
    i: Integer;
    str, loc: string;
 begin
-  if not fAvailable then exit;
-  if not fServerListening then exit;
-  if fDoc = nil then exit;
-  //
+  if not fAvailable or not fServerListening or fDoc.isNil then
+    exit;
+
   terminateClient;
-  //
   fClient.Parameters.Clear;
+  tryAddTcpParams;
   fClient.Parameters.Add('-l');
   fClient.Parameters.Add('-c');
   fClient.Parameters.Add(intToStr(fDoc.SelStart));
   fClient.Execute;
   writeSourceToInput;
-  //
+
   fTempLines.Clear;
   processOutputToStrings(fClient, fTempLines);
   while fClient.Running do ;
@@ -602,19 +618,18 @@ var
    i: Integer;
    str: string;
 begin
-  if not fAvailable then exit;
-  if not fServerListening then exit;
-  if fDoc = nil then exit;
-  //
+  if not fAvailable or not fServerListening or fDoc.isNil then
+    exit;
+
   terminateClient;
-  //
   fClient.Parameters.Clear;
+  tryAddTcpParams;
   fClient.Parameters.Add('-u');
   fClient.Parameters.Add('-c');
   fClient.Parameters.Add(intToStr(fDoc.SelStart - 1));
   fClient.Execute;
   writeSourceToInput;
-  //
+
   setLength(locs, 0);
   fTempLines.Clear;
   processOutputToStrings(fClient, fTempLines);
@@ -625,7 +640,7 @@ begin
   // symbol is not in current module, too complex for now
   if str[1..5] <> 'stdin' then
     exit;
-  //
+
   setLength(locs, fTempLines.count-1);
   for i:= 1 to fTempLines.count-1 do
     locs[i-1] := StrToIntDef(fTempLines[i], -1);
