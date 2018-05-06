@@ -820,6 +820,7 @@ begin
   fMaxRecentGroups:= 10;
   fReloadLastDocuments:=true;
   fFlatLook:=true;
+  fDcdPort:=DCDWrapper.port;
 end;
 
 function TCEApplicationOptionsBase.getNativeProjecCompiler: DCompiler;
