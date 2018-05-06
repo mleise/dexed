@@ -1010,9 +1010,9 @@ begin
   if ssCtrl in GetKeyShiftState then
     exit;
   msg := List.Selected.Text;
-  List.ClearSelection(false);
   if not openFileFromDmdMessage(msg) then
     exit;
+  List.ClearSelection(false);
   // from here, since a doc has the focus, List.Selected is nil
   pos := getLineFromMessage(msg);
   if fDoc.isNil then
