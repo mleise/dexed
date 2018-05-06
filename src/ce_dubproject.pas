@@ -40,16 +40,14 @@ type
 
   TDubLocalPackages = class
   strict private
-    fRoot: string;
-    fLocalPackages: array of TDubLocalPackage;
+    class var fLocalPackages: array of TDubLocalPackage;
+    class var fDoneFirstUpdate: boolean;
   public
-    destructor destroy; override;
-    procedure update;
-    function find(const name: string; out package: PDubLocalPackage): boolean; overload;
-    function find(const name, op: string; constref opVer: TSemVer;
+    class procedure deinit;
+    class procedure update;
+    class function find(const name: string; out package: PDubLocalPackage): boolean; overload;
+    class function find(const name, op: string; constref opVer: TSemVer;
       out package: PDubLocalPackage): PSemver; overload;
-    function fetch(constref version: TSemVer): PDubLocalPackage;
-    function getPackageePath(package: PDubLocalPackage): string;
   end;
 
   (**
@@ -131,7 +129,6 @@ type
     fSaveAsUtf8: boolean;
     fCompiled: boolean;
     fMsgs: ICEMessagesDisplay;
-    fLocalPackages: TDubLocalPackages;
     fNextTerminatedCommand: TDubCommand;
     fAsProjectItf: ICECommonProject;
     procedure doModified;
@@ -210,6 +207,7 @@ type
 var
   DubCompiler: DCompiler = dmd;
   DubCompilerFilename: string = 'dmd';
+  Lfm: ICELifetimeManager = nil;
 
 const
   DubSdlWarning = 'this feature is deactivated in DUB projects with the SDL format';
@@ -361,7 +359,7 @@ begin
       exit(fVersions.Items[i]);
 end;
 
-destructor TDubLocalPackages.destroy;
+class procedure TDubLocalPackages.deinit;
 var
   i: integer;
 begin
@@ -370,7 +368,7 @@ begin
   inherited;
 end;
 
-procedure TDubLocalPackages.update;
+class procedure TDubLocalPackages.update;
 var
   p: TStringList;
   r: TStringList;
@@ -382,17 +380,31 @@ var
   k: integer;
   d: PDubLocalPackage = nil;
   h: TStringRange = (ptr: nil; pos: 0; len: 0);
+  x: string;
+
 begin
+
+  if not assigned(Lfm) then
+    Lfm := getLifeTimeManager;
+  if not assigned(Lfm) or not (Lfm.getLifetimeStatus = lfsLoaded) then
+  begin
+    if fDoneFirstUpdate then
+      exit;
+  end;
+  fDoneFirstUpdate := true;
+
+  for i := 0 to high(fLocalPackages) do
+    fLocalPackages[i].Free;
   setLength(fLocalPackages, 0);
   r := TStringList.Create;
   getPackagesLocations(r);
 
   try for k := 0 to r.Count -1 do
   begin
-    fRoot := r[k];
+    x := r[k];
     p := TStringList.Create;
     try
-      listFolders(p, fRoot);
+      listFolders(p, x);
       for i := 0 to p.Count-1 do
       begin
         j := 0;
@@ -436,7 +448,7 @@ begin
 
 end;
 
-function TDubLocalPackages.find(const name: string; out package: PDubLocalPackage): boolean;
+class function TDubLocalPackages.find(const name: string; out package: PDubLocalPackage): boolean;
 var
   i: integer;
 begin
@@ -451,7 +463,7 @@ begin
   end;
 end;
 
-function TDubLocalPackages.find(const name, op: string; constref opVer: TSemVer;
+class function TDubLocalPackages.find(const name, op: string; constref opVer: TSemVer;
   out package: PDubLocalPackage): PSemVer;
 var
   hi: TSemVer;
@@ -497,16 +509,6 @@ begin
     if find(name, package) then
       result := package^.highest;
   end;
-end;
-
-function TDubLocalPackages.fetch(constref version: TSemVer): PDubLocalPackage;
-begin
-  result := nil;
-end;
-
-function TDubLocalPackages.getPackageePath(package: PDubLocalPackage): string;
-begin
-  result := fRoot + package^.Name;
 end;
 {$ENDREGION}
 
@@ -664,8 +666,7 @@ begin
   doModified;
   fModified:=false;
 
-  fLocalPackages := TDubLocalPackages.Create;
-  fLocalPackages.update;
+  TDubLocalPackages.update;
 end;
 
 destructor TCEDubProject.destroy;
@@ -679,7 +680,6 @@ begin
   fConfigs.Free;
   fSrcs.Free;
   fImportPaths.Free;
-  fLocalPackages.Free;
   inherited;
 end;
 {$ENDREGION --------------------------------------------------------------------}
@@ -1389,7 +1389,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
         end;
 
         // Try to fetch if not present at all
-        if not fLocalPackages.find(n, pck) and dubBuildOptions.autoFetch then
+        if not TDubLocalPackages.find(n, pck) and dubBuildOptions.autoFetch then
         begin
           with TProcess.Create(nil) do
           try
@@ -1400,13 +1400,13 @@ procedure TCEDubProject.updateImportPathsFromJson;
             Parameters.Add(n);
             Execute;
             if ExitStatus = 0 then
-              fLocalPackages.update();
+              TDubLocalPackages.update();
           finally
             free;
           end;
         end;
 
-        if fLocalPackages.find(n, pck) then
+        if TDubLocalPackages.find(n, pck) then
         begin
 
           j := deps.Items[i];
@@ -1429,7 +1429,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
             q.init('v' + p);
 
           // Finds a match for the version in the local packages list.
-          u := fLocalPackages.find(n, o, q, pck);
+          u := TDubLocalPackages.find(n, o, q, pck);
 
           // Try to fetch the right version if no match
           if not assigned(u) and dubBuildOptions.autoFetch then
@@ -1445,8 +1445,8 @@ procedure TCEDubProject.updateImportPathsFromJson;
               Execute;
               if ExitStatus = 0 then
               begin
-                fLocalPackages.update();
-                u := fLocalPackages.find(n, o, q, pck);
+                TDubLocalPackages.update();
+                u := TDubLocalPackages.find(n, o, q, pck);
               end;
             finally
               free;
@@ -1694,5 +1694,6 @@ initialization
   dubBuildOptions:= TCEDubBuildOptions.create(nil);
 finalization
   dubBuildOptions.free;
+  TDubLocalPackages.deinit;
 end.
 
