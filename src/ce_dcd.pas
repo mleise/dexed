@@ -413,11 +413,8 @@ begin
     fClient.Parameters.Add('-I' + i);
     dec(c);
   end;
-  if c = 0 then
-  begin
+  if c <> folders.Count then
     fClient.Execute;
-    while fClient.Running do ;
-  end;
 end;
 
 procedure TCEDcdWrapper.getCallTip(out tips: string);
