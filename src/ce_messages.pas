@@ -1004,15 +1004,18 @@ procedure TCEMessagesWidget.handleMessageClick(Sender: TObject);
 var
   pos: TPoint;
   msg: string;
+  old: TCESynMemo;
 begin
   if List.Selected.isNil then
     exit;
   if ssCtrl in GetKeyShiftState then
     exit;
+  old := fDoc;
   msg := List.Selected.Text;
   if not openFileFromDmdMessage(msg) then
     exit;
-  List.ClearSelection(false);
+  if fDoc <> old then
+    List.ClearSelection(false);
   // from here, since a doc has the focus, List.Selected is nil
   pos := getLineFromMessage(msg);
   if fDoc.isNil then
