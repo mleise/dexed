@@ -1004,6 +1004,7 @@ procedure TCEMessagesWidget.handleMessageClick(Sender: TObject);
 var
   pos: TPoint;
   msg: string;
+  dat: PMessageData;
   old: TCESynMemo;
 begin
   if List.Selected.isNil then
@@ -1012,10 +1013,12 @@ begin
     exit;
   old := fDoc;
   msg := List.Selected.Text;
+  dat := PMessageData(List.Selected.Data);
   if not openFileFromDmdMessage(msg) then
     exit;
-  if fDoc <> old then
-    List.ClearSelection(false);
+  if (fDoc <> old) and fOptions.singleMessageClick and
+    assigned(dat) and (dat^.ctxt = amcEdit) then
+      List.ClearSelection(false);
   // from here, since a doc has the focus, List.Selected is nil
   pos := getLineFromMessage(msg);
   if fDoc.isNil then
