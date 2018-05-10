@@ -2408,6 +2408,8 @@ end;
 procedure TCEMainForm.projCompiling(project: ICECommonProject);
 begin
   fProjActionsLock := true;
+  if fAppliOpts.showBuildDuration and not fIsCompilingGroup then
+    fCompStart := Time();
 end;
 
 procedure TCEMainForm.projCompiled(project: ICECommonProject; success: boolean);
@@ -2422,8 +2424,7 @@ begin
   begin
     if fAppliOpts.showBuildDuration then
     begin
-      fCompStart := Time - fCompStart;
-      fMsgs.message('Build duration: ' + TimeToStr(fCompStart), project, amcProj, amkInf);
+      fMsgs.message('Build duration: ' + TimeToStr(Time - fCompStart), project, amcProj, amkInf);
     end;
     if fRunProjAfterCompile and assigned(fProject) then
     begin
@@ -2457,8 +2458,7 @@ begin
         fMsgs.message('the project group is successfully compiled', nil, amcAll, amkInf);
       if fAppliOpts.showBuildDuration then
       begin
-        fCompStart := Time - fCompStart;
-        fMsgs.message('Group build duration: ' + TimeToStr(fCompStart), nil, amcAll, amkInf);
+        fMsgs.message('Group build duration: ' + TimeToStr(Time - fCompStart), nil, amcAll, amkInf);
       end;
       if assigned(fProjBeforeGroup) then
         fProjBeforeGroup.activate;
@@ -3425,8 +3425,6 @@ procedure TCEMainForm.actProjCompileExecute(Sender: TObject);
 begin
   if fAppliOpts.autoSaveProjectFiles then
     saveModifiedProjectFiles(fProject);
-  if fAppliOpts.showBuildDuration then
-    fCompStart := Time;
   fProject.compile;
 end;
 
@@ -3435,8 +3433,6 @@ begin
   fRunProjAfterCompile := true;
   if fAppliOpts.autoSaveProjectFiles then
     saveModifiedProjectFiles(fProject);
-  if fAppliOpts.showBuildDuration then
-    fCompStart := Time;
   fProject.compile;
 end;
 
@@ -3446,8 +3442,6 @@ begin
   fRunProjAfterCompArg := true;
   if fAppliOpts.autoSaveProjectFiles then
     saveModifiedProjectFiles(fProject);
-  if fAppliOpts.showBuildDuration then
-    fCompStart := Time;
   fProject.compile;
 end;
 
@@ -3462,8 +3456,6 @@ begin
       begin
         if fAppliOpts.autoSaveProjectFiles then
           saveModifiedProjectFiles(fProject);
-        if fAppliOpts.showBuildDuration then
-          fCompStart := Time;
         fProject.compile;
       end;
     if fProject.outputFilename.fileExists or (fProject.getFormat = pfDUB) then
