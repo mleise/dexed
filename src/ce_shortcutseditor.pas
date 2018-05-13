@@ -303,27 +303,56 @@ end;
 procedure TCEShortcutEditor.propeditModified(Sender: TObject);
 var
   i: integer;
-  sh: TShortCut;
-  sht: string;
-  dup: TShortcutItem = nil;
+  j: integer;
+  s: TShortCut;
+  d: TShortcutItem = nil;
+  t: string;
+  o: TTreeNode;
 const
-  msg = '"%s" is already assigned in the same category by "%s". The new shortcut will be ignored';
+  m1 = 'warning, "%s" is already assigned in the "%s" category and it is not guaranteed to work properly';
+  m2 = 'warning, "%s" is already assigned in the same category to "%s". The new shortcut will be ignored';
 begin
   if not anItemIsSelected then
     exit;
-  sh := propvalue.value;
-  sht := shortCutToText(sh);
-  if sht.isEmpty then
+  s := propvalue.value;
+  t := shortCutToText(s);
+  if t.isEmpty then
     exit;
-  for i:= 0 to tree.Selected.Parent.Count-1 do
-    if i <> tree.Selected.Index then
-      if TShortcutItem(tree.Selected.Parent.Items[i].Data).data = sh then
-        dup := TShortcutItem(tree.Selected.Parent.Items[i].Data);
-  if dup.isNotNil then
-    dlgOkInfo(format(msg,[ShortCutToText(sh), dup.identifier]))
-  else if TShortcutItem(tree.Selected.Data).data <> sh then
+
+  // warn but accept a dup if already in another category
+  for i:= 0 to tree.Items.Count-1 do
   begin
-    TShortcutItem(tree.Selected.Data).data := sh;
+    if tree.Items[i] = tree.Selected.Parent then
+      continue;
+    for j := 0 to Tree.Items[i].Count-1 do
+    begin
+      o := Tree.Items[i].Items[j];
+      if o.Data.isNil then
+        continue;
+      if TShortcutItem(o.Data).data = s then
+      begin
+        dlgOkInfo(format(m1, [t, Tree.Items[i].Text]));
+        break;
+      end;
+    end;
+  end;
+
+  // warn and discard aa dup if already in the same cat.
+  for i:= 0 to tree.Selected.Parent.Count-1 do
+  begin
+    if i = tree.Selected.Index then
+      continue;
+    o := tree.Selected.Parent.Items[i];
+    if o.Data.isNil then
+      continue;
+    if TShortcutItem(o.Data).data = s then
+      d := TShortcutItem(o.Data);
+  end;
+  if d.isNotNil then
+    dlgOkInfo(format(m2,[t, d.identifier]))
+  else if TShortcutItem(tree.Selected.Data).data <> s then
+  begin
+    TShortcutItem(tree.Selected.Data).data := s;
     fHasChanged := true;
   end;
   updateEditCtrls;
