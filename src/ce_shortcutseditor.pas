@@ -337,7 +337,7 @@ begin
     end;
   end;
 
-  // warn and discard aa dup if already in the same cat.
+  // warn and discard a dup if already in the same cat.
   for i:= 0 to tree.Selected.Parent.Count-1 do
   begin
     if i = tree.Selected.Index then
@@ -511,7 +511,6 @@ begin
       decl.scedSendDone;
   end;
 end;
-
 {$ENDREGION}
 
 initialization
