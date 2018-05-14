@@ -70,7 +70,6 @@ type
   public
     constructor create(aOwner: TCOmponent); override;
     destructor destroy; override;
-    //
     procedure LoadFromTool(str: TStream);
   end;
 
@@ -102,8 +101,6 @@ type
     procedure Assign(Source: TPersistent); override;
     procedure AssignTo(Dest: TPersistent); override;
   end;
-
-  { TCESymbolListWidget }
 
   TCESymbolListWidget = class(TCEWidget, ICEDocumentObserver, ICEEditableOptions)
     btnRefresh: TCEToolButton;
@@ -151,16 +148,16 @@ type
     procedure updateVisibleCat;
     procedure clearTree;
     procedure smartExpand;
-    //
+
     procedure checkIfHasToolExe;
     procedure callToolProc;
     procedure toolTerminated(sender: TObject);
-    //
+
     procedure docNew(document: TCESynMemo);
     procedure docClosing(document: TCESynMemo);
     procedure docFocused(document: TCESynMemo);
     procedure docChanged(document: TCESynMemo);
-    //
+
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -168,11 +165,11 @@ type
     function optionedOptionsModified: boolean;
   protected
     procedure updateDelayed; override;
-    //
+
     function contextName: string; override;
     function contextActionCount: integer; override;
     function contextAction(index: integer): TAction; override;
-    //
+
     procedure SetVisible(value: boolean); override;
     procedure setToolBarFlat(value: boolean); override;
   published
@@ -277,7 +274,7 @@ begin
   if Source is TCESymbolListWidget then
   begin
     widg := TCESymbolListWidget(Source);
-    //
+
     fDeep                 := widg.fDeep;
     fAutoRefreshDelay     := widg.updaterByDelayDuration;
     fRefreshOnFocus       := widg.fRefreshOnFocus;
@@ -499,7 +496,8 @@ end;
 
 procedure TCESymbolListWidget.actRefreshExecute(Sender: TObject);
 begin
-  if Updating then exit;
+  if Updating then
+    exit;
   callToolProc;
 end;
 
@@ -547,7 +545,8 @@ end;
 
 procedure TCESymbolListWidget.optionedEvent(event: TOptionEditorEvent);
 begin
-  if event <> oeeAccept then exit;
+  if event <> oeeAccept then
+    exit;
   fOptions.AssignTo(self);
   callToolProc;
 end;
@@ -567,7 +566,9 @@ end;
 
 procedure TCESymbolListWidget.docClosing(document: TCESynMemo);
 begin
-  if fDoc <> document then exit;
+  if fDoc <> document then
+    exit;
+
   fDoc := nil;
   clearTree;
   updateVisibleCat;
@@ -575,22 +576,26 @@ end;
 
 procedure TCESymbolListWidget.docFocused(document: TCESynMemo);
 begin
-  if fDoc = document then exit;
+  if fDoc = document then
+    exit;
   fDoc := document;
-  if not Visible then exit;
-  //
+  if not Visible then
+    exit;
+
   if fAutoRefresh then beginDelayedUpdate
   else if fRefreshOnFocus then callToolProc;
 end;
 
 procedure TCESymbolListWidget.docChanged(document: TCESynMemo);
 begin
-  if fDoc <> document then exit;
-  if not Visible then exit;
-  //
-  if fAutoRefresh then beginDelayedUpdate
-  else if fRefreshOnChange then callToolProc;
-  //
+  if (fDoc <> document) or not Visible then
+    exit;
+
+  if fAutoRefresh then
+    beginDelayedUpdate
+  else if fRefreshOnChange then
+    callToolProc;
+
   if fSmartExpander then
     smartExpand;
 end;
@@ -679,8 +684,9 @@ end;
 function TCESymbolListWidget.TreeFilterEdit1FilterItem(Item: TObject; out
   Done: Boolean): Boolean;
 begin
-  if not fSmartFilter then exit(false);
-  //
+  if not fSmartFilter then
+    exit(false);
+
   if TreeFilterEdit1.Filter.isNotEmpty then
     tree.FullExpand
   else if tree.Selected.isNil then
@@ -691,27 +697,29 @@ end;
 
 procedure TCESymbolListWidget.TreeFilterEdit1MouseEnter(Sender: TObject);
 begin
-  if not fSmartFilter then exit;
-  //
+  if not fSmartFilter then
+    exit;
+
   tree.Selected := nil;
 end;
 
 procedure TCESymbolListWidget.TreeKeyPress(Sender: TObject; var Key: char);
 begin
-  if Key = #13 then TreeDblClick(nil);
+  if Key = #13 then
+    TreeDblClick(nil);
 end;
 
 procedure TCESymbolListWidget.TreeDblClick(Sender: TObject);
 var
-  line: NativeUint;
+  line: PtrUInt;
 begin
-  if fDoc.isNil then exit;
-  if Tree.Selected.isNil then exit;
-  if Tree.Selected.Data.isNil then exit;
-  //
+  if fDoc.isNil or Tree.Selected.isNil or Tree.Selected.Data.isNil then
+    exit;
+
   {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
   line := NativeUInt(Tree.Selected.Data);
   {$POP}
+  fDoc.setFocus;
   fDoc.CaretY := line;
   fDoc.SelectLine;
 end;
@@ -726,15 +734,16 @@ procedure TCESymbolListWidget.callToolProc;
 var
   str: string;
 begin
-  if not fHasToolExe then exit;
-  if fDoc.isNil then exit;
+  if not fHasToolExe or fDoc.isNil then
+    exit;
+
   if (fDoc.Lines.Count = 0) or not fDoc.isDSource then
   begin
     clearTree;
     updateVisibleCat;
     exit;
   end;
-  //
+
   killProcess(fToolProc);
   fToolProc := TCEProcess.Create(nil);
   fToolProc.ShowWindow := swoHIDE;
@@ -752,101 +761,103 @@ begin
 end;
 
 procedure TCESymbolListWidget.toolTerminated(sender: TObject);
-//
-function getCatNode(node: TTreeNode; stype: TSymbolType ): TTreeNode;
-  //
-  function newCat(const aCat: string): TTreeNode;
+
+  function getCatNode(node: TTreeNode; stype: TSymbolType ): TTreeNode;
+    function newCat(const aCat: string): TTreeNode;
+    begin
+      result := node.FindNode(aCat);
+      if result.isNil then
+        result := node.TreeNodes.AddChild(node, aCat);
+      case stype of
+        _alias    : begin result.ImageIndex:=0; result.SelectedIndex:=0; end;
+        _class    : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
+        _enum     : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
+        _function : begin result.ImageIndex:=3; result.SelectedIndex:=3; end;
+        _import   : begin result.ImageIndex:=4; result.SelectedIndex:=4; end;
+        _interface: begin result.ImageIndex:=5; result.SelectedIndex:=5; end;
+        _mixin    : begin result.ImageIndex:=6; result.SelectedIndex:=6; end;
+        _struct   : begin result.ImageIndex:=7; result.SelectedIndex:=7; end;
+        _template : begin result.ImageIndex:=0; result.SelectedIndex:=0; end;
+        _union    : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
+        _unittest : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
+        _variable : begin result.ImageIndex:=3; result.SelectedIndex:=3; end;
+        _warning  : begin result.ImageIndex:=8; result.SelectedIndex:=8; end;
+        _error    : begin result.ImageIndex:=9; result.SelectedIndex:=9; end;
+      end;
+    end;
+
   begin
-    result := node.FindNode(aCat);
-    if result.isNil then
-      result := node.TreeNodes.AddChild(node, aCat);
-    case stype of
-      _alias    : begin result.ImageIndex:=0; result.SelectedIndex:=0; end;
-      _class    : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
-      _enum     : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
-      _function : begin result.ImageIndex:=3; result.SelectedIndex:=3; end;
-      _import   : begin result.ImageIndex:=4; result.SelectedIndex:=4; end;
-      _interface: begin result.ImageIndex:=5; result.SelectedIndex:=5; end;
-      _mixin    : begin result.ImageIndex:=6; result.SelectedIndex:=6; end;
-      _struct   : begin result.ImageIndex:=7; result.SelectedIndex:=7; end;
-      _template : begin result.ImageIndex:=0; result.SelectedIndex:=0; end;
-      _union    : begin result.ImageIndex:=1; result.SelectedIndex:=1; end;
-      _unittest : begin result.ImageIndex:=2; result.SelectedIndex:=2; end;
-      _variable : begin result.ImageIndex:=3; result.SelectedIndex:=3; end;
-      _warning  : begin result.ImageIndex:=8; result.SelectedIndex:=8; end;
-      _error    : begin result.ImageIndex:=9; result.SelectedIndex:=9; end;
-    end;
+    result := nil;
+    if node.isNil then case stype of
+      _alias    : exit(ndAlias);
+      _class    : exit(ndClass);
+      _enum     : exit(ndEnum);
+      _function : exit(ndFunc);
+      _import   : exit(ndImp);
+      _interface: exit(ndIntf);
+      _mixin    : exit(ndMix);
+      _struct   : exit(ndStruct);
+      _template : exit(ndTmp);
+      _union    : exit(ndUni);
+      _unittest : exit(ndUt);
+      _variable : exit(ndVar);
+      _warning  : exit(ndWarn);
+      _error    : exit(ndErr);
+    end else case stype of
+      _alias:     exit(newCat('Alias'));
+      _class:     exit(newCat('Class'));
+      _enum:      exit(newCat('Enum'));
+      _function:  exit(newCat('Function'));
+      _import:    exit(newCat('Import'));
+      _interface: exit(newCat('Interface'));
+      _mixin:     exit(newCat('Mixin'));
+      _struct:    exit(newCat('Struct'));
+      _template:  exit(newCat('Template'));
+      _union:     exit(newCat('Union'));
+      _unittest:  exit(newCat('Unittest'));
+      _variable:  exit(newCat('Variable'));
+      _warning:   exit(ndWarn);
+      _error:     exit(ndErr);
+      end;
   end;
-  //
-begin
-  result := nil;
-  if node.isNil then case stype of
-    _alias    : exit(ndAlias);
-    _class    : exit(ndClass);
-    _enum     : exit(ndEnum);
-    _function : exit(ndFunc);
-    _import   : exit(ndImp);
-    _interface: exit(ndIntf);
-    _mixin    : exit(ndMix);
-    _struct   : exit(ndStruct);
-    _template : exit(ndTmp);
-    _union    : exit(ndUni);
-    _unittest : exit(ndUt);
-    _variable : exit(ndVar);
-    _warning  : exit(ndWarn);
-    _error    : exit(ndErr);
-  end else case stype of
-    _alias:     exit(newCat('Alias'));
-    _class:     exit(newCat('Class'));
-    _enum:      exit(newCat('Enum'));
-    _function:  exit(newCat('Function'));
-    _import:    exit(newCat('Import'));
-    _interface: exit(newCat('Interface'));
-    _mixin:     exit(newCat('Mixin'));
-    _struct:    exit(newCat('Struct'));
-    _template:  exit(newCat('Template'));
-    _union:     exit(newCat('Union'));
-    _unittest:  exit(newCat('Unittest'));
-    _variable:  exit(newCat('Variable'));
-    _warning:   exit(ndWarn);
-    _error:     exit(ndErr);
-    end;
-end;
-//
-procedure symbolToTreeNode(origin: TTreenode; sym: TSymbol);
-var
-  cat: TTreeNode;
-  node: TTreeNode;
-  i: Integer;
-begin
-  cat := getCatNode(origin, sym.symType);
-  {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
-  node := tree.Items.AddChildObject(cat, sym.name, Pointer(sym.fline));
-  {$POP}
-  node.SelectedIndex:= cat.SelectedIndex;
-  node.ImageIndex:= cat.ImageIndex;
-  if not fShowChildCategories then
-    node := nil;
-  cat.Visible:=true;
-  for i := 0 to sym.subs.Count-1 do
-    symbolToTreeNode(node, sym.subs[i]);
-end;
-//
+
+  procedure symbolToTreeNode(origin: TTreenode; sym: TSymbol);
+  var
+    cat: TTreeNode;
+    node: TTreeNode;
+    i: Integer;
+  begin
+    cat := getCatNode(origin, sym.symType);
+    {$PUSH}{$WARNINGS OFF}{$HINTS OFF}
+    node := tree.Items.AddChildObject(cat, sym.name, Pointer(sym.fline));
+    {$POP}
+    node.SelectedIndex:= cat.SelectedIndex;
+    node.ImageIndex:= cat.ImageIndex;
+    if not fShowChildCategories then
+      node := nil;
+    cat.Visible:=true;
+    for i := 0 to sym.subs.Count-1 do
+      symbolToTreeNode(node, sym.subs[i]);
+  end;
+
 var
   i: Integer;
   flt: string;
 begin
-  if ndAlias.isNil then exit;
+  if ndAlias.isNil then
+    exit;
   clearTree;
   updateVisibleCat;
-  if fDoc.isNil then exit;
-  //
+  if fDoc.isNil then
+    exit;
+
   fToolProc.OnTerminate := nil;
   fToolProc.OnReadData  := nil;
   fToolProc.OutputStack.Position:=0;
-  if fToolProc.OutputStack.Size = 0 then exit;
+  if fToolProc.OutputStack.Size = 0 then
+    exit;
   fSyms.LoadFromTool(fToolProc.OutputStack);
-  //
+
   flt := TreeFilterEdit1.Filter;
   TreeFilterEdit1.Text := '';
   tree.BeginUpdate;
@@ -906,8 +917,9 @@ var
   end;
 
 begin
-  if fDoc.isNil then exit;
-  //
+  if fDoc.isNil then
+    exit;
+
   target := fDoc.CaretY;
   for i := 0 to tree.Items.Count-1 do
     look(tree.Items[i]);
