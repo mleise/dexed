@@ -13,14 +13,14 @@ inherited CETodoListWidget: TCETodoListWidget
     ClientHeight = 337
     ClientWidth = 584
     inherited Content: TPanel
-      Height = 303
-      Top = 34
+      Height = 301
+      Top = 36
       Width = 584
-      ClientHeight = 303
+      ClientHeight = 301
       ClientWidth = 584
       object lstItems: TListView[0]
         Left = 4
-        Height = 295
+        Height = 293
         Top = 4
         Width = 576
         Align = alClient
@@ -29,31 +29,32 @@ inherited CETodoListWidget: TCETodoListWidget
           item
             AutoSize = True
             Caption = 'text'
-            Width = 36
+            Width = 38
           end        
           item
             AutoSize = True
             Caption = 'category'
-            Width = 67
+            Width = 69
           end        
           item
             AutoSize = True
             Caption = 'assignee'
-            Width = 68
+            Width = 70
           end        
           item
             AutoSize = True
             Caption = 'status'
+            Width = 52
           end        
           item
             AutoSize = True
             Caption = 'priority'
-            Width = 57
+            Width = 59
           end        
           item
             AutoSize = True
             Caption = 'file'
-            Width = 278
+            Width = 266
           end>
         ReadOnly = True
         SortType = stText
@@ -62,7 +63,6 @@ inherited CETodoListWidget: TCETodoListWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Height = 28
       Width = 576
       object btnGo: TCEToolButton[0]
         Left = 29
@@ -84,7 +84,7 @@ inherited CETodoListWidget: TCETodoListWidget
       end
       object lstfilter: TListFilterEdit[2]
         Left = 61
-        Height = 24
+        Height = 26
         Hint = 'filter the TODO items that contain the text typed here'
         Top = 2
         Width = 513

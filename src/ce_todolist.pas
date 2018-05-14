@@ -554,6 +554,7 @@ var
 begin
   if lstItems.Selected.isNil or lstItems.Selected.Data.isNil then
     exit;
+
   // the collection will be cleared if a file is opened
   // docFocused->callToolProcess->fTodos....clear
   // so line and filename must be copied
@@ -561,9 +562,11 @@ begin
   fname := itm.filename;
   ln := itm.line;
   getMultiDocHandler.openDocument(fname);
-  //
+
   if fDoc.isNil then
     exit;
+
+  fDoc.setFocus;
   fDoc.CaretY := StrToInt(ln);
   fDoc.SelectLine;
 end;
