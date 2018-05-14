@@ -1016,13 +1016,17 @@ begin
   dat := PMessageData(List.Selected.Data);
   if not openFileFromDmdMessage(msg) then
     exit;
+
+  // fixes strange bug : https://github.com/BBasile/Coedit/issues/320
   if (fDoc <> old) and fOptions.singleMessageClick and
     assigned(dat) and (dat^.ctxt = amcEdit) then
       List.ClearSelection(false);
+
   // from here, since a doc has the focus, List.Selected is nil
   pos := getLineFromMessage(msg);
   if fDoc.isNil then
     exit;
+  fDoc.setFocus;
   fDoc.CaretXY := pos;
   fDoc.SelectLine;
 end;
