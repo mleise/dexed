@@ -350,6 +350,11 @@ begin
   if b then
     dlgOkError('the following projects are missing and are removed from the group:' + f,
       'Project group error');
+  if not assigned(fFreeStanding) then
+  begin
+    item[fSavedIndex].lazyLoad;
+    item[fSavedIndex].project.activate;
+  end;
 end;
 
 procedure TProjectGroup.afterSave;
