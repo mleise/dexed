@@ -6,7 +6,9 @@ import
     std.array, std.getopt, std.stdio, std.path, std.algorithm, std.functional,
     std.file;
 import
-    iz.memory, iz.options;
+    iz.memory: construct;
+import
+    iz.options: Argument, ArgFlags, ArgFlag, handleArguments, CantThrow;
 import
     dparse.lexer, dparse.parser, dparse.ast, dparse.rollback_allocator;
 import

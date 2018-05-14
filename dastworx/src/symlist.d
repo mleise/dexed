@@ -4,7 +4,9 @@ import
     std.stdio, std.array, std.traits, std.conv, std.json, std.format,
     std.algorithm;
 import
-    iz.memory, iz.containers;
+    iz.memory: construct;
+import
+    iz.containers : Array;
 import
     dparse.lexer, dparse.ast, dparse.parser, dparse.formatter : Formatter;
 import
