@@ -1153,17 +1153,17 @@ begin
     ((aMessage[i] = '(') or (aMessage[i] = ':') or
     ((aMessage[i] = '-') and (i < aMessage.length-5) and (aMessage[i..i+5] = '-mixin'))) then
     begin
-      // absolute fname
-      if ident.fileExists then
-      begin
-        getMultiDocHandler.openDocument(ident);
-        exit(true);
-      end;
       // relative fname if project file is the base path to a rel. fname
       absName := ExpandFileName(ident);
       if absName.fileExists then
       begin
         getMultiDocHandler.openDocument(absName);
+        exit(true);
+      end;
+      // absolute fname
+      if ident.fileExists then
+      begin
+        getMultiDocHandler.openDocument(ident);
         exit(true);
       end;
       // if fname relative to project path
@@ -1175,6 +1175,20 @@ begin
           getMultiDocHandler.openDocument(absName);
           exit(true);
         end;
+      end;
+      // finally try using pwd ...
+      absName := expandFilenameEx(GetCurrentDir, ident);
+      if absName.fileExists then
+      begin
+        getMultiDocHandler.openDocument(absName);
+        exit(true);
+      end;
+      // ... and $HOME
+      absName := expandFilenameEx(GetUserDir, ident);
+      if absName.fileExists then
+      begin
+        getMultiDocHandler.openDocument(absName);
+        exit(true);
       end;
     end
     // <assertion failure messg>@<filename>
