@@ -3102,6 +3102,7 @@ begin
     fCacheLoaded := true;
   end;
 
+  tryToPatchMixedIndentation();
   subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
   fCanDscan := true;
 end;
@@ -3573,7 +3574,7 @@ end;
 
 procedure TCESynMemo.tryToPatchMixedIndentation;
 begin
-  if fLifeTimeManager.isNotNil and not fIdentDialShown and
+  if fLifeTimeManager.isNotNil and not fIdentDialShown and (lines.Count <> 0) and
     ((fLifeTimeManager as ICELifetimeManager).getLifetimeStatus = lfsLoaded)
       then
   begin
