@@ -3608,6 +3608,16 @@ begin
           free;
         end;
     end;
+    if not (eoTabsToSpaces in Options) then
+    begin
+      BlockIndent := 0;
+      BlockTabIndent := 1;
+    end
+    else
+    begin
+      BlockIndent := TabWidth;
+      BlockTabIndent := 0;
+    end;
   end;
 end;
 

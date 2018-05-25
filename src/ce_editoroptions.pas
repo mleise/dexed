@@ -706,7 +706,6 @@ begin
   anEditor.HighlightAllColor.Assign(fIdentifierMarkup);
   anEditor.LineHighlightColor.Assign(fCurrLineAttribs);
   anEditor.TabWidth := tabulationWidth;
-  anEditor.BlockIndent := blockIndentation;
   anEditor.ExtraLineSpacing := lineSpacing;
   anEditor.ExtraCharSpacing := characterSpacing;
   anEditor.Options := options1;
@@ -726,6 +725,17 @@ begin
   anEditor.transparentGutter:=fTransparentGutter;
   anEditor.setDscannerOptions(fDscannerEnabled, fDscannerDelay);
   anEditor.scrollPreview:=fScrollPreview;
+
+  if not (eoTabsToSpaces in options1) then
+  begin
+    anEditor.BlockIndent := 0;
+    anEditor.BlockTabIndent := 1;
+  end
+  else
+  begin
+    anEditor.BlockIndent := blockIndentation;
+    anEditor.BlockTabIndent := 0;
+  end;
 
   cs := [];
   for c in fCloseCompletionCharsWithSpace do
