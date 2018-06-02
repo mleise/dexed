@@ -1250,7 +1250,7 @@ function isEditable(const ext: string): boolean;
 begin
   result := false;
   case ext of
-    '.d', '.di', '.dd', '.lst', '.md', '.txt', '.map' , '.ya': result := true;
+    '.d', '.di', '.dd', '.lst', '.md', '.txt', '.map' , '.sx': result := true;
   end;
 end;
 
