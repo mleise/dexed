@@ -37,9 +37,9 @@ struct Launcher
     __gshared string[] files;
 
     // -o : deep visit the symbols
-    alias deepSymList = option1;
+    // alias deepSymList = option1;
     // -o : outputs /++ +/ ddoc instead of /** */
-    alias plusComment = option1;
+    // alias plusComment = option1;
 
     /// Writes the list of files to process
     @Argument("-f")
@@ -71,7 +71,7 @@ struct Launcher
         source.data
             .getTokensForParser(config, &cache)
             .parseModule("", &alloc, &handleErrors)
-            .listSymbols(errors.data, deepSymList);
+            .listSymbols(errors.data, option1);
     }
 
     /// Writes the list of todo comments
@@ -150,7 +150,7 @@ struct Launcher
         source.data
             .getTokensForParser(config, &cache)
             .parseModule("", &alloc, toDelegate(&ignoreErrors))
-            .getDdocTemplate(caretLine, plusComment);
+            .getDdocTemplate(caretLine, option1);
     }
 }
 
