@@ -2285,6 +2285,7 @@ var
   itm: TMenuItem;
   fname: string;
   clickTrg: TNotifyEvent;
+  i: integer;
 begin
   srcLst := TCEMruFileList(Sender);
   if srcLst.isNil then
@@ -2305,11 +2306,18 @@ begin
 
     trgMnu.Clear;
 
-    for fname in srcLst do
+
+    for i := 0 to srcLst.Count-1 do
     begin
+
+      if srcLst = fFileMru then
+        fname := srcLst.Strings[i].extractFileName
+      else
+        fname := srcLst.Strings[i].extractFileDir.extractFileName;
+
       itm := TMenuItem.Create(trgMnu);
-      itm.Hint := fname;
-      itm.Caption := fname.extractFileName + ' - (' + fname + ')';
+      itm.Hint := srcLst.Strings[i];
+      itm.Caption := fname + ' - (' + itm.Hint + ')';
       itm.OnClick := clickTrg;
       trgMnu.Add(itm);
     end;
