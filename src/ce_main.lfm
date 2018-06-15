@@ -1837,7 +1837,7 @@ object CEMainForm: TCEMainForm
         ImageIndex = 31
       end
     end
-    object MenuItem113: TMenuItem
+    object mnuItemHelp: TMenuItem
       Caption = 'Help'
       object mnuItemAbout: TMenuItem
         Caption = 'About Coedit and tools information'

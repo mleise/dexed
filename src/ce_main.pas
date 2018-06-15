@@ -174,7 +174,7 @@ type
     MenuItem110: TMenuItem;
     MenuItem111: TMenuItem;
     MenuItem112: TMenuItem;
-    MenuItem113: TMenuItem;
+    mnuItemHelp: TMenuItem;
     mnuItemAbout: TMenuItem;
     mnuItemCheckUpd: TMenuItem;
     mnuItemManual: TMenuItem;
@@ -1263,6 +1263,9 @@ begin
   fAppliOpts.assignTo(self);
 
   InitOptionsMenu;
+
+  mainMenu.Items.Remove(mnuItemHelp);
+  mainMenu.Items.Add(mnuItemHelp);
 
   fInitialized := true;
 end;
