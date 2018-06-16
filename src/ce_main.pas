@@ -3801,6 +3801,8 @@ begin
       exit;
   fProjectGroup.closeGroup;
   fProjectGroup.openGroup(TMenuItem(Sender).Hint);
+  if (fProject = nil) and (fProjectGroup.getProjectIndex < fProjectGroup.projectCount) then
+    fProjectGroup.getProject(fProjectGroup.getProjectIndex).activate();
 end;
 
 procedure TCEMainForm.actProjCloseExecute(Sender: TObject);
@@ -3970,6 +3972,8 @@ begin
   finally
     free;
   end;
+  if (fProject = nil) and (fProjectGroup.getProjectIndex < fProjectGroup.projectCount) then
+    fProjectGroup.getProject(fProjectGroup.getProjectIndex).activate();
 end;
 
 procedure TCEMainForm.actProjSaveGroupAsExecute(Sender: TObject);

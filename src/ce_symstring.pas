@@ -103,10 +103,10 @@ end;
 
 procedure TCESymbolExpander.projClosing(project: ICECommonProject);
 begin
-  fProjInterface := nil;
-  if fProj <> project.getProject then
-    exit;
-  fProj := nil;
+  if fProjInterface = project then
+    fProjInterface := nil;
+  if fProj = project.getProject then
+    fProj := nil;
   fNeedUpdate := true;
 end;
 
@@ -178,6 +178,7 @@ var
 const
   na = '``';
 begin
+  //commented : mini explorer doesn't emitt notif,
   //if not fNeedUpdate then
   //  exit;
   fNeedUpdate := false;
