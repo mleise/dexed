@@ -35,9 +35,11 @@ type
     fTerminateChecker: TTimer;
     fDoneTerminated: boolean;
     fHasRead: boolean;
+    fRedirectStdErr: boolean;
     procedure checkTerminated(sender: TObject);
     procedure setOnTerminate(value: TNotifyEvent);
     procedure setOnReadData(value: TNotifyEvent);
+    procedure appendStdErr;
   protected
     procedure internalDoOnReadData(sender: TObject); virtual;
     procedure internalDoOnTerminate(sender: TObject); virtual;
@@ -161,10 +163,9 @@ begin
   inherited;
   FOutputStack := TMemoryStream.Create;
   FTerminateChecker := TTimer.Create(nil);
-  FTerminateChecker.Interval := 50;
+  FTerminateChecker.Interval := 100;
   fTerminateChecker.OnTimer := @checkTerminated;
   fTerminateChecker.Enabled := false;
-  //fTerminateChecker.AutoEnabled:= true;
   TAsyncProcess(self).OnTerminate := @internalDoOnTerminate;
   TAsyncProcess(self).OnReadData := @internalDoOnReadData;
 end;
@@ -178,6 +179,8 @@ end;
 
 procedure TCEProcess.Execute;
 begin
+  fRedirectStdErr := poStderrToOutPut in Options;
+  Options := Options - [poStderrToOutPut];
   fHasRead := false;
   fOutputStack.Clear;
   fDoneTerminated := false;
@@ -196,8 +199,24 @@ begin
   sum := fOutputStack.Size;
   while (Output <> nil) and (NumBytesAvailable > 0) do
   begin
-    fOutputStack.SetSize(sum + 1024);
-    cnt := Output.Read((fOutputStack.Memory + sum)^, 1024);
+    fOutputStack.SetSize(sum + NumBytesAvailable);
+    cnt := Output.Read((fOutputStack.Memory + sum)^, NumBytesAvailable);
+    sum += cnt;
+  end;
+  fOutputStack.SetSize(sum);
+end;
+
+procedure TCEProcess.appendStdErr;
+var
+  sum, cnt: Integer;
+begin
+  if not (poUsePipes in Options) then
+    exit;
+  sum := fOutputStack.Size;
+  while (Stderr <> nil) and (Stderr.NumBytesAvailable > 0) do
+  begin
+    fOutputStack.SetSize(sum + Stderr.NumBytesAvailable);
+    cnt := Stderr.Read((fOutputStack.Memory + sum)^, Stderr.NumBytesAvailable);
     sum += cnt;
   end;
   fOutputStack.SetSize(sum);
@@ -206,7 +225,7 @@ end;
 procedure TCEProcess.getFullLines(list: TStrings; consume: boolean = true);
 var
   stored: Integer;
-  lastTerm: Integer;
+  lastEOL: Integer;
   toread: Integer;
   buff: Byte = 0;
   str: TMemoryStream;
@@ -218,16 +237,17 @@ begin
       fOutputStack.Clear;
   end else
   begin
-    lastTerm := fOutputStack.Position;
+    lastEOL := fOutputStack.Position;
     stored := fOutputStack.Position;
     while fOutputStack.Read(buff, 1) = 1 do
-      if buff = 10 then lastTerm := fOutputStack.Position;
+      if buff = 10 then
+        lastEOL := fOutputStack.Position;
     fOutputStack.Position := stored;
-    if lastTerm <> stored then
+    if lastEOL <> stored then
     begin
       str := TMemoryStream.Create;
       try
-        toread := lastTerm - stored;
+        toread := lastEOL - stored;
         str.SetSize(toRead);
         fOutputStack.Read(str.Memory^, toread);
         list.LoadFromStream(str);
@@ -272,6 +292,11 @@ begin
   UnhookProcessHandle;
 
   fillOutputStack;
+  // note: redirection is to output stream is done by hand at the end
+  // because of sync issue (https://github.com/BBasile/Coedit/issues/336).
+  if fRedirectStdErr then
+    appendStdErr;
+
   if fRealOnTerminate <> nil then
     fRealOnTerminate(self);
 end;
