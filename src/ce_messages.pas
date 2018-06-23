@@ -903,8 +903,7 @@ begin
     fBtns[aCtxt].Click;
   if fastDisplay then
     IncLoopUpdate;
-  item := List.Items.Add(nil, msg);
-  item.Data := dt;
+  item := List.Items.AddObject(nil, msg, dt);
   item.ImageIndex := iconIndex(aKind);
   item.SelectedIndex := item.ImageIndex;
   if not fastDisplay then
