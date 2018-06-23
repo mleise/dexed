@@ -50,6 +50,7 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     procedure execute; override;
+    procedure checkTerminated;
     // reads TProcess.OUtput in OutputStack
     procedure fillOutputStack;
     // fills list with the full lines contained in OutputStack
@@ -307,6 +308,12 @@ begin
     exit;
   fTerminateChecker.Enabled := false;
   internalDoOnTerminate(self);
+end;
+
+procedure TCEProcess.checkTerminated;
+begin
+  sleep(20);
+  checkTerminated(self);
 end;
 
 constructor TCEAutoBufferedProcess.create(aOwner: TComponent);
