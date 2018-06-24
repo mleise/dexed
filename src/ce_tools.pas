@@ -254,6 +254,8 @@ begin
   begin
     lst := TStringList.Create;
     try
+      if not fProcess.Running then
+        fProcess.appendStdErr;
       fProcess.getFullLines(lst);
       for str in lst do
         fMsgs.message(str, nil, amcMisc, amkAuto);

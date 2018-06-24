@@ -9,6 +9,9 @@ uses
 
 type
 
+  //TODO: follow up https://bugs.freepascal.org/view.php?id=33897
+  //which is the cause of the timer workaround
+
   {
     The stanndard process wrapper used in Coedit.
 
@@ -16,6 +19,7 @@ type
 
     -   OnTerminate event is never called under Linux.
         Here a timer perdiodically check the process and call the event accordingly.
+        (STILL DOES NOT WORK)
     -   TAsyncProcess.OnReadData event is not usable to read full output lines.
         Here the output is accumulated in a TMemoryStream which allows to keep data
         at the left of an unterminated line when a buffer is available.
@@ -39,7 +43,6 @@ type
     procedure checkTerminated(sender: TObject);
     procedure setOnTerminate(value: TNotifyEvent);
     procedure setOnReadData(value: TNotifyEvent);
-    procedure appendStdErr;
   protected
     procedure internalDoOnReadData(sender: TObject); virtual;
     procedure internalDoOnTerminate(sender: TObject); virtual;
@@ -50,7 +53,11 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     procedure execute; override;
+    // Check if process is terminated (bug 33897).
+    // Not to be called in the OnTerminated handler.
     procedure checkTerminated;
+    // Add stderr to stdout, to be called when terminated
+    procedure appendStdErr;
     // reads TProcess.OUtput in OutputStack
     procedure fillOutputStack;
     // fills list with the full lines contained in OutputStack

@@ -20,7 +20,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       ClientWidth = 328
       object lstProj: TListView[0]
         Left = 4
-        Height = 140
+        Height = 124
         Top = 4
         Width = 320
         Align = alClient
@@ -30,22 +30,22 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
           item
             AutoSize = True
             Caption = 'Name'
-            Width = 47
+            Width = 51
           end        
           item
             AutoSize = True
             Caption = 'Type'
-            Width = 41
+            Width = 42
           end        
           item
             AutoSize = True
             Caption = 'Async'
-            Width = 47
+            Width = 51
           end        
           item
             AutoSize = True
             Caption = 'Configuration'
-            Width = 89
+            Width = 174
           end>
         GridLines = True
         HideSelection = False
@@ -59,19 +59,19 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
       object Panel2: TPanel[1]
         Left = 4
-        Height = 7
-        Top = 148
+        Height = 23
+        Top = 132
         Width = 320
         Align = alBottom
         AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 7
+        ClientHeight = 23
         ClientWidth = 320
         TabOrder = 1
         object btnFreeFocus: TSpeedButton
           Left = 312
-          Height = 7
+          Height = 23
           Hint = 'Put the focus on the ungrouped project'
           Top = 0
           Width = 4
@@ -83,7 +83,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         end
         object StaticText1: TStaticText
           Left = 2
-          Height = 3
+          Height = 19
           Top = 2
           Width = 308
           Align = alClient
@@ -94,7 +94,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
         end
         object btnAddUnfocused: TSpeedButton
           Left = 316
-          Height = 7
+          Height = 23
           Hint = 'Put the ungrouped project in the group'
           Top = 0
           Width = 4

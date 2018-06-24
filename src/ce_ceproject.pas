@@ -923,6 +923,8 @@ var
 begin
   lst := TStringList.Create;
   try
+    if not fCompilProc.Running then
+      fCompilProc.appendStdErr;
     fCompilProc.getFullLines(lst);
     for str in lst do
       fMsgs.message(str, fAsProjectItf, amcProj, amkAuto);
