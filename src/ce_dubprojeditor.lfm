@@ -71,6 +71,7 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
     end
     inherited toolbar: TCEToolBar
       Width = 399
+      OnResize = toolbarResize
       object btnReload: TCEToolButton[0]
         Left = 85
         Hint = 'reload the project, useful to fetch new dependencies or detect new source files'
@@ -102,11 +103,11 @@ inherited CEDubProjectEditorWidget: TCEDubProjectEditorWidget
         scaledSeparator = False
       end
       object fltEdit: TTreeFilterEdit[3]
-        Left = 128
+        Left = 120
         Height = 26
         Hint = 'filter properties'
         Top = 2
-        Width = 269
+        Width = 277
         ButtonWidth = 23
         NumGlyphs = 1
         Align = alRight

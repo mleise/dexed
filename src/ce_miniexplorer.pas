@@ -95,6 +95,7 @@ type
     procedure lstFilesFileAdded(Sender: TObject; Item: TListItem);
     procedure lstFilterButtonClick(Sender: TObject);
     procedure lstFilterKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure toolbarResize(Sender: TObject);
     procedure TreeEnter(Sender: TObject);
     procedure treeFoldersChange(Sender: TObject; Node: TTreeNode);
     procedure treeFoldersDblClick(Sender: TObject);
@@ -733,6 +734,11 @@ procedure TCEMiniExplorerWidget.lstFilterKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   filterFiles;
+end;
+
+procedure TCEMiniExplorerWidget.toolbarResize(Sender: TObject);
+begin
+  lstFilter.Width := toolbar.Width - lstFilter.Left - lstFilter.BorderSpacing.Around;
 end;
 
 procedure TCEMiniExplorerWidget.shellOpenSelected;

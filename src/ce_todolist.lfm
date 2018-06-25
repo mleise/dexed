@@ -29,32 +29,31 @@ inherited CETodoListWidget: TCETodoListWidget
           item
             AutoSize = True
             Caption = 'text'
-            Width = 38
+            Width = 36
           end        
           item
             AutoSize = True
             Caption = 'category'
-            Width = 69
+            Width = 67
           end        
           item
             AutoSize = True
             Caption = 'assignee'
-            Width = 70
+            Width = 68
           end        
           item
             AutoSize = True
             Caption = 'status'
-            Width = 52
           end        
           item
             AutoSize = True
             Caption = 'priority'
-            Width = 59
+            Width = 57
           end        
           item
             AutoSize = True
             Caption = 'file'
-            Width = 266
+            Width = 278
           end>
         ReadOnly = True
         SortType = stText
@@ -64,6 +63,7 @@ inherited CETodoListWidget: TCETodoListWidget
     end
     inherited toolbar: TCEToolBar
       Width = 576
+      OnResize = toolbarResize
       object btnGo: TCEToolButton[0]
         Left = 29
         Hint = 'go the TODO item definition'

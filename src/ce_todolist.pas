@@ -83,6 +83,7 @@ type
     mnuAutoRefresh: TMenuItem;
     procedure handleListClick(Sender: TObject);
     procedure mnuAutoRefreshClick(Sender: TObject);
+    procedure toolbarResize(Sender: TObject);
   private
     fAutoRefresh: Boolean;
     fSingleClick: Boolean;
@@ -575,6 +576,11 @@ procedure TCETodoListWidget.mnuAutoRefreshClick(Sender: TObject);
 begin
   autoRefresh := mnuAutoRefresh.Checked;
   fOptions.autoRefresh := autoRefresh;
+end;
+
+procedure TCETodoListWidget.toolbarResize(Sender: TObject);
+begin
+  lstfilter.Width := toolbar.Width - lstfilter.Left - lstfilter.BorderSpacing.Around;
 end;
 
 procedure TCETodoListWidget.lstItemsColumnClick(Sender: TObject; Column: TListColumn);

@@ -37,6 +37,7 @@ type
     procedure btnTreeClick(Sender: TObject);
     procedure btnReloadClick(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const fnames: array of String);
+    procedure toolbarResize(Sender: TObject);
     procedure TreeClick(Sender: TObject);
     procedure TreeDeletion(Sender: TObject; Node: TTreeNode);
     procedure TreeKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -162,6 +163,7 @@ begin
   Tree.Images := fImages;
   Tree.PopupMenu := contextMenu;
   TreeFilterEdit1.BorderSpacing.Left := ScaleX(filterAlign[false], 96);
+  toolbarResize(nil);
 
   fname := getCoeditDocPath + optFname;
   if fname.fileExists then
@@ -321,7 +323,10 @@ begin
   btnRemFold.Visible:= ce;
   btnAddFile.Visible:= ce;
   btnAddFold.Visible:= ce;
-  TreeFilterEdit1.BorderSpacing.Left := ScaleX(filterAlign[ce], 96);
+  toolbarResize(nil);
+  TreeFilterEdit1.BorderSpacing.Left:= 0;
+  TreeFilterEdit1.Left := ScaleX(filterAlign[ce], 96);
+  toolbarResize(nil);
 end;
 
 procedure TCEProjectInspectWidget.setFileListAsTree(value: boolean);
@@ -616,6 +621,11 @@ begin
     proj.endUpdate;
     lst.Free;
   end;
+end;
+
+procedure TCEProjectInspectWidget.toolbarResize(Sender: TObject);
+begin
+  TreeFilterEdit1.Width := toolbar.Width - TreeFilterEdit1.Left - TreeFilterEdit1.BorderSpacing.Around;
 end;
 
 procedure TCEProjectInspectWidget.updateDelayed;

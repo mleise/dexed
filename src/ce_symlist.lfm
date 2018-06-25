@@ -1,29 +1,29 @@
 inherited CESymbolListWidget: TCESymbolListWidget
-  Left = 1515
+  Left = 1322
   Height = 430
-  Top = 270
-  Width = 382
+  Top = 92
+  Width = 308
   Caption = 'Symbol list'
   ClientHeight = 430
-  ClientWidth = 382
+  ClientWidth = 308
   inherited Back: TPanel
     Height = 430
-    Width = 382
+    Width = 308
     AutoSize = True
     ClientHeight = 430
-    ClientWidth = 382
+    ClientWidth = 308
     inherited Content: TPanel
       Height = 394
       Top = 36
-      Width = 382
+      Width = 308
       ClientHeight = 394
-      ClientWidth = 382
+      ClientWidth = 308
       PopupMenu = nil
       object Tree: TTreeView[0]
         Left = 4
         Height = 386
         Top = 4
-        Width = 374
+        Width = 300
         Align = alClient
         BorderSpacing.Around = 4
         HideSelection = False
@@ -57,9 +57,10 @@ inherited CESymbolListWidget: TCESymbolListWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Width = 374
+      Width = 300
+      OnResize = toolbarResize
       object btnRefresh: TCEToolButton[0]
-        Left = 372
+        Left = 1
         Hint = 'refresh the symbol list'
         Top = 0
         AutoSize = True
@@ -69,16 +70,17 @@ inherited CESymbolListWidget: TCESymbolListWidget
         scaledSeparator = False
       end
       object TreeFilterEdit1: TTreeFilterEdit[1]
-        Left = 3
+        Left = 32
         Height = 26
         Hint = 'filter the symbols that contain the text typed here'
         Top = 2
-        Width = 369
+        Width = 264
         OnAfterFilter = TreeFilterEdit1AfterFilter
         OnFilterItem = TreeFilterEdit1FilterItem
         ButtonWidth = 28
         NumGlyphs = 1
         Align = alClient
+        BorderSpacing.Left = 30
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 0

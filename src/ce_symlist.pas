@@ -102,11 +102,14 @@ type
     procedure AssignTo(Dest: TPersistent); override;
   end;
 
+  { TCESymbolListWidget }
+
   TCESymbolListWidget = class(TCEWidget, ICEDocumentObserver, ICEEditableOptions)
     btnRefresh: TCEToolButton;
     Tree: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure btnRefreshClick(Sender: TObject);
+    procedure toolbarResize(Sender: TObject);
     procedure TreeCompare(Sender: TObject; Node1, Node2: TTreeNode; var Compare: Integer);
     procedure TreeFilterEdit1AfterFilter(Sender: TObject);
     function TreeFilterEdit1FilterItem(Item: TObject; out Done: Boolean): Boolean;
@@ -612,6 +615,11 @@ procedure TCESymbolListWidget.btnRefreshClick(Sender: TObject);
 begin
   checkIfHasToolExe;
   fActRefresh.Execute;
+end;
+
+procedure TCESymbolListWidget.toolbarResize(Sender: TObject);
+begin
+  TreeFilterEdit1.Width := toolbar.Width - TreeFilterEdit1.Left - TreeFilterEdit1.BorderSpacing.Around;
 end;
 
 procedure TCESymbolListWidget.TreeCompare(Sender: TObject; Node1,

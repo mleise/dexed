@@ -1,34 +1,34 @@
 inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
   Left = 1367
-  Height = 654
+  Height = 565
   Top = 3
-  Width = 530
+  Width = 535
   ActiveControl = lstFav
   Caption = 'Mini explorer'
-  ClientHeight = 654
-  ClientWidth = 530
+  ClientHeight = 565
+  ClientWidth = 535
   inherited Back: TPanel
-    Height = 654
-    Width = 530
+    Height = 565
+    Width = 535
     AutoSize = True
-    ClientHeight = 654
-    ClientWidth = 530
+    ClientHeight = 565
+    ClientWidth = 535
     inherited Content: TPanel
       Left = 4
-      Height = 612
-      Width = 522
+      Height = 523
+      Width = 527
       BorderSpacing.Around = 4
-      ClientHeight = 612
-      ClientWidth = 522
+      ClientHeight = 523
+      ClientWidth = 527
       object lstFav: TListView[0]
         Left = 0
         Height = 131
         Top = 0
-        Width = 522
+        Width = 527
         Align = alTop
         Columns = <        
           item
-            Width = 520
+            Width = 525
           end>
         ReadOnly = True
         ScrollBars = ssAutoBoth
@@ -44,27 +44,27 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         Left = 0
         Height = 6
         Top = 131
-        Width = 522
+        Width = 527
         Align = alTop
         ResizeAnchor = akTop
       end
       object Panel2: TPanel[2]
         Left = 0
-        Height = 475
+        Height = 386
         Top = 137
-        Width = 522
+        Width = 527
         Align = alClient
         AutoSize = True
         BevelOuter = bvNone
-        ClientHeight = 475
-        ClientWidth = 522
+        ClientHeight = 386
+        ClientWidth = 527
         TabOrder = 2
         object Splitter2: TSplitter
           Cursor = crVSplit
           Left = 0
           Height = 6
           Top = 218
-          Width = 522
+          Width = 527
           Align = alTop
           ResizeAnchor = akTop
         end
@@ -72,7 +72,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
           Left = 0
           Height = 218
           Top = 0
-          Width = 522
+          Width = 527
           Align = alTop
           FileSortType = fstAlphabet
           ReadOnly = True
@@ -89,9 +89,9 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         end
         object lstFiles: TShellListView
           Left = 0
-          Height = 251
+          Height = 162
           Top = 224
-          Width = 522
+          Width = 527
           Align = alClient
           Color = clDefault
           DragMode = dmAutomatic
@@ -108,7 +108,8 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Width = 522
+      Width = 527
+      OnResize = toolbarResize
       object btnEdit: TCEToolButton[0]
         Left = 153
         Hint = 'open the selected file in an editor or as a new project'
@@ -181,7 +182,6 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         Flat = True
         Align = alClient
         BorderSpacing.Left = 180
-        BorderSpacing.Bottom = 2
         BorderSpacing.Around = 2
         MaxLength = 0
         TabOrder = 0

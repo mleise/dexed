@@ -55,6 +55,7 @@ type
     procedure btnCloneObjectClick(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure propTreeSelectionChanged(Sender: TObject);
+    procedure toolbarResize(Sender: TObject);
   private
     fSelectedNode: TTreeNode;
     fProj: TCEDubProject;
@@ -385,6 +386,11 @@ begin
   btnAddProp.Enabled := tpe in [jtObject, jtArray];
   btnCloneObject.Enabled := (tpe = jtObject) and (fSelectedNode.Level > 0);
   updateValueEditor;
+end;
+
+procedure TCEDubProjectEditorWidget.toolbarResize(Sender: TObject);
+begin
+  fltEdit.Width := toolbar.Width - fltEdit.Left - fltEdit.BorderSpacing.Around;
 end;
 
 procedure TCEDubProjectEditorWidget.btnAcceptPropClick(Sender: TObject);
