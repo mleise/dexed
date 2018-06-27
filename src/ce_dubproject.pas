@@ -167,6 +167,7 @@ type
     function getCommandLine: string;
     function outputFilename: string;
     procedure reload;
+    procedure stopCompilation;
     //
     function isSource(const fname: string): boolean;
     function sourcesCount: integer;
@@ -937,6 +938,12 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION ICECommonProject: actions ---------------------------------------------}
+procedure TCEDubProject.stopCompilation;
+begin
+  if fDubProc.isNotNil and fDubProc.Running then
+    fDubProc.Terminate(1);
+end;
+
 procedure TCEDubProject.dubProcOutput(proc: TObject);
 var
   lst: TStringList;

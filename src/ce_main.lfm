@@ -1472,7 +1472,6 @@ object CEMainForm: TCEMainForm
   OnResize = FormResize
   OnWindowStateChange = FormWindowStateChange
   ShowHint = True
-  LCLVersion = '1.8.4.0'
   Visible = False
   object mainMenu: TMainMenu
     top = 1
@@ -1692,6 +1691,9 @@ object CEMainForm: TCEMainForm
       end
       object MenuItem35: TMenuItem
         Action = actProjCompAndRunWithArgs
+      end
+      object MenuItem113: TMenuItem
+        Action = actProjStopComp
       end
       object MenuItem47: TMenuItem
         Caption = '-'
@@ -2266,6 +2268,12 @@ object CEMainForm: TCEMainForm
       Category = 'Project'
       Caption = 'Test project'
       OnExecute = actProjTestExecute
+      OnUpdate = updateProjectBasedAction
+    end
+    object actProjStopComp: TAction
+      Category = 'Project'
+      Caption = 'Stop compiling'
+      OnExecute = actProjStopCompExecute
       OnUpdate = updateProjectBasedAction
     end
   end

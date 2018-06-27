@@ -55,6 +55,8 @@ type
       function binaryKind: TProjectBinaryKind;
       // returns what's gonna be executed in background for this config
       function getCommandLine: string;
+      // stops compilation
+      procedure stopCompilation;
 
     // configs -----------------------------------------------------------------
 

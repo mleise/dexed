@@ -117,6 +117,7 @@ type
     actFileCloseAll: TAction;
     actFileNewClip: TAction;
     actEdFormat: TAction;
+    actProjStopComp: TAction;
     actProjTest: TAction;
     actLayoutReset: TAction;
     actProjDscan: TAction;
@@ -174,6 +175,7 @@ type
     MenuItem110: TMenuItem;
     MenuItem111: TMenuItem;
     MenuItem112: TMenuItem;
+    MenuItem113: TMenuItem;
     mnuItemHelp: TMenuItem;
     mnuItemAbout: TMenuItem;
     mnuItemCheckUpd: TMenuItem;
@@ -309,6 +311,7 @@ type
     procedure actProjSaveGroupAsExecute(Sender: TObject);
     procedure actProjSaveGroupExecute(Sender: TObject);
     procedure actProjSelUngroupedExecute(Sender: TObject);
+    procedure actProjStopCompExecute(Sender: TObject);
     procedure actProjTestExecute(Sender: TObject);
     procedure actSetRunnableSwExecute(Sender: TObject);
     procedure ApplicationProperties1Activate(Sender: TObject);
@@ -1503,6 +1506,9 @@ begin
 
   i := LoadIcon('MOVE_TO_FOLDER');
   actFileAddToProj.ImageIndex:=i;
+
+  i := loadIcon('CROSS');
+  actProjStopComp.ImageIndex:=i;
 end;
 
 procedure TCEMainForm.InitWidgets;
@@ -3914,6 +3920,13 @@ begin
   if checkProjectLock then
       exit;
   fProject.test;
+end;
+
+procedure TCEMainForm.actProjStopCompExecute(Sender: TObject);
+begin
+  if fProject = nil then
+    exit;
+  fProject.stopCompilation();
 end;
 
 procedure TCEMainForm.actProjDscanExecute(Sender: TObject);

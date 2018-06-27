@@ -109,6 +109,7 @@ type
     function getCommandLine: string;
     function modified: boolean;
     procedure reload;
+    procedure stopCompilation;
     //
     function configurationCount: integer;
     procedure setActiveConfigurationIndex(index: integer);
@@ -774,6 +775,12 @@ end;
 function TCENativeProject.compiled: boolean;
 begin
   exit(fCompiled);
+end;
+
+procedure TCENativeProject.stopCompilation;
+begin
+  if fCompilProc.isNotNil and fCompilProc.Running then
+    fCompilProc.Terminate(1);
 end;
 
 procedure TCENativeProject.compile;
