@@ -1801,6 +1801,9 @@ object CEMainForm: TCEMainForm
       object MenuItem39: TMenuItem
         Action = actProjCompAndRunWithArgs
       end
+      object MenuItem114: TMenuItem
+        Action = actProjStopComp
+      end
       object MenuItem44: TMenuItem
         Caption = '-'
       end

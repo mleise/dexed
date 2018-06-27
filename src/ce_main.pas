@@ -176,6 +176,7 @@ type
     MenuItem111: TMenuItem;
     MenuItem112: TMenuItem;
     MenuItem113: TMenuItem;
+    MenuItem114: TMenuItem;
     mnuItemHelp: TMenuItem;
     mnuItemAbout: TMenuItem;
     mnuItemCheckUpd: TMenuItem;
