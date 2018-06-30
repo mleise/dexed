@@ -52,12 +52,25 @@ type
   end;
 
   { TCEEditorWidget }
-
   TCEEditorWidget = class(TCEWidget, ICEDocumentObserver, ICEMultiDocHandler, ICEProjectObserver)
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
+    MenuItem13: TMenuItem;
+    MenuItem14: TMenuItem;
+    MenuItem15: TMenuItem;
+    MenuItem16: TMenuItem;
+    mnuEdTabWidth2: TMenuItem;
+    mnuEdTabWidth3: TMenuItem;
+    mnuEdTabWidth4: TMenuItem;
+    mnuEdTabWidth5: TMenuItem;
+    mnuEdTabWidth6: TMenuItem;
+    mnuEdTabWidth7: TMenuItem;
+    mnuEdTabWidth8: TMenuItem;
+    mnuEdShowSpec: TMenuItem;
+    mnuEdSetSpaces: TMenuItem;
+    mnuEdSetTabs: TMenuItem;
     mnuedGotoline: TMenuItem;
     mnuedPrevWarn: TMenuItem;
     mnuedNextWarn: TMenuItem;
@@ -104,7 +117,11 @@ type
     procedure mnuedPrevCareaClick(Sender: TObject);
     procedure mnuedLowcaseClick(Sender: TObject);
     procedure mnuedPrevWarnClick(Sender: TObject);
+    procedure mnuEdSetSpacesClick(Sender: TObject);
+    procedure mnuEdSetTabsClick(Sender: TObject);
+    procedure mnuEdShowSpecClick(Sender: TObject);
     procedure mnuedSortLinesClick(Sender: TObject);
+    procedure mnuEdTabWidth2Click(Sender: TObject);
     procedure mnuedUpcaseClick(Sender: TObject);
     procedure MenuItem5Click(Sender: TObject);
     procedure MenuItem6Click(Sender: TObject);
@@ -950,10 +967,50 @@ begin
     fDoc.previousWarning;
 end;
 
+procedure TCEEditorWidget.mnuEdSetSpacesClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.Options := fDoc.Options + [eoTabsToSpaces];
+end;
+
+procedure TCEEditorWidget.mnuEdSetTabsClick(Sender: TObject);
+begin
+  if fDoc.isNotNil then
+    fDoc.Options := fDoc.Options - [eoTabsToSpaces];
+end;
+
+procedure TCEEditorWidget.mnuEdShowSpecClick(Sender: TObject);
+begin
+  if fDoc.isNil then
+    exit;
+  if mnuEdShowSpec.Checked then
+    fDoc.Options := fDoc.Options + [eoShowSpecialChars]
+  else
+    fDoc.Options := fDoc.Options - [eoShowSpecialChars];
+end;
+
 procedure TCEEditorWidget.mnuedSortLinesClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecSortLines, #0, nil);
+end;
+
+procedure TCEEditorWidget.mnuEdTabWidth2Click(Sender: TObject);
+begin
+  if fDoc.isNil then
+    exit;
+
+  fDoc.TabWidth:= TMenuItem(sender).Tag;
+  if not (eoTabsToSpaces in fDoc.options) then
+  begin
+    fDoc.BlockIndent := 0;
+    fDoc.BlockTabIndent := 1;
+  end
+  else
+  begin
+    fDoc.BlockIndent := fDoc.TabWidth;
+    fDoc.BlockTabIndent := 0;
+  end;
 end;
 
 procedure TCEEditorWidget.mnuedNextCareaClick(Sender: TObject);
@@ -1114,14 +1171,28 @@ end;
 
 procedure TCEEditorWidget.mnuEditorPopup(Sender: TObject);
 begin
-  if fDoc.isNil then exit;
-  //
+  if fDoc.isNil then
+    exit;
+
   mnuedCut.Enabled:=fDoc.SelAvail;
   mnuedPaste.Enabled:=fDoc.CanPaste;
   mnuedCopy.Enabled:=fDoc.SelAvail;
   mnuedUndo.Enabled:=fDoc.CanUndo;
   mnuedRedo.Enabled:=fDoc.CanRedo;
   mnuedJum2Decl.Enabled:=fDoc.isDSource;
+
+  mnuEdSetSpaces.Checked:= eoTabsToSpaces in fDoc.Options;
+  mnuEdSetTabs.Checked:= not (eoTabsToSpaces in fDoc.Options);
+  mnuEdShowSpec.Checked:=eoShowSpecialChars in fDoc.Options;
+  case fDoc.TabWidth of
+    2: mnuEdTabWidth2.Checked:=true;
+    3: mnuEdTabWidth3.Checked:=true;
+    4: mnuEdTabWidth4.Checked:=true;
+    5: mnuEdTabWidth5.Checked:=true;
+    6: mnuEdTabWidth6.Checked:=true;
+    7: mnuEdTabWidth7.Checked:=true;
+    8: mnuEdTabWidth8.Checked:=true;
+  end;
 end;
 {$ENDREGION}
 end.

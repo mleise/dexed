@@ -21,8 +21,8 @@ inherited CEEditorWidget: TCEEditorWidget
       ClientWidth = 465
       object editorStatus: TStatusBar[0]
         Left = 0
-        Height = 21
-        Top = 375
+        Height = 19
+        Top = 377
         Width = 465
         BorderSpacing.Bottom = 2
         Panels = <        
@@ -41,6 +41,9 @@ inherited CEEditorWidget: TCEEditorWidget
           end        
           item
             Width = 2000
+          end        
+          item
+            Width = 50
           end>
         SimplePanel = False
         SizeGrip = False
@@ -167,6 +170,84 @@ inherited CEEditorWidget: TCEEditorWidget
       OnClick = mnuedInvAllNoneClick
     end
     object MenuItem12: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem13: TMenuItem
+      Caption = 'Options overrides'
+      object MenuItem15: TMenuItem
+        Caption = 'Indentation mode'
+        object mnuEdSetSpaces: TMenuItem
+          Caption = 'spaces'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = mnuEdSetSpacesClick
+        end
+        object mnuEdSetTabs: TMenuItem
+          Caption = 'tabs'
+          GroupIndex = 1
+          RadioItem = True
+          OnClick = mnuEdSetTabsClick
+        end
+      end
+      object MenuItem16: TMenuItem
+        Caption = 'Spaces per tab'
+        object mnuEdTabWidth2: TMenuItem
+          Tag = 2
+          Caption = '2'
+          GroupIndex = 2
+          RadioItem = True
+          OnClick = mnuEdTabWidth2Click
+        end
+        object mnuEdTabWidth3: TMenuItem
+          Tag = 3
+          Caption = '3'
+          GroupIndex = 2
+          RadioItem = True
+          OnClick = mnuEdTabWidth2Click
+        end
+        object mnuEdTabWidth4: TMenuItem
+          Tag = 4
+          Caption = '4'
+          GroupIndex = 2
+          RadioItem = True
+          OnClick = mnuEdTabWidth2Click
+        end
+        object mnuEdTabWidth5: TMenuItem
+          Tag = 5
+          Caption = '5'
+          GroupIndex = 2
+          RadioItem = True
+          OnClick = mnuEdTabWidth2Click
+        end
+        object mnuEdTabWidth6: TMenuItem
+          Tag = 6
+          Caption = '6'
+          GroupIndex = 2
+          RadioItem = True
+          OnClick = mnuEdTabWidth2Click
+        end
+        object mnuEdTabWidth7: TMenuItem
+          Tag = 7
+          Caption = '7'
+          GroupIndex = 2
+          RadioItem = True
+          OnClick = mnuEdTabWidth2Click
+        end
+        object mnuEdTabWidth8: TMenuItem
+          Tag = 8
+          Caption = '8'
+          GroupIndex = 2
+          RadioItem = True
+          OnClick = mnuEdTabWidth2Click
+        end
+      end
+      object mnuEdShowSpec: TMenuItem
+        AutoCheck = True
+        Caption = 'Show special chars'
+        OnClick = mnuEdShowSpecClick
+      end
+    end
+    object MenuItem14: TMenuItem
       Caption = '-'
     end
     object mnuedDdocTmp: TMenuItem
