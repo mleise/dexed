@@ -111,7 +111,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
       Width = 527
       OnResize = toolbarResize
       object btnEdit: TCEToolButton[0]
-        Left = 156
+        Left = 153
         Hint = 'open the selected file in an editor or as a new project'
         Top = 0
         AutoSize = True
@@ -121,7 +121,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         scaledSeparator = False
       end
       object btnShellOpen: TCEToolButton[1]
-        Left = 128
+        Left = 125
         Hint = 'open the selected folder or the selected file using the shell'
         Top = 0
         AutoSize = True
@@ -131,7 +131,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         scaledSeparator = False
       end
       object btnRemFav: TCEToolButton[2]
-        Left = 100
+        Left = 97
         Hint = 'remove selected favorite folder'
         Top = 0
         AutoSize = True
@@ -141,7 +141,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         scaledSeparator = False
       end
       object btnAddFav: TCEToolButton[3]
-        Left = 72
+        Left = 69
         Hint = 'add selected folder to the favorites'
         Top = 0
         AutoSize = True
@@ -163,7 +163,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         scaledSeparator = False
       end
       object btnParentFolder: TCEToolButton[5]
-        Left = 44
+        Left = 41
         Hint = 'select parent folder'
         Top = 0
         AutoSize = True

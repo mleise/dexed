@@ -719,6 +719,7 @@ procedure TCEMiniExplorerWidget.lstFilesFileAdded(Sender: TObject;
   Item: TListItem);
 begin
   Item.ImageIndex:=0;
+  lstFiles.Sort;
 end;
 
 procedure TCEMiniExplorerWidget.lstFilterButtonClick(Sender: TObject);
