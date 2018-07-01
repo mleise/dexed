@@ -974,6 +974,8 @@ var
 begin
   inherited SetRange(value);
   stored := TSynD2SynRange(CodeFoldRange.RangeType);
+  if not assigned(fCurrRange) or not Assigned(stored) then
+    exit;
   fCurrRange.copyFrom(stored);
 end;
 
@@ -982,7 +984,8 @@ var
   stored: TSynD2SynRange;
 begin
   stored := TSynD2SynRange(inherited GetRange);
-  if (stored = nil) then stored := TSynD2SynRange.Create(nil);
+  if (stored = nil) then
+    stored := TSynD2SynRange.Create(nil);
   stored.copyFrom(fCurrRange);
   //
   CodeFoldRange.RangeType := Pointer(stored);
