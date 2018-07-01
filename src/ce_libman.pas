@@ -602,10 +602,7 @@ begin
         begin
           dep := libraryByAlias[itm.dependencies[j]];
           if dep.isNotNil then
-          begin
-            if not sel.contains(dep) then
-              sel.insert(dep)
-          end
+            sel.insert(dep)
           else
             //auto update: item removed, detect on usage that it has disapeared
             itm.dependencies.Delete(j);
