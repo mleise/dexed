@@ -3095,8 +3095,7 @@ begin
     end;
     deleteDups(dmdproc.Parameters);
     dmdproc.Execute;
-    while dmdproc.Running do
-      dmdproc.checkTerminated();
+    dmdproc.blockingWait();
     if not asObj then
       sysutils.DeleteFile(fname + objExt);
     if (dmdProc.ExitStatus = 0) then

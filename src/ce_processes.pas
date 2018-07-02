@@ -36,6 +36,7 @@ type
     fRealOnTerminate: TNotifyEvent;
     fRealOnReadData: TNotifyEvent;
     fOutputStack: TMemoryStream;
+    fStdError: TMemoryStream;
     fTerminateChecker: TTimer;
     fDoneTerminated: boolean;
     fHasRead: boolean;
@@ -55,10 +56,10 @@ type
     procedure execute; override;
     // Check if process is terminated (bug 33897).
     // Not to be called in the OnTerminated handler.
-    procedure checkTerminated;
+    procedure blockingWait;
     // Add stderr to stdout, to be called when terminated
     procedure appendStdErr;
-    // reads TProcess.OUtput in OutputStack
+    // reads TProcess.Output in OutputStack
     procedure fillOutputStack;
     // fills list with the full lines contained in OutputStack
     procedure getFullLines(list: TStrings; consume: boolean = true);
@@ -170,6 +171,7 @@ constructor TCEProcess.create(aOwner: TComponent);
 begin
   inherited;
   FOutputStack := TMemoryStream.Create;
+  fStdError := TMemoryStream.Create;
   FTerminateChecker := TTimer.Create(nil);
   FTerminateChecker.Interval := 100;
   fTerminateChecker.OnTimer := @checkTerminated;
@@ -182,6 +184,7 @@ destructor TCEProcess.destroy;
 begin
   FTerminateChecker.Free;
   FOutputStack.Free;
+  fStdError.Free;
   inherited;
 end;
 
@@ -191,6 +194,7 @@ begin
   Options := Options - [poStderrToOutPut];
   fHasRead := false;
   fOutputStack.Clear;
+  fStdError.Clear;
   fDoneTerminated := false;
   TAsyncProcess(self).OnReadData := @internalDoOnReadData;
   TAsyncProcess(self).OnTerminate := @internalDoOnTerminate;
@@ -204,6 +208,8 @@ var
 begin
   if not (poUsePipes in Options) then
     exit;
+
+  // output
   sum := fOutputStack.Size;
   while (Output <> nil) and (NumBytesAvailable > 0) do
   begin
@@ -212,22 +218,33 @@ begin
     sum += cnt;
   end;
   fOutputStack.SetSize(sum);
+
+  if not fRedirectStdErr then
+    exit;
+
+  // error
+  sum := fStdError.Size;
+  while (Stderr <> nil) and (Stderr.NumBytesAvailable > 0) do
+  begin
+    fStdError.SetSize(sum + Stderr.NumBytesAvailable);
+    cnt := Stderr.Read((fStdError.Memory + sum)^, Stderr.NumBytesAvailable);
+    sum += cnt;
+  end;
+  fStdError.SetSize(sum);
 end;
 
 procedure TCEProcess.appendStdErr;
 var
   sum, cnt: Integer;
 begin
-  if not (poUsePipes in Options) then
+  if not (poUsePipes in Options) or not fRedirectStdErr then
     exit;
+
+  fillOutputStack;
+  fStdError.Position:=0;
   sum := fOutputStack.Size;
-  while (Stderr <> nil) and (Stderr.NumBytesAvailable > 0) do
-  begin
-    fOutputStack.SetSize(sum + Stderr.NumBytesAvailable);
-    cnt := Stderr.Read((fOutputStack.Memory + sum)^, Stderr.NumBytesAvailable);
-    sum += cnt;
-  end;
-  fOutputStack.SetSize(sum);
+  fOutputStack.SetSize(sum + fStdError.size);
+  fStdError.Read((fOutputStack.Memory + sum)^, fStdError.Size);
 end;
 
 procedure TCEProcess.getFullLines(list: TStrings; consume: boolean = true);
@@ -296,8 +313,8 @@ begin
   // note: made to fix a leak in the process used by the linter
   // onTerminate is sometimes determined by an internal timer
   // and not the base method of TAsyncProcess (which usually unhooks)
-  UnhookPipeHandle;
-  UnhookProcessHandle;
+  //UnhookPipeHandle;
+  //UnhookProcessHandle;
 
   fillOutputStack;
   // note: redirection is to output stream is done by hand at the end
@@ -317,9 +334,12 @@ begin
   internalDoOnTerminate(self);
 end;
 
-procedure TCEProcess.checkTerminated;
+procedure TCEProcess.blockingWait;
 begin
-  sleep(20);
+  repeat
+    fillOutputStack;
+  until
+    not Running;
   checkTerminated(self);
 end;
 
