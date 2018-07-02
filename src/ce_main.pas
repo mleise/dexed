@@ -3073,6 +3073,7 @@ begin
     begin
       // back compat, see https://github.com/BBasile/Coedit/issues/276
       dmdproc.Parameters.Add('-version=runnable_module');
+
       dmdproc.Parameters.Add('-version=run_single_module');
     end;
 
@@ -3095,7 +3096,8 @@ begin
     end;
     deleteDups(dmdproc.Parameters);
     dmdproc.Execute;
-    dmdproc.blockingWait();
+    while dmdproc.Running do
+      application.ProcessMessages;
     if not asObj then
       sysutils.DeleteFile(fname + objExt);
     if (dmdProc.ExitStatus = 0) then
@@ -3105,8 +3107,8 @@ begin
         fDoc, amcEdit, amkInf);
     end
     else begin
-     (* fMsgs.message(format('error: the process (%s) has returned the status %s',
-        [dmdproc.Executable, prettyReturnStatus(dmdproc)]), fDoc, amcEdit, amkErr); *)
+      fMsgs.message(format('error: the process (%s) has returned the status %s',
+        [dmdproc.Executable, prettyReturnStatus(dmdproc)]), fDoc, amcEdit, amkErr);
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' has not been compiled',
         fDoc, amcEdit, amkErr);
     end;

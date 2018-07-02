@@ -951,8 +951,6 @@ var
 begin
   lst := TStringList.Create;
   try
-    if not fDubProc.Running then
-      fDubProc.appendStdErr;
     fDubProc.getFullLines(lst);
     for str in lst do
       fMsgs.message(str, fAsProjectItf, amcProj, amkAuto);

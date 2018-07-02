@@ -9,9 +9,6 @@ uses
 
 type
 
-  //TODO: follow up https://bugs.freepascal.org/view.php?id=33897
-  //which is the cause of the timer workaround
-
   {
     The stanndard process wrapper used in Coedit.
 
@@ -19,7 +16,6 @@ type
 
     -   OnTerminate event is never called under Linux.
         Here a timer perdiodically check the process and call the event accordingly.
-        (STILL DOES NOT WORK)
     -   TAsyncProcess.OnReadData event is not usable to read full output lines.
         Here the output is accumulated in a TMemoryStream which allows to keep data
         at the left of an unterminated line when a buffer is available.
@@ -40,7 +36,6 @@ type
     fTerminateChecker: TTimer;
     fDoneTerminated: boolean;
     fHasRead: boolean;
-    fRedirectStdErr: boolean;
     procedure checkTerminated(sender: TObject);
     procedure setOnTerminate(value: TNotifyEvent);
     procedure setOnReadData(value: TNotifyEvent);
@@ -54,12 +49,7 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     procedure execute; override;
-    // Check if process is terminated (bug 33897).
-    // Not to be called in the OnTerminated handler.
-    procedure blockingWait;
-    // Add stderr to stdout, to be called when terminated
-    procedure appendStdErr;
-    // reads TProcess.Output in OutputStack
+    // reads TProcess.OUtput in OutputStack
     procedure fillOutputStack;
     // fills list with the full lines contained in OutputStack
     procedure getFullLines(list: TStrings; consume: boolean = true);
@@ -173,9 +163,10 @@ begin
   FOutputStack := TMemoryStream.Create;
   fStdError := TMemoryStream.Create;
   FTerminateChecker := TTimer.Create(nil);
-  FTerminateChecker.Interval := 100;
+  FTerminateChecker.Interval := 50;
   fTerminateChecker.OnTimer := @checkTerminated;
   fTerminateChecker.Enabled := false;
+  //fTerminateChecker.AutoEnabled:= true;
   TAsyncProcess(self).OnTerminate := @internalDoOnTerminate;
   TAsyncProcess(self).OnReadData := @internalDoOnReadData;
 end;
@@ -190,8 +181,6 @@ end;
 
 procedure TCEProcess.Execute;
 begin
-  fRedirectStdErr := poStderrToOutPut in Options;
-  Options := Options - [poStderrToOutPut];
   fHasRead := false;
   fOutputStack.Clear;
   fStdError.Clear;
@@ -213,44 +202,17 @@ begin
   sum := fOutputStack.Size;
   while (Output <> nil) and (NumBytesAvailable > 0) do
   begin
-    fOutputStack.SetSize(sum + NumBytesAvailable);
-    cnt := Output.Read((fOutputStack.Memory + sum)^, NumBytesAvailable);
+    fOutputStack.SetSize(sum + 1024);
+    cnt := Output.Read((fOutputStack.Memory + sum)^, 1024);
     sum += cnt;
   end;
   fOutputStack.SetSize(sum);
-
-  if not fRedirectStdErr then
-    exit;
-
-  // error
-  sum := fStdError.Size;
-  while (Stderr <> nil) and (Stderr.NumBytesAvailable > 0) do
-  begin
-    fStdError.SetSize(sum + Stderr.NumBytesAvailable);
-    cnt := Stderr.Read((fStdError.Memory + sum)^, Stderr.NumBytesAvailable);
-    sum += cnt;
-  end;
-  fStdError.SetSize(sum);
-end;
-
-procedure TCEProcess.appendStdErr;
-var
-  sum, cnt: Integer;
-begin
-  if not (poUsePipes in Options) or not fRedirectStdErr then
-    exit;
-
-  fillOutputStack;
-  fStdError.Position:=0;
-  sum := fOutputStack.Size;
-  fOutputStack.SetSize(sum + fStdError.size);
-  fStdError.Read((fOutputStack.Memory + sum)^, fStdError.Size);
 end;
 
 procedure TCEProcess.getFullLines(list: TStrings; consume: boolean = true);
 var
   stored: Integer;
-  lastEOL: Integer;
+  lastTerm: Integer;
   toread: Integer;
   buff: Byte = 0;
   str: TMemoryStream;
@@ -262,17 +224,16 @@ begin
       fOutputStack.Clear;
   end else
   begin
-    lastEOL := fOutputStack.Position;
+    lastTerm := fOutputStack.Position;
     stored := fOutputStack.Position;
     while fOutputStack.Read(buff, 1) = 1 do
-      if buff = 10 then
-        lastEOL := fOutputStack.Position;
+      if buff = 10 then lastTerm := fOutputStack.Position;
     fOutputStack.Position := stored;
-    if lastEOL <> stored then
+    if lastTerm <> stored then
     begin
       str := TMemoryStream.Create;
       try
-        toread := lastEOL - stored;
+        toread := lastTerm - stored;
         str.SetSize(toRead);
         fOutputStack.Read(str.Memory^, toread);
         list.LoadFromStream(str);
@@ -317,11 +278,6 @@ begin
   //UnhookProcessHandle;
 
   fillOutputStack;
-  // note: redirection is to output stream is done by hand at the end
-  // because of sync issue (https://github.com/BBasile/Coedit/issues/336).
-  if fRedirectStdErr then
-    appendStdErr;
-
   if fRealOnTerminate <> nil then
     fRealOnTerminate(self);
 end;
@@ -332,15 +288,6 @@ begin
     exit;
   fTerminateChecker.Enabled := false;
   internalDoOnTerminate(self);
-end;
-
-procedure TCEProcess.blockingWait;
-begin
-  repeat
-    fillOutputStack;
-  until
-    not Running;
-  checkTerminated(self);
 end;
 
 constructor TCEAutoBufferedProcess.create(aOwner: TComponent);
