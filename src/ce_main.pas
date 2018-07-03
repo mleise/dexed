@@ -16,7 +16,7 @@ uses
   ce_toolseditor, ce_procinput, ce_optionseditor, ce_symlist, ce_mru, ce_processes,
   ce_infos, ce_dubproject, ce_dialogs, ce_dubprojeditor,{$IFDEF UNIX} ce_gdb,{$ENDIF}
   ce_dfmt, ce_lcldragdrop, ce_projgroup, ce_projutils, ce_stringrange, ce_dastworx,
-  ce_halstead, ce_profileviewer, ce_semver, ce_dsgncontrols, ce_term;
+  ce_halstead, ce_profileviewer, ce_semver, ce_dsgncontrols, ce_term, ce_newdubproj;
 
 type
 
@@ -117,6 +117,7 @@ type
     actFileCloseAll: TAction;
     actFileNewClip: TAction;
     actEdFormat: TAction;
+    actProjNewDialog: TAction;
     actProjStopComp: TAction;
     actProjTest: TAction;
     actLayoutReset: TAction;
@@ -177,6 +178,7 @@ type
     MenuItem112: TMenuItem;
     MenuItem113: TMenuItem;
     MenuItem114: TMenuItem;
+    mnuItemDubDialog: TMenuItem;
     mnuItemHelp: TMenuItem;
     mnuItemAbout: TMenuItem;
     mnuItemCheckUpd: TMenuItem;
@@ -305,6 +307,7 @@ type
     procedure actProjGroupCompileCustomSyncExecute(Sender: TObject);
     procedure actProjGroupCompileExecute(Sender: TObject);
     procedure actProjGroupCompileSyncExecute(Sender: TObject);
+    procedure actProjNewDialogExecute(Sender: TObject);
     procedure actProjNewDubJsonExecute(Sender: TObject);
     procedure actProjNewGroupExecute(Sender: TObject);
     procedure actProjNewNativeExecute(Sender: TObject);
@@ -1265,6 +1268,10 @@ begin
 
   getCMdParams;
   fAppliOpts.assignTo(self);
+
+  // waiting for interative mode working when piped:
+  // https://github.com/dlang/dub/issues/1500
+  mnuItemDubDialog.Visible:=false;
 
   InitOptionsMenu;
 
@@ -3724,6 +3731,25 @@ begin
   fDubProject := nil;
   showProjTitle;
   result := true;
+end;
+
+procedure TCEMainForm.actProjNewDialogExecute(Sender: TObject);
+var
+  r: TModalResult;
+begin
+  if assigned(fProject) and not fProject.inGroup and fProject.modified and
+    (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then
+      exit;
+  if not closeProj then
+    exit;
+  with TCeNewDubProject.create(nil) do
+  try
+    r := ShowModal();
+    if r = mrOk then
+      openProj(ce_newdubproj.createdNewProject);
+  finally
+    free;
+  end;
 end;
 
 procedure TCEMainForm.actProjNewDubJsonExecute(Sender: TObject);

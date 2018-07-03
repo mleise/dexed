@@ -1,11 +1,11 @@
 object CEMainForm: TCEMainForm
   Left = 383
-  Height = 54
+  Height = 35
   Top = 610
   Width = 687
   AllowDropFiles = True
   Caption = 'Coedit'
-  ClientHeight = 54
+  ClientHeight = 35
   ClientWidth = 687
   Icon.Data = {
     F1B500000000010001000000000001002000DBB500001600000089504E470D0A
@@ -1472,7 +1472,6 @@ object CEMainForm: TCEMainForm
   OnResize = FormResize
   OnWindowStateChange = FormWindowStateChange
   ShowHint = True
-  LCLVersion = '1.8.4.0'
   Visible = False
   object mainMenu: TMainMenu
     top = 1
@@ -1634,6 +1633,9 @@ object CEMainForm: TCEMainForm
       Caption = 'Project'
       object mnuProjNew: TMenuItem
         Caption = 'New project'
+        object mnuItemDubDialog: TMenuItem
+          Action = actProjNewDialog
+        end
         object MenuItem69: TMenuItem
           Action = actProjNewDubJson
         end
@@ -2279,6 +2281,11 @@ object CEMainForm: TCEMainForm
       Caption = 'Stop compiling'
       OnExecute = actProjStopCompExecute
       OnUpdate = updateProjectBasedAction
+    end
+    object actProjNewDialog: TAction
+      Category = 'Project'
+      Caption = 'New project dialog...'
+      OnExecute = actProjNewDialogExecute
     end
   end
   object ApplicationProperties1: TApplicationProperties

@@ -522,7 +522,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="60">
+    <Units Count="61">
       <Unit0>
         <Filename Value="coedit.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -836,6 +836,12 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit59>
+      <Unit60>
+        <Filename Value="..\src\ce_newdubproj.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CeNewDubProject"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit60>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
