@@ -323,7 +323,7 @@ type
     procedure save;
     procedure saveTempFile;
     //
-    function indentationMode: TIndentationMode;
+    function indentationMode(out numTabs, numSpaces: integer): TIndentationMode;
     procedure forceIndentation(m: TIndentationMode; w: integer);
     procedure addBreakPoint(line: integer);
     procedure removeBreakPoint(line: integer);
@@ -410,7 +410,7 @@ type
     class var fSpacesPerTab: integer;
     procedure spinSpacesPerTabChange(sender: TObject);
   public
-    constructor construct();
+    constructor construct(numSpaces, numTabs: integer);
   end;
 
   procedure SetDefaultCoeditKeystrokes(ed: TSynEdit);
@@ -581,7 +581,7 @@ end;
 {$ENDREGION}
 
 {$REGION TMixedIndentationDialog}
-constructor TMixedIndentationDialog.construct();
+constructor TMixedIndentationDialog.construct(numSpaces, numTabs: integer);
 var
   pn: TPanel;
 begin
@@ -615,6 +615,7 @@ begin
     parent := pn;
     MinValue:= 1;
     MaxValue:= 8;
+    AutoSize:= true;
     OnChange:= @spinSpacesPerTabChange;
     hint := 'defines how many spaces per TAB will be used';
     ShowHint:=true;
@@ -646,8 +647,17 @@ begin
     ModalResult:= 11;
     BorderSpacing.Around:=4;
   end;
+  with TLabel.Create(self) do
+  begin
+    Align := alTop;
+    parent  := self;
+    AutoSize :=true;
+    BorderSpacing.Around:=8;
+    caption := format('this document is%s- indented %d times by TAB%s- indented %d times by (n)spaces',
+      [#13#10, numTabs, #13#10, numSpaces]);
+  end;
   width := ScaleX(280, 96);
-  height := ScaleY(150, 96);
+  height := ScaleY(200, 96);
 end;
 
 procedure TMixedIndentationDialog.spinSpacesPerTabChange(sender: TObject);
@@ -1520,7 +1530,7 @@ begin
   end;
 end;
 
-function TCESynMemo.indentationMode: TIndentationMode;
+function TCESynMemo.indentationMode(out numTabs, numSpaces: integer): TIndentationMode;
   function checkLine(index: integer): TIndentationMode;
   var
     u: string;
@@ -1552,6 +1562,8 @@ begin
     result := imTabs
   else
     result := imNone;
+  numTabs:= t;
+  numSpaces:= s;
 end;
 
 procedure TCESynMemo.forceIndentation(m: TIndentationMode; w: integer);
@@ -3587,13 +3599,16 @@ begin
 end;
 
 procedure TCESynMemo.tryToPatchMixedIndentation;
+var
+  s: integer;
+  t: integer;
 begin
   if fLifeTimeManager.isNotNil and not fIdentDialShown and (lines.Count <> 0) and
     ((fLifeTimeManager as ICELifetimeManager).getLifetimeStatus = lfsLoaded)
       then
   begin
     fIdentDialShown := true;
-    case indentationMode() of
+    case indentationMode(t, s) of
       imTabs:
         if detectIndentMode then
           Options:= Options - [eoTabsToSpaces];
@@ -3604,7 +3619,7 @@ begin
         if (isDSource or alwaysAdvancedFeatures) and
           (dlgYesNo('Mixed indentation style detected in, "' + fFilename +
           '", do you wish to convert to a single mode ?') = mrYes) then
-        with TMixedIndentationDialog.construct() do
+        with TMixedIndentationDialog.construct(s, t) do
         try
         case ShowModal of
           10:
