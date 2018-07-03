@@ -441,7 +441,7 @@ begin
   else
   begin
     pName := '';
-    pVersion := ''
+    pVersion := '';
   end;
   frm.Free;
 end;
