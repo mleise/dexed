@@ -3458,7 +3458,8 @@ begin
       autoClosePair(autoCloseSquareBracket);
     '(': showCallTips(false);
     ')': if fCallTipWin.Visible then decCallTipsLvl;
-    '{':
+    '{': if GetKeyShiftState <> [ssShift] then
+    begin
         case fAutoCloseCurlyBrace of
           autoCloseAlways:
             curlyBraceCloseAndIndent;
@@ -3473,6 +3474,7 @@ begin
               curlyBraceCloseAndIndent;
           end;
         end;
+    end;
   end;
   if fCompletion.IsActive then
     fCompletion.CurrentString:=GetWordAtRowCol(LogicalCaretXY);
