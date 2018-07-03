@@ -331,10 +331,6 @@ constructor TCED2SynPresetsLoaderForm.Create(AOwner: TComponent);
 var
   fname: string;
   pnl: TPanel;
-  i: integer;
-const
-  h: array[0..5] of string = ('bright', 'dark', 'Mustard', 'Mars bright',
-    'Mars dark', 'Soft dust');
 begin
   inherited;
   fBackup:= TCED2SynPreset.Create(nil);
@@ -342,13 +338,6 @@ begin
   fname := getCoeditDocPath + optfname;
   if fname.fileExists then
     fPresets.loadFromFile(fname);
-
-  //TODO-cmaintenance: remove this the second version following 3.6.7
-  for i:= 5 downto 0 do
-  begin
-    if (i < fPresets.count) and (fPresets[i].name = h[i]) then
-      fPresets.fCollection.Delete(i);
-  end;
 
   with fPresets.insertPreset(0) do
   begin
