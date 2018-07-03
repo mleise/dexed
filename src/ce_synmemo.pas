@@ -1591,6 +1591,7 @@ var
   beg: string = '';
   numTabs: integer = 0;
   numSpac: integer = 0;
+  numSkip: integer = 0;
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
@@ -1601,10 +1602,18 @@ begin
     if i < 0 then
       break;
     beg := Lines[i];
-    if (Pos('{', beg) = 0) then
-      i -= 1
+    if (Pos('}', beg) <> 0) then
+    begin
+      numSkip += 1;
+    end
+    else if (Pos('{', beg) <> 0) then
+    begin
+      numSkip -= 1;
+    end;
+    if numSkip < 0 then
+      break
     else
-      break;
+      i -= 1;
   end;
 
   for i:= 1 to beg.length do
@@ -3337,55 +3346,58 @@ begin
     begin
       fCanDscan:=true;
       line := LineText;
-      case fAutoCloseCurlyBrace of
-        autoCloseOnNewLineAlways: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
-        begin
-          Key := 0;
-          curlyBraceCloseAndIndent;
-        end;
-        autoCloseOnNewLineEof: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
-        if (CaretY = Lines.Count) and (CaretX = line.length+1) then
-        begin
-          Key := 0;
-          curlyBraceCloseAndIndent;
-        end;
-      end;
-
-      if (fAutoCloseCurlyBrace = autoCloseOnNewLineLexically) or
-        fSmartDdocNewline then
+      if [ssCtrl] <> Shift then
       begin
-        lxd := false;
-        if (LogicalCaretXY.X - 1 >= line.length)
-            or isBlank(line[LogicalCaretXY.X .. line.length]) then
-        begin
-          lxd := true;
-          fLexToks.Clear;
-          lex(lines.Text, fLexToks);
-          if lexCanCloseBrace then
+        case fAutoCloseCurlyBrace of
+          autoCloseOnNewLineAlways: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
           begin
             Key := 0;
             curlyBraceCloseAndIndent;
-            lxd := false;
+          end;
+          autoCloseOnNewLineEof: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
+          if (CaretY = Lines.Count) and (CaretX = line.length+1) then
+          begin
+            Key := 0;
+            curlyBraceCloseAndIndent;
           end;
         end;
-        if (fSmartDdocNewline) then
+        if (fAutoCloseCurlyBrace = autoCloseOnNewLineLexically) or
+          fSmartDdocNewline then
         begin
-          if not lxd then
+          lxd := false;
+          if (LogicalCaretXY.X - 1 >= line.length)
+              or isBlank(line[LogicalCaretXY.X .. line.length]) then
           begin
+            lxd := true;
             fLexToks.Clear;
             lex(lines.Text, fLexToks);
+            if lexCanCloseBrace then
+            begin
+              Key := 0;
+              curlyBraceCloseAndIndent;
+              lxd := false;
+            end;
           end;
-          ddc := lexInDdoc;
-          if ddc in ['*', '+'] then
+          if (fSmartDdocNewline) then
           begin
-            inherited;
-            insertLeadingDDocSymbol(ddc);
-            fCanShowHint:=false;
-            fDDocWin.Hide;
-            exit;
+            if not lxd then
+            begin
+              fLexToks.Clear;
+              lex(lines.Text, fLexToks);
+            end;
+            ddc := lexInDdoc;
+            if ddc in ['*', '+'] then
+            begin
+              inherited;
+              insertLeadingDDocSymbol(ddc);
+              fCanShowHint:=false;
+              fDDocWin.Hide;
+              exit;
+            end;
           end;
         end;
-      end;
+      end
+      else shift := [];
     end;
   end;
   inherited;
