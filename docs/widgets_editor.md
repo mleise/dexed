@@ -1,5 +1,5 @@
 ---
-title: Widgets - GDB commander
+title: Widgets - Editor
 ---
 
 {% raw %}
@@ -51,7 +51,7 @@ Options for the curly brackets:
 - _autoCloseOnNewLineAlways_: Closes a brace after a `{` but only after <kbd>ENTER</kbd>.
 - _autoCloseOnNewLineLexically_: Closes a brace on <kbd>ENTER</kbd> and if the count of braces pairs is odd.
 
-The last option is the default.
+The last option is the default. Use the <kbd>CTRL</kbd> key to skip the auto closing done with <kbd>ENTER</kbd>.
 
 #### Custom regions
 
