@@ -3462,6 +3462,8 @@ begin
   case c of
     #39: if autoCloseSingleQuote in fAutoClosedPairs then
       autoClosePair(autoCloseSingleQuote);
+    ',': if not fCallTipWin.Visible then
+      showCallTips(true);
     '"': if autoCloseDoubleQuote in fAutoClosedPairs then
       autoClosePair(autoCloseDoubleQuote);
     '`': if autoCloseBackTick in fAutoClosedPairs then
