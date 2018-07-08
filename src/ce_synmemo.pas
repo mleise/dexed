@@ -2583,14 +2583,15 @@ begin
     for lne in fCallTipStrings do
       if lne.isNotEmpty then
         str += lne + LineEnding;
-    if str.isEmpty then
-      exit;
-    {$IFDEF WINDOWS}
-    str := str[1..str.length-2];
-    {$ELSE}
-    str := str[1..str.length-1];
-    {$ENDIF}
-    showCallTips(str);
+    if str.isNotEmpty then
+    begin
+      {$IFDEF WINDOWS}
+      str := str[1..str.length-2];
+      {$ELSE}
+      str := str[1..str.length-1];
+      {$ENDIF}
+      showCallTips(str);
+    end;
   end;
   if findOpenParen then
     CaretX:=x;
