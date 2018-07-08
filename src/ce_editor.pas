@@ -838,6 +838,8 @@ var
   dc1: TCESynMemo = nil;
   dc2: TCESynMemo = nil;
 begin
+  if page.isNil or (page.ControlCount = 0) then
+    exit;
   if pageControl.splitPage.isNotNil and
     (page <> pageControl.splitPage) then
   begin
