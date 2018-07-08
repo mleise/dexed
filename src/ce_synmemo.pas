@@ -1590,6 +1590,8 @@ end;
 
 procedure TCESynMemo.insertLeadingDDocSymbol(c: char);
 begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   BeginUndoBlock;
   if ((CaretX-1) and 1) = 0 then
     ExecuteCommand(ecChar, ' ', nil);
@@ -1826,6 +1828,8 @@ var
   cp, st, nd: TPoint;
   sel: boolean;
 begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   fLexToks.Clear;
   lex(lines.Text, fLexToks, nil, [lxoNoComments]);
   cp := CaretXY;
@@ -1886,6 +1890,8 @@ var
   p: TPoint;
   c: char;
 begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   if not DcdWrapper.available then
     exit;
   p := CaretXY;
@@ -1949,6 +1955,8 @@ var
         OpenURL(rac);
   end;
 begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   if fPhobosDocRoot.dirExists then
     rac := 'file://' + fPhobosDocRoot
   else
@@ -2152,6 +2160,8 @@ var
   tk0, tk1: PLexToken;
   tk: PLexToken = nil;
 begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   fLexToks.Clear;
   lex(Lines.Text, fLexToks, nil, [lxoNoComments, lxoNoWhites]);
   for i:=0 to fLexToks.Count-2 do
@@ -2185,6 +2195,8 @@ var
   i: integer;
   j: integer = -1;
 begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
   if not next then
   begin
     for i:= 0 to fDscannerResults.count-1 do
