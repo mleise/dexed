@@ -102,6 +102,7 @@ type
     procedure treeFoldersGetImageIndex(Sender: TObject; Node: TTreeNode);
     procedure treeFoldersGetSelectedIndex(Sender: TObject; Node: TTreeNode);
   private
+    fMnxSubj: TCEMiniExplorerSubject;
     fProj: ICECommonProject;
     fFreeProj: ICECommonProject;
     fFavorites: TStringList;
@@ -363,12 +364,14 @@ begin
     free;
   end;
 
+  fMnxSubj:= TCEMiniExplorerSubject.Create;
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
 end;
 
 destructor TCEMiniExplorerWidget.destroy;
 begin
+  fMnxSubj.free;
   EntitiesConnector.removeObserver(self);
   with TCEMiniExplorerOptions.create(nil) do
   try
@@ -781,6 +784,7 @@ begin
   if treeFolders.Selected.isNil then
      exit;
   fLastFold := treeFolders.Path.extractFileDir; // trailing path sep
+  subjMnexDirectoryChanged(fMnxSubj, fLastFold);
 end;
 
 procedure TCEMiniExplorerWidget.treeFoldersDblClick(Sender: TObject);

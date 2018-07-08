@@ -186,6 +186,18 @@ type
    *)
   TCEEditableShortCutSubject = specialize TCECustomSubject<ICEEditableShortCut>;
 
+  (**
+   * Listen to mini explorer changes. Mostly made to prevent redundant updates
+   * of the symbolic string translater.
+   *)
+  ICEMiniExplorerObserver = interface(IObserverType)
+  ['ICEMiniExplorerObserver']
+    procedure mnexDirectoryChanged(const directory: string);
+  end;
+  (**
+   * Mini-explorer implements this.
+   *)
+  TCEMiniExplorerSubject = specialize TCECustomSubject<ICEMiniExplorerObserver>;
 
 
   // the option editor uses this value as a hint to display an option container.
@@ -454,6 +466,11 @@ type
   procedure subjProjCompiling(aSubject: TCEProjectSubject; project: ICECommonProject);{$IFDEF RELEASE}inline;{$ENDIF}
   procedure subjProjCompiled(aSubject: TCEProjectSubject; project: ICECommonProject; success: boolean);{$IFDEF RELEASE}inline;{$ENDIF}
 
+  (**
+   * TCEMiniExplorerSubject primitives.
+   *)
+  procedure subjMnexDirectoryChanged(aSubject: TCEMiniExplorerSubject; const directory: string); {$IFDEF RELEASE}inline;{$ENDIF}
+
 
 {
   Service getters:
@@ -507,6 +524,16 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION TCEMiniExplorerSubject ------------------------------------------------}
+procedure subjMnexDirectoryChanged(aSubject: TCEMiniExplorerSubject; const directory: string);
+var
+  i: Integer;
+begin
+  with aSubject do for i:= 0 to fObservers.Count-1 do
+    (fObservers[i] as ICEMiniExplorerObserver).mnexDirectoryChanged(directory);
+end;
+{$ENDREGION}
+
 {$REGION TCEProjectSubject -----------------------------------------------------}
 procedure subjProjNew(aSubject: TCEProjectSubject; project: ICECommonProject);
 var
@@ -555,7 +582,6 @@ begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
     (fObservers[i] as ICEProjectObserver).projCompiled(project, success);
 end;
-
 {$ENDREGION}
 
 {$REGION ICESingleService getters ----------------------------------------------}

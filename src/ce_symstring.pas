@@ -26,7 +26,7 @@ type
    * TCESymbolExpander is designed to expand Coedit symbolic strings,
    * using the information collected from several observer interfaces.
    *)
-  TCESymbolExpander = class(ICEDocumentObserver, ICEProjectObserver, ICESymStringExpander)
+  TCESymbolExpander = class(ICEDocumentObserver, ICEProjectObserver, ICESymStringExpander, ICEMiniExplorerObserver)
   private
     fProj: TCENativeProject;
     fProjInterface: ICECommonProject;
@@ -35,19 +35,21 @@ type
     fExp: ICEExplorer;
     fSymbols: array[TCESymbol] of string;
     procedure updateSymbols;
-    //
+
     procedure projNew(project: ICECommonProject);
     procedure projClosing(project: ICECommonProject);
     procedure projFocused(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
     procedure projCompiling(project: ICECommonProject);
     procedure projCompiled(project: ICECommonProject; success: boolean);
-    //
+
     procedure docNew(document: TCESynMemo);
     procedure docClosing(document: TCESynMemo);
     procedure docFocused(document: TCESynMemo);
     procedure docChanged(document: TCESynMemo);
-    //
+
+    procedure mnexDirectoryChanged(const directory: string);
+
     function singleServiceName: string;
     function expand(const value: string): string;
   public
@@ -163,6 +165,11 @@ begin
     exit;
   fNeedUpdate := true;
 end;
+
+procedure TCESymbolExpander.mnexDirectoryChanged(const directory: string);
+begin
+  fNeedUpdate := true;
+end;
 {$ENDREGION}
 
 {$REGION Symbol things ---------------------------------------------------------}
@@ -178,9 +185,8 @@ var
 const
   na = '``';
 begin
-  //commented : mini explorer doesn't emitt notif,
-  //if not fNeedUpdate then
-  //  exit;
+  if not fNeedUpdate then
+    exit;
   fNeedUpdate := false;
 
   hasNativeProj := fProj.isNotNil;
