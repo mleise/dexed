@@ -276,9 +276,14 @@ type
   function commonFolder(const files: TStringList): string;
 
   (**
-   * Returns true if ext matches a file extension whose type is highlightable.
+   * Returns true if ext matches a file extension whose type is highlightable (D)
    *)
   function hasDlangSyntax(const ext: string): boolean;
+
+  (**
+   * Returns true if ext matches a file extension whose type is highlightable (C/C++)
+   *)
+  function hasCppSyntax(const ext: string): boolean;
 
   (**
    * Returns true if ext matches a file extension whose type can be passed as source.
@@ -1237,6 +1242,13 @@ begin
   end;
 end;
 
+function hasCppSyntax(const ext: string): boolean;
+begin
+  result := false;
+  case ext of
+    '.c', '.h', '.cc', '.cpp', '.hpp': result := true;
+  end;
+end;
 
 function isDlangCompilable(const ext: string): boolean;
 begin

@@ -9,7 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
-  md5, Spin, LCLIntf, LazFileUtils, LMessages,
+  md5, Spin, LCLIntf, LazFileUtils, LMessages, SynHighlighterCpp,
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs, ce_dastworx,
@@ -157,6 +157,7 @@ type
     fMemo: TSynEdit;
     fD2Hl: TSynD2Syn;
     fTxtHl: TSynTxtSyn;
+    fCppHl: TSynCppSyn;
     fSource: TCESynMemo;
     procedure updateFromSource;
   protected
@@ -180,7 +181,6 @@ type
     fFileDate: double;
     fCacheLoaded: boolean;
     fIsDSource: boolean;
-    fIsTxtFile: boolean;
     fFocusForInput: boolean;
     fIdentifier: string;
     fTempFileName: string;
@@ -203,6 +203,7 @@ type
     fCompletion: TSynCompletion;
     fD2Highlighter: TSynD2Syn;
     fTxtHighlighter: TSynTxtSyn;
+    fCppHighlighter: TSynCppSyn;
     fImages: TImageList;
     fMatchSelectionOpts: TSynSearchOptions;
     fMatchIdentOpts: TSynSearchOptions;
@@ -377,6 +378,7 @@ type
     property MouseBytePosition: Integer read getMouseBytePosition;
     property D2Highlighter: TSynD2Syn read fD2Highlighter;
     property TxtHighlighter: TSynTxtSyn read fTxtHighlighter;
+    property CppHighlighter: TSynCppSyn read fCppHighlighter;
     property defaultFontSize: Integer read fDefaultFontSize write setDefaultFontSize;
     property ddocDelay: Integer read fDDocDelay write setDDocDelay;
     property autoDotDelay: Integer read fAutoDotDelay write setAutoDotDelay;
@@ -864,7 +866,8 @@ begin
   fMemo.Options:=fMemo.Options+[eoNoCaret];
 
   fD2Hl:= TSynD2Syn.create(self);
-  fTxtHl:= TSynTxtSyn.Create(self);
+  fTxtHl:= TSynTxtSyn.create(self);
+  fCppHl:= TSynCppSyn.create(self);
   fSource:= editor;
   updateFromSource();
 end;
@@ -883,10 +886,13 @@ begin
     begin
       fD2Hl.Assign(fSource.Highlighter);
       fTxtHl.Assign(fSource.Highlighter);
+      fCppHl.Assign(fSource.Highlighter);
     end;
     if fSource.Highlighter is TSynD2Syn then
       fMemo.Highlighter := fD2Hl
-    else
+    else if fSource.Highlighter is TSynCppSyn then
+      fMemo.Highlighter := fCppHl
+    else  if fSource.Highlighter is TSynD2Syn then
       fMemo.Highlighter := fTxtHl;
   end;
 end;
@@ -1009,6 +1015,7 @@ begin
 
   fD2Highlighter := TSynD2Syn.create(self);
   fTxtHighlighter := TSynTxtSyn.Create(self);
+  fCppHighlighter := TSynCppSyn.Create(self);
   Highlighter := fD2Highlighter;
 
   fTempFileName := GetTempDir(false) + 'temp_' + uniqueObjStr(self) + '.d';
@@ -3073,7 +3080,6 @@ procedure TCESynMemo.SetHighlighter(const Value: TSynCustomHighlighter);
 begin
   inherited;
   fIsDSource := Highlighter = fD2Highlighter;
-  fIsTxtFile := Highlighter = fTxtHighlighter;
 end;
 
 procedure TCESynMemo.highlightCurrentIdentifier;
@@ -3118,12 +3124,19 @@ end;
 
 procedure TCESynMemo.loadFromFile(const fname: string);
 var
-  ext: string;
+  e: string;
+  c: boolean;
 begin
-  ext := fname.extractFileExt;
-  fIsDsource := hasDlangSyntax(ext);
+  e := fname.extractFileExt;
+  fIsDsource := hasDlangSyntax(e);
+  c := hasCppSyntax(e);
   if not fIsDsource then
-    Highlighter := TxtSyn;
+  begin
+    if c then
+      Highlighter := CppHighlighter
+    else
+      Highlighter := TxtSyn;
+  end;
   Lines.LoadFromFile(fname);
   fFilename := fname;
   FileAge(fFilename, fFileDate);
@@ -3158,7 +3171,12 @@ begin
   if fIsDsource then
     Highlighter := fD2Highlighter
   else if not isProjectDescription then
-    Highlighter := TxtHighlighter;
+  begin
+    if hasCppSyntax(ext) then
+      Highlighter := CppHighlighter
+    else
+      Highlighter := TxtHighlighter;
+  end;
   FileAge(fFilename, fFileDate);
   fModified := false;
   if fFilename <> fTempFileName then

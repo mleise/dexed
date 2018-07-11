@@ -689,6 +689,16 @@ begin
   if not fResetFontSize then
     anEditor.Font.Size := savedSize;
 
+  anEditor.CppHighlighter.AsmAttri := anEditor.D2Highlighter.inlineAsm;
+  anEditor.CppHighlighter.CommentAttri := anEditor.D2Highlighter.comments;
+  anEditor.CppHighlighter.DirecAttri := anEditor.D2Highlighter.ddoc;
+  anEditor.CppHighlighter.IdentifierAttri := anEditor.D2Highlighter.identifiers;
+  anEditor.CppHighlighter.KeyAttri := anEditor.D2Highlighter.keywords;
+  anEditor.CppHighlighter.SpaceAttri := anEditor.D2Highlighter.whites;
+  anEditor.CppHighlighter.StringAttri := anEditor.D2Highlighter.strings;
+  anEditor.CppHighlighter.SymbolAttri := anEditor.D2Highlighter.symbols;
+  anEditor.CppHighlighter.NumberAttri := anEditor.D2Highlighter.numbers;
+
   anEditor.completionMenu.TheForm.Font.Assign(font);
   anEditor.autoCloseCurlyBrace            := fAutoCloseCurlyBrace;
   anEditor.autoClosedPairs                := fAutoClosedPairs;
