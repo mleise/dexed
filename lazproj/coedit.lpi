@@ -13,7 +13,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="376">
+      <Resources Count="379">
         <Resource_0 FileName="..\icons\arrow\arrow_up.png" Type="RCDATA" ResourceName="ARROW_UP"/>
         <Resource_1 FileName="..\icons\arrow\arrow_down.png" Type="RCDATA" ResourceName="ARROW_DOWN"/>
         <Resource_2 FileName="..\icons\arrow\arrow_divide.png" Type="RCDATA" ResourceName="ARROW_DIVIDE"/>
@@ -390,6 +390,9 @@
         <Resource_373 FileName="../icons/other/check_boxes_series.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES"/>
         <Resource_374 FileName="../icons/other/check_boxes_series24.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES24"/>
         <Resource_375 FileName="../icons/other/check_boxes_series32.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES32"/>
+        <Resource_376 FileName="../icons/other/git.png" Type="RCDATA" ResourceName="GIT"/>
+        <Resource_377 FileName="../icons/other/git24.png" Type="RCDATA" ResourceName="GIT24"/>
+        <Resource_378 FileName="../icons/other/git32.png" Type="RCDATA" ResourceName="GIT32"/>
       </Resources>
     </General>
     <i18n>

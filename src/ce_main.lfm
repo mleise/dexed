@@ -1713,6 +1713,15 @@ object CEMainForm: TCEMainForm
       object MenuItem110: TMenuItem
         Action = actProjTest
       end
+      object MenuItem115: TMenuItem
+        Caption = '-'
+      end
+      object mnuGitBranch: TMenuItem
+        Caption = 'Git branch...'
+      end
+      object MenuItem116: TMenuItem
+        Action = actProjGitPull
+      end
     end
     object MenuItem100: TMenuItem
       Caption = 'Projects group'
@@ -2286,6 +2295,16 @@ object CEMainForm: TCEMainForm
       Category = 'Project'
       Caption = 'New project dialog...'
       OnExecute = actProjNewDialogExecute
+    end
+    object actProjGitBranchesUpd: TAction
+      Category = 'Project'
+      Caption = 'Update list'
+      OnExecute = actProjGitBranchesUpdExecute
+    end
+    object actProjGitPull: TAction
+      Category = 'Project'
+      Caption = 'Git pull'
+      OnExecute = actProjGitPullExecute
     end
   end
   object ApplicationProperties1: TApplicationProperties

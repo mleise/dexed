@@ -117,6 +117,8 @@ type
     actFileCloseAll: TAction;
     actFileNewClip: TAction;
     actEdFormat: TAction;
+    actProjGitPull: TAction;
+    actProjGitBranchesUpd: TAction;
     actProjNewDialog: TAction;
     actProjStopComp: TAction;
     actProjTest: TAction;
@@ -178,6 +180,9 @@ type
     MenuItem112: TMenuItem;
     MenuItem113: TMenuItem;
     MenuItem114: TMenuItem;
+    MenuItem115: TMenuItem;
+    MenuItem116: TMenuItem;
+    mnuGitBranch: TMenuItem;
     mnuItemDubDialog: TMenuItem;
     mnuItemHelp: TMenuItem;
     mnuItemAbout: TMenuItem;
@@ -304,6 +309,8 @@ type
     procedure actNewGroupExecute(Sender: TObject);
     procedure actProjAddToGroupExecute(Sender: TObject);
     procedure actProjDscanExecute(Sender: TObject);
+    procedure actProjGitBranchesUpdExecute(Sender: TObject);
+    procedure actProjGitPullExecute(Sender: TObject);
     procedure actProjGroupCompileCustomSyncExecute(Sender: TObject);
     procedure actProjGroupCompileExecute(Sender: TObject);
     procedure actProjGroupCompileSyncExecute(Sender: TObject);
@@ -377,6 +384,7 @@ type
 
   private
 
+    fGitIconIndex: integer;
     fImages: TImageList;
     fOptionCategories: TCEEditableOptionsSubject;
     fRunnablesOptions: TCEEditableRunnableOptions;
@@ -526,6 +534,9 @@ type
     procedure layoutLoadFromFile(const fname: string);
     procedure layoutSaveToFile(const fname: string);
     procedure layoutUpdateMenu;
+
+    // git
+    procedure gitBranchMenuItemClick(sender: TObject);
 
   public
     constructor create(aOwner: TComponent); override;
@@ -1517,6 +1528,14 @@ begin
 
   i := loadIcon('CROSS');
   actProjStopComp.ImageIndex:=i;
+
+  i := loadIcon('GIT');
+  fGitIconIndex := i;
+  mnuGitBranch.ImageIndex:=i;
+  actProjGitPull.ImageIndex:=i;
+
+  i := loadIcon('AROOW_UPDATE');
+  actProjGitBranchesUpd.ImageIndex:=i;
 end;
 
 procedure TCEMainForm.InitWidgets;
@@ -2426,6 +2445,9 @@ begin
     fFreeProj := project
   else if project = fFreeProj then
     fFreeProj := nil;
+
+  if assigned(fProject) then
+    actProjGitBranchesUpdExecute(nil);
 
   showProjTitle;
 end;
@@ -3990,6 +4012,139 @@ begin
   finally
     prc.Free;
     lst.Free;
+  end;
+end;
+
+procedure TCEMainForm.actProjGitPullExecute(Sender: TObject);
+var
+  p: TProcess;
+  r: TStringList;
+  i: integer;
+  b: string;
+begin
+  p := TProcess.Create(nil);
+  r := TStringList.Create;
+  try
+    p.Executable := exeFullName('git' + exeExt);
+    if p.Executable.fileExists then
+    begin
+      p.Options := [poUsePipes, poNoConsole];
+      p.ShowWindow:= swoHIDE;
+      p.Parameters.Add('pull');
+      //p.Parameters.Add('&&');
+      //p.Parameters.Add('git');
+      //p.Parameters.Add('submodule');
+      //p.Parameters.Add('--update');
+      //p.Parameters.Add('--init');
+      //p.Parameters.Add('--recursive');
+      p.CurrentDirectory:= fProject.basePath;
+      p.Execute;
+      processOutputToStrings(p,r);
+      for i := 0 to r.Count-1 do
+        fMsgs.message(r[i], fProject, amcProj, amkInf);
+      r.Clear;
+      r.LoadFromStream(p.Stderr);
+      for i := 0 to r.Count-1 do
+        fMsgs.message(r[i], fProject, amcProj, amkErr);
+    end;
+  finally;
+    actProjGitBranchesUpd.Execute;
+    p.Free;
+    r.Free;
+  end;
+end;
+
+
+procedure TCEMainForm.gitBranchMenuItemClick(sender: TObject);
+var
+  p: TProcess;
+  r: TStringList;
+  i: integer;
+  b: string;
+begin
+  p := TProcess.Create(nil);
+  r := TStringList.Create;
+  b := TMenuItem(sender).Caption;
+  try
+    p.Executable := exeFullName('git' + exeExt);
+    if p.Executable.fileExists then
+    begin
+      p.Options := [poUsePipes, poNoConsole];
+      p.ShowWindow:= swoHIDE;
+      p.Parameters.Add('checkout');
+      p.Parameters.Add(b);
+      p.CurrentDirectory:= fProject.basePath;
+      p.Execute;
+      processOutputToStrings(p,r);
+      r.Clear;
+      r.LoadFromStream(p.Stderr);
+      // git bug ? even on success they write the switch in stderr
+      if r.Count > 1 then
+      begin
+        for i := 0 to r.Count-1 do
+          fMsgs.message(r[i], fProject, amcProj, amkErr);
+      end
+      else
+      begin
+        fMsgs.message('now on branch `' + b + '`', fProject, amcProj, amkInf);
+      end;
+    end;
+  finally;
+    actProjGitBranchesUpd.Execute;
+    p.Free;
+    r.Free;
+  end;
+end;
+
+procedure TCEMainForm.actProjGitBranchesUpdExecute(Sender: TObject);
+var
+  p: TProcess;
+  r: TStringList;
+  i: integer;
+  m: TMenuItem;
+begin
+  mnuGitBranch.Clear;
+  p := TProcess.Create(nil);
+  r := TStringList.Create;
+  try
+    p.Executable := exeFullName('git' + exeExt);
+    if p.Executable.fileExists then
+    begin
+      p.Options := [poUsePipes, poNoConsole];
+      p.ShowWindow:= swoHIDE;
+      p.Parameters.Add('branch');
+      p.Parameters.Add('--list');
+      p.CurrentDirectory:= fProject.basePath;
+      p.Execute;
+      processOutputToStrings(p,r);
+      m := TMenuItem.Create(mnuGitBranch);
+      m.action := actProjGitBranchesUpd;
+      mnuGitBranch.Add(m);
+      mnuGitBranch.AddSeparator;
+      for i:= 0 to r.Count-1 do
+      begin
+        m := TMenuItem.Create(mnuGitBranch);
+        m.GroupIndex := 45;
+        m.RadioItem:= true;
+        m.ImageIndex:=fGitIconIndex;
+        m.OnClick:= @gitBranchMenuItemClick;
+        if r[i][1] = '*' then
+        begin
+          m.Caption:= Trim(r[i][2..r[i].length]);
+          m.Checked:= true;
+        end
+        else m.Caption:= Trim(r[i][1..r[i].length]);
+        mnuGitBranch.Add(m);
+      end;
+      r.Clear;
+      r.LoadFromStream(p.Stderr);
+      if r.Count <> 0 then
+        for i := 0 to r.Count-1 do
+          fMsgs.message(r[i], fProject, amcProj, amkErr);
+    end;
+  finally
+    p.Free;
+    r.Free;
   end;
 end;
 
