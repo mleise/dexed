@@ -9,7 +9,7 @@ uses
   Controls, Graphics, ExtCtrls, Menus, ComCtrls, Buttons, lcltype, dialogs,
   ce_widget, ce_sharedres, ce_common, ce_interfaces, ce_observer,
   ce_writableComponent, ce_dubproject, ce_ceproject, EditBtn, ShellCtrls,
-  ce_dialogs, ce_synmemo, ce_projutils, ce_dsgncontrols, ce_stringrange;
+  ce_dialogs, ce_synmemo, ce_projutils, ce_dsgncontrols, ce_stringrange, Types;
 
 type
 
@@ -95,6 +95,8 @@ type
     procedure lstFilesFileAdded(Sender: TObject; Item: TListItem);
     procedure lstFilterButtonClick(Sender: TObject);
     procedure lstFilterKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure Splitter2MouseWheel(Sender: TObject; Shift: TShiftState;
+      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure toolbarResize(Sender: TObject);
     procedure TreeEnter(Sender: TObject);
     procedure treeFoldersChange(Sender: TObject; Node: TTreeNode);
@@ -738,6 +740,23 @@ procedure TCEMiniExplorerWidget.lstFilterKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   filterFiles;
+end;
+
+procedure TCEMiniExplorerWidget.Splitter2MouseWheel(Sender: TObject;
+  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+  var Handled: Boolean);
+var
+  offs: integer;
+  splt: TSplitter;
+begin
+  offs := -240 * 8 div WheelDelta;
+  splt := TSplitter(sender);
+  splt.MoveSplitter(offs);
+  if splt.ResizeAnchor in [akLeft, akRight] then
+    Mouse.CursorPos:= classes.Point(Mouse.CursorPos.X + offs, Mouse.CursorPos.Y)
+  else
+    Mouse.CursorPos:= classes.Point(Mouse.CursorPos.X, Mouse.CursorPos.Y + offs);
+  Handled := true;
 end;
 
 procedure TCEMiniExplorerWidget.toolbarResize(Sender: TObject);

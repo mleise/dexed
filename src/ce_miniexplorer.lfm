@@ -46,6 +46,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         Top = 131
         Width = 527
         Align = alTop
+        OnMouseWheel = Splitter2MouseWheel
         ResizeAnchor = akTop
       end
       object Panel2: TPanel[2]
@@ -66,6 +67,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
           Top = 218
           Width = 527
           Align = alTop
+          OnMouseWheel = Splitter2MouseWheel
           ResizeAnchor = akTop
         end
         object treeFolders: TShellTreeView
