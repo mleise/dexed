@@ -4020,7 +4020,6 @@ var
   p: TProcess;
   r: TStringList;
   i: integer;
-  b: string;
 begin
   p := TProcess.Create(nil);
   r := TStringList.Create;
@@ -4028,24 +4027,25 @@ begin
     p.Executable := exeFullName('git' + exeExt);
     if p.Executable.fileExists then
     begin
-      p.Options := [poUsePipes, poNoConsole];
+      p.Options := [poUsePipes, poNoConsole, poStderrToOutPut];
       p.ShowWindow:= swoHIDE;
       p.Parameters.Add('pull');
-      //p.Parameters.Add('&&');
-      //p.Parameters.Add('git');
-      //p.Parameters.Add('submodule');
-      //p.Parameters.Add('--update');
-      //p.Parameters.Add('--init');
-      //p.Parameters.Add('--recursive');
       p.CurrentDirectory:= fProject.basePath;
       p.Execute;
       processOutputToStrings(p,r);
       for i := 0 to r.Count-1 do
-        fMsgs.message(r[i], fProject, amcProj, amkInf);
-      r.Clear;
-      r.LoadFromStream(p.Stderr);
+        fMsgs.message(r[i], fProject, amcProj, amkAuto);
+      while p.Running do
+        sleep(0);
+      p.Parameters.Clear;
+      p.Parameters.Add('submodule');
+      p.Parameters.Add('update');
+      p.Parameters.Add('--init');
+      p.Parameters.Add('--recursive');
+      p.Execute;
+      processOutputToStrings(p,r);
       for i := 0 to r.Count-1 do
-        fMsgs.message(r[i], fProject, amcProj, amkErr);
+        fMsgs.message(r[i], fProject, amcProj, amkAuto);
     end;
   finally;
     actProjGitBranchesUpd.Execute;
@@ -4069,25 +4069,15 @@ begin
     p.Executable := exeFullName('git' + exeExt);
     if p.Executable.fileExists then
     begin
-      p.Options := [poUsePipes, poNoConsole];
+      p.Options := [poUsePipes, poNoConsole, poStderrToOutPut];
       p.ShowWindow:= swoHIDE;
       p.Parameters.Add('checkout');
       p.Parameters.Add(b);
       p.CurrentDirectory:= fProject.basePath;
       p.Execute;
       processOutputToStrings(p,r);
-      r.Clear;
-      r.LoadFromStream(p.Stderr);
-      // git bug ? even on success they write the switch in stderr
-      if r.Count > 1 then
-      begin
-        for i := 0 to r.Count-1 do
-          fMsgs.message(r[i], fProject, amcProj, amkErr);
-      end
-      else
-      begin
-        fMsgs.message('now on branch `' + b + '`', fProject, amcProj, amkInf);
-      end;
+      for i := 0 to r.Count-1 do
+        fMsgs.message(r[i], fProject, amcProj, amkAuto);
     end;
   finally;
     actProjGitBranchesUpd.Execute;
@@ -4138,9 +4128,8 @@ begin
       end;
       r.Clear;
       r.LoadFromStream(p.Stderr);
-      if r.Count <> 0 then
-        for i := 0 to r.Count-1 do
-          fMsgs.message(r[i], fProject, amcProj, amkErr);
+      for i := 0 to r.Count-1 do
+        fMsgs.message(r[i], fProject, amcProj, amkAuto);
     end;
   finally
     p.Free;
