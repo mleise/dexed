@@ -464,7 +464,7 @@ var
 implementation
 
 uses
-  ce_interfaces, ce_dcd, ce_staticmacro, SynEditHighlighterFoldBase, ce_lcldragdrop;
+  ce_interfaces, ce_dcd, SynEditHighlighterFoldBase, ce_lcldragdrop;
 
 const
   DcdCompletionKindStrings: array[TDCDCompletionKind] of string = (
@@ -3479,8 +3479,6 @@ begin
     fCompletion.Execute(GetWordAtRowCol(LogicalCaretXY),
       ClientToScreen(point(CaretXPix, CaretYPix + LineHeight)));
   end;
-  if StaticEditorMacro.automatic then
-    StaticEditorMacro.Execute;
 end;
 
 procedure TCESynMemo.UTF8KeyPress(var Key: TUTF8Char);
