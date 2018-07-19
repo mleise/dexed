@@ -4035,8 +4035,7 @@ begin
       processOutputToStrings(p,r);
       for i := 0 to r.Count-1 do
         fMsgs.message(r[i], fProject, amcProj, amkAuto);
-      while p.Running do
-        sleep(0);
+      while p.Running do ;
       p.Parameters.Clear;
       p.Parameters.Add('submodule');
       p.Parameters.Add('update');
@@ -4044,6 +4043,7 @@ begin
       p.Parameters.Add('--recursive');
       p.Execute;
       processOutputToStrings(p,r);
+      while p.Running do ;
       for i := 0 to r.Count-1 do
         fMsgs.message(r[i], fProject, amcProj, amkAuto);
     end;
@@ -4076,6 +4076,7 @@ begin
       p.CurrentDirectory:= fProject.basePath;
       p.Execute;
       processOutputToStrings(p,r);
+      while p.Running do ;
       for i := 0 to r.Count-1 do
         fMsgs.message(r[i], fProject, amcProj, amkAuto);
     end;
@@ -4107,6 +4108,7 @@ begin
       p.CurrentDirectory:= fProject.basePath;
       p.Execute;
       processOutputToStrings(p,r);
+      while p.Running do ;
       m := TMenuItem.Create(mnuGitBranch);
       m.action := actProjGitBranchesUpd;
       mnuGitBranch.Add(m);

@@ -1406,6 +1406,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
             Parameters.Add('fetch');
             Parameters.Add(n);
             Execute;
+            while Running do ;
             if ExitStatus = 0 then
               TDubLocalPackages.update();
           finally
@@ -1450,6 +1451,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
               Parameters.Add(n);
               Parameters.Add('--version=' + p);
               Execute;
+              while Running do ;
               if ExitStatus = 0 then
               begin
                 TDubLocalPackages.update();

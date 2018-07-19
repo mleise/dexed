@@ -329,6 +329,7 @@ begin
     lst := TStringList.Create;
     try
       processOutputToStrings(prc,lst);
+      while prc.Running do ;
       for str in lst do
       if AnsiContainsText(str, '127.0.0.1:' + intToStr(prt))
       and AnsiContainsText(str, 'TCP')
@@ -414,7 +415,10 @@ begin
     dec(c);
   end;
   if c <> folders.Count then
+  begin
     fClient.Execute;
+    while fClient.Running do ;
+  end;
 end;
 
 procedure TCEDcdWrapper.getCallTip(out tips: string);
