@@ -86,16 +86,6 @@ The document to pin can be replaced on the fly, still using the same button, and
 
 It's useful to display a module that contains the declarations of a library binding since it's not anymore necessary to change the editor page to verify the members of an enum or the parameters of a function.
 
-#### Static Macros
-
-The static macros can be described as *parameter-less code snippets*.
-A static macro starts with the dollar symbol and ends with an alphabetic character.
-For example after typing `$a`, `auto` is inserted. 
-
-The static macros can be edited in the [options editor](widgets_options_editor).
-
-![](img/options_static_macros.png)
-
 #### External Modification tracking
 
 When a document that's edited in Coedit is modified by another program, a _diff_ is displayed.
