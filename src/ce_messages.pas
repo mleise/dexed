@@ -27,11 +27,12 @@ type
   TCEMessagesOptions = class(TWritableLfmTextComponent)
   private
     fFastDisplay: boolean;
-    fMaxCount: Integer;
+    fMaxCount: integer;
     fAutoSelect: boolean;
     fSingleClick: boolean;
     fAutoDemangle: boolean;
     fAlwaysFilter: boolean;
+    fMaxLineLength: integer;
     fFont: TFont;
     fMsgColors: array[TCEAppMessageKind] of TColor;
     procedure setFont(value: TFont);
@@ -39,6 +40,7 @@ type
     property alwaysFilter: boolean read fAlwaysFilter write fAlwaysFilter;
     property fastDisplay: boolean read fFastDisplay write fFastDisplay;
     property maxMessageCount: integer read fMaxCount write fMaxCount;
+    property maxLineLength: integer read fMaxLineLength write fMaxLineLength default 4096;
     property autoSelect: boolean read fAutoSelect write fAutoSelect;
     property autoDemangle: boolean read fAutoDemangle write fAutoDemangle;
     property singleMessageClick: boolean read fSingleClick write fSingleClick;
@@ -264,6 +266,7 @@ begin
   fFont.Size := ScaleY(11,96);
   fAutoSelect :=true;
   fMaxCount := 1000;
+  fMaxLineLength:= 4096;
   fMsgColors[amkBub] := $FCE7D2;
   fMsgColors[amkWarn]:= $B3FFFF;
   fMsgColors[amkErr] := $BDBDFF;
@@ -879,10 +882,12 @@ begin
   showWidget;
   if not fAlwaysFilter then
     TreeFilterEdit1.Filter:='';
-  case fAutoDemangle of
-    false: msg := value;
-    true: msg := demangle(value);
-  end;
+  if (value.length > fOptions.maxLineLength) and (fOptions.maxLineLength > 0) then
+    msg := value[1..fOptions.maxLineLength]
+  else
+    msg := value;
+  if fAutoDemangle then
+    msg := demangle(msg);
   if aKind = amkAuto then
     aKind := guessMessageKind(msg);
   if aCtxt = amcAutoCompile then
