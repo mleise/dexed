@@ -324,8 +324,7 @@ begin
   btnAddFile.Visible:= ce;
   btnAddFold.Visible:= ce;
   toolbarResize(nil);
-  TreeFilterEdit1.BorderSpacing.Left:= 0;
-  TreeFilterEdit1.Left := ScaleX(filterAlign[ce], 96);
+  TreeFilterEdit1.BorderSpacing.Left := ScaleX(filterAlign[ce], 96);
   toolbarResize(nil);
 end;
 
