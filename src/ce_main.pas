@@ -4054,7 +4054,6 @@ begin
   end;
 end;
 
-
 procedure TCEMainForm.gitBranchMenuItemClick(sender: TObject);
 var
   p: TProcess;
@@ -4062,6 +4061,8 @@ var
   i: integer;
   b: string;
 begin
+  if not assigned(fProject) then
+    exit;
   p := TProcess.Create(nil);
   r := TStringList.Create;
   b := TMenuItem(sender).Caption;
@@ -4093,8 +4094,16 @@ var
   r: TStringList;
   i: integer;
   m: TMenuItem;
+  a: boolean;
 begin
-  mnuGitBranch.Clear;
+  if not assigned(fProject) then
+    exit;
+  a := mnuGitBranch.Count >= 2;
+  if a then
+    while mnuGitBranch.Count <> 2 do
+      mnuGitBranch.delete(mnuGitBranch.Count-1);
+  if not DirectoryExistsUTF8(fProject.basePath + DirectorySeparator + '.git') then
+    exit;
   p := TProcess.Create(nil);
   r := TStringList.Create;
   try
@@ -4109,10 +4118,13 @@ begin
       p.Execute;
       processOutputToStrings(p,r);
       while p.Running do ;
-      m := TMenuItem.Create(mnuGitBranch);
-      m.action := actProjGitBranchesUpd;
-      mnuGitBranch.Add(m);
-      mnuGitBranch.AddSeparator;
+      if not a then
+      begin
+        m := TMenuItem.Create(mnuGitBranch);
+        m.action := actProjGitBranchesUpd;
+        mnuGitBranch.Add(m);
+        mnuGitBranch.AddSeparator;
+      end;
       for i:= 0 to r.Count-1 do
       begin
         m := TMenuItem.Create(mnuGitBranch);
