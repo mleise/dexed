@@ -3007,7 +3007,6 @@ var
   p: TPoint;
   tk1: PLexToken = nil;
   tk2: PLexToken = nil;
-  r: TStringRange = (ptr:nil; pos:0; len: 0);
 begin
   // note: never use SelStart here. SelStart is updated too early
   // and matches to the future position, e.g the one after auto-indentation.
@@ -3022,18 +3021,7 @@ begin
       if (tk1^.position < p) and (tk1^.kind in [ltkComment, ltkIllegal])
         and (p <= tk2^.position) and (tk1^.Data[1] in ['*','+']) then
       begin
-        r.init(tk1^.Data);
-        r.popUntil(#10)^.popFront;
-        if not r.empty then
-          r.popWhile([' ', #9]);
-        if not r.empty then
-        begin
-          if r.front in ['*','+'] then
-            exit(r.front)
-          else
-            exit(#0);
-        end
-        else exit(tk1^.Data[1])
+        exit(tk1^.Data[1]);
       end
       else if (tk1^.position > p) then
         exit;
