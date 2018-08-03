@@ -269,7 +269,7 @@ type
       var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
     procedure showCallTips(const tips: string);
     function lexCanCloseBrace: boolean;
-    function lexInDdoc: char;
+    function canInsertLeadingDdocSymbol: char;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
     procedure goToChangedArea(next: boolean);
     procedure goToProtectionGroup(next: boolean);
@@ -3001,7 +3001,7 @@ begin
   end;
 end;
 
-function TCESynMemo.lexInDdoc: char;
+function TCESynMemo.canInsertLeadingDdocSymbol: char;
 var
   i: integer;
   p: TPoint;
@@ -3416,7 +3416,7 @@ begin
               fLexToks.Clear;
               lex(lines.Text, fLexToks);
             end;
-            ddc := lexInDdoc;
+            ddc := canInsertLeadingDdocSymbol;
             if ddc in ['*', '+'] then
             begin
               inherited;
