@@ -267,7 +267,7 @@ type
       Selected: boolean; Index: integer): boolean;
     procedure completionCodeCompletion(var value: string; SourceValue: string;
       var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
-    procedure showCallTips(const tips: string);
+    procedure showCallTipsString(const tips: string);
     function lexCanCloseBrace: boolean;
     function canInsertLeadingDdocSymbol: char;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
@@ -2597,14 +2597,14 @@ begin
       {$ELSE}
       str := str[1..str.length-1];
       {$ENDIF}
-      showCallTips(str);
+      showCallTipsString(str);
     end;
   end;
   if findOpenParen then
     CaretX:=x;
 end;
 
-procedure TCESynMemo.showCallTips(const tips: string);
+procedure TCESynMemo.showCallTipsString(const tips: string);
 var
   pnt: TPoint;
 begin
@@ -2636,7 +2636,7 @@ begin
   if fCallTipStrings.Count = 0 then
     hideCallTips
   else
-    showCallTips(fCallTipStrings.Text);
+    showCallTipsString(fCallTipStrings.Text);
 end;
 
 procedure TCESynMemo.showDDocs;
