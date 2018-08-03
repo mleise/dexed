@@ -60,6 +60,17 @@ type
       AData: Pointer): TRect; override;
   end;
 
+  // Specialized to allow displaying call tips, actual param in bold
+  TCEEditorCallTipWindow = class(TCEEditorHintWindow)
+  strict private
+    fIndexOfExpectedArg: integer;
+  public
+    function CalcHintRect(MaxWidth: Integer; const AHint: string;
+      AData: Pointer): TRect; override;
+    procedure Paint; override;
+    property indexOfExpectedArg: integer write fIndexOfExpectedArg;
+  end;
+
   // Stores the state of a particular source code folding.
   TCEFoldCache = class(TCollectionItem)
   private
@@ -188,7 +199,7 @@ type
     fDefaultFontSize: Integer;
     fPositions: TCESynMemoPositions;
     fMousePos: TPoint;
-    fCallTipWin: TCEEditorHintWindow;
+    fCallTipWin: TCEEditorCallTipWindow;
     fDDocWin: TCEEditorHintWindow;
     fDDocDelay: Integer;
     fAutoDotDelay: Integer;
@@ -267,7 +278,7 @@ type
       Selected: boolean; Index: integer): boolean;
     procedure completionCodeCompletion(var value: string; SourceValue: string;
       var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
-    procedure showCallTipsString(const tips: string);
+    procedure showCallTipsString(const tips: string; indexOfExpected: integer);
     function lexCanCloseBrace: boolean;
     function canInsertLeadingDdocSymbol: char;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
@@ -492,6 +503,58 @@ begin
   Font.Size:= FontSize;
   result := inherited CalcHintRect(MaxWidth, AHint, AData);
 end;
+
+function TCEEditorCallTipWindow.CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect;
+begin
+  Font.Style := Font.Style + [fsBold];
+  result := inherited CalcHintRect(MaxWidth, AHint, AData);
+  Font.Style := Font.Style - [fsBold];
+end;
+
+procedure TCEEditorCallTipWindow.Paint;
+//var
+  //s: string;
+  //a: string;
+  //i: integer = 0;
+  //x: integer = 0;
+  //o: integer = 0;
+  //r: TStringRange = (ptr:nil; pos:0; len: 0);
+  //f: TFontStyles;
+begin
+  //s := caption;
+  //caption := '';
+  inherited Paint;
+  //if s.isEmpty then
+  //  exit;
+  //f := canvas.Font.Style;
+  //r.init(s);
+  //// func decl (TODO skip template params)
+  //a := r.takeUntil('(').yield + '(';
+  //o := x;
+  //x += canvas.TextWidth(a);
+  //canvas.TextOut(o, 0, a);
+  //r.popFront;
+  //// func args
+  //while not r.empty do
+  //begin
+  //  a := r.takeUntil(',').yield;
+  //  if not r.empty then
+  //  begin
+  //    r.popFrontN(2);
+  //    a += ', ';
+  //  end;
+  //  o := x;
+  //  if fIndexOfExpectedArg = i then
+  //    canvas.Font.Style := canvas.Font.Style + [fsBold]
+  //  else
+  //    canvas.Font.Style := canvas.Font.Style - [fsBold];
+  //  x += canvas.TextWidth(a);
+  //  canvas.TextOut(o, 0, a);
+  //  canvas.Font.Style := f;
+  //  i += 1;
+  //end;
+end;
+
 {$REGION TSortDialog -----------------------------------------------------------}
 constructor TSortDialog.construct(editor: TCESynMemo);
 var
@@ -2537,7 +2600,7 @@ procedure TCESynMemo.InitHintWins;
 begin
   if fCallTipWin.isNil then
   begin
-    fCallTipWin := TCEEditorHintWindow.Create(self);
+    fCallTipWin := TCEEditorCallTipWindow.Create(self);
     fCallTipWin.Color := clInfoBk + $01010100;
     fCallTipWin.Font.Color:= clInfoText;
   end;
@@ -2553,6 +2616,7 @@ procedure TCESynMemo.showCallTips(findOpenParen: boolean = true);
 var
   str, lne: string;
   i, x: integer;
+  j: integer = 0;
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
@@ -2565,6 +2629,8 @@ begin
   begin
     if i = 1 then
       break;
+    if str[i] = ',' then
+      j += 1;
     if str[i-1] = '(' then
     begin
       LogicalCaretXY := Point(i, CaretY);
@@ -2597,14 +2663,14 @@ begin
       {$ELSE}
       str := str[1..str.length-1];
       {$ENDIF}
-      showCallTipsString(str);
+      showCallTipsString(str, j);
     end;
   end;
   if findOpenParen then
     CaretX:=x;
 end;
 
-procedure TCESynMemo.showCallTipsString(const tips: string);
+procedure TCESynMemo.showCallTipsString(const tips: string; indexOfExpected: integer);
 var
   pnt: TPoint;
 begin
@@ -2612,6 +2678,7 @@ begin
     exit;
 
   pnt := ClientToScreen(point(CaretXPix, CaretYPix));
+  fCallTipWin.indexOfExpectedArg:=indexOfExpected;
   fCallTipWin.FontSize := Font.Size;
   fCallTipWin.HintRect := fCallTipWin.CalcHintRect(0, tips, nil);
   fCallTipWin.OffsetHintRect(pnt, Font.Size * 2);
@@ -2636,7 +2703,7 @@ begin
   if fCallTipStrings.Count = 0 then
     hideCallTips
   else
-    showCallTipsString(fCallTipStrings.Text);
+    showCallTipsString(fCallTipStrings.Text, 0);
 end;
 
 procedure TCESynMemo.showDDocs;
@@ -3479,8 +3546,11 @@ begin
   case c of
     #39: if autoCloseSingleQuote in fAutoClosedPairs then
       autoClosePair(autoCloseSingleQuote);
-    ',': if not fCallTipWin.Visible then
+    ',':
+    begin
+      hideCallTips;
       showCallTips(true);
+    end;
     '"': if autoCloseDoubleQuote in fAutoClosedPairs then
       autoClosePair(autoCloseDoubleQuote);
     '`': if autoCloseBackTick in fAutoClosedPairs then
