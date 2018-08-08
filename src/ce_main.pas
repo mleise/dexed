@@ -1534,7 +1534,7 @@ begin
   mnuGitBranch.ImageIndex:=i;
   actProjGitPull.ImageIndex:=i;
 
-  i := loadIcon('AROOW_UPDATE');
+  i := loadIcon('ARROW_UPDATE');
   actProjGitBranchesUpd.ImageIndex:=i;
 end;
 
