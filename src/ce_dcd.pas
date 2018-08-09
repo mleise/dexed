@@ -10,7 +10,7 @@ uses
   windows,
   {$ENDIF}
   ce_common, ce_writableComponent, ce_interfaces, ce_observer, ce_synmemo,
-  ce_stringrange, ce_projutils;
+  ce_stringrange, ce_projutils, ce_semver;
 
 type
 
@@ -37,6 +37,8 @@ type
     fDoc: TCESynMemo;
     fProj: ICECommonProject;
     fPortAsProcParam: string;
+    fVersion: TSemVer;
+    fCanRemove: boolean;
     procedure killServer;
     procedure terminateClient; {$IFNDEF DEBUG}inline;{$ENDIF}
     procedure waitClient; {$IFNDEF DEBUG}inline;{$ENDIF}
@@ -69,6 +71,8 @@ type
     //
     procedure addImportFolders(const folders: TStrings);
     procedure addImportFolder(const folder: string);
+    procedure remImportFolder(const folder: string);
+    procedure remImportFolders(const folders: TStrings);
     procedure getComplAtCursor(list: TStringList);
     procedure getCallTip(out tips: string);
     procedure getDdocFromCursor(out comment: string);
@@ -97,9 +101,11 @@ constructor TCEDcdWrapper.create(aOwner: TComponent);
 var
   fname: string;
   i: integer = 0;
+  r: TSemVer;
 begin
   inherited;
 
+  fVersion.init('v0.0.0');
   fname := getCoeditDocPath + optsname;
   if fname.fileExists then
     loadFromFile(fname);
@@ -133,6 +139,16 @@ begin
   end;
   fTempLines := TStringList.Create;
   fImportCache := TStringHashSet.Create;
+
+  fClient.Parameters.Add('--version');
+  fClient.Execute;
+  processOutputToStrings(fClient, fTempLines);
+  while fClient.Running do ;
+  fVersion.init(fTempLines.strictText);
+  r.major := 0;
+  r.minor := 9;
+  r.patch := 10;
+  fCanRemove := fVersion > r;
 
   if fServer.isNotNil then
   begin
@@ -421,6 +437,49 @@ begin
       continue;
     fImportCache.insert(i);
     fClient.Parameters.Add('-I' + i);
+    dec(c);
+  end;
+  if c <> folders.Count then
+  begin
+    fClient.Execute;
+    while fClient.Running do ;
+  end;
+end;
+
+procedure TCEDcdWrapper.remImportFolder(const folder: string);
+begin
+  if not fCanRemove then
+    exit;
+  if not fAvailable or not fServerListening or not fImportCache.contains(folder) then
+    exit;
+
+  fImportCache.delete(folder);
+  fClient.Parameters.Clear;
+  tryAddTcpParams;
+  fClient.Parameters.Add('-R' + folder);
+  fClient.Execute;
+  while fClient.Running do ;
+end;
+
+procedure TCEDcdWrapper.remImportFolders(const folders: TStrings);
+var
+  i: string;
+  c: integer;
+begin
+  if not fCanRemove then
+    exit;
+  if not fAvailable or not fServerListening then
+    exit;
+
+  fClient.Parameters.Clear;
+  tryAddTcpParams;
+  c := folders.Count;
+  for i in folders do
+  begin
+    if not fImportCache.contains(i) then
+      continue;
+    fImportCache.delete(i);
+    fClient.Parameters.Add('-R' + i);
     dec(c);
   end;
   if c <> folders.Count then
