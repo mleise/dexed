@@ -455,23 +455,31 @@ end;
 procedure TLibraryManager.updateDCD;
 var
   itm: TLibraryItem;
-  str: TStringList;
+  add: TStringList;
+  rem: TStringList;
   i: Integer;
 begin
-  if not DcdWrapper.available then exit;
-  // note: new libraries are directly handled but those who are removed
-  // remain in cache until next session.
-  str := TStringList.Create;
+  if not DcdWrapper.available then
+    exit;
+
+  add := TStringList.Create;
+  rem := TStringList.Create;
   try
     for i := 0 to fCollection.Count-1 do
     begin
       itm := TLibraryItem(fCollection.Items[i]);
       if itm.enabled then
-        str.Add(itm.libSourcePath);
+        add.Add(itm.libSourcePath)
+      else
+        rem.Add(itm.libSourcePath);
     end;
-    DcdWrapper.addImportFolders(str);
+    if add.Count > 0 then
+      DcdWrapper.addImportFolders(add);
+    if rem.Count > 0 then
+      DCDWrapper.remImportFolders(rem);
   finally
-    str.Free;
+    add.Free;
+    rem.Free;
   end;
 end;
 
