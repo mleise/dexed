@@ -45,6 +45,7 @@ type
     function checkDcdSocket: boolean;
     function getIfLaunched: boolean;
     procedure tryAddTcpParams; {$IFNDEF DEBUG}inline;{$ENDIF}
+    procedure updateImportPathFromProject;
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -207,23 +208,18 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEDcdWrapper.projNew(project: ICECommonProject);
-begin
-  fProj := project;
-end;
-
-procedure TCEDcdWrapper.projChanged(project: ICECommonProject);
+procedure TCEDcdWrapper.updateImportPathFromProject;
 var
   i: Integer;
   fold: string;
   folds: TStringList;
 begin
-  if (fProj = nil) or (fProj <> project) then
+  if not assigned(fProj) then
     exit;
 
   folds := TStringList.Create;
   try
-    fold := ce_projutils.projectSourcePath(project);
+    fold := ce_projutils.projectSourcePath(fProj);
     if fold.dirExists then
       folds.Add(fold);
   	for i := 0 to fProj.importsPathCount-1 do
@@ -238,6 +234,18 @@ begin
   end;
 end;
 
+procedure TCEDcdWrapper.projNew(project: ICECommonProject);
+begin
+  fProj := project;
+end;
+
+procedure TCEDcdWrapper.projChanged(project: ICECommonProject);
+begin
+  if (fProj = nil) or (fProj <> project) then
+    exit;
+  updateImportPathFromProject();
+end;
+
 procedure TCEDcdWrapper.projClosing(project: ICECommonProject);
 begin
   if fProj <> project then
@@ -248,6 +256,7 @@ end;
 procedure TCEDcdWrapper.projFocused(project: ICECommonProject);
 begin
   fProj := project;
+  updateImportPathFromProject();
 end;
 
 procedure TCEDcdWrapper.projCompiling(project: ICECommonProject);
