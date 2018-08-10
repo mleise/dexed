@@ -411,6 +411,7 @@ begin
             cli.dependencies.Delete(j);
         end;
       end;
+      DCDWrapper.remImportFolder(lib.libSourcePath);
       fItemsByAlias.delete(lib.libAlias);
     end;
   end;
@@ -469,7 +470,12 @@ begin
     begin
       itm := TLibraryItem(fCollection.Items[i]);
       if itm.enabled then
-        add.Add(itm.libSourcePath)
+      begin
+        if itm.hasValidLibSourcePath then
+          add.Add(itm.libSourcePath)
+        else
+          rem.Add(itm.libSourcePath);
+      end
       else
         rem.Add(itm.libSourcePath);
     end;
