@@ -323,7 +323,7 @@ var
 begin
   sleep(100);
   // nix/osx: the file might exists from a previous session that crashed
-  // however the 100 ms might be enough for DCD to initializes
+  // however the 100 ms might be enough for DCD initialization
   if fCurrentSessionPortNum = 0 then
   begin
     {$IFDEF LINUX}
