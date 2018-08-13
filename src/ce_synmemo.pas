@@ -506,9 +506,9 @@ end;
 
 function TCEEditorCallTipWindow.CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect;
 begin
-  Font.Style := Font.Style + [fsBold];
+  //Font.Style := Font.Style + [fsBold];
   result := inherited CalcHintRect(MaxWidth, AHint, AData);
-  Font.Style := Font.Style - [fsBold];
+  //Font.Style := Font.Style - [fsBold];
 end;
 
 procedure TCEEditorCallTipWindow.Paint;
@@ -2682,11 +2682,18 @@ begin
   fCallTipWin.FontSize := Font.Size;
   fCallTipWin.HintRect := fCallTipWin.CalcHintRect(0, tips, nil);
   fCallTipWin.OffsetHintRect(pnt, Font.Size * 2);
+
+  // see procedure THintWindow.ActivateHint(const AHint: String);
+  // caused a regression in call tips stacking
+  fCallTipWin.Caption:= tips;
+
   fCallTipWin.ActivateHint(tips);
 end;
 
 procedure TCESynMemo.hideCallTips;
 begin
+  if not fCallTipWin.Visible then
+    exit;
   fCallTipStrings.Clear;
   fCallTipWin.Hide;
 end;
@@ -3548,7 +3555,7 @@ begin
       autoClosePair(autoCloseSingleQuote);
     ',':
     begin
-      hideCallTips;
+      //hideCallTips;
       showCallTips(true);
     end;
     '"': if autoCloseDoubleQuote in fAutoClosedPairs then
