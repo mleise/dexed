@@ -47,7 +47,7 @@ type
     function checkDcdSocket: boolean;
     function getIfLaunched: boolean;
     procedure tryAddTcpParams; {$IFNDEF DEBUG}inline;{$ENDIF}
-    procedure updateImportPathFromProject;
+    procedure updateImportPathsFromProject;
     //
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -224,7 +224,7 @@ end;
 {$ENDREGION}
 
 {$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEDcdWrapper.updateImportPathFromProject;
+procedure TCEDcdWrapper.updateImportPathsFromProject;
 var
   i: Integer;
   fold: string;
@@ -259,7 +259,7 @@ procedure TCEDcdWrapper.projChanged(project: ICECommonProject);
 begin
   if (fProj = nil) or (fProj <> project) then
     exit;
-  updateImportPathFromProject();
+  updateImportPathsFromProject();
 end;
 
 procedure TCEDcdWrapper.projClosing(project: ICECommonProject);
@@ -272,7 +272,7 @@ end;
 procedure TCEDcdWrapper.projFocused(project: ICECommonProject);
 begin
   fProj := project;
-  updateImportPathFromProject();
+  updateImportPathsFromProject();
 end;
 
 procedure TCEDcdWrapper.projCompiling(project: ICECommonProject);
