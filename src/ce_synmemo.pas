@@ -2931,6 +2931,11 @@ begin
     or not fCanDscan then
       exit;
 
+  if fDscanner.Running then
+  begin
+    fDscanner.Terminate(0);
+    sleep(1);
+  end;
   removeDscannerWarnings;
   fCanDscan := false;
   fDScanner.execute;
