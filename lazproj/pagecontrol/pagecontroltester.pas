@@ -32,11 +32,11 @@ begin
   fPageControl.Align  := alClient;
   fPageControl.onChanged:=@pageControlChanged;
 
-  AssignPng(fPageControl.closeButton.Glyph, 'document_delete');
-  AssignPng(fPageControl.addButton.Glyph, 'document_add');
-  AssignPng(fPageControl.moveLeftButton.Glyph, 'document_back');
-  AssignPng(fPageControl.moveRightButton.Glyph, 'document_next');
-  AssignPng(fPageControl.splitButton.Glyph, 'splitter');
+  AssignPng(fPageControl.closeButton.Glyph, 'DOCUMENT_DELETE');
+  AssignPng(fPageControl.addButton.Glyph, 'DOCUMENT_ADD');
+  AssignPng(fPageControl.moveLeftButton.Glyph, 'DOCUMENT_BACK');
+  AssignPng(fPageControl.moveRightButton.Glyph, 'DOCUMENT_NEXT');
+  AssignPng(fPageControl.splitButton.Glyph, 'SPLITTER');
 end;
 
 procedure TForm1.pageControlChanged(sender: TObject);

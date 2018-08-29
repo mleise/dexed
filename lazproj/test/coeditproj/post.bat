@@ -1,2 +1,0 @@
-echo 'has compiled'
-pause
