@@ -330,6 +330,11 @@ class SymbolListBuilder(ListFmt Fmt): ASTVisitor
                 identifierChain.identifiers[0].column);
     }
 
+    final override void visit(const Invariant decl)
+    {
+        otherVisitorImpl(decl, SymbolType._function, "invariant", decl.line, 0);
+    }
+
     final override void visit(const MixinTemplateDeclaration decl)
     {
         namedVisitorImpl!(TemplateDeclaration, SymbolType._mixin)(decl.templateDeclaration);
