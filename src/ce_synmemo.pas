@@ -9,7 +9,7 @@ uses
   SynEdit, SynPluginSyncroEdit, SynCompletion, SynEditKeyCmds, LazSynEditText,
   SynHighlighterLFM, SynEditHighlighter, SynEditMouseCmds, SynEditFoldedView,
   SynEditMarks, SynEditTypes, SynHighlighterJScript, SynBeautifier, dialogs,
-  md5, Spin, LCLIntf, LazFileUtils, LMessages, SynHighlighterCpp,
+  md5, Spin, LCLIntf, LazFileUtils, LMessages, SynHighlighterCpp, math,
   //SynEditMarkupFoldColoring,
   Clipbrd, fpjson, jsonparser, LazUTF8, LazUTF8Classes, Buttons, StdCtrls,
   ce_common, ce_writableComponent, ce_d2syn, ce_txtsyn, ce_dialogs, ce_dastworx,
@@ -2624,7 +2624,7 @@ begin
     fCallTipStrings.Clear;
   str := LineText[1..CaretX];
   x := CaretX;
-  i := x;
+  i := min(x, str.length);
   if findOpenParen then while true do
   begin
     if i = 1 then
