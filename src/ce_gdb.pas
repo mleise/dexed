@@ -1552,7 +1552,7 @@ begin
     waitCommandProcessed;
     fSilentPause := false;
   end;
-  gdbCommand('break ' + fname + ':' + intToStr(line));
+  gdbCommand(format('-break-insert --source %s --line %d', [fname, line]) + #10);
   if r then
   begin
     fSilentPause := true;
@@ -1580,7 +1580,7 @@ begin
     waitCommandProcessed;
     fSilentPause := false;
   end;
-  gdbCommand('clear ' + fname + ':' + intToStr(line));
+  gdbCommand(format('-break-delete --source %s --line %d', [fname, line]) + #10);
   if r then
   begin
     fSilentPause := true;
@@ -1777,7 +1777,7 @@ begin
     case b.kind of
       bpkBreak:
       begin
-        str := 'break ' + b.filename + ':' + intToStr(b.line) + #10;
+        str := format('-break-insert --source %s --line %d', [b.filename, b.line]) + #10;
         fGdb.Input.Write(str[1], str.length);
       end;
       bpkWatch: {TODO-cGDB: put watchpoint from persistent};
@@ -1785,24 +1785,24 @@ begin
   end;
   gdbCommand('set disassembly-flavor ' + asmFlavorStr[fOptions.asmSyntax]);
   // break on druntime exceptions + any throw'
-  gdbCommand('break onAssertError');
-  gdbCommand('break onAssertErrorMsg');
-  gdbCommand('break onUnittestErrorMsg');
-  gdbCommand('break onRangeError');
-  gdbCommand('break onFinalizeError');
-  gdbCommand('break onHiddenFuncError');
-  gdbCommand('break onOutOfMemoryError');
-  gdbCommand('break onInvalidMemoryOperationError');
-  gdbCommand('break onSwitchError');
-  gdbCommand('break onUnicodeError');
-  gdbCommand('break _d_throwc');
-  gdbCommand('break _d_throwdwarf');
-  gdbCommand('break _d_assertm');
-  gdbCommand('break _d_assert');
-  gdbCommand('break _d_assert_msg');
-  gdbCommand('break _d_array_bounds');
-  gdbCommand('break _d_arraybounds');
-  gdbCommand('break _d_switch_error');
+  gdbCommand('-break-insert --function onAssertError');
+  gdbCommand('-break-insert --function onAssertErrorMsg');
+  gdbCommand('-break-insert --function onUnittestErrorMsg');
+  gdbCommand('-break-insert --function onRangeError');
+  gdbCommand('-break-insert --function onFinalizeError');
+  gdbCommand('-break-insert --function onHiddenFuncError');
+  gdbCommand('-break-insert --function onOutOfMemoryError');
+  gdbCommand('-break-insert --function onInvalidMemoryOperationError');
+  gdbCommand('-break-insert --function onSwitchError');
+  gdbCommand('-break-insert --function onUnicodeError');
+  gdbCommand('-break-insert --function _d_throwc');
+  gdbCommand('-break-insert --function _d_throwdwarf');
+  gdbCommand('-break-insert --function _d_assertm');
+  gdbCommand('-break-insert --function _d_assert');
+  gdbCommand('-break-insert --function _d_assert_msg');
+  gdbCommand('-break-insert --function _d_array_bounds');
+  gdbCommand('-break-insert --function _d_arraybounds');
+  gdbCommand('-break-insert --function _d_switch_error');
   gdbCommand('-gdb-set mi-async on');
   if fOptions.stopAllThreadsOnBreak then
     gdbCommand('-gdb-set non-stop off')
@@ -1833,7 +1833,7 @@ begin
       str += o.arguments[i] + ' ';
     str := fSyms.expand(str);
   end;
-  gdbCommand('set args '+ str + '> ' + fOutputName + '< ' + fInputName);
+  gdbCommand('-exec-arguments '+ str + '> ' + fOutputName + '< ' + fInputName);
   // non-MI command "run" has the same problem as https://sourceware.org/bugzilla/show_bug.cgi?id=18077
   gdbCommand('-exec-run');
   setState(gsRunning);
