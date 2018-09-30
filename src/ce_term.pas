@@ -19,6 +19,7 @@ type
     fSelectedColor: TColor;
     fFollowEditors: boolean;
     fFollowProjects: boolean;
+    fFollowExplorer: boolean;
     fScrollbackLines: longword;
     fFont: TFont;
     procedure setFont(value: TFont);
@@ -33,6 +34,7 @@ type
     property font: TFont read fFont write setFont;
     property followEditors: boolean read fFollowEditors write fFollowEditors;
     property followProjects: boolean read fFollowProjects write fFollowProjects;
+    property followExplorer: boolean read fFollowExplorer write fFollowExplorer;
     property scrollbackLines: longword read fScrollbackLines write fScrollbackLines default 512;
   end;
 
@@ -52,7 +54,7 @@ type
 
   { TCETermWidget }
 
-  TCETermWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver)
+  TCETermWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver, ICEMiniExplorerObserver)
     procedure ContentPaint(Sender: TObject);
   private
     fTerm: TTerminal;
@@ -64,6 +66,8 @@ type
     procedure docFocused(document: TCESynMemo);
     procedure docChanged(document: TCESynMemo);
     procedure docClosing(document: TCESynMemo);
+
+    procedure mnexDirectoryChanged(const directory: string);
 
     procedure projNew(project: ICECommonProject);
     procedure projChanged(project: ICECommonProject);
@@ -241,6 +245,16 @@ begin
     exit;
   fNeedApplyChanges:=false;
   fOpts.applyChanges;
+end;
+
+procedure TCETermWidget.mnexDirectoryChanged(const directory: string);
+begin
+  if fOpts.followExplorer and directory.dirExists and
+    not SameText(directory, fLastCd) then
+  begin
+    fLastCd := directory;
+    fTerm.Command('cd ' + directory);
+  end;
 end;
 
 procedure TCETermWidget.docNew(document: TCESynMemo);
