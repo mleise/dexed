@@ -58,6 +58,7 @@ type
     fTerm: TTerminal;
     fOpts: TCETerminalOptions;
     fLastCd: string;
+    fNeedApplyChanges: boolean;
 
     procedure docNew(document: TCESynMemo);
     procedure docFocused(document: TCESynMemo);
@@ -72,6 +73,9 @@ type
     procedure projCompiled(project: ICECommonProject; success: boolean);
 
   protected
+
+    procedure DoShow; override;
+    procedure SetVisible(Value: boolean); override;
 
   public
     constructor create(aOwner: TComponent); override;
@@ -218,8 +222,24 @@ begin
   inherited;
 end;
 
+procedure TCETermWidget.DoShow;
+begin
+  inherited;
+  fNeedApplyChanges := true;
+end;
+
+procedure TCETermWidget.SetVisible(Value: boolean);
+begin
+  inherited;
+  if Value then
+    fNeedApplyChanges := true;
+end;
+
 procedure TCETermWidget.ContentPaint(Sender: TObject);
 begin
+  if not fNeedApplyChanges then
+    exit;
+  fNeedApplyChanges:=false;
   fOpts.applyChanges;
 end;
 
