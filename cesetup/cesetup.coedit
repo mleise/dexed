@@ -84,5 +84,5 @@ object CurrentProject: TCENativeProject
     'cesetup.d'
   )
   ConfigurationIndex = 2
-  version = '3.6.19'
+  version = '3.6.20'
 end
