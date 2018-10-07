@@ -1567,11 +1567,17 @@ procedure TCEGdbWidget.removeBreakPoint(const fname: string; line: integer;
 var
   r: boolean;
   d: boolean = false;
+  a: TJSONArray;
+  o: TJSONObject;
+  t: TJSONObject;
+  v: TJSONData;
+  i: integer;
 begin
   if assigned(fBreakPoints) then
     d := fBreakPoints.deleteItem(fname, line, kind);
   if not d or fGdb.isNil or not fGdb.Running then
     exit;
+
   r := fGdbState = gsRunning;
   if r then
   begin
@@ -1580,7 +1586,28 @@ begin
     waitCommandProcessed;
     fSilentPause := false;
   end;
-  gdbCommand(format('-break-delete --source %s --line %d', [fname, line]) + #10);
+  gdbCommand('-break-list', @gdboutJsonize);
+  waitCommandProcessed;
+
+  if fJson.findObject('BreakpointTable', t) and t.findArray('body', a) then
+    for i := 0 to a.Count-1 do
+  begin
+    o := a.Objects[i];
+    if o.findAny('fullname', v) and (v.AsString <> fname) then
+      continue;
+    if o.findAny('line', v) and (v.AsInteger <> line) then
+      continue;
+    if o.findAny('type', v) then
+    begin
+      if (v.AsString = 'breakpoint') and (kind <> bpkBreak) then
+        continue
+      else if (v.AsString = 'watchpoint') and (kind <> bpkWatch) then
+        continue;
+    end;
+    if o.findAny('number', v) then
+      gdbCommand('-break-delete ' + v.AsString);
+  end;
+
   if r then
   begin
     fSilentPause := true;
@@ -1925,7 +1952,7 @@ procedure parseGdbout(const str: string; var json: TJSONObject);
         exit;
       c := r^.front;
       case c of
-        'a'..'z':
+        'a'..'z', 'A'..'Z', '_':
         begin
           r^.takeUntil('=').yield;
           r^.popFront;
@@ -1973,7 +2000,7 @@ procedure parseGdbout(const str: string; var json: TJSONObject);
         begin
           r^.popFront;
         end;
-        'a'..'z':
+        'a'..'z', 'A'..'Z', '_':
         begin
           idt := r^.takeUntil('=').yield;
           r^.popFront;
