@@ -1,3 +1,7 @@
+:: D compiler and arch
+if "%dc%"=="" set dc=dmd
+if "%mflags%"=="" set mflags=-m32
+
 ::iz sources
 set iz=
 for /r "../etc/iz/import/" %%F in (*.d) do call set iz=%%iz%% "%%F"
@@ -17,8 +21,8 @@ for /r "src/" %%F in (*.d) do call set dast=%%dast%% "%%F"
 echo building...
 
 ::build
-dmd %dast% %dparse% %iz% %stdxalloc% ^
--O -release -inline -boundscheck=off ^
+%dc% %dast% %dparse% %iz% %stdxalloc% ^
+-O -release -inline -boundscheck=off %mflags% ^
 -Isrc -I"..\etc\iz\import" -I"..\etc\libdparse\src" ^ -I"..\etc\stdx-allocator\source" ^
 -of"..\bin\dastworx"
 
