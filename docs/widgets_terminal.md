@@ -32,6 +32,7 @@ Commonly used keys are:
 
 - **backgroundColor**: The background color.
 - **followEditors**: When checked the current directory is automatically set to the folder containing a document when it gains the focus.
+- **followExplorer**: When checked the current directory is automatically set to the folder that gets selected in the [mini-explorer](widgets_mini_explorer).
 - **followProjects**: When checked the current directory is automatically set to the folder containing a project when it gains the focus.
 - **font**: Allows to customize the font name and its size. The color is not handled here.
 - **foregroundColor**: The font color.
