@@ -293,7 +293,7 @@ begin
 
   lstFiles.OnCompare := @compareFileList;
   fFileListSortDirection := sdAscending;
-  fFileListSortedColumnIndex:=-1;
+  fFileListSortedColumnIndex:=0;
 
   fImages := TImageList.Create(self);
   case GetIconScaledSize of
@@ -724,6 +724,8 @@ procedure TCEMiniExplorerWidget.lstFilesFileAdded(Sender: TObject;
   Item: TListItem);
 begin
   Item.ImageIndex:=0;
+  if lstFiles.SortColumn = -1 then
+    lstFIles.SortColumn := 0;
   lstFiles.Sort;
 end;
 
