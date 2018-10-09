@@ -2642,30 +2642,30 @@ begin
       i -= 1;
   end;
   DcdWrapper.getCallTip(str);
+
+  i := fCallTipStrings.Count;
+  if (fCallTipStrings.Count <> 0) and str.isNotEmpty then
+    fCallTipStrings.Insert(0, '---');
+  fCallTipStrings.Insert(0, str);
+  i := fCallTipStrings.Count - i;
+  // overload count to delete on ')'
+  {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
+  fCallTipStrings.Objects[0] := TObject(pointer(i));
+  {$POP}
+  str := '';
+  for lne in fCallTipStrings do
+    if lne.isNotEmpty then
+      str += lne + LineEnding;
+  if str.isNotEmpty then
   begin
-    i := fCallTipStrings.Count;
-    if (fCallTipStrings.Count <> 0) and str.isNotEmpty then
-      fCallTipStrings.Insert(0, '---');
-    fCallTipStrings.Insert(0, str);
-    i := fCallTipStrings.Count - i;
-    // overload count to delete on ')'
-    {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
-    fCallTipStrings.Objects[0] := TObject(pointer(i));
-    {$POP}
-    str := '';
-    for lne in fCallTipStrings do
-      if lne.isNotEmpty then
-        str += lne + LineEnding;
-    if str.isNotEmpty then
-    begin
-      {$IFDEF WINDOWS}
-      str := str[1..str.length-2];
-      {$ELSE}
-      str := str[1..str.length-1];
-      {$ENDIF}
-      showCallTipsString(str, j);
-    end;
+    {$IFDEF WINDOWS}
+    str := str[1..str.length-2];
+    {$ELSE}
+    str := str[1..str.length-1];
+    {$ENDIF}
+    showCallTipsString(str, j);
   end;
+
   if findOpenParen then
     CaretX:=x;
 end;
