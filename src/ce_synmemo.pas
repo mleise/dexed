@@ -3560,8 +3560,8 @@ begin
       autoClosePair(autoCloseSingleQuote);
     ',':
     begin
-      //hideCallTips;
-      showCallTips(true);
+      if not fCallTipWin.Visible then
+        showCallTips(true);
     end;
     '"': if autoCloseDoubleQuote in fAutoClosedPairs then
       autoClosePair(autoCloseDoubleQuote);
