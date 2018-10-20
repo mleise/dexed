@@ -1,6 +1,6 @@
-Coedit is an IDE for the [D programming language](https://dlang.org), its compilers, tools and libraries.
+_D Extended EDitor_ is an IDE for the [D programming language](https://dlang.org), its compilers, tools and libraries.
 
-[![](https://bbasile.github.io/Coedit/img/coedit_kde4_thumb.png)](https://bbasile.github.io/Coedit/img/coedit_kde4.png)
+[![](https://bbasile.github.io/dexed/img/coedit_kde4_thumb.png)](https://bbasile.github.io/dexed/img/coedit_kde4.png)
 
 **Overview**
 ---
@@ -17,10 +17,10 @@ Coedit is an IDE for the [D programming language](https://dlang.org), its compil
 - Debugging with a GDB gui. (**linux only**)
 - Integrated terminal emulator. (**linux only**)
 - Tree of symbols in the current module.
-- static library manager that supports auto-registration from local DUB projects, from online DUB packages or from Coedit custom project format.
+- static library manager that supports auto-registration from local DUB projects, from online DUB packages or from dexed custom project format.
 - todo list based on the _todo comments_ located in a project or in the current source.
 - user-defined tools powered by a string interpolation system.
-- integrated file browser, dfmt interface, search & replace, [discover more in the manual](https://bbasile.github.io/Coedit/).
+- integrated file browser, dfmt interface, search & replace, [discover more in the manual](https://bbasile.github.io/dexed/).
 
 **Project information**
 ---
@@ -34,19 +34,19 @@ Coedit is an IDE for the [D programming language](https://dlang.org), its compil
 
 Download the zipped binaries or the zip that contains the setup program for you platform:
 
-- :package: [setup program for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.20/coedit.3.6.20.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.20/coedit.3.6.20.linux64.zip)
-- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.20/coedit.3.6.20.win32.setup.zip)
-- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.20/coedit.3.6.20.win32.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.20/coedit-3.6.20-0.x86_64.rpm)
-- :package: [deb for Linux 64 bit](https://github.com/BBasile/Coedit/releases/download/v3.6.20/coedit-3.6.20.amd64.deb)
+- :package: [setup program for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.6.20/coedit.3.6.20.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.6.20/coedit.3.6.20.linux64.zip)
+- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/dexed/releases/download/v3.6.20/coedit.3.6.20.win32.setup.zip)
+- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/dexed/releases/download/v3.6.20/coedit.3.6.20.win32.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.6.20/coedit-3.6.20-0.x86_64.rpm)
+- :package: [deb for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.6.20/coedit-3.6.20.amd64.deb)
 
 The _zip_ archives allow to move freely the files.
 The _setup.zip_ archives contains a command line program that installs to predefined locations so that the software can be run without additional intervention.
 The _deb_ and the _rpm_ packages are for those who prefer the official setup system for their linux systems.
-Linux 32 bits version must be [built manually](https://bbasile.github.io/Coedit/build.html).
+Linux 32 bits version must be [built manually](https://bbasile.github.io/dexed/build.html).
 
-[**See this page**](https://bbasile.github.io/Coedit/setup.html) for more information about the setup.
+[**See this page**](https://bbasile.github.io/dexed/setup.html) for more information about the setup.
 
 Download 3rd part packages, maintained by volunteers, but the available versions are not guaranteed to be the latest:
 
@@ -56,4 +56,4 @@ Download 3rd part packages, maintained by volunteers, but the available versions
 **Build**
 ---
 
-Follow the procedure described [**here**](https://bbasile.github.io/Coedit/build.html).
+Follow the procedure described [**here**](https://bbasile.github.io/dexed/build.html).

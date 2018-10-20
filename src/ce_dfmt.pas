@@ -105,7 +105,7 @@ begin
   fDmtWrapper := TCEDmtWrapper.Create(self);
   fBackup := TStringList.Create;
 
-  fname := getCoeditDocPath + optFname;
+  fname := getDocPath + optFname;
   if fname.fileExists then
     fDmtWrapper.loadFromFile(fname);
 
@@ -138,7 +138,7 @@ end;
 destructor TCEDfmtWidget.destroy;
 begin
   dfmtOptionEditor.TIObject := nil;
-  fDmtWrapper.saveToFile(getCoeditDocPath + optFname);
+  fDmtWrapper.saveToFile(getDocPath + optFname);
   fBackup.Free;
   inherited;
 end;

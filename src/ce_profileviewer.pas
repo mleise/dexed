@@ -135,14 +135,14 @@ begin
   inherited create(aOwner);
   fBackup := TCEProfileViewerOptionsBase.create(nil);
   EntitiesConnector.addObserver(self);
-  s := getCoeditDocPath + optFname;
+  s := getDocPath + optFname;
   if s.fileExists then
     loadFromFile(s);
 end;
 
 destructor TCEprofileViewerOptions.destroy;
 begin
-  saveTofile(getCoeditDocPath + optFname);
+  saveTofile(getDocPath + optFname);
   EntitiesConnector.removeObserver(self);
   fBackup.free;
   inherited;

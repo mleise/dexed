@@ -61,7 +61,7 @@ begin
   fMru := TCEMRUList.Create;
   fMru.maxCount := 25;
   EntitiesConnector.addSingleService(self);
-  fname := getCoeditDocPath + OptsFname;
+  fname := getDocPath + OptsFname;
   if OptsFname.fileExists then
     fMru.LoadFromFile(fname);
   if fMru.Count = 0 then
@@ -94,7 +94,7 @@ end;
 destructor TCEProcInputWidget.destroy;
 begin
   // note that mru list max count is not saved.
-  fMru.SaveToFile(getCoeditDocPath + OptsFname);
+  fMru.SaveToFile(getDocPath + OptsFname);
   fMru.Free;
   inherited;
 end;

@@ -426,7 +426,7 @@ type
     constructor construct(numSpaces, numTabs: integer);
   end;
 
-  procedure SetDefaultCoeditKeystrokes(ed: TSynEdit);
+  procedure SetDefaultDexedKeystrokes(ed: TSynEdit);
 
   function CustomStringToCommand(const Ident: string; var Int: Longint): Boolean;
   function CustomCommandToSstring(Int: Longint; var Ident: string): Boolean;
@@ -820,7 +820,7 @@ begin
   if (tempn = fMemo.tempFilename) or (not tempn.fileExists) then
     exit;
 
-  fname := getCoeditDocPath + 'editorcache' + DirectorySeparator;
+  fname := getDocPath + 'editorcache' + DirectorySeparator;
   ForceDirectories(fname);
   chksm := crc32(0, nil, 0);
   chksm := crc32(chksm, @tempn[1], tempn.length);
@@ -838,7 +838,7 @@ begin
   if not tempn.fileExists then
     exit;
 
-  fname := getCoeditDocPath + 'editorcache' + DirectorySeparator;
+  fname := getDocPath + 'editorcache' + DirectorySeparator;
   chksm := crc32(0, nil, 0);
   chksm := crc32(chksm, @tempn[1], tempn.length);
   fname := fname + format('%.8X.txt', [chksm]);
@@ -1004,7 +1004,7 @@ begin
   OnStatusChange:= @handleStatusChanged;
   fDefaultFontSize := 10;
   Font.Size:=10;
-  SetDefaultCoeditKeystrokes(Self); // not called in inherited if owner = nil !
+  SetDefaultDexedKeystrokes(Self); // not called in inherited if owner = nil !
   fLexToks:= TLexTokenList.Create;
   fSmartDdocNewline := true;
 
@@ -1276,7 +1276,7 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION Custom editor commands and shortcuts ----------------------------------}
-procedure SetDefaultCoeditKeystrokes(ed: TSynEdit);
+procedure SetDefaultDexedKeystrokes(ed: TSynEdit);
 begin
   with ed do
   begin
@@ -3023,7 +3023,7 @@ begin
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION Coedit memo things ----------------------------------------------------}
+{$REGION memo things -----------------------------------------------------------}
 procedure TCESynMemo.handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
 begin
   if scOptions in Changes then
@@ -3313,7 +3313,7 @@ var
 begin
   lst := TStringList.Create;
   try
-    listFiles(lst, getCoeditDocPath + 'editorcache' + DirectorySeparator);
+    listFiles(lst, getDocPath + 'editorcache' + DirectorySeparator);
     today := date();
     for fname in lst do if FileAge(fname, t) then
     begin

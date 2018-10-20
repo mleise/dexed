@@ -6,7 +6,7 @@
     <General>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="coedit"/>
+      <Title Value="dexed"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
       <XPManifest>
@@ -344,55 +344,55 @@
         <Resource_327 FileName="..\icons\window\watch_window.png" Type="RCDATA" ResourceName="WATCH_WINDOW"/>
         <Resource_328 FileName="..\icons\window\watch_window24.png" Type="RCDATA" ResourceName="WATCH_WINDOW24"/>
         <Resource_329 FileName="..\icons\window\watch_window32.png" Type="RCDATA" ResourceName="WATCH_WINDOW32"/>
-        <Resource_330 FileName="..\cesetup\version.txt" Type="RCDATA" ResourceName="VERSION"/>
-        <Resource_331 FileName="../icons/other/evaluate_formula.png" Type="RCDATA" ResourceName="EVALUATE_FORMULA"/>
-        <Resource_332 FileName="../icons/other/evaluate_formula24.png" Type="RCDATA" ResourceName="EVALUATE_FORMULA24"/>
-        <Resource_333 FileName="../icons/other/evaluate_formula32.png" Type="RCDATA" ResourceName="EVALUATE_FORMULA32"/>
-        <Resource_334 FileName="../icons/folder/folders_explorer.png" Type="RCDATA" ResourceName="FOLDERS_EXPLORER"/>
-        <Resource_335 FileName="../icons/folder/folders_explorer24.png" Type="RCDATA" ResourceName="FOLDERS_EXPLORER24"/>
-        <Resource_336 FileName="../icons/folder/folders_explorer32.png" Type="RCDATA" ResourceName="FOLDERS_EXPLORER32"/>
-        <Resource_337 FileName="../icons/folder/folder_vertical_document.png" Type="RCDATA" ResourceName="FOLDER_VERTICAL_DOCUMENT"/>
-        <Resource_338 FileName="../icons/folder/folder_vertical_document24.png" Type="RCDATA" ResourceName="FOLDER_VERTICAL_DOCUMENT24"/>
-        <Resource_339 FileName="../icons/folder/folder_vertical_document32.png" Type="RCDATA" ResourceName="FOLDER_VERTICAL_DOCUMENT32"/>
-        <Resource_340 FileName="../icons/other/error_checking.png" Type="RCDATA" ResourceName="ERROR_CHECKING"/>
-        <Resource_341 FileName="../icons/other/error_checking24.png" Type="RCDATA" ResourceName="ERROR_CHECKING24"/>
-        <Resource_342 FileName="../icons/other/error_checking32.png" Type="RCDATA" ResourceName="ERROR_CHECKING32"/>
-        <Resource_343 FileName="../icons/file/script_lightning.png" Type="RCDATA" ResourceName="SCRIPT_LIGHTNING"/>
-        <Resource_344 FileName="../icons/file/script_lightning24.png" Type="RCDATA" ResourceName="SCRIPT_LIGHTNING24"/>
-        <Resource_345 FileName="../icons/file/script_lightning32.png" Type="RCDATA" ResourceName="SCRIPT_LIGHTNING32"/>
-        <Resource_346 FileName="../icons/cog/system_run.png" Type="RCDATA" ResourceName="SYSTEM_RUN"/>
-        <Resource_347 FileName="../icons/cog/system_run24.png" Type="RCDATA" ResourceName="SYSTEM_RUN24"/>
-        <Resource_348 FileName="../icons/cog/system_run32.png" Type="RCDATA" ResourceName="SYSTEM_RUN32"/>
-        <Resource_349 FileName="../icons/other/cross.png" Type="RCDATA" ResourceName="CROSS"/>
-        <Resource_350 FileName="../icons/other/cross24.png" Type="RCDATA" ResourceName="CROSS24"/>
-        <Resource_351 FileName="../icons/other/cross32.png" Type="RCDATA" ResourceName="CROSS32"/>
-        <Resource_352 FileName="../icons/other/break_reached32.png" Type="RCDATA" ResourceName="BREAK_REACHED32"/>
-        <Resource_353 FileName="../icons/other/break_reached24.png" Type="RCDATA" ResourceName="BREAK_REACHED24"/>
-        <Resource_354 FileName="../icons/other/break_set32.png" Type="RCDATA" ResourceName="BREAK_SET32"/>
-        <Resource_355 FileName="../icons/other/break_set24.png" Type="RCDATA" ResourceName="BREAK_SET24"/>
-        <Resource_356 FileName="../icons/other/indent_more.png" Type="RCDATA" ResourceName="INDENT_MORE"/>
-        <Resource_357 FileName="../icons/other/indent_more24.png" Type="RCDATA" ResourceName="INDENT_MORE24"/>
-        <Resource_358 FileName="../icons/other/indent_more32.png" Type="RCDATA" ResourceName="INDENT_MORE32"/>
-        <Resource_359 FileName="../icons/other/indent_less32.png" Type="RCDATA" ResourceName="INDENT_LESS32"/>
-        <Resource_360 FileName="../icons/other/indent_less24.png" Type="RCDATA" ResourceName="INDENT_LESS24"/>
-        <Resource_361 FileName="../icons/other/indent_less.png" Type="RCDATA" ResourceName="INDENT_LESS"/>
-        <Resource_362 FileName="../icons/book/book_grey32.png" Type="RCDATA" ResourceName="BOOK_GREY32"/>
-        <Resource_363 FileName="../icons/book/book_grey24.png" Type="RCDATA" ResourceName="BOOK_GREY24"/>
-        <Resource_364 FileName="../icons/other/shortcuts.png" Type="RCDATA" ResourceName="SHORTCUTS"/>
-        <Resource_365 FileName="../icons/other/shortcuts24.png" Type="RCDATA" ResourceName="SHORTCUTS24"/>
-        <Resource_366 FileName="../icons/other/shortcuts32.png" Type="RCDATA" ResourceName="SHORTCUTS32"/>
-        <Resource_367 FileName="../icons/other/html_go.png" Type="RCDATA" ResourceName="HTML_GO"/>
-        <Resource_368 FileName="../icons/other/html_go24.png" Type="RCDATA" ResourceName="HTML_GO24"/>
-        <Resource_369 FileName="../icons/other/html_go32.png" Type="RCDATA" ResourceName="HTML_GO32"/>
-        <Resource_370 FileName="../icons/folder/move_to_folder.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER"/>
-        <Resource_371 FileName="../icons/folder/move_to_folder24.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER24"/>
-        <Resource_372 FileName="../icons/folder/move_to_folder32.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER32"/>
-        <Resource_373 FileName="../icons/other/check_boxes_series.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES"/>
-        <Resource_374 FileName="../icons/other/check_boxes_series24.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES24"/>
-        <Resource_375 FileName="../icons/other/check_boxes_series32.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES32"/>
-        <Resource_376 FileName="../icons/other/git.png" Type="RCDATA" ResourceName="GIT"/>
-        <Resource_377 FileName="../icons/other/git24.png" Type="RCDATA" ResourceName="GIT24"/>
-        <Resource_378 FileName="../icons/other/git32.png" Type="RCDATA" ResourceName="GIT32"/>
+        <Resource_330 FileName="../icons/other/evaluate_formula.png" Type="RCDATA" ResourceName="EVALUATE_FORMULA"/>
+        <Resource_331 FileName="../icons/other/evaluate_formula24.png" Type="RCDATA" ResourceName="EVALUATE_FORMULA24"/>
+        <Resource_332 FileName="../icons/other/evaluate_formula32.png" Type="RCDATA" ResourceName="EVALUATE_FORMULA32"/>
+        <Resource_333 FileName="../icons/folder/folders_explorer.png" Type="RCDATA" ResourceName="FOLDERS_EXPLORER"/>
+        <Resource_334 FileName="../icons/folder/folders_explorer24.png" Type="RCDATA" ResourceName="FOLDERS_EXPLORER24"/>
+        <Resource_335 FileName="../icons/folder/folders_explorer32.png" Type="RCDATA" ResourceName="FOLDERS_EXPLORER32"/>
+        <Resource_336 FileName="../icons/folder/folder_vertical_document.png" Type="RCDATA" ResourceName="FOLDER_VERTICAL_DOCUMENT"/>
+        <Resource_337 FileName="../icons/folder/folder_vertical_document24.png" Type="RCDATA" ResourceName="FOLDER_VERTICAL_DOCUMENT24"/>
+        <Resource_338 FileName="../icons/folder/folder_vertical_document32.png" Type="RCDATA" ResourceName="FOLDER_VERTICAL_DOCUMENT32"/>
+        <Resource_339 FileName="../icons/other/error_checking.png" Type="RCDATA" ResourceName="ERROR_CHECKING"/>
+        <Resource_340 FileName="../icons/other/error_checking24.png" Type="RCDATA" ResourceName="ERROR_CHECKING24"/>
+        <Resource_341 FileName="../icons/other/error_checking32.png" Type="RCDATA" ResourceName="ERROR_CHECKING32"/>
+        <Resource_342 FileName="../icons/file/script_lightning.png" Type="RCDATA" ResourceName="SCRIPT_LIGHTNING"/>
+        <Resource_343 FileName="../icons/file/script_lightning24.png" Type="RCDATA" ResourceName="SCRIPT_LIGHTNING24"/>
+        <Resource_344 FileName="../icons/file/script_lightning32.png" Type="RCDATA" ResourceName="SCRIPT_LIGHTNING32"/>
+        <Resource_345 FileName="../icons/cog/system_run.png" Type="RCDATA" ResourceName="SYSTEM_RUN"/>
+        <Resource_346 FileName="../icons/cog/system_run24.png" Type="RCDATA" ResourceName="SYSTEM_RUN24"/>
+        <Resource_347 FileName="../icons/cog/system_run32.png" Type="RCDATA" ResourceName="SYSTEM_RUN32"/>
+        <Resource_348 FileName="../icons/other/cross.png" Type="RCDATA" ResourceName="CROSS"/>
+        <Resource_349 FileName="../icons/other/cross24.png" Type="RCDATA" ResourceName="CROSS24"/>
+        <Resource_350 FileName="../icons/other/cross32.png" Type="RCDATA" ResourceName="CROSS32"/>
+        <Resource_351 FileName="../icons/other/break_reached32.png" Type="RCDATA" ResourceName="BREAK_REACHED32"/>
+        <Resource_352 FileName="../icons/other/break_reached24.png" Type="RCDATA" ResourceName="BREAK_REACHED24"/>
+        <Resource_353 FileName="../icons/other/break_set32.png" Type="RCDATA" ResourceName="BREAK_SET32"/>
+        <Resource_354 FileName="../icons/other/break_set24.png" Type="RCDATA" ResourceName="BREAK_SET24"/>
+        <Resource_355 FileName="../icons/other/indent_more.png" Type="RCDATA" ResourceName="INDENT_MORE"/>
+        <Resource_356 FileName="../icons/other/indent_more24.png" Type="RCDATA" ResourceName="INDENT_MORE24"/>
+        <Resource_357 FileName="../icons/other/indent_more32.png" Type="RCDATA" ResourceName="INDENT_MORE32"/>
+        <Resource_358 FileName="../icons/other/indent_less32.png" Type="RCDATA" ResourceName="INDENT_LESS32"/>
+        <Resource_359 FileName="../icons/other/indent_less24.png" Type="RCDATA" ResourceName="INDENT_LESS24"/>
+        <Resource_360 FileName="../icons/other/indent_less.png" Type="RCDATA" ResourceName="INDENT_LESS"/>
+        <Resource_361 FileName="../icons/book/book_grey32.png" Type="RCDATA" ResourceName="BOOK_GREY32"/>
+        <Resource_362 FileName="../icons/book/book_grey24.png" Type="RCDATA" ResourceName="BOOK_GREY24"/>
+        <Resource_363 FileName="../icons/other/shortcuts.png" Type="RCDATA" ResourceName="SHORTCUTS"/>
+        <Resource_364 FileName="../icons/other/shortcuts24.png" Type="RCDATA" ResourceName="SHORTCUTS24"/>
+        <Resource_365 FileName="../icons/other/shortcuts32.png" Type="RCDATA" ResourceName="SHORTCUTS32"/>
+        <Resource_366 FileName="../icons/other/html_go.png" Type="RCDATA" ResourceName="HTML_GO"/>
+        <Resource_367 FileName="../icons/other/html_go24.png" Type="RCDATA" ResourceName="HTML_GO24"/>
+        <Resource_368 FileName="../icons/other/html_go32.png" Type="RCDATA" ResourceName="HTML_GO32"/>
+        <Resource_369 FileName="../icons/folder/move_to_folder.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER"/>
+        <Resource_370 FileName="../icons/folder/move_to_folder24.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER24"/>
+        <Resource_371 FileName="../icons/folder/move_to_folder32.png" Type="RCDATA" ResourceName="MOVE_TO_FOLDER32"/>
+        <Resource_372 FileName="../icons/other/check_boxes_series.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES"/>
+        <Resource_373 FileName="../icons/other/check_boxes_series24.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES24"/>
+        <Resource_374 FileName="../icons/other/check_boxes_series32.png" Type="RCDATA" ResourceName="CHECK_BOXES_SERIES32"/>
+        <Resource_375 FileName="../icons/other/git.png" Type="RCDATA" ResourceName="GIT"/>
+        <Resource_376 FileName="../icons/other/git24.png" Type="RCDATA" ResourceName="GIT24"/>
+        <Resource_377 FileName="../icons/other/git32.png" Type="RCDATA" ResourceName="GIT32"/>
+        <Resource_378 FileName="../setup/version.txt" Type="RCDATA" ResourceName="VERSION"/>
       </Resources>
     </General>
     <i18n>
@@ -405,7 +405,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="..\bin\coedit"/>
+            <Filename Value="..\bin\dexed"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -451,7 +451,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="..\bin\coedit"/>
+            <Filename Value="..\bin\dexed"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -527,7 +527,7 @@
     </RequiredPackages>
     <Units Count="60">
       <Unit0>
-        <Filename Value="coedit.lpr"/>
+        <Filename Value="dexed.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
@@ -847,7 +847,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\bin\coedit"/>
+      <Filename Value="..\bin\dexed"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>

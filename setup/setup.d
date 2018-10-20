@@ -34,11 +34,11 @@ struct Resource
 
 immutable Resource[] ceResources =
 [
-    Resource(cast(ImpType) import("coedit" ~ exeExt), "coedit" ~ exeExt, Kind.exe),
+    Resource(cast(ImpType) import("dexed" ~ exeExt), "dexed" ~ exeExt, Kind.exe),
     Resource(cast(ImpType) import("dastworx" ~ exeExt), "dastworx" ~ exeExt, Kind.exe),
-    Resource(cast(ImpType) import("coedit.ico"), "coedit.ico", Kind.dat),
-    Resource(cast(ImpType) import("coedit.png"), "coedit.png", Kind.dat),
-    Resource(cast(ImpType) import("coedit.license.txt"), "coedit.license.txt", Kind.doc)
+    Resource(cast(ImpType) import("dexed.ico"), "dexed.ico", Kind.dat),
+    Resource(cast(ImpType) import("dexed.png"), "dexed.png", Kind.dat),
+    Resource(cast(ImpType) import("dexed.license.txt"), "dexed.license.txt", Kind.doc)
 ];
 
 immutable Resource[] thirdPartBinaries =
@@ -233,14 +233,14 @@ void main(string[] args)
         // check that uninstall is executed as install (sudo or not)
         version(linux)
         {
-            if (!asSu && exists("/usr/bin/coedit"))
+            if (!asSu && exists("/usr/bin/dexed"))
             {
                 Formater.separate;
                 Formater.justify!'L'("warning, CE seems to be installed with sudo");
                 Formater.justify!'L'("but the uninstaller is not launched with sudo.");
                 Formater.separate;
             }
-            else if (asSu && exists("/home/" ~ environment.get("USER") ~ "/bin/coedit"))
+            else if (asSu && exists("/home/" ~ environment.get("USER") ~ "/bin/dexed"))
             {
                 Formater.separate;
                 Formater.justify!'L'("warning, CE seems not to be installed with sudo");
@@ -374,7 +374,7 @@ void postInstall()
         char[MAX_PATH] _desktopFolder;
         SHGetFolderPathA(null, CSIDL_DESKTOPDIRECTORY, null, 0, _desktopFolder.ptr);
         char[] desktopFolder = _desktopFolder.ptr.fromStringz();
-        string target = exePath ~ "coedit.exe";
+        string target = exePath ~ "dexed.exe";
         string wdir = exePath ~ "";
         const(wchar)* linkPath = buildNormalizedPath(desktopFolder, "Coedit.lnk").toUTF16z();
 
@@ -392,12 +392,12 @@ void postInstall()
     else version(linux)
     {
         mkdirRecurse(shortCutPath);
-        File f = File(shortCutPath ~ "coedit.desktop", "w");
+        File f = File(shortCutPath ~ "dexed.desktop", "w");
         f.writeln("[Desktop Entry]");
-        f.writeln("Name=coedit");
+        f.writeln("Name=dexed");
         f.writeln("Path=" ~ exePath);
-        f.writeln("Exec=" ~ exePath ~ "coedit %f");
-        f.writeln("Icon=" ~ datPath ~ "coedit.png");
+        f.writeln("Exec=" ~ exePath ~ "dexed %f");
+        f.writeln("Icon=" ~ datPath ~ "dexed.png");
         f.writeln("Type=Application");
         f.writeln("Categories=Application;IDE;Development;");
         f.writeln("Keywords=editor;Dlang;IDE;dmd;");
@@ -416,7 +416,7 @@ void postUninstall()
     }
     else version(linux)
     {
-        tryRemove(shortCutPath ~ "coedit.desktop");
+        tryRemove(shortCutPath ~ "dexed.desktop");
     }
 }
 

@@ -744,14 +744,14 @@ begin
   fAutoGetCallStack:= true;
   fAutoGetRegisters:= true;
   fAutoGetVariables:= true;
-  fname := getCoeditDocPath + optFname;
+  fname := getDocPath + optFname;
   if fname.fileExists then
     loadFromFile(fname);
 end;
 
 destructor TCEDebugOptions.destroy;
 begin
-  saveToFile(getCoeditDocPath + optFname);
+  saveToFile(getDocPath + optFname);
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
@@ -798,14 +798,14 @@ var
 begin
   Inherited;
   fItems := TCollection.Create(TPersistentBreakPoint);
-  fname := getCoeditDocPath + bpFname;
+  fname := getDocPath + bpFname;
   if fname.fileExists then
     loadFromFile(fname);
 end;
 
 destructor TPersistentBreakPoints.destroy;
 begin
-  saveToFile(getCoeditDocPath + bpFname);
+  saveToFile(getDocPath + bpFname);
   fItems.Free;
   inherited;
 end;
@@ -1125,14 +1125,14 @@ var
 begin
   inherited create(AOwner);
   fProjects := TCollection.Create(TCEDebugeeOption);
-  fname := getCoeditDocPath + prjFname;
+  fname := getDocPath + prjFname;
   if fname.fileExists then
     loadFromFile(fname);
 end;
 
 destructor TCEDebugeeOptions.Destroy;
 begin
-  saveToFile(getCoeditDocPath + prjFname);
+  saveToFile(getDocPath + prjFname);
   fProjects.Free;
   inherited;
 end;

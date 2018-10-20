@@ -39,7 +39,7 @@ type
   TPageControlButtonClick = procedure(sender: TObject; button: TCEPageControlButton) of object;
 
   (**
-   * Minimalist page-control dedicated to Coedit
+   * Minimalist page-control
    *
    * - get rid of the framed aspect of the default LCL one
    * - no published props, no need for design time support

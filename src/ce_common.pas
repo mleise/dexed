@@ -190,9 +190,9 @@ type
   function getUserDataPath: string;
 
   (**
-   * Returns the folder where Coedit stores the data, the cache, the settings.
+   * Returns the folder where Dexed stores the data, the cache, the settings.
    *)
-  function getCoeditDocPath: string;
+  function getDocPath: string;
 
   (**
    * Fills aList with the names of the files located in aPath.
@@ -291,7 +291,7 @@ type
   function isDlangCompilable(const ext: string): boolean;
 
   (**
-   * Returns true if ext matches a file extension whose type is editable in Coedit.
+   * Returns true if ext matches a file extension whose type is editable in Dexed.
    *)
   function isEditable(const ext: string): boolean;
 
@@ -771,14 +771,14 @@ begin
   result := sysutils.GetEnvironmentVariable('HOME') + '/Library/Application Support';
   {$ENDIF}
   if not DirectoryExists(result) then
-    raise Exception.Create('Coedit failed to retrieve the user data folder');
+    raise Exception.Create('dexed failed to retrieve the user data folder');
   if result[result.length] <> DirectorySeparator then
     result += directorySeparator;
 end;
 
-function getCoeditDocPath: string;
+function getDocPath: string;
 begin
-  result := getUserDataPath + 'Coedit' + directorySeparator;
+  result := getUserDataPath + 'dexed' + directorySeparator;
 end;
 
 function isFolder(sr: TSearchRec): boolean;

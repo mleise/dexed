@@ -276,7 +276,7 @@ begin
   ed := TSynEdit.Create(nil);
   try
     // note: cant use a TCESynMemo because it'd be added to the EntitiesConnector
-    SetDefaultCoeditKeystrokes(ed);
+    SetDefaultDexedKeystrokes(ed);
     for i:= 0 to ed.Keystrokes.Count-1 do
     begin
       shc := TCEPersistentShortcut(fShortCuts.Add);
@@ -462,14 +462,14 @@ begin
   fBackup := TCEEditorOptionsBase.Create(self);
   EntitiesConnector.addObserver(self);
   //
-  fname := getCoeditDocPath + edoptFname;
+  fname := getDocPath + edoptFname;
   if fileExists(fname) then
     loadFromFile(fname);
 end;
 
 destructor TCEEditorOptions.Destroy;
 begin
-  saveToFile(getCoeditDocPath + edoptFname);
+  saveToFile(getDocPath + edoptFname);
   //
   EntitiesConnector.removeObserver(self);
   inherited;
@@ -488,7 +488,7 @@ begin
   //
   ed := TSynEdit.Create(nil);
   try
-    SetDefaultCoeditKeystrokes(ed);
+    SetDefaultDexedKeystrokes(ed);
     // new version with more shortcuts
     for i:= 0 to ed.Keystrokes.Count-1 do
     begin

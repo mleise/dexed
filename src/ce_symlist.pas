@@ -418,7 +418,7 @@ begin
   TreeFilterEdit1.BorderSpacing.Left:= ScaleX(30,96);
   fOptions := TCESymbolListOptions.Create(self);
   fOptions.Name:= 'symbolListOptions';
-  fname := getCoeditDocPath + OptsFname;
+  fname := getDocPath + OptsFname;
   if fname.fileExists then
     fOptions.loadFromFile(fname);
   fOptions.AssignTo(self);
@@ -451,7 +451,7 @@ begin
   killProcess(fToolProc);
   fSyms.Free;
 
-  fOptions.saveToFile(getCoeditDocPath + OptsFname);
+  fOptions.saveToFile(getDocPath + OptsFname);
   fOptions.Free;
 
   inherited;

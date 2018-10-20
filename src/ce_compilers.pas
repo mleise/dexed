@@ -175,7 +175,7 @@ begin
   fPaths:= TCompilersPaths.Create(self);
   fPathsBackup:= TCompilersPaths.Create(self);
 
-  fname := getCoeditDocPath + optFname;
+  fname := getDocPath + optFname;
   if fname.fileExists then
     fPaths.loadFromFile(fname);
   if not isCompilerValid(dmd) then
@@ -231,7 +231,7 @@ end;
 
 destructor TCompilersPathsEditor.destroy;
 begin
-  fPaths.saveToFile(getCoeditDocPath + optFname);
+  fPaths.saveToFile(getDocPath + optFname);
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
@@ -475,7 +475,7 @@ begin
       if fPaths.wouldNeedRestart and fPaths.modified then
       begin
         if not DCDWrapper.launchedByCe then
-          dlgOkInfo('Coedit and DCD must be restarted manually in order to cache'
+          dlgOkInfo('Dexed and DCD must be restarted manually in order to cache'
             + ' the right runtime and the standard library versions.')
         else
         begin

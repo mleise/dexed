@@ -356,7 +356,7 @@ begin
 
   treeSetRoots;
 
-  fname := getCoeditDocPath + OptsFname;
+  fname := getDocPath + OptsFname;
   if fname.fileExists then
     with TCEMiniExplorerOptions.create(nil) do
   try
@@ -378,7 +378,7 @@ begin
   with TCEMiniExplorerOptions.create(nil) do
   try
     assign(self);
-    saveToFile(getCoeditDocPath + OptsFname);
+    saveToFile(getDocPath + OptsFname);
   finally
     free;
   end;

@@ -287,7 +287,7 @@ var
 begin
   inherited;
   fTools := TCEToolItems.Create(TCEToolItem);
-  fname := getCoeditDocPath + toolsFname;
+  fname := getDocPath + toolsFname;
   if fname.fileExists then
     loadFromFile(fname);
 
@@ -298,8 +298,8 @@ destructor TCETools.destroy;
 begin
   EntitiesConnector.removeObserver(self);
 
-  ForceDirectoriesUTF8(getCoeditDocPath);
-  saveToFile(getCoeditDocPath + toolsFname);
+  ForceDirectoriesUTF8(getDocPath);
+  saveToFile(getDocPath + toolsFname);
   fTools.Free;
   inherited;
 end;

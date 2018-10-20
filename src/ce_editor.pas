@@ -214,7 +214,7 @@ begin
   EntitiesConnector.addObserver(self);
   //
   fDetectModuleName := true;
-  fname := getCoeditDocPath + optname;
+  fname := getDocPath + optname;
   if fname.fileExists then
   begin
     loadFromFile(fname);
@@ -225,7 +225,7 @@ end;
 
 destructor TCEPagesOptions.Destroy;
 begin
-  saveToFile(getCoeditDocPath + optname);
+  saveToFile(getDocPath + optname);
   EntitiesConnector.removeObserver(self);
   inherited;
 end;

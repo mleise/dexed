@@ -10,7 +10,7 @@ else
     arch="i386"
 fi
 
-name=coedit-$ver.$arch
+name=dexed-$ver.$arch
 
 basdir=$HOME/$name/
 cfgdir=$basdir/DEBIAN
@@ -24,23 +24,23 @@ mkdir -p $bindir
 mkdir -p $pixdir
 mkdir -p $shcdir
 
-cp nux64/coedit $bindir
+cp nux64/dexed $bindir
 cp nux64/dastworx $bindir
-cp nux64/coedit.png $pixdir
+cp nux64/dexed.png $pixdir
 
 echo "[Desktop Entry]
 Categories=Application;IDE;Development;
-Exec=coedit %f
-GenericName=coedit
-Icon=coedit
+Exec=dexed %f
+GenericName=dexed
+Icon=dexed
 Keywords=editor;Dlang;IDE;dmd;
-Name=coedit
+Name=dexed
 StartupNotify=true
 Terminal=false
-Type=Application" > $shcdir/coedit.desktop
+Type=Application" > $shcdir/dexed.desktop
  
 cd $cfgdir 
-echo "Package: coedit
+echo "Package: dexed
 Version: $ver
 Section: devel
 Priority: optional

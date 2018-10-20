@@ -116,7 +116,7 @@ var
 begin
   inherited;
   fBackup:= THalsteadMetricsBase.create(self);
-  f := getCoeditDocPath + optFname;
+  f := getDocPath + optFname;
   if f.fileExists then
     loadFromFile(f);
   fBackup.assign(self);
@@ -126,7 +126,7 @@ end;
 destructor THalsteadMetrics.destroy;
 begin
   EntitiesConnector.removeObserver(self);
-  saveTofile(getCoeditDocPath + optFname);
+  saveTofile(getDocPath + optFname);
   inherited;
 end;
 

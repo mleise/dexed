@@ -212,7 +212,7 @@ begin
 
   fOpts:= TCETerminalOptions.Create(self);
 
-  f := getCoeditDocPath + optFname;
+  f := getDocPath + optFname;
   if f.fileExists then
     fOpts.loadFromFile(f);
 
@@ -221,7 +221,7 @@ end;
 
 destructor TCETermWidget.destroy;
 begin
-  fOpts.saveToFile(getCoeditDocPath + optFname);
+  fOpts.saveToFile(getDocPath + optFname);
   EntitiesConnector.removeObserver(fOpts);
   inherited;
 end;

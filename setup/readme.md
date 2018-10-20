@@ -1,10 +1,10 @@
-This folder contains the files necessary to make a Coedit release.
-The process is semi-automatic and achieved by compiling a project in Coedit itself.
+This folder contains the files necessary to make a dexed release.
+The process is semi-automatic and achieved by compiling a project in dexed itself.
 
-Coedit setup program
+dexed setup program
 ===
 
-This coedit project (_cesetup.coedit_) creates the coedit setup program.
+This dexed project (_cesetup.dexed_) creates the dexed setup program.
 The project contains 3 configurations named _win32_, _nux32_, _nux64. 
 Each takes the content of the matching sub-folder and puts it in the output folder, as an extractor program, 
 at compile time (using the `import(file)` expression).

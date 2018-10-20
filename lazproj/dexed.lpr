@@ -1,4 +1,4 @@
-program coedit;
+program dexed;
 
 {$mode objfpc}{$H+}
 

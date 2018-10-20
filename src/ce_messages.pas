@@ -447,7 +447,7 @@ begin
 
   fEditorMessagePos := TCEEditorMessagePos.Create;
 
-  fname := getCoeditDocPath + optname;
+  fname := getDocPath + optname;
   if fname.fileExists then
   begin
     fOptions.loadFromFile(fname);
@@ -461,7 +461,7 @@ end;
 destructor TCEMessagesWidget.destroy;
 begin
   fEditorMessagePos.Free;
-  fOptions.saveToFile(getCoeditDocPath + optname);
+  fOptions.saveToFile(getDocPath + optname);
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
@@ -1027,7 +1027,7 @@ begin
   if not openFileFromDmdMessage(msg) then
     exit;
 
-  // fixes strange bug : https://github.com/BBasile/Coedit/issues/320
+  // fixes strange bug : https://github.com/BBasile/dexed/issues/320
   if (fDoc <> old) and fOptions.singleMessageClick and
     assigned(dat) and (dat^.ctxt = amcEdit) then
       List.ClearSelection(false);

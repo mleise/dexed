@@ -47,7 +47,7 @@ const
   Btns = [mbOK,mbCancel];
 begin
   if title = '' then
-    title := 'Coedit';
+    title := 'dexed';
   exit( MessageDlg(title, message, mtConfirmation, Btns, ''));
 end;
 
@@ -56,7 +56,7 @@ const
   Btns = [mbYes,mbNo];
 begin
   if title = '' then
-    title := 'Coedit';
+    title := 'dexed';
   exit( MessageDlg(title, message, mtConfirmation, Btns, ''));
 end;
 
@@ -65,7 +65,7 @@ const
   Btns = [mbOK];
 begin
   if title = '' then
-    title := 'Coedit';
+    title := 'dexed';
   exit( MessageDlg(title, message, mtInformation, Btns, ''));
 end;
 
@@ -74,7 +74,7 @@ const
   Btns = [mbOK];
 begin
   if title = '' then
-    title := 'Coedit';
+    title := 'dexed';
   exit(MessageDlg(title, message, mtError, Btns, ''));
 end;
 

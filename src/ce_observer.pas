@@ -10,7 +10,7 @@ uses
 type
 
   (**
-   * interface for a single Coedit service (many to one relation).
+   * interface for a single service (many to one relation).
    * A service is valid during the whole application life-time and
    * is mostly designed to avoid messy uses clauses or to limit
    * the visibility of the implementer methods.
@@ -57,7 +57,7 @@ type
   end;
 
   (**
-   * Interface for a Coedit subject. Basically designed to hold a list of observer
+   * Interface for a subject. Basically designed to hold a list of observer
    *)
   ICESubject = interface
     // an observer is proposed. anObserver is not necessarly compatible.

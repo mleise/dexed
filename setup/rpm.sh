@@ -3,7 +3,7 @@ maj=${ver:0:1}
 ver=${ver:1:100}
 dte=$(LC_TIME='en_EN.UTF-8' date -u +"%a %b %d %Y")
 arch=`uname -m`
-specname=coedit-$arch.spec
+specname=dexed-$arch.spec
 cp_trgt=$(pwd)/output
 
 semver_regex() {
@@ -32,7 +32,7 @@ if [ $lbl == '_' ]; then
     lbl='0'
 fi
 
-name_and_ver=coedit-$maj.$min.$pch-$lbl.$arch
+name_and_ver=dexed-$maj.$min.$pch-$lbl.$arch
 buildroot=$HOME/rpmbuild/BUILDROOT/$name_and_ver
 bindir=$buildroot/usr/bin
 pixdir=$buildroot/usr/share/pixmaps
@@ -43,42 +43,42 @@ mkdir -p $bindir
 mkdir -p $pixdir
 mkdir -p $shcdir
 
-cp nux64/coedit $bindir
+cp nux64/dexed $bindir
 cp nux64/dastworx $bindir
-cp nux64/coedit.png $pixdir
+cp nux64/dexed.png $pixdir
 
 echo "[Desktop Entry]
 Categories=Application;IDE;Development;
-Exec=coedit %f
-GenericName=coedit
-Icon=coedit
+Exec=dexed %f
+GenericName=dexed
+Icon=dexed
 Keywords=editor;Dlang;IDE;dmd;
-Name=coedit
+Name=dexed
 StartupNotify=true
 Terminal=false
-Type=Application" > $shcdir/coedit.desktop
+Type=Application" > $shcdir/dexed.desktop
 
 cd $HOME/rpmbuild/SPECS
-echo "Name: coedit
+echo "Name: dexed
 Version: $maj.$min.$pch
 Release: $lbl
 Summary: IDE for the D programming language
 License: Boost
-URL: www.github.com/BBasile/Coedit
+URL: www.github.com/BBasile/dexed
 Requires: gtk2, glibc, cairo, libX11, vte
 
 %description
-Coedit is an IDE for the DMD D compiler.
+Dexed is an IDE for the DMD D compiler.
 
 %files
 /usr/bin/dastworx
-/usr/bin/coedit
-/usr/share/applications/coedit.desktop
-/usr/share/pixmaps/coedit.png
+/usr/bin/dexed
+/usr/share/applications/dexed.desktop
+/usr/share/pixmaps/dexed.png
 
 %changelog
 * $dte Basile Burg b2.temp@gmx.com
-- see https://github.com/BBasile/Coedit/releases/tag/$ver
+- see https://github.com/BBasile/dexed/releases/tag/$ver
 ">$specname
 
 rpmbuild -ba $specname

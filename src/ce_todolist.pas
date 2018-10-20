@@ -230,7 +230,7 @@ begin
   lstfilter.OnChange := @filterItems;
   btnGo.OnClick := @handleListClick;
 
-  fname := getCoeditDocPath + OptFname;
+  fname := getDocPath + OptFname;
   if fname.fileExists then
   begin
     fOptions.loadFromFile(fname);
@@ -242,7 +242,7 @@ end;
 
 destructor TCETodoListWidget.Destroy;
 begin
-  fOptions.saveToFile(getCoeditDocPath + OptFname);
+  fOptions.saveToFile(getDocPath + OptFname);
   killToolProcess;
   inherited;
 end;

@@ -215,7 +215,7 @@ begin
   try
     len := read(ver[1], ver.length);
     setLength(ver, len);
-    Label1.Caption := 'Coedit - ' + ver[1..ver.length];
+    Label1.Caption := 'dexed - ' + ver[1..ver.length];
   finally
     free;
   end;

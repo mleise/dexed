@@ -29,31 +29,32 @@ inherited CETodoListWidget: TCETodoListWidget
           item
             AutoSize = True
             Caption = 'text'
-            Width = 36
+            Width = 34
           end        
           item
             AutoSize = True
             Caption = 'category'
-            Width = 67
+            Width = 65
           end        
           item
             AutoSize = True
             Caption = 'assignee'
-            Width = 68
+            Width = 66
           end        
           item
             AutoSize = True
             Caption = 'status'
+            Width = 48
           end        
           item
             AutoSize = True
             Caption = 'priority'
-            Width = 57
+            Width = 55
           end        
           item
             AutoSize = True
             Caption = 'file'
-            Width = 278
+            Width = 291
           end>
         ReadOnly = True
         SortType = stText

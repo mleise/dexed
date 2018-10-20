@@ -351,7 +351,7 @@ type
 
 
   (**
-   * Single service related to the expansion of Coedit "symbolic strings".
+   * Single service related to the expansion of "symbolic strings".
    *)
   ICESymStringExpander = interface(ICESingleService)
     // expands all the symbols <IDENT> of value in result.

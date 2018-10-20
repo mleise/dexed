@@ -1472,6 +1472,7 @@ object CEMainForm: TCEMainForm
   OnResize = FormResize
   OnWindowStateChange = FormWindowStateChange
   ShowHint = True
+  LCLVersion = '1.8.4.0'
   Visible = False
   object mainMenu: TMainMenu
     top = 1
@@ -1857,7 +1858,7 @@ object CEMainForm: TCEMainForm
     object mnuItemHelp: TMenuItem
       Caption = 'Help'
       object mnuItemAbout: TMenuItem
-        Caption = 'About Coedit and tools information'
+        Caption = 'About  dexed and tools information'
         OnClick = mnuItemAboutClick
       end
       object mnuItemCheckUpd: TMenuItem

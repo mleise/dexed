@@ -10,7 +10,7 @@ uses
 type
 
   {
-    The stanndard process wrapper used in Coedit.
+    The standard process wrapper that used accross the applicaton.
 
     This class solves several issues encountered when using TProcess and TAsyncProcess:
 

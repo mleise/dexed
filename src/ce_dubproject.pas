@@ -599,14 +599,14 @@ begin
   inherited;
   fBackup := TCEDubBuildOptionsBase.Create(nil);
   EntitiesConnector.addObserver(self);
-  fname := getCoeditDocPath + optFname;
+  fname := getDocPath + optFname;
   if fname.fileExists then
     loadFromFile(fname);
 end;
 
 destructor TCEDubBuildOptions.destroy;
 begin
-  saveToFile(getCoeditDocPath + optFname);
+  saveToFile(getDocPath + optFname);
   EntitiesConnector.removeObserver(self);
   fBackup.free;
   inherited;
@@ -1129,7 +1129,7 @@ begin
   begin
     fConfigs.Add(DubDefaultConfigName);
     // default = what dub set as 'application' or 'library'
-    // in this case Coedit will pass only the type to DUB: 'DUB --build=release'
+    // in this case dexed will pass only the type to DUB: 'DUB --build=release'
   end;
 
   fBuildTypes.AddStrings(DubBuiltTypeName);
@@ -1308,7 +1308,7 @@ var
 begin
   fBinKind := executable;
   if fJSON.isNil then exit;
-  // note: in Coedit this is only used to known if output can be launched
+  // note: this is only used to known if output can be launched
   found := findTargetKindInd(fJSON);
   conf := getCurrentCustomConfig;
   if conf.isNotNil then

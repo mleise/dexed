@@ -234,7 +234,7 @@ begin
   fSearchMru := TCEMruList.Create;
   fReplaceMru:= TCEMruList.Create;
 
-  fname := getCoeditDocPath + OptsFname;
+  fname := getDocPath + OptsFname;
   if fname.fileExists then with TCESearchOptions.create(nil) do
   try
     loadFromFile(fname);
@@ -284,7 +284,7 @@ begin
   with TCESearchOptions.create(nil) do
   try
     assign(self);
-    saveToFile(getCoeditDocPath + OptsFname);
+    saveToFile(getDocPath + OptsFname);
   finally
     free;
   end;
@@ -311,7 +311,7 @@ function dlgReplaceAll: TModalResult;
 const
   Btns = [mbYes, mbNo, mbYesToAll, mbNoToAll];
 begin
-  exit( MessageDlg('Coedit', 'Replace this match ?', mtConfirmation, Btns, ''));
+  exit( MessageDlg('dexed', 'Replace this match ?', mtConfirmation, Btns, ''));
 end;
 
 procedure TCESearchWidget.replaceEvent(Sender: TObject; const ASearch, AReplace:

@@ -19,7 +19,7 @@ inherited CESearchWidget: TCESearchWidget
       ClientWidth = 422
       object cbToFind: TComboBox[0]
         Left = 4
-        Height = 29
+        Height = 27
         Top = 4
         Width = 414
         Align = alTop
@@ -34,8 +34,8 @@ inherited CESearchWidget: TCESearchWidget
       end
       object btnFind: TBitBtn[1]
         Left = 4
-        Height = 29
-        Top = 161
+        Height = 27
+        Top = 169
         Width = 414
         Align = alBottom
         AutoSize = True
@@ -45,8 +45,8 @@ inherited CESearchWidget: TCESearchWidget
       end
       object btnReplace: TBitBtn[2]
         Left = 4
-        Height = 29
-        Top = 227
+        Height = 27
+        Top = 231
         Width = 414
         Align = alBottom
         AutoSize = True
@@ -56,21 +56,21 @@ inherited CESearchWidget: TCESearchWidget
       end
       object grpOpts: TGroupBox[3]
         Left = 4
-        Height = 87
-        Top = 70
+        Height = 99
+        Top = 66
         Width = 414
         Align = alClient
         AutoSize = True
         BorderSpacing.Around = 4
         Caption = 'Options'
-        ClientHeight = 69
-        ClientWidth = 412
+        ClientHeight = 80
+        ClientWidth = 410
         TabOrder = 4
         object FlowPanel1: TFlowPanel
           Left = 0
-          Height = 69
+          Height = 80
           Top = 0
-          Width = 412
+          Width = 410
           Align = alClient
           AutoSize = True
           BevelOuter = bvNone
@@ -110,9 +110,9 @@ inherited CESearchWidget: TCESearchWidget
           TabOrder = 0
           object chkRegex: TCheckBox
             Left = 0
-            Height = 22
+            Height = 20
             Top = 0
-            Width = 100
+            Width = 98
             Anchors = []
             Caption = 'allow regex'
             Checked = True
@@ -121,27 +121,27 @@ inherited CESearchWidget: TCESearchWidget
           end
           object chkPrompt: TCheckBox
             Left = 0
-            Height = 22
-            Top = 23
-            Width = 71
+            Height = 20
+            Top = 21
+            Width = 69
             Anchors = []
             Caption = 'prompt'
             TabOrder = 1
           end
           object chkCaseSens: TCheckBox
             Left = 0
-            Height = 22
-            Top = 46
-            Width = 117
+            Height = 20
+            Top = 42
+            Width = 115
             Anchors = []
             Caption = 'case sensitive'
             TabOrder = 2
           end
           object chkFromCur: TCheckBox
-            Left = 117
-            Height = 22
+            Left = 115
+            Height = 20
             Top = 0
-            Width = 99
+            Width = 97
             Anchors = []
             Caption = 'from cursor'
             Checked = True
@@ -149,19 +149,19 @@ inherited CESearchWidget: TCESearchWidget
             TabOrder = 3
           end
           object chkBack: TCheckBox
-            Left = 117
-            Height = 22
-            Top = 23
-            Width = 87
+            Left = 115
+            Height = 20
+            Top = 21
+            Width = 85
             Anchors = []
             Caption = 'backward'
             TabOrder = 4
           end
           object chkWWord: TCheckBox
-            Left = 117
-            Height = 22
-            Top = 46
-            Width = 99
+            Left = 115
+            Height = 20
+            Top = 42
+            Width = 97
             Anchors = []
             Caption = 'whole word'
             Checked = True
@@ -172,8 +172,8 @@ inherited CESearchWidget: TCESearchWidget
       end
       object btnReplaceAll: TBitBtn[4]
         Left = 4
-        Height = 29
-        Top = 260
+        Height = 27
+        Top = 262
         Width = 414
         Align = alBottom
         AutoSize = True
@@ -183,21 +183,21 @@ inherited CESearchWidget: TCESearchWidget
       end
       object Panel1: TPanel[5]
         Left = 4
-        Height = 29
-        Top = 37
+        Height = 27
+        Top = 35
         Width = 414
         Align = alTop
         AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 29
+        ClientHeight = 27
         ClientWidth = 414
         TabOrder = 5
         object cbReplaceWth: TComboBox
-          Left = 111
-          Height = 29
+          Left = 109
+          Height = 27
           Top = 0
-          Width = 303
+          Width = 305
           Align = alClient
           AutoComplete = True
           AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchCaseSensitive, cbactSearchAscending]
@@ -209,9 +209,9 @@ inherited CESearchWidget: TCESearchWidget
         end
         object chkEnableRep: TCheckBox
           Left = 0
-          Height = 29
+          Height = 27
           Top = 0
-          Width = 111
+          Width = 109
           Align = alLeft
           Caption = 'Replace with '
           OnChange = chkEnableRepChange
@@ -220,31 +220,31 @@ inherited CESearchWidget: TCESearchWidget
       end
       object Panel2: TPanel[6]
         Left = 4
-        Height = 29
-        Top = 194
+        Height = 27
+        Top = 200
         Width = 414
         Align = alBottom
         AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 29
+        ClientHeight = 27
         ClientWidth = 414
         TabOrder = 6
         object btnFindAll: TBitBtn
           Left = 0
-          Height = 29
+          Height = 27
           Top = 0
-          Width = 400
+          Width = 402
           Align = alClient
           AutoSize = True
           Caption = 'btnFindAll'
           TabOrder = 0
         end
         object btnAllScope: TBitBtn
-          Left = 402
-          Height = 29
+          Left = 404
+          Height = 27
           Top = 0
-          Width = 12
+          Width = 10
           Align = alRight
           AutoSize = True
           BorderSpacing.Left = 2

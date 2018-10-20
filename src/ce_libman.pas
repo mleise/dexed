@@ -82,7 +82,7 @@ type
   TLibraryList = specialize TObjectHashSet<TLibraryItem>;
 
   (**
-   * Represents all the D libraries handled by Coedit.
+   * Represents all the D libraries handled by Dexed.
    *)
   TLibraryManager = class(TWritableLfmTextComponent, IFPObserver)
   type
@@ -330,7 +330,7 @@ begin
   fItemsByAlias := TItemsByAlias.create;
   fCollection := TCollection.Create(TLibraryItem);
   fCollection.FPOAttachObserver(self);
-  nme := getCoeditDocPath + libFname;
+  nme := getDocPath + libFname;
   if nme.fileExists then
     loadFromFile(nme);
   for i := fCollection.Count-1 downto 0 do
@@ -351,8 +351,8 @@ end;
 
 destructor TLibraryManager.destroy;
 begin
-  ForceDirectoriesUTF8(getCoeditDocPath);
-  LibMan.saveToFile(getCoeditDocPath + libFname);
+  ForceDirectoriesUTF8(getDocPath);
+  LibMan.saveToFile(getDocPath + libFname);
   fItemsByAlias.Free;
   fCollection.Free;
   inherited;

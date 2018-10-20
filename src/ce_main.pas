@@ -393,7 +393,7 @@ type
     fCovModUt: boolean;
     fDscanUnittests: boolean;
     fDoc: TCESynMemo;
-    fFirstTimeCoedit: boolean;
+    fFirstTimeRun: boolean;
     fMultidoc: ICEMultiDocHandler;
     fScCollectCount: Integer;
     fUpdateCount: NativeInt;
@@ -1697,7 +1697,7 @@ begin
   end;
 
   // load existing or default docking
-  if not reset and FileExists(getCoeditDocPath + 'docking.xml') then
+  if not reset and FileExists(getDocPath + 'docking.xml') then
   begin
     // load later (https://bugs.freepascal.org/view.php?id=29475)
   end
@@ -1781,7 +1781,7 @@ var
   fname: string;
 begin
   // project and files MRU
-  fname := getCoeditDocPath + 'mostrecent.txt';
+  fname := getDocPath + 'mostrecent.txt';
   if fname.fileExists then with TCEPersistentMainMrus.create(nil) do
   try
     setTargets(fFileMru, fProjMru, fPrjGrpMru);
@@ -1790,7 +1790,7 @@ begin
     Free;
   end;
   // shortcuts for the actions standing in the main action list
-  fname := getCoeditDocPath + 'mainshortcuts.txt';
+  fname := getDocPath + 'mainshortcuts.txt';
   if fname.fileExists then with TCEPersistentMainShortcuts.create(nil) do
   try
     loadFromFile(fname);
@@ -1800,18 +1800,18 @@ begin
   end;
   // runnables opts
   fRunnablesOptions := TCEEditableRunnableOptions.create(self);
-  fname := getCoeditDocPath + 'runnables.txt';
+  fname := getDocPath + 'runnables.txt';
   if fname.fileExists then
     fRunnablesOptions.loadFromFile(fname);
   // globals opts
   fAppliOpts := TCEApplicationOptions.Create(self);
-  fname := getCoeditDocPath + 'application.txt';
+  fname := getDocPath + 'application.txt';
   if fname.fileExists then
   begin
     fAppliOpts.loadFromFile(fname);
     fAppliOpts.assignTo(self);
   end
-  else fFirstTimeCoedit := true;
+  else fFirstTimeRun := true;
 end;
 
 procedure TCEMainForm.SaveSettings;
@@ -1822,7 +1822,7 @@ begin
   with TCEPersistentMainMrus.create(nil) do
   try
     setTargets(fFileMru, fProjMru, fPrjGrpMru);
-    saveToFile(getCoeditDocPath + 'mostrecent.txt');
+    saveToFile(getDocPath + 'mostrecent.txt');
   finally
     Free;
   end;
@@ -1830,15 +1830,15 @@ begin
   with TCEPersistentMainShortcuts.create(nil) do
   try
     assign(self);
-    saveToFile(getCoeditDocPath + 'mainshortcuts.txt');
+    saveToFile(getDocPath + 'mainshortcuts.txt');
   finally
     Free;
   end;
   // globals opts
   fAppliOpts.assign(self);
-  fAppliOpts.saveToFile(getCoeditDocPath + 'application.txt');
+  fAppliOpts.saveToFile(getDocPath + 'application.txt');
   // runnables opts
-  fRunnablesOptions.saveToFile(getCoeditDocPath + 'runnables.txt');
+  fRunnablesOptions.saveToFile(getDocPath + 'runnables.txt');
 end;
 
 procedure TCEMainForm.SaveDocking;
@@ -1861,19 +1861,19 @@ begin
       DockMaster.GetAnchorSite(fWidgList.widget[i]).Close;
   end;
 
-  forceDirectory(getCoeditDocPath);
-  xcfg := TXMLConfigStorage.Create(getCoeditDocPath + 'docking.xml.tmp', false);
+  forceDirectory(getDocPath);
+  xcfg := TXMLConfigStorage.Create(getDocPath + 'docking.xml.tmp', false);
   try
     DockMaster.SaveLayoutToConfig(xcfg);
     xcfg.WriteToDisk;
     // TODO-cdocking: remove this when AnchorDocking wont save anymore invalid layout
     with TMemoryStream.Create do
     try
-      LoadFromFile(getCoeditDocPath + 'docking.xml.tmp');
+      LoadFromFile(getDocPath + 'docking.xml.tmp');
       if Size < 10000 then
       begin
-        SaveToFile(getCoeditDocPath + 'docking.xml');
-        SysUtils.DeleteFile(getCoeditDocPath + 'docking.xml.tmp');
+        SaveToFile(getDocPath + 'docking.xml');
+        SysUtils.DeleteFile(getDocPath + 'docking.xml.tmp');
       end;
     finally
       free;
@@ -1882,7 +1882,7 @@ begin
     xcfg.Free;
   end;
 
-  xcfg := TXMLConfigStorage.Create(getCoeditDocPath + 'dockingopts.xml',false);
+  xcfg := TXMLConfigStorage.Create(getDocPath + 'dockingopts.xml',false);
   try
     DockMaster.SaveSettingsToConfig(xcfg);
     xcfg.WriteToDisk;
@@ -1897,9 +1897,9 @@ var
   str: TMemoryStream;
 begin
   result := false;
-  if fileExists(getCoeditDocPath + 'docking.xml') then
+  if fileExists(getDocPath + 'docking.xml') then
   begin
-    xcfg := TXMLConfigStorage.Create(getCoeditDocPath + 'docking.xml', true);
+    xcfg := TXMLConfigStorage.Create(getDocPath + 'docking.xml', true);
     try
       try
         DockMaster.LoadLayoutFromConfig(xcfg, false);
@@ -1909,7 +1909,7 @@ begin
       str := TMemoryStream.Create;
       try
         xcfg.SaveToStream(str);
-        str.saveToFile(getCoeditDocPath + 'docking.bak')
+        str.saveToFile(getDocPath + 'docking.bak')
       finally
         str.Free;
       end;
@@ -1917,9 +1917,9 @@ begin
       xcfg.Free;
     end;
   end;
-  if fileExists(getCoeditDocPath + 'dockingopts.xml') then
+  if fileExists(getDocPath + 'dockingopts.xml') then
   begin
-    xcfg := TXMLConfigStorage.Create(getCoeditDocPath + 'dockingopts.xml', true);
+    xcfg := TXMLConfigStorage.Create(getDocPath + 'dockingopts.xml', true);
     try
       try
         DockMaster.LoadSettingsFromConfig(xcfg);
@@ -1929,7 +1929,7 @@ begin
       str := TMemoryStream.Create;
       try
         xcfg.SaveToStream(str);
-        str.saveToFile(getCoeditDocPath + 'dockingopts.bak')
+        str.saveToFile(getDocPath + 'dockingopts.bak')
       finally
         str.Free;
       end;
@@ -1964,7 +1964,7 @@ begin
   with TCELastDocsAndProjs.create(nil) do
   try
     assign(self);
-    saveToFile(getCoeditDocPath + 'lastdocsandproj.txt');
+    saveToFile(getDocPath + 'lastdocsandproj.txt');
   finally
     free;
   end;
@@ -1974,7 +1974,7 @@ procedure TCEMainForm.LoadLastDocsAndProj;
 var
   str: string;
 begin
-  str := getCoeditDocPath + 'lastdocsandproj.txt';
+  str := getDocPath + 'lastdocsandproj.txt';
   if str.fileExists then
     with TCELastDocsAndProjs.create(nil) do
   try
@@ -1987,7 +1987,7 @@ end;
 
 function checkForUpdate: string;
 const
-  updURL = 'https://api.github.com/repos/BBasile/Coedit/releases/latest';
+  updURL = 'https://api.github.com/repos/BBasile/dexed/releases/latest';
 var
   prs: TJSONParser = nil;
   dat: TJSONData = nil;
@@ -2078,7 +2078,7 @@ begin
   DockMaster.ResetSplitters;
   setSplitterWheelEvent;
 
-  if fFirstTimeCoedit then
+  if fFirstTimeRun then
   begin
     actFileNewRun.Execute;
     if fInfoWidg.hasMissingTools then
@@ -2087,7 +2087,7 @@ begin
 
   // see https://bugs.freepascal.org/view.php?id=29475
   // reloading must be done here otherwise there are "jumps"
-  if FileExists(getCoeditDocPath + 'docking.xml') then
+  if FileExists(getDocPath + 'docking.xml') then
     LoadDocking();
 
   if fAppliOpts.autoCheckUpdates then
@@ -2142,7 +2142,7 @@ end;
 
 procedure TCEMainForm.mnuItemManualClick(Sender: TObject);
 begin
-  OpenURL('https://bbasile.github.io/Coedit/');
+  OpenURL('https://bbasile.github.io/dexed/');
 end;
 
 destructor TCEMainForm.destroy;
@@ -2164,7 +2164,7 @@ end;
 procedure TCEMainForm.UpdateDockCaption(Exclude: TControl = nil);
 begin
   // otherwise dockmaster puts the widget list.
-  Caption := 'Coedit';
+  Caption := 'dexed';
 end;
 
 procedure TCEMainForm.ApplicationProperties1Exception(Sender: TObject;E: Exception);
@@ -2679,7 +2679,7 @@ begin
   LineEnding +
   'void main(string[] args)' + LineEnding +
   '{' + LineEnding +
-      body[fFirstTimeCoedit] +
+      body[fFirstTimeRun] +
   '}';
   fDoc.setFocus;
 end;
@@ -3100,7 +3100,7 @@ begin
     end
     else
     begin
-      // back compat, see https://github.com/BBasile/Coedit/issues/276
+      // back compat, see https://github.com/BBasile/dexed/issues/276
       dmdproc.Parameters.Add('-version=runnable_module');
 
       dmdproc.Parameters.Add('-version=run_single_module');
@@ -3623,7 +3623,7 @@ begin
 
   lst := TStringList.Create;
   try
-    listFiles(lst, getCoeditDocPath + 'layouts' + DirectorySeparator);
+    listFiles(lst, getDocPath + 'layouts' + DirectorySeparator);
     for i := 0 to lst.Count-1 do
     begin
       itm := TMenuItem.Create(self);
@@ -3640,7 +3640,7 @@ end;
 
 procedure TCEMainForm.layoutMnuItemClick(sender: TObject);
 begin
-  layoutLoadFromFile(getCoeditDocPath + 'layouts' + DirectorySeparator +
+  layoutLoadFromFile(getDocPath + 'layouts' + DirectorySeparator +
     TMenuItem(sender).Caption + '.xml');
 end;
 
@@ -3655,7 +3655,7 @@ begin
   if fname.extractFileExt <> '.xml' then
     fname += '.xml';
 
-  layoutSaveToFile(getCoeditDocPath + 'layouts' + DirectorySeparator + fname);
+  layoutSaveToFile(getDocPath + 'layouts' + DirectorySeparator + fname);
   layoutUpdateMenu;
 end;
 
@@ -3717,9 +3717,9 @@ end;
 procedure TCEMainForm.showProjTitle;
 begin
   if assigned(fProject) and fProject.filename.fileExists then
-    caption := format('Coedit - %s', [shortenPath(fProject.filename, 30)])
+    caption := format('dexed - %s', [shortenPath(fProject.filename, 30)])
   else
-    caption := 'Coedit';
+    caption := 'dexed';
 end;
 
 procedure TCEMainForm.saveProjSource(const document: TCESynMemo);

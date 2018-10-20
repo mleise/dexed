@@ -35,27 +35,27 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
           item
             AutoSize = True
             Caption = 'Num calls'
-            Width = 75
-          end        
-          item
-            AutoSize = True
-            Caption = 'Tree time'
-            Width = 71
-          end        
-          item
-            AutoSize = True
-            Caption = 'Func time'
             Width = 73
           end        
           item
             AutoSize = True
+            Caption = 'Tree time'
+            Width = 69
+          end        
+          item
+            AutoSize = True
+            Caption = 'Func time'
+            Width = 71
+          end        
+          item
+            AutoSize = True
             Caption = 'Per call'
-            Width = 58
+            Width = 56
           end        
           item
             AutoSize = True
             Caption = 'function'
-            Width = 246
+            Width = 254
           end>
         HideSelection = False
         ReadOnly = True
@@ -165,7 +165,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
       end
       object selPieSource: TComboBox[3]
         Left = 118
-        Height = 33
+        Height = 31
         Hint = 'select the pie representation'
         Top = 0
         Width = 282

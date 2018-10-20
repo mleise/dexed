@@ -165,7 +165,7 @@ begin
   TreeFilterEdit1.BorderSpacing.Left := ScaleX(filterAlign[false], 96);
   toolbarResize(nil);
 
-  fname := getCoeditDocPath + optFname;
+  fname := getDocPath + optFname;
   if fname.fileExists then
   begin
     with TCEProjectInspectorOptions.Create(nil) do
@@ -186,7 +186,7 @@ begin
   with TCEProjectInspectorOptions.Create(nil) do
   try
     fileListAsTree:= self.fileListAsTree;
-    saveToFile(getCoeditDocPath + optFname);
+    saveToFile(getDocPath + optFname);
   finally
     free;
   end;

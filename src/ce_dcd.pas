@@ -106,7 +106,7 @@ begin
   inherited;
 
   fVersion.init('v0.0.0');
-  fname := getCoeditDocPath + optsname;
+  fname := getDocPath + optsname;
   if fname.fileExists then
     loadFromFile(fname);
   fCurrentSessionPortNum := fPortNum;
@@ -198,7 +198,7 @@ destructor TCEDcdWrapper.destroy;
 var
   i: integer = 0;
 begin
-  saveToFile(getCoeditDocPath + optsname);
+  saveToFile(getDocPath + optsname);
   EntitiesConnector.removeObserver(self);
   fImportCache.Free;
   if fTempLines.isNotNil then

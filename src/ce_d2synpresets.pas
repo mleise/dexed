@@ -335,7 +335,7 @@ begin
   inherited;
   fBackup:= TCED2SynPreset.Create(nil);
   fPresets:= TCED2SynPresets.Create(self);
-  fname := getCoeditDocPath + optfname;
+  fname := getDocPath + optfname;
   if fname.fileExists then
     fPresets.loadFromFile(fname);
 
@@ -675,7 +675,7 @@ begin
   for i:= fPresets.count-1 downto 0 do
     if fPresets.preset[i].isHardCoded then
       fPresets.fCollection.Delete(i);
-  fPresets.saveToFile(getCoeditDocPath + optfname);
+  fPresets.saveToFile(getDocPath + optfname);
   fBackup.Free;
   EntitiesConnector.removeObserver(self);
   inherited;

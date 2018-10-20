@@ -23,7 +23,7 @@ const
 type
 
   (**
-   * TCESymbolExpander is designed to expand Coedit symbolic strings,
+   * TCESymbolExpander is designed to expand symbolic strings,
    * using the information collected from several observer interfaces.
    *)
   TCESymbolExpander = class(ICEDocumentObserver, ICEProjectObserver, ICESymStringExpander, ICEMiniExplorerObserver)
@@ -295,8 +295,8 @@ begin
           'ENV_TEMP': Result += fSymbols[ENV_TEMP];
           'ENV_USER': Result += fSymbols[ENV_USER];
           //
-          'CAF', 'CoeditApplicationFile': Result += fSymbols[CAF];
-          'CAP', 'CoeditApplicationPath': Result += fSymbols[CAP];
+          'AF', 'CAF', 'CoeditApplicationFile': Result += fSymbols[CAF];
+          'AP', 'CAP', 'CoeditApplicationPath': Result += fSymbols[CAP];
           'MEP', 'MiniExplorerPath': Result += fSymbols[MEP];
           //
           'CFF', 'CurrentFileFile'      : Result += fSymbols[CFF];
