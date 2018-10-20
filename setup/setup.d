@@ -1,4 +1,4 @@
-module cesetup;
+module setup;
 
 import
     std.stdio, std.file, std.process, std.path, std.string, std.getopt;
@@ -96,8 +96,8 @@ static this()
 {
     version(Windows)
     { 
-        exePath = environment.get("PROGRAMFILES") ~ r"\Coedit\";
-        datPath = environment.get("APPDATA") ~ r"\Coedit\";
+        exePath = environment.get("PROGRAMFILES") ~ r"\dexed\";
+        datPath = environment.get("APPDATA") ~ r"\dexed\";
         shortCutPath = environment.get("USERPROFILE") ~ r"\Desktop\";
     }
     else
@@ -106,13 +106,13 @@ static this()
         if (asSu)
         {
             exePath = "/usr/bin/";
-            datPath = "/home/" ~ environment.get("SUDO_USER") ~ "/.config/Coedit/";
+            datPath = "/home/" ~ environment.get("SUDO_USER") ~ "/.config/dexed/";
             shortCutPath = "/usr/share/applications/";
         }
         else
         {
             exePath = "/home/" ~ environment.get("USER") ~ "/bin/";
-            datPath = "/home/" ~ environment.get("USER") ~ "/.config/Coedit/";
+            datPath = "/home/" ~ environment.get("USER") ~ "/.config/dexed/";
             shortCutPath = "/home/" ~ environment.get("USER") ~ "/.local/share/applications/";
         }
     }
@@ -163,16 +163,16 @@ void main(string[] args)
         return;
     }
 
-    if (!uninstall) Formater.justify!'C'(format("Coedit %s - setup",
+    if (!uninstall) Formater.justify!'C'(format("dexed %s - setup",
         import("version.txt")[1..$].chomp));
-    else Formater.justify!'C'("Coedit uninstaller");
+    else Formater.justify!'C'("dexed uninstaller");
     
     Formater.separate;
     version(Windows) Formater.justify!'L'("the setup program must be run as admin");
     else 
     {   
-        if(!asSu) Formater.justify!'L'("Coedit will be accessible to the current user");
-        else Formater.justify!'L'("Coedit will be accessible to all the users");
+        if(!asSu) Formater.justify!'L'("dexed will be accessible to the current user");
+        else Formater.justify!'L'("dexed will be accessible to all the users");
     }
     
     Formater.separate;
@@ -376,7 +376,7 @@ void postInstall()
         char[] desktopFolder = _desktopFolder.ptr.fromStringz();
         string target = exePath ~ "dexed.exe";
         string wdir = exePath ~ "";
-        const(wchar)* linkPath = buildNormalizedPath(desktopFolder, "Coedit.lnk").toUTF16z();
+        const(wchar)* linkPath = buildNormalizedPath(desktopFolder, "dexed.lnk").toUTF16z();
 
         CoInitialize(null);
         IShellLinkA shellLink;
@@ -412,7 +412,7 @@ void postUninstall()
 {
     version(Windows)
     {
-        tryRemove(shortCutPath ~ "Coedit.lnk");
+        tryRemove(shortCutPath ~ "dexed.lnk");
     }
     else version(linux)
     {
