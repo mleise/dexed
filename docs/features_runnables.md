@@ -10,10 +10,10 @@ title: Runnable modules
 
 #### Description
 
-Coedit is able to compile and execute the module that's currently edited even if it's not part of a project.
+Dexed is able to compile and execute the module that's currently edited even if it's not part of a project.
 Such a module is called a **runnable** module.
 
-Runnable modules don't have to be explicitly saved because Coedit will handle the task automatically, using an unique temporary file name.
+Runnable modules don't have to be explicitly saved because Dexed will handle the task automatically, using an unique temporary file name.
 For example it's possible to execute the _Compile and run file_ action directly after the _New runnable module_ action .
 By default the binary is produced in the folder where is located the D source but this can be changed in the options applied to this feature.
 
@@ -27,7 +27,7 @@ Two typical scenarios:
 - the runnable will be debugged so DWARF informations must be generated with `-g`.
 - the runnable must be linked with a C static library so the linker flag `-L-lthelib` must be specified.
 
-Coedit doesn't handle the program specified after the She-Bang, which means that all the following script lines are valid:
+Dexed doesn't handle the program specified after the She-Bang, which means that all the following script lines are valid:
 
 - `#!runnable-flags: --whatever`
 - `#!usr/bin/dmd --whatever`
@@ -85,7 +85,7 @@ Note that the action _Run file unittest_ is based on the same internal function 
 - **outputFolder**: Defines a folder where the runnable binary is output. If the value starts by a drive letter or a directory separator then the folder must exist, otherwise it's considered as a subfolder, relative to the runnable filename, which is created automatically.
 - **outputFolderConditions**: Defines the conditions for which **outputFolder** is handled.
     - **ifInProject**: The runnable file is part of the current project. For example if **temp/** is in the `.gitignore` and if **outputFolder** is also set to **temp/** then the binary won't appear in the staging area.
-    - **ifSaved**: The runnable file is not in the current project but it's been saved explicitly out of the temp folder that's automatically used by Coedit.
+    - **ifSaved**: The runnable file is not in the current project but it's been saved explicitly out of the temp folder that's automatically used by Dexed.
     - **ifNotSaved**: The runnable file is not part of the project and has never been saved explicitly.
 - **staticSwitches**: Defines a list of switches that are always passed to the compiler when a runnable is produced or when a module is tested.
 

@@ -13,7 +13,7 @@ This category exposes the DUB options that are passed to the build tool each tim
 ![](img/options_dub_build.png)
 
 - **archOverride: The option allows to build for x86 under x86_64 and the opposite.
-- **autoFetch**: If checked then Coedit will try to download missing dependencies when a project or a libman entry is opened. This option is designed to provide better completion but can slow down the startup and the loading of a project.
+- **autoFetch**: If checked then Dexed will try to download missing dependencies when a project or a libman entry is opened. This option is designed to provide better completion but can slow down the startup and the loading of a project.
 - **combined**: If checked, tries to build the whole project in a single compiler run.
 - **compiler**: Selects [which compiler](options_compilers_paths) is used by DUB when a project is compiled. Note that the DUB scripts don't use this setting, instead the same preference set for the [runnable modules](features_runnables#options) is used.
 - **dependenciesCheck**: Defines how DUB checks the project dependencies, typically used to avoid too much network operations.

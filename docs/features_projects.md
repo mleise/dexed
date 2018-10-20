@@ -14,7 +14,7 @@ Project properties are edited in specific widgets.
 
 #### DUB
 
-Coedit handles [DUB](http://code.dlang.org/getting_started) projects.
+Dexed handles [DUB](http://code.dlang.org/getting_started) projects.
 
 DUB [JSON format](http://code.dlang.org/package-format?lang=json) format is fully supported.
 DUB [SDL](http://code.dlang.org/package-format?lang=sdl) format is supported in read-only mode.
@@ -25,7 +25,7 @@ The option editor exposes a [category for DUB](options_dub_build). The options s
 
 #### CE format
 
-The CE (Coedit) format (previously called _native format_) is based on DMD command line interface.
+The CE format (previously called _native format_) is based on DMD command line interface.
 The widget used to edit the properties is the [CE project editor](widgets_ce_project_editor) (the format is detailed in this page).
 
 #### Menu reference

@@ -16,7 +16,7 @@ The _editor widget_ is a standard code editor, specialized for highlighting D so
 
 #### Navigation
 
-In addition to the standard actions used to navigate in a source, Coedit implements several helpers:
+In addition to the standard actions used to navigate in a source, Dexed implements several helpers:
 
 - **Next/Previous location**: The two actions are used to jump to the locations where the caret was activated. They follow the chronology and not the line numbers. In the [shortcut editor](options_shortcuts_editor) they can be found under the names _PreviousLocation_ and _NextLocation_. The actions are also hard linked to the mouse buttons X1 and X2 and the multimedia keys usually used by web browsers to reload the next or the previous page.
 - **Next/Previous changed area**: The two actions are used to jump to the locations that contain changes. They follow the line numbers. In the [shortcut editor](options_shortcuts_editor) they can be found under the names _PreviousChangedArea_ and _NextChangedArea_.
@@ -88,7 +88,7 @@ It's useful to display a module that contains the declarations of a library bind
 
 #### External Modification tracking
 
-When a document that's edited in Coedit is modified by another program, a _diff_ is displayed.
+When a document that's edited in Dexed is modified by another program, a _diff_ is displayed.
 
 ![](img/editor_diff.png)
 
@@ -99,7 +99,7 @@ The dialog is guaranteed to be only displayed when the content contains changes.
 If activated in the options (see beyond), the source can be automatically linted, after a relative period of time, following the last keystroke.
 Results are displayed in the gutter and the warning body can be consulted in the hint displayed when the mouse motin stops over the icon.
 Linting requires [D-Scanner](https://github.com/dlang-community/D-Scanner) to be setup.
-It's possible to use the [information box](widgets_about) to determine if Coedit can find the tool.
+It's possible to use the [information box](widgets_about) to determine if Dexed can find the tool.
 Note that linting can also be launched manually from the _File_ or the _Project_ menus.
 
 #### Notable options

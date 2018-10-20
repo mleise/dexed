@@ -6,7 +6,7 @@ title: index
 <script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
 {% endraw %}
 
-### Coedit documentation
+### Dexed documentation
 
 ![](img/coedit_kde4_thumb.png)
 
@@ -15,7 +15,7 @@ Screenshots can be outdated but descriptions are up to date.
 
 #### First steps
 
-_Install and configure Coedit._
+_Install and configure Dexed._
 
 * [Build](build.md)
 * [Setup](setup.md)
@@ -44,7 +44,7 @@ _Description of each entry in the main menu. May redirect to a specific widget p
 
 #### Options categories
 
-_Full description of Coedit options. May redirect to a specific widget page._
+_Full description of Dexed options. May redirect to a specific widget page._
 
 * [Application](options_application)
 * [Code metrics](options_code_metrics)

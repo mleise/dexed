@@ -20,8 +20,8 @@ Possible symbols, by context, include:
 
 Application:
 
-- **`<CAF>`**: also _`<CoeditApplicationFile>`_. Expanded to Coedit filename.
-- **`<CAP>`**: also _`<CoeditApplicationPath>`_. Expanded to Coedit path.
+- **`<AF>`**: Expanded to the application (Dexed) filename.
+- **`<AP>`**: Expanded to the application (Dexed) path.
 - **`<MEP>`**: Expanded to the path of the folder selected in the [mini-explorer](widgets_mini_explorer).
 
 Environment:

@@ -15,7 +15,7 @@ In general several metrics exist:
 * [Halstead complexity](https://en.wikipedia.org/wiki/Halstead_complexity_measures): quality indicator based on the count of operators and operands.
 * [Cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity): quality indicator based on the program execution flow.
 
-Coedit implements the Halstead metric. The others may be added in a further version.
+Dexed implements the Halstead metric. The others may be added in a further version.
 
 #### Halstead complexity
 

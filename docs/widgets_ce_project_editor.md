@@ -6,9 +6,9 @@ title: Widgets - CE project editor
 {% endraw %}
 {% include xstyle.css %}
 
-### Coedit project editor
+### CE project editor
 
-The widget is used to edit the properties of a project that has the CE (Coedit) format.
+The widget is used to edit the properties of a project that has the CE (for _Coedit_, Dexed former name) format.
 It's no recommended to use this format anymore.
 
 ![](img/ce_project_editor.png)

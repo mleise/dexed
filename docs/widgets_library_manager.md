@@ -51,7 +51,7 @@ When the toolbar button that displays DUB logo is clicked, a dialog is displayed
 The text field is used to select the name of the package to install.
 
 - <img src="{%include icurl%}arrow/arrow_update.png" class="tlbric"/>: Update the list of the online packages.
-- <img src="{%include icurl%}other/tag_purple.png" class="tlbric"/>: By the default the master version of the package is installed. When the tag button is down Coedit rather installs the package from its latest tag.
+- <img src="{%include icurl%}other/tag_purple.png" class="tlbric"/>: By the default the master version of the package is installed. When the tag button is down Dexed rather installs the package from its latest tag.
 - <img src="{%include icurl%}other/accept.png" class="tlbric"/>: Closes the dialog and start downloading before installing.
 - <img src="{%include icurl%}other/cancel.png" class="tlbric"/>: Cancels and does nothing.
 

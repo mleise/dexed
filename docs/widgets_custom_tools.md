@@ -10,7 +10,7 @@ title: Widgets - custom tools
 
 ### Custom tools
 
-This widget allows to define a set of third party applications that can be launched from Coedit.
+This widget allows to define a set of third party applications that can be launched from Dexed.
 The tools are not just applications that are launched from the software.
 Since they support [symbolic strings](features_symbolic_strings) they can directly perform some actions on the current source file, in its directory, in the project directory and more.
 The tools can even be chained and piped between themselves.
