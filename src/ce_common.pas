@@ -777,8 +777,15 @@ begin
 end;
 
 function getDocPath: string;
+var
+  o: string;
+  n: string;
 begin
-  result := getUserDataPath + 'dexed' + directorySeparator;
+  o := getUserDataPath + 'Coedit' + directorySeparator;
+  n := getUserDataPath + 'dexed' + directorySeparator;
+  if not n.dirExists and o.dirExists then
+    CopyDirTree(o, n);
+  result := n;
 end;
 
 function isFolder(sr: TSearchRec): boolean;
