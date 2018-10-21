@@ -10,12 +10,12 @@ uses
   {$IFDEF WINDOWS}
   Windows, JwaTlHelp32, registry,
   {$ELSE}
-  ExtCtrls, FileUtil,
+  ExtCtrls,
   {$ENDIF}
   {$IFNDEF CEBUILD}
   forms, ComCtrls,
   {$ENDIF}
-  LazFileUtils, process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils,
+  LazFileUtils, FileUtil, process, asyncprocess, ghashmap, ghashset, LCLIntf, strutils,
   fpjson, graphics;
 
 const

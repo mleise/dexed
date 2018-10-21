@@ -383,6 +383,7 @@ void postInstall()
         IPersistFile linkFile;
         CoCreateInstance(&CLSID_ShellLink, null, CLSCTX_INPROC_SERVER,
             &IID_IShellLinkA, cast(void**)&shellLink);
+        shellLink.SetIconLocation(buildNormalizedPath(datPath, "dexed.ico").toStringz, 0);
         shellLink.SetPath(target.ptr);
         shellLink.SetWorkingDirectory(wdir.ptr);
         shellLink.QueryInterface(&IID_IPersistFile, cast(void**)&linkFile);
