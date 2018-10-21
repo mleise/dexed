@@ -12,7 +12,7 @@ Two options exist.
 #### Using dexed & the submodules
 
 - If you've cloned this repository, make sure that the submodule are also here with `git submodule update --init`. 
-- In Coedit open the project `dastworx.ce`.
+- In Dexed open the project `dastworx.dxp`.
 - Select the `release` configuration.
 - Click `Compile project`
 

@@ -4,12 +4,12 @@ The process is semi-automatic and achieved by compiling a project in dexed itsel
 dexed setup program
 ===
 
-This dexed project (_cesetup.dexed_) creates the dexed setup program.
-The project contains 3 configurations named _win32_, _nux32_, _nux64. 
-Each takes the content of the matching sub-folder and puts it in the output folder, as an extractor program, 
+The dexed project (_cesetup.dxp_) creates the dexed setup program.
+It contains 3 configurations named _win32_, _nux32_, _nux64. 
+Each takes the content of the matching sub-folder and puts it in the output folder, as an extraction program, 
 at compile time (using the `import(file)` expression).
 
-The extractor program is then compressed by the post-build process, using the scripts named `setupzip-<os & arch>`.
+The extraction program is then compressed by the post-build process, using the scripts named `setupzip-<os & arch>`.
 
 Raw Zip
 ===
