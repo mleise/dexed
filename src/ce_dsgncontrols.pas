@@ -68,7 +68,7 @@ implementation
 
 procedure register;
 begin
-  RegisterComponents('Coedit', [TCEToolBar, TCEToolButton]);
+  RegisterComponents('dexed', [TCEToolBar, TCEToolButton]);
 end;
 
 constructor TCEToolButton.Create(TheOwner: TComponent);
