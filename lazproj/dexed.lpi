@@ -880,10 +880,6 @@
       </CompilerMessages>
       <CustomOptions Value="-dRELEASE
 -dGTK_REMOVE_CLIPBOARD_NULL"/>
-      <OtherDefines Count="2">
-        <Define0 Value="RELEASE"/>
-        <Define1 Value="GTK_REMOVE_CLIPBOARD_NULL"/>
-      </OtherDefines>
     </Other>
   </CompilerOptions>
   <Debugging>
