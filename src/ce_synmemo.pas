@@ -2765,8 +2765,17 @@ end;
 
 procedure TCESynMemo.completionDeleteKey(sender: TObject);
 begin
-  if fCompletionMenuAutoClose and (fCompletion.CurrentString.length < 2) then
-    fCompletion.TheForm.Close;
+  if fCompletionMenuAutoClose then
+  begin
+    if fCompletion.CurrentString.length < 2 then
+      fCompletion.TheForm.Close
+  end
+  else if CaretX > 0 then
+  begin
+    caretX := CaretX - 1;
+    getCompletionList();
+    caretX := CaretX + 1;
+  end;
 end;
 
 procedure TCESynMemo.getCompletionList;
