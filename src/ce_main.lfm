@@ -5,8 +5,6 @@ object CEMainForm: TCEMainForm
   Width = 687
   AllowDropFiles = True
   Caption = 'Coedit'
-  ClientHeight = 35
-  ClientWidth = 687
   Menu = mainMenu
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
@@ -14,7 +12,7 @@ object CEMainForm: TCEMainForm
   OnResize = FormResize
   OnWindowStateChange = FormWindowStateChange
   ShowHint = True
-  Visible = False
+  LCLVersion = '2.0.0.1'
   object mainMenu: TMainMenu
     top = 1
     object MenuItem1: TMenuItem
