@@ -1902,6 +1902,8 @@ begin
     xcfg := TXMLConfigStorage.Create(getDocPath + 'docking.xml', true);
     try
       try
+        DockMaster.CloseAll;
+        self.Visible:=true;
         DockMaster.LoadLayoutFromConfig(xcfg, false);
       except
         exit;
