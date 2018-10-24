@@ -48,8 +48,8 @@ begin
   //
   ShowHeaderCaptionCheckBox.OnChange := @doChanged;
   HideHeaderCaptionForFloatingCheckBox.OnChange := @doChanged;
-  FlattenHeaders.OnChange := @doChanged;
-  FilledHeaders.OnChange := @doChanged;
+  //FlattenHeaders.OnChange := @doChanged;
+  //FilledHeaders.OnChange := @doChanged;
   //
   HeaderStyleComboBox.OnChange := @doChanged;
   //
@@ -133,11 +133,11 @@ begin
   hasHeaders:=ShowHeaderCheckBox.Checked;
   ShowHeaderCaptionCheckBox.Enabled:=HasHeaders;
   HideHeaderCaptionForFloatingCheckBox.Enabled:=HasHeaders;
-  FlattenHeaders.Enabled:=HasHeaders;
-  FilledHeaders.Enabled:=HasHeaders;
+  //FlattenHeaders.Enabled:=HasHeaders;
+  //FilledHeaders.Enabled:=HasHeaders;
   //
-  DockMaster.HeaderFilled := FilledHeaders.Checked;
-  DockMaster.HeaderFlatten:= FlattenHeaders.Checked;
+  //DockMaster.HeaderFilled := FilledHeaders.Checked;
+  //DockMaster.HeaderFlatten:= FlattenHeaders.Checked;
   DockMaster.ShowHeaderCaption:= ShowHeaderCaptionCheckBox.Checked;
   DockMaster.HideHeaderCaptionFloatingControl:= HideHeaderCaptionForFloatingCheckBox.Checked;
   //
