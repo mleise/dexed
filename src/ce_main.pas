@@ -3630,7 +3630,7 @@ begin
     begin
       itm := TMenuItem.Create(self);
       itm.Caption := lst[i].extractFileName;
-      itm.Caption := itm.Caption.stripFileExt;
+      itm.Caption := stripFileExt(itm.Caption);
       itm.OnClick := @layoutMnuItemClick;
       itm.ImageIndex := 32;
       mnuLayout.Add(itm);
