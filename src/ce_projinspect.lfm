@@ -54,7 +54,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
       Width = 416
       OnResize = toolbarResize
       object btnRemFold: TCEToolButton[0]
-        Left = 113
+        Left = 141
         Hint = 'remove the selected source parent folder from the project'
         Top = 0
         AutoSize = True
@@ -64,7 +64,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         scaledSeparator = False
       end
       object btnAddFold: TCEToolButton[1]
-        Left = 141
+        Left = 113
         Hint = 'add a folder of sources to the project'
         Top = 0
         AutoSize = True
@@ -100,11 +100,9 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         Top = 2
         Width = 232
         ButtonWidth = 28
-        NumGlyphs = 1
         Align = alClient
-        Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Left = 142
         BorderSpacing.Around = 2
+        NumGlyphs = 1
         MaxLength = 0
         TabOrder = 0
         FilteredTreeview = Tree

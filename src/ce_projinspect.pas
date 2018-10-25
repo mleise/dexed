@@ -90,7 +90,7 @@ implementation
 {$R *.lfm}
 
 const optFname = 'projinspect.txt';
-const filterAlign: array[boolean] of integer = (66, 174);
+const filterAlign: array[boolean] of integer = (58, 162);
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
 constructor TCEProjectInspectWidget.create(aOwner: TComponent);
@@ -317,15 +317,24 @@ end;
 procedure TCEProjectInspectWidget.updateButtons;
 var
   ce: boolean;
+  sp: integer;
 begin
   ce := fProject.getFormat = pfCE;
-  btnRemFile.Visible:= ce;
+
   btnRemFold.Visible:= ce;
-  btnAddFile.Visible:= ce;
   btnAddFold.Visible:= ce;
-  toolbarResize(nil);
-  TreeFilterEdit1.BorderSpacing.Left := ScaleX(filterAlign[ce], 96);
-  toolbarResize(nil);
+  btnRemFile.Visible:= ce;
+  btnAddFile.Visible:= ce;
+
+  TreeFilterEdit1.Left := toolbar.Width - 5;
+  sp := scaleX(2, 96);
+  if ce then
+    TreeFilterEdit1.Left  := btnRemFold.Left + btnRemFold.Width + 2
+  else
+    TreeFilterEdit1.Left  := btnTree.Left + btnRemFold.Width + 2;
+  TreeFilterEdit1.width := toolbar.Width - TreeFilterEdit1.Left - sp;
+  TreeFilterEdit1.top   := sp;
+  TreeFilterEdit1.Height:= toolbar.Height - sp * 2;
 end;
 
 procedure TCEProjectInspectWidget.setFileListAsTree(value: boolean);
