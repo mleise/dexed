@@ -74,9 +74,10 @@ end;
 
 function TDockOptionsEditor.optionedWantContainer: TPersistent;
 begin
+  LoadFromMaster;
   fBackup.Clear;
   DockMaster.SaveSettingsToConfig(fBackup);
-  LoadFromMaster;
+  SaveToMaster;
   exit(DockOptionContainer);
 end;
 
@@ -100,14 +101,13 @@ begin
   // reload
   else if event = oeeSelectCat then
   begin
+    SaveToMaster;
     fBackup.Clear;
     DockMaster.SaveSettingsToConfig(fBackup);
-    LoadFromMaster;
   end
   //change
   else
   begin
-    SaveToMaster;
     doChanged(nil);
   end;
 end;
