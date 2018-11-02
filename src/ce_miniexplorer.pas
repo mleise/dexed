@@ -704,7 +704,10 @@ var
 begin
   p := treeFolders.Root.extractFileDir;
   if p.dirExists then
+  begin
     treeFolders.Root := p;
+    subjMnexDirectoryChanged(fMnxSubj, p);
+  end;
 end;
 
 procedure TCEMiniExplorerWidget.lstFilesDblClick(Sender: TObject);

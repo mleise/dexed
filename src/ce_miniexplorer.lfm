@@ -180,11 +180,11 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         Top = 2
         Width = 329
         ButtonWidth = 23
-        NumGlyphs = 1
         Flat = True
         Align = alClient
         BorderSpacing.Left = 180
         BorderSpacing.Around = 2
+        NumGlyphs = 1
         MaxLength = 0
         TabOrder = 0
         OnButtonClick = lstFilterButtonClick
