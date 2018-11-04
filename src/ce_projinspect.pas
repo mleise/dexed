@@ -670,7 +670,9 @@ begin
     itm.SelectedIndex := 2;
   end
   else
-  for i := 0 to fProject.sourcesCount-1 do
+  // first pass only creates the folders so that they're shown on top
+  for j := 0 to 1 do
+    for i := 0 to fProject.sourcesCount-1 do
   begin
     fld := '';
     rng.init(fProject.sourceRelative(i));
@@ -680,11 +682,12 @@ begin
       chd := nil;
       fld := rng.takeUntil(['/','\']).yield;
       chd := itm.FindNode(fld);
-      if chd.isNil then
+      if chd.isNil and ((rng.empty and (j = 1)) or (not rng.empty and (j = 0))) then
         chd := Tree.Items.AddChild(itm, fld);
-      itm := chd;
+      if chd.isNotNil then
+        itm := chd;
       // reached fname
-      if rng.empty then
+      if rng.empty and (j = 1) then
       begin
         itm.Data:= NewStr(fProject.sourceAbsolute(i));
         itm.ImageIndex := 2;
