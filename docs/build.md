@@ -12,12 +12,13 @@ title: Build Dexed
 
 Dexed is mostly programmed in Object Pascal, using the the [Lazarus development platform](http://www.lazarus-ide.org/).
 
-* [Download](http://lazarus.freepascal.org/index.php?page=downloads) and setup the latest Lazarus version (>= 1.8.0) and  FPC + FPC sources (>= 3.0.4) for your platform.
+* [Download](http://lazarus.freepascal.org/index.php?page=downloads) and setup the latest Lazarus version (1.8.4) and  FPC + FPC sources (3.0.4) for your platform.
     * Windows: the three packages are bundled in an installer.
     * Linux: the three packages must be downloaded and setup individually. It's recommended to download the packages from _SourceForge_ and not from the official repository of the distribution because they don't always propose the latest version.
 * `cd <user dir where to clone>`
 * `git clone https://github.com/BBasile/dexed.git`
 * `git submodule update --init --recursive`, to clone the dependencies used by the background tool.
+* `git checkout 3ddc0b59288b1af02194f82d38f6fc0175b0560e` to select the last revision that can be build with Lazarus 1.8.4. If you wish to build Dexed master then you must setup Lazarus 2.0 RC (and then ignore this step).
 
 The Lazarus LCL and the FreePascal FCL may require patches that fix bugs or regressions present in the latest Lazarus release and for which Dexed cannot include workarounds.
 Any `.patch` file located in the `patches/` folder should be applied. On linux you'll have to set the write permissions to `/usr/lib64/fpc` and `/usr/lib64/lazarus`.
@@ -50,7 +51,7 @@ You can also build it in CE using the project file _dastworx.ce_.
 
 #### Third party tools:
 
-Additionally you'll have to build [the completion daemon **DCD**](https://github.com/BBasile/DCD#setup) and the [D linter **Dscanner**](https://github.com/Hackerpilot/Dscanner#building-and-installing).
+Additionally you'll have to build [the completion daemon **DCD**](https://github.com/dlang-community/DCD#setup) and the [D linter **Dscanner**](https://github.com/dlang-community/Dscanner#building-and-installing).
 See the products documentation for more information.
 
 {% raw %}
