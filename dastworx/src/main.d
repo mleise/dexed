@@ -57,9 +57,9 @@ struct Launcher
     {
         mixin(logCall);
 
-        Appender!(AstErrors) errors;
+        static Appender!(AstErrors) errors;
 
-        void handleErrors(string fname, size_t line, size_t col, string message, bool err)
+        static void handleErrors(string fname, size_t line, size_t col, string message, bool err)
         {
             errors ~= construct!(AstError)(cast(ErrorType) err, message, line, col);
         }

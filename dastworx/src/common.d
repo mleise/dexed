@@ -396,6 +396,6 @@ T parseAndVisit(T : ASTVisitor)(const(char)[] source)
  * By default libdparse outputs errors and warnings to the standard streams.
  * This function prevents that.
  */
-void ignoreErrors(string, size_t, size_t, string, bool)
+void ignoreErrors(string, size_t, size_t, string, bool) @system
 {}
 
