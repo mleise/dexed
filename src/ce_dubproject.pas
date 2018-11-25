@@ -66,6 +66,7 @@ type
     fCompiler: DCompiler;
     fShowConsole: boolean;
     fAutoFetch: boolean;
+    fAutoSelectTestConfig: boolean;
     procedure setLinkMode(value: TDubLinkMode);
     procedure setCompiler(value: DCompiler);
     function getCompiler: DCompiler;
@@ -81,6 +82,7 @@ type
     property verbosity: TDubVerbosity read fVerbosity write fVerbosity default default;
     property archOverride: TDubArchOverride read fArchOverride write fArchOverride default auto;
     property autoFetch: boolean read fAutoFetch write fAutoFetch default false;
+    property autoSelectTestConfig: boolean read fAutoSelectTestConfig write fAutoSelectTestConfig default true;
   public
     procedure assign(source: TPersistent); override;
     procedure getOpts(options: TStrings);
@@ -551,6 +553,7 @@ begin
     verbosity:=opts.verbosity;
     archOverride:=opts.archOverride;
     autoFetch:=opts.autoFetch;
+    fAutoSelectTestConfig:=opts.fAutoSelectTestConfig;
   end
   else inherited;
 end;
@@ -599,6 +602,7 @@ begin
   inherited;
   fBackup := TCEDubBuildOptionsBase.Create(nil);
   EntitiesConnector.addObserver(self);
+  autoSelectTestConfig := true;
   fname := getDocPath + optFname;
   if fname.fileExists then
     loadFromFile(fname);
@@ -1030,9 +1034,12 @@ begin
     fDubProc.XTermProgram:=consoleProgram;
     fDubProc.Parameters.Add(dubCmd2Arg[command]);
     fDubProc.OnTerminate:= @dubProcTerminated;
-    fDubProc.Parameters.Add('--build=' + fBuildTypes[fBuiltTypeIx]);
-    if (fConfigs.Count <> 1) and (fConfigs[0] <> DubDefaultConfigName) then
-      fDubProc.Parameters.Add('--config=' + fConfigs[fConfigIx]);
+    if (command <> dcTest) or not dubBuildOptions.autoSelectTestConfig then
+    begin
+      fDubProc.Parameters.Add('--build=' + fBuildTypes[fBuiltTypeIx]);
+      if (fConfigs.Count <> 1) and (fConfigs[0] <> DubDefaultConfigName) then
+        fDubProc.Parameters.Add('--config=' + fConfigs[fConfigIx]);
+    end;
     fDubProc.Parameters.Add('--compiler=' + DubCompilerFilename);
     dubBuildOptions.getOpts(fDubProc.Parameters);
     if (command <> dcBuild) and runArgs.isNotEmpty then
