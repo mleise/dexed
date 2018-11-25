@@ -9,7 +9,7 @@ object CEWidget: TCEWidget
   ClientWidth = 332
   ShowHint = True
   ShowInTaskBar = stNever
-  LCLVersion = '1.8.0.6'
+  LCLVersion = '2.0.0.2'
   object Back: TPanel
     Left = 0
     Height = 121
@@ -34,14 +34,13 @@ object CEWidget: TCEWidget
     end
     object toolbar: TCEToolBar
       Left = 4
+      Height = 30
       Top = 4
       Width = 324
       BorderSpacing.Left = 2
       BorderSpacing.Top = 2
       BorderSpacing.Right = 2
       BorderSpacing.Around = 2
-      ButtonHeight = 28
-      ButtonWidth = 28
       Caption = 'toolbar'
       EdgeBorders = []
       EdgeInner = esNone
