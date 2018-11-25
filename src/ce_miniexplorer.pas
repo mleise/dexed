@@ -558,6 +558,7 @@ end;
 procedure TCEMiniExplorerWidget.filterFiles;
 var
   s: string;
+  p: string;
   i: integer;
 begin
 
@@ -565,8 +566,11 @@ begin
   // e.g after filtering failed
   treeFolders.BeginUpdate;
   s := treeFolders.Root;
+  p := treeFolders.Path;
   treeFolders.Root:= '';
   treeFolders.Root:= s;
+  treeFolders.Path:= p;
+
   treeFolders.EndUpdate;
 
   if lstFilter.filter.isEmpty then
