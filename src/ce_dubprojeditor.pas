@@ -303,12 +303,7 @@ end;
 {$REGION ICEProjectObserver ----------------------------------------------------}
 procedure TCEDubProjectEditorWidget.projNew(project: ICECommonProject);
 begin
-  fProj := nil;
-  enabled := false;
-  if project.getFormat <> pfDUB then
-    exit;
-  enabled := true;
-  fProj := TCEDubProject(project.getProject);
+  projFocused(project);
 end;
 
 procedure TCEDubProjectEditorWidget.projChanged(project: ICECommonProject);
@@ -346,14 +341,17 @@ begin
   end;
   fProj := TCEDubProject(project.getProject);
   enabled := true;
-  if not Visible then
-    exit;
-
   if fProj.isSDL then
   begin
     edProp.Enabled:= false;
     btnAcceptProp.Enabled:=false;
+  end else
+  begin
+    edProp.Enabled:= true;
+    btnAcceptProp.Enabled:=true;
   end;
+  if not Visible then
+    exit;
 
   updateEditor;
 end;
