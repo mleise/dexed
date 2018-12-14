@@ -425,7 +425,7 @@ begin
     exit;
   fActSelConf.Enabled := Tree.Selected.Parent = fConfNode;
   fActBuildConf.Enabled := Tree.Selected.Parent = fConfNode;
-  fActOpenFile.Enabled := Tree.Selected.Parent = fFileNode;
+  fActOpenFile.Enabled := Tree.Selected.ImageIndex = 2;
 end;
 
 procedure TCEProjectInspectWidget.DetectNewDubSources(const document: TCESynMemo
