@@ -2617,6 +2617,7 @@ var
   str, lne: string;
   i, x: integer;
   j: integer = 0;
+  n: integer = 0;
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
@@ -2631,10 +2632,16 @@ begin
       break;
     if str[i] = ',' then
       j += 1;
+    if str[i] = ')' then
+      n += 1;
     if str[i-1] = '(' then
     begin
-      LogicalCaretXY := Point(i, CaretY);
-      break;
+      if n = 0 then
+      begin
+        LogicalCaretXY := Point(i, CaretY);
+        break;
+      end
+      else n -= 1;
     end;
     if str[i] = #9 then
       i -= TabWidth
