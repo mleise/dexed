@@ -744,9 +744,11 @@ var
   ext: string;
   bom: dword = 0;
 begin
-  ext := fname.extractFileExt.upperCase;
-  fBasePath := fname.extractFilePath;
   fFilename := fname;
+  if not FilenameIsAbsolute(fFilename) then
+    fFilename := ExpandFileName(fFilename);
+  ext := fFilename.extractFileExt.upperCase;
+  fBasePath := fFilename.extractFilePath;
   fSaveAsUtf8 := false;
   fIsSdl := false;
   if ext = '.JSON' then
@@ -897,7 +899,7 @@ var
   fname: string;
 begin
   fname := fSrcs[index];
-  if fname.fileExists then
+  if FilenameIsAbsolute(fname) then
     result := fname
   else
     result := expandFilenameEx(fBasePath, fname);

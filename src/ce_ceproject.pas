@@ -265,9 +265,14 @@ begin
 end;
 
 procedure TCENativeProject.customLoadFromFile(const fname: string);
+var
+  f: string;
 begin
-  fbasePath := fname.extractFilePath;
-  inherited customLoadFromFile(fname);
+  f := fname;
+  if not FilenameIsAbsolute(f) then
+    f := ExpandFileName(f);
+  fbasePath := f.extractFilePath;
+  inherited customLoadFromFile(f);
 end;
 
 procedure TCENativeProject.customSaveToFile(const fname: string);
@@ -1090,7 +1095,7 @@ var
   fname: string;
 begin
   fname := fSrcs[index];
-  if fname.fileExists then
+  if FilenameIsAbsolute(fname) then
     result := fname
   else
     result := expandFilenameEx(fBasePath, fname);

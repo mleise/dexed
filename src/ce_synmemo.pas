@@ -3217,10 +3217,11 @@ begin
     else
       Highlighter := TxtSyn;
   end;
-  Lines.LoadFromFile(fname);
   fFilename := fname;
+  if not FilenameIsAbsolute(fFilename) then
+    fFilename := ExpandFileName(fFilename);
+  Lines.LoadFromFile(fname);
   FileAge(fFilename, fFileDate);
-
   fModified := false;
   if Showing then
   begin

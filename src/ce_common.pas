@@ -630,6 +630,8 @@ function expandFilenameEx(const basePath, fname: string): string;
 var
   curr: string = '';
 begin
+  if FilenameIsAbsolute(fname) then
+    exit(fname);
   getDir(0, curr);
   try
     if (curr <> basePath) and basePath.dirExists then

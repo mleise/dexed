@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
   EditBtn, lcltype, ce_widget, ActnList, Menus, clipbrd, AnchorDocking, math,
-  TreeFilterEdit, Buttons, GraphType, fgl, strutils,
+  TreeFilterEdit, Buttons, GraphType, fgl, strutils, LazFileUtils,
   ce_ddemangle, ce_writableComponent, ce_common, ce_synmemo, ce_interfaces,
   ce_observer, ce_sharedres, ce_stringrange, ce_dsgncontrols;
 
@@ -1171,7 +1171,7 @@ begin
         exit(true);
       end;
       // absolute fname
-      if ident.fileExists then
+      if FilenameIsAbsolute(ident) then
       begin
         getMultiDocHandler.openDocument(ident);
         exit(true);
