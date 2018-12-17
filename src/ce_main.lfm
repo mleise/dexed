@@ -12,7 +12,6 @@ object CEMainForm: TCEMainForm
   OnResize = FormResize
   OnWindowStateChange = FormWindowStateChange
   ShowHint = True
-  LCLVersion = '2.0.0.1'
   object mainMenu: TMainMenu
     top = 1
     object MenuItem1: TMenuItem
