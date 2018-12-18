@@ -2647,30 +2647,35 @@ begin
       i -= TabWidth
     else
       i -= 1;
+    if i <= 0 then
+      break;
   end;
-  DcdWrapper.getCallTip(str);
 
-  i := fCallTipStrings.Count;
-  if (fCallTipStrings.Count <> 0) and str.isNotEmpty then
-    fCallTipStrings.Insert(0, '---');
-  fCallTipStrings.Insert(0, str);
-  i := fCallTipStrings.Count - i;
-  // overload count to delete on ')'
-  {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
-  fCallTipStrings.Objects[0] := TObject(pointer(i));
-  {$POP}
-  str := '';
-  for lne in fCallTipStrings do
-    if lne.isNotEmpty then
-      str += lne + LineEnding;
-  if str.isNotEmpty then
+  if i > 0 then
   begin
-    {$IFDEF WINDOWS}
-    str := str[1..str.length-2];
-    {$ELSE}
-    str := str[1..str.length-1];
-    {$ENDIF}
-    showCallTipsString(str, j);
+    DcdWrapper.getCallTip(str);
+    i := fCallTipStrings.Count;
+    if (fCallTipStrings.Count <> 0) and str.isNotEmpty then
+      fCallTipStrings.Insert(0, '---');
+    fCallTipStrings.Insert(0, str);
+    i := fCallTipStrings.Count - i;
+    // overload count to delete on ')'
+    {$PUSH}{$HINTS OFF}{$WARNINGS OFF}
+    fCallTipStrings.Objects[0] := TObject(pointer(i));
+    {$POP}
+    str := '';
+    for lne in fCallTipStrings do
+      if lne.isNotEmpty then
+        str += lne + LineEnding;
+    if str.isNotEmpty then
+    begin
+      {$IFDEF WINDOWS}
+      str := str[1..str.length-2];
+      {$ELSE}
+      str := str[1..str.length-1];
+      {$ENDIF}
+      showCallTipsString(str, j);
+    end;
   end;
 
   if findOpenParen then
