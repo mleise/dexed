@@ -3988,7 +3988,8 @@ var
   pth: string;
   msg: string;
   i: integer;
-  c: string;
+  s1: string;
+  s2: string;
 begin
   if fProject = nil then
     exit;
@@ -4003,9 +4004,12 @@ begin
     prc.Options := [poUsePipes, poStderrToOutPut {$IFDEF WINDOWS}, poNewConsole{$ENDIF}];
     prc.ShowWindow:= swoHIDE;
     prc.Parameters.Add('-S');
-    c := fProject.basePath + 'dscanner.ini';
-    if c.fileExists then
-      prc.Parameters.Add('--config='+c)
+    s1 := fProject.basePath + 'dscanner.ini';
+    s2 := fProject.basePath + '.dscanner.ini';
+    if s1.fileExists then
+      prc.Parameters.Add('--config='+s1)
+    else if s2.fileExists then
+      prc.Parameters.Add('--config='+s2)
     else if not fDscanUnittests then
       prc.Parameters.Add('--skipTests');
     for i := 0 to fProject.sourcesCount-1 do
