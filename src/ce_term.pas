@@ -253,6 +253,9 @@ begin
     not SameText(directory, fLastCd) then
   begin
     fLastCd := directory;
+    fTerm.Restart;
+    fNeedApplyChanges := true;
+    fOpts.applyChanges;
     fTerm.Command('cd ' + directory);
   end;
 end;
@@ -269,6 +272,9 @@ begin
   if fOpts.followEditors and s.fileExists and not SameText(s, fLastCd) then
   begin
     fLastCd := s;
+    fTerm.Restart;
+    fNeedApplyChanges := true;
+    fOpts.applyChanges;
     fTerm.Command('cd ' + s);
   end;
 end;
@@ -301,6 +307,9 @@ begin
   if fOpts.followProjects and s.dirExists and not SameText(s, fLastCd) then
   begin
     fLastCd := s;
+    fTerm.Restart;
+    fNeedApplyChanges := true;
+    fOpts.applyChanges;
     fTerm.Command('cd ' + s);
   end;
 end;
