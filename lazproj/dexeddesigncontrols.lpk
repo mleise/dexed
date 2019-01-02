@@ -22,9 +22,9 @@
     </CompilerOptions>
     <Files Count="1">
       <Item1>
-        <Filename Value="../src/ce_dsgncontrols.pas"/>
+        <Filename Value="../src/u_dsgncontrols.pas"/>
         <HasRegisterProc Value="True"/>
-        <UnitName Value="ce_dsgncontrols"/>
+        <UnitName Value="u_dsgncontrols"/>
       </Item1>
     </Files>
     <RequiredPkgs Count="2">

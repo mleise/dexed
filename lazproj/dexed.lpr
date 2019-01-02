@@ -7,13 +7,13 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, Forms, lazcontrols, runtimetypeinfocontrols, anchordockpkg,
-  tachartlazaruspkg, ce_sharedres, ce_observer, ce_libman, ce_symstring,
-  ce_tools, ce_dcd, ce_main, ce_writableComponent,
-  ce_inspectors, ce_editoroptions, ce_dockoptions, ce_shortcutseditor, ce_mru,
-  ce_processes, ce_dialogs, ce_dubprojeditor, ce_controls, ce_dfmt,
-  ce_lcldragdrop, ce_stringrange, ce_dlangmaps, ce_projgroup, ce_projutils,
-  ce_d2synpresets, ce_dastworx, ce_dbgitf, ce_ddemangle, ce_dubproject,
-  ce_halstead, ce_diff, ce_profileviewer, ce_semver, ce_term;
+  tachartlazaruspkg, u_sharedres, u_observer, u_libman, u_symstring,
+  u_tools, u_dcd, u_main, u_writableComponent,
+  u_inspectors, u_editoroptions, u_dockoptions, u_shortcutseditor, u_mru,
+  u_processes, u_dialogs, u_dubprojeditor, u_controls, u_dfmt,
+  u_lcldragdrop, u_stringrange, u_dlangmaps, u_projgroup, u_projutils,
+  u_d2synpresets, u_dastworx, u_dbgitf, u_ddemangle, u_dubproject,
+  u_halstead, u_diff, u_profileviewer, u_semver, u_term;
 
 {$R *.res}
 

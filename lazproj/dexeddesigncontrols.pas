@@ -8,13 +8,13 @@ unit DexedDesignControls;
 interface
 
 uses
-  ce_dsgncontrols, LazarusPackageIntf;
+  u_dsgncontrols, LazarusPackageIntf;
 
 implementation
 
 procedure Register;
 begin
-  RegisterUnit('ce_dsgncontrols', @ce_dsgncontrols.Register);
+  RegisterUnit('u_dsgncontrols', @u_dsgncontrols.Register);
 end;
 
 initialization
