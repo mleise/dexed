@@ -473,7 +473,7 @@ type
 
     //Init - Fina
     procedure InitImages;
-    procedure getCMdParams;
+    procedure processCmdlineParams;
     procedure InitMRUs;
     procedure InitWidgets;
     procedure InitDocking(reset: boolean = false);
@@ -1277,7 +1277,7 @@ begin
   fProjectGroup := getProjectGroup;
   fCompilerSelector := getCompilerSelector;
 
-  getCMdParams;
+  processCmdlineParams;
   fAppliOpts.assignTo(self);
 
   // waiting for interative mode working when piped:
@@ -1292,7 +1292,7 @@ begin
   fInitialized := true;
 end;
 
-procedure TMainForm.getCMdParams;
+procedure TMainForm.processCmdlineParams;
 var
   value: string;
   lst: TStringList;
