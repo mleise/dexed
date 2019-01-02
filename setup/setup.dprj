@@ -1,5 +1,5 @@
-object CurrentProject: TCENativeProject
-  OptionsCollection = <  
+object CurrentProject: TNativeProject
+  OptionsCollection = <
     item
       name = 'win32'
       messagesOptions.tlsInformations = True
@@ -21,14 +21,46 @@ object CurrentProject: TCENativeProject
         ' zip-win32.bat'
       )
       preBuildProcess.showWindow = swoHIDE
-      postBuildProcess.executable = 'setupzip-win32.bat'
+      postBuildProcess.executable = 'setupzip-win-noarch.bat'
       postBuildProcess.workingDirectory = '<CPP>'
       postBuildProcess.options = [poUsePipes, poStderrToOutPut]
       postBuildProcess.parameters.Strings = (
         '<CPO>'
       )
       postBuildProcess.showWindow = swoHIDE
-    end  
+    end
+    item
+      name = 'win64'
+      messagesOptions.tlsInformations = True
+      outputOptions.inlining = True
+      outputOptions.boundsCheck = offAlways
+      outputOptions.optimizations = True
+      outputOptions.release = True
+      pathsOptions.outputFilename = 'output/dexed.<CPV>.win64.setup'
+      pathsOptions.importStringPaths.Strings = (
+        'win64/'
+        '<CPP>'
+      )
+      pathsOptions.forceExtension = True
+      otherOptions.dmdOtherOptions.Strings = (
+        '-m64'
+      )
+      preBuildProcess.executable = 'cmd'
+      preBuildProcess.workingDirectory = '<CPP>'
+      preBuildProcess.options = [poUsePipes, poStderrToOutPut]
+      preBuildProcess.parameters.Strings = (
+        '/c'
+        ' zip-win64.bat'
+      )
+      preBuildProcess.showWindow = swoHIDE
+      postBuildProcess.executable = 'setupzip-win-noarch.bat'
+      postBuildProcess.workingDirectory = '<CPP>'
+      postBuildProcess.options = [poUsePipes, poStderrToOutPut]
+      postBuildProcess.parameters.Strings = (
+        '<CPO>'
+      )
+      postBuildProcess.showWindow = swoHIDE
+    end
     item
       name = 'nux32'
       outputOptions.inlining = True
@@ -53,7 +85,7 @@ object CurrentProject: TCENativeProject
         'setupzip-nux-noarch.sh'
         '<CPO>'
       )
-    end  
+    end
     item
       name = 'nux64'
       outputOptions.inlining = True
@@ -83,6 +115,6 @@ object CurrentProject: TCENativeProject
   Sources.Strings = (
     'setup.d'
   )
-  ConfigurationIndex = 2
-  version = '3.6.21'
+  ConfigurationIndex = 3
+  version = '3.7.0'
 end

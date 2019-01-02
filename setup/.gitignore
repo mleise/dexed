@@ -25,5 +25,6 @@ temp
 nux32
 nux64
 win32
+win64
 output
 ppas.bat
