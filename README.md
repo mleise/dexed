@@ -36,8 +36,8 @@ Download the zipped binaries or the zip that contains the setup program for you 
 
 - :package: [setup program for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.linux64.setup.zip)
 - :package: [binaries for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.linux64.zip)
-- :package: [setup program for Windows 32/64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.win64.setup.zip)
-- :package: [binaries for Windows 32/64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.win64.zip)
+- :package: [setup program for Windows 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.win64.setup.zip)
+- :package: [binaries for Windows 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.win64.zip)
 - :package: [rpm for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed-3.7.0-0.x86_64.rpm)
 - :package: [deb for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed-3.7.0.amd64.deb)
 
