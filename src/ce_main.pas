@@ -1059,7 +1059,7 @@ begin
       if assigned(hdl) then
       mem := hdl.findDocument(dst.fProject.filename);
       if mem.isNotNil then
-        if dst.fProject.getFormat = pfCE then
+        if dst.fProject.getFormat = pfDEXED then
           mem.Highlighter := LfmSyn
         else
           mem.Highlighter := JsSyn;
@@ -2412,7 +2412,7 @@ procedure TCEMainForm.projNew(project: ICECommonProject);
 begin
   fProject := project;
   case fProject.getFormat of
-    pfCE: fNativeProject := TCENativeProject(fProject.getProject);
+    pfDEXED: fNativeProject := TCENativeProject(fProject.getProject);
     pfDUB: fDubProject := TCEDubProject(fProject.getProject);
   end;
   if not fProject.inGroup then
@@ -2440,7 +2440,7 @@ procedure TCEMainForm.projFocused(project: ICECommonProject);
 begin
   fProject := project;
   case fProject.getFormat of
-    pfCE: fNativeProject := TCENativeProject(fProject.getProject);
+    pfDEXED: fNativeProject := TCENativeProject(fProject.getProject);
     pfDUB: fDubProject := TCEDubProject(fProject.getProject);
   end;
   if not fProject.inGroup then
@@ -2723,7 +2723,7 @@ begin
   if fProject.filename = fDoc.fileName then
     exit;
 
-  if fProject.getFormat = pfCE then
+  if fProject.getFormat = pfDEXED then
   begin
     if fDoc.fileName.fileExists and not fDoc.isTemporary then
       fNativeProject.addSource(fDoc.fileName)
@@ -3831,8 +3831,13 @@ begin
   ext := fname.extractFileExt.upperCase;
   if (ext = '.JSON') or (ext = '.SDL') then
     newDubProj
+  else if ext = '.DPRJ' then
+    newNativeProj
   else
-    newNativeProj;
+  begin
+    dlgOkError('Unknown project extesion : ' + ext);
+    exit;
+  end;
 
   fProject.loadFromFile(fname);
   showProjTitle;
@@ -3881,6 +3886,7 @@ begin
   end;
   with TSaveDialog.Create(nil) do
   try
+    Filter := 'DUB json|*.json|DUB sdl|*.sdl|Dexed project|*.dprj';
     if fProject.filename.fileExists then
       InitialDir := fproject.filename.extractFileDir;
     if execute then
@@ -3916,6 +3922,7 @@ begin
       exit;
   with TOpenDialog.Create(nil) do
   try
+    Filter := 'DUB json|*.json|DUB sdl|*.sdl|Dexed project|*.dprj';
     if execute then
       openProj(filename.normalizePath);
   finally
@@ -3929,7 +3936,7 @@ var
 begin
   if assigned(fProject) then case fProject.getFormat of
     pfDUB: win := DockMaster.GetAnchorSite(fDubProjWidg);
-    pfCE: win := DockMaster.GetAnchorSite(fPrjCfWidg);
+    pfDEXED: win := DockMaster.GetAnchorSite(fPrjCfWidg);
   end
   else win := DockMaster.GetAnchorSite(fPrjCfWidg);
   if win.isNotNil then
@@ -3952,7 +3959,7 @@ begin
 
   openFile(fProject.filename);
   fDoc.isProjectDescription := true;
-  if fProject.getFormat = pfCE then
+  if fProject.getFormat = pfDEXED then
     fDoc.Highlighter := LfmSyn
   else
     fDoc.Highlighter := JsSyn;
@@ -4170,6 +4177,7 @@ begin
   end;
   with TOpenDialog.Create(nil) do
   try
+    Filter := 'Dexed project groups|*.dgrp';
     if execute then
     begin
       filename := filename.normalizePath;
@@ -4188,6 +4196,7 @@ procedure TCEMainForm.actProjSaveGroupAsExecute(Sender: TObject);
 begin
   with TSaveDialog.Create(nil) do
   try
+    Filter := 'Dexed project groups|*.dgrp';
     if fProjectGroup.groupFilename.fileExists then
       InitialDir := fProjectGroup.groupFilename.extractFileDir;
     if execute then

@@ -137,7 +137,7 @@ begin
   if not fname.fileExists then exit;
 
   fmt := projectFormat(fname);
-  if fmt in [pffCe, pffDub] then
+  if fmt in [pffDexed, pffDub] then
   begin
     if assigned(fFreeProj) then
     begin
@@ -145,7 +145,7 @@ begin
         exit;
       fFreeProj.getProject.Free;
     end;
-    if fmt = pffCe then
+    if fmt = pffDexed then
       TCENativeProject.create(nil)
     else
       TCEDubProject.create(nil);

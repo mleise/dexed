@@ -319,7 +319,7 @@ var
   ce: boolean;
   sp: integer;
 begin
-  ce := fProject.getFormat = pfCE;
+  ce := fProject.getFormat = pfDEXED;
 
   btnRemFold.Visible:= ce;
   btnAddFold.Visible:= ce;

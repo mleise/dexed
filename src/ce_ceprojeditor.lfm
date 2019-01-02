@@ -90,7 +90,6 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
       end
     end
     inherited toolbar: TCEToolBar
-      Height = 28
       Width = 437
       object btnSyncEdit: TCEToolButton[0]
         Left = 85

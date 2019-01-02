@@ -5,7 +5,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, ExtCtrls, Menus,
-  Buttons, dialogs, ComCtrls, StdCtrls,
+  Buttons, dialogs, ComCtrls, StdCtrls, LazFileUtils,
   ce_widget, ce_common, ce_interfaces, ce_writableComponent, ce_observer,
   ce_ceproject, ce_dubproject, ce_projutils, ce_sharedres, ce_dsgncontrols,
   ce_dialogs;
@@ -388,9 +388,19 @@ end;
 procedure TProjectGroup.openGroup(const fname: string);
 var
   i: integer;
+  f: string;
 begin
-  fBasePath := fname.extractFilePath;
-  loadFromFile(fname);
+  f := fname;
+  if not FilenameIsAbsolute(f) then
+    f := ExpandFileName(f);
+  if fname.extractFileExt <> '.dgrp' then
+  begin
+    dlgOkInfo('project file extension automatically updated to "dgrp"');
+    f := ChangeFileExt(fname, '.dgrp');
+    RenameFile(fname, f);
+  end;
+  fBasePath := f.extractFilePath;
+  loadFromFile(f);
   for i:= 0 to fItems.Count-1 do
     getItem(i).fGroup := self;
   doChanged;
@@ -402,8 +412,10 @@ var
   i: integer;
   c: boolean = false;
   n: string;
+  f: string;
 begin
-  n := fname.extractFilePath;
+  f := fname;
+  n := f.extractFilePath;
   if (fBasePath <> '') and (n <> fBasePath) then
   begin
     c := true;
@@ -415,7 +427,8 @@ begin
   if c then for i:= 0 to projectCount-1 do
     getItem(i).fFilename := ExtractRelativepath(n, getItem(i).fFilename);
   fBasePath := n;
-  saveToFile(fname);
+  f := ChangeFileExt(f, '.dgrp');
+  saveToFile(f);
   fModified := false;
 end;
 
@@ -760,7 +773,7 @@ var
   prj: TProjectGroupItem;
   fmt: TCEProjectFormat;
 const
-  typeStr: array[TCEProjectFormat] of string = ('CE','DUB');
+  typeStr: array[TCEProjectFormat] of string = ('DEXED','DUB');
 begin
   if fUpdating then
     exit;
@@ -777,7 +790,7 @@ begin
       Data:= prj;
       fmt := prj.project.getFormat;
       case fmt of
-        pfCE: Caption := prj.fFilename.extractFileName;
+        pfDEXED: Caption := prj.fFilename.extractFileName;
         pfDUB: Caption := TCEDubProject(prj.project.getProject).packageName;
       end;
       SubItems.Add(typeStr[fmt]);
@@ -797,7 +810,7 @@ begin
   begin
     if fFreeProj.filename.fileExists then
       case fFreeProj.getFormat of
-        pfCE: StaticText1.Caption:= 'Free standing: ' + fFreeProj.filename.extractFileName;
+        pfDEXED: StaticText1.Caption:= 'Free standing: ' + fFreeProj.filename.extractFileName;
         pfDUB: StaticText1.Caption:= 'Free standing: ' + TCEDubProject(fFreeProj.getProject).packageName;
       end
     else

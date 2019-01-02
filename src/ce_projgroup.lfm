@@ -160,7 +160,7 @@ inherited CEProjectGroupWidget: TCEProjectGroupWidget
       end
       object button0: TCEToolButton[5]
         Left = 113
-        Height = 28
+        Height = 5
         Top = 0
         AutoSize = True
         Caption = 'button0'

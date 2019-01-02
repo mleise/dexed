@@ -603,7 +603,7 @@ begin
   fDoc.loadFromFile(TrimFilename(fname));
   if assigned(fProj) and (fProj.filename = fDoc.fileName) then
   begin
-    if fProj.getFormat = pfCE then
+    if fProj.getFormat = pfDEXED then
       fDoc.Highlighter := LfmSyn
     else
       fDoc.Highlighter := JsSyn;

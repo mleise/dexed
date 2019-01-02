@@ -209,7 +209,7 @@ end;
 
 function TCENativeProject.getFormat: TCEProjectFormat;
 begin
-  exit(pfCE);
+  exit(pfDEXED);
 end;
 
 function TCENativeProject.getProject: TObject;
@@ -271,6 +271,12 @@ begin
   f := fname;
   if not FilenameIsAbsolute(f) then
     f := ExpandFileName(f);
+  if fname.extractFileExt <> '.dprj' then
+  begin
+    dlgOkInfo('project file extension automatically updated to "dprj"');
+    f := ChangeFileExt(fname, '.dprj');
+    RenameFile(fname, f);
+  end;
   fbasePath := f.extractFilePath;
   inherited customLoadFromFile(f);
 end;
@@ -278,13 +284,15 @@ end;
 procedure TCENativeProject.customSaveToFile(const fname: string);
 var
   oldAbs, newRel, oldBase: string;
+  f: string;
   i: NativeInt;
 begin
   beginUpdate;
-  if fname <> fFilename then
+  f := fname;
+  if f <> fFilename then
     inGroup(false);
   oldBase := fBasePath;
-  fBasePath := fname.extractFilePath;
+  fBasePath := f.extractFilePath;
   //
   for i:= 0 to fSrcs.Count-1 do
   begin
@@ -293,7 +301,8 @@ begin
     fSrcs[i] := newRel;
   end;
   endUpdate;
-  inherited customSaveToFile(fname);
+  f := ChangeFileExt(f, '.dprj');
+  inherited customSaveToFile(f);
 end;
 
 procedure TCENativeProject.setLibAliases(value: TStringList);

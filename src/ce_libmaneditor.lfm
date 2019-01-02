@@ -111,7 +111,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
       end
       object button5: TCEToolButton[5]
         Left = 225
-        Height = 28
+        Height = 5
         Top = 0
         AutoSize = True
         Caption = 'button8'

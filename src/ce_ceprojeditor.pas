@@ -98,7 +98,7 @@ procedure TCEProjectConfigurationWidget.projNew(project: ICECommonProject);
 begin
   fProj := nil;
   enabled := false;
-  if project.getFormat <> pfCE then
+  if project.getFormat <> pfDEXED then
     exit;
   enabled := true;
   //
@@ -132,7 +132,7 @@ procedure TCEProjectConfigurationWidget.projFocused(project: ICECommonProject);
 begin
   fProj := nil;
   enabled := false;
-  if project.getFormat <> pfCE then
+  if project.getFormat <> pfDEXED then
     exit;
   enabled := true;
   //

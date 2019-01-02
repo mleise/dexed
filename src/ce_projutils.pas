@@ -9,7 +9,7 @@ uses
   ce_dlang, ce_stringrange;
 
 type
-  TCEProjectFileFormat = (pffNone, pffCe, pffDub);
+  TCEProjectFileFormat = (pffNone, pffDexed, pffDub);
 
   TLexNameCallback = class
   private
@@ -61,8 +61,10 @@ begin
   ext := filename.extractFileExt.upperCase;
   if (ext = '.JSON') or (ext = '.SDL') then
     result := isValidDubProject(filename)
+  else if (ext = '.DPRJ') then
+    result := isValidNativeProject(filename)
   else
-    result := isValidNativeProject(filename);
+    result := false;
 end;
 
 function projectFormat(const filename: string): TCEProjectFileFormat;
@@ -76,8 +78,8 @@ begin
     if isValidDubProject(filename) then
       result := pffDub;
   end
-  else
-    if isValidNativeProject(filename) then result := pffCe;
+  else if (ext = '.DPRJ') and isValidNativeProject(filename) then
+    result := pffDexed;
 end;
 
 function loadProject(const filename: string; discret: boolean): ICECommonProject;

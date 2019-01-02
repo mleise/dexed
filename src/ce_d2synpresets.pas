@@ -627,7 +627,7 @@ begin
   fList.Align:= alClient;
   fList.BorderSpacing.Around:= 2;
   fList.Parent := pnl;
-  fList.ReadOnly:=true;
+  fList.Style:=csDropDownList;
   fList.OnSelect:= @lstBoxSelChange;
   fList.AutoSize := true;
   updateList;

@@ -97,7 +97,7 @@ procedure TCESymbolExpander.projNew(project: ICECommonProject);
 begin
   fProjInterface := project;
   case project.getFormat of
-    pfCE: fProj := TCENativeProject(project.getProject);
+    pfDEXED: fProj := TCENativeProject(project.getProject);
     pfDUB: fProj := nil;
   end;
   fNeedUpdate := true;
@@ -116,7 +116,7 @@ procedure TCESymbolExpander.projFocused(project: ICECommonProject);
 begin
   fProjInterface := project;
   case project.getFormat of
-    pfCE: fProj := TCENativeProject(project.getProject);
+    pfDEXED: fProj := TCENativeProject(project.getProject);
     pfDUB: fProj := nil;
   end;
   fNeedUpdate := true;
