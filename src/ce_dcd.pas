@@ -19,11 +19,11 @@ type
   (**
    * Wrap the dcd-server and dcd-client processes.
    *
-   * Projects folders are automatically imported: ICEProjectObserver.
+   * Projects folders are automatically imported: IProjectObserver.
    * Completion, hints and declaration finder automatically work on the current
-   *   document: ICEDocumentObserver.
+   *   document: IDocumentObserver.
    *)
-  TCEDcdWrapper = class(TWritableLfmTextComponent, ICEProjectObserver, ICEDocumentObserver)
+  TDcdWrapper = class(TWritableLfmTextComponent, IProjectObserver, IDocumentObserver)
   private
     fTempLines: TStringList;
     fInputSource: string;
@@ -34,8 +34,8 @@ type
     fClient, fServer: TProcess;
     fAvailable: boolean;
     fServerListening: boolean;
-    fDoc: TCESynMemo;
-    fProj: ICECommonProject;
+    fDoc: TDexedMemo;
+    fProj: ICommonProject;
     fPortAsProcParam: string;
     fVersion: TSemVer;
     fCanRemove: boolean;
@@ -49,17 +49,17 @@ type
     procedure tryAddTcpParams; {$IFNDEF DEBUG}inline;{$ENDIF}
     procedure updateImportPathsFromProject;
     //
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
     //
-    procedure docNew(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
   published
     property port: word read fPortNum write fPortNum default 0;
   public
@@ -83,12 +83,12 @@ type
     property launchedByCe: boolean read getIfLaunched;
   end;
 
-    function DCDWrapper: TCEDcdWrapper;
+    function DCDWrapper: TDcdWrapper;
 
 implementation
 
 var
-  fDcdWrapper: TCEDcdWrapper = nil;
+  fDcdWrapper: TDcdWrapper = nil;
 
 const
   clientName = 'dcd-client' + exeExt;
@@ -97,7 +97,7 @@ const
 
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEDcdWrapper.create(aOwner: TComponent);
+constructor TDcdWrapper.create(aOwner: TComponent);
 var
   fname: string;
   i: integer = 0;
@@ -165,7 +165,7 @@ begin
   EntitiesConnector.addObserver(self);
 end;
 
-class function TCEDcdWrapper.noDcdPassedAsArg(): boolean;
+class function TDcdWrapper.noDcdPassedAsArg(): boolean;
 var
   i: integer;
 begin
@@ -178,23 +178,23 @@ begin
   end;
 end;
 
-class procedure TCEDcdWrapper.relaunch;
+class procedure TDcdWrapper.relaunch;
 begin
   fDcdWrapper.Free;
-  fDcdWrapper := TCEDcdWrapper.create(nil);
+  fDcdWrapper := TDcdWrapper.create(nil);
 end;
 
-function TCEDcdWrapper.getIfLaunched: boolean;
+function TDcdWrapper.getIfLaunched: boolean;
 begin
   result := fServer.isNotNil;
 end;
 
-procedure TCEDcdWrapper.updateServerlistening;
+procedure TDcdWrapper.updateServerlistening;
 begin
   fServerListening := AppIsRunning((serverName));
 end;
 
-destructor TCEDcdWrapper.destroy;
+destructor TDcdWrapper.destroy;
 var
   i: integer = 0;
 begin
@@ -223,8 +223,8 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEDcdWrapper.updateImportPathsFromProject;
+{$REGION IProjectObserver ----------------------------------------------------}
+procedure TDcdWrapper.updateImportPathsFromProject;
 var
   i: Integer;
   fold: string;
@@ -250,57 +250,57 @@ begin
   end;
 end;
 
-procedure TCEDcdWrapper.projNew(project: ICECommonProject);
+procedure TDcdWrapper.projNew(project: ICommonProject);
 begin
   fProj := project;
 end;
 
-procedure TCEDcdWrapper.projChanged(project: ICECommonProject);
+procedure TDcdWrapper.projChanged(project: ICommonProject);
 begin
   if (fProj = nil) or (fProj <> project) then
     exit;
   updateImportPathsFromProject();
 end;
 
-procedure TCEDcdWrapper.projClosing(project: ICECommonProject);
+procedure TDcdWrapper.projClosing(project: ICommonProject);
 begin
   if fProj <> project then
     exit;
   fProj := nil;
 end;
 
-procedure TCEDcdWrapper.projFocused(project: ICECommonProject);
+procedure TDcdWrapper.projFocused(project: ICommonProject);
 begin
   fProj := project;
   updateImportPathsFromProject();
 end;
 
-procedure TCEDcdWrapper.projCompiling(project: ICECommonProject);
+procedure TDcdWrapper.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEDcdWrapper.projCompiled(project: ICECommonProject; success: boolean);
+procedure TDcdWrapper.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEDcdWrapper.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TDcdWrapper.docNew(document: TDexedMemo);
 begin
   fDoc := document;
 end;
 
-procedure TCEDcdWrapper.docFocused(document: TCESynMemo);
+procedure TDcdWrapper.docFocused(document: TDexedMemo);
 begin
   fDoc := document;
 end;
 
-procedure TCEDcdWrapper.docChanged(document: TCESynMemo);
+procedure TDcdWrapper.docChanged(document: TDexedMemo);
 begin
   if fDoc <> document then exit;
 end;
 
-procedure TCEDcdWrapper.docClosing(document: TCESynMemo);
+procedure TDcdWrapper.docClosing(document: TDexedMemo);
 begin
   if fDoc <> document then exit;
   fDoc := nil;
@@ -308,13 +308,13 @@ end;
 {$ENDREGION}
 
 {$REGION DCD things ------------------------------------------------------------}
-procedure TCEDcdWrapper.terminateClient;
+procedure TDcdWrapper.terminateClient;
 begin
   if fClient.Running then
     fClient.Terminate(0);
 end;
 
-function TCEDcdWrapper.checkDcdSocket: boolean;
+function TDcdWrapper.checkDcdSocket: boolean;
 var
   str: string;
   prt: word = 9166;
@@ -372,7 +372,7 @@ begin
   exit(result);
 end;
 
-procedure TCEDcdWrapper.tryAddTcpParams;
+procedure TDcdWrapper.tryAddTcpParams;
 begin
   if fCurrentSessionPortNum <> 0 then
   begin
@@ -381,7 +381,7 @@ begin
   end;
 end;
 
-procedure TCEDcdWrapper.killServer;
+procedure TDcdWrapper.killServer;
 begin
   if not fAvailable or not fServerListening then
     exit;
@@ -394,20 +394,20 @@ begin
     sleep(50);
 end;
 
-procedure TCEDcdWrapper.waitClient;
+procedure TDcdWrapper.waitClient;
 begin
   while fClient.Running do
     sleep(5);
 end;
 
-procedure TCEDcdWrapper.writeSourceToInput;
+procedure TDcdWrapper.writeSourceToInput;
 begin
   fInputSource := fDoc.Text;
   fClient.Input.Write(fInputSource[1], fInputSource.length);
   fClient.CloseInput;
 end;
 
-procedure TCEDcdWrapper.addImportFolder(const folder: string);
+procedure TDcdWrapper.addImportFolder(const folder: string);
 begin
   if not fAvailable or not fServerListening or fImportCache.contains(folder) then
     exit;
@@ -420,7 +420,7 @@ begin
   while fClient.Running do ;
 end;
 
-procedure TCEDcdWrapper.addImportFolders(const folders: TStrings);
+procedure TDcdWrapper.addImportFolders(const folders: TStrings);
 var
   i: string;
   c: integer;
@@ -446,7 +446,7 @@ begin
   end;
 end;
 
-procedure TCEDcdWrapper.remImportFolder(const folder: string);
+procedure TDcdWrapper.remImportFolder(const folder: string);
 begin
   if not fCanRemove then
     exit;
@@ -461,7 +461,7 @@ begin
   while fClient.Running do ;
 end;
 
-procedure TCEDcdWrapper.remImportFolders(const folders: TStrings);
+procedure TDcdWrapper.remImportFolders(const folders: TStrings);
 var
   i: string;
   c: integer;
@@ -489,7 +489,7 @@ begin
   end;
 end;
 
-procedure TCEDcdWrapper.getCallTip(out tips: string);
+procedure TDcdWrapper.getCallTip(out tips: string);
 begin
   if not fAvailable or not fServerListening or fDoc.isNil then
     exit;
@@ -535,7 +535,7 @@ begin
     result := CompareStr(list[Index1], list[Index2]);
 end;
 
-procedure TCEDcdWrapper.getComplAtCursor(list: TStringList);
+procedure TDcdWrapper.getComplAtCursor(list: TStringList);
 var
   i: Integer;
   kind: Char;
@@ -595,7 +595,7 @@ begin
   //list.CustomSort(@compareknd);
 end;
 
-procedure TCEDcdWrapper.getDdocFromCursor(out comment: string);
+procedure TDcdWrapper.getDdocFromCursor(out comment: string);
 var
   i: Integer;
   len: Integer;
@@ -645,7 +645,7 @@ begin
   end;
 end;
 
-procedure TCEDcdWrapper.getDeclFromCursor(out fname: string; out position: Integer);
+procedure TDcdWrapper.getDeclFromCursor(out fname: string; out position: Integer);
 var
    i: Integer;
    str, loc: string;
@@ -682,7 +682,7 @@ begin
   else updateServerlistening;
 end;
 
-procedure TCEDcdWrapper.getLocalSymbolUsageFromCursor(var locs: TIntOpenArray);
+procedure TDcdWrapper.getLocalSymbolUsageFromCursor(var locs: TIntOpenArray);
 var
    i: Integer;
    str: string;
@@ -716,10 +716,10 @@ begin
 end;
 {$ENDREGION}
 
-function DCDWrapper: TCEDcdWrapper;
+function DCDWrapper: TDcdWrapper;
 begin
   if fDcdWrapper.isNil then
-    fDcdWrapper := TCEDcdWrapper.create(nil);
+    fDcdWrapper := TDcdWrapper.create(nil);
   exit(fDcdWrapper);
 end;
 

@@ -75,7 +75,7 @@ type
 
   { TCompilersPathsEditor }
 
-  TCompilersPathsEditor = class(TForm, ICEEditableOptions, ICECompilerSelector, ICEProjectObserver)
+  TCompilersPathsEditor = class(TForm, IEditableOptions, ICompilerSelector, IProjectObserver)
     selDefault: TComboBox;
     selDMDrt: TDirectoryEdit;
     selUSER2std: TDirectoryEdit;
@@ -118,7 +118,7 @@ type
   strict private
     fPaths: TCompilersPaths;
     fPathsBackup: TCompilersPaths;
-    fProj: ICECommonProject;
+    fProj: ICommonProject;
     procedure editedExe(sender: TObject);
     procedure editedRt(sender: TObject);
     procedure editedStd(sender: TObject);
@@ -142,12 +142,12 @@ type
     function getCompilerPath(value: DCompiler): string;
     procedure getCompilerImports(value: DCompiler; paths: TStrings);
     //
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
     procedure updateDCD;
   public
     constructor create(aOwner: TComponent); override;
@@ -420,36 +420,36 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCompilersPathsEditor.projNew(project: ICECommonProject);
+{$REGION IProjectObserver ----------------------------------------------------}
+procedure TCompilersPathsEditor.projNew(project: ICommonProject);
 begin
 end;
 
-procedure TCompilersPathsEditor.projChanged(project: ICECommonProject);
+procedure TCompilersPathsEditor.projChanged(project: ICommonProject);
 begin
 end;
 
-procedure TCompilersPathsEditor.projClosing(project: ICECommonProject);
+procedure TCompilersPathsEditor.projClosing(project: ICommonProject);
 begin
   if fProj = project then
     fProj := nil;
 end;
 
-procedure TCompilersPathsEditor.projFocused(project: ICECommonProject);
+procedure TCompilersPathsEditor.projFocused(project: ICommonProject);
 begin
   fProj := project;
 end;
 
-procedure TCompilersPathsEditor.projCompiling(project: ICECommonProject);
+procedure TCompilersPathsEditor.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCompilersPathsEditor.projCompiled(project: ICECommonProject; success: boolean);
+procedure TCompilersPathsEditor.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
-{$REGION ICEEditableOptions ----------------------------------------------------}
+{$REGION IEditableOptions ----------------------------------------------------}
 function TCompilersPathsEditor.optionedWantCategory(): string;
 begin
   exit('Compilers paths');
@@ -504,10 +504,10 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICECompilerSelector ---------------------------------------------------}
+{$REGION ICompilerSelector ---------------------------------------------------}
 function TCompilersPathsEditor.singleServiceName: string;
 begin
-  exit('ICECompilerSelector');
+  exit('ICompilerSelector');
 end;
 
 function TCompilersPathsEditor.isCompilerValid(value: DCompiler): boolean;

@@ -1,4 +1,4 @@
-object CEShortcutEditor: TCEShortcutEditor
+object ShortcutEditor: TShortcutEditor
   Left = 0
   Height = 449
   Top = 0
@@ -7,6 +7,8 @@ object CEShortcutEditor: TCEShortcutEditor
   ClientHeight = 449
   ClientWidth = 424
   TabOrder = 0
+  DesignLeft = -1
+  DesignTop = -1
   object Panel1: TPanel
     Left = 0
     Height = 449
@@ -25,9 +27,9 @@ object CEShortcutEditor: TCEShortcutEditor
       Width = 420
       OnFilterItem = fltItemsFilterItem
       ButtonWidth = 28
-      NumGlyphs = 1
       Align = alTop
       BorderSpacing.Around = 2
+      NumGlyphs = 1
       MaxLength = 0
       TabOrder = 0
       FilteredTreeview = tree

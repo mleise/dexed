@@ -16,7 +16,7 @@ type
   TTodoColumn = (filename, line, text, priority, assignee, category, status);
   TTodoColumns = set of TTodoColumn;
 
-  TCETodoOptions = class(TWritableLfmTextComponent)
+  TTodoOptions = class(TWritableLfmTextComponent)
   private
     fAutoRefresh: boolean;
     fSingleClick: boolean;
@@ -73,11 +73,11 @@ type
     property item[index: integer]: TTodoItem read getItem; default;
   end;
 
-  { TCETodoListWidget }
+  { TTodoListWidget }
 
-  TCETodoListWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver, ICEEditableOptions)
-    btnGo: TCEToolButton;
-    btnRefresh: TCEToolButton;
+  TTodoListWidget = class(TDexedWidget, IDocumentObserver, IProjectObserver, IEditableOptions)
+    btnGo: TDexedToolButton;
+    btnRefresh: TDexedToolButton;
     lstItems: TListView;
     lstfilter: TListFilterEdit;
     mnuAutoRefresh: TMenuItem;
@@ -88,25 +88,25 @@ type
     fAutoRefresh: Boolean;
     fSingleClick: Boolean;
     fColumns: TTodoColumns;
-    fProj: ICECommonProject;
-    fDoc: TCESynMemo;
-    fToolProc: TCEProcess;
+    fProj: ICommonProject;
+    fDoc: TDexedMemo;
+    fToolProc: TDexedProcess;
     fTodos: TTodoItems;
-    fMsgs: ICEMessagesDisplay;
-    fOptions: TCETodoOptions;
-    // ICEDocumentObserver
-    procedure docNew(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
-    // ICEProjectObserver
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
-    // ICEEditableOptions
+    fMsgs: IMessagesDisplay;
+    fOptions: TTodoOptions;
+    // IDocumentObserver
+    procedure docNew(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
+    // IProjectObserver
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
+    // IEditableOptions
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -201,7 +201,7 @@ end;
 {$ENDREGIOn}
 
 {$REGION Standard Comp/Obj -----------------------------------------------------}
-constructor TCETodoListWidget.Create(aOwner: TComponent);
+constructor TTodoListWidget.Create(aOwner: TComponent);
 var
   fname: string;
 begin
@@ -215,7 +215,7 @@ begin
   lstfilter.BorderSpacing.Left := scaleX(58, 96);
 
   columns:= [TTodoColumn.filename .. TTodoColumn.line];
-  fOptions := TCETodoOptions.Create(self);
+  fOptions := TTodoOptions.Create(self);
   fOptions.autoRefresh := True;
   fOptions.Name := 'todolistOptions';
 
@@ -240,14 +240,14 @@ begin
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCETodoListWidget.Destroy;
+destructor TTodoListWidget.Destroy;
 begin
   fOptions.saveToFile(getDocPath + OptFname);
   killToolProcess;
   inherited;
 end;
 
-procedure TCETodoListWidget.SetVisible(value: boolean);
+procedure TTodoListWidget.SetVisible(value: boolean);
 begin
   inherited;
   if value and fAutoRefresh then
@@ -255,21 +255,21 @@ begin
   refreshVisibleColumns;
 end;
 
-procedure TCETodoListWidget.setToolBarFlat(value: boolean);
+procedure TTodoListWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolBarFlat(value);
   lstfilter.Flat:=value;
 end;
 {$ENDREGION}
 
-{$REGION ICEEditableOptions ----------------------------------------------------}
-procedure TCETodoOptions.AssignTo(target: TPersistent);
+{$REGION IEditableOptions ----------------------------------------------------}
+procedure TTodoOptions.AssignTo(target: TPersistent);
 var
-  widg: TCETodoListWidget;
+  widg: TTodoListWidget;
 begin
-  if target is TCETodoListWidget then
+  if target is TTodoListWidget then
   begin
-    widg := TCETodoListWidget(target);
+    widg := TTodoListWidget(target);
     widg.singleClickSelect := fSingleClick;
     widg.autoRefresh := fAutoRefresh;
     widg.columns := fColumns;
@@ -278,13 +278,13 @@ begin
     inherited;
 end;
 
-procedure TCETodoOptions.Assign(source: TPersistent);
+procedure TTodoOptions.Assign(source: TPersistent);
 var
-  widg: TCETodoListWidget;
+  widg: TTodoListWidget;
 begin
-  if source is TCETodoListWidget then
+  if source is TTodoListWidget then
   begin
-    widg := TCETodoListWidget(source);
+    widg := TTodoListWidget(source);
     fSingleClick := widg.singleClickSelect;
     fAutoRefresh := widg.autoRefresh;
     fColumns:=widg.columns;
@@ -293,41 +293,41 @@ begin
     inherited;
 end;
 
-function TCETodoListWidget.optionedWantCategory(): string;
+function TTodoListWidget.optionedWantCategory(): string;
 begin
   exit('Todo list');
 end;
 
-function TCETodoListWidget.optionedWantEditorKind: TOptionEditorKind;
+function TTodoListWidget.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekGeneric);
 end;
 
-function TCETodoListWidget.optionedWantContainer: TPersistent;
+function TTodoListWidget.optionedWantContainer: TPersistent;
 begin
   fOptions.Assign(self);
   exit(fOptions);
 end;
 
-procedure TCETodoListWidget.optionedEvent(event: TOptionEditorEvent);
+procedure TTodoListWidget.optionedEvent(event: TOptionEditorEvent);
 begin
   if event <> oeeAccept then
     exit;
   fOptions.AssignTo(self);
 end;
 
-function TCETodoListWidget.optionedOptionsModified: boolean;
+function TTodoListWidget.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCETodoListWidget.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TTodoListWidget.docNew(document: TDexedMemo);
 begin
 end;
 
-procedure TCETodoListWidget.docFocused(document: TCESynMemo);
+procedure TTodoListWidget.docFocused(document: TDexedMemo);
 begin
   if document = fDoc then
     exit;
@@ -336,11 +336,11 @@ begin
     callToolProcess;
 end;
 
-procedure TCETodoListWidget.docChanged(document: TCESynMemo);
+procedure TTodoListWidget.docChanged(document: TDexedMemo);
 begin
 end;
 
-procedure TCETodoListWidget.docClosing(document: TCESynMemo);
+procedure TTodoListWidget.docClosing(document: TDexedMemo);
 begin
   if fDoc <> document then
     exit;
@@ -350,13 +350,13 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCETodoListWidget.projNew(project: ICECommonProject);
+{$REGION IProjectObserver ----------------------------------------------------}
+procedure TTodoListWidget.projNew(project: ICommonProject);
 begin
   fProj := project;
 end;
 
-procedure TCETodoListWidget.projChanged(project: ICECommonProject);
+procedure TTodoListWidget.projChanged(project: ICommonProject);
 begin
   if fProj <> project then
     exit;
@@ -364,7 +364,7 @@ begin
     callToolProcess;
 end;
 
-procedure TCETodoListWidget.projClosing(project: ICECommonProject);
+procedure TTodoListWidget.projClosing(project: ICommonProject);
 begin
   if fProj <> project then
     exit;
@@ -373,7 +373,7 @@ begin
     callToolProcess;
 end;
 
-procedure TCETodoListWidget.projFocused(project: ICECommonProject);
+procedure TTodoListWidget.projFocused(project: ICommonProject);
 begin
   if project = fProj then
     exit;
@@ -382,17 +382,17 @@ begin
     callToolProcess;
 end;
 
-procedure TCETodoListWidget.projCompiling(project: ICECommonProject);
+procedure TTodoListWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCETodoListWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TTodoListWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
 {$REGION Todo list things ------------------------------------------------------}
-function TCETodoListWidget.getContext: TTodoContext;
+function TTodoListWidget.getContext: TTodoContext;
 begin
   if (fProj = nil) and fDoc.isNil then
     exit(tcNone);
@@ -407,7 +407,7 @@ begin
     exit(tcFile);
 end;
 
-procedure TCETodoListWidget.killToolProcess;
+procedure TTodoListWidget.killToolProcess;
 begin
   if fToolProc.isNil then
     exit;
@@ -417,7 +417,7 @@ begin
   fToolProc := nil;
 end;
 
-procedure TCETodoListWidget.callToolProcess;
+procedure TTodoListWidget.callToolProcess;
 var
   ctxt: TTodoContext;
   i,j: integer;
@@ -435,7 +435,7 @@ begin
     exit;
   //
   killToolProcess;
-  fToolProc := TCEProcess.Create(nil);
+  fToolProc := TDexedProcess.Create(nil);
   fToolProc.Executable := exeFullName(ToolExeName);
   fToolProc.Options := [poUsePipes];
   fToolProc.ShowWindow := swoHIDE;
@@ -464,7 +464,7 @@ begin
   fToolProc.CloseInput;
 end;
 
-procedure TCETodoListWidget.procOutputDbg(Sender: TObject);
+procedure TTodoListWidget.procOutputDbg(Sender: TObject);
 var
   str: TStringList;
   msg: string;
@@ -486,7 +486,7 @@ begin
   end;
 end;
 
-procedure TCETodoListWidget.toolTerminated(Sender: TObject);
+procedure TTodoListWidget.toolTerminated(Sender: TObject);
 begin
   fToolProc.OutputStack.Position := 0;
   fTodos.loadFromTxtStream(fToolProc.OutputStack);
@@ -494,13 +494,13 @@ begin
   fToolProc.OnTerminate := nil;
 end;
 
-procedure TCETodoListWidget.clearTodoList;
+procedure TTodoListWidget.clearTodoList;
 begin
   lstItems.Clear;
   fTodos.items.Clear;
 end;
 
-procedure TCETodoListWidget.fillTodoList;
+procedure TTodoListWidget.fillTodoList;
 var
   i: integer;
   src: TTodoItem;
@@ -548,7 +548,7 @@ begin
   end;
 end;
 
-procedure TCETodoListWidget.handleListClick(Sender: TObject);
+procedure TTodoListWidget.handleListClick(Sender: TObject);
 var
   itm: TTodoItem;
   fname, ln: string;
@@ -572,18 +572,18 @@ begin
   fDoc.SelectLine;
 end;
 
-procedure TCETodoListWidget.mnuAutoRefreshClick(Sender: TObject);
+procedure TTodoListWidget.mnuAutoRefreshClick(Sender: TObject);
 begin
   autoRefresh := mnuAutoRefresh.Checked;
   fOptions.autoRefresh := autoRefresh;
 end;
 
-procedure TCETodoListWidget.toolbarResize(Sender: TObject);
+procedure TTodoListWidget.toolbarResize(Sender: TObject);
 begin
   lstfilter.Width := toolbar.Width - lstfilter.Left - lstfilter.BorderSpacing.Around;
 end;
 
-procedure TCETodoListWidget.lstItemsColumnClick(Sender: TObject; Column: TListColumn);
+procedure TTodoListWidget.lstItemsColumnClick(Sender: TObject; Column: TListColumn);
 var
   curr: TListItem;
 begin
@@ -602,7 +602,7 @@ begin
   lstItems.EndUpdate;
 end;
 
-procedure TCETodoListWidget.lstItemsCompare(Sender: TObject; item1, item2: TListItem; Data: Integer; var Compare: Integer);
+procedure TTodoListWidget.lstItemsCompare(Sender: TObject; item1, item2: TListItem; Data: Integer; var Compare: Integer);
 var
   txt1: string = '';
   txt2: string = '';
@@ -627,17 +627,17 @@ begin
     Compare := -Compare;
 end;
 
-procedure TCETodoListWidget.btnRefreshClick(Sender: TObject);
+procedure TTodoListWidget.btnRefreshClick(Sender: TObject);
 begin
   callToolProcess;
 end;
 
-procedure TCETodoListWidget.filterItems(Sender: TObject);
+procedure TTodoListWidget.filterItems(Sender: TObject);
 begin
   fillTodoList;
 end;
 
-procedure TCETodoListWidget.setSingleClick(value: boolean);
+procedure TTodoListWidget.setSingleClick(value: boolean);
 begin
   fSingleClick := value;
   if fSingleClick then
@@ -652,7 +652,7 @@ begin
   end;
 end;
 
-procedure TCETodoListWidget.setAutoRefresh(value: boolean);
+procedure TTodoListWidget.setAutoRefresh(value: boolean);
 begin
   fAutoRefresh := value;
   mnuAutoRefresh.Checked := value;
@@ -660,13 +660,13 @@ begin
     callToolProcess;
 end;
 
-procedure TCETodoListWidget.setColumns(value: TTodoColumns);
+procedure TTodoListWidget.setColumns(value: TTodoColumns);
 begin
   fColumns := value;
   refreshVisibleColumns;
 end;
 
-procedure TCETodoListWidget.refreshVisibleColumns;
+procedure TTodoListWidget.refreshVisibleColumns;
 begin
   if lstItems.isNil then exit;
   if lstItems.Columns.isNil then exit;

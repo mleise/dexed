@@ -12,7 +12,7 @@ uses
 type
 
   // Terminal options
-  TCETerminalOptionsBase = class(TWritableLfmTextComponent)
+  TTerminalOptionsBase = class(TWritableLfmTextComponent)
   private
     fBackgroundColor: TColor;
     fForegroundColor: TColor;
@@ -39,9 +39,9 @@ type
   end;
 
   // Editable and reversible Terminal options
-  TCETerminalOptions = class(TCETerminalOptionsBase, ICEEditableOptions)
+  TTerminalOptions = class(TTerminalOptionsBase, IEditableOptions)
   private
-    fBackup: TCETerminalOptionsBase;
+    fBackup: TTerminalOptionsBase;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -52,29 +52,29 @@ type
     procedure applyChanges;
   end;
 
-  { TCETermWidget }
+  { TTermWidget }
 
-  TCETermWidget = class(TCEWidget, ICEDocumentObserver, ICEProjectObserver, ICEMiniExplorerObserver)
+  TTermWidget = class(TDexedWidget, IDocumentObserver, IProjectObserver, IMiniExplorerObserver)
     procedure ContentPaint(Sender: TObject);
   private
     fTerm: TTerminal;
-    fOpts: TCETerminalOptions;
+    fOpts: TTerminalOptions;
     fLastCd: string;
     fNeedApplyChanges: boolean;
 
-    procedure docNew(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
 
     procedure mnexDirectoryChanged(const directory: string);
 
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
 
   protected
 
@@ -92,7 +92,7 @@ implementation
 const
   optFname = 'terminal.txt';
 
-constructor TCETerminalOptionsBase.create(AOwner: TComponent);
+constructor TTerminalOptionsBase.create(AOwner: TComponent);
 begin
   inherited;
   fFont := TFont.Create;
@@ -104,24 +104,24 @@ begin
   fScrollbackLines:=512;
 end;
 
-destructor TCETerminalOptionsBase.destroy;
+destructor TTerminalOptionsBase.destroy;
 begin
   fFont.Free;
   inherited;
 end;
 
-procedure TCETerminalOptionsBase.setFont(value: TFont);
+procedure TTerminalOptionsBase.setFont(value: TFont);
 begin
   fFont.Assign(value);
 end;
 
-procedure TCETerminalOptionsBase.assign(value: TPersistent);
+procedure TTerminalOptionsBase.assign(value: TPersistent);
 var
-  s: TCETerminalOptionsBase;
+  s: TTerminalOptionsBase;
 begin
-  if value is TCETerminalOptionsBase then
+  if value is TTerminalOptionsBase then
   begin
-    s := TCETerminalOptionsBase(value);
+    s := TTerminalOptionsBase(value);
     fBackgroundColor:=s.fbackgroundColor;
     fForegroundColor:=s.fForegroundColor;
     fSelectedColor:=s.fSelectedColor;
@@ -136,17 +136,17 @@ begin
   else inherited;
 end;
 
-constructor TCETerminalOptions.Create(AOwner: TComponent);
+constructor TTerminalOptions.Create(AOwner: TComponent);
 begin
   inherited;
-  fBackup := TCETerminalOptionsBase.Create(self);
+  fBackup := TTerminalOptionsBase.Create(self);
 end;
 
-procedure TCETerminalOptions.applyChanges;
+procedure TTerminalOptions.applyChanges;
 var
-  w: TCETermWidget;
+  w: TTermWidget;
 begin
-  w := TCETermWidget(owner);
+  w := TTermWidget(owner);
   w.fTerm.backgroundColor:= backgroundColor;
   w.fTerm.foregroundColor:= foregroundColor;
   w.fTerm.selectedColor:= selectedColor;
@@ -159,22 +159,22 @@ begin
   w.fTerm.scrollbackLines:=fScrollbackLines;
 end;
 
-function TCETerminalOptions.optionedWantCategory(): string;
+function TTerminalOptions.optionedWantCategory(): string;
 begin
   result := 'Terminal';
 end;
 
-function TCETerminalOptions.optionedWantEditorKind: TOptionEditorKind;
+function TTerminalOptions.optionedWantEditorKind: TOptionEditorKind;
 begin
   result := oekGeneric;
 end;
 
-function TCETerminalOptions.optionedWantContainer: TPersistent;
+function TTerminalOptions.optionedWantContainer: TPersistent;
 begin
   result := self;
 end;
 
-procedure TCETerminalOptions.optionedEvent(event: TOptionEditorEvent);
+procedure TTerminalOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
     oeeAccept:
@@ -194,12 +194,12 @@ begin
   end;
 end;
 
-function TCETerminalOptions.optionedOptionsModified: boolean;
+function TTerminalOptions.optionedOptionsModified: boolean;
 begin
   result := false;
 end;
 
-constructor TCETermWidget.create(aOwner: TComponent);
+constructor TTermWidget.create(aOwner: TComponent);
 var
   f: string;
 begin
@@ -210,7 +210,7 @@ begin
   fTerm.BorderSpacing.Around:=4;
   fterm.Parent := self;
 
-  fOpts:= TCETerminalOptions.Create(self);
+  fOpts:= TTerminalOptions.Create(self);
 
   f := getDocPath + optFname;
   if f.fileExists then
@@ -219,27 +219,27 @@ begin
   EntitiesConnector.addObserver(fOpts);
 end;
 
-destructor TCETermWidget.destroy;
+destructor TTermWidget.destroy;
 begin
   fOpts.saveToFile(getDocPath + optFname);
   EntitiesConnector.removeObserver(fOpts);
   inherited;
 end;
 
-procedure TCETermWidget.DoShow;
+procedure TTermWidget.DoShow;
 begin
   inherited;
   fNeedApplyChanges := true;
 end;
 
-procedure TCETermWidget.SetVisible(Value: boolean);
+procedure TTermWidget.SetVisible(Value: boolean);
 begin
   inherited;
   if Value then
     fNeedApplyChanges := true;
 end;
 
-procedure TCETermWidget.ContentPaint(Sender: TObject);
+procedure TTermWidget.ContentPaint(Sender: TObject);
 begin
   if not fNeedApplyChanges then
     exit;
@@ -247,7 +247,7 @@ begin
   fOpts.applyChanges;
 end;
 
-procedure TCETermWidget.mnexDirectoryChanged(const directory: string);
+procedure TTermWidget.mnexDirectoryChanged(const directory: string);
 begin
   if fOpts.followExplorer and directory.dirExists and
     not SameText(directory, fLastCd) then
@@ -260,11 +260,11 @@ begin
   end;
 end;
 
-procedure TCETermWidget.docNew(document: TCESynMemo);
+procedure TTermWidget.docNew(document: TDexedMemo);
 begin
 end;
 
-procedure TCETermWidget.docFocused(document: TCESynMemo);
+procedure TTermWidget.docFocused(document: TDexedMemo);
 var
   s: string;
 begin
@@ -279,27 +279,27 @@ begin
   end;
 end;
 
-procedure TCETermWidget.docChanged(document: TCESynMemo);
+procedure TTermWidget.docChanged(document: TDexedMemo);
 begin
 end;
 
-procedure TCETermWidget.docClosing(document: TCESynMemo);
+procedure TTermWidget.docClosing(document: TDexedMemo);
 begin
 end;
 
-procedure TCETermWidget.projNew(project: ICECommonProject);
+procedure TTermWidget.projNew(project: ICommonProject);
 begin
 end;
 
-procedure TCETermWidget.projChanged(project: ICECommonProject);
+procedure TTermWidget.projChanged(project: ICommonProject);
 begin
 end;
 
-procedure TCETermWidget.projClosing(project: ICECommonProject);
+procedure TTermWidget.projClosing(project: ICommonProject);
 begin
 end;
 
-procedure TCETermWidget.projFocused(project: ICECommonProject);
+procedure TTermWidget.projFocused(project: ICommonProject);
 var
   s: string;
 begin
@@ -314,11 +314,11 @@ begin
   end;
 end;
 
-procedure TCETermWidget.projCompiling(project: ICECommonProject);
+procedure TTermWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCETermWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TTermWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 

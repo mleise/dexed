@@ -12,22 +12,22 @@ uses
 
 type
 
-  TCEProjectInspectorOptions = class(TWritableLfmTextComponent)
+  TProjectInspectorOptions = class(TWritableLfmTextComponent)
   private
     fFileListAsTree: boolean;
   published
     property fileListAsTree: boolean read fFileListAsTree write fFileListAsTree;
   end;
 
-  { TCEProjectInspectWidget }
+  { TProjectInspectWidget }
 
-  TCEProjectInspectWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver)
-    btnAddFile: TCEToolButton;
-    btnAddFold: TCEToolButton;
-    btnReload: TCEToolButton;
-    btnRemFile: TCEToolButton;
-    btnRemFold: TCEToolButton;
-    btnTree: TCEToolButton;
+  TProjectInspectWidget = class(TDexedWidget, IProjectObserver, IDocumentObserver)
+    btnAddFile: TDexedToolButton;
+    btnAddFold: TDexedToolButton;
+    btnReload: TDexedToolButton;
+    btnRemFile: TDexedToolButton;
+    btnRemFold: TDexedToolButton;
+    btnTree: TDexedToolButton;
     Tree: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure btnAddFileClick(Sender: TObject);
@@ -51,31 +51,31 @@ type
     fActOpenFile: TAction;
     fActSelConf: TAction;
     fActBuildConf: TAction;
-    fProject: ICECommonProject;
+    fProject: ICommonProject;
     fFileNode, fConfNode: TTreeNode;
     fLastFileOrFolder: string;
-    fSymStringExpander: ICESymStringExpander;
+    fSymStringExpander: ISymStringExpander;
     fImages: TImageList;
     fFileListAsTree: boolean;
     procedure actUpdate(sender: TObject);
-    procedure DetectNewDubSources(const document: TCESynMemo);
+    procedure DetectNewDubSources(const document: TDexedMemo);
     procedure TreeDblClick(sender: TObject);
     procedure actOpenFileExecute(sender: TObject);
     procedure actBuildExecute(sender: TObject);
     //
-    procedure projNew(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
     procedure updateButtons;
     procedure setFileListAsTree(value: boolean);
     //
-    procedure docNew(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
   protected
     function contextName: string; override;
     function contextActionCount: integer; override;
@@ -93,7 +93,7 @@ const optFname = 'projinspect.txt';
 const filterAlign: array[boolean] of integer = (58, 162);
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEProjectInspectWidget.create(aOwner: TComponent);
+constructor TProjectInspectWidget.create(aOwner: TComponent);
 var
   fname: string;
 begin
@@ -168,7 +168,7 @@ begin
   fname := getDocPath + optFname;
   if fname.fileExists then
   begin
-    with TCEProjectInspectorOptions.Create(nil) do
+    with TProjectInspectorOptions.Create(nil) do
     try
       loadFromFile(fname);
       self.setFileListAsTree(fileListAsTree);
@@ -181,9 +181,9 @@ begin
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCEProjectInspectWidget.destroy;
+destructor TProjectInspectWidget.destroy;
 begin
-  with TCEProjectInspectorOptions.Create(nil) do
+  with TProjectInspectorOptions.Create(nil) do
   try
     fileListAsTree:= self.fileListAsTree;
     saveToFile(getDocPath + optFname);
@@ -194,32 +194,32 @@ begin
   inherited;
 end;
 
-procedure TCEProjectInspectWidget.SetVisible(value: boolean);
+procedure TProjectInspectWidget.SetVisible(value: boolean);
 begin
   inherited;
   if value then
     updateImperative;
 end;
 
-procedure TCEProjectInspectWidget.setToolBarFlat(value: boolean);
+procedure TProjectInspectWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolBarFlat(value);
   TreeFilterEdit1.Flat:=value;
 end;
 {$ENDREGION}
 
-{$REGION ICEContextualActions---------------------------------------------------}
-function TCEProjectInspectWidget.contextName: string;
+{$REGION IContextualActions---------------------------------------------------}
+function TProjectInspectWidget.contextName: string;
 begin
   exit('Inspector');
 end;
 
-function TCEProjectInspectWidget.contextActionCount: integer;
+function TProjectInspectWidget.contextActionCount: integer;
 begin
   exit(3);
 end;
 
-function TCEProjectInspectWidget.contextAction(index: integer): TAction;
+function TProjectInspectWidget.contextAction(index: integer): TAction;
 begin
   case index of
     0: exit(fActOpenFile);
@@ -229,12 +229,12 @@ begin
   end;
 end;
 
-procedure TCEProjectInspectWidget.actOpenFileExecute(sender: TObject);
+procedure TProjectInspectWidget.actOpenFileExecute(sender: TObject);
 begin
   TreeDblClick(sender);
 end;
 
-procedure TCEProjectInspectWidget.actBuildExecute(sender: TObject);
+procedure TProjectInspectWidget.actBuildExecute(sender: TObject);
 begin
   if fProject <> nil then
   begin
@@ -244,29 +244,29 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEProjectInspectWidget.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TProjectInspectWidget.docNew(document: TDexedMemo);
 begin
   DetectNewDubSources(document);
 end;
 
-procedure TCEProjectInspectWidget.docFocused(document: TCESynMemo);
+procedure TProjectInspectWidget.docFocused(document: TDexedMemo);
 begin
   DetectNewDubSources(document);
 end;
 
-procedure TCEProjectInspectWidget.docChanged(document: TCESynMemo);
+procedure TProjectInspectWidget.docChanged(document: TDexedMemo);
 begin
 end;
 
-procedure TCEProjectInspectWidget.docClosing(document: TCESynMemo);
+procedure TProjectInspectWidget.docClosing(document: TDexedMemo);
 begin
   DetectNewDubSources(document);
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectObserver -----------------------------------------------------}
-procedure TCEProjectInspectWidget.projNew(project: ICECommonProject);
+{$REGION IProjectObserver -----------------------------------------------------}
+procedure TProjectInspectWidget.projNew(project: ICommonProject);
 begin
   fLastFileOrFolder := '';
   fProject := project;
@@ -275,7 +275,7 @@ begin
   updateButtons;
 end;
 
-procedure TCEProjectInspectWidget.projClosing(project: ICECommonProject);
+procedure TProjectInspectWidget.projClosing(project: ICommonProject);
 begin
   if not assigned(fProject)  then
     exit;
@@ -286,7 +286,7 @@ begin
   updateImperative;
 end;
 
-procedure TCEProjectInspectWidget.projFocused(project: ICECommonProject);
+procedure TProjectInspectWidget.projFocused(project: ICommonProject);
 begin
   fLastFileOrFolder := '';
   fProject := project;
@@ -296,7 +296,7 @@ begin
     beginDelayedUpdate;
 end;
 
-procedure TCEProjectInspectWidget.projChanged(project: ICECommonProject);
+procedure TProjectInspectWidget.projChanged(project: ICommonProject);
 begin
   if not assigned(fProject)  then
     exit;
@@ -306,15 +306,15 @@ begin
     beginDelayedUpdate;
 end;
 
-procedure TCEProjectInspectWidget.projCompiling(project: ICECommonProject);
+procedure TProjectInspectWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEProjectInspectWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TProjectInspectWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 
-procedure TCEProjectInspectWidget.updateButtons;
+procedure TProjectInspectWidget.updateButtons;
 var
   ce: boolean;
   sp: integer;
@@ -337,7 +337,7 @@ begin
   TreeFilterEdit1.Height:= toolbar.Height - sp * 2;
 end;
 
-procedure TCEProjectInspectWidget.setFileListAsTree(value: boolean);
+procedure TProjectInspectWidget.setFileListAsTree(value: boolean);
 begin
   if fFileListAsTree = value then
     exit;
@@ -348,13 +348,13 @@ end;
 {$ENDREGION}
 
 {$REGION Inspector things -------------------------------------------------------}
-procedure TCEProjectInspectWidget.TreeKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TProjectInspectWidget.TreeKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key = VK_RETURN then
     TreeDblClick(nil);
 end;
 
-procedure TCEProjectInspectWidget.TreeClick(Sender: TObject);
+procedure TProjectInspectWidget.TreeClick(Sender: TObject);
 begin
   if Tree.Selected.isNotNil then
   begin
@@ -373,14 +373,14 @@ begin
   end;
 end;
 
-procedure TCEProjectInspectWidget.TreeDeletion(Sender: TObject; Node: TTreeNode
+procedure TProjectInspectWidget.TreeDeletion(Sender: TObject; Node: TTreeNode
   );
 begin
   if Node.isNotNil and Node.Data.isNotNil then
     dispose(PString(Node.Data));
 end;
 
-procedure TCEProjectInspectWidget.TreeSelectionChanged(Sender: TObject);
+procedure TProjectInspectWidget.TreeSelectionChanged(Sender: TObject);
 begin
   actUpdate(sender);
   if not assigned(fProject) or Tree.Selected.isNil then
@@ -391,7 +391,7 @@ begin
     fLastFileOrFolder := tree.Selected.Text;
 end;
 
-procedure TCEProjectInspectWidget.TreeDblClick(sender: TObject);
+procedure TProjectInspectWidget.TreeDblClick(sender: TObject);
 var
   fname: string;
   i: integer;
@@ -416,7 +416,7 @@ begin
   end;
 end;
 
-procedure TCEProjectInspectWidget.actUpdate(sender: TObject);
+procedure TProjectInspectWidget.actUpdate(sender: TObject);
 begin
   fActSelConf.Enabled := false;
   fActOpenFile.Enabled := false;
@@ -428,7 +428,7 @@ begin
   fActOpenFile.Enabled := Tree.Selected.ImageIndex = 2;
 end;
 
-procedure TCEProjectInspectWidget.DetectNewDubSources(const document: TCESynMemo
+procedure TProjectInspectWidget.DetectNewDubSources(const document: TDexedMemo
   );
 begin
   if not assigned(fProject) or (fProject.getFormat <> pfDUB) then
@@ -436,21 +436,21 @@ begin
   if document.isNotNil then
   begin
     if document.fileName.contains(fProject.basePath) then
-      TCEDubProject(fProject.getProject).updateSourcesList;
+      TDubProject(fProject.getProject).updateSourcesList;
   end
-  else TCEDubProject(fProject.getProject).updateSourcesList;
+  else TDubProject(fProject.getProject).updateSourcesList;
   //updateImperative;
 end;
 
-procedure TCEProjectInspectWidget.btnAddFileClick(Sender: TObject);
+procedure TProjectInspectWidget.btnAddFileClick(Sender: TObject);
 var
   fname: string;
-  proj: TCENativeProject;
+  proj: TNativeProject;
 begin
   if not assigned(fProject) or (fProject.getFormat = pfDUB) then
     exit;
 
-  proj := TCENativeProject(fProject.getProject);
+  proj := TNativeProject(fProject.getProject);
   with TOpenDialog.Create(nil) do
   try
     options := options + [ofAllowMultiSelect];
@@ -471,18 +471,18 @@ begin
   end;
 end;
 
-procedure TCEProjectInspectWidget.btnAddFoldClick(Sender: TObject);
+procedure TProjectInspectWidget.btnAddFoldClick(Sender: TObject);
 var
   dir, fname: string;
   lst: TStringList;
-  proj: TCENativeProject;
+  proj: TNativeProject;
   i: integer;
 begin
   if not assigned(fProject) or (fProject.getFormat = pfDUB) then
     exit;
 
   dir := '';
-  proj := TCENativeProject(fProject.getProject);
+  proj := TNativeProject(fProject.getProject);
   if fLastFileOrFolder.fileExists then
     dir := fLastFileOrFolder.extractFilePath
   else if fLastFileOrFolder.dirExists then
@@ -508,17 +508,17 @@ begin
   end;
 end;
 
-procedure TCEProjectInspectWidget.btnRemFoldClick(Sender: TObject);
+procedure TProjectInspectWidget.btnRemFoldClick(Sender: TObject);
 var
   dir, fname: string;
-  proj: TCENativeProject;
+  proj: TNativeProject;
   i: Integer;
 begin
   if not assigned(fProject) or (fProject.getFormat = pfDUB)
   or Tree.Selected.isNil or (Tree.Selected.Parent <> fFileNode) then
     exit;
 
-  proj := TCENativeProject(fProject.getProject);
+  proj := TNativeProject(fProject.getProject);
   fname := Tree.Selected.Text;
   i := proj.Sources.IndexOf(fname);
   if i = -1 then
@@ -535,12 +535,12 @@ begin
   proj.endUpdate;
 end;
 
-procedure TCEProjectInspectWidget.btnTreeClick(Sender: TObject);
+procedure TProjectInspectWidget.btnTreeClick(Sender: TObject);
 begin
   setFileListAsTree(btnTree.Down);
 end;
 
-procedure TCEProjectInspectWidget.btnReloadClick(Sender: TObject);
+procedure TProjectInspectWidget.btnReloadClick(Sender: TObject);
 var
   f: string;
 begin
@@ -556,17 +556,17 @@ begin
   end;
 end;
 
-procedure TCEProjectInspectWidget.btnRemFileClick(Sender: TObject);
+procedure TProjectInspectWidget.btnRemFileClick(Sender: TObject);
 var
   fname: string;
-  proj: TCENativeProject;
+  proj: TNativeProject;
   i, j: integer;
 begin
   if not assigned(fProject) or (fProject.getFormat = pfDUB)
   or Tree.Selected.isNil or (Tree.Selected.Parent <> fFileNode) then
     exit;
 
-  proj := TCENativeProject(fProject.getProject);
+  proj := TNativeProject(fProject.getProject);
   proj.beginUpdate;
   for j:= 0 to Tree.SelectionCount-1 do
   begin
@@ -592,11 +592,11 @@ begin
   proj.endUpdate;
 end;
 
-procedure TCEProjectInspectWidget.FormDropFiles(Sender: TObject; const fnames: array of String);
+procedure TProjectInspectWidget.FormDropFiles(Sender: TObject; const fnames: array of String);
 var
   fname, direntry: string;
   lst: TStringList;
-  proj: TCENativeProject;
+  proj: TNativeProject;
 procedure addFile(const value: string);
 var
   ext: string;
@@ -612,7 +612,7 @@ begin
   if not assigned(fProject) or (fProject.getFormat = pfDUB) then
     exit;
 
-  proj := TCENativeProject(fProject.getProject);
+  proj := TNativeProject(fProject.getProject);
   lst := TStringList.Create;
   proj.beginUpdate;
   try for fname in fnames do
@@ -631,17 +631,17 @@ begin
   end;
 end;
 
-procedure TCEProjectInspectWidget.toolbarResize(Sender: TObject);
+procedure TProjectInspectWidget.toolbarResize(Sender: TObject);
 begin
   TreeFilterEdit1.Width := toolbar.Width - TreeFilterEdit1.Left - TreeFilterEdit1.BorderSpacing.Around;
 end;
 
-procedure TCEProjectInspectWidget.updateDelayed;
+procedure TProjectInspectWidget.updateDelayed;
 begin
   updateImperative;
 end;
 
-procedure TCEProjectInspectWidget.updateImperative;
+procedure TProjectInspectWidget.updateImperative;
 var
   conf: string;
   itm: TTreeNode;

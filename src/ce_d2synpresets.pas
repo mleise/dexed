@@ -25,7 +25,7 @@ type
   (**
    * persistent class used to store a highlighter preset.
    *)
-  TCED2SynPreset = class(TCollectionItem)
+  TD2SynPreset = class(TCollectionItem)
   private
     fBackground: TColor;
     fBracketMatchAttribs: TSynSelectedColor;
@@ -64,32 +64,32 @@ type
     procedure Assign(source: TPersistent); override;
   end;
 
-  TCED2SynPresets = class(TWritableLfmTextComponent)
+  TD2SynPresets = class(TWritableLfmTextComponent)
   private
     fCollection: TCollection;
     procedure setCollection(value: TCollection);
-    function getPreset(index: integer): TCED2SynPreset;
+    function getPreset(index: integer): TD2SynPreset;
   published
     property presets: TCollection read fCollection write setCollection;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    function addPreset: TCED2SynPreset;
-    function insertPreset(index: integer): TCED2SynPreset;
+    function addPreset: TD2SynPreset;
+    function insertPreset(index: integer): TD2SynPreset;
     function count: integer;
-    property preset[index: integer]: TCED2SynPreset read getPreset ; default;
+    property preset[index: integer]: TD2SynPreset read getPreset ; default;
   end;
 
   (**
    * UI for loading highlighter presets in the options editor.
    *)
-  TCED2SynPresetsLoaderForm = class(TWinControl, ICEEditableOptions)
+  TD2SynPresetsLoaderForm = class(TWinControl, IEditableOptions)
   private
-    fPresets: TCED2SynPresets;
+    fPresets: TD2SynPresets;
     fList: TComboBox;
     fEditor: TSynEdit;
     fPropEd: TTIPropertyGrid;
-    fBackup: TCED2SynPreset;
+    fBackup: TD2SynPreset;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -119,10 +119,10 @@ const
   optfname = 'highlighterPresets.txt';
 
 var
-  presetsLoaderForm: TCED2SynPresetsLoaderForm;
+  presetsLoaderForm: TD2SynPresetsLoaderForm;
 
-{$REGION TCED2SynPreset -------------------------------------------------------}
-constructor TCED2SynPreset.create(ACollection: TCollection);
+{$REGION TD2SynPreset -------------------------------------------------------}
+constructor TD2SynPreset.create(ACollection: TCollection);
 begin
   inherited Create(ACOllection);
   fBracketMatchAttribs:= TSynSelectedColor.Create;
@@ -134,7 +134,7 @@ begin
   fd2syn := TSynD2Syn.create(nil);
 end;
 
-destructor TCED2SynPreset.destroy;
+destructor TD2SynPreset.destroy;
 begin
   fBracketMatchAttribs.free;
   fCurrLineAttribs.free;
@@ -146,47 +146,47 @@ begin
   inherited;
 end;
 
-procedure TCED2SynPreset.setD2syn(value: TPersistent);
+procedure TD2SynPreset.setD2syn(value: TPersistent);
 begin
   fd2syn.Assign(value);
 end;
 
-function TCED2SynPreset.getHl: TSynD2Syn;
+function TD2SynPreset.getHl: TSynD2Syn;
 begin
   exit(TSynD2Syn(fd2syn));
 end;
 
-procedure TCED2SynPreset.setBracketMatchColor(value: TSynSelectedColor);
+procedure TD2SynPreset.setBracketMatchColor(value: TSynSelectedColor);
 begin
   fBracketMatchAttribs.Assign(value);
 end;
 
-procedure TCED2SynPreset.setCurrLineAttribs(value: TSynSelectedColor);
+procedure TD2SynPreset.setCurrLineAttribs(value: TSynSelectedColor);
 begin
   fCurrLineAttribs.Assign(value);
 end;
 
-procedure TCED2SynPreset.setFoldedColor(value: TSynSelectedColor);
+procedure TD2SynPreset.setFoldedColor(value: TSynSelectedColor);
 begin
   fFoldedColor.Assign(value);
 end;
 
-procedure TCED2SynPreset.setIdentifierMarkup(value: TSynSelectedColor);
+procedure TD2SynPreset.setIdentifierMarkup(value: TSynSelectedColor);
 begin
   fIdentifierMarkup.Assign(value);
 end;
 
-procedure TCED2SynPreset.setMouseLinkColor(value: TSynSelectedColor);
+procedure TD2SynPreset.setMouseLinkColor(value: TSynSelectedColor);
 begin
   fMouseLinkAttribs.Assign(value);
 end;
 
-procedure TCED2SynPreset.setSelCol(value: TSynSelectedColor);
+procedure TD2SynPreset.setSelCol(value: TSynSelectedColor);
 begin
   fSelAttribs.Assign(value);
 end;
 
-procedure TCED2SynPreset.assignToOptions;
+procedure TD2SynPreset.assignToOptions;
 begin
   EditorOptions.background:=background;
   EditorOptions.highlighterDlang.Assign(highlighter);
@@ -202,7 +202,7 @@ begin
   EditorOptions.applyChangesFromSelf;
 end;
 
-procedure TCED2SynPreset.assignFromOptions;
+procedure TD2SynPreset.assignFromOptions;
 begin
   background:=EditorOptions.background;
   highlighter.Assign(EditorOptions.highlighterDlang);
@@ -214,13 +214,13 @@ begin
   selection.Assign(EditorOptions.selection);
 end;
 
-procedure TCED2SynPreset.Assign(source: TPersistent);
+procedure TD2SynPreset.Assign(source: TPersistent);
 var
-  src: TCED2SynPreset;
+  src: TD2SynPreset;
 begin
-  if source is TCED2SynPreset then
+  if source is TD2SynPreset then
   begin
-    src := TCED2SynPreset(source);
+    src := TD2SynPreset(source);
     background:=src.background;
     highlighter.Assign(src.highlighter);
     bracketMatch.Assign(src.bracketMatch);
@@ -234,46 +234,46 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TCED2SynPresets ------------------------------------------------------}
-constructor TCED2SynPresets.Create(AOwner: TComponent);
+{$REGION TD2SynPresets ------------------------------------------------------}
+constructor TD2SynPresets.Create(AOwner: TComponent);
 begin
   inherited;
-  fCollection := TCollection.Create(TCED2SynPreset);
+  fCollection := TCollection.Create(TD2SynPreset);
 end;
 
-destructor TCED2SynPresets.Destroy;
+destructor TD2SynPresets.Destroy;
 begin
   fCollection.Free;
   inherited;
 end;
 
-procedure TCED2SynPresets.setCollection(value: TCollection);
+procedure TD2SynPresets.setCollection(value: TCollection);
 begin
   fCollection.Assign(value);
 end;
 
-function TCED2SynPresets.addPreset: TCED2SynPreset;
+function TD2SynPresets.addPreset: TD2SynPreset;
 begin
-  exit(TCED2SynPreset(fCollection.Add));
+  exit(TD2SynPreset(fCollection.Add));
 end;
 
-function TCED2SynPresets.insertPreset(index: integer): TCED2SynPreset;
+function TD2SynPresets.insertPreset(index: integer): TD2SynPreset;
 begin
-  exit(TCED2SynPreset(fCollection.Insert(index)));
+  exit(TD2SynPreset(fCollection.Insert(index)));
 end;
 
-function TCED2SynPresets.count: integer;
+function TD2SynPresets.count: integer;
 begin
   exit(fCollection.Count);
 end;
 
-function TCED2SynPresets.getPreset(index: integer): TCED2SynPreset;
+function TD2SynPresets.getPreset(index: integer): TD2SynPreset;
 begin
-  exit(TCED2SynPreset(fCollection.Items[index]));
+  exit(TD2SynPreset(fCollection.Items[index]));
 end;
 {$ENDREGION}
 
-{$REGION TCED2SynPresetsLoaderForm --------------------------------------------}
+{$REGION TD2SynPresetsLoaderForm --------------------------------------------}
 procedure TAttribHelper.define(fore: TColor;Stl: TFontStyles = [];
   bck: TColor = clNone; frCol: TColor = clNone; frStyle: TSynLineStyle = slsSolid;
   frEdges: TSynFrameEdges = sfeNone; stlMsk: TFontStyles = []);
@@ -287,7 +287,7 @@ begin
   StyleMask:=stlMsk;
 end;
 
-procedure TCED2SynPresetsLoaderForm.SetVisible(Value: Boolean);
+procedure TD2SynPresetsLoaderForm.SetVisible(Value: Boolean);
 var
   firstTime: boolean;
 begin
@@ -327,14 +327,14 @@ begin
   end;
 end;
 
-constructor TCED2SynPresetsLoaderForm.Create(AOwner: TComponent);
+constructor TD2SynPresetsLoaderForm.Create(AOwner: TComponent);
 var
   fname: string;
   pnl: TPanel;
 begin
   inherited;
-  fBackup:= TCED2SynPreset.Create(nil);
-  fPresets:= TCED2SynPresets.Create(self);
+  fBackup:= TD2SynPreset.Create(nil);
+  fPresets:= TD2SynPresets.Create(self);
   fname := getDocPath + optfname;
   if fname.fileExists then
     fPresets.loadFromFile(fname);
@@ -668,7 +668,7 @@ begin
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCED2SynPresetsLoaderForm.Destroy;
+destructor TD2SynPresetsLoaderForm.Destroy;
 var
   i: integer;
 begin
@@ -681,22 +681,22 @@ begin
   inherited;
 end;
 
-function TCED2SynPresetsLoaderForm.optionedWantCategory(): string;
+function TD2SynPresetsLoaderForm.optionedWantCategory(): string;
 begin
   exit('Highlighter presets');
 end;
 
-function TCED2SynPresetsLoaderForm.optionedWantEditorKind: TOptionEditorKind;
+function TD2SynPresetsLoaderForm.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekControl);
 end;
 
-function TCED2SynPresetsLoaderForm.optionedWantContainer: TPersistent;
+function TD2SynPresetsLoaderForm.optionedWantContainer: TPersistent;
 begin
   exit(self);
 end;
 
-procedure TCED2SynPresetsLoaderForm.optionedEvent(event: TOptionEditorEvent);
+procedure TD2SynPresetsLoaderForm.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
     oeeAccept:
@@ -709,12 +709,12 @@ begin
   end;
 end;
 
-function TCED2SynPresetsLoaderForm.optionedOptionsModified: boolean;
+function TD2SynPresetsLoaderForm.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
 
-procedure TCED2SynPresetsLoaderForm.lstBoxSelChange(Sender: TObject);
+procedure TD2SynPresetsLoaderForm.lstBoxSelChange(Sender: TObject);
 begin
   if fList.ItemIndex <> -1 then
   begin
@@ -727,9 +727,9 @@ begin
     fPropEd.TIObject := nil;
 end;
 
-procedure TCED2SynPresetsLoaderForm.btnAddClick(sender: TObject);
+procedure TD2SynPresetsLoaderForm.btnAddClick(sender: TObject);
 var
-  prs: TCED2SynPreset;
+  prs: TD2SynPreset;
 begin
   prs := fPresets.addPreset;
   prs.name := format('preset %d', [fPresets.count]);
@@ -738,7 +738,7 @@ begin
   lstBoxSelChange(nil);
 end;
 
-procedure TCED2SynPresetsLoaderForm.btnDelClick(sender: TObject);
+procedure TD2SynPresetsLoaderForm.btnDelClick(sender: TObject);
 var
   o: integer;
 begin
@@ -754,9 +754,9 @@ begin
   lstBoxSelChange(nil);
 end;
 
-procedure TCED2SynPresetsLoaderForm.btnCloneClick(sender: TObject);
+procedure TD2SynPresetsLoaderForm.btnCloneClick(sender: TObject);
 var
-  old: TCED2SynPreset;
+  old: TD2SynPreset;
 begin
   if fList.ItemIndex = -1 then
     exit;
@@ -766,12 +766,12 @@ begin
   updateEditor;
 end;
 
-procedure TCED2SynPresetsLoaderForm.propEdModified(sender: TObject);
+procedure TD2SynPresetsLoaderForm.propEdModified(sender: TObject);
 begin
   updateEditor;
 end;
 
-procedure TCED2SynPresetsLoaderForm.updateList;
+procedure TD2SynPresetsLoaderForm.updateList;
 var
   i, j: integer;
 begin
@@ -785,9 +785,9 @@ begin
   fList.OnChange:=@lstBoxSelChange;
 end;
 
-procedure TCED2SynPresetsLoaderForm.updateEditor;
+procedure TD2SynPresetsLoaderForm.updateEditor;
 var
-  p: TCED2SynPreset;
+  p: TD2SynPreset;
 begin
   if fList.ItemIndex = -1 then
     exit;
@@ -804,7 +804,7 @@ end;
 {$ENDREGION}
 
 initialization
-  presetsLoaderForm:= TCED2SynPresetsLoaderForm.Create(nil);
+  presetsLoaderForm:= TD2SynPresetsLoaderForm.Create(nil);
 finalization
   presetsLoaderForm.Free;
 end.

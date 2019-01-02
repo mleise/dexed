@@ -13,7 +13,7 @@ type
   (**
    * 'Most Recently Used' list for strings.
    *)
-  TCEMruList = class(TStringList)
+  TMruList = class(TStringList)
   private
     fMaxCount: Integer;
     fObj: TObject;
@@ -35,7 +35,7 @@ type
   (**
    * MRU list for filenames.
    *)
-  TCEMRUFileList = class(TCEMruList)
+  TMRUFileList = class(TMruList)
   protected
     function checkItem(const value: string): boolean; override;
   public
@@ -45,14 +45,14 @@ type
 
   (**
    * MRU list for D/text files.
-   * Insertion is automatic (ICEDocumentObserver).
+   * Insertion is automatic (IDocumentObserver).
    *)
-  TCEMRUDocumentList = class(TCEMRUFileList, ICEDocumentObserver)
+  TMRUDocumentList = class(TMRUFileList, IDocumentObserver)
   private
-    procedure docNew(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
   public
     constructor create; override;
     destructor destroy; override;
@@ -60,16 +60,16 @@ type
 
   (**
    * MRU list for the ceodit projects.
-   * Insertion is automatic (ICEProjectObserver).
+   * Insertion is automatic (IProjectObserver).
    *)
-  TCEMRUProjectList = class(TCEMRUFileList, ICEProjectObserver)
+  TMRUProjectList = class(TMRUFileList, IProjectObserver)
   private
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
   public
     constructor create; override;
     destructor destroy; override;
@@ -79,23 +79,23 @@ type
    * MRU list for the ceodit projects group.
    * Managed manually since only 1 group exists.
    *)
-  TCEMRUProjectsGroupList = class(TCEMRUFileList)
+  TMRUProjectsGroupList = class(TMRUFileList)
   end;
 
 implementation
 
-constructor TCEMruList.Create;
+constructor TMruList.Create;
 begin
   fMaxCount := 10;
 end;
 
-procedure TCEMruList.clearOutOfRange;
+procedure TMruList.clearOutOfRange;
 begin
   while Count > fMaxCount do
     delete(Count-1);
 end;
 
-procedure TCEMruList.setMaxCount(value: Integer);
+procedure TMruList.setMaxCount(value: Integer);
 begin
   if value < 0 then
     value := 0;
@@ -105,7 +105,7 @@ begin
   clearOutOfRange;
 end;
 
-function TCEMruList.checkItem(const value: string): boolean;
+function TMruList.checkItem(const value: string): boolean;
 var
   i: integer;
 begin
@@ -120,7 +120,7 @@ begin
   exit( false);
 end;
 
-procedure TCEMruList.Put(index: Integer; const value: string);
+procedure TMruList.Put(index: Integer; const value: string);
 begin
   if not (checkItem(value)) then
     exit;
@@ -128,7 +128,7 @@ begin
   clearOutOfRange;
 end;
 
-procedure TCEMruList.InsertItem(index: Integer; const value: string);
+procedure TMruList.InsertItem(index: Integer; const value: string);
 begin
   if not (checkItem(value)) then
     exit;
@@ -136,7 +136,7 @@ begin
   clearOutOfRange;
 end;
 
-procedure TCEMruList.Insert(index: Integer; const value: string);
+procedure TMruList.Insert(index: Integer; const value: string);
 begin
   if not (checkItem(value)) then
     exit;
@@ -144,7 +144,7 @@ begin
   clearOutOfRange;
 end;
 
-constructor TCEMRUFileList.create;
+constructor TMRUFileList.create;
 begin
   inherited;
   {$IFDEF WINDOWS}
@@ -152,7 +152,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TCEMRUFileList.assign(source: TPersistent);
+procedure TMRUFileList.assign(source: TPersistent);
 var
   i: Integer;
 begin
@@ -162,74 +162,74 @@ begin
       Delete(i);
 end;
 
-function TCEMRUFileList.checkItem(const value: string): boolean;
+function TMRUFileList.checkItem(const value: string): boolean;
 begin
   exit( inherited checkItem(value) and value.fileExists);
 end;
 
-constructor TCEMRUDocumentList.create;
+constructor TMRUDocumentList.create;
 begin
   inherited;
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCEMRUDocumentList.destroy;
+destructor TMRUDocumentList.destroy;
 begin
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
 
-procedure TCEMRUDocumentList.docNew(document: TCESynMemo);
+procedure TMRUDocumentList.docNew(document: TDexedMemo);
 begin
 end;
 
-procedure TCEMRUDocumentList.docFocused(document: TCESynMemo);
+procedure TMRUDocumentList.docFocused(document: TDexedMemo);
 begin
 end;
 
-procedure TCEMRUDocumentList.docChanged(document: TCESynMemo);
+procedure TMRUDocumentList.docChanged(document: TDexedMemo);
 begin
 end;
 
-procedure TCEMRUDocumentList.docClosing(document: TCESynMemo);
+procedure TMRUDocumentList.docClosing(document: TDexedMemo);
 begin
   if document.fileName.fileExists and not document.isTemporary then
     Insert(0, document.fileName);
 end;
 
-constructor TCEMRUProjectList.create;
+constructor TMRUProjectList.create;
 begin
   inherited;
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCEMRUProjectList.destroy;
+destructor TMRUProjectList.destroy;
 begin
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
 
-procedure TCEMRUProjectList.projNew(project: ICECommonProject);
+procedure TMRUProjectList.projNew(project: ICommonProject);
 begin
 end;
 
-procedure TCEMRUProjectList.projFocused(project: ICECommonProject);
+procedure TMRUProjectList.projFocused(project: ICommonProject);
 begin
 end;
 
-procedure TCEMRUProjectList.projChanged(project: ICECommonProject);
+procedure TMRUProjectList.projChanged(project: ICommonProject);
 begin
 end;
 
-procedure TCEMRUProjectList.projCompiling(project: ICECommonProject);
+procedure TMRUProjectList.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEMRUProjectList.projCompiled(project: ICECommonProject; success: boolean);
+procedure TMRUProjectList.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 
-procedure TCEMRUProjectList.projClosing(project: ICECommonProject);
+procedure TMRUProjectList.projClosing(project: ICommonProject);
 var
   fname: string;
 begin

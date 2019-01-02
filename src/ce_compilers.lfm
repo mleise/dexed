@@ -6,8 +6,7 @@ object CompilersPathsEditor: TCompilersPathsEditor
   Caption = 'CompilersPathsEditor'
   ClientHeight = 900
   ClientWidth = 460
-  LCLVersion = '1.8.4.0'
-  Visible = False
+  LCLVersion = '2.0.0.3'
   object ScrollBox1: TScrollBox
     Left = 0
     Height = 900

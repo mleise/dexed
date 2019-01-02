@@ -25,10 +25,10 @@ type
  *
  * Basically it' s designed to provide the options for the dmd process.
  *)
-  TCENativeProject = class(TWritableLfmTextComponent, ICECommonProject)
+  TNativeProject = class(TWritableLfmTextComponent, ICommonProject)
   private
     fInGroup: boolean;
-    fCompilProc: TCEProcess;
+    fCompilProc: TDexedProcess;
     fOnChange: TNotifyEvent;
     fModified: boolean;
     fPreCompilePath: string;
@@ -42,15 +42,15 @@ type
     fSrcs: TStringList;
     fConfIx: Integer;
     fUpdateCount: NativeInt;
-    fProjectSubject: TCEProjectSubject;
-    fRunner: TCEProcess;
+    fProjectSubject: TProjectSubject;
+    fRunner: TDexedProcess;
     fOutputFilename: string;
     fCanBeRun: boolean;
     fBaseConfig: TCompilerConfiguration;
     fCompiled: boolean;
-    fSymStringExpander: ICESymStringExpander;
-    fMsgs: ICEMessagesDisplay;
-    fAsProjectItf: ICECommonProject;
+    fSymStringExpander: ISymStringExpander;
+    fMsgs: IMessagesDisplay;
+    fAsProjectItf: ICommonProject;
     procedure updateOutFilename;
     procedure doChanged(modified: boolean = true);
     procedure getBaseConfig;
@@ -100,7 +100,7 @@ type
     procedure activate;
     procedure inGroup(value: boolean);
     function inGroup: boolean;
-    function getFormat: TCEProjectFormat;
+    function getFormat: TProjectFormat;
     function getProject: TObject;
     function filename: string;
     function basePath: string;
@@ -151,15 +151,15 @@ var
   CEProjectCompilerFilename: string = 'dmd';
   CEProjectCompiler: DCompiler;
 
-constructor TCENativeProject.create(aOwner: TComponent);
+constructor TNativeProject.create(aOwner: TComponent);
 begin
   inherited create(aOwner);
-  fAsProjectItf := self as ICECommonProject;
+  fAsProjectItf := self as ICommonProject;
   fSymStringExpander := getSymStringExpander;
   fMsgs:= getMessageDisplay;
   //
   fRunnerOldCwd := GetCurrentDirUTF8;
-  fProjectSubject := TCEProjectSubject.create;
+  fProjectSubject := TProjectSubject.create;
   //
   fLibAliases := TStringList.Create;
   fSrcs := TStringList.Create;
@@ -178,7 +178,7 @@ begin
   fModified := false;
 end;
 
-destructor TCENativeProject.destroy;
+destructor TNativeProject.destroy;
 begin
   killProcess(fCompilProc);
   subjProjClosing(fProjectSubject, self);
@@ -192,38 +192,38 @@ begin
   inherited;
 end;
 
-function TCENativeProject.inGroup: boolean;
+function TNativeProject.inGroup: boolean;
 begin
   exit(fInGroup);
 end;
 
-procedure TCENativeProject.inGroup(value: boolean);
+procedure TNativeProject.inGroup(value: boolean);
 begin
   fInGroup:=value;
 end;
 
-procedure TCENativeProject.activate;
+procedure TNativeProject.activate;
 begin
   subjProjFocused(fProjectSubject, fAsProjectItf);
 end;
 
-function TCENativeProject.getFormat: TCEProjectFormat;
+function TNativeProject.getFormat: TProjectFormat;
 begin
   exit(pfDEXED);
 end;
 
-function TCENativeProject.getProject: TObject;
+function TNativeProject.getProject: TObject;
 begin
   exit(Self);
 end;
 
-function TCENativeProject.addConfiguration: TCompilerConfiguration;
+function TNativeProject.addConfiguration: TCompilerConfiguration;
 begin
   result := TCompilerConfiguration(fConfigs.Add);
   result.onChanged := @subMemberChanged;
 end;
 
-procedure TCENativeProject.setOptsColl(value: TCollection);
+procedure TNativeProject.setOptsColl(value: TCollection);
 var
   i: nativeInt;
 begin
@@ -232,7 +232,7 @@ begin
     Configuration[i].onChanged := @subMemberChanged;
 end;
 
-procedure TCENativeProject.addSource(const fname: string);
+procedure TNativeProject.addSource(const fname: string);
 var
   relSrc, absSrc: string;
   expand: boolean;
@@ -250,7 +250,7 @@ begin
   fSrcs.Add(relSrc);
 end;
 
-procedure TCENativeProject.setRoot(const value: string);
+procedure TNativeProject.setRoot(const value: string);
 begin
   if fRootFolder = value then exit;
   beginUpdate;
@@ -258,13 +258,13 @@ begin
   endUpdate;
 end;
 
-procedure TCENativeProject.reload;
+procedure TNativeProject.reload;
 begin
   if fFilename.fileExists then
     loadFromFile(fFilename);
 end;
 
-procedure TCENativeProject.customLoadFromFile(const fname: string);
+procedure TNativeProject.customLoadFromFile(const fname: string);
 var
   f: string;
 begin
@@ -281,7 +281,7 @@ begin
   inherited customLoadFromFile(f);
 end;
 
-procedure TCENativeProject.customSaveToFile(const fname: string);
+procedure TNativeProject.customSaveToFile(const fname: string);
 var
   oldAbs, newRel, oldBase: string;
   f: string;
@@ -305,14 +305,14 @@ begin
   inherited customSaveToFile(f);
 end;
 
-procedure TCENativeProject.setLibAliases(value: TStringList);
+procedure TNativeProject.setLibAliases(value: TStringList);
 begin
   beginUpdate;
   fLibAliases.Assign(value);
   endUpdate;
 end;
 
-procedure TCENativeProject.setSrcs(value: TStringList);
+procedure TNativeProject.setSrcs(value: TStringList);
 begin
   beginUpdate;
   fSrcs.Assign(value);
@@ -320,7 +320,7 @@ begin
   endUpdate;
 end;
 
-procedure TCENativeProject.setConfIx(value: Integer);
+procedure TNativeProject.setConfIx(value: Integer);
 begin
   beginUpdate;
   if value < 0 then
@@ -331,7 +331,7 @@ begin
   endUpdate(false);
 end;
 
-procedure TCENativeProject.getBaseConfig;
+procedure TNativeProject.getBaseConfig;
 var
   i: integer;
 begin
@@ -348,19 +348,19 @@ begin
   Dec(fUpdateCount);
 end;
 
-procedure TCENativeProject.subMemberChanged(sender : TObject);
+procedure TNativeProject.subMemberChanged(sender : TObject);
 begin
   beginUpdate;
   fModified := true;
   endUpdate;
 end;
 
-procedure TCENativeProject.beginUpdate;
+procedure TNativeProject.beginUpdate;
 begin
   Inc(fUpdateCount);
 end;
 
-procedure TCENativeProject.endUpdate(modified: boolean = true);
+procedure TNativeProject.endUpdate(modified: boolean = true);
 begin
   Dec(fUpdateCount);
   if fUpdateCount > 0 then
@@ -369,7 +369,7 @@ begin
   doChanged(modified);
 end;
 
-procedure TCENativeProject.doChanged(modified: boolean = true);
+procedure TNativeProject.doChanged(modified: boolean = true);
 begin
   fModified := modified;
   updateOutFilename;
@@ -379,18 +379,18 @@ begin
     fOnChange(Self);
 end;
 
-function TCENativeProject.getConfig(value: integer): TCompilerConfiguration;
+function TNativeProject.getConfig(value: integer): TCompilerConfiguration;
 begin
   result := TCompilerConfiguration(fConfigs.Items[value]);
   result.onChanged := @subMemberChanged;
 end;
 
-function TCENativeProject.getCurrConf: TCompilerConfiguration;
+function TNativeProject.getCurrConf: TCompilerConfiguration;
 begin
   result := TCompilerConfiguration(fConfigs.Items[fConfIx]);
 end;
 
-procedure TCENativeProject.addDefaults;
+procedure TNativeProject.addDefaults;
 begin
   with TCompilerConfiguration(fConfigs.Add) do
   begin
@@ -415,7 +415,7 @@ begin
   end;
 end;
 
-procedure TCENativeProject.reset;
+procedure TNativeProject.reset;
 var
   defConf: TCompilerConfiguration;
 begin
@@ -430,7 +430,7 @@ begin
   fModified := false;
 end;
 
-procedure TCENativeProject.getOpts(opts: TStrings);
+procedure TNativeProject.getOpts(opts: TStrings);
 var
   i: Integer;
   exc: TStringList;
@@ -522,7 +522,7 @@ begin
   end;
 end;
 
-function TCENativeProject.isSource(const fname: string): boolean;
+function TNativeProject.isSource(const fname: string): boolean;
 var
   i: Integer;
 begin
@@ -532,19 +532,19 @@ begin
   exit(false);
 end;
 
-procedure TCENativeProject.afterSave;
+procedure TNativeProject.afterSave;
 begin
   fModified := false;
   updateOutFilename;
 end;
 
-procedure TCENativeProject.beforeLoad;
+procedure TNativeProject.beforeLoad;
 begin
   beginUpdate;
   Inherited;
 end;
 
-procedure TCENativeProject.checkMissingFiles;
+procedure TNativeProject.checkMissingFiles;
 var
   hasPatched: Boolean = false;
   // either all the source files have moved or only the project file
@@ -639,7 +639,7 @@ begin
   else fModified:= false;
 end;
 
-procedure TCENativeProject.afterLoad;
+procedure TNativeProject.afterLoad;
 begin
   //if not fHasLoaded then
   //begin
@@ -652,7 +652,7 @@ begin
   fModified := false;
 end;
 
-procedure TCENativeProject.readerPropNoFound(Reader: TReader; Instance: TPersistent;
+procedure TNativeProject.readerPropNoFound(Reader: TReader; Instance: TPersistent;
   var PropName: string; IsPath: Boolean; var Handled, Skip: Boolean);
 begin
   // errors are avoided by property deprecation, error here means "not a project".
@@ -660,7 +660,7 @@ begin
   Handled := false;
 end;
 
-procedure TCENativeProject.updateOutFilename;
+procedure TNativeProject.updateOutFilename;
 var
   fe: boolean = false;
   ext: string;
@@ -719,7 +719,7 @@ begin
     fCanBeRun := fOutputFilename.fileExists;
 end;
 
-function TCENativeProject.runPrePostProcess(processInfo: TCompileProcOptions): Boolean;
+function TNativeProject.runPrePostProcess(processInfo: TCompileProcOptions): Boolean;
 var
   lst: TStringList;
   com: boolean;
@@ -786,18 +786,18 @@ begin
   end;
 end;
 
-function TCENativeProject.compiled: boolean;
+function TNativeProject.compiled: boolean;
 begin
   exit(fCompiled);
 end;
 
-procedure TCENativeProject.stopCompilation;
+procedure TNativeProject.stopCompilation;
 begin
   if fCompilProc.isNotNil and fCompilProc.Running then
     fCompilProc.Terminate(1);
 end;
 
-procedure TCENativeProject.compile;
+procedure TNativeProject.compile;
 var
   config: TCompilerConfiguration;
   prjpath: string;
@@ -839,7 +839,7 @@ begin
   end;
   //
   prjname := shortenPath(filename, 25);
-  fCompilProc := TCEProcess.Create(nil);
+  fCompilProc := TDexedProcess.Create(nil);
   subjProjCompiling(fProjectSubject, fAsProjectItf);
   fMsgs.message('compiling ' + prjname, fAsProjectItf, amcProj, amkInf);
   fMsgs.message(usingCompilerInfo(CEProjectCompiler), fAsProjectItf, amcProj, amkInf);
@@ -858,7 +858,7 @@ begin
   fCompilProc.Execute;
 end;
 
-procedure TCENativeProject.run(const runArgs: string = '');
+procedure TNativeProject.run(const runArgs: string = '');
 var
   prm: string;
   i: Integer;
@@ -868,7 +868,7 @@ begin
   if fRunnerOldCwd.dirExists then
     ChDir(fRunnerOldCwd);
   //
-  fRunner := TCEProcess.Create(nil);
+  fRunner := TDexedProcess.Create(nil);
   fRunner.XTermProgram:=consoleProgram;
   currentConfiguration.runOptions.setProcess(fRunner);
   if runArgs.isNotEmpty then
@@ -907,7 +907,7 @@ begin
   fRunner.Execute;
 end;
 
-procedure TCENativeProject.runProcOutput(sender: TObject);
+procedure TNativeProject.runProcOutput(sender: TObject);
 var
   lst: TStringList;
   str: string;
@@ -915,8 +915,8 @@ var
 begin
   lst := TStringList.Create;
   try
-    if (sender is TCEProcess) then
-      (sender as TCEProcess).getFullLines(lst)
+    if (sender is TDexedProcess) then
+      (sender as TDexedProcess).getFullLines(lst)
     else
       processOutputToStrings(TProcess(sender), lst);
     for str in lst do
@@ -937,7 +937,7 @@ begin
   end;
 end;
 
-procedure TCENativeProject.compProcOutput(proc: TObject);
+procedure TNativeProject.compProcOutput(proc: TObject);
 var
   lst: TStringList;
   str: string;
@@ -952,7 +952,7 @@ begin
   end;
 end;
 
-procedure TCENativeProject.compProcTerminated(proc: TObject);
+procedure TNativeProject.compProcTerminated(proc: TObject);
 var
   prjname: string;
 begin
@@ -975,7 +975,7 @@ begin
   SetCurrentDirUTF8(fPreCompilePath);
 end;
 
-function TCENativeProject.targetUpToDate: boolean;
+function TNativeProject.targetUpToDate: boolean;
 var
   dt: double;
   i: integer;
@@ -988,7 +988,7 @@ begin
   result := true;
 end;
 
-function TCENativeProject.getObjectsDirectory: string; inline;
+function TNativeProject.getObjectsDirectory: string; inline;
 var
   cfg: TCompilerConfiguration;
 begin
@@ -999,7 +999,7 @@ begin
       result := cfg.pathsOptions.objectDirectory;
 end;
 
-procedure TCENativeProject.getUpToDateObjects(str: TStrings);
+procedure TNativeProject.getUpToDateObjects(str: TStrings);
 var
   odr: string;
   src: string;
@@ -1028,54 +1028,54 @@ begin
   end;
 end;
 
-function TCENativeProject.outputFilename: string;
+function TNativeProject.outputFilename: string;
 begin
   exit(fOutputFilename);
 end;
 
-function TCENativeProject.configurationCount: integer;
+function TNativeProject.configurationCount: integer;
 begin
   exit(fConfigs.Count);
 end;
 
-procedure TCENativeProject.setActiveConfigurationIndex(index: integer);
+procedure TNativeProject.setActiveConfigurationIndex(index: integer);
 begin
   setConfIx(index);
 end;
 
-function TCENativeProject.getActiveConfigurationIndex: integer;
+function TNativeProject.getActiveConfigurationIndex: integer;
 begin
   exit(fConfIx);
 end;
 
-function TCENativeProject.configurationName(index: integer): string;
+function TNativeProject.configurationName(index: integer): string;
 begin
   if index > fConfigs.Count -1 then index := fConfigs.Count -1;
   if index < 0 then index := 0;
   result := getConfig(index).name;
 end;
 
-function TCENativeProject.filename: string;
+function TNativeProject.filename: string;
 begin
   exit(fFilename);
 end;
 
-function TCENativeProject.modified: boolean;
+function TNativeProject.modified: boolean;
 begin
   exit(fModified);
 end;
 
-function TCENativeProject.basePath: string;
+function TNativeProject.basePath: string;
 begin
   exit(fBasePath);
 end;
 
-function TCENativeProject.binaryKind: TProjectBinaryKind;
+function TNativeProject.binaryKind: TProjectBinaryKind;
 begin
   exit(currentConfiguration.outputOptions.binaryKind);
 end;
 
-function TCENativeProject.getCommandLine: string;
+function TNativeProject.getCommandLine: string;
 var
   str: TStringList;
 begin
@@ -1089,17 +1089,17 @@ begin
   end;
 end;
 
-function TCENativeProject.sourcesCount: integer;
+function TNativeProject.sourcesCount: integer;
 begin
   exit(fSrcs.Count);
 end;
 
-function TCENativeProject.sourceRelative(index: integer): string;
+function TNativeProject.sourceRelative(index: integer): string;
 begin
   exit(fSrcs[index]);
 end;
 
-function TCENativeProject.sourceAbsolute(index: integer): string;
+function TNativeProject.sourceAbsolute(index: integer): string;
 var
   fname: string;
 begin
@@ -1110,32 +1110,32 @@ begin
     result := expandFilenameEx(fBasePath, fname);
 end;
 
-function TCENativeProject.importsPathCount: integer;
+function TNativeProject.importsPathCount: integer;
 begin
   result := currentConfiguration.pathsOptions.importModulePaths.Count;
 end;
 
-function TCENativeProject.importPath(index: integer): string;
+function TNativeProject.importPath(index: integer): string;
 begin
   result := currentConfiguration.pathsOptions.importModulePaths[index];
   if fBasePath.dirExists then
     result := expandFilenameEx(fBasePath, result);
 end;
 
-procedure TCENativeProject.test;
+procedure TNativeProject.test;
 begin
 end;
 
 function isValidNativeProject(const filename: string): boolean;
 var
-  maybe: TCENativeProject;
+  maybe: TNativeProject;
 begin
   result := false;
   if isDlangCompilable(filename.extractFileExt) then
     exit;
   // avoid the project to notify the observers, current project is not replaced
   EntitiesConnector.beginUpdate;
-  maybe := TCENativeProject.create(nil);
+  maybe := TNativeProject.create(nil);
   try
     maybe.loadFromFile(filename);
     result := maybe.hasLoaded;
@@ -1152,7 +1152,7 @@ end;
 
 procedure setCEProjectCompiler(value: DCompiler);
 var
-  sel: ICECompilerSelector;
+  sel: ICompilerSelector;
 begin
   sel := getCompilerSelector;
   if value = gdc then

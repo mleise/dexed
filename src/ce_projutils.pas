@@ -9,7 +9,7 @@ uses
   ce_dlang, ce_stringrange;
 
 type
-  TCEProjectFileFormat = (pffNone, pffDexed, pffDub);
+  TProjectFileFormat = (pffNone, pffDexed, pffDub);
 
   TLexNameCallback = class
   private
@@ -21,10 +21,10 @@ type
 (**
  * Loads either a DUB or a CE project. If the filename is invalid or if it
  * doesn't points to a valid project, nil is returned, otherwise a project.
- * When 'discret' is set to true, the ICEPorjectObserver are not notified
+ * When 'discret' is set to true, the IPorjectObserver are not notified
  * that a new project is created and focused
  *)
-function loadProject(const filename: string; discret: boolean): ICECommonProject;
+function loadProject(const filename: string; discret: boolean): ICommonProject;
 
 (**
  * Indicates wether a file is a project, either CE or DUB.
@@ -34,17 +34,17 @@ function isProject(const filename: string): boolean;
 (**
  * Indicates wether a file is a project, either CE or DUB.
  *)
-function projectFormat(const filename: string): TCEProjectFileFormat;
+function projectFormat(const filename: string): TProjectFileFormat;
 
 (**
  * Saves all the project files that are being edited and if they're modified.
  *)
-procedure saveModifiedProjectFiles(project: ICECommonProject);
+procedure saveModifiedProjectFiles(project: ICommonProject);
 
 (**
  * Returns the root of the project sources.
  *)
-function projectSourcePath(project: ICECommonProject): string;
+function projectSourcePath(project: ICommonProject): string;
 
 implementation
 
@@ -67,7 +67,7 @@ begin
     result := false;
 end;
 
-function projectFormat(const filename: string): TCEProjectFileFormat;
+function projectFormat(const filename: string): TProjectFileFormat;
 var
   ext: string;
 begin
@@ -82,12 +82,12 @@ begin
     result := pffDexed;
 end;
 
-function loadProject(const filename: string; discret: boolean): ICECommonProject;
+function loadProject(const filename: string; discret: boolean): ICommonProject;
 var
   isDubProject: boolean = false;
   isCeProject: boolean = false;
-  dubProj: TCEDubProject;
-  ceProj: TCENativeProject;
+  dubProj: TDubProject;
+  ceProj: TNativeProject;
 begin
   result := nil;
   if not filename.fileExists then
@@ -106,23 +106,23 @@ begin
     EntitiesConnector.beginUpdate;
   if isDubProject then
   begin
-    dubProj := TCEDubProject.create(nil);
+    dubProj := TDubProject.create(nil);
     dubproj.loadFromFile(filename);
-    result := dubProj as ICECommonProject;
+    result := dubProj as ICommonProject;
   end
   else begin
-    ceProj := TCENativeProject.create(nil);
+    ceProj := TNativeProject.create(nil);
     ceProj.loadFromFile(filename);
-    result := ceProj as ICECommonProject;
+    result := ceProj as ICommonProject;
   end;
   if discret then
     EntitiesConnector.endUpdate;
 end;
 
-procedure saveModifiedProjectFiles(project: ICECommonProject);
+procedure saveModifiedProjectFiles(project: ICommonProject);
 var
-  mdh: ICEMultiDocHandler;
-  doc: TCESynMemo;
+  mdh: IMultiDocHandler;
+  doc: TDexedMemo;
   i: integer;
 begin
   mdh := getMultiDocHandler;
@@ -148,7 +148,7 @@ begin
   end;
 end;
 
-function projectSourcePath(project: ICECommonProject): string;
+function projectSourcePath(project: ICommonProject): string;
 var
   i, j: integer;
   mnme: string;
@@ -158,7 +158,7 @@ var
   lst: TStringList;
   srcc: TStringList;
   toks: TLexTokenList;
-  pdb: TCEDubProject;
+  pdb: TDubProject;
   jsn: TJSONArray;
   rng: TStringRange = (ptr: nil; pos: 0; len: 0);
   sym: boolean;
@@ -181,7 +181,7 @@ begin
   // DUB sourcePath
   if project.getFormat = pfDUB then
   begin
-    pdb := TCEDubProject(project.getProject);
+    pdb := TDubProject(project.getProject);
     if pdb.json.findArray('sourcePath', jsn) then
     begin
       if (jsn.Count = 1) then

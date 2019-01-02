@@ -1,4 +1,4 @@
-inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
+inherited ProjectConfigurationWidget: TProjectConfigurationWidget
   Left = 1467
   Height = 315
   Top = 349
@@ -13,26 +13,25 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
     ClientHeight = 315
     ClientWidth = 445
     inherited Content: TPanel
-      Height = 281
-      Top = 34
+      Height = 279
       Width = 445
-      ClientHeight = 281
+      ClientHeight = 279
       ClientWidth = 445
       object Panel2: TPanel[0]
         Left = 4
-        Height = 273
+        Height = 271
         Top = 4
         Width = 437
         Align = alClient
         AutoSize = True
         BorderSpacing.Around = 4
         BevelOuter = bvNone
-        ClientHeight = 273
+        ClientHeight = 271
         ClientWidth = 437
         TabOrder = 0
         object Tree: TTreeView
           Left = 0
-          Height = 273
+          Height = 271
           Hint = 'filter configuration elements'
           Top = 0
           Width = 160
@@ -66,14 +65,14 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         end
         object Splitter1: TSplitter
           Left = 160
-          Height = 273
+          Height = 271
           Top = 0
           Width = 5
           AutoSnap = False
         end
         object inspector: TTIPropertyGrid
           Left = 165
-          Height = 273
+          Height = 271
           Top = 0
           Width = 272
           Align = alClient
@@ -89,9 +88,9 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         end
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 437
-      object btnSyncEdit: TCEToolButton[0]
+      object btnSyncEdit: TDexedToolButton[0]
         Left = 85
         Hint = 'activate or deactivate the synchronized edition'
         Top = 0
@@ -101,7 +100,7 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         resourceName = 'LINK_BREAK'
         scaledSeparator = False
       end
-      object btnCloneConf: TCEToolButton[1]
+      object btnCloneConf: TDexedToolButton[1]
         Left = 57
         Hint = 'clone the selected configuration'
         Top = 0
@@ -111,7 +110,7 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         resourceName = 'COG_GO'
         scaledSeparator = False
       end
-      object btnDelConf: TCEToolButton[2]
+      object btnDelConf: TDexedToolButton[2]
         Left = 29
         Hint = 'delete selected configuration'
         Top = 0
@@ -121,7 +120,7 @@ inherited CEProjectConfigurationWidget: TCEProjectConfigurationWidget
         resourceName = 'COG_DELETE'
         scaledSeparator = False
       end
-      object btnAddConf: TCEToolButton[3]
+      object btnAddConf: TDexedToolButton[3]
         Left = 1
         Hint = 'add a new configuration'
         Top = 0

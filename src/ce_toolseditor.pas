@@ -11,15 +11,15 @@ uses
 
 type
 
-  { TCEToolsEditorWidget }
-  TCEToolsEditorWidget = class(TCEWidget)
-    btnAddTool: TCEToolButton;
-    btnClone: TCEToolButton;
-    btnEdit: TCEToolButton;
-    btnMoveDown: TCEToolButton;
-    btnMoveUp: TCEToolButton;
-    btnRemTool: TCEToolButton;
-    btnRun: TCEToolButton;
+  { TToolsEditorWidget }
+  TToolsEditorWidget = class(TDexedWidget)
+    btnAddTool: TDexedToolButton;
+    btnClone: TDexedToolButton;
+    btnEdit: TDexedToolButton;
+    btnMoveDown: TDexedToolButton;
+    btnMoveUp: TDexedToolButton;
+    btnRemTool: TDexedToolButton;
+    btnRun: TDexedToolButton;
     lstTools: TListBox;
     Panel2: TPanel;
     Splitter1: TSplitter;
@@ -47,7 +47,7 @@ type
 implementation
 {$R *.lfm}
 
-constructor TCEToolsEditorWidget.create(aOwner: TComponent);
+constructor TToolsEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
   propsEd.CheckboxForBoolean := true;
@@ -57,13 +57,13 @@ begin
   setReadOnly(CustomTools.readOnly);
 end;
 
-procedure TCEToolsEditorWidget.clearInspector;
+procedure TToolsEditorWidget.clearInspector;
 begin
   propsEd.TIObject := nil;
   propsEd.ItemIndex := -1;
 end;
 
-procedure TCEToolsEditorWidget.rebuildToolList;
+procedure TToolsEditorWidget.rebuildToolList;
 var
   i: integer;
 begin
@@ -77,7 +77,7 @@ begin
   CustomTools.updateMenu;
 end;
 
-procedure TCEToolsEditorWidget.updateToolList;
+procedure TToolsEditorWidget.updateToolList;
 var
   i: Integer;
 begin
@@ -86,7 +86,7 @@ begin
   CustomTools.updateMenu;
 end;
 
-procedure TCEToolsEditorWidget.lstToolsSelectionChange(Sender: TObject;
+procedure TToolsEditorWidget.lstToolsSelectionChange(Sender: TObject;
   User: boolean);
 begin
   if lstTools.ItemIndex = -1 then
@@ -94,7 +94,7 @@ begin
   propsEd.TIObject := CustomTools[lstTools.ItemIndex];
 end;
 
-procedure TCEToolsEditorWidget.propsEdModified(Sender: TObject);
+procedure TToolsEditorWidget.propsEdModified(Sender: TObject);
 begin
   if propsEd.ItemIndex = -1 then
     exit;
@@ -104,15 +104,15 @@ begin
     updateToolList;
 end;
 
-procedure TCEToolsEditorWidget.BtnAddToolClick(Sender: TObject);
+procedure TToolsEditorWidget.BtnAddToolClick(Sender: TObject);
 begin
   CustomTools.addTool;
   rebuildToolList;
 end;
 
-procedure TCEToolsEditorWidget.btnCloneClick(Sender: TObject);
+procedure TToolsEditorWidget.btnCloneClick(Sender: TObject);
 var
-  itm: TCEToolItem;
+  itm: TToolItem;
 begin
   if lstTools.ItemIndex = -1 then
     exit;
@@ -123,7 +123,7 @@ begin
   rebuildToolList;
 end;
 
-procedure TCEToolsEditorWidget.setReadOnly(value: boolean);
+procedure TToolsEditorWidget.setReadOnly(value: boolean);
 begin
   if value then
   begin
@@ -141,12 +141,12 @@ begin
   end;
 end;
 
-procedure TCEToolsEditorWidget.btnEditClick(Sender: TObject);
+procedure TToolsEditorWidget.btnEditClick(Sender: TObject);
 begin
   setReadOnly(not CustomTools.readOnly);
 end;
 
-procedure TCEToolsEditorWidget.btnRemToolClick(Sender: TObject);
+procedure TToolsEditorWidget.btnRemToolClick(Sender: TObject);
 begin
   if lstTools.ItemIndex = -1 then
     exit;
@@ -156,7 +156,7 @@ begin
   rebuildToolList;
 end;
 
-procedure TCEToolsEditorWidget.btnMoveUpClick(Sender: TObject);
+procedure TToolsEditorWidget.btnMoveUpClick(Sender: TObject);
 begin
   if lstTools.ItemIndex < 1 then
     exit;
@@ -166,7 +166,7 @@ begin
   updateToolList;
 end;
 
-procedure TCEToolsEditorWidget.btnMoveDownClick(Sender: TObject);
+procedure TToolsEditorWidget.btnMoveDownClick(Sender: TObject);
 begin
   if (lstTools.ItemIndex = -1) or (lstTools.ItemIndex = lstTools.Items.Count-1) then
     exit;
@@ -176,7 +176,7 @@ begin
   updateToolList;
 end;
 
-procedure TCEToolsEditorWidget.executeSelectedTool;
+procedure TToolsEditorWidget.executeSelectedTool;
 begin
   if lstTools.ItemIndex = -1 then
     exit;
@@ -184,12 +184,12 @@ begin
   CustomTools.executeTool(lstTools.ItemIndex);
 end;
 
-procedure TCEToolsEditorWidget.btnRunClick(Sender: TObject);
+procedure TToolsEditorWidget.btnRunClick(Sender: TObject);
 begin
   executeSelectedTool;
 end;
 
-procedure TCEToolsEditorWidget.lstToolsDblClick(Sender: TObject);
+procedure TToolsEditorWidget.lstToolsDblClick(Sender: TObject);
 begin
   executeSelectedTool;
 end;

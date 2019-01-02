@@ -10,10 +10,10 @@ uses
 
 type
 
-  TCEDDemangler = class
+  TDDemangler = class
   strict private
     fActive: boolean;
-    fProc: TCEProcess;
+    fProc: TDexedProcess;
     fList, fOut: TStringList;
     procedure procTerminate(sender: TObject);
   public
@@ -32,9 +32,9 @@ procedure demangle(values, output: TStrings);
 implementation
 
 var
-  demangler: TCEDDemangler;
+  demangler: TDDemangler;
 
-constructor TCEDDemangler.create;
+constructor TDDemangler.create;
 var
   s: string = '.0.';
   r: TStringRange;
@@ -42,7 +42,7 @@ var
 begin
   fList := TStringList.Create;
   fOut  := TStringList.Create;
-  fProc := TCEProcess.create(nil);
+  fProc := TDexedProcess.create(nil);
   fProc.Options:= [poUsePipes];
   fProc.OnTerminate:=@procTerminate;
   fProc.ShowWindow:= swoHIDE;
@@ -88,7 +88,7 @@ begin
   else fActive := false;
 end;
 
-destructor TCEDDemangler.destroy;
+destructor TDDemangler.destroy;
 begin
   if fProc.Running then
     fProc.Terminate(0);
@@ -98,12 +98,12 @@ begin
   inherited;
 end;
 
-procedure TCEDDemangler.procTerminate(sender: TObject);
+procedure TDDemangler.procTerminate(sender: TObject);
 begin
   fActive := false;
 end;
 
-procedure TCEDDemangler.demangle(const value: string);
+procedure TDDemangler.demangle(const value: string);
 var
   nb: integer;
 begin
@@ -151,7 +151,7 @@ begin
 end;
 
 initialization
-  demangler := TCEDDemangler.create;
+  demangler := TDDemangler.create;
 finalization
   demangler.Free;
 end.

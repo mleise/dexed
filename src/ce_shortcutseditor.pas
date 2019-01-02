@@ -16,8 +16,8 @@ type
   private
     fIdentifier: string;
     fData: TShortcut;
-    fDeclarator: ICEEditableShortCut;
-    property declarator: ICEEditableShortCut read fDeclarator write fDeclarator;
+    fDeclarator: IEditableShortCut;
+    property declarator: IEditableShortCut read fDeclarator write fDeclarator;
   published
     property identifier: string read fIdentifier write fIdentifier;
     property data: TShortcut read fData write fData;
@@ -53,9 +53,9 @@ type
     property shortcut: TShortCut read value write value;
   end;
 
-  { TCEShortcutEditor }
+  { TShortcutEditor }
 
-  TCEShortcutEditor = class(TFrame, ICEEditableOptions)
+  TShortcutEditor = class(TFrame, IEditableOptions)
     btnClear: TSpeedButton;
     btnEdit: TSpeedButton;
     Panel1: TPanel;
@@ -71,7 +71,7 @@ type
     procedure propeditModified(Sender: TObject);
     procedure treeSelectionChanged(Sender: TObject);
   private
-    fObservers: TCEEditableShortCutSubject;
+    fObservers: TEditableShortCutSubject;
     fShortcuts: TShortCutCollection;
     fBackup: TShortCutCollection;
     fHasChanged: boolean;
@@ -101,7 +101,7 @@ implementation
 {$R *.lfm}
 
 var
-  CEShortcutEditor: TCEShortcutEditor;
+  ShortcutEditor: TShortcutEditor;
 
 {$REGION TShortCutCollection ---------------------------------------------------}
 function TShortcutItem.combination: string;
@@ -180,11 +180,11 @@ end;
 {$ENDREGION}
 
 {$REGION Standard Comp/Object things -------------------------------------------}
-constructor TCEShortcutEditor.create(TheOwner: TComponent);
+constructor TShortcutEditor.create(TheOwner: TComponent);
 begin
   inherited;
   propvalue := TEditableShortcut.Create;
-  fObservers := TCEEditableShortCutSubject.create;
+  fObservers := TEditableShortCutSubject.create;
   fShortcuts := TShortCutCollection.create(self);
   fBackup := TShortCutCollection.create(self);
   EntitiesConnector.addObserver(self);
@@ -192,14 +192,14 @@ begin
   propedit.PropertyEditorHook.AddHandlerModified(@propeditModified);
 end;
 
-destructor TCEShortcutEditor.destroy;
+destructor TShortcutEditor.destroy;
 begin
   propvalue.Free;
   fObservers.Free;
   inherited;
 end;
 
-procedure TCEShortcutEditor.updateScaling;
+procedure TShortcutEditor.updateScaling;
 begin
   if fHasScaled then
     exit;
@@ -229,7 +229,7 @@ begin
   propedit.BuildPropertyList();
 end;
 
-function TCEShortcutEditor.anItemIsSelected: boolean;
+function TShortcutEditor.anItemIsSelected: boolean;
 begin
   result := true;
   if tree.Selected.isNil or (tree.Selected.Level = 0) or tree.Selected.Data.isNil then
@@ -237,25 +237,25 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEEditableOptions ----------------------------------------------------}
-function TCEShortcutEditor.optionedWantCategory(): string;
+{$REGION IEditableOptions ----------------------------------------------------}
+function TShortcutEditor.optionedWantCategory(): string;
 begin
   exit('Shortcuts');
 end;
 
-function TCEShortcutEditor.optionedWantEditorKind: TOptionEditorKind;
+function TShortcutEditor.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekControl);
 end;
 
-function TCEShortcutEditor.optionedWantContainer: TPersistent;
+function TShortcutEditor.optionedWantContainer: TPersistent;
 begin
   updateScaling;
   receiveShortcuts;
   exit(self);
 end;
 
-procedure TCEShortcutEditor.optionedEvent(event: TOptionEditorEvent);
+procedure TShortcutEditor.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
     oeeSelectCat:
@@ -278,29 +278,29 @@ begin
   end;
 end;
 
-function TCEShortcutEditor.optionedOptionsModified: boolean;
+function TShortcutEditor.optionedOptionsModified: boolean;
 begin
   exit(fHasChanged);
 end;
 {$ENDREGION}
 
 {$REGION shortcut editor things ------------------------------------------------}
-procedure TCEShortcutEditor.treeSelectionChanged(Sender: TObject);
+procedure TShortcutEditor.treeSelectionChanged(Sender: TObject);
 begin
   updateEditCtrls;
 end;
 
-procedure TCEShortcutEditor.shortcutCatcherExit(Sender: TObject);
+procedure TShortcutEditor.shortcutCatcherExit(Sender: TObject);
 begin
   updateEditCtrls;
 end;
 
-procedure TCEShortcutEditor.shortcutCatcherMouseLeave(Sender: TObject);
+procedure TShortcutEditor.shortcutCatcherMouseLeave(Sender: TObject);
 begin
   updateEditCtrls;
 end;
 
-procedure TCEShortcutEditor.propeditModified(Sender: TObject);
+procedure TShortcutEditor.propeditModified(Sender: TObject);
 var
   i: integer;
   j: integer;
@@ -358,7 +358,7 @@ begin
   updateEditCtrls;
 end;
 
-procedure TCEShortcutEditor.btnClearClick(Sender: TObject);
+procedure TShortcutEditor.btnClearClick(Sender: TObject);
 begin
   if not anItemIsSelected then
     exit;
@@ -370,14 +370,14 @@ begin
   updateEditCtrls;
 end;
 
-procedure TCEShortcutEditor.btnEditClick(Sender: TObject);
+procedure TShortcutEditor.btnEditClick(Sender: TObject);
 begin
   if not anItemIsSelected then
     exit;
   propedit.Rows[0].Editor.Edit;
 end;
 
-function TCEShortcutEditor.fltItemsFilterItem(Item: TObject; out Done: Boolean): Boolean;
+function TShortcutEditor.fltItemsFilterItem(Item: TObject; out Done: Boolean): Boolean;
 var
   shc: TShortcutItem;
 begin
@@ -399,7 +399,7 @@ begin
   end;
 end;
 
-procedure TCEShortcutEditor.updateEditCtrls;
+procedure TShortcutEditor.updateEditCtrls;
 var
   shc: TShortcutItem;
 begin
@@ -413,7 +413,7 @@ begin
   end;
 end;
 
-function TCEShortcutEditor.findCategory(const aName: string; aData: Pointer): TTreeNode;
+function TShortcutEditor.findCategory(const aName: string; aData: Pointer): TTreeNode;
 var
   i: integer;
 begin
@@ -424,7 +424,7 @@ begin
         exit(tree.Items[i]);
 end;
 
-function TCEShortcutEditor.findCategory(const aShortcutItem: TShortcutItem): string;
+function TShortcutEditor.findCategory(const aShortcutItem: TShortcutItem): string;
 var
   i, j: integer;
 begin
@@ -435,15 +435,15 @@ begin
         exit(tree.Items.Item[i].Text);
 end;
 
-function TCEShortcutEditor.sortCategories(Cat1, Cat2: TTreeNode): integer;
+function TShortcutEditor.sortCategories(Cat1, Cat2: TTreeNode): integer;
 begin
   result := CompareText(Cat1.Text, Cat2.Text);
 end;
 
-procedure TCEShortcutEditor.receiveShortcuts;
+procedure TShortcutEditor.receiveShortcuts;
 var
   i: Integer;
-  obs: ICEEditableShortCut;
+  obs: IEditableShortCut;
   cat: string;
   sht: word;
   idt: string;
@@ -475,7 +475,7 @@ begin
   idt := '';
   for i:= 0 to fObservers.observersCount-1 do
   begin
-    obs := fObservers.observers[i] as ICEEditableShortCut;
+    obs := fObservers.observers[i] as IEditableShortCut;
     if obs.scedWantFirst then
     begin
       while obs.scedWantNext(cat, idt, sht) do
@@ -487,11 +487,11 @@ begin
   fBackup.Assign(fShortcuts);
 end;
 
-procedure TCEShortcutEditor.sendShortcuts;
+procedure TShortcutEditor.sendShortcuts;
 var
   i: integer;
   shc: TShortcutItem;
-  decl: ICEEditableShortCut = nil;
+  decl: IEditableShortCut = nil;
   cat: string;
 begin
   for i := 0 to fShortcuts.count-1 do
@@ -514,8 +514,8 @@ end;
 {$ENDREGION}
 
 initialization
-  CEShortcutEditor := TCEShortcutEditor.Create(nil);
+  ShortcutEditor := TShortcutEditor.Create(nil);
 finalization
-  CEShortcutEditor.Free;
+  ShortcutEditor.Free;
 end.
 

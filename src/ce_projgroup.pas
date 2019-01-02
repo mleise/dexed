@@ -14,10 +14,10 @@ type
 
   TProjectGroup = class;
 
-  TCEProjectAsyncMode = (amSequential, amParallel);
+  TProjectAsyncMode = (amSequential, amParallel);
 
 const
-  asyncStr: array[TCEProjectAsyncMode] of string = ('wait', 'async');
+  asyncStr: array[TProjectAsyncMode] of string = ('wait', 'async');
 
 type
 
@@ -28,16 +28,16 @@ type
   private
     fConfigIndex: integer;
     fFilename: string;
-    fProj: ICECommonProject;
+    fProj: ICommonProject;
     fGroup: TProjectGroup;
-    fAsyncMode: TCEProjectAsyncMode;
+    fAsyncMode: TProjectAsyncMode;
     function storeConfigIndex: boolean;
   published
     property filename: string read fFilename write fFilename;
-    property asyncMode: TCEProjectAsyncMode read fAsyncMode write fAsyncMode;
+    property asyncMode: TProjectAsyncMode read fAsyncMode write fAsyncMode;
     property configurationIndex: integer read fConfigIndex write fConfigIndex stored storeConfigIndex;
   public
-    property project: ICECommonProject read fProj;
+    property project: ICommonProject read fProj;
     procedure lazyLoad;
     destructor destroy; override;
     function absoluteFilename: string;
@@ -46,7 +46,7 @@ type
   (**
    * Collection that handles several project at once.
    *)
-  TProjectGroup = class(TWritableLfmTextComponent, ICEProjectGroup, IFPObserver, ICEProjectObserver)
+  TProjectGroup = class(TWritableLfmTextComponent, IProjectGroup, IFPObserver, IProjectObserver)
   private
     fProjectIndex: integer;
     fItems: TCollection;
@@ -55,19 +55,19 @@ type
     fOnChanged: TNotifyEvent;
     fBasePath: string;
     fSavedIndex: integer;
-    fFreeStanding: ICECommonProject;
+    fFreeStanding: ICommonProject;
     procedure setItems(value: TCollection);
     function getItem(index: integer): TProjectGroupItem;
     procedure doChanged;
     //
     procedure FPOObservedChanged(ASender : TObject; Operation :
       TFPObservedOperation; Data : Pointer);
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
   protected
     procedure afterLoad; override;
     procedure afterSave; override;
@@ -76,7 +76,7 @@ type
     destructor destroy; override;
     //
     function singleServiceName: string;
-    procedure addProject(project: ICECommonProject);
+    procedure addProject(project: ICommonProject);
     procedure openGroup(const fname: string);
     procedure saveGroup(const fname: string);
     procedure closeGroup;
@@ -86,8 +86,8 @@ type
     function groupFilename: string;
     function projectCount: integer;
     function getProjectIndex: integer;
-    function getProject(ix: Integer): ICECommonProject;
-    function findProject(const fname: string): ICECommonProject;
+    function getProject(ix: Integer): ICommonProject;
+    function findProject(const fname: string): ICommonProject;
     procedure setProjectIndex(value: Integer);
     function projectIsAsync(ix: integer): boolean;
     function projectModified(ix: integer): boolean;
@@ -104,14 +104,14 @@ type
   (**
    * GUI for a project group
    *)
-  TCEProjectGroupWidget = class(TCEWidget, ICEProjectObserver)
-    BtnAddProj: TCEToolButton;
+  TProjectGroupWidget = class(TDexedWidget, IProjectObserver)
+    BtnAddProj: TDexedToolButton;
     btnAddUnfocused: TSpeedButton;
-    btnAsync: TCEToolButton;
+    btnAsync: TDexedToolButton;
     btnFreeFocus: TSpeedButton;
-    btnMoveDown: TCEToolButton;
-    btnMoveUp: TCEToolButton;
-    btnRemProj: TCEToolButton;
+    btnMoveDown: TDexedToolButton;
+    btnMoveUp: TDexedToolButton;
+    btnRemProj: TDexedToolButton;
     lstProj: TListView;
     Panel2: TPanel;
     StaticText1: TStaticText;
@@ -126,17 +126,17 @@ type
     procedure slstProjSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
   private
-    fPrevProj: ICECommonProject;
-    fFreeProj: ICECommonProject;
-    fProjSubj: TCEProjectSubject;
+    fPrevProj: ICommonProject;
+    fFreeProj: ICommonProject;
+    fProjSubj: TProjectSubject;
     fUpdating: boolean;
     //
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
     //
     procedure updateButtons;
     procedure updateList;
@@ -192,13 +192,13 @@ begin
     fModified := true;
 end;
 
-procedure TProjectGroup.projNew(project: ICECommonProject);
+procedure TProjectGroup.projNew(project: ICommonProject);
 begin
   if (project <> nil) and not project.inGroup then
     fFreeStanding := project;
 end;
 
-procedure TProjectGroup.projChanged(project: ICECommonProject);
+procedure TProjectGroup.projChanged(project: ICommonProject);
 var
   itm: TProjectGroupItem;
 begin
@@ -210,23 +210,23 @@ begin
   end;
 end;
 
-procedure TProjectGroup.projClosing(project: ICECommonProject);
+procedure TProjectGroup.projClosing(project: ICommonProject);
 begin
   if (project <> nil) and (project = fFreeStanding) then
     fFreeStanding := nil;
 end;
 
-procedure TProjectGroup.projFocused(project: ICECommonProject);
+procedure TProjectGroup.projFocused(project: ICommonProject);
 begin
   if (project <> nil) and not project.inGroup then
     fFreeStanding := project;
 end;
 
-procedure TProjectGroup.projCompiling(project: ICECommonProject);
+procedure TProjectGroup.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TProjectGroup.projCompiled(project: ICECommonProject; success: boolean);
+procedure TProjectGroup.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 
@@ -280,7 +280,7 @@ begin
   result.configurationIndex:=result.fProj.getActiveConfigurationIndex;
 end;
 
-function TProjectGroup.getProject(ix: Integer): ICECommonProject;
+function TProjectGroup.getProject(ix: Integer): ICommonProject;
 begin
   item[ix].lazyLoad;
   result := item[ix].project;
@@ -290,7 +290,7 @@ end;
 
 function TProjectGroup.projectModified(ix: integer): boolean;
 var
-  p: ICECommonProject;
+  p: ICommonProject;
 begin
   result := false;
   p := item[ix].project;
@@ -298,7 +298,7 @@ begin
     result := true
 end;
 
-function TProjectGroup.findProject(const fname: string): ICECommonProject;
+function TProjectGroup.findProject(const fname: string): ICommonProject;
 var
   i: integer;
 begin
@@ -364,7 +364,7 @@ begin
   fSavedIndex := fProjectIndex;
 end;
 
-procedure TProjectGroup.addProject(project: ICECommonProject);
+procedure TProjectGroup.addProject(project: ICommonProject);
 var
   it: TCollectionItem;
 begin
@@ -484,7 +484,7 @@ end;
 
 function TProjectGroup.singleServiceName: string;
 begin
-  exit('ICEProjectGroup');
+  exit('IProjectGroup');
 end;
 
 procedure TProjectGroupItem.lazyLoad;
@@ -528,7 +528,7 @@ end;
 {$ENDREGION}
 
 {$REGION Widget Standard component things --------------------------------------}
-constructor TCEProjectGroupWidget.create(aOwner: TCOmponent);
+constructor TProjectGroupWidget.create(aOwner: TCOmponent);
 begin
   inherited;
   case GetIconScaledSize of
@@ -550,22 +550,22 @@ begin
   end;
 
   projectGroup.onChanged:= @handleChanged;
-  fProjSubj:= TCEProjectSubject.Create;
+  fProjSubj:= TProjectSubject.Create;
 end;
 
-destructor TCEProjectGroupWidget.destroy;
+destructor TProjectGroupWidget.destroy;
 begin
   fProjSubj.free;
   inherited;
 end;
 
-procedure TCEProjectGroupWidget.DoShow;
+procedure TProjectGroupWidget.DoShow;
 begin
   inherited;
   updateList;
 end;
 
-procedure TCEProjectGroupWidget.setToolBarFlat(value: boolean);
+procedure TProjectGroupWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolBarFlat(value);
   btnFreeFocus.flat := value;
@@ -573,20 +573,20 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION Widget ICEProjectObserver ---------------------------------------------}
-procedure TCEProjectGroupWidget.projNew(project: ICECommonProject);
+{$REGION Widget IProjectObserver ---------------------------------------------}
+procedure TProjectGroupWidget.projNew(project: ICommonProject);
 begin
   fPrevProj := project;
   if not project.inGroup then
     fFreeProj := project;
 end;
 
-procedure TCEProjectGroupWidget.projChanged(project: ICECommonProject);
+procedure TProjectGroupWidget.projChanged(project: ICommonProject);
 begin
   updateList;
 end;
 
-procedure TCEProjectGroupWidget.projClosing(project: ICECommonProject);
+procedure TProjectGroupWidget.projClosing(project: ICommonProject);
 begin
   fPrevProj := nil;
   if project = fFreeProj then
@@ -596,7 +596,7 @@ begin
   end;
 end;
 
-procedure TCEProjectGroupWidget.projFocused(project: ICECommonProject);
+procedure TProjectGroupWidget.projFocused(project: ICommonProject);
 begin
   fPrevProj := project;
   if not project.inGroup then
@@ -611,17 +611,17 @@ begin
   end;
 end;
 
-procedure TCEProjectGroupWidget.projCompiling(project: ICECommonProject);
+procedure TProjectGroupWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEProjectGroupWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TProjectGroupWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
 {$REGION Widget project group things -------------------------------------------}
-procedure TCEProjectGroupWidget.BtnAddProjClick(Sender: TObject);
+procedure TProjectGroupWidget.BtnAddProjClick(Sender: TObject);
 var
   fname: string;
   added: boolean;
@@ -645,13 +645,13 @@ begin
   end;
 end;
 
-procedure TCEProjectGroupWidget.btnFreeFocusClick(Sender: TObject);
+procedure TProjectGroupWidget.btnFreeFocusClick(Sender: TObject);
 begin
   if fFreeProj <> nil then
     subjProjFocused(fProjSubj, fFreeProj);
 end;
 
-procedure TCEProjectGroupWidget.btnAddUnfocusedClick(Sender: TObject);
+procedure TProjectGroupWidget.btnAddUnfocusedClick(Sender: TObject);
 begin
   if fFreeProj = nil then
     exit;
@@ -662,7 +662,7 @@ begin
   updateList;
 end;
 
-procedure TCEProjectGroupWidget.btnAsyncClick(Sender: TObject);
+procedure TProjectGroupWidget.btnAsyncClick(Sender: TObject);
 var
   prj: TProjectGroupItem;
 begin
@@ -676,7 +676,7 @@ begin
   updateButtons;
 end;
 
-procedure TCEProjectGroupWidget.btnMoveDownClick(Sender: TObject);
+procedure TProjectGroupWidget.btnMoveDownClick(Sender: TObject);
 begin
   if lstProj.ItemIndex = -1 then exit;
   if lstProj.ItemIndex = lstProj.Items.Count-1 then exit;
@@ -687,7 +687,7 @@ begin
   lstProj.ItemIndex:=lstProj.ItemIndex+1;
 end;
 
-procedure TCEProjectGroupWidget.btnMoveUpClick(Sender: TObject);
+procedure TProjectGroupWidget.btnMoveUpClick(Sender: TObject);
 begin
   if lstProj.ItemIndex = -1 then exit;
   if lstProj.ItemIndex = 0 then exit;
@@ -698,14 +698,14 @@ begin
   lstProj.ItemIndex:=lstProj.ItemIndex-1;
 end;
 
-procedure TCEProjectGroupWidget.btnRemProjClick(Sender: TObject);
+procedure TProjectGroupWidget.btnRemProjClick(Sender: TObject);
 begin
   if lstProj.ItemIndex = -1 then exit;
   projectGroup.items.Delete(lstProj.Selected.Index);
   updateList;
 end;
 
-procedure TCEProjectGroupWidget.lstProjDblClick(Sender: TObject);
+procedure TProjectGroupWidget.lstProjDblClick(Sender: TObject);
 begin
   if lstProj.ItemIndex = -1 then
     exit;
@@ -715,13 +715,13 @@ begin
     projectGroup.setProjectIndex(lstProj.ItemIndex);
 end;
 
-procedure TCEProjectGroupWidget.slstProjSelectItem(Sender: TObject;
+procedure TProjectGroupWidget.slstProjSelectItem(Sender: TObject;
   Item: TListItem; Selected: Boolean);
 begin
   updateButtons
 end;
 
-procedure TCEProjectGroupWidget.handleChanged(sender: TObject);
+procedure TProjectGroupWidget.handleChanged(sender: TObject);
 begin
   updateList;
   if (projectGroup.getProjectIndex <> -1) and (projectGroup.getProjectIndex <> lstProj.ItemIndex) then
@@ -731,10 +731,10 @@ begin
   end;
 end;
 
-procedure TCEProjectGroupWidget.updateButtons;
+procedure TProjectGroupWidget.updateButtons;
 var
   idx: integer;
-  asc: TCEProjectAsyncMode;
+  asc: TProjectAsyncMode;
 begin
   idx := lstProj.ItemIndex;
   if idx = -1 then
@@ -767,13 +767,13 @@ begin
   end;
 end;
 
-procedure TCEProjectGroupWidget.updateList;
+procedure TProjectGroupWidget.updateList;
 var
   i: integer;
   prj: TProjectGroupItem;
-  fmt: TCEProjectFormat;
+  fmt: TProjectFormat;
 const
-  typeStr: array[TCEProjectFormat] of string = ('DEXED','DUB');
+  typeStr: array[TProjectFormat] of string = ('DEXED','DUB');
 begin
   if fUpdating then
     exit;
@@ -791,7 +791,7 @@ begin
       fmt := prj.project.getFormat;
       case fmt of
         pfDEXED: Caption := prj.fFilename.extractFileName;
-        pfDUB: Caption := TCEDubProject(prj.project.getProject).packageName;
+        pfDUB: Caption := TDubProject(prj.project.getProject).packageName;
       end;
       SubItems.Add(typeStr[fmt]);
       SubItems.Add(asyncStr[prj.fAsyncMode]);
@@ -811,7 +811,7 @@ begin
     if fFreeProj.filename.fileExists then
       case fFreeProj.getFormat of
         pfDEXED: StaticText1.Caption:= 'Free standing: ' + fFreeProj.filename.extractFileName;
-        pfDUB: StaticText1.Caption:= 'Free standing: ' + TCEDubProject(fFreeProj.getProject).packageName;
+        pfDUB: StaticText1.Caption:= 'Free standing: ' + TDubProject(fFreeProj.getProject).packageName;
       end
     else
       StaticText1.Caption:= 'Free standing: (not yet saved)';

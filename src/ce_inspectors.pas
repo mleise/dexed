@@ -15,7 +15,7 @@ type
   // base class for a property representing a path
   // additionaly to the text field, a dialog can be opened
   // to select the directory or the file.
-  TCECustomPathEditor = class(TStringPropertyEditor)
+  TCustomPathEditor = class(TStringPropertyEditor)
   private
     fType: TCustomPathType;
   public
@@ -23,15 +23,15 @@ type
     procedure Edit; override;
   end;
 
-  TCEPathnameEditor = class(TCECustomPathEditor)
+  TPathnameEditor = class(TCustomPathEditor)
     constructor Create(Hook: TPropertyEditorHook; APropCount: Integer); override;
   end;
 
-  TCEFilenameEditor = class(TCECustomPathEditor)
+  TFilenameEditor = class(TCustomPathEditor)
     constructor Create(Hook: TPropertyEditorHook; APropCount: Integer); override;
   end;
 
-  TCEActionInEditor = class(TPropertyEditor)
+  TActionInEditor = class(TPropertyEditor)
     constructor Create(Hook:TPropertyEditorHook; APropCount:Integer); override;
     function GetAttributes: TPropertyAttributes; override;
     function IsReadOnly: boolean; override;
@@ -42,14 +42,14 @@ type
   TListDrawValueProc = procedure(const CurValue: ansistring; Index: integer;
     ACanvas: TCanvas; const ARect:TRect; AState: TPropEditDrawState) of object;
 
-  TCEColorEditor = class(TColorPropertyEditor)
+  TColorEditor = class(TColorPropertyEditor)
     procedure ListDrawValue(const CurValue: ansistring; Index: integer;
       ACanvas: TCanvas; const ARect:TRect; AState: TPropEditDrawState); override;
   end;
 
 implementation
 
-procedure TCEColorEditor.ListDrawValue(const CurValue: ansistring; Index: integer;
+procedure TColorEditor.ListDrawValue(const CurValue: ansistring; Index: integer;
   ACanvas: TCanvas; const ARect:TRect; AState: TPropEditDrawState);
 
   function ColorToBorderColor(AColor: TColorRef): TColor;
@@ -174,12 +174,12 @@ begin
   ACanvas.TextRect(rc, rc.Left+2, rc.Top, CurValue, Style);
 end;
 
-function TCECustomPathEditor.GetAttributes: TPropertyAttributes;
+function TCustomPathEditor.GetAttributes: TPropertyAttributes;
 begin
   exit( inherited GetAttributes() + [paDialog]);
 end;
 
-procedure TCECustomPathEditor.Edit;
+procedure TCustomPathEditor.Edit;
 var
   newValue: string;
 begin
@@ -199,48 +199,48 @@ begin
   end;
 end;
 
-constructor TCEPathnameEditor.Create(Hook: TPropertyEditorHook; APropCount: Integer);
+constructor TPathnameEditor.Create(Hook: TPropertyEditorHook; APropCount: Integer);
 begin
   inherited;
   fType := ptFolder;
 end;
 
-constructor TCEFilenameEditor.Create(Hook: TPropertyEditorHook; APropCount: Integer);
+constructor TFilenameEditor.Create(Hook: TPropertyEditorHook; APropCount: Integer);
 begin
   inherited;
   fType := ptFile;
 end;
 
-constructor TCEActionInEditor.Create(Hook:TPropertyEditorHook; APropCount:Integer);
+constructor TActionInEditor.Create(Hook:TPropertyEditorHook; APropCount:Integer);
 begin
   inherited;
 end;
 
-function TCEActionInEditor.GetAttributes: TPropertyAttributes;
+function TActionInEditor.GetAttributes: TPropertyAttributes;
 begin
   exit([paReadOnly, paDialog]);
 end;
 
-function TCEActionInEditor.IsReadOnly: boolean;
+function TActionInEditor.IsReadOnly: boolean;
 begin
   exit(true);
 end;
 
-function TCEActionInEditor.GetVisualValue: ansistring;
+function TActionInEditor.GetVisualValue: ansistring;
 begin
   exit('(click)');
 end;
 
-procedure TCEActionInEditor.Edit;
+procedure TActionInEditor.Edit;
 begin
   SetOrdValue(not GetOrdValue);
   Modified;
 end;
 
 initialization
-  RegisterPropertyEditor(TypeInfo(TCEPathname), nil, '', TCEPathnameEditor);
-  RegisterPropertyEditor(TypeInfo(TCEFilename), nil, '', TCEfilenameEditor);
-  RegisterPropertyEditor(TypeInfo(TCEEditEvent), nil, '', TCEActionInEditor);
-  RegisterPropertyEditor(TypeInfo(TColor), nil, '', TCEColorEditor);
+  RegisterPropertyEditor(TypeInfo(TPathname), nil, '', TPathnameEditor);
+  RegisterPropertyEditor(TypeInfo(TFilename), nil, '', TFilenameEditor);
+  RegisterPropertyEditor(TypeInfo(TEditEvent), nil, '', TActionInEditor);
+  RegisterPropertyEditor(TypeInfo(TColor), nil, '', TColorEditor);
 end.
 

@@ -248,7 +248,7 @@ type
   end;
 
   // Makes a category for the shortcuts in the option editor.
-  TCEDebugShortcuts = class(TPersistent)
+  TDebugShortcuts = class(TPersistent)
   private
     fStart, fStop, fPause, fContinue, fStep, fStepOver, fStack, fRegs,
       fVariables, fRepeatCustomEval: TShortCut;
@@ -267,7 +267,7 @@ type
     procedure assign(source: TPersistent); override;
   end;
 
-  TCEDebugOptionsBase = class(TWritableLfmTextComponent)
+  TDebugOptionsBase = class(TWritableLfmTextComponent)
   private
     fAutoDisassemble: boolean;
     fAutoGetThreads: boolean;
@@ -281,14 +281,14 @@ type
     fShowGdbOutput: boolean;
     fShowOutput: boolean;
     fShowRawMiOutput: boolean;
-    fShortcuts: TCEDebugShortcuts;
+    fShortcuts: TDebugShortcuts;
     fAsmSyntax: TAsmSyntax;
     fKeepRedirectedStreams: boolean;
     fStopAllThreadsOnBreak: boolean;
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
     procedure setCustomEvalHistory(value: TStringList);
-    procedure setShortcuts(value: TCEDebugShortcuts);
+    procedure setShortcuts(value: TDebugShortcuts);
     procedure cleanInvalidHistoryEntries;
   published
     property asmSyntax: TAsmSyntax read fAsmSyntax write fAsmSyntax;
@@ -302,7 +302,7 @@ type
     property customEvalHistory: TStringList read fCustomEvalHistory write setCustomEvalHistory;
     property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
     property keepRedirectedStreams: boolean read fKeepRedirectedStreams write fKeepRedirectedStreams default false;
-    property shortcuts: TCEDebugShortcuts read fShortcuts write setShortcuts;
+    property shortcuts: TDebugShortcuts read fShortcuts write setShortcuts;
     property showGdbOutput: boolean read fShowGdbOutput write fShowGdbOutput;
     property showRawMiOutput: boolean read fShowRawMiOutput write fShowRawMiOutput;
     property showOutput: boolean read fShowOutput write fShowOutput;
@@ -316,10 +316,10 @@ type
     procedure assign(source: TPersistent); override;
   end;
 
-  TCEDebugOptions = class(TCEDebugOptionsBase, ICEEditableOptions)
+  TDebugOptions = class(TDebugOptionsBase, IEditableOptions)
   private
     FonChangesApplied: TNotifyEvent;
-    fBackup: TCEDebugOptionsBase;
+    fBackup: TDebugOptionsBase;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -336,11 +336,11 @@ type
   TAddWatchPointKind = (wpkRead, wpkWrite, wpkReadWrite);
 
   // Persistent command line & environment of the inferior.
-  TCEDebugeeOption = class(TCollectionItem)
+  TDebugeeOption = class(TCollectionItem)
   strict private
     fQueryArguments: boolean;
     fFname: string;
-    fWorkingDir: TCEPathname;
+    fWorkingDir: TPathname;
     fAgruments: TStringList;
     fEnvPaths: TStringList;
     procedure setOptions(value: TStringList);
@@ -351,19 +351,19 @@ type
     property arguments: TStringList read fAgruments write setOptions;
     property queryArguments: boolean read fQueryArguments write fQueryArguments default false;
     property target: string read fFname;
-    property workingDirectory: TCEPathname read fWorkingDir write fWorkingDir;
+    property workingDirectory: TPathname read fWorkingDir write fWorkingDir;
   public
     constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
   end;
 
   // Store for the command line & environment of the inferior.
-  TCEDebugeeOptions = class(TWritableLfmTextComponent)
+  TDebugeeOptions = class(TWritableLfmTextComponent)
   strict private
     fProjects: TCollection;
     procedure setProjects(value: TCollection);
-    function getProjectByIndex(index: integer): TCEDebugeeOption;
-    function getProjectByFile(const fname: string): TCEDebugeeOption;
+    function getProjectByIndex(index: integer): TDebugeeOption;
+    function getProjectByFile(const fname: string): TDebugeeOption;
     procedure cleanup;
   protected
     procedure beforeSave; override;
@@ -372,26 +372,26 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    property projectByIndex[index: integer]: TCEDebugeeOption read getProjectByIndex;
-    property projectByFile[const fname: string]: TCEDebugeeOption read getProjectByFile; default;
+    property projectByIndex[index: integer]: TDebugeeOption read getProjectByIndex;
+    property projectByFile[const fname: string]: TDebugeeOption read getProjectByFile; default;
   end;
 
   TGdbEvalKind = (gekSelectedVar, gekDerefSelectedVar, gekCustom);
 
-  { TCEGdbWidget }
-  TCEGdbWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEDebugger)
-    btnContinue: TCEToolButton;
-    btnEval: TCEToolButton;
-    btnVariables: TCEToolButton;
-    btnNext: TCEToolButton;
-    btnOver: TCEToolButton;
-    btnPause: TCEToolButton;
-    btnReg: TCEToolButton;
-    btnStack: TCEToolButton;
-    btnStop: TCEToolButton;
-    btnStart: TCEToolButton;
-    btnWatch: TCEToolButton;
-    button4: TCEToolButton;
+  { TGdbWidget }
+  TGdbWidget = class(TDexedWidget, IProjectObserver, IDocumentObserver, IDebugger)
+    btnContinue: TDexedToolButton;
+    btnEval: TDexedToolButton;
+    btnVariables: TDexedToolButton;
+    btnNext: TDexedToolButton;
+    btnOver: TDexedToolButton;
+    btnPause: TDexedToolButton;
+    btnReg: TDexedToolButton;
+    btnStack: TDexedToolButton;
+    btnStop: TDexedToolButton;
+    btnStart: TDexedToolButton;
+    btnWatch: TDexedToolButton;
+    button4: TDexedToolButton;
     Edit1: TComboBox;
     GroupBox3: TGroupBox;
     lstThreads: TListView;
@@ -462,28 +462,28 @@ type
     fEvalKind: TGdbEvalKind;
     fSynchronizedDocuments: TStringList;
     fSynchronizingBreakpoints: boolean;
-    fSyms: ICESymStringExpander;
+    fSyms: ISymStringExpander;
     fExe: string;
     fOutputName: string;
     fInputName: string;
     fShowFromCustomCommand: boolean;
     fGdbState: TGdbState;
-    fSubj: TCEDebugObserverSubject;
-    fDoc: TCESynMemo;
+    fSubj: TDebugObserverSubject;
+    fDoc: TDexedMemo;
     fDbgRunnable: boolean;
-    fProj: ICECommonProject;
+    fProj: ICommonProject;
     fJson: TJsonObject;
     fLog: TStringList;
-    fDocHandler: ICEMultiDocHandler;
-    fMsg: ICEMessagesDisplay;
-    fGdb: TCEProcess;
+    fDocHandler: IMultiDocHandler;
+    fMsg: IMessagesDisplay;
+    fGdb: TDexedProcess;
     fOutput: TFileStream;
     fInput: TFileStream;
     fInspState: TInspectableCPU;
     fStackItems: TStackItems;
     fCatchPause: boolean;
     fSilentPause: boolean;
-    fOptions: TCEDebugOptions;
+    fOptions: TDebugOptions;
     fAddWatchPointKind: TAddWatchPointKind;
     fBreakPoints: TPersistentBreakPoints;
     fMenu: TMenuItem;
@@ -493,7 +493,7 @@ type
     fLastLine: string;
     fLastEvalStuff: string;
     fCommandProcessed: boolean;
-    fDebugeeOptions: TCEDebugeeOptions;
+    fDebugeeOptions: TDebugeeOptions;
     procedure continueDebugging;
     procedure waitCommandProcessed;
     procedure clearDisplays;
@@ -525,17 +525,17 @@ type
     procedure setFlag(val: PtrUint);
     procedure readOutput;
     //
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
     //
-    procedure docNew(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
     //
     function running: boolean;
     function singleServiceName: string;
@@ -612,14 +612,14 @@ const optFname = 'gdbcommander.txt';
 const bpFname = 'breakpoints.txt';
 const prjFname = 'projectsgdboptions.txt';
 
-{$REGION TCEDebugOption --------------------------------------------------------}
-procedure TCEDebugShortcuts.assign(source: TPersistent);
+{$REGION TDebugOption --------------------------------------------------------}
+procedure TDebugShortcuts.assign(source: TPersistent);
 var
-  src: TCEDebugShortcuts;
+  src: TDebugShortcuts;
 begin
-  if source is TCEDebugShortcuts then
+  if source is TDebugShortcuts then
   begin
-    src := TCEDebugShortcuts(source);
+    src := TDebugShortcuts(source);
     fStart    := src.fStart;
     fStop     := src.fStop;
     fPause    := src.fPause;
@@ -634,7 +634,7 @@ begin
   else inherited;
 end;
 
-constructor TCEDebugOptionsBase.create(aOwner: TComponent);
+constructor TDebugOptionsBase.create(aOwner: TComponent);
 begin
   inherited;
   fAutoDemangle := true;
@@ -651,13 +651,13 @@ begin
   fCommandsHistory := TStringList.Create;
   fCommandsHistory.Duplicates:= dupIgnore;
   fCommandsHistory.Sorted:=true;
-  fShortcuts := TCEDebugShortcuts.Create;
+  fShortcuts := TDebugShortcuts.Create;
   fCustomEvalHistory := TstringList.Create;
   fCustomEvalHistory.Duplicates:= dupIgnore;
   fCustomEvalHistory.Sorted:=true;
 end;
 
-destructor TCEDebugOptionsBase.destroy;
+destructor TDebugOptionsBase.destroy;
 begin
   fIgnoredSignals.Free;
   fCommandsHistory.Free;
@@ -666,7 +666,7 @@ begin
   inherited;
 end;
 
-procedure TCEDebugOptionsBase.cleanInvalidHistoryEntries;
+procedure TDebugOptionsBase.cleanInvalidHistoryEntries;
 var
   i: integer;
 begin
@@ -675,43 +675,43 @@ begin
       fCommandsHistory.Delete(i);
 end;
 
-procedure TCEDebugOptionsBase.beforeSave;
+procedure TDebugOptionsBase.beforeSave;
 begin
   cleanInvalidHistoryEntries;
 end;
 
-procedure TCEDebugOptionsBase.afterLoad;
+procedure TDebugOptionsBase.afterLoad;
 begin
   cleanInvalidHistoryEntries;
 end;
 
-procedure TCEDebugOptionsBase.setIgnoredSignals(value: TStringList);
+procedure TDebugOptionsBase.setIgnoredSignals(value: TStringList);
 begin
   fIgnoredSignals.Assign(value);
 end;
 
-procedure TCEDebugOptionsBase.setCommandsHistory(value: TStringList);
+procedure TDebugOptionsBase.setCommandsHistory(value: TStringList);
 begin
   fCommandsHistory.Assign(value);
 end;
 
-procedure TCEDebugOptionsBase.setCustomEvalHistory(value: TStringList);
+procedure TDebugOptionsBase.setCustomEvalHistory(value: TStringList);
 begin
   fCustomEvalHistory.Assign(value);
 end;
 
-procedure TCEDebugOptionsBase.setShortcuts(value: TCEDebugShortcuts);
+procedure TDebugOptionsBase.setShortcuts(value: TDebugShortcuts);
 begin
   fShortcuts.assign(value);
 end;
 
-procedure TCEDebugOptionsBase.assign(source: TPersistent);
+procedure TDebugOptionsBase.assign(source: TPersistent);
 var
-  src: TCEDebugOptionsBase;
+  src: TDebugOptionsBase;
 begin
-  if source is TCEDebugOptionsBase then
+  if source is TDebugOptionsBase then
   begin
-    src := TCEDebugOptionsBase(source);
+    src := TDebugOptionsBase(source);
     fAsmSyntax:=src.fAsmSyntax;
     fAutoDemangle:=src.fAutoDemangle;
     fAutoDisassemble:=src.fAutoDisassemble;
@@ -731,12 +731,12 @@ begin
   else inherited;
 end;
 
-constructor TCEDebugOptions.create(aOwner: TComponent);
+constructor TDebugOptions.create(aOwner: TComponent);
 var
   fname: string;
 begin
   inherited;
-  fBackup := TCEDebugOptionsBase.create(self);
+  fBackup := TDebugOptionsBase.create(self);
   EntitiesConnector.addObserver(self);
   fShowGdbOutput:=false;
   fShowOutput:= true;
@@ -749,29 +749,29 @@ begin
     loadFromFile(fname);
 end;
 
-destructor TCEDebugOptions.destroy;
+destructor TDebugOptions.destroy;
 begin
   saveToFile(getDocPath + optFname);
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
 
-function TCEDebugOptions.optionedWantCategory(): string;
+function TDebugOptions.optionedWantCategory(): string;
 begin
   exit('Debugger');
 end;
 
-function TCEDebugOptions.optionedWantEditorKind: TOptionEditorKind;
+function TDebugOptions.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekGeneric);
 end;
 
-function TCEDebugOptions.optionedWantContainer: TPersistent;
+function TDebugOptions.optionedWantContainer: TPersistent;
 begin
   exit(self);
 end;
 
-procedure TCEDebugOptions.optionedEvent(event: TOptionEditorEvent);
+procedure TDebugOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
     oeeSelectCat: fBackup.assign(self);
@@ -785,7 +785,7 @@ begin
   end;
 end;
 
-function TCEDebugOptions.optionedOptionsModified: boolean;
+function TDebugOptions.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
@@ -1093,8 +1093,8 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TCEDebugeeOption ------------------------------------------------------}
-constructor TCEDebugeeOption.Create(ACollection: TCollection);
+{$REGION TDebugeeOption ------------------------------------------------------}
+constructor TDebugeeOption.Create(ACollection: TCollection);
 begin
   inherited create(ACollection);
   fAgruments := TStringList.Create;
@@ -1102,45 +1102,45 @@ begin
   fAgruments.Delimiter:= ' ';
 end;
 
-destructor TCEDebugeeOption.Destroy;
+destructor TDebugeeOption.Destroy;
 begin
   fAgruments.Free;
   fEnvPaths.Free;
   inherited;
 end;
 
-procedure TCEDebugeeOption.setOptions(value: TStringList);
+procedure TDebugeeOption.setOptions(value: TStringList);
 begin
   fAgruments.Assign(value);
 end;
 
-procedure TCEDebugeeOption.setEnvPaths(value: TStringList);
+procedure TDebugeeOption.setEnvPaths(value: TStringList);
 begin
   fEnvPaths.Assign(value);
 end;
 
-constructor TCEDebugeeOptions.Create(AOwner: TComponent);
+constructor TDebugeeOptions.Create(AOwner: TComponent);
 var
   fname: string;
 begin
   inherited create(AOwner);
-  fProjects := TCollection.Create(TCEDebugeeOption);
+  fProjects := TCollection.Create(TDebugeeOption);
   fname := getDocPath + prjFname;
   if fname.fileExists then
     loadFromFile(fname);
 end;
 
-destructor TCEDebugeeOptions.Destroy;
+destructor TDebugeeOptions.Destroy;
 begin
   saveToFile(getDocPath + prjFname);
   fProjects.Free;
   inherited;
 end;
 
-procedure TCEDebugeeOptions.cleanup;
+procedure TDebugeeOptions.cleanup;
 var
   i: integer;
-  p: TCEDebugeeOption;
+  p: TDebugeeOption;
 begin
   for i:= fProjects.Count-1 downto 0 do
   begin
@@ -1153,22 +1153,22 @@ begin
   end;
 end;
 
-procedure TCEDebugeeOptions.beforeSave;
+procedure TDebugeeOptions.beforeSave;
 begin
   cleanup;
 end;
 
-procedure TCEDebugeeOptions.setProjects(value: TCollection);
+procedure TDebugeeOptions.setProjects(value: TCollection);
 begin
   fProjects.Assign(value);
 end;
 
-function TCEDebugeeOptions.getProjectByIndex(index: integer): TCEDebugeeOption;
+function TDebugeeOptions.getProjectByIndex(index: integer): TDebugeeOption;
 begin
-  exit(TCEDebugeeOption(fProjects.Items[index]));
+  exit(TDebugeeOption(fProjects.Items[index]));
 end;
 
-function TCEDebugeeOptions.getProjectByFile(const fname: string): TCEDebugeeOption;
+function TDebugeeOptions.getProjectByFile(const fname: string): TDebugeeOption;
 var
   i: integer;
 begin
@@ -1178,13 +1178,13 @@ begin
     if result.filename = fname then
       exit;
   end;
-  result := TCEDebugeeOption(fProjects.Add);
+  result := TDebugeeOption(fProjects.Add);
   result.filename:=fname;
 end;
 {$ENDREGION}
 
 {$REGION Common/standard comp --------------------------------------------------}
-constructor TCEGdbWidget.create(aOwner: TComponent);
+constructor TGdbWidget.create(aOwner: TComponent);
 begin
   inherited;
   EntitiesConnector.addObserver(self);
@@ -1196,19 +1196,19 @@ begin
   fInspState := TInspectableCPU.Create(@setGpr, @setSsr, @setFlag, @setFpr);
   fJson := TJsonObject.Create;
   fStackItems := TStackItems.create;
-  fSubj:= TCEDebugObserverSubject.Create;
-  fOptions:= TCEDebugOptions.create(self);
+  fSubj:= TDebugObserverSubject.Create;
+  fOptions:= TDebugOptions.create(self);
   fOptions.onChangesApplied:=@optionsChangesApplied;
-  fDebugeeOptions:= TCEDebugeeOptions.Create(self);
+  fDebugeeOptions:= TDebugeeOptions.Create(self);
   Edit1.Items.Assign(fOptions.commandsHistory);
   fAddWatchPointKind := wpkWrite;
   fBreakPoints := TPersistentBreakPoints.create(self);
   fSynchronizedDocuments := TStringList.Create;
 
-  TCEListViewCopyMenu.create(lstCallStack);
-  TCEListViewCopyMenu.create(lstAsm);
-  TCEListViewCopyMenu.create(lstVariables);
-  TCEListViewCopyMenu.create(lstThreads);
+  TListViewCopyMenu.create(lstCallStack);
+  TListViewCopyMenu.create(lstAsm);
+  TListViewCopyMenu.create(lstVariables);
+  TListViewCopyMenu.create(lstThreads);
 
   cpuViewer.DefaultItemHeight := scaleY(22, 96);
   dbgeeOptsEd.DefaultItemHeight:= cpuViewer.DefaultItemHeight;
@@ -1235,7 +1235,7 @@ begin
   updateButtonsState;
 end;
 
-destructor TCEGdbWidget.destroy;
+destructor TGdbWidget.destroy;
 begin
   fInput.free;
   fOutput.Free;
@@ -1252,16 +1252,16 @@ begin
   inherited;
 end;
 
-procedure TCEGdbWidget.setToolBarFlat(value: boolean);
+procedure TGdbWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolBarFlat(value);
   btnSendCom.Flat:=value;
   varListFlt.flat := value;
 end;
 
-procedure TCEGdbWidget.updateMenu;
+procedure TGdbWidget.updateMenu;
 var
-  mnu: ICEMainMenu;
+  mnu: IMainMenu;
   itm: TMenuItem;
   bmp: TBitmap;
 begin
@@ -1386,7 +1386,7 @@ begin
   bmp.Free;
 end;
 
-procedure TCEGdbWidget.clearDisplays;
+procedure TGdbWidget.clearDisplays;
 begin
   lstVariables.Clear;
   lstCallStack.Clear;
@@ -1396,12 +1396,12 @@ begin
   cpuViewer.TIObject := nil;
 end;
 
-procedure TCEGdbWidget.optionsChangesApplied(sender: TObject);
+procedure TGdbWidget.optionsChangesApplied(sender: TObject);
 begin
   updateMenu;
 end;
 
-procedure TCEGdbWidget.executeFromShortcut(sender: TObject);
+procedure TGdbWidget.executeFromShortcut(sender: TObject);
 begin
   case TMenuItem(sender).Tag of
     0: begin showWidget; btnStart.Click; end;
@@ -1418,19 +1418,19 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEGdbWidget.projNew(project: ICECommonProject);
+{$REGION IProjectObserver ----------------------------------------------------}
+procedure TGdbWidget.projNew(project: ICommonProject);
 begin
   fProj := project;
 end;
 
-procedure TCEGdbWidget.projChanged(project: ICECommonProject);
+procedure TGdbWidget.projChanged(project: ICommonProject);
 begin
   if fProj <> project then
     exit;
 end;
 
-procedure TCEGdbWidget.projClosing(project: ICECommonProject);
+procedure TGdbWidget.projClosing(project: ICommonProject);
 begin
   if fProj <> project then
     exit;
@@ -1438,27 +1438,27 @@ begin
   updateDebugeeOptionsEditor;
 end;
 
-procedure TCEGdbWidget.projFocused(project: ICECommonProject);
+procedure TGdbWidget.projFocused(project: ICommonProject);
 begin
   fProj := project;
   updateDebugeeOptionsEditor;
 end;
 
-procedure TCEGdbWidget.projCompiling(project: ICECommonProject);
+procedure TGdbWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEGdbWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TGdbWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEGdbWidget.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TGdbWidget.docNew(document: TDexedMemo);
 begin
 end;
 
-procedure TCEGdbWidget.docFocused(document: TCESynMemo);
+procedure TGdbWidget.docFocused(document: TDexedMemo);
 var
   i: integer;
   b: TPersistentBreakPoint;
@@ -1483,11 +1483,11 @@ begin
   end;
 end;
 
-procedure TCEGdbWidget.docChanged(document: TCESynMemo);
+procedure TGdbWidget.docChanged(document: TDexedMemo);
 begin
 end;
 
-procedure TCEGdbWidget.docClosing(document: TCESynMemo);
+procedure TGdbWidget.docClosing(document: TDexedMemo);
 var
   i: integer;
 begin
@@ -1503,7 +1503,7 @@ end;
 {$ENDREGION}
 
 {$REGION Unsorted Debugging things ---------------------------------------------}
-function TCEGdbWidget.running: boolean;
+function TGdbWidget.running: boolean;
 begin
   if assigned(fGdb) then
     exit(fGdb.Running)
@@ -1511,12 +1511,12 @@ begin
     exit(false);
 end;
 
-function TCEGdbWidget.singleServiceName: string;
+function TGdbWidget.singleServiceName: string;
 begin
-  exit('ICEDebugger');
+  exit('IDebugger');
 end;
 
-procedure TCEGdbWidget.killGdb;
+procedure TGdbWidget.killGdb;
 begin
   if not assigned(fGdb) then
     exit;
@@ -1526,13 +1526,13 @@ begin
   updateDebugeeOptionsEditor;
 end;
 
-procedure TCEGdbWidget.waitCommandProcessed;
+procedure TGdbWidget.waitCommandProcessed;
 begin
   while not fCommandProcessed do
     application.ProcessMessages;
 end;
 
-procedure TCEGdbWidget.addBreakPoint(const fname: string; line: integer;
+procedure TGdbWidget.addBreakPoint(const fname: string; line: integer;
   kind: TBreakPointKind = bpkBreak);
 var
   r: boolean;
@@ -1562,7 +1562,7 @@ begin
   end;
 end;
 
-procedure TCEGdbWidget.removeBreakPoint(const fname: string; line: integer;
+procedure TGdbWidget.removeBreakPoint(const fname: string; line: integer;
   kind: TBreakPointKind = bpkBreak);
 var
   r: boolean;
@@ -1617,12 +1617,12 @@ begin
   end;
 end;
 
-procedure TCEGdbWidget.removeBreakPoints(const fname: string);
+procedure TGdbWidget.removeBreakPoints(const fname: string);
 begin
   fBreakPoints.clearFile(fname);
 end;
 
-procedure TCEGdbWidget.setState(value: TGdbState);
+procedure TGdbWidget.setState(value: TGdbState);
 begin
   if fGdbState = value then
     exit;
@@ -1630,7 +1630,7 @@ begin
   updateButtonsState;
 end;
 
-procedure TCEGdbWidget.updateButtonsState;
+procedure TGdbWidget.updateButtonsState;
 begin
   case fGdbState of
     gsNone:
@@ -1676,34 +1676,34 @@ begin
   end;
 end;
 
-procedure TCEGdbWidget.mnuSelProjClick(Sender: TObject);
+procedure TGdbWidget.mnuSelProjClick(Sender: TObject);
 begin
   fDbgRunnable := false;
   mnuSelRunnable.Checked:=false;
   updateDebugeeOptionsEditor;
 end;
 
-procedure TCEGdbWidget.mnuSelRunnableClick(Sender: TObject);
+procedure TGdbWidget.mnuSelRunnableClick(Sender: TObject);
 begin
   fDbgRunnable := true;
   mnuSelProj.Checked:=false;
   updateDebugeeOptionsEditor;
 end;
 
-procedure TCEGdbWidget.mnuWriteWClick(Sender: TObject);
+procedure TGdbWidget.mnuWriteWClick(Sender: TObject);
 begin
   fAddWatchPointKind := wpkWrite;
   mnuReadW.Checked:=false;
   mnuReadWriteW.Checked:=false;
 end;
 
-procedure TCEGdbWidget.PageControl2Change(Sender: TObject);
+procedure TGdbWidget.PageControl2Change(Sender: TObject);
 begin
   // workaround LCL bug, "cannot focus..." due to caret in filter
   varListFlt.Enabled := PageControl2.PageIndex = 0
 end;
 
-procedure TCEGdbWidget.varListFltChange(Sender: TObject);
+procedure TGdbWidget.varListFltChange(Sender: TObject);
 var
   i: integer;
 begin
@@ -1718,18 +1718,18 @@ begin
     end;
 end;
 
-procedure TCEGdbWidget.disableEditor;
+procedure TGdbWidget.disableEditor;
 begin
   cpuViewer.ItemIndex:=-1;
 end;
 
-procedure TCEGdbWidget.startDebugging;
+procedure TGdbWidget.startDebugging;
 var
   str: string = '';
   gdb: string;
   i: integer;
   b: TPersistentBreakPoint;
-  o: TCEDebugeeOption;
+  o: TDebugeeOption;
 const
   asmFlavorStr: array[TAsmSyntax] of string = ('intel','att');
 begin
@@ -1781,7 +1781,7 @@ begin
   if fInputName.fileExists then
     deletefile(fInputName);
   fInput:= TFileStream.Create(fInputName, fmCreate or fmShareExclusive);
-  subjDebugStart(fSubj, self as ICEDebugger);
+  subjDebugStart(fSubj, self as IDebugger);
   case fDbgRunnable of
     true: o := fDebugeeOptions.projectByFile[fDoc.fileName];
     false:o := fDebugeeOptions.projectByFile[fProj.fileName];
@@ -1789,7 +1789,7 @@ begin
   fLastFunction := '';
   // gdb process
   killGdb;
-  fGdb := TCEProcess.create(nil);
+  fGdb := TDexedProcess.create(nil);
   fGdb.Executable:= gdb;
   fgdb.Options:= [poUsePipes, poStderrToOutPut];
   fgdb.Parameters.Add(fExe);
@@ -1866,10 +1866,10 @@ begin
   setState(gsRunning);
 end;
 
-procedure TCEGdbWidget.updateDebugeeOptionsEditor;
+procedure TGdbWidget.updateDebugeeOptionsEditor;
 var
   nme: string = '';
-  opt: TCEDebugeeOption;
+  opt: TDebugeeOption;
 begin
   dbgeeOptsEd.ItemIndex:=-1;
   dbgeeOptsEd.TIObject := nil;
@@ -1890,7 +1890,7 @@ begin
   end;
 end;
 
-procedure TCEGdbWidget.deleteRedirectedIO;
+procedure TGdbWidget.deleteRedirectedIO;
 begin
   if fOptions.keepRedirectedStreams then
     exit;
@@ -2106,7 +2106,7 @@ begin
   end;
 end;
 
-procedure TCEGdbWidget.interpretJson;
+procedure TGdbWidget.interpretJson;
 
   procedure selectAsmInstr;
   var
@@ -2150,7 +2150,7 @@ var
   // signal data
   sigmean: string;
   signame: string;
-  brkreason: TCEDebugBreakReason;
+  brkreason: TDebugBreakReason;
   // FPU
   fpustr: string;
   fFpuExtended: extended;
@@ -2482,7 +2482,7 @@ begin
 
 end;
 
-procedure TCEGdbWidget.gdboutJsonize(sender: TObject);
+procedure TGdbWidget.gdboutJsonize(sender: TObject);
 var
   str: string;
 begin
@@ -2504,7 +2504,7 @@ begin
   interpretJson;
 end;
 
-procedure TCEGdbWidget.readOutput;
+procedure TGdbWidget.readOutput;
 var
   str: TMemoryStream;
   lst: TStringList;
@@ -2535,7 +2535,7 @@ begin
   end;
 end;
 
-procedure TCEGdbWidget.gdboutQuiet(sender: TObject);
+procedure TGdbWidget.gdboutQuiet(sender: TObject);
 begin
   fCommandProcessed := true;
   fGdb.OutputStack.Clear;
@@ -2544,7 +2544,7 @@ end;
 {$ENDREGION}
 
 {$REGION GDB commands & actions ------------------------------------------------}
-procedure TCEGdbWidget.gdbCommand(aCommand: string; gdbOutProcessor: TNotifyEvent = nil);
+procedure TGdbWidget.gdbCommand(aCommand: string; gdbOutProcessor: TNotifyEvent = nil);
 begin
   if fGdb.isNil or not fGdb.Running then
     exit;
@@ -2555,28 +2555,28 @@ begin
   fGdb.Input.Write(aCommand[1], aCommand.length);
 end;
 
-procedure TCEGdbWidget.infoRegs;
+procedure TGdbWidget.infoRegs;
 begin
   disableEditor;
   gdbCommand('-data-list-register-values r', @gdboutJsonize);
 end;
 
-procedure TCEGdbWidget.infoStack;
+procedure TGdbWidget.infoStack;
 begin
   gdbCommand('-stack-list-frames', @gdboutJsonize);
 end;
 
-procedure TCEGdbWidget.infoVariables;
+procedure TGdbWidget.infoVariables;
 begin
   gdbCommand('-stack-list-variables --skip-unavailable --all-values');
 end;
 
-procedure TCEGdbWidget.infoThreads;
+procedure TGdbWidget.infoThreads;
 begin
   gdbCommand('-thread-info');
 end;
 
-procedure TCEGdbWidget.infoAsm(const fname: string);
+procedure TGdbWidget.infoAsm(const fname: string);
 var
   cmd: string;
 begin
@@ -2587,13 +2587,13 @@ begin
   gdbCommand(cmd, @gdboutJsonize);
 end;
 
-procedure TCEGdbWidget.evalStuff(const stuff: string);
+procedure TGdbWidget.evalStuff(const stuff: string);
 begin
   fLastEvalStuff := stuff;
   gdbCommand('-data-evaluate-expression "' + stuff + '"');
 end;
 
-procedure TCEGdbWidget.continueDebugging;
+procedure TGdbWidget.continueDebugging;
 begin
   gdbCommand('-exec-continue --all', @gdboutJsonize);
   if assigned(fGdb) and fgdb.Running then
@@ -2603,17 +2603,17 @@ begin
   end;
 end;
 
-procedure TCEGdbWidget.btnStartClick(Sender: TObject);
+procedure TGdbWidget.btnStartClick(Sender: TObject);
 begin
   startDebugging;
 end;
 
-procedure TCEGdbWidget.btnContClick(Sender: TObject);
+procedure TGdbWidget.btnContClick(Sender: TObject);
 begin
   continueDebugging;
 end;
 
-procedure TCEGdbWidget.btnEvalClick(Sender: TObject);
+procedure TGdbWidget.btnEvalClick(Sender: TObject);
 var
   e: string = '';
 begin
@@ -2639,12 +2639,12 @@ begin
     evalStuff(e);
 end;
 
-procedure TCEGdbWidget.btnVariablesClick(Sender: TObject);
+procedure TGdbWidget.btnVariablesClick(Sender: TObject);
 begin
   infoVariables;
 end;
 
-procedure TCEGdbWidget.btnNextClick(Sender: TObject);
+procedure TGdbWidget.btnNextClick(Sender: TObject);
 const
   cmd: array[boolean] of string = ('-exec-step','-exec-step-instruction');
 begin
@@ -2653,7 +2653,7 @@ begin
     setState(gsRunning);
 end;
 
-procedure TCEGdbWidget.btnOverClick(Sender: TObject);
+procedure TGdbWidget.btnOverClick(Sender: TObject);
 const
   cmd: array[boolean] of string = ('-exec-next','-exec-next-instruction');
 begin
@@ -2662,24 +2662,24 @@ begin
     setState(gsRunning);
 end;
 
-procedure TCEGdbWidget.btnPauseClick(Sender: TObject);
+procedure TGdbWidget.btnPauseClick(Sender: TObject);
 begin
   if assigned(fGdb) and fGdb.Running then
     fCatchPause:=true;
   gdbCommand('-exec-interrupt --all', @gdboutJsonize);
 end;
 
-procedure TCEGdbWidget.btnRegClick(Sender: TObject);
+procedure TGdbWidget.btnRegClick(Sender: TObject);
 begin
   infoRegs;
 end;
 
-procedure TCEGdbWidget.btnStackClick(Sender: TObject);
+procedure TGdbWidget.btnStackClick(Sender: TObject);
 begin
   infoStack;
 end;
 
-procedure TCEGdbWidget.btnStopClick(Sender: TObject);
+procedure TGdbWidget.btnStopClick(Sender: TObject);
 begin
   gdbCommand('kill', @gdboutJsonize);
   subjDebugStop(fSubj);
@@ -2689,7 +2689,7 @@ begin
   killGdb;
 end;
 
-procedure TCEGdbWidget.btnWatchClick(Sender: TObject);
+procedure TGdbWidget.btnWatchClick(Sender: TObject);
 const
   cmd: array[TAddWatchPointKind] of string = (
     '-break-watch -r ','-break-watch ','-break-watch -a ');
@@ -2702,28 +2702,28 @@ begin
   gdbCommand(cmd[fAddWatchPointKind] + nme);
 end;
 
-procedure TCEGdbWidget.dbgeeOptsEdEditorFilter(Sender: TObject;
+procedure TGdbWidget.dbgeeOptsEdEditorFilter(Sender: TObject;
   aEditor: TPropertyEditor; var aShow: boolean);
 begin
   aShow := aEditor.GetName <> 'filename';
 end;
 
-procedure TCEGdbWidget.btnSendComClick(Sender: TObject);
+procedure TGdbWidget.btnSendComClick(Sender: TObject);
 begin
   sendCustomCommand;
 end;
 
-procedure TCEGdbWidget.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TGdbWidget.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key = byte(#13) then
     sendCustomCommand;
 end;
 
-procedure TCEGdbWidget.lstCallStackDblClick(Sender: TObject);
+procedure TGdbWidget.lstCallStackDblClick(Sender: TObject);
 var
   itm: TStackItem;
   nme: string;
-  doc: TCESynMemo;
+  doc: TDexedMemo;
 begin
   if lstCallStack.Selected.isNil or lstCallStack.Selected.Data.isNil then
     exit;
@@ -2742,11 +2742,11 @@ begin
     infoRegs;}
 end;
 
-procedure TCEGdbWidget.lstThreadsDblClick(Sender: TObject);
+procedure TGdbWidget.lstThreadsDblClick(Sender: TObject);
 var
   lne: integer;
   nme: string;
-  doc: TCESynMemo = nil;
+  doc: TDexedMemo = nil;
 begin
   if (lstThreads.Selected.isNil) or (lstThreads.Selected.SubItems.Count < 6) then
     exit;
@@ -2760,42 +2760,42 @@ begin
     doc.CaretY:= lne;
 end;
 
-procedure TCEGdbWidget.mnuEvalDerefClick(Sender: TObject);
+procedure TGdbWidget.mnuEvalDerefClick(Sender: TObject);
 begin
   fEvalKind := gekDerefSelectedVar;
   mnuEvalSelected.Checked:=false;
   mnuEvalCustom.Checked:=false;
 end;
 
-procedure TCEGdbWidget.mnuEvalCustomClick(Sender: TObject);
+procedure TGdbWidget.mnuEvalCustomClick(Sender: TObject);
 begin
   fEvalKind := gekCustom;
   mnuEvalSelected.Checked:=false;
   mnuEvalDeref.Checked:=false;
 end;
 
-procedure TCEGdbWidget.mnuEvalSelectedClick(Sender: TObject);
+procedure TGdbWidget.mnuEvalSelectedClick(Sender: TObject);
 begin
   fEvalKind := gekSelectedVar;
   mnuEvalCustom.Checked:=false;
   mnuEvalDeref.Checked:=false;
 end;
 
-procedure TCEGdbWidget.mnuReadWClick(Sender: TObject);
+procedure TGdbWidget.mnuReadWClick(Sender: TObject);
 begin
   fAddWatchPointKind := wpkRead;
   mnuWriteW.Checked:=false;
   mnuReadWriteW.Checked:=false;
 end;
 
-procedure TCEGdbWidget.mnuReadWriteWClick(Sender: TObject);
+procedure TGdbWidget.mnuReadWriteWClick(Sender: TObject);
 begin
   fAddWatchPointKind := wpkReadWrite;
   mnuReadW.Checked:=false;
   mnuWriteW.Checked:=false;
 end;
 
-procedure TCEGdbWidget.sendCustomCommand;
+procedure TGdbWidget.sendCustomCommand;
 var
   cmd: string;
 begin
@@ -2825,7 +2825,7 @@ begin
   edit1.Text := '';
 end;
 
-procedure TCEGdbWidget.setGpr(reg: TCpuRegister; val: TCpuGprValue);
+procedure TGdbWidget.setGpr(reg: TCpuRegister; val: TCpuGprValue);
 const
   spec = 'set $%s = 0x%X';
 var
@@ -2835,7 +2835,7 @@ begin
   gdbCommand(cmd);
 end;
 
-procedure TCEGdbWidget.setSsr(reg: TSegRegister; val: TCPUSegValue);
+procedure TGdbWidget.setSsr(reg: TSegRegister; val: TCPUSegValue);
 const
   spec = 'set $%s = 0x%X';
 var
@@ -2845,7 +2845,7 @@ begin
   gdbCommand(cmd);
 end;
 
-procedure TCEGdbWidget.setFlag(val: PtrUint);
+procedure TGdbWidget.setFlag(val: PtrUint);
 const
   spec = 'set $eflags = 0x%X';
 var
@@ -2855,7 +2855,7 @@ begin
   gdbCommand(cmd);
 end;
 
-procedure TCEGdbWidget.setFpr(reg: TFpuRegister; val: extended);
+procedure TGdbWidget.setFpr(reg: TFpuRegister; val: extended);
 const
   spec = 'set $%s = %.18g';
 var

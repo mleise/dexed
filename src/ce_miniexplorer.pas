@@ -15,14 +15,14 @@ type
 
   TExplorerDoubleClick = (openInside, openOutside);
 
-  TCEMiniExplorerWidget = class;
+  TMiniExplorerWidget = class;
 
-  TCEMiniExplorerEditableOptions = class(TPersistent, ICEEditableOptions)
+  TMiniExplorerEditableOptions = class(TPersistent, IEditableOptions)
   private
     fDblClick: TExplorerDoubleClick;
     fContextExpand: boolean;
     fShowHidden: boolean;
-    fExplorer: TCEMiniExplorerWidget;
+    fExplorer: TMiniExplorerWidget;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -34,11 +34,11 @@ type
     property contextExpand: boolean read fContextExpand write fContextExpand;
     property showHidden: boolean read fShowHidden write fShowHidden default true;
   public
-    constructor create(miniexpl: TCEMiniExplorerWidget);
+    constructor create(miniexpl: TMiniExplorerWidget);
     destructor destroy; override;
   end;
 
-  TCEMiniExplorerOptions = class(TWritableLfmTextComponent)
+  TMiniExplorerOptions = class(TWritableLfmTextComponent)
   private
     fFavoriteFolders: TStringList;
     fSplitter1Position: integer;
@@ -63,15 +63,15 @@ type
     procedure assignTo(target: TPersistent); override;
   end;
 
-  { TCEMiniExplorerWidget }
+  { TMiniExplorerWidget }
 
-  TCEMiniExplorerWidget = class(TCEWidget, ICEProjectObserver, ICEDocumentObserver, ICEExplorer)
-    btnAddFav: TCEToolButton;
-    btnDrive: TCEToolButton;
-    btnEdit: TCEToolButton;
-    btnParentFolder: TCEToolButton;
-    btnRemFav: TCEToolButton;
-    btnShellOpen: TCEToolButton;
+  TMiniExplorerWidget = class(TDexedWidget, IProjectObserver, IDocumentObserver, IExplorer)
+    btnAddFav: TDexedToolButton;
+    btnDrive: TDexedToolButton;
+    btnEdit: TDexedToolButton;
+    btnParentFolder: TDexedToolButton;
+    btnRemFav: TDexedToolButton;
+    btnShellOpen: TDexedToolButton;
     lstFilter: TListViewFilterEdit;
     lstFav: TListView;
     Panel2: TPanel;
@@ -104,15 +104,15 @@ type
     procedure treeFoldersGetImageIndex(Sender: TObject; Node: TTreeNode);
     procedure treeFoldersGetSelectedIndex(Sender: TObject; Node: TTreeNode);
   private
-    fMnxSubj: TCEMiniExplorerSubject;
-    fProj: ICECommonProject;
-    fFreeProj: ICECommonProject;
+    fMnxSubj: TMiniExplorerSubject;
+    fProj: ICommonProject;
+    fFreeProj: ICommonProject;
     fFavorites: TStringList;
     fLastFold: string;
     fLastListOrTree: TControl;
     fDblClick: TExplorerDoubleClick;
     fContextExpand: boolean;
-    fEditableOptions: TCEMiniExplorerEditableOptions;
+    fEditableOptions: TMiniExplorerEditableOptions;
     fImages: TImageList;
     fFileListSortedColumnIndex: integer;
     fFileListSortDirection: TSortDirection;
@@ -128,17 +128,17 @@ type
     procedure compareFileList(Sender: TObject; Item1, Item2: TListItem; Data: Integer;
       var Compare: Integer);
 
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
 
-    procedure docNew(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
 
     function singleServiceName: string;
     procedure browse(const location: string);
@@ -157,21 +157,21 @@ const
   OptsFname = 'miniexplorer.txt';
 
 
-{$REGION TCEMiniExplorerEditableOptions}
-constructor TCEMiniExplorerEditableOptions.create(miniexpl: TCEMiniExplorerWidget);
+{$REGION TMiniExplorerEditableOptions}
+constructor TMiniExplorerEditableOptions.create(miniexpl: TMiniExplorerWidget);
 begin
   fExplorer := miniexpl;
   fShowHidden:=true;
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCEMiniExplorerEditableOptions.destroy;
+destructor TMiniExplorerEditableOptions.destroy;
 begin
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
 
-procedure TCEMiniExplorerEditableOptions.apply;
+procedure TMiniExplorerEditableOptions.apply;
 begin
   fExplorer.fContextExpand:= fContextExpand;
   fExplorer.fDblClick:= fDblClick;
@@ -188,53 +188,53 @@ begin
   fExplorer.treeFolders.Refresh;
 end;
 
-function TCEMiniExplorerEditableOptions.optionedWantCategory(): string;
+function TMiniExplorerEditableOptions.optionedWantCategory(): string;
 begin
   exit('Mini explorer');
 end;
 
-function TCEMiniExplorerEditableOptions.optionedWantEditorKind: TOptionEditorKind;
+function TMiniExplorerEditableOptions.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekGeneric);
 end;
 
-function TCEMiniExplorerEditableOptions.optionedWantContainer: TPersistent;
+function TMiniExplorerEditableOptions.optionedWantContainer: TPersistent;
 begin
   exit(self);
 end;
 
-procedure TCEMiniExplorerEditableOptions.optionedEvent(event: TOptionEditorEvent);
+procedure TMiniExplorerEditableOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   apply;
 end;
 
-function TCEMiniExplorerEditableOptions.optionedOptionsModified: boolean;
+function TMiniExplorerEditableOptions.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
 {$ENDREGION}
 
-{$REGION TCEMiniExplorerOptions ------------------------------------------------}
-constructor TCEMiniExplorerOptions.create(aOwner: TComponent);
+{$REGION TMiniExplorerOptions ------------------------------------------------}
+constructor TMiniExplorerOptions.create(aOwner: TComponent);
 begin
   inherited;
   fFavoriteFolders := TStringList.Create;
   fShowHidden:=true;
 end;
 
-destructor TCEMiniExplorerOptions.destroy;
+destructor TMiniExplorerOptions.destroy;
 begin
   fFavoriteFolders.Free;
   inherited;
 end;
 
-procedure TCEMiniExplorerOptions.assign(source: TPersistent);
+procedure TMiniExplorerOptions.assign(source: TPersistent);
 var
-  widg: TCEMiniExplorerWidget;
+  widg: TMiniExplorerWidget;
 begin
-  if source is TCEMiniExplorerWidget then
+  if source is TMiniExplorerWidget then
   begin
-    widg := TCEMiniExplorerWidget(source);
+    widg := TMiniExplorerWidget(source);
     fFavoriteFolders.Assign(widg.fFavorites);
     fLastFolder := widg.fLastFold;
     fSplitter1Position := widg.Splitter1.GetSplitterPosition;
@@ -246,13 +246,13 @@ begin
   else inherited;
 end;
 
-procedure TCEMiniExplorerOptions.assignTo(target: TPersistent);
+procedure TMiniExplorerOptions.assignTo(target: TPersistent);
 var
-  widg: TCEMiniExplorerWidget;
+  widg: TMiniExplorerWidget;
 begin
-  if target is TCEMiniExplorerWidget then
+  if target is TMiniExplorerWidget then
   begin
-    widg := TCEMiniExplorerWidget(target);
+    widg := TMiniExplorerWidget(target);
     widg.fFavorites.Assign(fFavoriteFolders);
     widg.fLastFold:=fLastFolder;
     widg.Splitter1.SetSplitterPosition(fSplitter1Position);
@@ -278,14 +278,14 @@ begin
   else inherited;
 end;
 
-procedure TCEMiniExplorerOptions.setFavoriteFolders(value: TStringList);
+procedure TMiniExplorerOptions.setFavoriteFolders(value: TStringList);
 begin
   fFavoriteFolders.Assign(value);
 end;
 {$ENDREGION}
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEMiniExplorerWidget.create(aOwner: TComponent);
+constructor TMiniExplorerWidget.create(aOwner: TComponent);
 var
   fname: string;
 begin
@@ -345,7 +345,7 @@ begin
   {$ENDIF}
   lstFiles.OnEnter:=@lstFilesEnter;
 
-  fEditableOptions:= TCEMiniExplorerEditableOptions.create(self);
+  fEditableOptions:= TMiniExplorerEditableOptions.create(self);
 
   fFavorites := TStringList.Create;
   fFavorites.onChange := @favStringsChange;
@@ -358,7 +358,7 @@ begin
 
   fname := getDocPath + OptsFname;
   if fname.fileExists then
-    with TCEMiniExplorerOptions.create(nil) do
+    with TMiniExplorerOptions.create(nil) do
   try
     loadFromFile(fname);
     assignTo(self);
@@ -366,16 +366,16 @@ begin
     free;
   end;
 
-  fMnxSubj:= TCEMiniExplorerSubject.Create;
+  fMnxSubj:= TMiniExplorerSubject.Create;
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
 end;
 
-destructor TCEMiniExplorerWidget.destroy;
+destructor TMiniExplorerWidget.destroy;
 begin
   fMnxSubj.free;
   EntitiesConnector.removeObserver(self);
-  with TCEMiniExplorerOptions.create(nil) do
+  with TMiniExplorerOptions.create(nil) do
   try
     assign(self);
     saveToFile(getDocPath + OptsFname);
@@ -388,33 +388,33 @@ begin
   inherited;
 end;
 
-procedure TCEMiniExplorerWidget.setToolBarFlat(value: boolean);
+procedure TMiniExplorerWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolBarFlat(value);
   lstFilter.Flat:=value;
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEMiniExplorerWidget.projNew(project: ICECommonProject);
+{$REGION IProjectObserver ----------------------------------------------------}
+procedure TMiniExplorerWidget.projNew(project: ICommonProject);
 begin
   fProj := project;
   if not project.inGroup then
     fFreeProj := project;
 end;
 
-procedure TCEMiniExplorerWidget.projChanged(project: ICECommonProject);
+procedure TMiniExplorerWidget.projChanged(project: ICommonProject);
 begin
 end;
 
-procedure TCEMiniExplorerWidget.projClosing(project: ICECommonProject);
+procedure TMiniExplorerWidget.projClosing(project: ICommonProject);
 begin
   fProj := nil;
   if project = fFreeProj then
     fFreeProj := nil;
 end;
 
-procedure TCEMiniExplorerWidget.projFocused(project: ICECommonProject);
+procedure TMiniExplorerWidget.projFocused(project: ICommonProject);
 begin
   fProj := project;
   if not project.inGroup then
@@ -425,42 +425,42 @@ begin
     browse(project.fileName);
 end;
 
-procedure TCEMiniExplorerWidget.projCompiling(project: ICECommonProject);
+procedure TMiniExplorerWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEMiniExplorerWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TMiniExplorerWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEMiniExplorerWidget.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TMiniExplorerWidget.docNew(document: TDexedMemo);
 begin
 end;
 
-procedure TCEMiniExplorerWidget.docFocused(document: TCESynMemo);
+procedure TMiniExplorerWidget.docFocused(document: TDexedMemo);
 begin
   if visible and document.fileName.fileExists and fContextExpand then
     browse(document.fileName);
 end;
 
-procedure TCEMiniExplorerWidget.docChanged(document: TCESynMemo);
+procedure TMiniExplorerWidget.docChanged(document: TDexedMemo);
 begin
 end;
 
-procedure TCEMiniExplorerWidget.docClosing(document: TCESynMemo);
+procedure TMiniExplorerWidget.docClosing(document: TDexedMemo);
 begin
 end;
 {$ENDREGION}
 
 {$REGION Favorites -------------------------------------------------------------}
-procedure TCEMiniExplorerWidget.favStringsChange(sender: TObject);
+procedure TMiniExplorerWidget.favStringsChange(sender: TObject);
 begin
   updateFavorites;
 end;
 
-procedure TCEMiniExplorerWidget.updateFavorites;
+procedure TMiniExplorerWidget.updateFavorites;
 var
   itm: TListItem;
   fold: string;
@@ -477,7 +477,7 @@ begin
   end;
 end;
 
-procedure TCEMiniExplorerWidget.lstFavSelect(Sender: TObject; Item: TListItem; Selected: Boolean);
+procedure TMiniExplorerWidget.lstFavSelect(Sender: TObject; Item: TListItem; Selected: Boolean);
 var
   d: string;
 begin
@@ -488,7 +488,7 @@ begin
     browse(d)
 end;
 
-procedure TCEMiniExplorerWidget.btnRemFavClick(Sender: TObject);
+procedure TMiniExplorerWidget.btnRemFavClick(Sender: TObject);
 var
   i: Integer;
 begin
@@ -500,7 +500,7 @@ begin
   lstFiles.Clear;
 end;
 
-procedure TCEMiniExplorerWidget.lstFavClick(Sender: TObject);
+procedure TMiniExplorerWidget.lstFavClick(Sender: TObject);
 var
   d: string;
 begin
@@ -515,18 +515,18 @@ begin
   end;
 end;
 
-procedure TCEMiniExplorerWidget.lstFavDeletion(Sender: TObject; Item: TListItem);
+procedure TMiniExplorerWidget.lstFavDeletion(Sender: TObject; Item: TListItem);
 begin
   if Item.isNotNil and item.Data.isNotNil then
     dispose(PString(item.Data));
 end;
 
-procedure TCEMiniExplorerWidget.lstFavEnter(Sender: TObject);
+procedure TMiniExplorerWidget.lstFavEnter(Sender: TObject);
 begin
   fLastListOrTree := lstFav;
 end;
 
-procedure TCEMiniExplorerWidget.lstFilesColumnClick(Sender: TObject;Column: TListColumn);
+procedure TMiniExplorerWidget.lstFilesColumnClick(Sender: TObject;Column: TListColumn);
 begin
   if Column.isNotNil then
   begin
@@ -541,21 +541,21 @@ begin
   end;
 end;
 
-procedure TCEMiniExplorerWidget.btnAddFavClick(Sender: TObject);
+procedure TMiniExplorerWidget.btnAddFavClick(Sender: TObject);
 begin
   if treeFolders.Selected.isNil then
     exit;
   fFavorites.Add(treeFolders.GetPathFromNode(treeFolders.Selected).extractFileDir);
 end;
 
-procedure TCEMiniExplorerWidget.lstFavDblClick(Sender: TObject);
+procedure TMiniExplorerWidget.lstFavDblClick(Sender: TObject);
 begin
   if lstFav.Selected.isNil then
      exit;
   treeFolders.Root := lstFav.Selected.Caption;
 end;
 
-procedure TCEMiniExplorerWidget.filterFiles;
+procedure TMiniExplorerWidget.filterFiles;
 var
   s: string;
   p: string;
@@ -583,7 +583,7 @@ begin
   lstFiles.EndUpdate;
 end;
 
-procedure TCEMiniExplorerWidget.compareFileList(Sender: TObject; Item1, Item2: TListItem;
+procedure TMiniExplorerWidget.compareFileList(Sender: TObject; Item1, Item2: TListItem;
   Data: Integer; var Compare: Integer);
 var
   s1, s2: integer;
@@ -663,15 +663,15 @@ end;
 {$ENDREGION}
 
 {$REGION Files -----------------------------------------------------------------}
-procedure TCEMiniExplorerWidget.btnShellOpenClick(Sender: TObject);
+procedure TMiniExplorerWidget.btnShellOpenClick(Sender: TObject);
 begin
   shellOpenSelected;
 end;
 
-procedure TCEMiniExplorerWidget.btnEditClick(Sender: TObject);
+procedure TMiniExplorerWidget.btnEditClick(Sender: TObject);
 var
   fname: string;
-  fmt: TCEProjectFileFormat;
+  fmt: TProjectFileFormat;
 begin
   if lstFiles.Selected.isNil then
     exit;
@@ -688,21 +688,21 @@ begin
       fFreeProj.getProject.Free;
     end;
     if fmt = pffDexed then
-      TCENativeProject.create(nil)
+      TNativeProject.create(nil)
     else
-      TCEDubProject.create(nil);
+      TDubProject.create(nil);
     fProj.loadFromFile(fname);
     fProj.activate;
   end
   else getMultiDocHandler.openDocument(fname);
 end;
 
-procedure TCEMiniExplorerWidget.btnDriveClick(Sender: TObject);
+procedure TMiniExplorerWidget.btnDriveClick(Sender: TObject);
 begin
   mnuDriveSelect(nil);
 end;
 
-procedure TCEMiniExplorerWidget.btnParentFolderClick(Sender: TObject);
+procedure TMiniExplorerWidget.btnParentFolderClick(Sender: TObject);
 var
   p: string;
 begin
@@ -714,7 +714,7 @@ begin
   end;
 end;
 
-procedure TCEMiniExplorerWidget.lstFilesDblClick(Sender: TObject);
+procedure TMiniExplorerWidget.lstFilesDblClick(Sender: TObject);
 begin
   case fDblClick of
     openInside: btnEditClick(nil);
@@ -722,12 +722,12 @@ begin
   end;
 end;
 
-procedure TCEMiniExplorerWidget.lstFilesEnter(Sender: TObject);
+procedure TMiniExplorerWidget.lstFilesEnter(Sender: TObject);
 begin
   fLastListOrTree := lstFiles;
 end;
 
-procedure TCEMiniExplorerWidget.lstFilesFileAdded(Sender: TObject;
+procedure TMiniExplorerWidget.lstFilesFileAdded(Sender: TObject;
   Item: TListItem);
 begin
   Item.ImageIndex:=0;
@@ -736,7 +736,7 @@ begin
   lstFiles.Sort;
 end;
 
-procedure TCEMiniExplorerWidget.lstFilterButtonClick(Sender: TObject);
+procedure TMiniExplorerWidget.lstFilterButtonClick(Sender: TObject);
 var
   s: string;
 begin
@@ -745,13 +745,13 @@ begin
   treeFolders.Root:= s;
 end;
 
-procedure TCEMiniExplorerWidget.lstFilterKeyUp(Sender: TObject; var Key: Word;
+procedure TMiniExplorerWidget.lstFilterKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   filterFiles;
 end;
 
-procedure TCEMiniExplorerWidget.Splitter2MouseWheel(Sender: TObject;
+procedure TMiniExplorerWidget.Splitter2MouseWheel(Sender: TObject;
   Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
   var Handled: Boolean);
 var
@@ -768,12 +768,12 @@ begin
   Handled := true;
 end;
 
-procedure TCEMiniExplorerWidget.toolbarResize(Sender: TObject);
+procedure TMiniExplorerWidget.toolbarResize(Sender: TObject);
 begin
   lstFilter.Width := toolbar.Width - lstFilter.Left - lstFilter.BorderSpacing.Around;
 end;
 
-procedure TCEMiniExplorerWidget.shellOpenSelected;
+procedure TMiniExplorerWidget.shellOpenSelected;
 var
   fname: string = '';
 begin
@@ -801,12 +801,12 @@ end;
 {$ENDREGION}
 
 {$REGION Tree ------------------------------------------------------------------}
-procedure TCEMiniExplorerWidget.TreeEnter(Sender: TObject);
+procedure TMiniExplorerWidget.TreeEnter(Sender: TObject);
 begin
   fLastListOrTree := treeFolders;
 end;
 
-procedure TCEMiniExplorerWidget.treeFoldersChange(Sender: TObject;
+procedure TMiniExplorerWidget.treeFoldersChange(Sender: TObject;
   Node: TTreeNode);
 begin
   if treeFolders.Selected.isNil then
@@ -815,7 +815,7 @@ begin
   subjMnexDirectoryChanged(fMnxSubj, fLastFold);
 end;
 
-procedure TCEMiniExplorerWidget.treeFoldersDblClick(Sender: TObject);
+procedure TMiniExplorerWidget.treeFoldersDblClick(Sender: TObject);
 begin
   if treeFolders.Selected.isNil then
      exit;
@@ -823,21 +823,21 @@ begin
     .extractFileDir; // trailing path sep
 end;
 
-procedure TCEMiniExplorerWidget.treeFoldersGetImageIndex(Sender: TObject;
+procedure TMiniExplorerWidget.treeFoldersGetImageIndex(Sender: TObject;
   Node: TTreeNode);
 begin
   Node.ImageIndex:=1;
   Node.SelectedIndex:=1;
 end;
 
-procedure TCEMiniExplorerWidget.treeFoldersGetSelectedIndex(Sender: TObject;
+procedure TMiniExplorerWidget.treeFoldersGetSelectedIndex(Sender: TObject;
   Node: TTreeNode);
 begin
   Node.ImageIndex:=1;
   Node.SelectedIndex:=1;
 end;
 
-procedure TCEMiniExplorerWidget.treeSetRoots;
+procedure TMiniExplorerWidget.treeSetRoots;
 var
   m: TMenuItem;
   d: TStringList;
@@ -864,12 +864,12 @@ begin
   end;
 end;
 
-procedure TCEMiniExplorerWidget.mnuDriveItemClick(sender: TObject);
+procedure TMiniExplorerWidget.mnuDriveItemClick(sender: TObject);
 begin
   treeFolders.Root := TMenuItem(sender).Caption;
 end;
 
-procedure TCEMiniExplorerWidget.mnuDriveSelect(sender: TObject);
+procedure TMiniExplorerWidget.mnuDriveSelect(sender: TObject);
 var
   d: string;
 begin
@@ -878,13 +878,13 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEEXplorer -----------------------------------------------------------}
-function TCEMiniExplorerWidget.singleServiceName: string;
+{$REGION IExplorer -----------------------------------------------------------}
+function TMiniExplorerWidget.singleServiceName: string;
 begin
-  exit('ICEExplorer');
+  exit('IExplorer');
 end;
 
-procedure TCEMiniExplorerWidget.browse(const location: string);
+procedure TMiniExplorerWidget.browse(const location: string);
 begin
   if location.EndsWith('\') or location.EndsWith('/') then
     treeFolders.Root := location[1..location.length - 1]
@@ -898,7 +898,7 @@ begin
     treeFolders.Items.Item[0].Selected:=true;
 end;
 
-function TCEMiniExplorerWidget.currentLocation: string;
+function TMiniExplorerWidget.currentLocation: string;
 begin
   result := treeFolders.Root;
 end;

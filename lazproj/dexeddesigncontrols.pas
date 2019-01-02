@@ -2,8 +2,9 @@
   This source is only used to compile and install the package.
  }
 
-unit cedsgncontrols;
+unit DexedDesignControls;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
@@ -17,5 +18,5 @@ begin
 end;
 
 initialization
-  RegisterPackage('cedsgncontrols', @Register);
+  RegisterPackage('DexedDesignControls', @Register);
 end.

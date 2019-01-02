@@ -13,7 +13,7 @@ type
    * The ancestor of classes which can be saved or reloaded to/from a file.
    * It's used each time some options or data have to
    * persist from a cession to another, independently from the centralized
-   * system provided by the ICESessionOptionObserver/Subject mechanism.
+   * system provided by the ISessionOptionObserver/Subject mechanism.
    *
    * The descendants overrides customLoadFromFile and customSaveToFile
    * to save/load to/from a specific format.

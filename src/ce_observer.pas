@@ -15,7 +15,7 @@ type
    * is mostly designed to avoid messy uses clauses or to limit
    * the visibility of the implementer methods.
    *)
-  ICESingleService = interface
+  ISingleService = interface
     function singleServiceName: string;
   end;
 
@@ -25,7 +25,7 @@ type
    * Manages the connections between the observers and their subjects in the
    * whole program.
    *)
-  TCEEntitiesConnector = class
+  TEntitiesConnector = class
   private
     fObservers: TObjectList;
     fSubjects: TObjectList;
@@ -59,7 +59,7 @@ type
   (**
    * Interface for a subject. Basically designed to hold a list of observer
    *)
-  ICESubject = interface
+  ISubject = interface
     // an observer is proposed. anObserver is not necessarly compatible.
     procedure addObserver(observer: TObject);
     // anObserver must be removed.
@@ -69,16 +69,16 @@ type
 
   (**
    * Base type used as constraint for an interface that contains
-   * the methods called by a ICESubject.
+   * the methods called by a ISubject.
    *)
   IObserverType = interface
   end;
 
   (**
-   * Standard implementation of an ICESubject.
+   * Standard implementation of an ISubject.
    * Any descendant automatically adds itself to the EntitiesConnector.
    *)
-  generic TCECustomSubject<T:IObserverType> = class(ICESubject)
+  generic TCustomSubject<T:IObserverType> = class(ISubject)
   protected
     fObservers: TObjectList;
     // test for a specific interface when adding an observer.
@@ -97,22 +97,22 @@ type
   end;
 
 var
-  EntitiesConnector: TCEEntitiesConnector = nil;
+  EntitiesConnector: TEntitiesConnector = nil;
 
 implementation
 
 uses
   LCLProc;
 
-{$REGION TCEEntitiesConnector --------------------------------------------------}
-constructor TCEEntitiesConnector.Create;
+{$REGION TEntitiesConnector --------------------------------------------------}
+constructor TEntitiesConnector.Create;
 begin
   fObservers := TObjectList.Create(False);
   fSubjects := TObjectList.Create(False);
   fServices := TServiceList.Create();
 end;
 
-destructor TCEEntitiesConnector.Destroy;
+destructor TEntitiesConnector.Destroy;
 begin
   fObservers.Free;
   fSubjects.Free;
@@ -120,51 +120,51 @@ begin
   inherited;
 end;
 
-function TCEEntitiesConnector.getIsUpdating: boolean;
+function TEntitiesConnector.getIsUpdating: boolean;
 begin
   exit(fUpdatesCount > 0);
 end;
 
-procedure TCEEntitiesConnector.tryUpdate;
+procedure TEntitiesConnector.tryUpdate;
 begin
   if fUpdatesCount <= 0 then
     updateEntities;
 end;
 
-procedure TCEEntitiesConnector.forceUpdate;
+procedure TEntitiesConnector.forceUpdate;
 begin
   updateEntities;
 end;
 
-procedure TCEEntitiesConnector.updateEntities;
+procedure TEntitiesConnector.updateEntities;
 var
   i, j: Integer;
 begin
   fUpdatesCount := 0;
   for i := 0 to fSubjects.Count - 1 do
   begin
-    if not (fSubjects[i] is ICESubject) then
+    if not (fSubjects[i] is ISubject) then
       continue;
     for j := 0 to fObservers.Count - 1 do
     begin
       if fSubjects[i] <> fObservers[j] then
-        (fSubjects[i] as ICESubject).addObserver(fObservers[j]);
+        (fSubjects[i] as ISubject).addObserver(fObservers[j]);
     end;
   end;
 end;
 
-procedure TCEEntitiesConnector.beginUpdate;
+procedure TEntitiesConnector.beginUpdate;
 begin
   fUpdatesCount += 1;
 end;
 
-procedure TCEEntitiesConnector.endUpdate;
+procedure TEntitiesConnector.endUpdate;
 begin
   fUpdatesCount -= 1;
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.addObserver(observer: TObject);
+procedure TEntitiesConnector.addObserver(observer: TObject);
 begin
   if fObservers.IndexOf(observer) <> -1 then
     exit;
@@ -172,9 +172,9 @@ begin
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.addSubject(subject: TObject);
+procedure TEntitiesConnector.addSubject(subject: TObject);
 begin
-  if (subject as ICESubject) = nil then
+  if (subject as ISubject) = nil then
     exit;
   if fSubjects.IndexOf(subject) <> -1 then
     exit;
@@ -182,32 +182,32 @@ begin
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.removeObserver(observer: TObject);
+procedure TEntitiesConnector.removeObserver(observer: TObject);
 var
   i: Integer;
 begin
   fObservers.Remove(observer);
   for i := 0 to fSubjects.Count - 1 do
     if fSubjects[i] <> nil then
-      (fSubjects[i] as ICESubject).removeObserver(observer);
+      (fSubjects[i] as ISubject).removeObserver(observer);
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.removeSubject(subject: TObject);
+procedure TEntitiesConnector.removeSubject(subject: TObject);
 
 begin
   fSubjects.Remove(subject);
   tryUpdate;
 end;
 
-procedure TCEEntitiesConnector.addSingleService(provider: TObject);
+procedure TEntitiesConnector.addSingleService(provider: TObject);
 begin
-  if not (provider is ICESingleService) then
+  if not (provider is ISingleService) then
     exit;
-  fServices.insert((provider as ICESingleService).singleServiceName, provider);
+  fServices.insert((provider as ISingleService).singleServiceName, provider);
 end;
 
-function TCEEntitiesConnector.getSingleService(const serviceName: string): TObject;
+function TEntitiesConnector.getSingleService(const serviceName: string): TObject;
 begin
   Result := nil;
   if not fServices.GetValue(serviceName, result) then
@@ -215,36 +215,36 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TCECustomSubject ------------------------------------------------------}
-constructor TCECustomSubject.Create;
+{$REGION TCustomSubject ------------------------------------------------------}
+constructor TCustomSubject.Create;
 begin
   fObservers := TObjectList.Create(False);
   EntitiesConnector.addSubject(Self);
 end;
 
-destructor TCECustomSubject.Destroy;
+destructor TCustomSubject.Destroy;
 begin
   EntitiesConnector.removeSubject(Self);
   fObservers.Free;
   Inherited;
 end;
 
-function TCECustomSubject.acceptObserver(observer: TObject): boolean;
+function TCustomSubject.acceptObserver(observer: TObject): boolean;
 begin
   exit(observer is T);
 end;
 
-function TCECustomSubject.getObserversCount: Integer;
+function TCustomSubject.getObserversCount: Integer;
 begin
   exit(fObservers.Count);
 end;
 
-function TCECustomSubject.getObserver(index: Integer): TObject;
+function TCustomSubject.getObserver(index: Integer): TObject;
 begin
   exit(fObservers.Items[index]);
 end;
 
-procedure TCECustomSubject.addObserver(observer: TObject);
+procedure TCustomSubject.addObserver(observer: TObject);
 begin
   if not acceptObserver(observer) then
     exit;
@@ -253,14 +253,14 @@ begin
   fObservers.Add(observer);
 end;
 
-procedure TCECustomSubject.removeObserver(observer: TObject);
+procedure TCustomSubject.removeObserver(observer: TObject);
 begin
   fObservers.Remove(observer);
 end;
 {$ENDREGION}
 
 initialization
-  EntitiesConnector := TCEEntitiesConnector.Create;
+  EntitiesConnector := TEntitiesConnector.Create;
   EntitiesConnector.beginUpdate;
 
 finalization

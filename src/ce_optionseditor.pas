@@ -17,12 +17,12 @@ type
   TCategoryData = record
     kind: TOptionEditorKind;
     container: TPersistent;
-    observer: ICEEditableOptions;
+    observer: IEditableOptions;
   end;
 
-  { TCEOptionEditorWidget }
+  { TOptionEditorWidget }
 
-  TCEOptionEditorWidget = class(TCEWidget, ICEOptionsEditor)
+  TOptionEditorWidget = class(TDexedWidget, IOptionsEditor)
     btnCancel: TSpeedButton;
     btnAccept: TSpeedButton;
     pnlEd: TPanel;
@@ -46,11 +46,11 @@ type
   private
     fUpdatingCat: boolean;
     fCatChanged: boolean;
-    fEdOptsSubj: TCEEditableOptionsSubject;
+    fEdOptsSubj: TEditableOptionsSubject;
     procedure updateCategories;
     function allowCategoryChange: boolean;
     function sortCategories(Cat1, Cat2: TTreeNode): integer;
-    procedure showOptionEditor(observer: ICEEditableOptions = nil);
+    procedure showOptionEditor(observer: IEditableOptions = nil);
     function singleServiceName: string;
   public
     constructor create(aOwner: TComponent); override;
@@ -64,13 +64,13 @@ const
   msg_mod = 'The current category modifications are not validated, discard them and continue ?';
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEOptionEditorWidget.create(aOwner: TComponent);
+constructor TOptionEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
   toolbarVisible:=false;
   fIsDockable := false;
   fIsModal:= true;
-  fEdOptsSubj := TCEEditableOptionsSubject.create;
+  fEdOptsSubj := TEditableOptionsSubject.create;
   inspector.CheckboxForBoolean := true;
   inspector.PropertyEditorHook.AddHandlerModified(@inspectorModified);
   inspector.DefaultItemHeight := scaleY(22, 96);
@@ -98,14 +98,14 @@ begin
   EntitiesConnector.addSingleService(self);
 end;
 
-destructor TCEOptionEditorWidget.destroy;
+destructor TOptionEditorWidget.destroy;
 begin
   fCatChanged := false;
   fEdOptsSubj.Free;
   inherited;
 end;
 
-procedure TCEOptionEditorWidget.UpdateShowing;
+procedure TOptionEditorWidget.UpdateShowing;
 begin
   inherited;
   if Visible then
@@ -118,7 +118,7 @@ end;
 {$ENDREGION}
 
 {$REGION Option editor things --------------------------------------------------}
-procedure TCEOptionEditorWidget.showOptionEditor(observer: ICEEditableOptions = nil);
+procedure TOptionEditorWidget.showOptionEditor(observer: IEditableOptions = nil);
 var
   n: TTreeNode;
 begin
@@ -133,16 +133,16 @@ begin
   showWidget;
 end;
 
-function TCEOptionEditorWidget.singleServiceName: string;
+function TOptionEditorWidget.singleServiceName: string;
 begin
-  exit('ICEOptionsEditor');
+  exit('IOptionsEditor');
 end;
 
-procedure TCEOptionEditorWidget.updateCategories;
+procedure TOptionEditorWidget.updateCategories;
 var
   i: Integer;
   dt: PCategoryData;
-  ed: ICEEditableOptions;
+  ed: IEditableOptions;
   sel: string = '';
 begin
   if selCat.Selected.isNotNil then
@@ -154,7 +154,7 @@ begin
   for i:= 0 to fEdOptsSubj.observersCount-1 do
   begin
     dt := new(PCategoryData);
-    ed := fEdOptsSubj.observers[i] as ICEEditableOptions;
+    ed := fEdOptsSubj.observers[i] as IEditableOptions;
     selCat.Items.AddObject(nil, ed.optionedWantCategory, dt);
     dt^.container := ed.optionedWantContainer;
     dt^.kind := ed.optionedWantEditorKind;
@@ -168,18 +168,18 @@ begin
   fUpdatingCat := false;
 end;
 
-function TCEOptionEditorWidget.sortCategories(Cat1, Cat2: TTreeNode): integer;
+function TOptionEditorWidget.sortCategories(Cat1, Cat2: TTreeNode): integer;
 begin
   result := CompareText(Cat1.Text, Cat2.Text);
 end;
 
-procedure TCEOptionEditorWidget.selCatDeletion(Sender: TObject; Node: TTreeNode);
+procedure TOptionEditorWidget.selCatDeletion(Sender: TObject; Node: TTreeNode);
 begin
   if node.Data.isNotNil then
     Dispose(PCategoryData(node.Data));
 end;
 
-function TCEOptionEditorWidget.allowCategoryChange: boolean;
+function TOptionEditorWidget.allowCategoryChange: boolean;
 var
   dt: PCategoryData;
 begin
@@ -213,13 +213,13 @@ begin
   end;
 end;
 
-procedure TCEOptionEditorWidget.selCatChanging(Sender: TObject;Node: TTreeNode;
+procedure TOptionEditorWidget.selCatChanging(Sender: TObject;Node: TTreeNode;
   var AllowChange: Boolean);
 begin
   AllowChange := allowCategoryChange;
 end;
 
-procedure TCEOptionEditorWidget.selCatSelectionChanged(Sender: TObject);
+procedure TOptionEditorWidget.selCatSelectionChanged(Sender: TObject);
 var
   dt: PCategoryData;
 begin
@@ -267,7 +267,7 @@ begin
     .optionedEvent(oeeSelectCat);
 end;
 
-procedure TCEOptionEditorWidget.inspectorModified(Sender: TObject);
+procedure TOptionEditorWidget.inspectorModified(Sender: TObject);
 begin
   if selCat.Selected.isNil then exit;
   if selcat.Selected.Data.isNil then exit;
@@ -278,7 +278,7 @@ begin
     .optionedEvent(oeeChange);
 end;
 
-procedure TCEOptionEditorWidget.btnCancelClick(Sender: TObject);
+procedure TOptionEditorWidget.btnCancelClick(Sender: TObject);
 begin
   if selCat.Selected.isNil then exit;
   if selcat.Selected.Data.isNil then exit;
@@ -291,13 +291,13 @@ begin
     .optionedEvent(oeeCancel);
 end;
 
-procedure TCEOptionEditorWidget.FormCloseQuery(Sender: TObject;
+procedure TOptionEditorWidget.FormCloseQuery(Sender: TObject;
   var CanClose: boolean);
 begin
   canClose := allowCategoryChange;
 end;
 
-procedure TCEOptionEditorWidget.inspectorEditorFilter(Sender: TObject;aEditor:
+procedure TOptionEditorWidget.inspectorEditorFilter(Sender: TObject;aEditor:
   TPropertyEditor; var aShow: boolean);
 var
   nme: string;
@@ -316,7 +316,7 @@ begin
   end;
 end;
 
-procedure TCEOptionEditorWidget.btnAcceptClick(Sender: TObject);
+procedure TOptionEditorWidget.btnAcceptClick(Sender: TObject);
 begin
   if selCat.Selected.isNil then exit;
   if selcat.Selected.Data.isNil then exit;

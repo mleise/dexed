@@ -16,9 +16,9 @@ type
   );
 
   (**
-   * ICEEDebugObserver can call any of the method during debugging
+   * IEDebugObserver can call any of the method during debugging
    *)
-  ICEDebugger = interface(ICESingleService)
+  IDebugger = interface(ISingleService)
     function running: boolean;
     procedure addBreakPoint(const fname: string; line: integer; kind: TBreakPointKind = bpkBreak);
     procedure removeBreakPoint(const fname: string; line: integer; kind: TBreakPointKind = bpkBreak);
@@ -26,7 +26,7 @@ type
   end;
 
   // Enumerates th e reason why debuging breaks.
-  TCEDebugBreakReason = (
+  TDebugBreakReason = (
     dbUnknown,      // ?
     dbBreakPoint,   // a break point is reached.
     dbSignal,       // an unexpected signal is emitted.
@@ -36,14 +36,14 @@ type
   (**
    * An implementer is informed about a debuging session.
    *)
-  ICEDebugObserver = interface(IObserverType)
-  ['ICEDebugObserver']
-    // a debugging session starts. The ICEDebugger can be stored for the session.
-    procedure debugStart(debugger: ICEDebugger);
-    // a debugging session terminates. Any pointer to a ICEDebugger becomes invalid.
+  IDebugObserver = interface(IObserverType)
+  ['IDebugObserver']
+    // a debugging session starts. The IDebugger can be stored for the session.
+    procedure debugStart(debugger: IDebugger);
+    // a debugging session terminates. Any pointer to a IDebugger becomes invalid.
     procedure debugStop;
     // a break happens when code in fname at line is executed.
-    procedure debugBreak(const fname: string; line: integer; reason: TCEDebugBreakReason);
+    procedure debugBreak(const fname: string; line: integer; reason: TDebugBreakReason);
     // debugging continue
     procedure debugContinue;
   end;
@@ -51,49 +51,49 @@ type
   (**
    * An implementer notifies is observer about a debuginf session.
    *)
-  TCEDebugObserverSubject = specialize TCECustomSubject<ICEDebugObserver>;
+  TDebugObserverSubject = specialize TCustomSubject<IDebugObserver>;
 
-  // TCEDebugObserverSubject primitives
-  procedure subjDebugStart(subj: TCEDebugObserverSubject; dbg: ICEDebugger);
-  procedure subjDebugStop(subj: TCEDebugObserverSubject);
-  procedure subjDebugContinue(subj: TCEDebugObserverSubject);
-  procedure subjDebugBreak(subj: TCEDebugObserverSubject; const fname: string;
-    line: integer; reason: TCEDebugBreakReason);
+  // TDebugObserverSubject primitives
+  procedure subjDebugStart(subj: TDebugObserverSubject; dbg: IDebugger);
+  procedure subjDebugStop(subj: TDebugObserverSubject);
+  procedure subjDebugContinue(subj: TDebugObserverSubject);
+  procedure subjDebugBreak(subj: TDebugObserverSubject; const fname: string;
+    line: integer; reason: TDebugBreakReason);
 
 
 implementation
 
-procedure subjDebugStart(subj: TCEDebugObserverSubject; dbg: ICEDebugger);
+procedure subjDebugStart(subj: TDebugObserverSubject; dbg: IDebugger);
 var
   i: integer;
 begin
   for i:= 0 to subj.observersCount-1 do
-    (subj.observers[i] as ICEDebugObserver).debugStart(dbg);
+    (subj.observers[i] as IDebugObserver).debugStart(dbg);
 end;
 
-procedure subjDebugStop(subj: TCEDebugObserverSubject);
+procedure subjDebugStop(subj: TDebugObserverSubject);
 var
   i: integer;
 begin
   for i:= 0 to subj.observersCount-1 do
-    (subj.observers[i] as ICEDebugObserver).debugStop;
+    (subj.observers[i] as IDebugObserver).debugStop;
 end;
 
-procedure subjDebugBreak(subj: TCEDebugObserverSubject; const fname: string;
-    line: integer; reason: TCEDebugBreakReason);
+procedure subjDebugBreak(subj: TDebugObserverSubject; const fname: string;
+    line: integer; reason: TDebugBreakReason);
 var
   i: integer;
 begin
   for i:= 0 to subj.observersCount-1 do
-    (subj.observers[i] as ICEDebugObserver).debugBreak(fname, line, reason);
+    (subj.observers[i] as IDebugObserver).debugBreak(fname, line, reason);
 end;
 
-procedure subjDebugContinue(subj: TCEDebugObserverSubject);
+procedure subjDebugContinue(subj: TDebugObserverSubject);
 var
   i: integer;
 begin
   for i:= 0 to subj.observersCount-1 do
-    (subj.observers[i] as ICEDebugObserver).debugContinue;
+    (subj.observers[i] as IDebugObserver).debugContinue;
 end;
 
 end.

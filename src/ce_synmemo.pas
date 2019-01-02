@@ -18,7 +18,7 @@ uses
 
 type
 
-  TCESynMemo = class;
+  TDexedMemo = class;
 
   TIdentifierMatchOption = (
     caseSensitive = longInt(ssoMatchCase),
@@ -53,7 +53,7 @@ type
   TIdentifierMatchOptions = set of TIdentifierMatchOption;
 
   // Simple THintWindow descendant allowing the font size to be in sync with the editor.
-  TCEEditorHintWindow = class(THintWindow)
+  TEditorHintWindow = class(THintWindow)
   public
     class var FontSize: Integer;
     function CalcHintRect(MaxWidth: Integer; const AHint: string;
@@ -61,7 +61,7 @@ type
   end;
 
   // Specialized to allow displaying call tips, actual param in bold
-  TCEEditorCallTipWindow = class(TCEEditorHintWindow)
+  TEditorCallTipWindow = class(TEditorHintWindow)
   strict private
     fIndexOfExpectedArg: integer;
   public
@@ -72,7 +72,7 @@ type
   end;
 
   // Stores the state of a particular source code folding.
-  TCEFoldCache = class(TCollectionItem)
+  TFoldCache = class(TCollectionItem)
   private
     fCollapsed: boolean;
     fLineIndex: Integer;
@@ -84,9 +84,9 @@ type
   end;
 
   // Stores the state of a document between two cessions.
-  TCESynMemoCache = class(TWritableLfmTextComponent)
+  TSynMemoCache = class(TWritableLfmTextComponent)
   private
-    fMemo: TCESynMemo;
+    fMemo: TDexedMemo;
     fFolds: TCollection;
     fCaretPosition: Integer;
     fSelectionEnd: Integer;
@@ -110,7 +110,7 @@ type
 
   // Caret positions buffer allowing to jump fast to the most recent locations.
   // Replaces the bookmarks.
-  TCESynMemoPositions = class
+  TSynMemoPositions = class
   private
     fPos: Integer;
     fMax: Integer;
@@ -163,29 +163,29 @@ type
   //TODO-cGDB: add a system allowing to define watch points
 
   // Partial read-only editor displayed as scroll hint
-  TCEScrollMemo = class(TPanel)
+  TScrollMemo = class(TPanel)
   private
     fMemo: TSynEdit;
     fD2Hl: TSynD2Syn;
     fTxtHl: TSynTxtSyn;
     fCppHl: TSynCppSyn;
-    fSource: TCESynMemo;
+    fSource: TDexedMemo;
     procedure updateFromSource;
   protected
     procedure SetVisible(Value: Boolean); override;
   public
-    constructor construct(editor: TCESynMemo);
+    constructor construct(editor: TDexedMemo);
     procedure goToLine(value: integer);
   end;
 
-  { TCESynMemo }
+  { TDexedMemo }
 
-  TCESynMemo = class(TSynEdit, ICEDebugObserver)
+  TDexedMemo = class(TSynEdit, IDebugObserver)
   private
     //fIndentGuideMarkup: TSynEditMarkupFoldColors;
     fLifeTimeManager: TObject;
     fIdentDialShown: boolean;
-    fScrollMemo: TCEScrollMemo;
+    fScrollMemo: TScrollMemo;
     fFilename: string;
     fDastWorxExename: string;
     fModified: boolean;
@@ -197,10 +197,10 @@ type
     fTempFileName: string;
     fMultiDocSubject: TObject;
     fDefaultFontSize: Integer;
-    fPositions: TCESynMemoPositions;
+    fPositions: TSynMemoPositions;
     fMousePos: TPoint;
-    fCallTipWin: TCEEditorCallTipWindow;
-    fDDocWin: TCEEditorHintWindow;
+    fCallTipWin: TEditorCallTipWindow;
+    fDDocWin: TEditorHintWindow;
     fDDocDelay: Integer;
     fAutoDotDelay: Integer;
     fDscannerDelay: Integer;
@@ -234,14 +234,14 @@ type
     fModuleTokFound: boolean;
     fHasModuleDeclaration: boolean;
     fLastCompletion: string;
-    fDebugger: ICEDebugger;
+    fDebugger: IDebugger;
     fInsertPlusDdoc: boolean;
     fAutoCallCompletion: boolean;
     fCloseCompletionCharsWithSpace: TSysCharSet;
     fCloseCompletionChars: TSysCharSet;
     fCompletionMenuAutoClose: boolean;
     fTransparentGutter: boolean;
-    fDscanner: TCEProcess;
+    fDscanner: TDexedProcess;
     fDscannerResults: TDscannerResults;
     fCanDscan: boolean;
     fKnowsDscanner: boolean;
@@ -298,12 +298,12 @@ type
     procedure removeDebugTimeMarks;
     function  isGutterIconSet(line: integer; value: TGutterIcon): boolean;
     function  findBreakPoint(line: integer): boolean;
-    procedure debugStart(debugger: ICEDebugger);
+    procedure debugStart(debugger: IDebugger);
     procedure debugStop;
     procedure debugContinue;
     function debugQueryBpCount: integer;
     procedure debugQueryBreakPoint(const line: integer; out fname: string; out kind: TBreakPointKind);
-    procedure debugBreak(const fname: string; line: integer; reason: TCEDebugBreakReason);
+    procedure debugBreak(const fname: string; line: integer; reason: TDebugBreakReason);
     function breakPointsCount: integer;
     procedure tryToPatchMixedIndentation;
   protected
@@ -408,14 +408,14 @@ type
   private
     class var fDescending: boolean;
     class var fCaseSensitive: boolean;
-    fEditor: TCESynMemo;
+    fEditor: TDexedMemo;
     fCanUndo: boolean;
     procedure btnApplyClick(sender: TObject);
     procedure btnUndoClick(sender: TObject);
     procedure chkCaseSensClick(sender: TObject);
     procedure chkDescClick(sender: TObject);
   public
-    constructor construct(editor: TCESynMemo);
+    constructor construct(editor: TDexedMemo);
   end;
 
   TMixedIndentationDialog = class(TForm)
@@ -498,20 +498,20 @@ const
     ' (mixin)            '
   );
 
-function TCEEditorHintWindow.CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect;
+function TEditorHintWindow.CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect;
 begin
   Font.Size:= FontSize;
   result := inherited CalcHintRect(MaxWidth, AHint, AData);
 end;
 
-function TCEEditorCallTipWindow.CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect;
+function TEditorCallTipWindow.CalcHintRect(MaxWidth: Integer; const AHint: String; AData: Pointer): TRect;
 begin
   //Font.Style := Font.Style + [fsBold];
   result := inherited CalcHintRect(MaxWidth, AHint, AData);
   //Font.Style := Font.Style - [fsBold];
 end;
 
-procedure TCEEditorCallTipWindow.Paint;
+procedure TEditorCallTipWindow.Paint;
 //var
   //s: string;
   //a: string;
@@ -556,7 +556,7 @@ begin
 end;
 
 {$REGION TSortDialog -----------------------------------------------------------}
-constructor TSortDialog.construct(editor: TCESynMemo);
+constructor TSortDialog.construct(editor: TDexedMemo);
 var
   pnl: TPanel;
 begin
@@ -731,30 +731,30 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TCESynMemoCache -------------------------------------------------------}
-constructor TCESynMemoCache.create(aComponent: TComponent);
+{$REGION TSynMemoCache -------------------------------------------------------}
+constructor TSynMemoCache.create(aComponent: TComponent);
 begin
   inherited create(nil);
-  if (aComponent is TCESynMemo) then
-  	fMemo := TCESynMemo(aComponent);
-  fFolds := TCollection.Create(TCEFoldCache);
+  if (aComponent is TDexedMemo) then
+  	fMemo := TDexedMemo(aComponent);
+  fFolds := TCollection.Create(TFoldCache);
 end;
 
-destructor TCESynMemoCache.destroy;
+destructor TSynMemoCache.destroy;
 begin
   fFolds.Free;
   inherited;
 end;
 
-procedure TCESynMemoCache.setFolds(someFolds: TCollection);
+procedure TSynMemoCache.setFolds(someFolds: TCollection);
 begin
   fFolds.Assign(someFolds);
 end;
 
-procedure TCESynMemoCache.beforeSave;
+procedure TSynMemoCache.beforeSave;
 var
   i, start, prev: Integer;
-  itm : TCEFoldCache;
+  itm : TFoldCache;
 begin
   if fMemo.isNil then
     exit;
@@ -763,7 +763,7 @@ begin
   fSourceFilename := fMemo.fileName;
   fSelectionEnd := fMemo.SelEnd;
   fFontSize := fMemo.Font.Size;
-  TCEEditorHintWindow.FontSize := fMemo.Font.Size;
+  TEditorHintWindow.FontSize := fMemo.Font.Size;
 
   prev := fMemo.Lines.Count-1;
   for i := fMemo.Lines.Count-1 downto 0 do
@@ -776,16 +776,16 @@ begin
     if start = prev then
       continue;
     prev := start;
-    itm := TCEFoldCache(fFolds.Add);
+    itm := TFoldCache(fFolds.Add);
     itm.isCollapsed := true;
     itm.fLineIndex := start;
   end;
 end;
 
-procedure TCESynMemoCache.afterLoad;
+procedure TSynMemoCache.afterLoad;
 var
   i: integer;
-  itm : TCEFoldCache;
+  itm : TFoldCache;
 begin
   if fMemo.isNil then
     exit;
@@ -799,7 +799,7 @@ begin
 
   for i := 0 to fFolds.Count-1 do
   begin
-    itm := TCEFoldCache(fFolds.Items[i]);
+    itm := TFoldCache(fFolds.Items[i]);
     if not itm.isCollapsed then
       continue;
     fMemo.TextView.FoldAtLine(itm.lineIndex-1);
@@ -810,7 +810,7 @@ begin
 end;
 
 {$IFDEF DEBUG}{$R-}{$ENDIF}
-procedure TCESynMemoCache.save;
+procedure TSynMemoCache.save;
 var
   fname: string;
   tempn: string;
@@ -828,7 +828,7 @@ begin
   saveToFile(fname);
 end;
 
-procedure TCESynMemoCache.load;
+procedure TSynMemoCache.load;
 var
   fname: string;
   tempn: string;
@@ -850,8 +850,8 @@ end;
 {$IFDEF DEBUG}{$R+}{$ENDIF}
 {$ENDREGION}
 
-{$REGION TCESynMemoPositions ---------------------------------------------------}
-constructor TCESynMemoPositions.create(memo: TCustomSynEdit);
+{$REGION TSynMemoPositions ---------------------------------------------------}
+constructor TSynMemoPositions.create(memo: TCustomSynEdit);
 begin
   fList := TFPList.Create;
   fMax  := 40;
@@ -859,13 +859,13 @@ begin
   fPos  := -1;
 end;
 
-destructor TCESynMemoPositions.destroy;
+destructor TSynMemoPositions.destroy;
 begin
   fList.Free;
   inherited;
 end;
 
-procedure TCESynMemoPositions.back;
+procedure TSynMemoPositions.back;
 begin
   Inc(fPos);
   {$HINTS OFF}
@@ -875,7 +875,7 @@ begin
   else Dec(fPos);
 end;
 
-procedure TCESynMemoPositions.next;
+procedure TSynMemoPositions.next;
 begin
   Dec(fPos);
   {$HINTS OFF}
@@ -885,7 +885,7 @@ begin
   else Inc(fPos);
 end;
 
-procedure TCESynMemoPositions.store;
+procedure TSynMemoPositions.store;
 var
   delta: NativeInt;
 const
@@ -906,8 +906,8 @@ begin
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION TCEScrollMemo ---------------------------------------------------------}
-constructor TCEScrollMemo.construct(editor: TCESynMemo);
+{$REGION TScrollMemo ---------------------------------------------------------}
+constructor TScrollMemo.construct(editor: TDexedMemo);
 begin
   inherited create(editor);
   visible := false;
@@ -935,7 +935,7 @@ begin
   updateFromSource();
 end;
 
-procedure TCEScrollMemo.updateFromSource;
+procedure TScrollMemo.updateFromSource;
 begin
   fMemo.Font.Assign(fSource.Font);
   fMemo.Lines := fSource.Lines;
@@ -960,7 +960,7 @@ begin
   end;
 end;
 
-procedure TCEScrollMemo.SetVisible(Value: Boolean);
+procedure TScrollMemo.SetVisible(Value: Boolean);
 var
   o: boolean;
 begin
@@ -970,7 +970,7 @@ begin
     updateFromSource;
 end;
 
-procedure TCEScrollMemo.goToLine(value: integer);
+procedure TScrollMemo.goToLine(value: integer);
 begin
   if fMemo.PaintLock <> 0 then
     exit;
@@ -984,17 +984,17 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TCESynMemo ------------------------------------------------------------}
+{$REGION TDexedMemo ------------------------------------------------------------}
 
 {$REGION Standard Obj and Comp -------------------------------------------------}
-constructor TCESynMemo.Create(aOwner: TComponent);
+constructor TDexedMemo.Create(aOwner: TComponent);
 var
   z: TIconScaledSize;
-  i: ICELifetimeManager;
+  i: ILifetimeManager;
 begin
   inherited;
 
-  fScrollMemo := TCEScrollMemo.construct(self);
+  fScrollMemo := TScrollMemo.construct(self);
 
   i := getLifeTimeManager();
   if (i <> nil) then
@@ -1030,7 +1030,7 @@ begin
   fDscannerTimer.AutoEnabled:=true;
   fDscannerTimer.Interval := fDscannerDelay;
   fDscannerTimer.OnTimer := @dscannerTimerEvent;
-  fDscanner := TCEProcess.create(self);
+  fDscanner := TDexedProcess.create(self);
   fDscanner.Executable:= exeFullName('dscanner' + exeExt);
   fDscanner.Options:=[poUsePipes];
   fDscanner.ShowWindow:=swoHIDE;
@@ -1132,8 +1132,8 @@ begin
     end;
   end;
 
-  fPositions := TCESynMemoPositions.create(self);
-  fMultiDocSubject := TCEMultiDocSubject.create;
+  fPositions := TSynMemoPositions.create(self);
+  fMultiDocSubject := TMultiDocSubject.create;
 
   HighlightAllColor.Foreground := clNone;
   HighlightAllColor.Background := clSilver;
@@ -1151,25 +1151,25 @@ begin
 
   fDastWorxExename:= exeFullName('dastworx' + exeExt);
 
-  fDebugger := EntitiesConnector.getSingleService('ICEDebugger') as ICEDebugger;
+  fDebugger := EntitiesConnector.getSingleService('IDebugger') as IDebugger;
 
-  subjDocNew(TCEMultiDocSubject(fMultiDocSubject), self);
+  subjDocNew(TMultiDocSubject(fMultiDocSubject), self);
   EntitiesConnector.addObserver(self);
 end;
 
-procedure TCESynMemo.WMKillFocus(var Message: TLMKillFocus);
+procedure TDexedMemo.WMKillFocus(var Message: TLMKillFocus);
 begin
   if eoAutoHideCursor in options2 then
     inherited MouseMove([], 0, 0);
 end;
 
-destructor TCESynMemo.destroy;
+destructor TDexedMemo.destroy;
 begin
   saveCache;
 
   //fIndentGuideMarkup.Free;
   EntitiesConnector.removeObserver(self);
-  subjDocClosing(TCEMultiDocSubject(fMultiDocSubject), self);
+  subjDocClosing(TMultiDocSubject(fMultiDocSubject), self);
   fMultiDocSubject.Free;
   fPositions.Free;
   fCompletion.Free;
@@ -1185,7 +1185,7 @@ begin
   inherited;
 end;
 
-procedure TCESynMemo.setGutterTransparent(value: boolean);
+procedure TDexedMemo.setGutterTransparent(value: boolean);
 begin
   fTransparentGutter:=value;
   if fTransparentGutter then
@@ -1208,7 +1208,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.setDefaultFontSize(value: Integer);
+procedure TDexedMemo.setDefaultFontSize(value: Integer);
 var
   old: Integer;
 begin
@@ -1220,30 +1220,30 @@ begin
     Font.Size := fDefaultFontSize;
 end;
 
-procedure TCESynMemo.setFocus;
+procedure TDexedMemo.setFocus;
 begin
   inherited;
   highlightCurrentIdentifier;
-  subjDocFocused(TCEMultiDocSubject(fMultiDocSubject), self);
+  subjDocFocused(TMultiDocSubject(fMultiDocSubject), self);
 end;
 
-procedure TCESynMemo.showPage;
+procedure TDexedMemo.showPage;
 begin
   getMultiDocHandler.openDocument(fileName);
 end;
 
-procedure TCESynMemo.DoEnter;
+procedure TDexedMemo.DoEnter;
 begin
   inherited;
   checkFileDate;
   if not fFocusForInput then
-    subjDocFocused(TCEMultiDocSubject(fMultiDocSubject), self);
+    subjDocFocused(TMultiDocSubject(fMultiDocSubject), self);
   fFocusForInput := true;
   fScrollMemo.Visible:=false;
   tryToPatchMixedIndentation;
 end;
 
-procedure TCESynMemo.DoExit;
+procedure TDexedMemo.DoExit;
 begin
   inherited;
   fFocusForInput := false;
@@ -1254,7 +1254,7 @@ begin
     fCompletion.Deactivate;
 end;
 
-procedure TCESynMemo.SetVisible(Value: Boolean);
+procedure TDexedMemo.SetVisible(Value: Boolean);
 begin
   inherited;
   if Value then
@@ -1480,7 +1480,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.DoOnProcessCommand(var Command: TSynEditorCommand;
+procedure TDexedMemo.DoOnProcessCommand(var Command: TSynEditorCommand;
   var AChar: TUTF8Char; Data: pointer);
 begin
   FBlockSelection.AutoExtend := False;
@@ -1600,7 +1600,7 @@ begin
   end;
 end;
 
-function TCESynMemo.indentationMode(out numTabs, numSpaces: integer): TIndentationMode;
+function TDexedMemo.indentationMode(out numTabs, numSpaces: integer): TIndentationMode;
   function checkLine(index: integer): TIndentationMode;
   var
     u: string;
@@ -1636,7 +1636,7 @@ begin
   numSpaces:= s;
 end;
 
-procedure TCESynMemo.forceIndentation(m: TIndentationMode; w: integer);
+procedure TDexedMemo.forceIndentation(m: TIndentationMode; w: integer);
 var
   i: integer;
 begin
@@ -1658,7 +1658,7 @@ begin
   lines.EndUpdate;
 end;
 
-procedure TCESynMemo.insertLeadingDDocSymbol(c: char);
+procedure TDexedMemo.insertLeadingDDocSymbol(c: char);
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
@@ -1669,7 +1669,7 @@ begin
   EndUndoBlock;
 end;
 
-procedure TCESynMemo.curlyBraceCloseAndIndent;
+procedure TDexedMemo.curlyBraceCloseAndIndent;
 var
   i: integer;
   beg: string = '';
@@ -1728,7 +1728,7 @@ begin
   EndUndoBlock;
 end;
 
-procedure TCESynMemo.commentSelection;
+procedure TDexedMemo.commentSelection;
   procedure commentHere;
   begin
     ExecuteCommand(ecChar, '/', nil);
@@ -1812,7 +1812,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.commentIdentifier;
+procedure TDexedMemo.commentIdentifier;
 var
   str: string;
   x, x0, x1: integer;
@@ -1890,7 +1890,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.invertVersionAllNone;
+procedure TDexedMemo.invertVersionAllNone;
 var
   i: integer;
   c: char;
@@ -1952,7 +1952,7 @@ begin
   CaretXY := cp;
 end;
 
-procedure TCESynMemo.renameIdentifier;
+procedure TDexedMemo.renameIdentifier;
 var
   locs: TIntOpenArray = nil;
   old, idt, line: string;
@@ -1997,7 +1997,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.ShowPhobosDoc;
+procedure TDexedMemo.ShowPhobosDoc;
 var
   str: string;
   pth: string;
@@ -2113,27 +2113,27 @@ begin
   OpenURL(pth);
 end;
 
-procedure TCESynMemo.nextChangedArea;
+procedure TDexedMemo.nextChangedArea;
 begin
   goToChangedArea(true);
 end;
 
-procedure TCESynMemo.previousChangedArea;
+procedure TDexedMemo.previousChangedArea;
 begin
   goToChangedArea(false);
 end;
 
-procedure TCESynMemo.previousWarning;
+procedure TDexedMemo.previousWarning;
 begin
   goToWarning(false);
 end;
 
-procedure TCESynMemo.nextWarning;
+procedure TDexedMemo.nextWarning;
 begin
   goToWarning(true);
 end;
 
-procedure TCESynMemo.gotoLinePrompt;
+procedure TDexedMemo.gotoLinePrompt;
 var
   d: string;
   v: string;
@@ -2156,7 +2156,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.showWarningForLine(line: integer);
+procedure TDexedMemo.showWarningForLine(line: integer);
 var
   s: string;
   p: TPoint;
@@ -2178,12 +2178,12 @@ begin
   end;
 end;
 
-procedure TCESynMemo.showCurLineWarning;
+procedure TDexedMemo.showCurLineWarning;
 begin
   showWarningForLine(CaretY);
 end;
 
-procedure TCESynMemo.goToChangedArea(next: boolean);
+procedure TDexedMemo.goToChangedArea(next: boolean);
 var
   i: integer;
   s: TSynLineState;
@@ -2224,7 +2224,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.goToProtectionGroup(next: boolean);
+procedure TDexedMemo.goToProtectionGroup(next: boolean);
 var
   i: integer;
   tk0, tk1: PLexToken;
@@ -2260,7 +2260,7 @@ begin
     ExecuteCommand(ecGotoXY, #0, @tk^.position);
 end;
 
-procedure TCESynMemo.goToWarning(next: boolean);
+procedure TDexedMemo.goToWarning(next: boolean);
 var
   i: integer;
   j: integer = -1;
@@ -2297,17 +2297,17 @@ begin
   end;
 end;
 
-procedure TCESynMemo.previousProtectionGroup;
+procedure TDexedMemo.previousProtectionGroup;
 begin
   goToProtectionGroup(false);
 end;
 
-procedure TCESynMemo.nextProtectionGroup;
+procedure TDexedMemo.nextProtectionGroup;
 begin
   goToProtectionGroup(true);
 end;
 
-function TCESynMemo.implementMain: THasMain;
+function TDexedMemo.implementMain: THasMain;
 var
   res: char = '0';
   prc: TProcess;
@@ -2337,7 +2337,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.autoClosePair(value: TAutoClosedPair);
+procedure TDexedMemo.autoClosePair(value: TAutoClosedPair);
 var
   i, p: integer;
   tk0, tk1: PLexToken;
@@ -2402,7 +2402,7 @@ begin
   EndUndoBlock;
 end;
 
-procedure TCESynMemo.setSelectionOrWordCase(upper: boolean);
+procedure TDexedMemo.setSelectionOrWordCase(upper: boolean);
 var
   i: integer;
   txt: string;
@@ -2440,7 +2440,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.sortSelectedLines(descending, caseSensitive: boolean);
+procedure TDexedMemo.sortSelectedLines(descending, caseSensitive: boolean);
 var
   i,j: integer;
   lne: string;
@@ -2486,26 +2486,26 @@ begin
   end;
 end;
 
-procedure TCESynMemo.sortLines;
+procedure TDexedMemo.sortLines;
 begin
   if not assigned(fSortDialog) then
     fSortDialog := TSortDialog.construct(self);
   fSortDialog.Show;
 end;
 
-procedure TCESynMemo.addCurLineBreakPoint;
+procedure TDexedMemo.addCurLineBreakPoint;
 begin
   if not findBreakPoint(CaretY) then
     addBreakPoint(CaretY);
 end;
 
-procedure TCESynMemo.removeCurLineBreakPoint;
+procedure TDexedMemo.removeCurLineBreakPoint;
 begin
   if findBreakPoint(CaretY) then
     removeBreakPoint(CaretY);
 end;
 
-procedure TCESynMemo.toggleCurLineBreakpoint;
+procedure TDexedMemo.toggleCurLineBreakpoint;
 begin
   if not findBreakPoint(CaretY) then
     addBreakPoint(CaretY)
@@ -2513,7 +2513,7 @@ begin
     removeBreakPoint(CaretY);
 end;
 
-procedure TCESynMemo.insertDdocTemplate;
+procedure TDexedMemo.insertDdocTemplate;
 var
   d: TStringList;
   i: integer;
@@ -2549,7 +2549,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.gotoWordEdge(right: boolean);
+procedure TDexedMemo.gotoWordEdge(right: boolean);
 var
   s: string;
   c: char;
@@ -2596,23 +2596,23 @@ end;
 {$ENDREGION}
 
 {$REGION DDoc & CallTip --------------------------------------------------------}
-procedure TCESynMemo.InitHintWins;
+procedure TDexedMemo.InitHintWins;
 begin
   if fCallTipWin.isNil then
   begin
-    fCallTipWin := TCEEditorCallTipWindow.Create(self);
+    fCallTipWin := TEditorCallTipWindow.Create(self);
     fCallTipWin.Color := clInfoBk + $01010100;
     fCallTipWin.Font.Color:= clInfoText;
   end;
   if fDDocWin.isNil then
   begin
-    fDDocWin := TCEEditorHintWindow.Create(self);
+    fDDocWin := TEditorHintWindow.Create(self);
     fDDocWin.Color := clInfoBk + $01010100;
     fDDocWin.Font.Color:= clInfoText;
   end;
 end;
 
-procedure TCESynMemo.showCallTips(findOpenParen: boolean = true);
+procedure TDexedMemo.showCallTips(findOpenParen: boolean = true);
 var
   str, lne: string;
   i, x: integer;
@@ -2682,7 +2682,7 @@ begin
     CaretX:=x;
 end;
 
-procedure TCESynMemo.showCallTipsString(const tips: string; indexOfExpected: integer);
+procedure TDexedMemo.showCallTipsString(const tips: string; indexOfExpected: integer);
 var
   pnt: TPoint;
 begin
@@ -2702,7 +2702,7 @@ begin
   fCallTipWin.ActivateHint(tips);
 end;
 
-procedure TCESynMemo.hideCallTips;
+procedure TDexedMemo.hideCallTips;
 begin
   if not fCallTipWin.Visible then
     exit;
@@ -2710,7 +2710,7 @@ begin
   fCallTipWin.Hide;
 end;
 
-procedure TCESynMemo.decCallTipsLvl;
+procedure TDexedMemo.decCallTipsLvl;
 var
   i: integer;
 begin
@@ -2725,7 +2725,7 @@ begin
     showCallTipsString(fCallTipStrings.Text, 0);
 end;
 
-procedure TCESynMemo.showDDocs;
+procedure TDexedMemo.showDDocs;
 var
   str: string;
 begin
@@ -2743,19 +2743,19 @@ begin
   end;
 end;
 
-procedure TCESynMemo.hideDDocs;
+procedure TDexedMemo.hideDDocs;
 begin
   fCanShowHint := false;
   fDDocWin.Hide;
 end;
 
-procedure TCESynMemo.setDDocDelay(value: Integer);
+procedure TDexedMemo.setDDocDelay(value: Integer);
 begin
   fDDocDelay:=value;
   fDDocTimer.Interval:=fDDocDelay;
 end;
 
-procedure TCESynMemo.DDocTimerEvent(sender: TObject);
+procedure TDexedMemo.DDocTimerEvent(sender: TObject);
 begin
   if (not Visible) or (not isDSource) or (not fCanShowHint) then
     exit;
@@ -2765,7 +2765,7 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION Completion ------------------------------------------------------------}
-procedure TCESynMemo.completionExecute(sender: TObject);
+procedure TDexedMemo.completionExecute(sender: TObject);
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
@@ -2775,7 +2775,7 @@ begin
   getCompletionList;
 end;
 
-procedure TCESynMemo.completionDeleteKey(sender: TObject);
+procedure TDexedMemo.completionDeleteKey(sender: TObject);
 begin
   if CaretX > 0 then
   begin
@@ -2787,7 +2787,7 @@ begin
     fCompletion.TheForm.Close;
 end;
 
-procedure TCESynMemo.getCompletionList;
+procedure TDexedMemo.getCompletionList;
 var
   i: integer;
   o: TObject;
@@ -2811,7 +2811,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.completionCodeCompletion(var value: string;
+procedure TDexedMemo.completionCodeCompletion(var value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
 begin
@@ -2830,13 +2830,13 @@ begin
   end;
 end;
 
-procedure TCESynMemo.completionFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TDexedMemo.completionFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if char(key) = #9 then
     key := 13;
 end;
 
-function TCESynMemo.completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
+function TDexedMemo.completionItemPaint(const AKey: string; ACanvas: TCanvas;X, Y: integer;
   Selected: boolean; Index: integer): boolean;
 var
   dck: TDCDCompletionKind;
@@ -2872,7 +2872,7 @@ begin
   ACanvas.TextOut(2 + X + len + 2, Y, knd);
 end;
 
-procedure TCESynMemo.AutoDotTimerEvent(sender: TObject);
+procedure TDexedMemo.AutoDotTimerEvent(sender: TObject);
 begin
   if (not fCanAutoDot) or (fAutoDotDelay = 0) then
     exit;
@@ -2881,7 +2881,7 @@ begin
   fCompletion.Execute('', ClientToScreen(point(CaretXPix, CaretYPix + LineHeight)));
 end;
 
-procedure TCESynMemo.setAutoDotDelay(value: Integer);
+procedure TDexedMemo.setAutoDotDelay(value: Integer);
 begin
   fAutoDotDelay:=value;
   fAutoDotTimer.Interval:=fAutoDotDelay;
@@ -2931,7 +2931,7 @@ begin
   result := PDscannerResult(fList[index]);
 end;
 
-procedure TCESynMemo.setDscannerOptions(dsEnabled: boolean; dsDelay: integer);
+procedure TDexedMemo.setDscannerOptions(dsEnabled: boolean; dsDelay: integer);
 begin
   fDscannerTimer.Interval:=dsDelay;
   fDscannerEnabled := dsEnabled;
@@ -2941,7 +2941,7 @@ begin
     dscannerTimerEvent(nil);
 end;
 
-procedure TCESynMemo.dscannerTimerEvent(sender: TObject);
+procedure TDexedMemo.dscannerTimerEvent(sender: TObject);
 var
   s: string;
 begin
@@ -2963,7 +2963,7 @@ begin
   fDscanner.CloseInput;
 end;
 
-procedure TCESynMemo.dscannerTerminate(sender: TObject);
+procedure TDexedMemo.dscannerTerminate(sender: TObject);
   procedure processLine(const lne: string);
   var
     r: TStringRange = (ptr:nil; pos:0; len: 0);
@@ -3000,7 +3000,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.removeDscannerWarnings;
+procedure TDexedMemo.removeDscannerWarnings;
 var
   i: integer;
   n: TSynEditMark;
@@ -3018,7 +3018,7 @@ begin
   repaint;
 end;
 
-function TCESynMemo.getDscannerWarning(line: integer): string;
+function TDexedMemo.getDscannerWarning(line: integer): string;
 const
   spec = '@column %d: %s' + LineEnding;
 var
@@ -3030,7 +3030,7 @@ begin
       result += format(spec, [fDscannerResults[i]^.column, fDscannerResults[i]^.warning]);
 end;
 
-function TCESynMemo.lineHasDscannerWarning(line: integer): boolean;
+function TDexedMemo.lineHasDscannerWarning(line: integer): boolean;
 var
   i: integer;
 begin
@@ -3042,7 +3042,7 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION memo things -----------------------------------------------------------}
-procedure TCESynMemo.handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
+procedure TDexedMemo.handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
 begin
   if scOptions in Changes then
   begin
@@ -3060,7 +3060,7 @@ begin
   end;
 end;
 
-function TCESynMemo.pageCaption(checkModule: boolean): string;
+function TDexedMemo.pageCaption(checkModule: boolean): string;
 begin
   result := '';
   fHasModuleDeclaration := false;
@@ -3080,7 +3080,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.tokFoundForCaption(const token: PLexToken; out stop: boolean);
+procedure TDexedMemo.tokFoundForCaption(const token: PLexToken; out stop: boolean);
 begin
   if token^.kind = ltkKeyword then
   begin
@@ -3098,7 +3098,7 @@ begin
   end;
 end;
 
-function TCESynMemo.canInsertLeadingDdocSymbol: char;
+function TDexedMemo.canInsertLeadingDdocSymbol: char;
 var
   i: integer;
   p: TPoint;
@@ -3129,7 +3129,7 @@ begin
   end;
 end;
 
-function TCESynMemo.lexCanCloseBrace: boolean;
+function TDexedMemo.lexCanCloseBrace: boolean;
 var
   i: integer;
   p: integer;
@@ -3161,13 +3161,13 @@ begin
     result := c > 0;
 end;
 
-procedure TCESynMemo.SetHighlighter(const Value: TSynCustomHighlighter);
+procedure TDexedMemo.SetHighlighter(const Value: TSynCustomHighlighter);
 begin
   inherited;
   fIsDSource := Highlighter = fD2Highlighter;
 end;
 
-procedure TCESynMemo.highlightCurrentIdentifier;
+procedure TDexedMemo.highlightCurrentIdentifier;
 var
   str: string;
   i: integer;
@@ -3192,22 +3192,22 @@ begin
   else SetHighlightSearch('', []);
 end;
 
-procedure TCESynMemo.setMatchOpts(value: TIdentifierMatchOptions);
+procedure TDexedMemo.setMatchOpts(value: TIdentifierMatchOptions);
 begin
   fMatchOpts:= value;
   fMatchIdentOpts := TSynSearchOptions(fMatchOpts);
   fMatchSelectionOpts:= TSynSearchOptions(fMatchOpts - [wholeWord]);
 end;
 
-procedure TCESynMemo.changeNotify(Sender: TObject);
+procedure TDexedMemo.changeNotify(Sender: TObject);
 begin
   highlightCurrentIdentifier;
   fModified := true;
   fPositions.store;
-  subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
+  subjDocChanged(TMultiDocSubject(fMultiDocSubject), self);
 end;
 
-procedure TCESynMemo.loadFromFile(const fname: string);
+procedure TDexedMemo.loadFromFile(const fname: string);
 var
   e: string;
   c: boolean;
@@ -3236,11 +3236,11 @@ begin
   end;
 
   tryToPatchMixedIndentation();
-  subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
+  subjDocChanged(TMultiDocSubject(fMultiDocSubject), self);
   fCanDscan := true;
 end;
 
-procedure TCESynMemo.saveToFile(const fname: string);
+procedure TDexedMemo.saveToFile(const fname: string);
 var
   ext: string;
 begin
@@ -3269,11 +3269,11 @@ begin
   begin
     if fTempFileName.fileExists then
       sysutils.DeleteFile(fTempFileName);
-    subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
+    subjDocChanged(TMultiDocSubject(fMultiDocSubject), self);
   end;
 end;
 
-procedure TCESynMemo.save;
+procedure TDexedMemo.save;
 begin
   if fFilename.fileExists and not FileIsWritable(fFilename) then
   begin
@@ -3285,25 +3285,25 @@ begin
   FileAge(fFilename, fFileDate);
   fModified := false;
   if fFilename <> fTempFileName then
-    subjDocChanged(TCEMultiDocSubject(fMultiDocSubject), self);
+    subjDocChanged(TMultiDocSubject(fMultiDocSubject), self);
 end;
 
-procedure TCESynMemo.saveTempFile;
+procedure TDexedMemo.saveTempFile;
 begin
   saveToFile(fTempFileName);
   fModified := false;
 end;
 
-function TCESynMemo.getIfTemp: boolean;
+function TDexedMemo.getIfTemp: boolean;
 begin
   exit(fFilename = fTempFileName);
 end;
 
-procedure TCESynMemo.saveCache;
+procedure TDexedMemo.saveCache;
 var
-  cache: TCESynMemoCache;
+  cache: TSynMemoCache;
 begin
-  cache := TCESynMemoCache.create(self);
+  cache := TSynMemoCache.create(self);
   try
     cache.save;
   finally
@@ -3311,11 +3311,11 @@ begin
   end;
 end;
 
-procedure TCESynMemo.loadCache;
+procedure TDexedMemo.loadCache;
 var
-  cache: TCESynMemoCache;
+  cache: TSynMemoCache;
 begin
-  cache := TCESynMemoCache.create(self);
+  cache := TSynMemoCache.create(self);
   try
     cache.load;
   finally
@@ -3323,7 +3323,7 @@ begin
   end;
 end;
 
-class procedure TCESynMemo.cleanCache;
+class procedure TDexedMemo.cleanCache;
 var
   lst: TStringList;
   today, t: TDateTime;
@@ -3346,7 +3346,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.replaceUndoableContent(const value: string);
+procedure TDexedMemo.replaceUndoableContent(const value: string);
 var
   b: TPoint;
   e: TPoint;
@@ -3361,7 +3361,7 @@ begin
   fModified := true;
 end;
 
-procedure TCESynMemo.checkFileDate;
+procedure TDexedMemo.checkFileDate;
 var
   mr: TModalResult;
   newDate: double;
@@ -3394,7 +3394,7 @@ begin
       begin
         lines.SaveToFile(tempFilename);
         fDiffDialogWillClose := true;
-        With TCEDiffViewer.construct(self, fTempFileName, fFilename) do
+        With TDiffViewer.construct(self, fTempFileName, fFilename) do
         try
           mr := ShowModal;
           case mr of
@@ -3419,7 +3419,7 @@ begin
   else fFileDate := newDate;
 end;
 
-function TCESynMemo.getMouseBytePosition: Integer;
+function TDexedMemo.getMouseBytePosition: Integer;
 var
   i, len, llen: Integer;
 begin
@@ -3433,7 +3433,7 @@ begin
   result += fMousePos.x;
 end;
 
-procedure TCESynMemo.patchClipboardIndentation;
+procedure TDexedMemo.patchClipboardIndentation;
 var
   lst: TStringList;
   i: integer;
@@ -3457,7 +3457,7 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION user input ------------------------------------------------------------}
-procedure TCESynMemo.KeyDown(var Key: Word; Shift: TShiftState);
+procedure TDexedMemo.KeyDown(var Key: Word; Shift: TShiftState);
 var
   line: string;
   ddc: char;
@@ -3552,7 +3552,7 @@ begin
   fDDocWin.Hide;
 end;
 
-procedure TCESynMemo.KeyUp(var Key: Word; Shift: TShiftState);
+procedure TDexedMemo.KeyUp(var Key: Word; Shift: TShiftState);
 begin
   case Key of
     VK_PRIOR, VK_NEXT, VK_UP: fPositions.store;
@@ -3567,7 +3567,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.UTF8KeyPress(var Key: TUTF8Char);
+procedure TDexedMemo.UTF8KeyPress(var Key: TUTF8Char);
 var
   c: AnsiChar;
 begin
@@ -3612,7 +3612,7 @@ begin
     fCompletion.CurrentString:=GetWordAtRowCol(LogicalCaretXY);
 end;
 
-procedure TCESynMemo.MouseLeave;
+procedure TDexedMemo.MouseLeave;
 begin
   inherited;
   hideDDocs;
@@ -3620,7 +3620,7 @@ begin
   fScrollMemo.Visible:=false;
 end;
 
-procedure TCESynMemo.MouseMove(Shift: TShiftState; X, Y: Integer);
+procedure TDexedMemo.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   dx, dy: Integer;
 begin
@@ -3656,7 +3656,7 @@ begin
 
 end;
 
-procedure TCESynMemo.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y:Integer);
+procedure TDexedMemo.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y:Integer);
 begin
   inherited;
   highlightCurrentIdentifier;
@@ -3671,7 +3671,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y:Integer);
+procedure TDexedMemo.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y:Integer);
 var
   pt: TPoint;
 begin
@@ -3700,7 +3700,7 @@ begin
   end;
 end;
 
-function TCESynMemo.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
+function TDexedMemo.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
 begin
   result := inherited DoMouseWheel(Shift, WheelDelta, MousePos);
   fCanShowHint:=false;
@@ -3709,7 +3709,7 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION debugging/breakpoints -----------------------------------------------------------}
-function TCESynMemo.breakPointsCount: integer;
+function TDexedMemo.breakPointsCount: integer;
 var
   i: integer;
 begin
@@ -3718,13 +3718,13 @@ begin
     result += byte(marks[i].ImageIndex = integer(giBreakSet));
 end;
 
-procedure TCESynMemo.tryToPatchMixedIndentation;
+procedure TDexedMemo.tryToPatchMixedIndentation;
 var
   s: integer;
   t: integer;
 begin
   if fLifeTimeManager.isNotNil and not fIdentDialShown and (lines.Count <> 0) and
-    ((fLifeTimeManager as ICELifetimeManager).getLifetimeStatus = lfsLoaded)
+    ((fLifeTimeManager as ILifetimeManager).getLifetimeStatus = lfsLoaded)
       then
   begin
     fIdentDialShown := true;
@@ -3770,7 +3770,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.addBreakPoint(line: integer);
+procedure TDexedMemo.addBreakPoint(line: integer);
 begin
   if findBreakPoint(line) then
     exit;
@@ -3779,7 +3779,7 @@ begin
     fDebugger.addBreakPoint(fFilename, line, bpkBreak);
 end;
 
-procedure TCESynMemo.removeBreakPoint(line: integer);
+procedure TDexedMemo.removeBreakPoint(line: integer);
 var
   break2step: boolean;
 begin
@@ -3797,7 +3797,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.showHintEvent(Sender: TObject; HintInfo: PHintInfo);
+procedure TDexedMemo.showHintEvent(Sender: TObject; HintInfo: PHintInfo);
 var
   p: TPoint;
 begin
@@ -3810,7 +3810,7 @@ begin
   showWarningForLine(p.y);
 end;
 
-procedure TCESynMemo.removeDebugTimeMarks;
+procedure TDexedMemo.removeDebugTimeMarks;
 var
   i: integer;
 begin
@@ -3820,7 +3820,7 @@ begin
   DecPaintLock;
 end;
 
-function TCESynMemo.isGutterIconSet(line: integer; value: TGutterIcon): boolean;
+function TDexedMemo.isGutterIconSet(line: integer; value: TGutterIcon): boolean;
 var
   m: TSynEditMarkLine = nil;
   i: integer;
@@ -3834,12 +3834,12 @@ begin
         exit(true);
 end;
 
-function TCESynMemo.findBreakPoint(line: integer): boolean;
+function TDexedMemo.findBreakPoint(line: integer): boolean;
 begin
   result := isGutterIconSet(line, giBreakSet);
 end;
 
-procedure TCESynMemo.gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
+procedure TDexedMemo.gutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
 begin
   if findBreakPoint(line) then
     removeBreakPoint(line)
@@ -3849,7 +3849,7 @@ begin
   EnsureCursorPosVisible;
 end;
 
-procedure TCESynMemo.addGutterIcon(line: integer; value: TGutterIcon);
+procedure TDexedMemo.addGutterIcon(line: integer; value: TGutterIcon);
 var
   m: TSynEditMarkLine;
   n: TSynEditMark;
@@ -3874,7 +3874,7 @@ begin
   end;
 end;
 
-procedure TCESynMemo.removeGutterIcon(line: integer; value: TGutterIcon);
+procedure TDexedMemo.removeGutterIcon(line: integer; value: TGutterIcon);
 var
   m: TSynEditMarkLine;
   n: TSynEditMark;
@@ -3894,7 +3894,7 @@ begin
   Repaint;
 end;
 
-procedure TCESynMemo.debugStart(debugger: ICEDebugger);
+procedure TDexedMemo.debugStart(debugger: IDebugger);
 var
   i: integer;
   m: TSynEditMark;
@@ -3909,22 +3909,22 @@ begin
   end;
 end;
 
-procedure TCESynMemo.debugStop;
+procedure TDexedMemo.debugStop;
 begin
   removeDebugTimeMarks;
 end;
 
-procedure TCESynMemo.debugContinue;
+procedure TDexedMemo.debugContinue;
 begin
   removeDebugTimeMarks;
 end;
 
-function TCESynMemo.debugQueryBpCount: integer;
+function TDexedMemo.debugQueryBpCount: integer;
 begin
   exit(breakPointsCount());
 end;
 
-procedure TCESynMemo.debugQueryBreakPoint(const line: integer; out fname: string; out kind: TBreakPointKind);
+procedure TDexedMemo.debugQueryBreakPoint(const line: integer; out fname: string; out kind: TBreakPointKind);
 begin
   if findBreakPoint(line) then
   begin
@@ -3934,8 +3934,8 @@ begin
   else kind := bpkNone;
 end;
 
-procedure TCESynMemo.debugBreak(const fname: string; line: integer;
-  reason: TCEDebugBreakReason);
+procedure TDexedMemo.debugBreak(const fname: string; line: integer;
+  reason: TDebugBreakReason);
 begin
   if fname <> fFilename then
     exit;
@@ -3974,7 +3974,7 @@ initialization
   JsSyn.SymbolAttribute.Foreground:= clPurple;
   JsSyn.SymbolAttribute.Style := [fsBold];
   //
-  TCEEditorHintWindow.FontSize := 10;
+  TEditorHintWindow.FontSize := 10;
   //
   RegisterKeyCmdIdentProcs(@CustomStringToCommand, @CustomCommandToSstring);
 finalization
@@ -3983,5 +3983,5 @@ finalization
   TxtSyn.Free;
   JsSyn.Free;
   //
-  TCESynMemo.cleanCache;
+  TDexedMemo.cleanCache;
 end.

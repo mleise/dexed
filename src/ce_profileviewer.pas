@@ -13,7 +13,7 @@ uses
 
 type
 
-  TCEProfileViewerOptionsBase = class(TWritableLfmTextComponent)
+  TProfileViewerOptionsBase = class(TWritableLfmTextComponent)
   private
     fHideAttributes: boolean;
     fHideStandardLibraryCalls: boolean;
@@ -31,9 +31,9 @@ type
     property otherExclusions: TStringList read fOtherExclusions write setOtherExclusions;
   end;
 
-  TCEprofileViewerOptions = class(TCEProfileViewerOptionsBase, ICEEditableOptions)
+  TProfileViewerOptions = class(TProfileViewerOptionsBase, IEditableOptions)
   private
-    fBackup: TCEProfileViewerOptionsBase;
+    fBackup: TProfileViewerOptionsBase;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -44,12 +44,12 @@ type
     destructor destroy; override;
   end;
 
-  TCEProfileViewerWidget = class(TCEWidget, ICEProjectObserver)
-    btnOpen: TCEToolButton;
-    btnOpts: TCEToolButton;
-    btnProj: TCEToolButton;
-    btnRefresh: TCEToolButton;
-    button0: TCEToolButton;
+  TProfileViewerWidget = class(TDexedWidget, IProjectObserver)
+    btnOpen: TDexedToolButton;
+    btnOpts: TDexedToolButton;
+    btnProj: TDexedToolButton;
+    btnRefresh: TDexedToolButton;
+    button0: TDexedToolButton;
     ChartToolset1: TChartToolset;
     ChartToolset1DataPointHintTool1: TDataPointHintTool;
     ImageList1: TImageList;
@@ -72,20 +72,20 @@ type
     procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
     procedure Splitter1Moved(Sender: TObject);
   private
-    fOptions: TCEprofileViewerOptions;
+    fOptions: TProfileViewerOptions;
     logFname: string;
-    fProj: ICECommonProject;
+    fProj: ICommonProject;
     procedure updateIcons;
     procedure clearViewer;
     procedure updateFromFile(const fname: string);
     procedure updatePie;
     procedure listCompare(Sender: TObject; item1, item2: TListItem; Data: Integer; var Compare: Integer);
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -97,25 +97,25 @@ type
 implementation
 {$R *.lfm}
 
-constructor TCEProfileViewerOptionsBase.create(aOwner: TComponent);
+constructor TProfileViewerOptionsBase.create(aOwner: TComponent);
 begin
   inherited create(aOwner);
   fOtherExclusions := TStringList.Create;
 end;
 
-destructor TCEProfileViewerOptionsBase.destroy;
+destructor TProfileViewerOptionsBase.destroy;
 begin
   fOtherExclusions.free;
   inherited;
 end;
 
-procedure TCEProfileViewerOptionsBase.assign(value: TPersistent);
+procedure TProfileViewerOptionsBase.assign(value: TPersistent);
 var
-  s: TCEProfileViewerOptionsBase;
+  s: TProfileViewerOptionsBase;
 begin
-  if value is TCEProfileViewerOptionsBase then
+  if value is TProfileViewerOptionsBase then
   begin
-    s := TCEProfileViewerOptionsBase(value);
+    s := TProfileViewerOptionsBase(value);
     fOtherExclusions.Assign(s.fOtherExclusions);
     fHideRunTimeCalls:=s.fHideRunTimeCalls;
     fHideStandardLibraryCalls:=fHideStandardLibraryCalls;
@@ -123,24 +123,24 @@ begin
   else inherited;
 end;
 
-procedure TCEProfileViewerOptionsBase.setOtherExclusions(value: TStringList);
+procedure TProfileViewerOptionsBase.setOtherExclusions(value: TStringList);
 begin
   fOtherExclusions.assign(value);
 end;
 
-constructor TCEprofileViewerOptions.create(aOwner: TComponent);
+constructor TProfileViewerOptions.create(aOwner: TComponent);
 var
   s: string;
 begin
   inherited create(aOwner);
-  fBackup := TCEProfileViewerOptionsBase.create(nil);
+  fBackup := TProfileViewerOptionsBase.create(nil);
   EntitiesConnector.addObserver(self);
   s := getDocPath + optFname;
   if s.fileExists then
     loadFromFile(s);
 end;
 
-destructor TCEprofileViewerOptions.destroy;
+destructor TProfileViewerOptions.destroy;
 begin
   saveTofile(getDocPath + optFname);
   EntitiesConnector.removeObserver(self);
@@ -148,92 +148,92 @@ begin
   inherited;
 end;
 
-function TCEprofileViewerOptions.optionedWantCategory(): string;
+function TProfileViewerOptions.optionedWantCategory(): string;
 begin
   result := 'Profile viewer';
 end;
 
-function TCEprofileViewerOptions.optionedWantEditorKind: TOptionEditorKind;
+function TProfileViewerOptions.optionedWantEditorKind: TOptionEditorKind;
 begin
   result := oekGeneric;
 end;
 
-function TCEprofileViewerOptions.optionedWantContainer: TPersistent;
+function TProfileViewerOptions.optionedWantContainer: TPersistent;
 begin
   result := self;
 end;
 
-procedure TCEprofileViewerOptions.optionedEvent(event: TOptionEditorEvent);
+procedure TProfileViewerOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
     oeeAccept:
       begin
         fBackup.assign(self);
-        TCEProfileViewerWidget(owner).reloadCurrent;
+        TProfileViewerWidget(owner).reloadCurrent;
       end;
     oeeCancel:
       begin
         self.assign(fBackup);
-        TCEProfileViewerWidget(owner).reloadCurrent;
+        TProfileViewerWidget(owner).reloadCurrent;
       end;
     oeeSelectCat:
       fBackup.assign(self);
     oeeChange:
-      TCEProfileViewerWidget(owner).reloadCurrent;
+      TProfileViewerWidget(owner).reloadCurrent;
   end;
 end;
 
-function TCEprofileViewerOptions.optionedOptionsModified: boolean;
+function TProfileViewerOptions.optionedOptionsModified: boolean;
 begin
   result := false;
 end;
 
-constructor TCEProfileViewerWidget.create(aOwner: TComponent);
+constructor TProfileViewerWidget.create(aOwner: TComponent);
 begin
   inherited;
   EntitiesConnector.addObserver(self);
-  fOptions:= TCEprofileViewerOptions.create(self);
+  fOptions:= TProfileViewerOptions.create(self);
   clearViewer;
   updatePie;
   list.OnCompare:=@listCompare;
   selPieSourceSelect(nil);
-  list.PopupMenu := TCEListViewCopyMenu.create(list);
+  list.PopupMenu := TListViewCopyMenu.create(list);
 end;
 
-destructor TCEProfileViewerWidget.destroy;
+destructor TProfileViewerWidget.destroy;
 begin
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
 
-procedure TCEProfileViewerWidget.projNew(project: ICECommonProject);
+procedure TProfileViewerWidget.projNew(project: ICommonProject);
 begin
 end;
 
-procedure TCEProfileViewerWidget.projChanged(project: ICECommonProject);
+procedure TProfileViewerWidget.projChanged(project: ICommonProject);
 begin
 end;
 
-procedure TCEProfileViewerWidget.projClosing(project: ICECommonProject);
+procedure TProfileViewerWidget.projClosing(project: ICommonProject);
 begin
   if project = fProj then
     fProj := nil;
 end;
 
-procedure TCEProfileViewerWidget.projFocused(project: ICECommonProject);
+procedure TProfileViewerWidget.projFocused(project: ICommonProject);
 begin
   fProj := project;
 end;
 
-procedure TCEProfileViewerWidget.projCompiling(project: ICECommonProject);
+procedure TProfileViewerWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEProfileViewerWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TProfileViewerWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 
-procedure TCEProfileViewerWidget.reloadCurrent;
+procedure TProfileViewerWidget.reloadCurrent;
 var
   fname: string;
 begin
@@ -250,17 +250,17 @@ begin
   end;
 end;
 
-procedure TCEProfileViewerWidget.btnRefreshClick(Sender: TObject);
+procedure TProfileViewerWidget.btnRefreshClick(Sender: TObject);
 begin
   reloadCurrent;
 end;
 
-procedure TCEProfileViewerWidget.btnOptsClick(Sender: TObject);
+procedure TProfileViewerWidget.btnOptsClick(Sender: TObject);
 begin
-  getOptionsEditor.showOptionEditor(fOptions as ICEEditableOptions);
+  getOptionsEditor.showOptionEditor(fOptions as IEditableOptions);
 end;
 
-procedure TCEProfileViewerWidget.selPieSourceSelect(Sender: TObject);
+procedure TProfileViewerWidget.selPieSourceSelect(Sender: TObject);
 begin
   case selPieSource.ItemIndex of
     1: pieSeries.Source := datTreeTime;
@@ -271,7 +271,7 @@ begin
   updateIcons;
 end;
 
-procedure TCEProfileViewerWidget.btnOpenClick(Sender: TObject);
+procedure TProfileViewerWidget.btnOpenClick(Sender: TObject);
 begin
   with TOpenDialog.Create(nil) do
   try
@@ -287,7 +287,7 @@ begin
   end;
 end;
 
-procedure TCEProfileViewerWidget.btnProjClick(Sender: TObject);
+procedure TProfileViewerWidget.btnProjClick(Sender: TObject);
 var
   fname: string;
 begin
@@ -302,29 +302,29 @@ begin
   end;
 end;
 
-procedure TCEProfileViewerWidget.updatePie;
+procedure TProfileViewerWidget.updatePie;
 begin
   pieSeries.FixedRadius:= max(1, pie.Height div 2 - 10);
 end;
 
-procedure TCEProfileViewerWidget.selPieSourceSelectionChange(Sender: TObject;User: boolean);
+procedure TProfileViewerWidget.selPieSourceSelectionChange(Sender: TObject;User: boolean);
 begin
   updatePie;
 end;
 
-procedure TCEProfileViewerWidget.Splitter1CanResize(Sender: TObject;
+procedure TProfileViewerWidget.Splitter1CanResize(Sender: TObject;
   var NewSize: Integer; var Accept: Boolean);
 begin
   if accept then
     updatePie;
 end;
 
-procedure TCEProfileViewerWidget.Splitter1Moved(Sender: TObject);
+procedure TProfileViewerWidget.Splitter1Moved(Sender: TObject);
 begin
   updatePie;
 end;
 
-procedure TCEProfileViewerWidget.clearViewer;
+procedure TProfileViewerWidget.clearViewer;
 begin
   list.Clear;
   pieSeries.Clear;
@@ -334,7 +334,7 @@ begin
   datPerCall.Clear;
 end;
 
-procedure TCEProfileViewerWidget.updateIcons;
+procedure TProfileViewerWidget.updateIcons;
 var
   b: TBitmap;
   i: integer;
@@ -365,7 +365,7 @@ begin
   end;
 end;
 
-procedure TCEProfileViewerWidget.updateFromFile(const fname: string);
+procedure TProfileViewerWidget.updateFromFile(const fname: string);
 var
   log: string;
   rng: TStringRange = (ptr:nil; pos:0; len: 0);
@@ -531,7 +531,7 @@ begin
 
 end;
 
-procedure TCEProfileViewerWidget.listCompare(Sender: TObject; item1, item2: TListItem; Data: Integer; var Compare: Integer);
+procedure TProfileViewerWidget.listCompare(Sender: TObject; item1, item2: TListItem; Data: Integer; var Compare: Integer);
 var
   i1, i2: qword;
   col: Integer;

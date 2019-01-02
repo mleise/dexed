@@ -12,7 +12,7 @@ type
   (**
    * Toolbutton with methods to load the glyph from the shared resources
    *)
-  TCEToolButton = class(TToolButton)
+  TDexedToolButton = class(TToolButton)
   private
     fResourceName: string;
     fScaledSeparator: boolean;
@@ -40,7 +40,7 @@ type
   (**
    * Toolbar with design-time support for TCEToolbutton
    *)
-  TCEToolBar = class(TToolBar)
+  TDexedToolBar = class(TToolBar)
   protected
     fDesignMenu: TPopupMenu;
     fToolBarScaling: TToolBarScaling;
@@ -68,10 +68,10 @@ implementation
 
 procedure register;
 begin
-  RegisterComponents('dexed', [TCEToolBar, TCEToolButton]);
+  RegisterComponents('dexed', [TDexedToolBar, TDexedToolButton]);
 end;
 
-constructor TCEToolButton.Create(TheOwner: TComponent);
+constructor TDexedToolButton.Create(TheOwner: TComponent);
 begin
   inherited;
   fPng := TPortableNetworkGraphic.Create;
@@ -79,7 +79,7 @@ begin
   AutoSize := true;
 end;
 
-destructor TCEToolButton.Destroy;
+destructor TDexedToolButton.Destroy;
 begin
   fPng.FreeImage;
   fPng.Free;
@@ -88,12 +88,12 @@ begin
   inherited;
 end;
 
-procedure TCEToolButton.setToolBar(value: TToolbar);
+procedure TDexedToolButton.setToolBar(value: TToolbar);
 begin
   FToolBar := value;
 end;
 
-function TCEToolButton.findResourceWithSize(value: integer): boolean;
+function TDexedToolButton.findResourceWithSize(value: integer): boolean;
 var
   n: string;
 begin
@@ -101,7 +101,7 @@ begin
   result := FindResource(HINSTANCE, PChar(n), PChar(RT_RCDATA)) <> 0;
 end;
 
-procedure TCEToolButton.reloadPng;
+procedure TDexedToolButton.reloadPng;
 var
   i: integer;
   j: integer;
@@ -147,7 +147,7 @@ begin
   end;
 end;
 
-procedure TCEToolButton.setResourceName(const value: string);
+procedure TDexedToolButton.setResourceName(const value: string);
 begin
   if fResourceName = value then
     exit;
@@ -160,7 +160,7 @@ begin
     FToolBar.Repaint;
 end;
 
-procedure TCEToolButton.setScaledSeparator(value: boolean);
+procedure TDexedToolButton.setScaledSeparator(value: boolean);
 begin
   if fScaledSeparator = value then
     exit;
@@ -168,7 +168,7 @@ begin
   // store ratio if true
 end;
 
-procedure TCEToolButton.SetEnabled(Value: Boolean);
+procedure TDexedToolButton.SetEnabled(Value: Boolean);
 var
   old: boolean;
 begin
@@ -178,12 +178,12 @@ begin
     FToolBar.Repaint;
 end;
 
-procedure TCEToolButton.toBitmap(value: TBitmap);
+procedure TDexedToolButton.toBitmap(value: TBitmap);
 begin
   value.Assign(fPng);
 end;
 
-procedure TCEToolButton.Paint;
+procedure TDexedToolButton.Paint;
 var
   rc: TRect;
   x, y: integer;
@@ -203,7 +203,7 @@ begin
   end;
 end;
 
-constructor TCEToolBar.Create(TheOwner: TComponent);
+constructor TDexedToolBar.Create(TheOwner: TComponent);
 var
   item: TMenuItem;
 begin
@@ -243,20 +243,20 @@ begin
   Transparent := true;
 end;
 
-destructor TCEToolBar.Destroy;
+destructor TDexedToolBar.Destroy;
 begin
   if csDesigning in ComponentState then
     fDesignMenu.Free;
   inherited;
 end;
 
-procedure TCEToolBar.Loaded;
+procedure TDexedToolBar.Loaded;
 begin
   inherited;
   setScaling(auto);
 end;
 
-procedure TCEToolBar.setScaling(value: TToolBarScaling);
+procedure TDexedToolBar.setScaling(value: TToolBarScaling);
 var
   i: integer;
 begin
@@ -283,13 +283,13 @@ begin
   end;
 
   for i := 0 to ControlCount-1 do
-    if Controls[i] is TCEToolButton then
-      TCEToolButton(Controls[i]).reloadPng;
+    if Controls[i] is TDexedToolButton then
+      TDexedToolButton(Controls[i]).reloadPng;
 
   Repaint;
 end;
 
-procedure TCEToolBar.CMDesignHitTest(var Message: TCMDesignHitTest);
+procedure TDexedToolBar.CMDesignHitTest(var Message: TCMDesignHitTest);
 begin
   inherited;
   if not (csDesigning in ComponentState) then
@@ -300,13 +300,13 @@ begin
   fDesignMenu.PopUp(Mouse.CursorPos.x,Mouse.CursorPos.y);
 end;
 
-procedure TCEToolBar.dsgnAdd(style: TToolButtonStyle);
+procedure TDexedToolBar.dsgnAdd(style: TToolButtonStyle);
 var
-  button: TCEToolButton;
+  button: TDexedToolButton;
   str: string = '';
   i: integer = 0;
 begin
-  button := TCEToolButton.Create(owner);
+  button := TDexedToolButton.Create(owner);
   while true do
   begin
     str := format('button%d',[i]);
@@ -323,32 +323,32 @@ begin
     width := 16;
 end;
 
-procedure TCEToolBar.dsgnAddButton(sender: TObject);
+procedure TDexedToolBar.dsgnAddButton(sender: TObject);
 begin
   dsgnAdd(tbsButton);
 end;
 
-procedure TCEToolBar.dsgnAddDivider(sender: TObject);
+procedure TDexedToolBar.dsgnAddDivider(sender: TObject);
 begin
   dsgnAdd(tbsDivider);
 end;
 
-procedure TCEToolBar.dsgnAddSeparator(sender: TObject);
+procedure TDexedToolBar.dsgnAddSeparator(sender: TObject);
 begin
   dsgnAdd(tbsSeparator);
 end;
 
-procedure TCEToolBar.dsgnAddCheckbutton(sender: TObject);
+procedure TDexedToolBar.dsgnAddCheckbutton(sender: TObject);
 begin
   dsgnAdd(tbsCheck);
 end;
 
-procedure TCEToolBar.dsgnAddDropdown(sender: TObject);
+procedure TDexedToolBar.dsgnAddDropdown(sender: TObject);
 begin
   dsgnAdd(tbsDropDown);
 end;
 
 initialization
-  RegisterClasses([TCEToolBar, TCEToolButton]);
+  RegisterClasses([TDexedToolBar, TDexedToolButton]);
 end.
 

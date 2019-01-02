@@ -1,4 +1,4 @@
-object CEMainForm: TCEMainForm
+object MainForm: TMainForm
   Left = 383
   Height = 35
   Top = 610
@@ -12,6 +12,7 @@ object CEMainForm: TCEMainForm
   OnResize = FormResize
   OnWindowStateChange = FormWindowStateChange
   ShowHint = True
+  LCLVersion = '2.0.0.3'
   object mainMenu: TMainMenu
     top = 1
     object MenuItem1: TMenuItem

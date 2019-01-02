@@ -22,7 +22,7 @@ type
 
   TDubPropAddEvent = procedure(const propName: string; tpe: TJSONtype) of object;
 
-  TCEDubProjectPropAddPanel = class(TForm)
+  TDubProjectPropAddPanel = class(TForm)
   private
     fSelType: TRadioGroup;
     fEdName: TComboBox;
@@ -36,13 +36,13 @@ type
     constructor construct(event: TDubPropAddEvent; json: TJSONData);
   end;
 
-  { TCEDubProjectEditorWidget }
-  TCEDubProjectEditorWidget = class(TCEWidget, ICEProjectObserver)
+  { TDubProjectEditorWidget }
+  TDubProjectEditorWidget = class(TDexedWidget, IProjectObserver)
     btnAcceptProp: TSpeedButton;
-    btnAddProp: TCEToolButton;
-    btnCloneObject: TCEToolButton;
-    btnDelProp: TCEToolButton;
-    btnReload: TCEToolButton;
+    btnAddProp: TDexedToolButton;
+    btnCloneObject: TDexedToolButton;
+    btnDelProp: TDexedToolButton;
+    btnReload: TDexedToolButton;
     edProp: TEdit;
     fltEdit: TTreeFilterEdit;
     MenuItem1: TMenuItem;
@@ -58,19 +58,19 @@ type
     procedure toolbarResize(Sender: TObject);
   private
     fSelectedNode: TTreeNode;
-    fProj: TCEDubProject;
+    fProj: TDubProject;
     fImages: TImageList;
     procedure updateEditor;
     procedure updateValueEditor;
     procedure setJsonValueFromEditor;
     procedure addProp(const propName: string; tpe: TJSONtype);
     //
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
     //
   protected
     procedure SetVisible(value: boolean); override;
@@ -130,8 +130,8 @@ const
     (name: 'workingDirectory';    jtype: ptValue)
   );
 
-{$REGION TCEDubProjectPropAddPanel ---------------------------------------------}
-constructor TCEDubProjectPropAddPanel.construct(event: TDubPropAddEvent; json: TJSONData);
+{$REGION TDubProjectPropAddPanel ---------------------------------------------}
+constructor TDubProjectPropAddPanel.construct(event: TDubPropAddEvent; json: TJSONData);
 var
   layout: TPanel;
   i: integer;
@@ -193,13 +193,13 @@ begin
   selTypeChanged(nil);
 end;
 
-procedure TCEDubProjectPropAddPanel.selTypeChanged(sender: TObject);
+procedure TDubProjectPropAddPanel.selTypeChanged(sender: TObject);
 begin
   if fJson.isNotNil then
     fEdName.Enabled := fJson.JSONType <> TJSONtype.jtArray;
 end;
 
-procedure TCEDubProjectPropAddPanel.setSelFromProposal(sender: TObject);
+procedure TDubProjectPropAddPanel.setSelFromProposal(sender: TObject);
 var
   i: integer;
 begin
@@ -219,7 +219,7 @@ begin
   end;
 end;
 
-procedure TCEDubProjectPropAddPanel.doValidate(sender: TObject);
+procedure TDubProjectPropAddPanel.doValidate(sender: TObject);
 var
   tpe: TJSONtype;
 begin
@@ -242,7 +242,7 @@ end;
 {$ENDREGION}
 
 {$REGION Standard Comp/Obj -----------------------------------------------------}
-constructor TCEDubProjectEditorWidget.create(aOwner: TComponent);
+constructor TDubProjectEditorWidget.create(aOwner: TComponent);
 begin
   inherited;
   setToolBarVisible(true);
@@ -284,7 +284,7 @@ begin
   propTree.Images := fImages;
 end;
 
-procedure TCEDubProjectEditorWidget.SetVisible(value: boolean);
+procedure TDubProjectEditorWidget.SetVisible(value: boolean);
 begin
   inherited;
   if not value then
@@ -292,7 +292,7 @@ begin
   updateEditor;
 end;
 
-procedure TCEDubProjectEditorWidget.setToolBarFlat(value: boolean);
+procedure TDubProjectEditorWidget.setToolBarFlat(value: boolean);
 begin
   inherited;
   btnAcceptProp.Flat:=value;
@@ -300,13 +300,13 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEDubProjectEditorWidget.projNew(project: ICECommonProject);
+{$REGION IProjectObserver ----------------------------------------------------}
+procedure TDubProjectEditorWidget.projNew(project: ICommonProject);
 begin
   projFocused(project);
 end;
 
-procedure TCEDubProjectEditorWidget.projChanged(project: ICECommonProject);
+procedure TDubProjectEditorWidget.projChanged(project: ICommonProject);
 begin
   if fProj.isNil then
     exit;
@@ -318,7 +318,7 @@ begin
   updateEditor;
 end;
 
-procedure TCEDubProjectEditorWidget.projClosing(project: ICECommonProject);
+procedure TDubProjectEditorWidget.projClosing(project: ICommonProject);
 begin
   if fProj.isNil then
     exit;
@@ -330,7 +330,7 @@ begin
   enabled := false;
 end;
 
-procedure TCEDubProjectEditorWidget.projFocused(project: ICECommonProject);
+procedure TDubProjectEditorWidget.projFocused(project: ICommonProject);
 begin
   fProj := nil;
   enabled := false;
@@ -339,7 +339,7 @@ begin
     updateEditor;
     exit;
   end;
-  fProj := TCEDubProject(project.getProject);
+  fProj := TDubProject(project.getProject);
   enabled := true;
   if fProj.isSDL then
   begin
@@ -356,17 +356,17 @@ begin
   updateEditor;
 end;
 
-procedure TCEDubProjectEditorWidget.projCompiling(project: ICECommonProject);
+procedure TDubProjectEditorWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEDubProjectEditorWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TDubProjectEditorWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
 {$REGION Editor ----------------------------------------------------------------}
-procedure TCEDubProjectEditorWidget.propTreeSelectionChanged(Sender: TObject);
+procedure TDubProjectEditorWidget.propTreeSelectionChanged(Sender: TObject);
 var
   tpe: TJSONtype;
 begin
@@ -386,12 +386,12 @@ begin
   updateValueEditor;
 end;
 
-procedure TCEDubProjectEditorWidget.toolbarResize(Sender: TObject);
+procedure TDubProjectEditorWidget.toolbarResize(Sender: TObject);
 begin
   fltEdit.Width := toolbar.Width - fltEdit.Left - fltEdit.BorderSpacing.Around;
 end;
 
-procedure TCEDubProjectEditorWidget.btnAcceptPropClick(Sender: TObject);
+procedure TDubProjectEditorWidget.btnAcceptPropClick(Sender: TObject);
 begin
   if fSelectedNode.isNil then
     exit;
@@ -399,18 +399,18 @@ begin
   propTree.FullExpand;
 end;
 
-procedure TCEDubProjectEditorWidget.btnAddPropClick(Sender: TObject);
+procedure TDubProjectEditorWidget.btnAddPropClick(Sender: TObject);
 var
-  pnl: TCEDubProjectPropAddPanel;
+  pnl: TDubProjectPropAddPanel;
 begin
   if fSelectedNode.isNil then
     exit;
-  pnl := TCEDubProjectPropAddPanel.construct(@addProp, TJSONData(fSelectedNode.Data));
+  pnl := TDubProjectPropAddPanel.construct(@addProp, TJSONData(fSelectedNode.Data));
   pnl.ShowModal;
   pnl.Free;
 end;
 
-procedure TCEDubProjectEditorWidget.addProp(const propName: string;
+procedure TDubProjectEditorWidget.addProp(const propName: string;
   tpe: TJSONtype);
 var
   arr: TJSONArray;
@@ -450,7 +450,7 @@ begin
   end;
 end;
 
-procedure TCEDubProjectEditorWidget.btnDelPropClick(Sender: TObject);
+procedure TDubProjectEditorWidget.btnDelPropClick(Sender: TObject);
 var
   prt: TJSONData;
   sel: TTreeNode;
@@ -479,7 +479,7 @@ begin
   updateValueEditor;
 end;
 
-procedure TCEDubProjectEditorWidget.btnRefreshClick(Sender: TObject);
+procedure TDubProjectEditorWidget.btnRefreshClick(Sender: TObject);
 var
   f: string;
 begin
@@ -495,7 +495,7 @@ begin
   end;
 end;
 
-procedure TCEDubProjectEditorWidget.btnCloneObjectClick(Sender: TObject);
+procedure TDubProjectEditorWidget.btnCloneObjectClick(Sender: TObject);
 var
   dat: TJSONData;
   prt: TJSONData;
@@ -541,14 +541,14 @@ begin
   end;
 end;
 
-procedure TCEDubProjectEditorWidget.MenuItem1Click(Sender: TObject);
+procedure TDubProjectEditorWidget.MenuItem1Click(Sender: TObject);
 begin
   if fProj.isNil or not fProj.filename.fileExists then
     exit;
   fProj.loadFromFile(fProj.filename);
 end;
 
-procedure TCEDubProjectEditorWidget.setJsonValueFromEditor;
+procedure TDubProjectEditorWidget.setJsonValueFromEditor;
 var
   dat: TJSONData;
   vFloat: TJSONFloat;
@@ -583,7 +583,7 @@ begin
   fProj.endModification;
 end;
 
-procedure TCEDubProjectEditorWidget.updateValueEditor;
+procedure TDubProjectEditorWidget.updateValueEditor;
 var
   dat: TJSONData;
 begin
@@ -609,7 +609,7 @@ begin
   end;
 end;
 
-procedure TCEDubProjectEditorWidget.updateEditor;
+procedure TDubProjectEditorWidget.updateEditor;
 
   procedure addPropsFrom(node: TTreeNode; data: TJSONData);
   var

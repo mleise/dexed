@@ -10,7 +10,7 @@ uses
   ce_common, StdCtrls, ExtCtrls, Buttons;
 
 type
-  TCEDiffViewer = class(TForm)
+  TDiffViewer = class(TForm)
     btnIgnore: TBitBtn;
     btnAccept: TBitBtn;
     btnCancel: TBitBtn;
@@ -27,7 +27,7 @@ type
 implementation
 {$R *.lfm}
 
-constructor TCEDiffViewer.construct(ed: TSynEdit; const fname1, fname2: string);
+constructor TDiffViewer.construct(ed: TSynEdit; const fname1, fname2: string);
 var
   p: TProcess;
   r: TStringList;

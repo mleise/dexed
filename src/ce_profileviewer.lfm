@@ -1,4 +1,4 @@
-inherited CEProfileViewerWidget: TCEProfileViewerWidget
+inherited ProfileViewerWidget: TProfileViewerWidget
   Left = 979
   Height = 537
   Top = 198
@@ -14,7 +14,6 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
     ClientWidth = 551
     inherited Content: TPanel
       Height = 501
-      Top = 36
       Width = 551
       ClientHeight = 501
       ClientWidth = 551
@@ -35,27 +34,27 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
           item
             AutoSize = True
             Caption = 'Num calls'
-            Width = 73
+            Width = 75
           end        
           item
             AutoSize = True
             Caption = 'Tree time'
-            Width = 69
-          end        
-          item
-            AutoSize = True
-            Caption = 'Func time'
             Width = 71
           end        
           item
             AutoSize = True
+            Caption = 'Func time'
+            Width = 73
+          end        
+          item
+            AutoSize = True
             Caption = 'Per call'
-            Width = 56
+            Width = 58
           end        
           item
             AutoSize = True
             Caption = 'function'
-            Width = 254
+            Width = 246
           end>
         HideSelection = False
         ReadOnly = True
@@ -132,9 +131,9 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         ResizeAnchor = akTop
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 543
-      object btnRefresh: TCEToolButton[0]
+      object btnRefresh: TDexedToolButton[0]
         Left = 57
         Hint = 'reload current trace log file or auto load from the current directory'
         Top = 0
@@ -144,7 +143,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         resourceName = 'ARROW_UPDATE'
         scaledSeparator = False
       end
-      object btnOpen: TCEToolButton[1]
+      object btnOpen: TDexedToolButton[1]
         Left = 29
         Hint = 'open a trace log file'
         Top = 0
@@ -154,9 +153,9 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         resourceName = 'FOLDER'
         scaledSeparator = False
       end
-      object button0: TCEToolButton[2]
+      object button0: TDexedToolButton[2]
         Left = 113
-        Height = 28
+        Height = 5
         Top = 0
         AutoSize = True
         Caption = 'button0'
@@ -183,7 +182,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         TabOrder = 0
         Text = 'Number of calls'
       end
-      object btnOpts: TCEToolButton[4]
+      object btnOpts: TDexedToolButton[4]
         Left = 85
         Hint = 'edit profile viewer options'
         Top = 0
@@ -193,7 +192,7 @@ inherited CEProfileViewerWidget: TCEProfileViewerWidget
         resourceName = 'WRENCH'
         scaledSeparator = False
       end
-      object btnProj: TCEToolButton[5]
+      object btnProj: TDexedToolButton[5]
         Left = 1
         Hint = 'Try to load using the project output path'
         Top = 0

@@ -34,9 +34,9 @@ type
   end;
 
 
-  { TCEInfoWidget }
+  { TInfoWidget }
 
-  TCEInfoWidget = class(TCEWidget)
+  TInfoWidget = class(TDexedWidget)
     boxTools: TScrollBox;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
@@ -199,7 +199,7 @@ begin
   Invalidate;
 end;
 
-constructor TCEInfoWidget.create(aOwner: TComponent);
+constructor TInfoWidget.create(aOwner: TComponent);
 var
   itm: TToolInfo;
   ver: string = 'enough_space_for_the_version';
@@ -275,7 +275,7 @@ begin
   Realign;
 end;
 
-function TCEInfoWidget.findCriticalyMissingTool: boolean;
+function TInfoWidget.findCriticalyMissingTool: boolean;
 var
   i: integer;
   t: TToolInfo;
@@ -292,7 +292,7 @@ begin
   end;
 end;
 
-procedure TCEInfoWidget.RefreshAllStatus;
+procedure TInfoWidget.RefreshAllStatus;
 var
   i: integer;
   s: string = '';
@@ -311,7 +311,7 @@ begin
     getMessageDisplay.message('Some tools cannot be found:' + s, nil, amcApp, amkWarn);
 end;
 
-procedure TCEInfoWidget.SetVisible(Value: Boolean);
+procedure TInfoWidget.SetVisible(Value: Boolean);
 begin
   inherited;
   if Visible then

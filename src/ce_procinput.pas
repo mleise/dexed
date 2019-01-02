@@ -11,9 +11,9 @@ uses
 
 type
 
-  { TCEProcInputWidget }
+  { TProcInputWidget }
 
-  TCEProcInputWidget = class(TCEWidget, ICEProcInputHandler)
+  TProcInputWidget = class(TDexedWidget, IProcInputHandler)
     Panel1: TPanel;
     btnClose: TSpeedButton;
     btnKill: TSpeedButton;
@@ -28,9 +28,9 @@ type
     procedure setToolBarFlat(value: boolean); override;
   private
     fMruPos: Integer;
-    fMru: TCEMRUList;
+    fMru: TMruList;
     fProc: TProcess;
-    fSymStringExpander: ICESymStringExpander;
+    fSymStringExpander: ISymStringExpander;
     procedure sendInput;
     //
     function singleServiceName: string;
@@ -52,13 +52,13 @@ const
   OptsFname = 'procinput.txt';
 
 {$REGION Standard Comp/Obj -----------------------------------------------------}
-constructor TCEProcInputWidget.create(aOwner: TComponent);
+constructor TProcInputWidget.create(aOwner: TComponent);
 var
   fname: string;
 begin
   inherited;
   fSymStringExpander:= getSymStringExpander;
-  fMru := TCEMRUList.Create;
+  fMru := TMruList.Create;
   fMru.maxCount := 25;
   EntitiesConnector.addSingleService(self);
   fname := getDocPath + OptsFname;
@@ -91,7 +91,7 @@ begin
   toolbarVisible:=false;
 end;
 
-destructor TCEProcInputWidget.destroy;
+destructor TProcInputWidget.destroy;
 begin
   // note that mru list max count is not saved.
   fMru.SaveToFile(getDocPath + OptsFname);
@@ -99,7 +99,7 @@ begin
   inherited;
 end;
 
-procedure TCEProcInputWidget.setToolBarFlat(value: boolean);
+procedure TProcInputWidget.setToolBarFlat(value: boolean);
 begin
   inherited;
   btnClose.flat := fToolbarFlat;
@@ -108,17 +108,17 @@ begin
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION ICEProcInputHandler ---------------------------------------------------}
-function TCEProcInputWidget.singleServiceName: string;
+{$REGION IProcInputHandler ---------------------------------------------------}
+function TProcInputWidget.singleServiceName: string;
 begin
-  exit('ICEProcInputHandler');
+  exit('IProcInputHandler');
 end;
 
-procedure TCEProcInputWidget.addProcess(process: TProcess);
+procedure TProcInputWidget.addProcess(process: TProcess);
 begin
   Panel1.Enabled:=false;
 
-  // TODO-cfeature: process list, imply that each TCESynMemo must have its own runnable TProcess
+  // TODO-cfeature: process list, imply that each TDexedMemo must have its own runnable TProcess
   // currently they share the CEMainForm.fRunProc variable.
   if fProc.isNotNil then
     if fProc.Running then
@@ -135,20 +135,20 @@ begin
   txtExeName.Caption := shortenPath(fProc.Executable);
 end;
 
-procedure TCEProcInputWidget.removeProcess(process: TProcess);
+procedure TProcInputWidget.removeProcess(process: TProcess);
 begin
   if fProc = process then
     addProcess(nil);
 end;
 
-function TCEProcInputWidget.process(): TProcess;
+function TProcInputWidget.process(): TProcess;
 begin
   exit(fProc);
 end;
 {$ENDREGION}
 
 {$REGION Process input things --------------------------------------------------}
-procedure TCEProcInputWidget.sendInput;
+procedure TProcInputWidget.sendInput;
 var
   inp: string;
 begin
@@ -165,26 +165,26 @@ begin
   txtInp.Text := '';
 end;
 
-procedure TCEProcInputWidget.btnSendClick(Sender: TObject);
+procedure TProcInputWidget.btnSendClick(Sender: TObject);
 begin
   if fProc.isNotNil then
     sendInput;
 end;
 
-procedure TCEProcInputWidget.btnCloseClick(Sender: TObject);
+procedure TProcInputWidget.btnCloseClick(Sender: TObject);
 begin
   if fProc.isNotNil and fProc.Input.isNotNil and
     (fProc.Input.Handle <> 0) then
       fProc.CloseInput;
 end;
 
-procedure TCEProcInputWidget.btnKillClick(Sender: TObject);
+procedure TProcInputWidget.btnKillClick(Sender: TObject);
 begin
   if fProc.isNotNil then
     fProc.Terminate(0);
 end;
 
-procedure TCEProcInputWidget.txtInpKeyDown(Sender: TObject; var Key: Word;
+procedure TProcInputWidget.txtInpKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   case Key of

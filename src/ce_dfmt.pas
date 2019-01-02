@@ -21,7 +21,7 @@ type
 type
   // wraps dfmt options to build the command line with ease
   // and allows to save the options between session.
-  TCEDmtWrapper = class(TWritableLfmTextComponent)
+  TDmtWrapper = class(TWritableLfmTextComponent)
   private
     fEol: DfmtEol;
     fTabStyle: DfmtIndentstyle;
@@ -61,9 +61,9 @@ type
     procedure getParameters(str: TStrings; majv, minv: Byte);
   end;
 
-  { TCEDfmtWidget }
+  { TDfmtWidget }
 
-  TCEDfmtWidget = class(TCEWidget, ICEDocumentObserver, ICECodeFormatting)
+  TDfmtWidget = class(TDexedWidget, IDocumentObserver, ICodeFormatting)
     btnApply: TSpeedButton;
     btnCancel: TSpeedButton;
     pnlFooter: TPanel;
@@ -71,14 +71,14 @@ type
     procedure dfmtOptionEditorEditorFilter(Sender: TObject;
       aEditor: TPropertyEditor; var aShow: boolean);
   private
-    fDoc: TCESynMemo;
+    fDoc: TDexedMemo;
     fBackup: TStringList;
-    fDmtWrapper: TCEDmtWrapper;
+    fDmtWrapper: TDmtWrapper;
     //
-    procedure docNew(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
     //
     procedure doApply(sender: TObject);
     procedure doCancel(sender: TObject);
@@ -96,13 +96,13 @@ const
   optFname = 'dfmt.txt';
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEDfmtWidget.create(aOwner: TComponent);
+constructor TDfmtWidget.create(aOwner: TComponent);
 var
   fname: string;
 begin
   inherited;
   toolbarVisible:=false;
-  fDmtWrapper := TCEDmtWrapper.Create(self);
+  fDmtWrapper := TDmtWrapper.Create(self);
   fBackup := TStringList.Create;
 
   fname := getDocPath + optFname;
@@ -135,7 +135,7 @@ begin
   EntitiesConnector.addSingleService(self);
 end;
 
-destructor TCEDfmtWidget.destroy;
+destructor TDfmtWidget.destroy;
 begin
   dfmtOptionEditor.TIObject := nil;
   fDmtWrapper.saveToFile(getDocPath + optFname);
@@ -143,7 +143,7 @@ begin
   inherited;
 end;
 
-constructor TCEDmtWrapper.create(AOwner: TComponent);
+constructor TDmtWrapper.create(AOwner: TComponent);
 begin
   inherited;
   fEol          := lf;
@@ -160,7 +160,7 @@ begin
   fConstraints  := DfmtConstraint.condNewLineIndent;
 end;
 
-procedure TCEDfmtWidget.dfmtOptionEditorEditorFilter(Sender: TObject;
+procedure TDfmtWidget.dfmtOptionEditorEditorFilter(Sender: TObject;
   aEditor: TPropertyEditor; var aShow: boolean);
 begin
   case aEditor.GetName of
@@ -169,7 +169,7 @@ begin
   end;
 end;
 
-procedure TCEDmtWrapper.setSoftLLen(value: integer);
+procedure TDmtWrapper.setSoftLLen(value: integer);
 begin
   if value < 60 then
     value := 60
@@ -178,7 +178,7 @@ begin
   fSoftLLen := value;
 end;
 
-procedure TCEDmtWrapper.setHardLLen(value: integer);
+procedure TDmtWrapper.setHardLLen(value: integer);
 begin
   if value < 60 then
     value := 60
@@ -187,7 +187,7 @@ begin
   fHardLLen := value;
 end;
 
-procedure TCEDmtWrapper.setTabWidth(value: integer);
+procedure TDmtWrapper.setTabWidth(value: integer);
 begin
   if value < 1 then
     value := 1
@@ -196,7 +196,7 @@ begin
   fTabWidth := value;
 end;
 
-procedure TCEDmtWrapper.setIndentSize(value: integer);
+procedure TDmtWrapper.setIndentSize(value: integer);
 begin
   if value < 1 then
     value := 1
@@ -205,14 +205,14 @@ begin
   fIndentSize := value;
 end;
 
-procedure TCEDmtWrapper.setEol(value: DfmtEol);
+procedure TDmtWrapper.setEol(value: DfmtEol);
 begin
   if not (value in [DfmtEol.cr, DfmtEol.lf, DfmtEol.crlf]) then
     value := DfmtEol.lf;
   fEol:=value;
 end;
 
-procedure TCEDmtWrapper.setBraceStyle(value: DfmtBraceStyle);
+procedure TDmtWrapper.setBraceStyle(value: DfmtBraceStyle);
 begin
   if not (value in [DfmtBraceStyle.allman, DfmtBraceStyle.otbs,
     DfmtBraceStyle.stroustrup]) then
@@ -220,14 +220,14 @@ begin
   fBraceStyle:=value;
 end;
 
-procedure TCEDmtWrapper.setIndentStyle(value: DfmtIndentstyle);
+procedure TDmtWrapper.setIndentStyle(value: DfmtIndentstyle);
 begin
   if not (value in [DfmtIndentstyle.space, DfmtIndentstyle.tab]) then
     value := DfmtIndentstyle.space;
   fTabStyle:=value;
 end;
 
-procedure TCEDmtWrapper.setConstraintsStyle(value: DfmtConstraint);
+procedure TDmtWrapper.setConstraintsStyle(value: DfmtConstraint);
 begin
   if not (value in [DfmtConstraint.alwaysNewLine, DfmtConstraint.alwaysNewLineIndent,
     DfmtConstraint.condNewLine, DfmtConstraint.condNewLineIndent]) then
@@ -236,24 +236,24 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEDfmtWidget.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TDfmtWidget.docNew(document: TDexedMemo);
 begin
   fDoc := document;
 end;
 
-procedure TCEDfmtWidget.docFocused(document: TCESynMemo);
+procedure TDfmtWidget.docFocused(document: TDexedMemo);
 begin
   if document = fDoc
     then exit;
   fDoc := document;
 end;
 
-procedure TCEDfmtWidget.docChanged(document: TCESynMemo);
+procedure TDfmtWidget.docChanged(document: TDexedMemo);
 begin
 end;
 
-procedure TCEDfmtWidget.docClosing(document: TCESynMemo);
+procedure TDfmtWidget.docClosing(document: TDexedMemo);
 begin
   if fDoc <> document then
     exit;
@@ -262,7 +262,7 @@ end;
 {$ENDREGION}
 
 {$REGION Dfmt things -----------------------------------------------------------}
-procedure TCEDmtWrapper.getParameters(str: TStrings; majv, minv: Byte);
+procedure TDmtWrapper.getParameters(str: TStrings; majv, minv: Byte);
 const
   eol: array[DfmtEol] of string = ('cr', 'lf', 'crlf');
   falsetrue: array[boolean] of string = ('false', 'true');
@@ -286,17 +286,17 @@ begin
     str.Add('--template_constraint_style=' + cts[fConstraints]);
 end;
 
-function TCEDfmtWidget.singleServiceName: string;
+function TDfmtWidget.singleServiceName: string;
 begin
-  exit('ICECodeFormatting');
+  exit('ICodeFormatting');
 end;
 
-procedure TCEDfmtWidget.formatCurrent();
+procedure TDfmtWidget.formatCurrent();
 begin
   doApply(self);
 end;
 
-procedure TCEDfmtWidget.doApply(sender: TObject);
+procedure TDfmtWidget.doApply(sender: TObject);
 var
   inp: string;
   i: integer;
@@ -349,7 +349,7 @@ begin
   end;
 end;
 
-procedure TCEDfmtWidget.doCancel(sender: TObject);
+procedure TDfmtWidget.doCancel(sender: TObject);
 begin
   if fDoc.isNil then
     exit;

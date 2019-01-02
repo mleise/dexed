@@ -53,7 +53,7 @@ type
   (**
    * Stores the build options, always applied when a project is build
    *)
-  TCEDubBuildOptionsBase = class(TWritableLfmTextComponent)
+  TDubBuildOptionsBase = class(TWritableLfmTextComponent)
   strict private
     fParallel: boolean;
     fForceRebuild: boolean;
@@ -91,9 +91,9 @@ type
   (**
    * Make the build options editable
    *)
-  TCEDubBuildOptions = class(TCEDubBuildOptionsBase, ICEEditableOptions)
+  TDubBuildOptions = class(TDubBuildOptionsBase, IEditableOptions)
   strict private
-    fBackup: TCEDubBuildOptionsBase;
+    fBackup: TDubBuildOptionsBase;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -106,18 +106,18 @@ type
 
   TDubCommand = (dcBuild, dcRun, dcTest);
 
-  TCEDubProject = class(TComponent, ICECommonProject)
+  TDubProject = class(TComponent, ICommonProject)
   private
     fIsSdl: boolean;
     fInGroup: boolean;
-    fDubProc: TCEProcess;
+    fDubProc: TDexedProcess;
     fPreCompilePath: string;
     fPackageName: string;
     fFilename: string;
     fModified: boolean;
     fJSON: TJSONObject;
     fSrcs: TStringList;
-    fProjectSubject: TCEProjectSubject;
+    fProjectSubject: TProjectSubject;
     fConfigsCount: integer;
     fImportPaths: TStringList;
     fBuildTypes: TStringList;
@@ -130,9 +130,9 @@ type
     fOutputFileName: string;
     fSaveAsUtf8: boolean;
     fCompiled: boolean;
-    fMsgs: ICEMessagesDisplay;
+    fMsgs: IMessagesDisplay;
     fNextTerminatedCommand: TDubCommand;
-    fAsProjectItf: ICECommonProject;
+    fAsProjectItf: ICommonProject;
     procedure doModified;
     procedure updateFields;
     procedure updatePackageNameFromJson;
@@ -162,7 +162,7 @@ type
     procedure activate;
     function inGroup: boolean;
     procedure inGroup(value: boolean);
-    function getFormat: TCEProjectFormat;
+    function getFormat: TProjectFormat;
     function getProject: TObject;
     function modified: boolean;
     function binaryKind: TProjectBinaryKind;
@@ -210,7 +210,7 @@ type
 var
   DubCompiler: DCompiler = dmd;
   DubCompilerFilename: string = 'dmd';
-  Lfm: ICELifetimeManager = nil;
+  Lfm: ILifetimeManager = nil;
 
 const
   DubSdlWarning = 'this feature is deactivated in DUB projects with the SDL format';
@@ -218,7 +218,7 @@ const
 implementation
 
 var
-  dubBuildOptions: TCEDubBuildOptions;
+  dubBuildOptions: TDubBuildOptions;
 
 const
 
@@ -516,7 +516,7 @@ end;
 {$ENDREGION}
 
 {$REGION Options ---------------------------------------------------------------}
-procedure TCEDubBuildOptionsBase.setLinkMode(value: TDubLinkMode);
+procedure TDubBuildOptionsBase.setLinkMode(value: TDubLinkMode);
 begin
   if fLinkMode = value then
     exit;
@@ -525,24 +525,24 @@ begin
   fLinkMode:=value;
 end;
 
-procedure TCEDubBuildOptionsBase.setCompiler(value: DCompiler);
+procedure TDubBuildOptionsBase.setCompiler(value: DCompiler);
 begin
   fCompiler := value;
   setDubCompiler(fCompiler);
 end;
 
-function TCEDubBuildOptionsBase.getCompiler: DCompiler;
+function TDubBuildOptionsBase.getCompiler: DCompiler;
 begin
   result := fCompiler;
 end;
 
-procedure TCEDubBuildOptionsBase.assign(source: TPersistent);
+procedure TDubBuildOptionsBase.assign(source: TPersistent);
 var
-  opts: TCEDubBuildOptionsBase;
+  opts: TDubBuildOptionsBase;
 begin
-  if source is TCEDubBuildOptionsBase then
+  if source is TDubBuildOptionsBase then
   begin
-    opts := TCEDubBuildOptionsBase(source);
+    opts := TDubBuildOptionsBase(source);
     parallel:=opts.parallel;
     forceRebuild:=opts.forceRebuild;
     combined:=opts.combined;
@@ -558,7 +558,7 @@ begin
   else inherited;
 end;
 
-procedure TCEDubBuildOptionsBase.getOpts(options: TStrings);
+procedure TDubBuildOptionsBase.getOpts(options: TStrings);
 const
   vb: array[TDubVerbosity] of string = (
   '',           //auto,
@@ -595,12 +595,12 @@ begin
     CommandToList(other, options);
 end;
 
-constructor TCEDubBuildOptions.create(aOwner: TComponent);
+constructor TDubBuildOptions.create(aOwner: TComponent);
 var
   fname: string;
 begin
   inherited;
-  fBackup := TCEDubBuildOptionsBase.Create(nil);
+  fBackup := TDubBuildOptionsBase.Create(nil);
   EntitiesConnector.addObserver(self);
   autoSelectTestConfig := true;
   fname := getDocPath + optFname;
@@ -608,7 +608,7 @@ begin
     loadFromFile(fname);
 end;
 
-destructor TCEDubBuildOptions.destroy;
+destructor TDubBuildOptions.destroy;
 begin
   saveToFile(getDocPath + optFname);
   EntitiesConnector.removeObserver(self);
@@ -616,23 +616,23 @@ begin
   inherited;
 end;
 
-function TCEDubBuildOptions.optionedWantCategory(): string;
+function TDubBuildOptions.optionedWantCategory(): string;
 begin
   exit('DUB build');
 end;
 
-function TCEDubBuildOptions.optionedWantEditorKind: TOptionEditorKind;
+function TDubBuildOptions.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekGeneric);
 end;
 
-function TCEDubBuildOptions.optionedWantContainer: TPersistent;
+function TDubBuildOptions.optionedWantContainer: TPersistent;
 begin
   exit(self);
   fBackup.assign(self);
 end;
 
-procedure TCEDubBuildOptions.optionedEvent(event: TOptionEditorEvent);
+procedure TDubBuildOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
     oeeAccept: fBackup.assign(self);
@@ -641,20 +641,20 @@ begin
   end;
 end;
 
-function TCEDubBuildOptions.optionedOptionsModified: boolean;
+function TDubBuildOptions.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
 {$ENDREGION}
 
 {$REGION Standard Comp/Obj -----------------------------------------------------}
-constructor TCEDubProject.create(aOwner: TComponent);
+constructor TDubProject.create(aOwner: TComponent);
 begin
   inherited;
-  fAsProjectItf := self as ICECommonProject;
+  fAsProjectItf := self as ICommonProject;
   fSaveAsUtf8 := true;
   fJSON := TJSONObject.Create();
-  fProjectSubject := TCEProjectSubject.Create;
+  fProjectSubject := TProjectSubject.Create;
   fMsgs:= getMessageDisplay;
   fBuildTypes := TStringList.Create;
   fConfigs := TStringList.Create;
@@ -674,7 +674,7 @@ begin
   TDubLocalPackages.update;
 end;
 
-destructor TCEDubProject.destroy;
+destructor TDubProject.destroy;
 begin
   killProcess(fDubProc);
   subjProjClosing(fProjectSubject, self);
@@ -689,55 +689,55 @@ begin
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION ICECommonProject: project props ---------------------------------------}
-procedure TCEDubProject.activate;
+{$REGION ICommonProject: project props ---------------------------------------}
+procedure TDubProject.activate;
 begin
   subjProjFocused(fProjectSubject, fAsProjectItf);
 end;
 
-function TCEDubProject.inGroup: boolean;
+function TDubProject.inGroup: boolean;
 begin
   exit(fInGroup);
 end;
 
-procedure TCEDubProject.inGroup(value: boolean);
+procedure TDubProject.inGroup(value: boolean);
 begin
   fInGroup:=value;
 end;
 
 
-function TCEDubProject.getFormat: TCEProjectFormat;
+function TDubProject.getFormat: TProjectFormat;
 begin
   exit(pfDUB);
 end;
 
-function TCEDubProject.getProject: TObject;
+function TDubProject.getProject: TObject;
 begin
   exit(self);
 end;
 
-function TCEDubProject.modified: boolean;
+function TDubProject.modified: boolean;
 begin
   exit(fModified);
 end;
 
-function TCEDubProject.filename: string;
+function TDubProject.filename: string;
 begin
   exit(fFilename);
 end;
 
-function TCEDubProject.basePath: string;
+function TDubProject.basePath: string;
 begin
   exit(fBasePath);
 end;
 
-procedure TCEDubProject.reload;
+procedure TDubProject.reload;
 begin
   if fFilename.fileExists then
     loadFromFile(fFilename);
 end;
 
-procedure TCEDubProject.loadFromFile(const fname: string);
+procedure TDubProject.loadFromFile(const fname: string);
 var
   loader: TMemoryStream;
   parser : TJSONParser;
@@ -819,7 +819,7 @@ begin
   fModified := false;
 end;
 
-procedure TCEDubProject.saveToFile(const fname: string);
+procedure TDubProject.saveToFile(const fname: string);
 var
   saver: TMemoryStream;
   str: string;
@@ -843,12 +843,12 @@ begin
   end;
 end;
 
-function TCEDubProject.binaryKind: TProjectBinaryKind;
+function TDubProject.binaryKind: TProjectBinaryKind;
 begin
   exit(fBinKind);
 end;
 
-function TCEDubProject.getCommandLine: string;
+function TDubProject.getCommandLine: string;
 var
   str: TStringList;
 begin
@@ -867,14 +867,14 @@ begin
   end;
 end;
 
-function TCEDubProject.outputFilename: string;
+function TDubProject.outputFilename: string;
 begin
   exit(fOutputFileName);
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION ICECommonProject: sources ---------------------------------------------}
-function TCEDubProject.isSource(const fname: string): boolean;
+{$REGION ICommonProject: sources ---------------------------------------------}
+function TDubProject.isSource(const fname: string): boolean;
 var
   str: string;
 begin
@@ -884,17 +884,17 @@ begin
   result := fSrcs.IndexOf(str) <> -1;
 end;
 
-function TCEDubProject.sourcesCount: integer;
+function TDubProject.sourcesCount: integer;
 begin
   exit(fSrcs.Count);
 end;
 
-function TCEDubProject.sourceRelative(index: integer): string;
+function TDubProject.sourceRelative(index: integer): string;
 begin
   exit(fSrcs[index]);
 end;
 
-function TCEDubProject.sourceAbsolute(index: integer): string;
+function TDubProject.sourceAbsolute(index: integer): string;
 var
   fname: string;
 begin
@@ -905,29 +905,29 @@ begin
     result := expandFilenameEx(fBasePath, fname);
 end;
 
-function TCEDubProject.importsPathCount: integer;
+function TDubProject.importsPathCount: integer;
 begin
   result := fImportPaths.Count;
 end;
 
-function TCEDubProject.importPath(index: integer): string;
+function TDubProject.importPath(index: integer): string;
 begin
   result := expandFilenameEx(fBasePath, fImportPaths[index]);
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION ICECommonProject: configs ---------------------------------------------}
-function TCEDubProject.configurationCount: integer;
+{$REGION ICommonProject: configs ---------------------------------------------}
+function TDubProject.configurationCount: integer;
 begin
   exit(fConfigsCount);
 end;
 
-function TCEDubProject.getActiveConfigurationIndex: integer;
+function TDubProject.getActiveConfigurationIndex: integer;
 begin
   exit(fBuiltTypeIx * fConfigs.Count + fConfigIx);
 end;
 
-procedure TCEDubProject.setActiveConfigurationIndex(index: integer);
+procedure TDubProject.setActiveConfigurationIndex(index: integer);
 begin
   fBuiltTypeIx := index div fConfigs.Count;
   fConfigIx := index mod fConfigs.Count;
@@ -936,21 +936,21 @@ begin
   fModified:=false;
 end;
 
-function TCEDubProject.configurationName(index: integer): string;
+function TDubProject.configurationName(index: integer): string;
 begin
   result := fBuildTypes[index div fConfigs.Count] + ' - ' +
     fConfigs[index mod fConfigs.Count];
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION ICECommonProject: actions ---------------------------------------------}
-procedure TCEDubProject.stopCompilation;
+{$REGION ICommonProject: actions ---------------------------------------------}
+procedure TDubProject.stopCompilation;
 begin
   if fDubProc.isNotNil and fDubProc.Running then
     fDubProc.Terminate(1);
 end;
 
-procedure TCEDubProject.dubProcOutput(proc: TObject);
+procedure TDubProject.dubProcOutput(proc: TObject);
 var
   lst: TStringList;
   str: string;
@@ -965,7 +965,7 @@ begin
   end;
 end;
 
-procedure TCEDubProject.dubProcTerminated(proc: TObject);
+procedure TDubProject.dubProcTerminated(proc: TObject);
 var
   n: string;
 begin
@@ -991,7 +991,7 @@ begin
   SetCurrentDirUTF8(fPreCompilePath);
 end;
 
-procedure TCEDubProject.executeDub(command: TDubCommand; const runArgs: string = '');
+procedure TDubProject.executeDub(command: TDubCommand; const runArgs: string = '');
 var
   olddir: string;
   prjname: string;
@@ -1013,7 +1013,7 @@ begin
   fNextTerminatedCommand := command;
   fMsgs.clearByData(fAsProjectItf);
   prjname := shortenPath(fFilename);
-  fDubProc:= TCEProcess.Create(nil);
+  fDubProc:= TDexedProcess.Create(nil);
   olddir  := GetCurrentDir;
   try
     subjProjCompiling(fProjectSubject, fAsProjectItf);
@@ -1061,28 +1061,28 @@ begin
   end;
 end;
 
-procedure TCEDubProject.compile;
+procedure TDubProject.compile;
 begin
   fPreCompilePath := GetCurrentDirUTF8;
   executeDub(dcBuild);
 end;
 
-function TCEDubProject.compiled: boolean;
+function TDubProject.compiled: boolean;
 begin
   exit(fCompiled);
 end;
 
-procedure TCEDubProject.run(const runArgs: string = '');
+procedure TDubProject.run(const runArgs: string = '');
 begin
   executeDub(dcRun, runArgs);
 end;
 
-procedure TCEDubProject.test;
+procedure TDubProject.test;
 begin
   executeDub(dcTest);
 end;
 
-function TCEDubProject.targetUpToDate: boolean;
+function TDubProject.targetUpToDate: boolean;
 begin
   // rebuilding is done automatically when the command is 'run'
   result := true;
@@ -1090,7 +1090,7 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION JSON to internal fields -----------------------------------------------}
-function TCEDubProject.getCurrentCustomConfig: TJSONObject;
+function TDubProject.getCurrentCustomConfig: TJSONObject;
 var
   confs: TJSONArray;
 begin
@@ -1099,7 +1099,7 @@ begin
     result := confs.Objects[fConfigIx];
 end;
 
-procedure TCEDubProject.updatePackageNameFromJson;
+procedure TDubProject.updatePackageNameFromJson;
 var
   value: TJSONData;
 begin
@@ -1111,7 +1111,7 @@ begin
       fPackageName := value.AsString;
 end;
 
-procedure TCEDubProject.udpateConfigsFromJson;
+procedure TDubProject.udpateConfigsFromJson;
 var
   i: integer;
   dat: TJSONData;
@@ -1156,12 +1156,12 @@ begin
   fConfigsCount := fConfigs.Count * fBuildTypes.Count;
 end;
 
-procedure TCEDubProject.updateSourcesList;
+procedure TDubProject.updateSourcesList;
 begin
   updateSourcesFromJson;
 end;
 
-procedure TCEDubProject.updateSourcesFromJson;
+procedure TDubProject.updateSourcesFromJson;
 var
   lst: TStringList;
   item: TJSONData;
@@ -1289,7 +1289,7 @@ begin
   deleteDups(fSrcs);
 end;
 
-function TCEDubProject.findTargetKindInd(value: TJSONObject): boolean;
+function TDubProject.findTargetKindInd(value: TJSONObject): boolean;
 var
   tt: TJSONData;
 begin
@@ -1309,7 +1309,7 @@ begin
   else result := false;
 end;
 
-procedure TCEDubProject.updateTargetKindFromJson;
+procedure TDubProject.updateTargetKindFromJson;
 var
   found: boolean = false;
   conf: TJSONObject;
@@ -1345,7 +1345,7 @@ begin
   end;
 end;
 
-procedure TCEDubProject.updateImportPathsFromJson;
+procedure TDubProject.updateImportPathsFromJson;
 
   procedure addFrom(obj: TJSONObject);
   var
@@ -1364,7 +1364,7 @@ procedure TCEDubProject.updateImportPathsFromJson;
   end;
 
   // note: dependencies are added as import to allow DCD completion
-  // see TCEDcdWrapper.projChanged()
+  // see TDcdWrapper.projChanged()
   procedure addDepsFrom(obj: TJSONObject; const suffix: string = '');
   var
     deps: TJSONObject;
@@ -1539,7 +1539,7 @@ begin
   end;
 end;
 
-procedure TCEDubProject.updateOutputNameFromJson;
+procedure TDubProject.updateOutputNameFromJson;
 var
   conf: TJSONObject;
   item: TJSONData;
@@ -1580,7 +1580,7 @@ begin
   end;
 end;
 
-procedure TCEDubProject.updateFields;
+procedure TDubProject.updateFields;
 begin
   updatePackageNameFromJson;
   udpateConfigsFromJson;
@@ -1590,19 +1590,19 @@ begin
   updateOutputNameFromJson;
 end;
 
-procedure TCEDubProject.beginModification;
+procedure TDubProject.beginModification;
 begin
   fModificationCount += 1;
 end;
 
-procedure TCEDubProject.endModification;
+procedure TDubProject.endModification;
 begin
   fModificationCount -=1;
   if fModificationCount <= 0 then
     doModified;
 end;
 
-procedure TCEDubProject.doModified;
+procedure TDubProject.doModified;
 begin
   fModificationCount := 0;
   fModified:=true;
@@ -1664,7 +1664,7 @@ end;
 
 function isValidDubProject(const filename: string): boolean;
 var
-  maybe: TCEDubProject;
+  maybe: TDubProject;
   ext: string;
 begin
   ext := filename.extractFileExt.upperCase;
@@ -1673,7 +1673,7 @@ begin
   result := true;
   // avoid the project to notify the observers, current project is not replaced
   EntitiesConnector.beginUpdate;
-  maybe := TCEDubProject.create(nil);
+  maybe := TDubProject.create(nil);
   try
     try
       maybe.loadFromFile(filename);
@@ -1697,7 +1697,7 @@ end;
 
 procedure setDubCompiler(value: DCompiler);
 var
-  sel: ICECompilerSelector;
+  sel: ICompilerSelector;
 begin
   sel := getCompilerSelector;
   DubCompiler := value;
@@ -1709,7 +1709,7 @@ end;
 
 initialization
   setDubCompiler(dmd);
-  dubBuildOptions:= TCEDubBuildOptions.create(nil);
+  dubBuildOptions:= TDubBuildOptions.create(nil);
 finalization
   dubBuildOptions.free;
   TDubLocalPackages.deinit;

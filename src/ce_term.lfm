@@ -1,4 +1,4 @@
-inherited CETermWidget: TCETermWidget
+inherited TermWidget: TTermWidget
   Left = 1018
   Height = 296
   Width = 674
@@ -12,11 +12,10 @@ inherited CETermWidget: TCETermWidget
     ClientWidth = 674
     inherited Content: TPanel
       Height = 260
-      Top = 36
       Width = 674
       OnPaint = ContentPaint
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 666
     end
   end

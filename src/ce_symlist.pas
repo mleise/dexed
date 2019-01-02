@@ -73,7 +73,7 @@ type
     procedure LoadFromTool(str: TStream);
   end;
 
-  TCESymbolListOptions = class(TWritableLfmTextComponent)
+  TSymbolListOptions = class(TWritableLfmTextComponent)
   private
     fAutoRefresh: boolean;
     fRefreshOnChange: boolean;
@@ -102,10 +102,10 @@ type
     procedure AssignTo(Dest: TPersistent); override;
   end;
 
-  { TCESymbolListWidget }
+  { TSymbolListWidget }
 
-  TCESymbolListWidget = class(TCEWidget, ICEDocumentObserver, ICEEditableOptions)
-    btnRefresh: TCEToolButton;
+  TSymbolListWidget = class(TDexedWidget, IDocumentObserver, IEditableOptions)
+    btnRefresh: TDexedToolButton;
     Tree: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure btnRefreshClick(Sender: TObject);
@@ -119,17 +119,17 @@ type
     fImages: TImageList;
     fHasToolExe: boolean;
     fToolExeName: string;
-    fOptions: TCESymbolListOptions;
+    fOptions: TSymbolListOptions;
     fSyms: TSymbolList;
-    fMsgs: ICEMessagesDisplay;
-    fToolProc: TCEProcess;
+    fMsgs: IMessagesDisplay;
+    fToolProc: TDexedProcess;
     fActCopyIdent: TAction;
     fActRefresh: TAction;
     fActRefreshOnChange: TAction;
     fActRefreshOnFocus: TAction;
     fActAutoRefresh: TAction;
     fActSelectInSource: TAction;
-    fDoc: TCESynMemo;
+    fDoc: TDexedMemo;
     fAutoRefresh: boolean;
     fRefreshOnChange: boolean;
     fRefreshOnFocus: boolean;
@@ -156,10 +156,10 @@ type
     procedure callToolProc;
     procedure toolTerminated(sender: TObject);
 
-    procedure docNew(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
 
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
@@ -256,8 +256,8 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TCESymbolListOptions --------------------------------------------------}
-constructor  TCESymbolListOptions.Create(AOwner: TComponent);
+{$REGION TSymbolListOptions --------------------------------------------------}
+constructor  TSymbolListOptions.Create(AOwner: TComponent);
 begin
   inherited;
   fDeep := true;
@@ -270,13 +270,13 @@ begin
   fAutoRefreshDelay := 750;
 end;
 
-procedure TCESymbolListOptions.Assign(Source: TPersistent);
+procedure TSymbolListOptions.Assign(Source: TPersistent);
 var
-  widg: TCESymbolListWidget;
+  widg: TSymbolListWidget;
 begin
-  if Source is TCESymbolListWidget then
+  if Source is TSymbolListWidget then
   begin
-    widg := TCESymbolListWidget(Source);
+    widg := TSymbolListWidget(Source);
 
     fDeep                 := widg.fDeep;
     fAutoRefreshDelay     := widg.updaterByDelayDuration;
@@ -292,13 +292,13 @@ begin
   else inherited;
 end;
 
-procedure TCESymbolListOptions.AssignTo(Dest: TPersistent);
+procedure TSymbolListOptions.AssignTo(Dest: TPersistent);
 var
-  widg: TCESymbolListWidget;
+  widg: TSymbolListWidget;
 begin
-  if Dest is TCESymbolListWidget then
+  if Dest is TSymbolListWidget then
   begin
-    widg := TCESymbolListWidget(Dest);
+    widg := TSymbolListWidget(Dest);
 
     widg.updaterByDelayDuration := fAutoRefreshDelay;
     widg.fRefreshOnFocus        := fRefreshOnFocus;
@@ -320,7 +320,7 @@ end;
 {$ENDREGION}
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCESymbolListWidget.create(aOwner: TComponent);
+constructor TSymbolListWidget.create(aOwner: TComponent);
 var
   fname: string;
 begin
@@ -416,7 +416,7 @@ begin
   Tree.Images := fImages;
 
   TreeFilterEdit1.BorderSpacing.Left:= ScaleX(30,96);
-  fOptions := TCESymbolListOptions.Create(self);
+  fOptions := TSymbolListOptions.Create(self);
   fOptions.Name:= 'symbolListOptions';
   fname := getDocPath + OptsFname;
   if fname.fileExists then
@@ -444,7 +444,7 @@ begin
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCESymbolListWidget.destroy;
+destructor TSymbolListWidget.destroy;
 begin
   EntitiesConnector.removeObserver(self);
 
@@ -457,7 +457,7 @@ begin
   inherited;
 end;
 
-procedure TCESymbolListWidget.SetVisible(value: boolean);
+procedure TSymbolListWidget.SetVisible(value: boolean);
 begin
   inherited;
   checkIfHasToolExe;
@@ -466,25 +466,25 @@ begin
     callToolProc;
 end;
 
-procedure TCESymbolListWidget.setToolBarFlat(value: boolean);
+procedure TSymbolListWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolbarFlat(value);
   TreeFilterEdit1.Flat:=value;
 end;
 {$ENDREGION}
 
-{$REGION ICEContextualActions---------------------------------------------------}
-function TCESymbolListWidget.contextName: string;
+{$REGION IContextualActions---------------------------------------------------}
+function TSymbolListWidget.contextName: string;
 begin
   result := 'Static explorer';
 end;
 
-function TCESymbolListWidget.contextActionCount: integer;
+function TSymbolListWidget.contextActionCount: integer;
 begin
   result := 6;
 end;
 
-function TCESymbolListWidget.contextAction(index: integer): TAction;
+function TSymbolListWidget.contextAction(index: integer): TAction;
 begin
   case index of
     0: exit(fActSelectInSource);
@@ -497,56 +497,56 @@ begin
   end;
 end;
 
-procedure TCESymbolListWidget.actRefreshExecute(Sender: TObject);
+procedure TSymbolListWidget.actRefreshExecute(Sender: TObject);
 begin
   if Updating then
     exit;
   callToolProc;
 end;
 
-procedure TCESymbolListWidget.actAutoRefreshExecute(Sender: TObject);
+procedure TSymbolListWidget.actAutoRefreshExecute(Sender: TObject);
 begin
   autoRefresh := fActAutoRefresh.Checked;
   //fOptions.Assign(self);
 end;
 
-procedure TCESymbolListWidget.actRefreshOnChangeExecute(Sender: TObject);
+procedure TSymbolListWidget.actRefreshOnChangeExecute(Sender: TObject);
 begin
   refreshOnChange := fActRefreshOnChange.Checked;
   fOptions.Assign(self);
 end;
 
-procedure TCESymbolListWidget.actRefreshOnFocusExecute(Sender: TObject);
+procedure TSymbolListWidget.actRefreshOnFocusExecute(Sender: TObject);
 begin
   refreshOnFocus := fActRefreshOnFocus.Checked;
   fOptions.Assign(self);
 end;
 
-procedure TCESymbolListWidget.actCopyIdentExecute(Sender: TObject);
+procedure TSymbolListWidget.actCopyIdentExecute(Sender: TObject);
 begin
   if Tree.Selected.isNotNil then
     Clipboard.AsText:= Tree.Selected.Text;
 end;
 {$ENDREGION}
 
-{$REGION ICEEditableOptions ----------------------------------------------------}
-function TCESymbolListWidget.optionedWantCategory(): string;
+{$REGION IEditableOptions ----------------------------------------------------}
+function TSymbolListWidget.optionedWantCategory(): string;
 begin
   exit('Symbol list');
 end;
 
-function TCESymbolListWidget.optionedWantEditorKind: TOptionEditorKind;
+function TSymbolListWidget.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekGeneric);
 end;
 
-function TCESymbolListWidget.optionedWantContainer: TPersistent;
+function TSymbolListWidget.optionedWantContainer: TPersistent;
 begin
   fOptions.Assign(self);
   exit(fOptions);
 end;
 
-procedure TCESymbolListWidget.optionedEvent(event: TOptionEditorEvent);
+procedure TSymbolListWidget.optionedEvent(event: TOptionEditorEvent);
 begin
   if event <> oeeAccept then
     exit;
@@ -554,20 +554,20 @@ begin
   callToolProc;
 end;
 
-function TCESymbolListWidget.optionedOptionsModified: boolean;
+function TSymbolListWidget.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCESymbolListWidget.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TSymbolListWidget.docNew(document: TDexedMemo);
 begin
   fDoc := document;
   beginDelayedUpdate;
 end;
 
-procedure TCESymbolListWidget.docClosing(document: TCESynMemo);
+procedure TSymbolListWidget.docClosing(document: TDexedMemo);
 begin
   if fDoc <> document then
     exit;
@@ -577,7 +577,7 @@ begin
   updateVisibleCat;
 end;
 
-procedure TCESymbolListWidget.docFocused(document: TCESynMemo);
+procedure TSymbolListWidget.docFocused(document: TDexedMemo);
 begin
   if fDoc = document then
     exit;
@@ -589,7 +589,7 @@ begin
   else if fRefreshOnFocus then callToolProc;
 end;
 
-procedure TCESymbolListWidget.docChanged(document: TCESynMemo);
+procedure TSymbolListWidget.docChanged(document: TDexedMemo);
 begin
   if (fDoc <> document) or not Visible then
     exit;
@@ -605,30 +605,30 @@ end;
 {$ENDREGION}
 
 {$REGION Symbol-tree things ----------------------------------------------------}
-procedure TCESymbolListWidget.updateDelayed;
+procedure TSymbolListWidget.updateDelayed;
 begin
   if not fAutoRefresh then exit;
   callToolProc;
 end;
 
-procedure TCESymbolListWidget.btnRefreshClick(Sender: TObject);
+procedure TSymbolListWidget.btnRefreshClick(Sender: TObject);
 begin
   checkIfHasToolExe;
   fActRefresh.Execute;
 end;
 
-procedure TCESymbolListWidget.toolbarResize(Sender: TObject);
+procedure TSymbolListWidget.toolbarResize(Sender: TObject);
 begin
   TreeFilterEdit1.Width := toolbar.Width - TreeFilterEdit1.Left - TreeFilterEdit1.BorderSpacing.Around;
 end;
 
-procedure TCESymbolListWidget.TreeCompare(Sender: TObject; Node1,
+procedure TSymbolListWidget.TreeCompare(Sender: TObject; Node1,
   Node2: TTreeNode; var Compare: Integer);
 begin
   Compare := CompareStr(Node1.Text, Node2.text);
 end;
 
-procedure TCESymbolListWidget.updateVisibleCat;
+procedure TSymbolListWidget.updateVisibleCat;
 begin
   if fDoc.isNotNil and fDoc.isDSource then
   begin
@@ -665,7 +665,7 @@ begin
   end;
 end;
 
-procedure TCESymbolListWidget.clearTree;
+procedure TSymbolListWidget.clearTree;
 begin
   ndAlias.DeleteChildren;
   ndClass.DeleteChildren;
@@ -683,13 +683,13 @@ begin
   ndErr.DeleteChildren;
 end;
 
-procedure TCESymbolListWidget.TreeFilterEdit1AfterFilter(Sender: TObject);
+procedure TSymbolListWidget.TreeFilterEdit1AfterFilter(Sender: TObject);
 begin
   if TreeFilterEdit1.Filter.isEmpty then
     updateVisibleCat;
 end;
 
-function TCESymbolListWidget.TreeFilterEdit1FilterItem(Item: TObject; out
+function TSymbolListWidget.TreeFilterEdit1FilterItem(Item: TObject; out
   Done: Boolean): Boolean;
 begin
   if not fSmartFilter then
@@ -703,7 +703,7 @@ begin
   result := false;
 end;
 
-procedure TCESymbolListWidget.TreeFilterEdit1MouseEnter(Sender: TObject);
+procedure TSymbolListWidget.TreeFilterEdit1MouseEnter(Sender: TObject);
 begin
   if not fSmartFilter then
     exit;
@@ -711,13 +711,13 @@ begin
   tree.Selected := nil;
 end;
 
-procedure TCESymbolListWidget.TreeKeyPress(Sender: TObject; var Key: char);
+procedure TSymbolListWidget.TreeKeyPress(Sender: TObject; var Key: char);
 begin
   if Key = #13 then
     TreeDblClick(nil);
 end;
 
-procedure TCESymbolListWidget.TreeDblClick(Sender: TObject);
+procedure TSymbolListWidget.TreeDblClick(Sender: TObject);
 var
   line: PtrUInt;
 begin
@@ -732,13 +732,13 @@ begin
   fDoc.SelectLine;
 end;
 
-procedure TCESymbolListWidget.checkIfHasToolExe;
+procedure TSymbolListWidget.checkIfHasToolExe;
 begin
   fToolExeName := exeFullName(toolExeName);
   fHasToolExe := fToolExeName.fileExists;
 end;
 
-procedure TCESymbolListWidget.callToolProc;
+procedure TSymbolListWidget.callToolProc;
 var
   str: string;
 begin
@@ -753,7 +753,7 @@ begin
   end;
 
   killProcess(fToolProc);
-  fToolProc := TCEProcess.Create(nil);
+  fToolProc := TDexedProcess.Create(nil);
   fToolProc.ShowWindow := swoHIDE;
   fToolProc.Options := [poUsePipes];
   fToolProc.Executable := fToolExeName;
@@ -768,7 +768,7 @@ begin
   fToolProc.CloseInput;
 end;
 
-procedure TCESymbolListWidget.toolTerminated(sender: TObject);
+procedure TSymbolListWidget.toolTerminated(sender: TObject);
 
   function getCatNode(node: TTreeNode; stype: TSymbolType ): TTreeNode;
     function newCat(const aCat: string): TTreeNode;
@@ -889,7 +889,7 @@ begin
     TreeFilterEdit1.Text := flt;
 end;
 
-procedure TCESymbolListWidget.smartExpand;
+procedure TSymbolListWidget.smartExpand;
 var
   i: integer;
   target: NativeUint;

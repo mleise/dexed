@@ -11,16 +11,16 @@ uses
 
 type
 
-  TDDHandler = class(TObject, ICEProjectObserver)
+  TDDHandler = class(TObject, IProjectObserver)
   private
-    fProj: ICECommonProject;
-    fFreeProj: ICECommonProject;
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    fProj: ICommonProject;
+    fFreeProj: ICommonProject;
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
     //
     function getFilename(src: TObject): string;
   public
@@ -52,25 +52,25 @@ begin
   inherited;
 end;
 
-procedure TDDHandler.projNew(project: ICECommonProject);
+procedure TDDHandler.projNew(project: ICommonProject);
 begin
   fProj := project;
   if not fProj.inGroup then
     fFreeProj := fProj;
 end;
 
-procedure TDDHandler.projChanged(project: ICECommonProject);
+procedure TDDHandler.projChanged(project: ICommonProject);
 begin
 end;
 
-procedure TDDHandler.projClosing(project: ICECommonProject);
+procedure TDDHandler.projClosing(project: ICommonProject);
 begin
   fProj := nil;
   if project = fFreeProj then
     fFreeProj := nil;
 end;
 
-procedure TDDHandler.projFocused(project: ICECommonProject);
+procedure TDDHandler.projFocused(project: ICommonProject);
 begin
   fProj := project;
   if not fProj.inGroup then
@@ -79,11 +79,11 @@ begin
     fFreeProj := nil;
 end;
 
-procedure TDDHandler.projCompiling(project: ICECommonProject);
+procedure TDDHandler.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TDDHandler.projCompiled(project: ICECommonProject; success: boolean);
+procedure TDDHandler.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 
@@ -130,7 +130,7 @@ end;
 procedure TDDHandler.DragDrop(Sender, Source: TObject; X, Y: Integer);
 var
   fname: string;
-  fmt: TCEProjectFileFormat;
+  fmt: TProjectFileFormat;
 begin
   if Source.isNil then exit;
   fname := getFilename(Source);
@@ -146,9 +146,9 @@ begin
       fFreeProj.getProject.Free;
     end;
     if fmt = pffDexed then
-      TCENativeProject.create(nil)
+      TNativeProject.create(nil)
     else
-      TCEDubProject.create(nil);
+      TDubProject.create(nil);
     fProj.loadFromFile(fname);
     fProj.activate;
   end

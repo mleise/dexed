@@ -1,4 +1,4 @@
-inherited CEMessagesWidget: TCEMessagesWidget
+inherited MessagesWidget: TMessagesWidget
   Left = 900
   Height = 159
   Top = 226
@@ -14,7 +14,6 @@ inherited CEMessagesWidget: TCEMessagesWidget
     ClientWidth = 844
     inherited Content: TPanel
       Height = 123
-      Top = 36
       Width = 844
       ClientHeight = 123
       ClientWidth = 844
@@ -42,12 +41,12 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Options = [tvoAllowMultiselect, tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoThemedDraw]
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 836
       ShowCaptions = True
       Wrapable = False
       OnResize = toolbarResize
-      object sep: TCEToolButton[0]
+      object sep: TDexedToolButton[0]
         Left = 299
         Height = 5
         Hint = 'Clean filtered messages'
@@ -56,7 +55,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Style = tbsDivider
         scaledSeparator = False
       end
-      object btnSelMisc: TCEToolButton[1]
+      object btnSelMisc: TDexedToolButton[1]
         Left = 262
         Hint = 'filter the other messages'
         Top = 0
@@ -64,7 +63,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Caption = 'Misc'
         scaledSeparator = False
       end
-      object button2: TCEToolButton[2]
+      object button2: TDexedToolButton[2]
         Left = 257
         Height = 5
         Top = 0
@@ -73,7 +72,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Style = tbsDivider
         scaledSeparator = False
       end
-      object btnSelApp: TCEToolButton[3]
+      object btnSelApp: TDexedToolButton[3]
         Left = 176
         Hint = 'filter the messages related to Coedit'
         Top = 0
@@ -81,7 +80,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Caption = 'Application'
         scaledSeparator = False
       end
-      object button4: TCEToolButton[4]
+      object button4: TDexedToolButton[4]
         Left = 171
         Height = 5
         Top = 0
@@ -90,7 +89,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Style = tbsDivider
         scaledSeparator = False
       end
-      object btnSelProj: TCEToolButton[5]
+      object btnSelProj: TDexedToolButton[5]
         Left = 118
         Hint = 'filter the messages related to the active project'
         Top = 0
@@ -98,7 +97,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Caption = 'Project'
         scaledSeparator = False
       end
-      object button6: TCEToolButton[6]
+      object button6: TDexedToolButton[6]
         Left = 113
         Height = 5
         Top = 0
@@ -107,7 +106,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Style = tbsDivider
         scaledSeparator = False
       end
-      object btnSelEdit: TCEToolButton[7]
+      object btnSelEdit: TDexedToolButton[7]
         Left = 67
         Hint = 'filter the messages related to the active editor'
         Top = 0
@@ -115,7 +114,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Caption = 'Editor'
         scaledSeparator = False
       end
-      object button8: TCEToolButton[8]
+      object button8: TDexedToolButton[8]
         Left = 62
         Height = 5
         Top = 0
@@ -124,7 +123,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         Style = tbsDivider
         scaledSeparator = False
       end
-      object btnSelAll: TCEToolButton[9]
+      object btnSelAll: TDexedToolButton[9]
         Left = 34
         Hint = 'don''t filter the messages'
         Top = 0
@@ -149,7 +148,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         TabOrder = 0
         OnButtonClick = TreeFilterEdit1ButtonClick
       end
-      object btnClearCat: TCEToolButton[11]
+      object btnClearCat: TDexedToolButton[11]
         Left = 1
         Hint = 'Delete the messages stored for the selected category'
         Top = 0
@@ -157,7 +156,7 @@ inherited CEMessagesWidget: TCEMessagesWidget
         resourceName = 'CLEAN'
         scaledSeparator = False
       end
-      object sepCat: TCEToolButton[12]
+      object sepCat: TDexedToolButton[12]
         Left = 29
         Height = 5
         Top = 0

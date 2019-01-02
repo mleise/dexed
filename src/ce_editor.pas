@@ -13,13 +13,13 @@ uses
 
 type
 
-  TCEEditorWidget = class;
+  TEditorWidget = class;
 
-  TCEPagesOptions = class(TWritableLfmTextComponent, ICEEditableOptions, ICEEditableShortCut)
+  TPagesOptions = class(TWritableLfmTextComponent, IEditableOptions, IEditableShortCut)
   private
-    fEditorWidget: TCEEditorWidget;
-    fPageButtons: TCEPageControlButtons;
-    fPageOptions: TCEPageControlOptions;
+    fEditorWidget: TEditorWidget;
+    fPageButtons: TPageControlButtons;
+    fPageOptions: TPageControlOptions;
     fMoveLeft: TShortCut;
     fMoveRight: TShortCut;
     fNextPage: TShortCut;
@@ -37,8 +37,8 @@ type
     procedure scedSendItem(const category, identifier: string; aShortcut: TShortcut);
     procedure scedSendDone;
   published
-    property pageButtons: TCEPageControlButtons read fPageButtons write fPageButtons;
-    property pageOptions: TCEPageControlOptions read fPageOptions write fPageOptions;
+    property pageButtons: TPageControlButtons read fPageButtons write fPageButtons;
+    property pageOptions: TPageControlOptions read fPageOptions write fPageOptions;
     property nextPage: TShortCut read fNextPage write fNextPage;
     property previousPage: TShortCut read fPrevPage write fPrevPage;
     property moveLeft: TShortCut read fMoveLeft write fMoveLeft;
@@ -47,12 +47,12 @@ type
   public
     procedure assign(source: TPersistent); override;
     procedure assignTo(target: TPersistent); override;
-    constructor construct(editorWidg: TCEEditorWidget);
+    constructor construct(editorWidg: TEditorWidget);
     destructor Destroy; override;
   end;
 
-  { TCEEditorWidget }
-  TCEEditorWidget = class(TCEWidget, ICEDocumentObserver, ICEMultiDocHandler, ICEProjectObserver)
+  { TEditorWidget }
+  TEditorWidget = class(TDexedWidget, IDocumentObserver, IMultiDocHandler, IProjectObserver)
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
@@ -146,18 +146,18 @@ type
     procedure setToolBarFlat(value: boolean); override;
   private
     fDetectModuleName: boolean;
-    fOptions: TCEPagesOptions;
-    pageControl: TCEPageControl;
+    fOptions: TPagesOptions;
+    pageControl: TDexedPageControl;
     fKeyChanged: boolean;
-    fDoc: TCESynMemo;
-    fProj: ICECommonProject;
+    fDoc: TDexedMemo;
+    fProj: ICommonProject;
     fTokList: TLexTokenList;
     fLastCommand: TSynEditorCommand;
-    procedure PageControlButtonClick(sender: TObject; button: TCEPageControlButton);
+    procedure PageControlButtonClick(sender: TObject; button: TPageControlButton);
     procedure PageControlChanged(Sender: TObject);
     procedure PageControlChanging(Sender: TObject; var AllowChange: Boolean);
     procedure updateStatusBar;
-    procedure updatePageCaption(page: TCEPage);
+    procedure updatePageCaption(page: TDexedPage);
     procedure pageBtnAddCLick(Sender: TObject);
     procedure pageCloseBtnClick(Sender: TObject);
     procedure memoKeyPress(Sender: TObject; var Key: char);
@@ -171,25 +171,25 @@ type
     procedure memoCmdProcessed(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure setDetectModuleName(value: boolean);
     //
-    procedure docNew(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
     //
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
     //
     function SingleServiceName: string;
     function documentCount: Integer;
-    function getDocument(index: Integer): TCESynMemo;
-    function findDocument(const fname: string): TCESynMemo;
+    function getDocument(index: Integer): TDexedMemo;
+    function findDocument(const fname: string): TDexedMemo;
     procedure openDocument(const fname: string);
     function closeDocument(index: Integer;promptOnChanged: boolean = true): boolean;
-    function closeDocument(doc: TCESynMemo;promptOnChanged: boolean = true): boolean;
+    function closeDocument(doc: TDexedMemo;promptOnChanged: boolean = true): boolean;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -204,8 +204,8 @@ uses
 const
   optname = 'editorpages.txt';
 
-{$REGION TCEPagesOptions -------------------------------------------------------}
-constructor TCEPagesOptions.construct(editorWidg: TCEEditorWidget);
+{$REGION TPagesOptions -------------------------------------------------------}
+constructor TPagesOptions.construct(editorWidg: TEditorWidget);
 var
   fname: string;
 begin
@@ -223,14 +223,14 @@ begin
   else assign(fEditorWidget);
 end;
 
-destructor TCEPagesOptions.Destroy;
+destructor TPagesOptions.Destroy;
 begin
   saveToFile(getDocPath + optname);
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
 
-procedure TCEPagesOptions.assign(source: TPersistent);
+procedure TPagesOptions.assign(source: TPersistent);
 begin
   if source = fEditorWidget then
   begin
@@ -241,7 +241,7 @@ begin
   else inherited;
 end;
 
-procedure TCEPagesOptions.assignTo(target: TPersistent);
+procedure TPagesOptions.assignTo(target: TPersistent);
 begin
   if target = fEditorWidget then
   begin
@@ -252,22 +252,22 @@ begin
   else inherited;
 end;
 
-function TCEPagesOptions.optionedWantCategory(): string;
+function TPagesOptions.optionedWantCategory(): string;
 begin
   exit('Editor pages')
 end;
 
-function TCEPagesOptions.optionedWantEditorKind: TOptionEditorKind;
+function TPagesOptions.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekGeneric);
 end;
 
-function TCEPagesOptions.optionedWantContainer: TPersistent;
+function TPagesOptions.optionedWantContainer: TPersistent;
 begin
   exit(self);
 end;
 
-procedure TCEPagesOptions.optionedEvent(event: TOptionEditorEvent);
+procedure TPagesOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
     oeeAccept: assignTo(fEditorWidget);
@@ -275,18 +275,18 @@ begin
   end;
 end;
 
-function TCEPagesOptions.optionedOptionsModified: boolean;
+function TPagesOptions.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
 
-function TCEPagesOptions.scedWantFirst: boolean;
+function TPagesOptions.scedWantFirst: boolean;
 begin
   fShCount := 0;
   exit(true);
 end;
 
-function TCEPagesOptions.scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
+function TPagesOptions.scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
 begin
   category := 'Editor pages';
   case fShCount of
@@ -299,7 +299,7 @@ begin
   result := fShCount <> 4;
 end;
 
-procedure TCEPagesOptions.scedSendItem(const category, identifier: string; aShortcut: TShortcut);
+procedure TPagesOptions.scedSendItem(const category, identifier: string; aShortcut: TShortcut);
 begin
   case identifier of
     'Select next page': fNextPage := aShortcut;
@@ -309,14 +309,14 @@ begin
   end;
 end;
 
-procedure TCEPagesOptions.scedSendDone;
+procedure TPagesOptions.scedSendDone;
 begin
   fShCount := 0;
 end;
 {$ENDREGION}
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEEditorWidget.create(aOwner: TComponent);
+constructor TEditorWidget.create(aOwner: TComponent);
 var
   s: TIconScaledSize;
 begin
@@ -324,7 +324,7 @@ begin
   toolbarVisible:=false;
   fDetectModuleName:=true;
 
-  pageControl := TCEPageControl.Create(self);
+  pageControl := TDexedPageControl.Create(self);
   pageControl.Parent := Content;
   pageControl.align := alClient;
   pageControl.onChanged:= @PageControlChanged;
@@ -435,29 +435,29 @@ begin
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
 
-  fOptions:= TCEPagesOptions.construct(self);
+  fOptions:= TPagesOptions.construct(self);
 end;
 
-destructor TCEEditorWidget.destroy;
+destructor TEditorWidget.destroy;
 var
   i: integer;
 begin
   EntitiesConnector.removeObserver(self);
   for i := PageControl.PageCount-1 downto 0 do
     if PageControl.Pages[i].ControlCount > 0 then
-      if (PageControl.Pages[i].Controls[0] is TCESynMemo) then
+      if (PageControl.Pages[i].Controls[0] is TDexedMemo) then
         PageControl.Pages[i].Controls[0].Free;
   fTokList.Free;
   fOptions.Free;
   inherited;
 end;
 
-function TCEEditorWidget.closeQuery: boolean;
+function TEditorWidget.closeQuery: boolean;
 begin
   result := inherited and Parent.isNil;
 end;
 
-procedure TCEEditorWidget.setToolBarFlat(value: boolean);
+procedure TEditorWidget.setToolBarFlat(value: boolean);
 begin
   inherited setToolBarFlat(value);
   if value then
@@ -473,10 +473,10 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEEditorWidget.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TEditorWidget.docNew(document: TDexedMemo);
 var
-  pge: TCEPage;
+  pge: TDexedPage;
 begin
   pge := pageControl.addPage;
   //
@@ -498,7 +498,7 @@ begin
   updateImperative;
 end;
 
-procedure TCEEditorWidget.docClosing(document: TCESynMemo);
+procedure TEditorWidget.docClosing(document: TDexedMemo);
 begin
   if document.isNil then
     exit;
@@ -509,7 +509,7 @@ begin
   updateImperative;
 end;
 
-procedure TCEEditorWidget.docFocused(document: TCESynMemo);
+procedure TEditorWidget.docFocused(document: TDexedMemo);
 begin
   if fDoc.isNotNil and pageControl.currentPage.isNotNil and
     (pageControl.currentPage.Caption = '<new document>') then
@@ -521,7 +521,7 @@ begin
   updateImperative;
 end;
 
-procedure TCEEditorWidget.docChanged(document: TCESynMemo);
+procedure TEditorWidget.docChanged(document: TDexedMemo);
 begin
   if fDoc <> document then
     exit;
@@ -530,52 +530,52 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICECommonProject ------------------------------------------------------}
-procedure TCEEditorWidget.projNew(project: ICECommonProject);
+{$REGION ICommonProject ------------------------------------------------------}
+procedure TEditorWidget.projNew(project: ICommonProject);
 begin
 end;
 
-procedure TCEEditorWidget.projChanged(project: ICECommonProject);
+procedure TEditorWidget.projChanged(project: ICommonProject);
 begin
 end;
 
-procedure TCEEditorWidget.projClosing(project: ICECommonProject);
+procedure TEditorWidget.projClosing(project: ICommonProject);
 begin
   if fProj = project then
     fProj := nil;
 end;
 
-procedure TCEEditorWidget.projFocused(project: ICECommonProject);
+procedure TEditorWidget.projFocused(project: ICommonProject);
 begin
   fProj := project;
 end;
 
-procedure TCEEditorWidget.projCompiling(project: ICECommonProject);
+procedure TEditorWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEEditorWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TEditorWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMultiDocHandler ----------------------------------------------------}
-function TCEEditorWidget.SingleServiceName: string;
+{$REGION IMultiDocHandler ----------------------------------------------------}
+function TEditorWidget.SingleServiceName: string;
 begin
-  exit('ICEMultiDocHandler');
+  exit('IMultiDocHandler');
 end;
 
-function TCEEditorWidget.documentCount: Integer;
+function TEditorWidget.documentCount: Integer;
 begin
   exit(PageControl.PageCount);
 end;
 
-function TCEEditorWidget.getDocument(index: Integer): TCESynMemo;
+function TEditorWidget.getDocument(index: Integer): TDexedMemo;
 begin
-  exit(TCESynMemo(pageControl.Pages[index].Controls[0]));
+  exit(TDexedMemo(pageControl.Pages[index].Controls[0]));
 end;
 
-function TCEEditorWidget.findDocument(const fname: string): TCESynMemo;
+function TEditorWidget.findDocument(const fname: string): TDexedMemo;
 var
   i: Integer;
 begin
@@ -588,18 +588,18 @@ begin
   result := nil;
 end;
 
-procedure TCEEditorWidget.openDocument(const fname: string);
+procedure TEditorWidget.openDocument(const fname: string);
 var
-  doc: TCESynMemo;
+  doc: TDexedMemo;
 begin
   showWidget;
   doc := findDocument(fname);
   if doc.isNotNil then
   begin
-    PageControl.currentPage := TCEPage(doc.Parent);
+    PageControl.currentPage := TDexedPage(doc.Parent);
     exit;
   end;
-  doc := TCESynMemo.Create(nil);
+  doc := TDexedMemo.Create(nil);
   fDoc.loadFromFile(TrimFilename(fname));
   if assigned(fProj) and (fProj.filename = fDoc.fileName) then
   begin
@@ -610,9 +610,9 @@ begin
   end;
 end;
 
-function TCEEditorWidget.closeDocument(index: Integer; promptOnChanged: boolean = true): boolean;
+function TEditorWidget.closeDocument(index: Integer; promptOnChanged: boolean = true): boolean;
 var
-  doc: TCESynMemo;
+  doc: TDexedMemo;
 begin
   doc := getDocument(index);
   if doc.isNil then
@@ -627,11 +627,11 @@ begin
   result := true;
 end;
 
-function TCEEditorWidget.closeDocument(doc: TCESynMemo;promptOnChanged: boolean = true): boolean;
+function TEditorWidget.closeDocument(doc: TDexedMemo;promptOnChanged: boolean = true): boolean;
 var
-  page: TCEPage = nil;
+  page: TDexedPage = nil;
 begin
-  page := TCEPage(doc.Parent);
+  page := TDexedPage(doc.Parent);
   if page.isNil then
     exit(false);
   exit(closeDocument(page.index, promptOnChanged));
@@ -639,19 +639,19 @@ end;
 {$ENDREGION}
 
 {$REGION PageControl/Editor things ---------------------------------------------}
-procedure TCEEditorWidget.pageCloseBtnClick(Sender: TObject);
+procedure TEditorWidget.pageCloseBtnClick(Sender: TObject);
 begin
   closeDocument(PageControl.PageIndex);
   PageControlButtonClick(pageControl, pbClose);
 end;
 
-procedure TCEEditorWidget.pageBtnAddCLick(Sender: TObject);
+procedure TEditorWidget.pageBtnAddCLick(Sender: TObject);
 begin
-  TCESynMemo.Create(nil);
+  TDexedMemo.Create(nil);
   pageControl.currentPage.Caption:='<new document>';
 end;
 
-procedure TCEEditorWidget.setDetectModuleName(value: boolean);
+procedure TEditorWidget.setDetectModuleName(value: boolean);
 var
   i: integer;
 begin
@@ -662,7 +662,7 @@ begin
     updatePageCaption(pageControl.pages[i]);
 end;
 
-procedure TCEEditorWidget.focusedEditorChanged;
+procedure TEditorWidget.focusedEditorChanged;
 begin
   if fDoc.isNil then exit;
   //
@@ -678,21 +678,21 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.PageControlChanged(Sender: TObject);
+procedure TEditorWidget.PageControlChanged(Sender: TObject);
 begin
   if fDoc.isNil then exit;
   fDoc.hideCallTips;
   fDoc.hideDDocs;
 end;
 
-procedure TCEEditorWidget.PageControlChanging(Sender: TObject; var AllowChange: Boolean);
+procedure TEditorWidget.PageControlChanging(Sender: TObject; var AllowChange: Boolean);
 begin
   if fDoc.isNil then exit;
   fDoc.hideCallTips;
   fDoc.hideDDocs;
 end;
 
-procedure TCEEditorWidget.memoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TEditorWidget.memoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
     VK_CLEAR,VK_RETURN,VK_BACK :
@@ -705,7 +705,7 @@ begin
     beginDelayedUpdate;
 end;
 
-procedure TCEEditorWidget.memoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TEditorWidget.memoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case fLastCommand of
     ecSelectionStart..ecSelectionEnd: updateImperative;
@@ -713,7 +713,7 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.memoCmdProcessed(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+procedure TEditorWidget.memoCmdProcessed(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 begin
   fLastCommand := Command;
   //
@@ -737,31 +737,31 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.memoKeyPress(Sender: TObject; var Key: char);
+procedure TEditorWidget.memoKeyPress(Sender: TObject; var Key: char);
 begin
   fKeyChanged := true;
   beginDelayedUpdate;
 end;
 
-procedure TCEEditorWidget.memoMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TEditorWidget.memoMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   updateImperative;
 end;
 
-procedure TCEEditorWidget.memoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TEditorWidget.memoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
   if not (ssLeft in Shift) then exit;
   beginDelayedUpdate;
 end;
 
-procedure TCEEditorWidget.memoCtrlClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TEditorWidget.memoCtrlClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   getSymbolLoc;
 end;
 
-procedure TCEEditorWidget.getSymbolLoc;
+procedure TEditorWidget.getSymbolLoc;
 var
-  page: TCEPage;
+  page: TDexedPage;
   srcpos, i, sum, linelen: Integer;
   fname: string;
   len: byte;
@@ -774,7 +774,7 @@ begin
     page := pageControl.splitPage;
     if assigned(page) then
     begin
-      fDoc := TCESynMemo(page.Controls[0]);
+      fDoc := TDexedMemo(page.Controls[0]);
       if fDoc.fileName <> fname then
         openDocument(fname);
     end
@@ -801,7 +801,7 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.updateStatusBar;
+procedure TEditorWidget.updateStatusBar;
 const
   modstr: array[boolean] of string = ('...', 'MODIFIED');
 begin
@@ -832,11 +832,11 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.updatePageCaption(page: TCEPage);
+procedure TEditorWidget.updatePageCaption(page: TDexedPage);
 var
   txt: string = '<new document>';
-  dc1: TCESynMemo = nil;
-  dc2: TCESynMemo = nil;
+  dc1: TDexedMemo = nil;
+  dc2: TDexedMemo = nil;
 begin
   if page.isNil or (page.ControlCount = 0) then
     exit;
@@ -844,18 +844,18 @@ begin
     (page <> pageControl.splitPage) then
   begin
     txt := '';
-    dc1 := TCESynMemo(page.Controls[0]);
-    dc2 := TCESynMemo(pageControl.splitPage.Controls[0]);
+    dc1 := TDexedMemo(page.Controls[0]);
+    dc2 := TDexedMemo(pageControl.splitPage.Controls[0]);
     if dc1.isNotNil and dc2.isNotNil then
       txt := dc1.pageCaption(fDetectModuleName) + ' - ' +
         dc2.pageCaption(fDetectModuleName);
   end
   else
-    txt := TCESynMemo(page.Controls[0]).pageCaption(fDetectModuleName);
+    txt := TDexedMemo(page.Controls[0]).pageCaption(fDetectModuleName);
   page.Caption := txt;
 end;
 
-procedure TCEEditorWidget.PageControlButtonClick(sender: TObject; button: TCEPageControlButton);
+procedure TEditorWidget.PageControlButtonClick(sender: TObject; button: TPageControlButton);
 var
   i: integer;
 begin
@@ -867,14 +867,14 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.updateImperative;
+procedure TEditorWidget.updateImperative;
 begin
   updateStatusBar;
   if fDoc.isNotNil then
     updatePageCaption(pageControl.currentPage);
 end;
 
-procedure TCEEditorWidget.updateDelayed;
+procedure TEditorWidget.updateDelayed;
 begin
   if fDoc = nil then
     exit;
@@ -887,13 +887,13 @@ end;
 {$ENDREGION}
 
 {$REGION Editor context menu ---------------------------------------------------}
-procedure TCEEditorWidget.mnuedCopyClick(Sender: TObject);
+procedure TEditorWidget.mnuedCopyClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.ExecuteCommand(ecCopy, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedCallTipClick(Sender: TObject);
+procedure TEditorWidget.mnuedCallTipClick(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
@@ -904,25 +904,25 @@ begin
   fDoc.showCallTips;
 end;
 
-procedure TCEEditorWidget.mnuedCommClick(Sender: TObject);
+procedure TEditorWidget.mnuedCommClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecCommentSelection, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedPrevClick(Sender: TObject);
+procedure TEditorWidget.mnuedPrevClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecPreviousLocation, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedNextClick(Sender: TObject);
+procedure TEditorWidget.mnuedNextClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecNextLocation, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedInvAllNoneClick(Sender: TObject);
+procedure TEditorWidget.mnuedInvAllNoneClick(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
@@ -931,7 +931,7 @@ begin
   fDoc.CommandProcessor(ecSwapVersionAllNone, '', nil);
 end;
 
-procedure TCEEditorWidget.MenuItem5Click(Sender: TObject);
+procedure TEditorWidget.MenuItem5Click(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
@@ -951,37 +951,37 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.mnuedUpcaseClick(Sender: TObject);
+procedure TEditorWidget.mnuedUpcaseClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecUpperCaseWordOrSel, #0, nil);
 end;
 
-procedure TCEEditorWidget.mnuedLowcaseClick(Sender: TObject);
+procedure TEditorWidget.mnuedLowcaseClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecLowerCaseWordOrSel, #0, nil);
 end;
 
-procedure TCEEditorWidget.mnuedPrevWarnClick(Sender: TObject);
+procedure TEditorWidget.mnuedPrevWarnClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.previousWarning;
 end;
 
-procedure TCEEditorWidget.mnuEdSetSpacesClick(Sender: TObject);
+procedure TEditorWidget.mnuEdSetSpacesClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.Options := fDoc.Options + [eoTabsToSpaces];
 end;
 
-procedure TCEEditorWidget.mnuEdSetTabsClick(Sender: TObject);
+procedure TEditorWidget.mnuEdSetTabsClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.Options := fDoc.Options - [eoTabsToSpaces];
 end;
 
-procedure TCEEditorWidget.mnuEdShowSpecClick(Sender: TObject);
+procedure TEditorWidget.mnuEdShowSpecClick(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
@@ -991,13 +991,13 @@ begin
     fDoc.Options := fDoc.Options - [eoShowSpecialChars];
 end;
 
-procedure TCEEditorWidget.mnuedSortLinesClick(Sender: TObject);
+procedure TEditorWidget.mnuedSortLinesClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecSortLines, #0, nil);
 end;
 
-procedure TCEEditorWidget.mnuEdTabWidth2Click(Sender: TObject);
+procedure TEditorWidget.mnuEdTabWidth2Click(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
@@ -1015,25 +1015,25 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.mnuedNextCareaClick(Sender: TObject);
+procedure TEditorWidget.mnuedNextCareaClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.nextChangedArea;
 end;
 
-procedure TCEEditorWidget.mnuedPrevProtGrpClick(Sender: TObject);
+procedure TEditorWidget.mnuedPrevProtGrpClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.previousProtectionGroup;
 end;
 
-procedure TCEEditorWidget.mnuedDdocTmpClick(Sender: TObject);
+procedure TEditorWidget.mnuedDdocTmpClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.insertDdocTemplate;
 end;
 
-procedure TCEEditorWidget.FormShortCut(var Msg: TLMKey; var Handled: Boolean);
+procedure TEditorWidget.FormShortCut(var Msg: TLMKey; var Handled: Boolean);
 var
   sh: TShortCut;
 begin
@@ -1064,37 +1064,37 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.FormShow(Sender: TObject);
+procedure TEditorWidget.FormShow(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.Visible:=true;
 end;
 
-procedure TCEEditorWidget.mnuedGotolineClick(Sender: TObject);
+procedure TEditorWidget.mnuedGotolineClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.gotoLinePrompt;
 end;
 
-procedure TCEEditorWidget.mnuedNextWarnClick(Sender: TObject);
+procedure TEditorWidget.mnuedNextWarnClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.nextWarning;
 end;
 
-procedure TCEEditorWidget.mnuedNextProtGrpClick(Sender: TObject);
+procedure TEditorWidget.mnuedNextProtGrpClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.nextProtectionGroup;
 end;
 
-procedure TCEEditorWidget.mnuedPrevCareaClick(Sender: TObject);
+procedure TEditorWidget.mnuedPrevCareaClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.previousChangedArea;
 end;
 
-procedure TCEEditorWidget.MenuItem8Click(Sender: TObject);
+procedure TEditorWidget.MenuItem8Click(Sender: TObject);
 var
   str: TStringList;
 begin
@@ -1119,25 +1119,25 @@ begin
   end;
 end;
 
-procedure TCEEditorWidget.MenuItem6Click(Sender: TObject);
+procedure TEditorWidget.MenuItem6Click(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecCommentIdentifier, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedRenameClick(Sender: TObject);
+procedure TEditorWidget.mnuedRenameClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CommandProcessor(ecRenameIdentifier, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedCutClick(Sender: TObject);
+procedure TEditorWidget.mnuedCutClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.ExecuteCommand(ecCut, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedDdocClick(Sender: TObject);
+procedure TEditorWidget.mnuedDdocClick(Sender: TObject);
 begin
   if fDoc.isNil then exit;
   mnuEditor.Close;
@@ -1147,31 +1147,31 @@ begin
   fDoc.showDDocs;
 end;
 
-procedure TCEEditorWidget.mnuedPasteClick(Sender: TObject);
+procedure TEditorWidget.mnuedPasteClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.ExecuteCommand(ecPaste, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedUndoClick(Sender: TObject);
+procedure TEditorWidget.mnuedUndoClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.ExecuteCommand(ecUndo, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedRedoClick(Sender: TObject);
+procedure TEditorWidget.mnuedRedoClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.ExecuteCommand(ecRedo, '', nil);
 end;
 
-procedure TCEEditorWidget.mnuedJum2DeclClick(Sender: TObject);
+procedure TEditorWidget.mnuedJum2DeclClick(Sender: TObject);
 begin
   if fDoc.isNotNil then
     getSymbolLoc;
 end;
 
-procedure TCEEditorWidget.mnuEditorPopup(Sender: TObject);
+procedure TEditorWidget.mnuEditorPopup(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;

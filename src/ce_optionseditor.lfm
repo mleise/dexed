@@ -1,4 +1,4 @@
-inherited CEOptionEditorWidget: TCEOptionEditorWidget
+inherited OptionEditorWidget: TOptionEditorWidget
   Left = 594
   Height = 514
   Top = 257
@@ -15,7 +15,6 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
     ClientWidth = 637
     inherited Content: TPanel
       Height = 478
-      Top = 36
       Width = 637
       ClientHeight = 478
       ClientWidth = 637
@@ -122,7 +121,7 @@ inherited CEOptionEditorWidget: TCEOptionEditorWidget
         end
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 629
     end
   end

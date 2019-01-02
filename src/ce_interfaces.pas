@@ -10,8 +10,8 @@ uses
 
 type
 
-  // describes the project kind. Used as a hint to cast ICECommonProject.getProject()
-  TCEProjectFormat = (pfDEXED, pfDUB);
+  // describes the project kind. Used as a hint to cast ICommonProject.getProject()
+  TProjectFormat = (pfDEXED, pfDUB);
 
   // describes the binary kind produces when compiling a project
   TProjectBinaryKind = (executable, staticlib, sharedlib, obj);
@@ -22,8 +22,8 @@ type
    * Each project format has its own dedicated editors.
    * A few common properties allow some generic operations whatever is the format.
    *)
-  ICECommonProject = interface
-  ['ICECommonProject']
+  ICommonProject = interface
+  ['ICommonProject']
 
     // general properties ------------------------------------------------------
 
@@ -34,7 +34,7 @@ type
       // in a context of a group, activates the project
       procedure activate;
       // indicates the project format
-      function getFormat: TCEProjectFormat;
+      function getFormat: TProjectFormat;
       // returns an untyped object that can be casted using getFormat()
       function getProject: TObject;
       // returns the project filename
@@ -104,8 +104,8 @@ type
   (**
    * An implementer declares some actions on demand.
    *)
-  ICEContextualActions = interface(IObserverType)
-  ['ICEContextualActions']
+  IContextualActions = interface(IObserverType)
+  ['IContextualActions']
     // declares a context name for the actions
     function contextName: string;
     // action count, called before contextAction()
@@ -119,85 +119,85 @@ type
   (**
    * An implementer is informed about the current file(s).
    *)
-  ICEDocumentObserver = interface(IObserverType)
-  ['ICEDocumentObserver']
+  IDocumentObserver = interface(IObserverType)
+  ['IDocumentObserver']
     // document has been created (empty, runnable, project source, ...).
-    procedure docNew(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
     // document is the document being edited.
-    procedure docFocused(document: TCESynMemo);
+    procedure docFocused(document: TDexedMemo);
     // document content has just been modified (edited, saved).
-    procedure docChanged(document: TCESynMemo);
+    procedure docChanged(document: TDexedMemo);
     // document is about to be closed.
-    procedure docClosing(document: TCESynMemo);
+    procedure docClosing(document: TDexedMemo);
   end;
   (**
-   * An implementer informs the ICEMultiDocObserver about the current file(s)
+   * An implementer informs the IMultiDocObserver about the current file(s)
    *)
-  TCEMultiDocSubject = specialize TCECustomSubject<ICEDocumentObserver>;
+  TMultiDocSubject = specialize TCustomSubject<IDocumentObserver>;
 
 
 
   (**
    * An implementer is informed about the current project(s).
-   * Usually observer should keep track of two ICECommonProject:
+   * Usually observer should keep track of two ICommonProject:
    * - the "free standing project" (FSP): the project that's not in a group and
    * that has to be freed manualy in order to be replaced.
    * - the current project, the one that's active) which can be either the FSP
    * or one of the project in the group.
    *)
-  ICEProjectObserver = interface(IObserverType)
-  ['ICEProjectObserver']
+  IProjectObserver = interface(IObserverType)
+  ['IProjectObserver']
     // a project has been created/opened
-    procedure projNew(project: ICECommonProject);
+    procedure projNew(project: ICommonProject);
     // a project has been modified: switches, source name, ...
-    procedure projChanged(project: ICECommonProject);
+    procedure projChanged(project: ICommonProject);
     // a project is about to be closed.
-    procedure projClosing(project: ICECommonProject);
+    procedure projClosing(project: ICommonProject);
     // a project is focused, it can be inGroup or not
-    procedure projFocused(project: ICECommonProject);
+    procedure projFocused(project: ICommonProject);
     // project is about to be compiled, time to lock related actions.
-    procedure projCompiling(project: ICECommonProject);
+    procedure projCompiling(project: ICommonProject);
     // project compilation is finsihed, related actions can be unlocked.
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projCompiled(project: ICommonProject; success: boolean);
   end;
   (**
-   * An implementer informs the ICEProjectObserver about the current project(s)
+   * An implementer informs the IProjectObserver about the current project(s)
    *)
-  TCEProjectSubject = specialize TCECustomSubject<ICEProjectObserver>;
+  TProjectSubject = specialize TCustomSubject<IProjectObserver>;
 
 
 
   (**
    * An implementer can expose customizable shortcuts to be edited in a dedicated widget.
    *)
-  ICEEditableShortCut = interface(IObserverType)
-  ['ICEEditableShortCut']
-    // a TCEEditableShortCutSubject will start to collect shortcuts if result.
+  IEditableShortCut = interface(IObserverType)
+  ['IEditableShortCut']
+    // a TEditableShortCutSubject will start to collect shortcuts if result.
     function scedWantFirst: boolean;
-    // a TCEEditableShortCutSubject collects the information on the shortcuts while result.
+    // a TEditableShortCutSubject collects the information on the shortcuts while result.
     function scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
-    // a TCEEditableShortCutSubject sends the possibly modified shortcut.
+    // a TEditableShortCutSubject sends the possibly modified shortcut.
     procedure scedSendItem(const category, identifier: string; aShortcut: TShortcut);
-    // a TCEEditableShortCutSubject has finished to send the shortcuts.
+    // a TEditableShortCutSubject has finished to send the shortcuts.
     procedure scedSendDone;
   end;
   (**
    * An implementer manages its observers shortcuts.
    *)
-  TCEEditableShortCutSubject = specialize TCECustomSubject<ICEEditableShortCut>;
+  TEditableShortCutSubject = specialize TCustomSubject<IEditableShortCut>;
 
   (**
    * Listen to mini explorer changes. Mostly made to prevent redundant updates
    * of the symbolic string translater.
    *)
-  ICEMiniExplorerObserver = interface(IObserverType)
-  ['ICEMiniExplorerObserver']
+  IMiniExplorerObserver = interface(IObserverType)
+  ['IMiniExplorerObserver']
     procedure mnexDirectoryChanged(const directory: string);
   end;
   (**
    * Mini-explorer implements this.
    *)
-  TCEMiniExplorerSubject = specialize TCECustomSubject<ICEMiniExplorerObserver>;
+  TMiniExplorerSubject = specialize TCustomSubject<IMiniExplorerObserver>;
 
 
   // the option editor uses this value as a hint to display an option container.
@@ -206,7 +206,7 @@ type
     oekForm,    // the editor will cast the result of optionedWantContainer as a TForm and host this form
     oekControl  // the editor will cast the result of optionedWantContainer as a TControl and host this control
   );
-  // event generated by the option editor and passed to an ICEEditableOptions.
+  // event generated by the option editor and passed to an IEditableOptions.
   TOptionEditorEvent = (
     oeeCancel,    // the "cancel" button of the option editor is pressed
     oeeAccept,    // the "accept" button of the option editor is pressed
@@ -216,8 +216,8 @@ type
   (**
    * An implementer can expose options to be edited in a dedicated widget.
    *)
-  ICEEditableOptions = interface(IObserverType)
-  ['ICEEditableOptions']
+  IEditableOptions = interface(IObserverType)
+  ['IEditableOptions']
     // the widget wants the category.
     function optionedWantCategory(): string;
     // the widget wants to know if the options will use a generic editor or a custom form.
@@ -232,22 +232,22 @@ type
   (**
    * An implementer displays its observers editable options.
    *)
-  TCEEditableOptionsSubject = specialize TCECustomSubject<ICEEditableOptions>;
+  TEditableOptionsSubject = specialize TCustomSubject<IEditableOptions>;
 
 
 
-  /// describes the message kind, 'amkAuto' implies that an ICELogMessageObserver guess the kind.
-  TCEAppMessageKind = (amkAuto, amkBub, amkInf, amkHint, amkWarn, amkErr);
-  /// describes the message context. Used by a ICELogMessageObserver to filter the messages.
-  TCEAppMessageCtxt = (
+  /// describes the message kind, 'amkAuto' implies that an ILogMessageObserver guess the kind.
+  TAppMessageKind = (amkAuto, amkBub, amkInf, amkHint, amkWarn, amkErr);
+  /// describes the message context. Used by a ILogMessageObserver to filter the messages.
+  TAppMessageCtxt = (
     amcAll,         // used as filter
     amcEdit,        // used as filter
     amcProj,        // used as filter
     amcApp,         // used as filter
     amcMisc,        // used as filter
-    amcAutoEdit,    // same as amcEdit but the message data is set automatically by the ICEMessagesDisplay
-    amcAutoProj,    // same as amcProj but the message data is set automatically by the ICEMessagesDisplay
-    amcAutoCompile  // same as amcAutoEdit or amcAutoProj but set by the ICEMessagesDisplay according to what's being compiled.
+    amcAutoEdit,    // same as amcEdit but the message data is set automatically by the IMessagesDisplay
+    amcAutoProj,    // same as amcProj but the message data is set automatically by the IMessagesDisplay
+    amcAutoCompile  // same as amcAutoEdit or amcAutoProj but set by the IMessagesDisplay according to what's being compiled.
   );
 
   TLifetimeStatus = (
@@ -259,7 +259,7 @@ type
   (**
    * Single service providing information about the IDE liftetime
    *)
-  ICELifetimeManager = interface(ICESingleService)
+  ILifetimeManager = interface(ISingleService)
     function getLifetimeStatus: TLifetimeStatus;
     function asObject: TObject;
   end;
@@ -267,11 +267,11 @@ type
   (**
    * Single service provided by the messages widget.
    *)
-  ICEMessagesDisplay = interface(ICESingleService)
+  IMessagesDisplay = interface(ISingleService)
     // displays a message.
-    procedure message(const value: string; aData: Pointer; aCtxt: TCEAppMessageCtxt; aKind: TCEAppMessageKind);
+    procedure message(const value: string; aData: Pointer; aCtxt: TAppMessageCtxt; aKind: TAppMessageKind);
     // clears the messages related to the context aCtxt.
-    procedure clearByContext(aCtxt: TCEAppMessageCtxt);
+    procedure clearByContext(aCtxt: TAppMessageCtxt);
     // clears the messages related to the data aData.
     procedure clearByData(aData: Pointer);
   end;
@@ -281,7 +281,7 @@ type
   (**
    * Single service provided by the process-input widget.
    *)
-  ICEProcInputHandler = interface(ICESingleService)
+  IProcInputHandler = interface(ISingleService)
     // add an entry to the list of process which can receive an user input.
     procedure addProcess(aProcess: TProcess);
     // removes an entry.
@@ -295,21 +295,21 @@ type
   (**
    * Single service related to the documents as a collection.
    *)
-  ICEMultiDocHandler = interface(ICESingleService)
+  IMultiDocHandler = interface(ISingleService)
     // returns the count of opened document.
     function documentCount: Integer;
     // returns the nth document.
-    function getDocument(index: Integer): TCESynMemo;
+    function getDocument(index: Integer): TDexedMemo;
     // returns true if the document matching aFilename is already opened.
-    function findDocument(const fname: string): TCESynMemo;
+    function findDocument(const fname: string): TDexedMemo;
     // opens or set the focus on the document matching aFilename.
     procedure openDocument(const fname: string);
     // closes the nth document.
     function closeDocument(index: Integer; promptOnChanged: boolean = true): boolean;
     // closes a particular document.
-    function closeDocument(doc: TCESynMemo; promptOnChanged: boolean = true): boolean;
+    function closeDocument(doc: TDexedMemo; promptOnChanged: boolean = true): boolean;
     // conveniance property.
-    property document[index: integer]: TCESynMemo read getDocument;
+    property document[index: integer]: TDexedMemo read getDocument;
   end;
 
 
@@ -317,9 +317,9 @@ type
   (**
    * Single service related to the project groups
    *)
-  ICEProjectGroup = interface(ICESingleService)
+  IProjectGroup = interface(ISingleService)
     // adds a project to the gtoup.
-    procedure addProject(project: ICECommonProject);
+    procedure addProject(project: ICommonProject);
     // opens a group of project.
     procedure openGroup(const fname: string);
     // saves the group to a file.
@@ -335,11 +335,11 @@ type
     // indicates the index of the project.
     function getProjectIndex: integer;
     // returns the nth project.
-    function getProject(index: Integer): ICECommonProject;
+    function getProject(index: Integer): ICommonProject;
     // returns true if the nth project is modified
     function projectModified(index: integer): boolean;
     // tries to find the project named fname.
-    function findProject(const fname: string): ICECommonProject;
+    function findProject(const fname: string): ICommonProject;
     // selects the nth project of the group.
     procedure setProjectIndex(index: Integer);
     // indicates wether a project is marked for async compilation
@@ -353,7 +353,7 @@ type
   (**
    * Single service related to the expansion of "symbolic strings".
    *)
-  ICESymStringExpander = interface(ICESingleService)
+  ISymStringExpander = interface(ISingleService)
     // expands all the symbols <IDENT> of value in result.
     function expand(const value: string): string;
   end;
@@ -362,7 +362,7 @@ type
   (**
    * Single service related to build-in file explorer.
    *)
-  ICEExplorer = interface(ICESingleService)
+  IExplorer = interface(ISingleService)
     // expands the explorer to the folder "location".
     procedure browse(const location: string);
     // returns current folder.
@@ -373,9 +373,9 @@ type
   (**
    * Single service provided by the options editor.
    *)
-  ICEOptionsEditor = interface(ICESingleService)
+  IOptionsEditor = interface(ISingleService)
     // Shows the editor. When observer is not nil, its category is selected.
-    procedure showOptionEditor(observer: ICEEditableOptions = nil);
+    procedure showOptionEditor(observer: IEditableOptions = nil);
   end;
 
 
@@ -384,7 +384,7 @@ type
   (**
    * Single service provided by the options editor.
    *)
-  ICECompilerSelector = interface(ICESingleService)
+  ICompilerSelector = interface(ISingleService)
     // Indicates wether a D compiler is usable.
     function isCompilerValid(value: DCompiler): boolean;
     // Returns a D compiler exe filename.
@@ -401,7 +401,7 @@ type
   (**
    * Single service that provides access to the main menu.
    *)
-  ICEMainMenu = interface(ICESingleService)
+  IMainMenu = interface(ISingleService)
     // adds a main menu entry
     function mnuAdd: TMenuItem;
     // removes a main menu entry
@@ -413,7 +413,7 @@ type
   (**
    * Single service for DFMT
    *)
-  ICECodeFormatting = interface(ICESingleService)
+  ICodeFormatting = interface(ISingleService)
     // formats the focused editor
     procedure formatCurrent();
   end;
@@ -449,216 +449,216 @@ type
 }
 
   (**
-   * TCEMultiDocSubject primitives.
+   * TMultiDocSubject primitives.
    *)
-  procedure subjDocNew(aSubject: TCEMultiDocSubject; document: TCESynMemo);      {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjDocClosing(aSubject: TCEMultiDocSubject; document: TCESynMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjDocFocused(aSubject: TCEMultiDocSubject; document: TCESynMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjDocChanged(aSubject: TCEMultiDocSubject; document: TCESynMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjDocNew(aSubject: TMultiDocSubject; document: TDexedMemo);      {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjDocClosing(aSubject: TMultiDocSubject; document: TDexedMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjDocFocused(aSubject: TMultiDocSubject; document: TDexedMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjDocChanged(aSubject: TMultiDocSubject; document: TDexedMemo);  {$IFDEF RELEASE}inline;{$ENDIF}
 
   (**
-   * TCEProjectSubject primitives.
+   * TProjectSubject primitives.
    *)
-  procedure subjProjNew(aSubject: TCEProjectSubject; project: ICECommonProject);     {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjClosing(aSubject: TCEProjectSubject; project: ICECommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjFocused(aSubject: TCEProjectSubject; project: ICECommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjChanged(aSubject: TCEProjectSubject; project: ICECommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjCompiling(aSubject: TCEProjectSubject; project: ICECommonProject);{$IFDEF RELEASE}inline;{$ENDIF}
-  procedure subjProjCompiled(aSubject: TCEProjectSubject; project: ICECommonProject; success: boolean);{$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjNew(aSubject: TProjectSubject; project: ICommonProject);     {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjClosing(aSubject: TProjectSubject; project: ICommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjFocused(aSubject: TProjectSubject; project: ICommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjChanged(aSubject: TProjectSubject; project: ICommonProject); {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjCompiling(aSubject: TProjectSubject; project: ICommonProject);{$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjProjCompiled(aSubject: TProjectSubject; project: ICommonProject; success: boolean);{$IFDEF RELEASE}inline;{$ENDIF}
 
   (**
-   * TCEMiniExplorerSubject primitives.
+   * TMiniExplorerSubject primitives.
    *)
-  procedure subjMnexDirectoryChanged(aSubject: TCEMiniExplorerSubject; const directory: string); {$IFDEF RELEASE}inline;{$ENDIF}
+  procedure subjMnexDirectoryChanged(aSubject: TMiniExplorerSubject; const directory: string); {$IFDEF RELEASE}inline;{$ENDIF}
 
 
 {
   Service getters:
 }
-  function getMessageDisplay(var obj: ICEMessagesDisplay): ICEMessagesDisplay; inline;
-  function getMessageDisplay: ICEMessagesDisplay; inline;
-  function getprocInputHandler: ICEProcInputHandler; inline;
-  function getMultiDocHandler: ICEMultiDocHandler; inline;
-  function getSymStringExpander: ICESymStringExpander; inline;
-  function getProjectGroup: ICEProjectGroup; inline;
-  function getExplorer: ICEExplorer; inline;
-  function getOptionsEditor: ICEOptionsEditor; inline;
-  function getCompilerSelector: ICECompilerSelector; inline;
-  function getMainMenu: ICEMainMenu; inline;
-  function getCodeFormatting: ICECodeFormatting; inline;
-  function getLifeTimeManager: ICELifetimeManager; inline;
+  function getMessageDisplay(var obj: IMessagesDisplay): IMessagesDisplay; inline;
+  function getMessageDisplay: IMessagesDisplay; inline;
+  function getprocInputHandler: IProcInputHandler; inline;
+  function getMultiDocHandler: IMultiDocHandler; inline;
+  function getSymStringExpander: ISymStringExpander; inline;
+  function getProjectGroup: IProjectGroup; inline;
+  function getExplorer: IExplorer; inline;
+  function getOptionsEditor: IOptionsEditor; inline;
+  function getCompilerSelector: ICompilerSelector; inline;
+  function getMainMenu: IMainMenu; inline;
+  function getCodeFormatting: ICodeFormatting; inline;
+  function getLifeTimeManager: ILifetimeManager; inline;
 
 implementation
 
-{$REGION TCEMultiDocSubject ----------------------------------------------------}
-procedure subjDocNew(aSubject: TCEMultiDocSubject; document: TCESynMemo);
+{$REGION TMultiDocSubject ----------------------------------------------------}
+procedure subjDocNew(aSubject: TMultiDocSubject; document: TDexedMemo);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEDocumentObserver).docNew(document);
+    (fObservers[i] as IDocumentObserver).docNew(document);
 end;
 
-procedure subjDocClosing(aSubject: TCEMultiDocSubject; document: TCESynMemo);
+procedure subjDocClosing(aSubject: TMultiDocSubject; document: TDexedMemo);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEDocumentObserver).docClosing(document);
+    (fObservers[i] as IDocumentObserver).docClosing(document);
 end;
 
-procedure subjDocFocused(aSubject: TCEMultiDocSubject; document: TCESynMemo);
+procedure subjDocFocused(aSubject: TMultiDocSubject; document: TDexedMemo);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEDocumentObserver).docFocused(document);
+    (fObservers[i] as IDocumentObserver).docFocused(document);
 end;
 
-procedure subjDocChanged(aSubject: TCEMultiDocSubject; document: TCESynMemo);
+procedure subjDocChanged(aSubject: TMultiDocSubject; document: TDexedMemo);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEDocumentObserver).docChanged(document);
+    (fObservers[i] as IDocumentObserver).docChanged(document);
 end;
 {$ENDREGION}
 
-{$REGION TCEMiniExplorerSubject ------------------------------------------------}
-procedure subjMnexDirectoryChanged(aSubject: TCEMiniExplorerSubject; const directory: string);
+{$REGION TMiniExplorerSubject ------------------------------------------------}
+procedure subjMnexDirectoryChanged(aSubject: TMiniExplorerSubject; const directory: string);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEMiniExplorerObserver).mnexDirectoryChanged(directory);
+    (fObservers[i] as IMiniExplorerObserver).mnexDirectoryChanged(directory);
 end;
 {$ENDREGION}
 
-{$REGION TCEProjectSubject -----------------------------------------------------}
-procedure subjProjNew(aSubject: TCEProjectSubject; project: ICECommonProject);
+{$REGION TProjectSubject -----------------------------------------------------}
+procedure subjProjNew(aSubject: TProjectSubject; project: ICommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).ProjNew(project);
+    (fObservers[i] as IProjectObserver).ProjNew(project);
 end;
 
-procedure subjProjClosing(aSubject: TCEProjectSubject; project: ICECommonProject);
+procedure subjProjClosing(aSubject: TProjectSubject; project: ICommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projClosing(project);
+    (fObservers[i] as IProjectObserver).projClosing(project);
 end;
 
-procedure subjProjFocused(aSubject: TCEProjectSubject; project: ICECommonProject);
+procedure subjProjFocused(aSubject: TProjectSubject; project: ICommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projFocused(project);
+    (fObservers[i] as IProjectObserver).projFocused(project);
 end;
 
-procedure subjProjChanged(aSubject: TCEProjectSubject; project: ICECommonProject);
+procedure subjProjChanged(aSubject: TProjectSubject; project: ICommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projChanged(project);
+    (fObservers[i] as IProjectObserver).projChanged(project);
 end;
 
-procedure subjProjCompiling(aSubject: TCEProjectSubject; project: ICECommonProject);
+procedure subjProjCompiling(aSubject: TProjectSubject; project: ICommonProject);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projCompiling(project);
+    (fObservers[i] as IProjectObserver).projCompiling(project);
 end;
 
-procedure subjProjCompiled(aSubject: TCEProjectSubject; project: ICECommonProject; success: boolean);
+procedure subjProjCompiled(aSubject: TProjectSubject; project: ICommonProject; success: boolean);
 var
   i: Integer;
 begin
   with aSubject do for i:= 0 to fObservers.Count-1 do
-    (fObservers[i] as ICEProjectObserver).projCompiled(project, success);
+    (fObservers[i] as IProjectObserver).projCompiled(project, success);
 end;
 {$ENDREGION}
 
-{$REGION ICESingleService getters ----------------------------------------------}
-function getMessageDisplay(var obj: ICEMessagesDisplay): ICEMessagesDisplay;
+{$REGION ISingleService getters ----------------------------------------------}
+function getMessageDisplay(var obj: IMessagesDisplay): IMessagesDisplay;
 begin
   if obj = nil then
-    obj := EntitiesConnector.getSingleService('ICEMessagesDisplay') as ICEMessagesDisplay;
+    obj := EntitiesConnector.getSingleService('IMessagesDisplay') as IMessagesDisplay;
   exit(obj);
 end;
 
-function getMessageDisplay: ICEMessagesDisplay;
+function getMessageDisplay: IMessagesDisplay;
 begin
-  exit(EntitiesConnector.getSingleService('ICEMessagesDisplay') as ICEMessagesDisplay);
+  exit(EntitiesConnector.getSingleService('IMessagesDisplay') as IMessagesDisplay);
 end;
 
-function getprocInputHandler(var obj: ICEProcInputHandler): ICEProcInputHandler;
+function getprocInputHandler(var obj: IProcInputHandler): IProcInputHandler;
 begin
   if obj = nil then
-    obj := EntitiesConnector.getSingleService('ICEProcInputHandler') as ICEProcInputHandler;
+    obj := EntitiesConnector.getSingleService('IProcInputHandler') as IProcInputHandler;
   exit(obj);
 end;
 
-function getprocInputHandler: ICEProcInputHandler;
+function getprocInputHandler: IProcInputHandler;
 begin
-  exit(EntitiesConnector.getSingleService('ICEProcInputHandler') as ICEProcInputHandler);
+  exit(EntitiesConnector.getSingleService('IProcInputHandler') as IProcInputHandler);
 end;
 
-function getMultiDocHandler(var obj: ICEMultiDocHandler): ICEMultiDocHandler;
+function getMultiDocHandler(var obj: IMultiDocHandler): IMultiDocHandler;
 begin
   if obj = nil then
-    obj := EntitiesConnector.getSingleService('ICEMultiDocHandler') as ICEMultiDocHandler;
+    obj := EntitiesConnector.getSingleService('IMultiDocHandler') as IMultiDocHandler;
   exit(obj);
 end;
 
-function getMultiDocHandler: ICEMultiDocHandler;
+function getMultiDocHandler: IMultiDocHandler;
 begin
-  exit(EntitiesConnector.getSingleService('ICEMultiDocHandler') as ICEMultiDocHandler);
+  exit(EntitiesConnector.getSingleService('IMultiDocHandler') as IMultiDocHandler);
 end;
 
-function getSymStringExpander: ICESymStringExpander;
+function getSymStringExpander: ISymStringExpander;
 begin
-  exit(EntitiesConnector.getSingleService('ICESymStringExpander') as ICESymStringExpander);
+  exit(EntitiesConnector.getSingleService('ISymStringExpander') as ISymStringExpander);
 end;
 
-function getProjectGroup: ICEProjectGroup;
+function getProjectGroup: IProjectGroup;
 begin
-  exit(EntitiesConnector.getSingleService('ICEProjectGroup') as ICEProjectGroup);
+  exit(EntitiesConnector.getSingleService('IProjectGroup') as IProjectGroup);
 end;
 
-function getExplorer: ICEExplorer;
+function getExplorer: IExplorer;
 begin
-  exit(EntitiesConnector.getSingleService('ICEExplorer') as ICEExplorer);
+  exit(EntitiesConnector.getSingleService('IExplorer') as IExplorer);
 end;
 
-function getOptionsEditor: ICEOptionsEditor;
+function getOptionsEditor: IOptionsEditor;
 begin
-  exit(EntitiesConnector.getSingleService('ICEOptionsEditor') as ICEOptionsEditor);
+  exit(EntitiesConnector.getSingleService('IOptionsEditor') as IOptionsEditor);
 end;
 
-function getCompilerSelector: ICECompilerSelector;
+function getCompilerSelector: ICompilerSelector;
 begin
-  exit(EntitiesConnector.getSingleService('ICECompilerSelector') as ICECompilerSelector);
+  exit(EntitiesConnector.getSingleService('ICompilerSelector') as ICompilerSelector);
 end;
 
-function getMainMenu: ICEMainMenu;
+function getMainMenu: IMainMenu;
 begin
-  exit(EntitiesConnector.getSingleService('ICEMainMenu') as ICEMainMenu);
+  exit(EntitiesConnector.getSingleService('IMainMenu') as IMainMenu);
 end;
 
-function getCodeFormatting: ICECodeFormatting; inline;
+function getCodeFormatting: ICodeFormatting; inline;
 begin
-  exit(EntitiesConnector.getSingleService('ICECodeFormatting') as ICECodeFormatting);
+  exit(EntitiesConnector.getSingleService('ICodeFormatting') as ICodeFormatting);
 end;
 
-function getLifeTimeManager: ICELifetimeManager; inline;
+function getLifeTimeManager: ILifetimeManager; inline;
 begin
-  exit(EntitiesConnector.getSingleService('ICELifetimeManager') as ICELifetimeManager);
+  exit(EntitiesConnector.getSingleService('ILifetimeManager') as ILifetimeManager);
 end;
 {$ENDREGION}
 

@@ -1,4 +1,4 @@
-inherited CEProjectInspectWidget: TCEProjectInspectWidget
+inherited ProjectInspectWidget: TProjectInspectWidget
   Left = 1443
   Height = 258
   Top = 213
@@ -17,7 +17,6 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
     ClientWidth = 424
     inherited Content: TPanel
       Height = 222
-      Top = 36
       Width = 424
       ClientHeight = 222
       ClientWidth = 424
@@ -50,10 +49,10 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         }
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 416
       OnResize = toolbarResize
-      object btnRemFold: TCEToolButton[0]
+      object btnRemFold: TDexedToolButton[0]
         Left = 141
         Hint = 'remove the selected source parent folder from the project'
         Top = 0
@@ -63,7 +62,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         resourceName = 'FOLDER_DELETE'
         scaledSeparator = False
       end
-      object btnAddFold: TCEToolButton[1]
+      object btnAddFold: TDexedToolButton[1]
         Left = 113
         Hint = 'add a folder of sources to the project'
         Top = 0
@@ -73,7 +72,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         resourceName = 'FOLDER_ADD'
         scaledSeparator = False
       end
-      object btnRemFile: TCEToolButton[2]
+      object btnRemFile: TDexedToolButton[2]
         Left = 85
         Hint = 'remove selected source from the project'
         Top = 0
@@ -83,7 +82,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         resourceName = 'DOCUMENT_DELETE'
         scaledSeparator = False
       end
-      object btnAddFile: TCEToolButton[3]
+      object btnAddFile: TDexedToolButton[3]
         Left = 57
         Hint = 'add a source to the project'
         Top = 0
@@ -108,7 +107,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         FilteredTreeview = Tree
         ExpandAllInitially = True
       end
-      object btnTree: TCEToolButton[5]
+      object btnTree: TDexedToolButton[5]
         Left = 29
         Hint = 'display the file list as a tree'
         Top = 0
@@ -119,7 +118,7 @@ inherited CEProjectInspectWidget: TCEProjectInspectWidget
         resourceName = 'FOLDERS_EXPLORER'
         scaledSeparator = False
       end
-      object btnReload: TCEToolButton[6]
+      object btnReload: TDexedToolButton[6]
         Left = 1
         Hint = 'reload the project, useful to fetch new dependencies or detect new source files'
         Top = 0

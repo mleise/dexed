@@ -1,4 +1,4 @@
-inherited CEEditorWidget: TCEEditorWidget
+inherited EditorWidget: TEditorWidget
   Left = 704
   Height = 434
   Top = 245
@@ -15,7 +15,6 @@ inherited CEEditorWidget: TCEEditorWidget
     ClientWidth = 465
     inherited Content: TPanel
       Height = 398
-      Top = 36
       Width = 465
       ClientHeight = 398
       ClientWidth = 465
@@ -50,7 +49,7 @@ inherited CEEditorWidget: TCEEditorWidget
         UseSystemFont = False
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 457
     end
   end

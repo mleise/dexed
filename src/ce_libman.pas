@@ -90,7 +90,7 @@ type
   strict private
     fCollection: TCollection;
     fItemsByAlias: TItemsByAlias;
-    fMsgs: ICEMessagesDisplay;
+    fMsgs: IMessagesDisplay;
     function getLibraryByIndex(index: integer): TLibraryItem;
     function getLibraryByAlias(const value: string): TLibraryItem;
     function getLibraryByImport(const value: string): TLibraryItem;
@@ -237,7 +237,7 @@ end;
 
 procedure TLibraryItem.updateModulesInfo;
 var
-  prj: ICECommonProject;
+  prj: ICommonProject;
   str: TStringList;
   mdi: TModuleInfo = nil;
   fls: string = '';

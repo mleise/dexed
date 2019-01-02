@@ -27,7 +27,7 @@ type
     -   OutputStack can be used to read the raw output. It allows to seek, which
         overcomes another limitation of the basic process classes.
   }
-  TCEProcess = class(TASyncProcess)
+  TDexedProcess = class(TASyncProcess)
   private
     fRealOnTerminate: TNotifyEvent;
     fRealOnReadData: TNotifyEvent;
@@ -63,7 +63,7 @@ type
     OnReadData is only called if no additional buffers are passed
     during a timeout.
   }
-  TCEAutoBufferedProcess = class(TCEProcess)
+  TAutoBufferedProcess = class(TDexedProcess)
   private
     fNewBufferChecker: TTimer;
     fNewBufferTimeOut: Integer;
@@ -79,13 +79,13 @@ type
     property timeOut: integer read fNewBufferTimeOut write setTimeout;
   end;
 
-  procedure killProcess(var proc: TCEProcess);
+  procedure killProcess(var proc: TDexedProcess);
 
   function prettyReturnStatus(proc: TProcess): string;
 
 implementation
 
-procedure killProcess(var proc: TCEProcess);
+procedure killProcess(var proc: TDexedProcess);
 begin
   if proc = nil then
     exit;
@@ -157,7 +157,7 @@ begin
     result := intToStr(s) + ' (undeterminated meaning)';
 end;
 
-constructor TCEProcess.create(aOwner: TComponent);
+constructor TDexedProcess.create(aOwner: TComponent);
 begin
   inherited;
   FOutputStack := TMemoryStream.Create;
@@ -171,7 +171,7 @@ begin
   TAsyncProcess(self).OnReadData := @internalDoOnReadData;
 end;
 
-destructor TCEProcess.destroy;
+destructor TDexedProcess.destroy;
 begin
   FTerminateChecker.Free;
   FOutputStack.Free;
@@ -179,7 +179,7 @@ begin
   inherited;
 end;
 
-procedure TCEProcess.Execute;
+procedure TDexedProcess.Execute;
 begin
   fHasRead := false;
   fOutputStack.Clear;
@@ -191,7 +191,7 @@ begin
   inherited;
 end;
 
-procedure TCEProcess.fillOutputStack;
+procedure TDexedProcess.fillOutputStack;
 var
   sum, cnt: Integer;
 begin
@@ -209,7 +209,7 @@ begin
   fOutputStack.SetSize(sum);
 end;
 
-procedure TCEProcess.getFullLines(list: TStrings; consume: boolean = true);
+procedure TDexedProcess.getFullLines(list: TStrings; consume: boolean = true);
 var
   stored: Integer;
   lastTerm: Integer;
@@ -244,19 +244,19 @@ begin
   end;
 end;
 
-procedure TCEProcess.setOnTerminate(value: TNotifyEvent);
+procedure TDexedProcess.setOnTerminate(value: TNotifyEvent);
 begin
   fRealOnTerminate := value;
   TAsyncProcess(self).OnTerminate := @internalDoOnTerminate;
 end;
 
-procedure TCEProcess.setOnReadData(value: TNotifyEvent);
+procedure TDexedProcess.setOnReadData(value: TNotifyEvent);
 begin
   fRealOnReadData := value;
   TAsyncProcess(self).OnReadData := @internalDoOnReadData;
 end;
 
-procedure TCEProcess.internalDoOnReadData(sender: TObject);
+procedure TDexedProcess.internalDoOnReadData(sender: TObject);
 begin
   fHasRead := true;
   fillOutputStack;
@@ -264,7 +264,7 @@ begin
     fRealOnReadData(self);
 end;
 
-procedure TCEProcess.internalDoOnTerminate(sender: TObject);
+procedure TDexedProcess.internalDoOnTerminate(sender: TObject);
 begin
   fHasRead := false;
   fTerminateChecker.Enabled := false;
@@ -282,7 +282,7 @@ begin
     fRealOnTerminate(self);
 end;
 
-procedure TCEProcess.checkTerminated(sender: TObject);
+procedure TDexedProcess.checkTerminated(sender: TObject);
 begin
   if Running then
     exit;
@@ -290,7 +290,7 @@ begin
   internalDoOnTerminate(self);
 end;
 
-constructor TCEAutoBufferedProcess.create(aOwner: TComponent);
+constructor TAutoBufferedProcess.create(aOwner: TComponent);
 begin
   inherited;
   fNewBufferTimeOut := 1000;
@@ -300,7 +300,7 @@ begin
   fNewBufferChecker.OnTimer:= @newBufferCheckerChecks;
 end;
 
-procedure TCEAutoBufferedProcess.setTimeout(value: integer);
+procedure TAutoBufferedProcess.setTimeout(value: integer);
 begin
   if fNewBufferTimeOut = value then
     exit;
@@ -308,14 +308,14 @@ begin
   fNewBufferChecker.Interval:= fNewBufferTimeOut;
 end;
 
-procedure TCEAutoBufferedProcess.execute;
+procedure TAutoBufferedProcess.execute;
 begin
   fPreviousSize := fOutputStack.Size;
   fNewBufferChecker.Enabled:=true;
   inherited;
 end;
 
-procedure TCEAutoBufferedProcess.newBufferCheckerChecks(sender: TObject);
+procedure TAutoBufferedProcess.newBufferCheckerChecks(sender: TObject);
 begin
   if fOutputStack.Size = fPreviousSize then
   begin
@@ -325,12 +325,12 @@ begin
   fPreviousSize := fOutputStack.Size;
 end;
 
-procedure TCEAutoBufferedProcess.internalDoOnReadData(sender: TObject);
+procedure TAutoBufferedProcess.internalDoOnReadData(sender: TObject);
 begin
   fillOutputStack;
 end;
 
-procedure TCEAutoBufferedProcess.internalDoOnTerminate(sender: TObject);
+procedure TAutoBufferedProcess.internalDoOnTerminate(sender: TObject);
 begin
   fNewBufferChecker.Enabled:=false;
   inherited;

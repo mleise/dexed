@@ -1,4 +1,4 @@
-inherited CESymbolListWidget: TCESymbolListWidget
+inherited SymbolListWidget: TSymbolListWidget
   Left = 1322
   Height = 430
   Top = 92
@@ -14,7 +14,6 @@ inherited CESymbolListWidget: TCESymbolListWidget
     ClientWidth = 308
     inherited Content: TPanel
       Height = 394
-      Top = 36
       Width = 308
       ClientHeight = 394
       ClientWidth = 308
@@ -56,10 +55,10 @@ inherited CESymbolListWidget: TCESymbolListWidget
         TreeLineColor = clDefault
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 300
       OnResize = toolbarResize
-      object btnRefresh: TCEToolButton[0]
+      object btnRefresh: TDexedToolButton[0]
         Left = 1
         Hint = 'refresh the symbol list'
         Top = 0
@@ -78,10 +77,10 @@ inherited CESymbolListWidget: TCESymbolListWidget
         OnAfterFilter = TreeFilterEdit1AfterFilter
         OnFilterItem = TreeFilterEdit1FilterItem
         ButtonWidth = 28
-        NumGlyphs = 1
         Align = alClient
         BorderSpacing.Left = 30
         BorderSpacing.Around = 2
+        NumGlyphs = 1
         MaxLength = 0
         TabOrder = 0
         OnMouseEnter = TreeFilterEdit1MouseEnter

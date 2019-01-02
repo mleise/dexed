@@ -1,4 +1,4 @@
-inherited CEGdbWidget: TCEGdbWidget
+inherited GdbWidget: TGdbWidget
   Left = 840
   Height = 668
   Top = 219
@@ -15,7 +15,6 @@ inherited CEGdbWidget: TCEGdbWidget
     ClientWidth = 517
     inherited Content: TPanel
       Height = 626
-      Top = 36
       Width = 517
       ClientHeight = 626
       ClientWidth = 517
@@ -78,13 +77,13 @@ inherited CEGdbWidget: TCEGdbWidget
           OnChange = PageControl2Change
           object TabSheet3: TTabSheet
             Caption = 'Variables'
-            ClientHeight = 173
-            ClientWidth = 515
+            ClientHeight = 169
+            ClientWidth = 513
             object lstVariables: TListView
               Left = 2
-              Height = 140
+              Height = 136
               Top = 31
-              Width = 511
+              Width = 509
               Align = alClient
               AutoWidthLastColumn = True
               BorderSpacing.Around = 2
@@ -92,11 +91,11 @@ inherited CEGdbWidget: TCEGdbWidget
                 item
                   AutoSize = True
                   Caption = 'name'
-                  Width = 45
+                  Width = 47
                 end              
                 item
                   Caption = 'value'
-                  Width = 464
+                  Width = 460
                 end>
               GridLines = True
               HideSelection = False
@@ -112,11 +111,11 @@ inherited CEGdbWidget: TCEGdbWidget
               Height = 27
               Hint = 'locate variables'
               Top = 2
-              Width = 511
+              Width = 509
               ButtonWidth = 24
-              NumGlyphs = 1
               Align = alTop
               BorderSpacing.Around = 2
+              NumGlyphs = 1
               MaxLength = 0
               TabOrder = 1
               OnChange = varListFltChange
@@ -124,8 +123,8 @@ inherited CEGdbWidget: TCEGdbWidget
           end
           object TabSheet4: TTabSheet
             Caption = 'Assembler'
-            ClientHeight = 173
-            ClientWidth = 515
+            ClientHeight = 169
+            ClientWidth = 513
             object lstAsm: TListView
               Left = 2
               Height = 161
@@ -139,7 +138,7 @@ inherited CEGdbWidget: TCEGdbWidget
                 item
                   AutoSize = True
                   Caption = 'address'
-                  Width = 59
+                  Width = 61
                 end              
                 item
                   Caption = 'instruction'
@@ -214,14 +213,14 @@ inherited CEGdbWidget: TCEGdbWidget
         TabOrder = 3
         object TabSheet1: TTabSheet
           Caption = 'Call stack'
-          ClientHeight = 173
-          ClientWidth = 515
+          ClientHeight = 169
+          ClientWidth = 513
           object lstCallStack: TListView
             Left = 0
-            Height = 173
+            Height = 169
             Hint = 'call stack'
             Top = 0
-            Width = 515
+            Width = 513
             Align = alClient
             AutoSort = False
             Columns = <            
@@ -251,8 +250,8 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object TabSheet2: TTabSheet
           Caption = 'Thread list'
-          ClientHeight = 173
-          ClientWidth = 515
+          ClientHeight = 169
+          ClientWidth = 513
           object lstThreads: TListView
             Left = 0
             Height = 169
@@ -266,32 +265,32 @@ inherited CEGdbWidget: TCEGdbWidget
               item
                 AutoSize = True
                 Caption = 'id'
-                Width = 20
+                Width = 22
               end            
               item
                 AutoSize = True
                 Caption = 'state'
-                Width = 41
+                Width = 43
               end            
               item
                 AutoSize = True
                 Caption = 'core'
-                Width = 36
+                Width = 38
               end            
               item
                 AutoSize = True
                 Caption = 'function'
-                Width = 61
+                Width = 63
               end            
               item
                 AutoSize = True
                 Caption = 'address'
-                Width = 59
+                Width = 61
               end            
               item
                 AutoSize = True
                 Caption = 'filename'
-                Width = 65
+                Width = 67
               end            
               item
                 Caption = 'line'
@@ -307,8 +306,8 @@ inherited CEGdbWidget: TCEGdbWidget
         end
         object TabSheet5: TTabSheet
           Caption = 'Debugee options'
-          ClientHeight = 173
-          ClientWidth = 515
+          ClientHeight = 169
+          ClientWidth = 513
           object dbgeeOptsEd: TTIPropertyGrid
             Left = 2
             Height = 161
@@ -329,9 +328,9 @@ inherited CEGdbWidget: TCEGdbWidget
         end
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 509
-      object btnStack: TCEToolButton[0]
+      object btnStack: TDexedToolButton[0]
         Left = 238
         Hint = 'view call stack'
         Top = 0
@@ -341,7 +340,7 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'LIST'
         scaledSeparator = False
       end
-      object btnReg: TCEToolButton[1]
+      object btnReg: TDexedToolButton[1]
         Left = 210
         Hint = 'update CPU registers values'
         Top = 0
@@ -351,16 +350,16 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'PROCESSOR'
         scaledSeparator = False
       end
-      object button4: TCEToolButton[2]
+      object button4: TDexedToolButton[2]
         Left = 205
-        Height = 28
+        Height = 5
         Top = 0
         AutoSize = True
         Caption = 'button4'
         Style = tbsDivider
         scaledSeparator = False
       end
-      object btnPause: TCEToolButton[3]
+      object btnPause: TDexedToolButton[3]
         Left = 97
         Hint = 'pause debugging'
         Top = 0
@@ -370,7 +369,7 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'PAUSE'
         scaledSeparator = False
       end
-      object btnStop: TCEToolButton[4]
+      object btnStop: TDexedToolButton[4]
         Left = 41
         Hint = 'stop debugging'
         Top = 0
@@ -380,7 +379,7 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'STOP'
         scaledSeparator = False
       end
-      object btnContinue: TCEToolButton[5]
+      object btnContinue: TDexedToolButton[5]
         Left = 69
         Hint = 'continue debugging'
         Top = 0
@@ -390,7 +389,7 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'PLAY'
         scaledSeparator = False
       end
-      object btnNext: TCEToolButton[6]
+      object btnNext: TDexedToolButton[6]
         Left = 125
         Hint = 'step to next instruction, including in calls'
         Top = 0
@@ -402,7 +401,7 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'GO_DOWN'
         scaledSeparator = False
       end
-      object btnOver: TCEToolButton[7]
+      object btnOver: TDexedToolButton[7]
         Left = 165
         Hint = 'step to the next instruction, excluding calls'
         Top = 0
@@ -414,7 +413,7 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'GO_JUMP'
         scaledSeparator = False
       end
-      object btnVariables: TCEToolButton[8]
+      object btnVariables: TDexedToolButton[8]
         Left = 266
         Hint = 'update variables list'
         Top = 0
@@ -424,7 +423,7 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'WATCH_WINDOW'
         scaledSeparator = False
       end
-      object btnStart: TCEToolButton[9]
+      object btnStart: TDexedToolButton[9]
         Left = 1
         Hint = 'start debugging'
         Top = 0
@@ -436,7 +435,7 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'POWER'
         scaledSeparator = False
       end
-      object btnWatch: TCEToolButton[10]
+      object btnWatch: TDexedToolButton[10]
         Left = 294
         Hint = 'add a watchpoint for the variable selected in the list'
         Top = 0
@@ -448,7 +447,7 @@ inherited CEGdbWidget: TCEGdbWidget
         resourceName = 'CAMERA_ADD'
         scaledSeparator = False
       end
-      object btnEval: TCEToolButton[11]
+      object btnEval: TDexedToolButton[11]
         Left = 334
         Hint = 'evaluate either a variable from the list or a custom expression'
         Top = 0

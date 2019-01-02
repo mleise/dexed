@@ -33,20 +33,20 @@ type
     property packageVersion: string read getPackageVersion;
   end;
 
-  TCELibManEditorWidget = class(TCEWidget, ICEProjectObserver)
-    btnAddLib: TCEToolButton;
-    btnDubFetch: TCEToolButton;
-    btnEditAlias: TCEToolButton;
-    btnEnabled: TCEToolButton;
-    btnMoveDown: TCEToolButton;
-    btnMoveUp: TCEToolButton;
-    btnOpenProj: TCEToolButton;
-    btnReg: TCEToolButton;
-    btnRemLib: TCEToolButton;
-    btnSelFile: TCEToolButton;
-    btnSelfoldOfFiles: TCEToolButton;
-    btnSelProj: TCEToolButton;
-    btnSelRoot: TCEToolButton;
+  TLibManEditorWidget = class(TDexedWidget, IProjectObserver)
+    btnAddLib: TDexedToolButton;
+    btnDubFetch: TDexedToolButton;
+    btnEditAlias: TDexedToolButton;
+    btnEnabled: TDexedToolButton;
+    btnMoveDown: TDexedToolButton;
+    btnMoveUp: TDexedToolButton;
+    btnOpenProj: TDexedToolButton;
+    btnReg: TDexedToolButton;
+    btnRemLib: TDexedToolButton;
+    btnSelFile: TDexedToolButton;
+    btnSelfoldOfFiles: TDexedToolButton;
+    btnSelProj: TDexedToolButton;
+    btnSelRoot: TDexedToolButton;
     List: TListView;
     procedure btnAddLibClick(Sender: TObject);
     procedure btnEnabledClick(Sender: TObject);
@@ -64,15 +64,15 @@ type
     procedure ListEdited(Sender: TObject; Item: TListItem; var value: string);
     procedure ListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
   private
-    fProj: ICECommonProject;
-    fFreeProj: ICECommonProject;
+    fProj: ICommonProject;
+    fFreeProj: ICommonProject;
     procedure updateButtonsState;
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
     function  itemForRow(row: TListItem): TLibraryItem;
     procedure RowToLibrary(row: TListItem; added: boolean = false);
     procedure dataToGrid;
@@ -100,13 +100,13 @@ begin
     'If you click `YES` this will be done, otherwise the new entry will only be used for the completions.');
 end;
 
-constructor TCELibManEditorWidget.Create(aOwner: TComponent);
+constructor TLibManEditorWidget.Create(aOwner: TComponent);
 begin
   inherited;
-  TCEListViewCopyMenu.create(List);
+  TListViewCopyMenu.create(List);
 end;
 
-procedure TCELibManEditorWidget.updateButtonsState;
+procedure TLibManEditorWidget.updateButtonsState;
 var
   i: TIconScaledSize;
 begin
@@ -133,21 +133,21 @@ begin
   end;
 end;
 
-function TCELibManEditorWidget.isAliasRegistered(const anAlias: string): boolean;
+function TLibManEditorWidget.isAliasRegistered(const anAlias: string): boolean;
 var
   i: TListItem = nil;
 begin
   result := list.Items.findCaption(anAlias, i);
 end;
 
-procedure TCELibManEditorWidget.projNew(project: ICECommonProject);
+procedure TLibManEditorWidget.projNew(project: ICommonProject);
 begin
   fProj := project;
   if not project.inGroup then
     fFreeProj := project;
 end;
 
-procedure TCELibManEditorWidget.projChanged(project: ICECommonProject);
+procedure TLibManEditorWidget.projChanged(project: ICommonProject);
 begin
   if fProj = nil then exit;
   if fProj <> project then
@@ -156,7 +156,7 @@ begin
   updateButtonsState;
 end;
 
-procedure TCELibManEditorWidget.projClosing(project: ICECommonProject);
+procedure TLibManEditorWidget.projClosing(project: ICommonProject);
 begin
   if fProj = project then
     fProj := nil;
@@ -165,7 +165,7 @@ begin
   updateButtonsState;
 end;
 
-procedure TCELibManEditorWidget.projFocused(project: ICECommonProject);
+procedure TLibManEditorWidget.projFocused(project: ICommonProject);
 begin
   fProj := project;
   if not project.inGroup then
@@ -175,32 +175,32 @@ begin
   updateButtonsState;
 end;
 
-procedure TCELibManEditorWidget.projCompiling(project: ICECommonProject);
+procedure TLibManEditorWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCELibManEditorWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TLibManEditorWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 
-function TCELibManEditorWidget.itemForRow(row: TListItem): TLibraryItem;
+function TLibManEditorWidget.itemForRow(row: TListItem): TLibraryItem;
 begin
   result := TLibraryItem(row.Data);
 end;
 
-procedure TCELibManEditorWidget.ListEdited(Sender: TObject; Item: TListItem; var value: string);
+procedure TLibManEditorWidget.ListEdited(Sender: TObject; Item: TListItem; var value: string);
 begin
   if Item.isNotNil then
     RowToLibrary(item);
 end;
 
-procedure TCELibManEditorWidget.ListSelectItem(Sender: TObject;
+procedure TLibManEditorWidget.ListSelectItem(Sender: TObject;
   Item: TListItem; Selected: Boolean);
 begin
   updateButtonsState;
 end;
 
-procedure TCELibManEditorWidget.btnAddLibClick(Sender: TObject);
+procedure TLibManEditorWidget.btnAddLibClick(Sender: TObject);
 var
   itm: TListItem;
 begin
@@ -446,7 +446,7 @@ begin
   frm.Free;
 end;
 
-procedure TCELibManEditorWidget.btnDubFetchClick(Sender: TObject);
+procedure TLibManEditorWidget.btnDubFetchClick(Sender: TObject);
 var
   dub: TProcess;
   nme: string = '';
@@ -455,9 +455,9 @@ var
   pth: string;
   dfn: string;
   str: TStringList;
-  itf: ICEMessagesDisplay;
+  itf: IMessagesDisplay;
   err: integer;
-  prj: TCEDubProject;
+  prj: TDubProject;
   ovw: boolean = false;
   row: TListItem = nil;
 begin
@@ -565,7 +565,7 @@ begin
   begin
     // allow "sourceLibrary"
     EntitiesConnector.beginUpdate;
-    prj := TCEDubProject.create(nil);
+    prj := TDubProject.create(nil);
     try
       prj.loadFromFile(dfn);
       if prj.json.isNotNil and TJSONObject(prj.json).Find('targetType').isNotNil
@@ -578,7 +578,7 @@ begin
           row.Data := LibMan.libraries.Add;
         row.Caption:= nme;
         row.SubItems.Clear;
-        nme := projectSourcePath(prj as ICECommonProject);
+        nme := projectSourcePath(prj as ICommonProject);
         row.SubItems.Add(nme);
         row.SubItems.Add(nme);
         row.SubItems.Add(prj.filename);
@@ -600,7 +600,7 @@ begin
 
   // project used to get the infos
   EntitiesConnector.beginUpdate;
-  prj := TCEDubProject.create(nil);
+  prj := TDubProject.create(nil);
   try
     prj.loadFromFile(dfn);
     if prj.filename.isNotEmpty then
@@ -620,7 +620,7 @@ begin
         else
           row.SubItems.Add('');
       end;
-      row.SubItems.Add(projectSourcePath(prj as ICECommonProject));
+      row.SubItems.Add(projectSourcePath(prj as ICommonProject));
       row.SubItems.Add(prj.filename);
       row.SubItems.Add(enableStr[true]);
       row.Selected:=true;
@@ -636,7 +636,7 @@ begin
   end;
 end;
 
-procedure TCELibManEditorWidget.btnEditAliasClick(Sender: TObject);
+procedure TLibManEditorWidget.btnEditAliasClick(Sender: TObject);
 var
   al: string;
   i: integer;
@@ -661,7 +661,7 @@ begin
 
 end;
 
-procedure TCELibManEditorWidget.btnEnabledClick(Sender: TObject);
+procedure TLibManEditorWidget.btnEnabledClick(Sender: TObject);
 begin
   if List.Selected.isNil then
     exit;
@@ -674,10 +674,10 @@ begin
   updateButtonsState;
 end;
 
-procedure TCELibManEditorWidget.btnOpenProjClick(Sender: TObject);
+procedure TLibManEditorWidget.btnOpenProjClick(Sender: TObject);
 var
   fname: string;
-  fmt: TCEProjectFileFormat;
+  fmt: TProjectFileFormat;
 begin
   if List.Selected.isNil then
     exit;
@@ -695,23 +695,23 @@ begin
       fFreeProj.getProject.Free;
     end;
     if fmt = pffDexed then
-      TCENativeProject.create(nil)
+      TNativeProject.create(nil)
     else
-      TCEDubProject.create(nil);
+      TDubProject.create(nil);
     fProj.loadFromFile(fname);
     fProj.activate;
   end
   else dlgOkInfo('the project file for this library seems to be invalid');
 end;
 
-procedure TCELibManEditorWidget.btnRegClick(Sender: TObject);
+procedure TLibManEditorWidget.btnRegClick(Sender: TObject);
 var
   str: TStringList;
   fname: string;
   root: string;
   lalias: string;
   row: TListItem;
-  itf: ICEMessagesDisplay;
+  itf: IMessagesDisplay;
 begin
   if fProj = nil then
     exit;
@@ -770,7 +770,7 @@ begin
   end;
 end;
 
-procedure TCELibManEditorWidget.btnRemLibClick(Sender: TObject);
+procedure TLibManEditorWidget.btnRemLibClick(Sender: TObject);
 begin
   if List.Selected.isNil then
     exit;
@@ -780,7 +780,7 @@ begin
   updateButtonsState;
 end;
 
-procedure TCELibManEditorWidget.btnSelProjClick(Sender: TObject);
+procedure TLibManEditorWidget.btnSelProjClick(Sender: TObject);
 var
   ini: string;
 begin
@@ -800,7 +800,7 @@ begin
   RowToLibrary(List.Selected);
 end;
 
-procedure TCELibManEditorWidget.btnSelFileClick(Sender: TObject);
+procedure TLibManEditorWidget.btnSelFileClick(Sender: TObject);
 var
   ini: string = '';
 begin
@@ -830,7 +830,7 @@ begin
   RowToLibrary(List.Selected);
 end;
 
-procedure TCELibManEditorWidget.btnSelfoldOfFilesClick(Sender: TObject);
+procedure TLibManEditorWidget.btnSelfoldOfFilesClick(Sender: TObject);
 var
   dir, outdir: string;
 begin
@@ -843,7 +843,7 @@ begin
   RowToLibrary(List.Selected);
 end;
 
-procedure TCELibManEditorWidget.btnSelRootClick(Sender: TObject);
+procedure TLibManEditorWidget.btnSelRootClick(Sender: TObject);
 var
   dir: string;
 begin
@@ -864,7 +864,7 @@ begin
   RowToLibrary(List.Selected);
 end;
 
-procedure TCELibManEditorWidget.btnMoveUpClick(Sender: TObject);
+procedure TLibManEditorWidget.btnMoveUpClick(Sender: TObject);
 var
   i: integer;
 begin
@@ -876,7 +876,7 @@ begin
   LibMan.libraries.Exchange(i, i - 1);
 end;
 
-procedure TCELibManEditorWidget.btnMoveDownClick(Sender: TObject);
+procedure TLibManEditorWidget.btnMoveDownClick(Sender: TObject);
 var
   i: integer;
 begin
@@ -888,13 +888,13 @@ begin
   LibMan.libraries.Exchange(i, i + 1);
 end;
 
-procedure TCELibManEditorWidget.DoShow;
+procedure TLibManEditorWidget.DoShow;
 begin
   inherited;
   dataToGrid;
 end;
 
-procedure TCELibManEditorWidget.dataToGrid;
+procedure TLibManEditorWidget.dataToGrid;
 var
   itm: TLibraryItem;
   row: TListItem;
@@ -919,7 +919,7 @@ begin
   List.EndUpdate;
 end;
 
-procedure TCELibManEditorWidget.RowToLibrary(row: TListItem; added: boolean = false);
+procedure TLibManEditorWidget.RowToLibrary(row: TListItem; added: boolean = false);
 var
   itm: TLibraryItem;
 begin

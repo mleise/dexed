@@ -13,7 +13,7 @@ type
   (**
    * Enumerates the symbol kinds, used to index an associative array.
    *)
-  TCESymbol = ( ENV_USER, ENV_HOME, ENV_TEMP, CAF, CAP, MEP,
+  TExpandableSymbol = ( ENV_USER, ENV_HOME, ENV_TEMP, CAF, CAP, MEP,
                 CFF, CFP, CFR, CI, CL, CPF, CPP, CPO, CPOP, CPR, CPN, CPFS, CPCD,
                 CPV, CS);
 const
@@ -23,30 +23,30 @@ const
 type
 
   (**
-   * TCESymbolExpander is designed to expand symbolic strings,
+   * TSymbolExpander is designed to expand symbolic strings,
    * using the information collected from several observer interfaces.
    *)
-  TCESymbolExpander = class(ICEDocumentObserver, ICEProjectObserver, ICESymStringExpander, ICEMiniExplorerObserver)
+  TSymbolExpander = class(IDocumentObserver, IProjectObserver, ISymStringExpander, IMiniExplorerObserver)
   private
-    fProj: TCENativeProject;
-    fProjInterface: ICECommonProject;
-    fDoc: TCESynMemo;
+    fProj: TNativeProject;
+    fProjInterface: ICommonProject;
+    fDoc: TDexedMemo;
     fNeedUpdate: boolean;
-    fExp: ICEExplorer;
-    fSymbols: array[TCESymbol] of string;
+    fExp: IExplorer;
+    fSymbols: array[TExpandableSymbol] of string;
     procedure updateSymbols;
 
-    procedure projNew(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
 
-    procedure docNew(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
 
     procedure mnexDirectoryChanged(const directory: string);
 
@@ -62,10 +62,10 @@ implementation
 uses
   Forms, Classes;
 var
-  symbolExpander: TCESymbolExpander;
+  symbolExpander: TSymbolExpander;
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCESymbolExpander.Create;
+constructor TSymbolExpander.Create;
 begin
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
@@ -84,7 +84,7 @@ begin
   fSymbols[CAP] := fSymbols[CAF].extractFilePath;
 end;
 
-destructor TCESymbolExpander.Destroy;
+destructor TSymbolExpander.Destroy;
 begin
   fNeedUpdate := false;
   EntitiesConnector.removeObserver(self);
@@ -92,18 +92,18 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCESymbolExpander.projNew(project: ICECommonProject);
+{$REGION IProjectObserver ----------------------------------------------------}
+procedure TSymbolExpander.projNew(project: ICommonProject);
 begin
   fProjInterface := project;
   case project.getFormat of
-    pfDEXED: fProj := TCENativeProject(project.getProject);
+    pfDEXED: fProj := TNativeProject(project.getProject);
     pfDUB: fProj := nil;
   end;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.projClosing(project: ICECommonProject);
+procedure TSymbolExpander.projClosing(project: ICommonProject);
 begin
   if fProjInterface = project then
     fProjInterface := nil;
@@ -112,38 +112,38 @@ begin
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.projFocused(project: ICECommonProject);
+procedure TSymbolExpander.projFocused(project: ICommonProject);
 begin
   fProjInterface := project;
   case project.getFormat of
-    pfDEXED: fProj := TCENativeProject(project.getProject);
+    pfDEXED: fProj := TNativeProject(project.getProject);
     pfDUB: fProj := nil;
   end;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.projChanged(project: ICECommonProject);
+procedure TSymbolExpander.projChanged(project: ICommonProject);
 begin
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.projCompiling(project: ICECommonProject);
+procedure TSymbolExpander.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCESymbolExpander.projCompiled(project: ICECommonProject; success: boolean);
+procedure TSymbolExpander.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCESymbolExpander.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TSymbolExpander.docNew(document: TDexedMemo);
 begin
   fDoc := document;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.docClosing(document: TCESynMemo);
+procedure TSymbolExpander.docClosing(document: TDexedMemo);
 begin
   if document <> fDoc then
     exit;
@@ -151,7 +151,7 @@ begin
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.docFocused(document: TCESynMemo);
+procedure TSymbolExpander.docFocused(document: TDexedMemo);
 begin
   if (document.isNotNil) and (fDoc = document) then
     exit;
@@ -159,28 +159,28 @@ begin
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.docChanged(document: TCESynMemo);
+procedure TSymbolExpander.docChanged(document: TDexedMemo);
 begin
   if document <> fDoc then
     exit;
   fNeedUpdate := true;
 end;
 
-procedure TCESymbolExpander.mnexDirectoryChanged(const directory: string);
+procedure TSymbolExpander.mnexDirectoryChanged(const directory: string);
 begin
   fNeedUpdate := true;
 end;
 {$ENDREGION}
 
 {$REGION Symbol things ---------------------------------------------------------}
-procedure TCESymbolExpander.updateSymbols;
+procedure TSymbolExpander.updateSymbols;
 var
   hasNativeProj: boolean;
   hasProjItf: boolean;
   hasDoc: boolean;
   fname: string;
   i: Integer;
-  e: TCESymbol;
+  e: TExpandableSymbol;
   str: TStringList;
 const
   na = '``';
@@ -195,7 +195,7 @@ begin
   if not assigned(fExp) then
     fExp := getExplorer;
 
-  for e := FirstVariableSymbol to high(TCESymbol) do
+  for e := FirstVariableSymbol to high(TExpandableSymbol) do
     fSymbols[e] := na;
 
   if assigned(fExp) then
@@ -257,17 +257,17 @@ begin
     end;
   end;
   //
-  for e := FirstVariableSymbol to high(TCESymbol) do
+  for e := FirstVariableSymbol to high(TExpandableSymbol) do
     if fSymbols[e].isEmpty then
       fSymbols[e] := na;
 end;
 
-function TCESymbolExpander.singleServiceName: string;
+function TSymbolExpander.singleServiceName: string;
 begin
-  exit('ICESymStringExpander');
+  exit('ISymStringExpander');
 end;
 
-function TCESymbolExpander.expand(const value: string): string;
+function TSymbolExpander.expand(const value: string): string;
 var
   rng: TStringRange = (ptr:nil; pos:0; len: 0);
   sym: string;
@@ -326,7 +326,7 @@ end;
 {$ENDREGION}
 
 initialization
-  symbolExpander := TCESymbolExpander.Create;
+  symbolExpander := TSymbolExpander.Create;
 
 finalization
   symbolExpander.Free;

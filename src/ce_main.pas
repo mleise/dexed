@@ -20,9 +20,9 @@ uses
 
 type
 
-  TCEApplicationOptions = class;
+  TApplicationOptions = class;
 
-  TCELifetimeProvider = class(ICELifetimeManager)
+  TLifetimeProvider = class(ILifetimeManager)
   strict private
     fStatus: TLifetimeStatus;
     function singleServiceName: string;
@@ -43,16 +43,16 @@ type
 
   TRunnablesToFolderConditions = set of TRunnableToFolderCondition;
 
-  TCERunnableOptions = class(TWritableLfmTextComponent)
+  TRunnableOptions = class(TWritableLfmTextComponent)
   private
     fCompiler: DCompiler;
     fDetectMain: boolean;
     fDetectLibraries: boolean;
-    fOutputFolder: TCEPathname;
+    fOutputFolder: TPathname;
     fAlwaysToFolder: boolean;
     fStaticSwitches: TStringList;
     fToFolderConditions: TRunnablesToFolderConditions;
-    procedure setOutputFolder(const value: TCEPathname);
+    procedure setOutputFolder(const value: TPathname);
     procedure setStaticSwitches(value: TStringList);
     procedure setCompiler(value: DCompiler);
   protected
@@ -62,7 +62,7 @@ type
     property compiler: DCompiler read fCompiler write setCompiler;
     property detectMain: boolean read fDetectMain write fDetectMain;
     property detectLibraries: boolean read fDetectLibraries write fDetectLibraries;
-    property outputFolder: TCEPathname read fOutputFolder write setOutputFolder;
+    property outputFolder: TPathname read fOutputFolder write setOutputFolder;
     property outputFolderConditions: TRunnablesToFolderConditions read fToFolderConditions write fToFolderConditions;
     property staticSwitches: TStringList read fStaticSwitches write setStaticSwitches;
   public
@@ -73,9 +73,9 @@ type
     procedure sanitizeSwitches;
   end;
 
-  TCEEditableRunnableOptions = class(TCERunnableOptions, ICEEditableOptions)
+  TEditableRunnableOptions = class(TRunnableOptions, IEditableOptions)
   private
-    fBackup: TCERunnableOptions;
+    fBackup: TRunnableOptions;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -86,8 +86,8 @@ type
     destructor destroy; override;
   end;
 
-  { TCEMainForm }
-  TCEMainForm = class(TForm, ICEDocumentObserver, ICEEditableShortCut, ICEProjectObserver, ICEMainMenu)
+  { TMainForm }
+  TMainForm = class(TForm, IDocumentObserver, IEditableShortCut, IProjectObserver, IMainMenu)
     actFileCompAndRun: TAction;
     actFileSaveAll: TAction;
     actFileClose: TAction;
@@ -386,48 +386,48 @@ type
 
     fGitIconIndex: integer;
     fImages: TImageList;
-    fOptionCategories: TCEEditableOptionsSubject;
-    fRunnablesOptions: TCEEditableRunnableOptions;
-    fSymStringExpander: ICESymStringExpander;
-    fProjectGroup: ICEProjectGroup;
+    fOptionCategories: TEditableOptionsSubject;
+    fRunnablesOptions: TEditableRunnableOptions;
+    fSymStringExpander: ISymStringExpander;
+    fProjectGroup: IProjectGroup;
     fCovModUt: boolean;
     fDscanUnittests: boolean;
-    fDoc: TCESynMemo;
+    fDoc: TDexedMemo;
     fFirstTimeRun: boolean;
-    fMultidoc: ICEMultiDocHandler;
+    fMultidoc: IMultiDocHandler;
     fScCollectCount: Integer;
     fUpdateCount: NativeInt;
-    fProject: ICECommonProject;
-    fFreeProj: ICECommonProject;
-    fProjBeforeGroup: ICECommonProject;
-    fDubProject: TCEDubProject;
-    fNativeProject: TCENativeProject;
-    fProjMru: TCEMRUProjectList;
-    fFileMru: TCEMRUDocumentList;
-    fPrjGrpMru: TCEMRUProjectsGroupList;
-    fWidgList: TCEWidgetList;
-    fMesgWidg: TCEMessagesWidget;
-    fEditWidg: TCEEditorWidget;
-    fProjWidg: TCEProjectInspectWidget;
-    fPrjCfWidg: TCEProjectConfigurationWidget;
-    fFindWidg:  TCESearchWidget;
-    fExplWidg: TCEMiniExplorerWidget;
-    fLibMWidg: TCELibManEditorWidget;
-    fTlsEdWidg: TCEToolsEditorWidget;
-    fPrInpWidg: TCEProcInputWidget;
-    fTodolWidg: TCETodoListWidget;
-    fOptEdWidg: TCEOptionEditorWidget;
-    fSymlWidg: TCESymbolListWidget;
-    fInfoWidg: TCEInfoWidget;
-    fDubProjWidg: TCEDubProjectEditorWidget;
-    fPrjGrpWidg: TCEProjectGroupWidget;
+    fProject: ICommonProject;
+    fFreeProj: ICommonProject;
+    fProjBeforeGroup: ICommonProject;
+    fDubProject: TDubProject;
+    fNativeProject: TNativeProject;
+    fProjMru: TMRUProjectList;
+    fFileMru: TMRUDocumentList;
+    fPrjGrpMru: TMRUProjectsGroupList;
+    fWidgList: TWidgetList;
+    fMesgWidg: TMessagesWidget;
+    fEditWidg: TEditorWidget;
+    fProjWidg: TProjectInspectWidget;
+    fPrjCfWidg: TProjectConfigurationWidget;
+    fFindWidg:  TSearchWidget;
+    fExplWidg: TMiniExplorerWidget;
+    fLibMWidg: TLibManEditorWidget;
+    fTlsEdWidg: TToolsEditorWidget;
+    fPrInpWidg: TProcInputWidget;
+    fTodolWidg: TTodoListWidget;
+    fOptEdWidg: TOptionEditorWidget;
+    fSymlWidg: TSymbolListWidget;
+    fInfoWidg: TInfoWidget;
+    fDubProjWidg: TDubProjectEditorWidget;
+    fPrjGrpWidg: TProjectGroupWidget;
     {$IFDEF UNIX}
-    fTermWWidg: TCETermWidget;
-    fGdbWidg: TCEGdbWidget;
+    fTermWWidg: TTermWidget;
+    fGdbWidg: TGdbWidget;
     {$ENDIF}
 
-    fDfmtWidg: TCEDfmtWidget;
-    fProfWidg: TCEProfileViewerWidget;
+    fDfmtWidg: TDfmtWidget;
+    fProfWidg: TProfileViewerWidget;
     fCompStart: TDateTime;
 
     fRunProjAfterCompArg: boolean;
@@ -436,36 +436,36 @@ type
     fGroupCompilationCnt: integer;
     fProjFromCommandLine: boolean;
     fInitialized: boolean;
-    fRunProc: TCEProcess;
-    fMsgs: ICEMessagesDisplay;
-    fAppliOpts: TCEApplicationOptions;
+    fRunProc: TDexedProcess;
+    fMsgs: IMessagesDisplay;
+    fAppliOpts: TApplicationOptions;
     fProjActionsLock: boolean;
-    fCompilerSelector: ICECompilerSelector;
-    fLifeTimeStatusProvider: TCELifetimeProvider;
+    fCompilerSelector: ICompilerSelector;
+    fLifeTimeStatusProvider: TLifetimeProvider;
     procedure updateFloatingWidgetOnTop(onTop: boolean);
-    procedure widgetDockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
+    procedure widgetDockingChanged(sender: TDexedWidget; newState: TWidgetDockingState);
     procedure mnuOptsItemClick(sender: TObject);
 
-    // ICEMainMenu
+    // IMainMenu
     function singleServiceName: string;
     function mnuAdd: TMenuItem;
     procedure mnuDelete(value: TMenuItem);
 
-    // ICEDocumentObserver
-    procedure docNew(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
+    // IDocumentObserver
+    procedure docNew(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
 
-    // ICEProjectObserver
-    procedure projNew(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    // IProjectObserver
+    procedure projNew(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
 
-    // ICEEditableShortcut
+    // IEditableShortCut
     function scedWantFirst: boolean;
     function scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
     procedure scedSendItem(const category, identifier: string; aShortcut: TShortcut);
@@ -504,11 +504,11 @@ type
 
     // file sub routines
     procedure newFile;
-    procedure saveFile(document: TCESynMemo);
+    procedure saveFile(document: TDexedMemo);
     procedure openFile(const fname: string);
 
     // project sub routines
-    procedure saveProjSource(const document: TCESynMemo);
+    procedure saveProjSource(const document: TDexedMemo);
     procedure newNativeProj;
     procedure newDubProj;
     procedure saveProj;
@@ -544,7 +544,7 @@ type
     procedure UpdateDockCaption(Exclude: TControl = nil); override;
   end;
 
-  TCEPersistentMainShortcuts = class(TWritableLfmTextComponent)
+  TPersistentMainShortcuts = class(TWritableLfmTextComponent)
   private
     fCol: TCollection;
     procedure setCol(value: TCollection);
@@ -558,23 +558,23 @@ type
     procedure assignTo(target: TPersistent); override;
   end;
 
-  TCEPersistentMainMrus = class(TWritableLfmTextComponent)
+  TPersistentMainMrus = class(TWritableLfmTextComponent)
   private
-    fFileMruPt: TCEMRUFileList;
-    fProjMruPt: TCEMRUFileList;
-    fPrjGrpMruPt: TCEMRUFileList;
-    procedure setProjMru(value: TCEMRUFileList);
-    procedure setFileMru(value: TCEMRUFileList);
-    procedure setProjectsGroupMru(value: TCEMRUFileList);
+    fFileMruPt: TMRUFileList;
+    fProjMruPt: TMRUFileList;
+    fPrjGrpMruPt: TMRUFileList;
+    procedure setProjMru(value: TMRUFileList);
+    procedure setFileMru(value: TMRUFileList);
+    procedure setProjectsGroupMru(value: TMRUFileList);
   published
-    property mostRecentFiles: TCEMRUFileList read fFileMruPt write setFileMru;
-    property mostRecentprojects: TCEMRUFileList read fProjMruPt write setProjMru;
-    property mostRecentProjectsGroups: TCEMRUFileList read fPrjGrpMruPt write setProjectsGroupMru;
+    property mostRecentFiles: TMRUFileList read fFileMruPt write setFileMru;
+    property mostRecentprojects: TMRUFileList read fProjMruPt write setProjMru;
+    property mostRecentProjectsGroups: TMRUFileList read fPrjGrpMruPt write setProjectsGroupMru;
   public
-    procedure setTargets(projs: TCEMRUFileList; files: TCEMRUFileList; group: TCEMRUFileList);
+    procedure setTargets(projs: TMRUFileList; files: TMRUFileList; group: TMRUFileList);
   end;
 
-  TCELastDocsAndProjs = class(TWritableLfmTextComponent)
+  TLastDocsAndProjs = class(TWritableLfmTextComponent)
   private
     fDocuments: TStringList;
     fProject: string;
@@ -598,7 +598,7 @@ type
     procedure AssignTo(target: TPersistent); override;
   end;
 
-  TCEApplicationOptionsBase = class(TWritableLfmTextComponent)
+  TApplicationOptionsBase = class(TWritableLfmTextComponent)
   private
     fFloatingWidgetOnTop: boolean;
     fReloadLastDocuments: boolean;
@@ -638,13 +638,13 @@ type
     property splitterScrollSpeed: byte read fSplitterScrollSpeed write setSplitterScsrollSpeed;
     property showBuildDuration: boolean read fShowBuildDuration write fShowBuildDuration default false;
     // property toolBarScaling: TToolBarScaling read fToolBarScaling write fToolBarScaling stored false;
-    // published for ICEEditableOptions but stored by DCD wrapper since it reloads before CEMainForm
+    // published for IEditableOptions but stored by DCD wrapper since it reloads before MainForm
     property dcdPort: word read fDcdPort write fDcdPort stored false;
   end;
 
-  TCEApplicationOptions = class(TCEApplicationOptionsBase, ICEEditableOptions)
+  TApplicationOptions = class(TApplicationOptionsBase, IEditableOptions)
   private
-    fBackup:TCEApplicationOptionsBase;
+    fBackup:TApplicationOptionsBase;
     //
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
@@ -659,7 +659,7 @@ type
   end;
 
 var
-  CEMainForm: TCEMainForm;
+  MainForm: TMainForm;
 
 implementation
 {$R *.lfm}
@@ -667,8 +667,8 @@ implementation
 uses
   SynMacroRecorder, ce_dcd, openssl;
 
-{$REGION TCERunnableOptions ----------------------------------------------------}
-constructor TCERunnableOptions.create(aOwner: TComponent);
+{$REGION TRunnableOptions ----------------------------------------------------}
+constructor TRunnableOptions.create(aOwner: TComponent);
 begin
   inherited;
   fStaticSwitches := TStringList.create;
@@ -677,19 +677,19 @@ begin
 end;
 
 
-destructor TCERunnableOptions.destroy;
+destructor TRunnableOptions.destroy;
 begin
   fStaticSwitches.free;
   inherited;
 end;
 
-procedure TCERunnableOptions.assign(source: TPersistent);
+procedure TRunnableOptions.assign(source: TPersistent);
 var
-  src: TCERunnableOptions;
+  src: TRunnableOptions;
 begin
-  if source is TCERunnableOptions then
+  if source is TRunnableOptions then
   begin
-    src := TCERunnableOptions(source);
+    src := TRunnableOptions(source);
     fCompiler:= src.fCompiler;
     fDetectMain:= src.fDetectMain;
     fDetectLibraries:= src.fDetectLibraries;
@@ -700,13 +700,13 @@ begin
   else inherited;
 end;
 
-procedure TCERunnableOptions.setStaticSwitches(value: TStringList);
+procedure TRunnableOptions.setStaticSwitches(value: TStringList);
 begin
   fStaticSwitches.Assign(value);
   sanitizeSwitches;
 end;
 
-procedure TCERunnableOptions.afterLoad;
+procedure TRunnableOptions.afterLoad;
 begin
   inherited;
   if fStaticSwitches.Count = 0 then
@@ -715,13 +715,13 @@ begin
     sanitizeSwitches;
 end;
 
-procedure TCERunnableOptions.setDefaultSwitches;
+procedure TRunnableOptions.setDefaultSwitches;
 begin
   fStaticSwitches.Clear;
   fStaticSwitches.AddStrings(['-vcolumns', '-w', '-wi']);
 end;
 
-procedure TCERunnableOptions.sanitizeSwitches;
+procedure TRunnableOptions.sanitizeSwitches;
 var
   i: integer;
   sw: string;
@@ -758,7 +758,7 @@ begin
   end;
 end;
 
-procedure TCERunnableOptions.setOutputFolder(const value: TCEPathname);
+procedure TRunnableOptions.setOutputFolder(const value: TPathname);
 begin
   fOutputFolder := value;
   if (length(fOutputFolder) > 0)
@@ -766,7 +766,7 @@ begin
       fOutputFolder += DirectorySeparator;
 end;
 
-procedure TCERunnableOptions.setCompiler(value: DCompiler);
+procedure TRunnableOptions.setCompiler(value: DCompiler);
 begin
   if fCompiler = value then
     exit;
@@ -776,37 +776,37 @@ begin
   fCompiler :=value;
 end;
 
-constructor TCEEditableRunnableOptions.create(aOwner: TComponent);
+constructor TEditableRunnableOptions.create(aOwner: TComponent);
 begin
   inherited;
-  fBackup := TCERunnableOptions.create(nil);
+  fBackup := TRunnableOptions.create(nil);
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCEEditableRunnableOptions.destroy;
+destructor TEditableRunnableOptions.destroy;
 begin
   fBackup.free;
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
 
-function TCEEditableRunnableOptions.optionedWantCategory(): string;
+function TEditableRunnableOptions.optionedWantCategory(): string;
 begin
   exit('Runnable modules');
 end;
 
-function TCEEditableRunnableOptions.optionedWantEditorKind: TOptionEditorKind;
+function TEditableRunnableOptions.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekGeneric);
 end;
 
-function TCEEditableRunnableOptions.optionedWantContainer: TPersistent;
+function TEditableRunnableOptions.optionedWantContainer: TPersistent;
 begin
   fBackup.assign(self);
   exit(self);
 end;
 
-procedure TCEEditableRunnableOptions.optionedEvent(event: TOptionEditorEvent);
+procedure TEditableRunnableOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
     oeeAccept:
@@ -819,17 +819,17 @@ begin
   end;
 end;
 
-function TCEEditableRunnableOptions.optionedOptionsModified: boolean;
+function TEditableRunnableOptions.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION TCEApplicationOptions -------------------------------------------------}
-constructor TCEApplicationOptions.Create(AOwner: TComponent);
+{$REGION TApplicationOptions -------------------------------------------------}
+constructor TApplicationOptions.Create(AOwner: TComponent);
 begin
   inherited;
-  fBackup := TCEApplicationOptionsBase.Create(self);
+  fBackup := TApplicationOptionsBase.Create(self);
   EntitiesConnector.addObserver(self);
   fDscanUnittests := true;
   fSplitterScrollSpeed := 2;
@@ -841,17 +841,17 @@ begin
   fDcdPort:=DCDWrapper.port;
 end;
 
-function TCEApplicationOptionsBase.getNativeProjecCompiler: DCompiler;
+function TApplicationOptionsBase.getNativeProjecCompiler: DCompiler;
 begin
   exit(ce_ceproject.getCEProjectCompiler);
 end;
 
-procedure TCEApplicationOptionsBase.setNativeProjecCompiler(value: DCompiler);
+procedure TApplicationOptionsBase.setNativeProjecCompiler(value: DCompiler);
 begin
   ce_ceproject.setCEProjectCompiler(value);
 end;
 
-procedure TCEApplicationOptionsBase.setSplitterScsrollSpeed(value: byte);
+procedure TApplicationOptionsBase.setSplitterScsrollSpeed(value: byte);
 begin
   if value < 1 then
     value := 1
@@ -860,23 +860,23 @@ begin
   fSplitterScrollSpeed:=value;
 end;
 
-function TCEApplicationOptionsBase.getAdditionalPATH: string;
+function TApplicationOptionsBase.getAdditionalPATH: string;
 begin
   exit(ce_common.additionalPath);
 end;
 
-function TCEApplicationOptionsBase.getConsoleProgram: string;
+function TApplicationOptionsBase.getConsoleProgram: string;
 begin
   result := ce_common.consoleProgram;
 end;
 
-procedure TCEApplicationOptionsBase.setConsoleProgram(const value: string);
+procedure TApplicationOptionsBase.setConsoleProgram(const value: string);
 begin
   if exeFullName(value).fileExists then
     ce_common.consoleProgram:=value;
 end;
 
-procedure TCEApplicationOptionsBase.setAdditionalPath(const value: string);
+procedure TApplicationOptionsBase.setAdditionalPath(const value: string);
 var
   str: TStringList;
   cat: string;
@@ -896,22 +896,22 @@ begin
   end;
 end;
 
-destructor TCEApplicationOptions.Destroy;
+destructor TApplicationOptions.Destroy;
 begin
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
 
-procedure TCEApplicationOptions.assign(source: TPersistent);
+procedure TApplicationOptions.assign(source: TPersistent);
 begin
-  if source = CEMainForm then
+  if source = MainForm then
   begin
-    fMaxRecentProjs:= CEMainForm.fProjMru.maxCount;
-    fMaxRecentDocs:= CEMainForm.fFileMru.maxCount;
-    fMaxRecentGroups:= CEMainForm.fPrjGrpMru.maxCount;
+    fMaxRecentProjs:= MainForm.fProjMru.maxCount;
+    fMaxRecentDocs:= MainForm.fFileMru.maxCount;
+    fMaxRecentGroups:= MainForm.fPrjGrpMru.maxCount;
     fDcdPort := DcdWrapper.port;
-    fCovModUt:= CEMainForm.fCovModUt;
-    fDscanUnittests := CEMainForm.fDscanUnittests;
+    fCovModUt:= MainForm.fCovModUt;
+    fDscanUnittests := MainForm.fDscanUnittests;
   end else if source = fBackup then
   begin
     fCovModUt:=fBackup.fCovModUt;
@@ -926,30 +926,30 @@ begin
     fdscanUnittests:= fBackup.dscanUnittests;
     fFlatLook:=fBackup.fFlatLook;
     fAutoCheckUpdates:= fBackup.fAutoCheckUpdates;
-    CEMainForm.fDscanUnittests := fDscanUnittests;
+    MainForm.fDscanUnittests := fDscanUnittests;
     nativeProjectCompiler:= fBackup.nativeProjectCompiler;
     fToolBarScaling:= fBackup.fToolBarScaling;
   end
   else inherited;
 end;
 
-procedure TCEApplicationOptions.assignTo(target: TPersistent);
+procedure TApplicationOptions.assignTo(target: TPersistent);
 var
   i: integer;
 begin
-  if target = CEMainForm then
+  if target = MainForm then
   begin
-    CEMainForm.fCovModUt:= fCovModUt;
-    CEMainForm.fProjMru.maxCount := fMaxRecentProjs;
-    CEMainForm.fFileMru.maxCount := fMaxRecentDocs;
-    CEMainForm.fPrjGrpMru.maxCount:= fMaxRecentGroups;
-    CEMainForm.updateFloatingWidgetOnTop(fFloatingWidgetOnTop);
-    CEMainForm.fDscanUnittests := fDscanUnittests;
+    MainForm.fCovModUt:= fCovModUt;
+    MainForm.fProjMru.maxCount := fMaxRecentProjs;
+    MainForm.fFileMru.maxCount := fMaxRecentDocs;
+    MainForm.fPrjGrpMru.maxCount:= fMaxRecentGroups;
+    MainForm.updateFloatingWidgetOnTop(fFloatingWidgetOnTop);
+    MainForm.fDscanUnittests := fDscanUnittests;
     DcdWrapper.port:=fDcdPort;
-    for i := 0 to CEMainForm.fWidgList.Count-1 do
+    for i := 0 to MainForm.fWidgList.Count-1 do
     begin
-      CEMainForm.fWidgList.widget[i].toolbarFlat:=fFlatLook;
-      CEMainForm.fWidgList.widget[i].toolbar.Scaling:= fToolBarScaling;
+      MainForm.fWidgList.widget[i].toolbarFlat:=fFlatLook;
+      MainForm.fWidgList.widget[i].toolbar.Scaling:= fToolBarScaling;
     end;
   end
   else if target = fBackup then
@@ -972,66 +972,66 @@ begin
   else inherited;
 end;
 
-function TCEApplicationOptions.optionedWantCategory(): string;
+function TApplicationOptions.optionedWantCategory(): string;
 begin
   exit('Application');
 end;
 
-function TCEApplicationOptions.optionedWantEditorKind: TOptionEditorKind;
+function TApplicationOptions.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekGeneric);
 end;
 
-function TCEApplicationOptions.optionedWantContainer: TPersistent;
+function TApplicationOptions.optionedWantContainer: TPersistent;
 begin
   AssignTo(fBackup);
   exit(self);
 end;
 
-procedure TCEApplicationOptions.optionedEvent(event: TOptionEditorEvent);
+procedure TApplicationOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   case event of
-    oeeCancel: begin Assign(fBackup); AssignTo(CEMainForm); end;
-    oeeAccept: begin AssignTo(CEMainForm); AssignTo(fBackup);end;
-    oeeSelectCat: begin Assign(CEMainForm); AssignTo(fBackup); end;
-    oeeChange: AssignTo(CEMainForm);
+    oeeCancel: begin Assign(fBackup); AssignTo(MainForm); end;
+    oeeAccept: begin AssignTo(MainForm); AssignTo(fBackup);end;
+    oeeSelectCat: begin Assign(MainForm); AssignTo(fBackup); end;
+    oeeChange: AssignTo(MainForm);
   end;
 end;
 
-function TCEApplicationOptions.optionedOptionsModified: boolean;
+function TApplicationOptions.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
 {$ENDREGION}
 
-{$REGION TCELastDocsAndProjs ---------------------------------------------------}
-constructor TCELastDocsAndProjs.create(aOwner: TComponent);
+{$REGION TLastDocsAndProjs ---------------------------------------------------}
+constructor TLastDocsAndProjs.create(aOwner: TComponent);
 begin
   inherited;
   fDocuments := TStringList.Create;
 end;
 
-destructor TCELastDocsAndProjs.destroy;
+destructor TLastDocsAndProjs.destroy;
 begin
   fDocuments.Free;
   inherited;
 end;
 
-procedure TCELastDocsAndProjs.Assign(source: TPersistent);
+procedure TLastDocsAndProjs.Assign(source: TPersistent);
 var
-  grp: ICEProjectGroup;
-  prj: ICECommonProject = nil;
+  grp: IProjectGroup;
+  prj: ICommonProject = nil;
   pix: integer;
 begin
-  if source = CEMainForm then
+  if source = MainForm then
   begin
     grp := getProjectGroup;
     pix := grp.reloadedProjectIndex;
-    prj := CEMainForm.fFreeProj;
+    prj := MainForm.fFreeProj;
     if assigned(prj) then
       fProject := prj.filename;
     fProjectGroup := getProjectGroup.groupFilename;
-    if prj = CEMainForm.fProject then
+    if prj = MainForm.fProject then
       fProjectIndex :=- 1
     else
       fProjectIndex := pix;
@@ -1039,16 +1039,16 @@ begin
     inherited;
 end;
 
-procedure TCELastDocsAndProjs.AssignTo(target: TPersistent);
+procedure TLastDocsAndProjs.AssignTo(target: TPersistent);
 var
-  dst: TCEMainForm;
-  hdl: ICEMultiDocHandler;
-  mem: TCESynMemo = nil;
-  grp: ICEProjectGroup;
+  dst: TMainForm;
+  hdl: IMultiDocHandler;
+  mem: TDexedMemo = nil;
+  grp: IProjectGroup;
 begin
-  if target is TCEMainForm then
+  if target is TMainForm then
   begin
-    dst := TCEMainForm(target);
+    dst := TMainForm(target);
     if dst.fProjFromCommandLine then
       exit;
 
@@ -1080,16 +1080,16 @@ begin
   else inherited;
 end;
 
-procedure TCELastDocsAndProjs.setDocuments(value: TStringList);
+procedure TLastDocsAndProjs.setDocuments(value: TStringList);
 begin
   fDocuments.Assign(value);
 end;
 
-procedure TCELastDocsAndProjs.beforeSave;
+procedure TLastDocsAndProjs.beforeSave;
 var
   i: integer;
-  docHandler: ICEMultiDocHandler;
-  document: TCESynMemo;
+  docHandler: IMultiDocHandler;
+  document: TDexedMemo;
   str: string;
 begin
   docHandler := getMultiDocHandler;
@@ -1109,9 +1109,9 @@ begin
   end;
 end;
 
-procedure TCELastDocsAndProjs.afterLoad;
+procedure TLastDocsAndProjs.afterLoad;
 var
-  docHandler: ICEMultiDocHandler;
+  docHandler: IMultiDocHandler;
   str: string;
   focusedName: string = '';
   i: integer;
@@ -1137,77 +1137,77 @@ end;
 {$ENDREGION}
 
 {$REGION Lifetime}
-constructor TCELifetimeProvider.create;
+constructor TLifetimeProvider.create;
 begin
   EntitiesConnector.addSingleService(self);
 end;
 
-function TCELifetimeProvider.singleServiceName: string;
+function TLifetimeProvider.singleServiceName: string;
 begin
-  result := 'ICELifetimeManager';
+  result := 'ILifetimeManager';
 end;
 
-function TCELifetimeProvider.getLifetimeStatus: TLifetimeStatus;
+function TLifetimeProvider.getLifetimeStatus: TLifetimeStatus;
 begin
   result := fStatus;
 end;
 
-function TCELifetimeProvider.asObject: TObject;
+function TLifetimeProvider.asObject: TObject;
 begin
   result := self;
 end;
 {$ENDREGION}
 
 {$REGION Actions shortcuts -----------------------------------------------------}
-constructor TCEPersistentMainShortcuts.create(aOwner: TComponent);
+constructor TPersistentMainShortcuts.create(aOwner: TComponent);
 begin
   inherited;
-  fCol := TCollection.Create(TCEPersistentShortcut);
+  fCol := TCollection.Create(TPersistentShortcut);
 end;
 
-destructor TCEPersistentMainShortcuts.destroy;
+destructor TPersistentMainShortcuts.destroy;
 begin
   fCol.Free;
   inherited;
 end;
 
-procedure TCEPersistentMainShortcuts.setCol(value: TCollection);
+procedure TPersistentMainShortcuts.setCol(value: TCollection);
 begin
   fCol.Assign(value);
 end;
 
-procedure TCEPersistentMainShortcuts.assign(source: TPersistent);
+procedure TPersistentMainShortcuts.assign(source: TPersistent);
 var
-  itm: TCEPersistentShortcut;
+  itm: TPersistentShortcut;
   i: Integer;
 begin
   fCol.Clear;
-  if source = CEMainForm then
-    for i := 0 to CEMainForm.Actions.ActionCount-1 do
+  if source = MainForm then
+    for i := 0 to MainForm.Actions.ActionCount-1 do
     begin
-      if CEMainForm.Actions.Actions[i].Owner <> CEMainForm then
+      if MainForm.Actions.Actions[i].Owner <> MainForm then
         continue;
-      itm := TCEPersistentShortcut(fCol.Add);
-      itm.shortcut := TAction(CEMainForm.Actions.Actions[i]).Shortcut;
-      itm.actionName := CEMainForm.Actions.Actions[i].Name;
+      itm := TPersistentShortcut(fCol.Add);
+      itm.shortcut := TAction(MainForm.Actions.Actions[i]).Shortcut;
+      itm.actionName := MainForm.Actions.Actions[i].Name;
     end
   else inherited;
 end;
 
-procedure TCEPersistentMainShortcuts.assignTo(target: TPersistent);
+procedure TPersistentMainShortcuts.assignTo(target: TPersistent);
 var
-  m: TCEPersistentShortcut;
+  m: TPersistentShortcut;
   a: TAction;
   i: integer;
   j: integer;
 begin
-  if target = CEMainForm then
+  if target = MainForm then
     for i:= 0 to fCol.Count-1 do
   begin
-    m := TCEPersistentShortcut(fCol.Items[i]);
-    for j := 0 to CEMainForm.Actions.ActionCount-1 do
+    m := TPersistentShortcut(fCol.Items[i]);
+    for j := 0 to MainForm.Actions.ActionCount-1 do
     begin
-      a := TAction(CEMainForm.Actions.Actions[j]);
+      a := TAction(MainForm.Actions.Actions[j]);
       if a.Name = m.actionName then
       begin
         a.shortcut := m.shortcut;
@@ -1219,24 +1219,24 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION TCEPersistentMainMrus -------------------------------------------------}
-procedure TCEPersistentMainMrus.setProjMru(value: TCEMRUFileList);
+{$REGION TPersistentMainMrus -------------------------------------------------}
+procedure TPersistentMainMrus.setProjMru(value: TMRUFileList);
 begin
   fProjMruPt.assign(value);
 end;
 
-procedure TCEPersistentMainMrus.setFileMru(value: TCEMRUFileList);
+procedure TPersistentMainMrus.setFileMru(value: TMRUFileList);
 begin
   fFileMruPt.assign(value);
 end;
 
-procedure TCEPersistentMainMrus.setProjectsGroupMru(value: TCEMRUFileList);
+procedure TPersistentMainMrus.setProjectsGroupMru(value: TMRUFileList);
 begin
   fPrjGrpMruPt.assign(value);
 end;
 
-procedure TCEPersistentMainMrus.setTargets(projs: TCEMRUFileList; files: TCEMRUFileList;
-  group: TCEMRUFileList);
+procedure TPersistentMainMrus.setTargets(projs: TMRUFileList; files: TMRUFileList;
+  group: TMRUFileList);
 begin
   fFileMruPt := files;
   fProjMruPt := projs;
@@ -1245,9 +1245,9 @@ end;
 {$ENDREGION}
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEMainForm.create(aOwner: TComponent);
+constructor TMainForm.create(aOwner: TComponent);
 begin
-  fLifeTimeStatusProvider := TCELifetimeProvider.create;
+  fLifeTimeStatusProvider := TLifetimeProvider.create;
   fLifeTimeStatusProvider.lifetimeStatus:=lfsLoading;
 
 
@@ -1257,7 +1257,7 @@ begin
   width := (Screen.Width div 3) * 2;
   height := (Screen.Height div 3) * 2;
 
-  fOptionCategories := TCEEditableOptionsSubject.create;
+  fOptionCategories := TEditableOptionsSubject.create;
 
   EntitiesConnector.addObserver(self);
   EntitiesConnector.addSingleService(self);
@@ -1292,7 +1292,7 @@ begin
   fInitialized := true;
 end;
 
-procedure TCEMainForm.getCMdParams;
+procedure TMainForm.getCMdParams;
 var
   value: string;
   lst: TStringList;
@@ -1343,19 +1343,19 @@ begin
   end;
 end;
 
-procedure TCEMainForm.InitOptionsMenu;
+procedure TMainForm.InitOptionsMenu;
 var
   l: TStringList;
   i: integer;
   s: string;
   t: TMenuItem;
-  e: ICEEditableOptions;
+  e: IEditableOptions;
 begin
   l := TStringList.Create;
   try
     for i := 0 to fOptionCategories.observersCount-1 do
     begin
-      e := fOptionCategories.observers[i] as ICEEditableOptions;
+      e := fOptionCategories.observers[i] as IEditableOptions;
       s := e.optionedWantCategory;
       {$PUSH} {$WARNINGS OFF}
       l.AddObject(s, TObject(e));
@@ -1375,19 +1375,19 @@ begin
   end;
 end;
 
-procedure TCEMainForm.mnuOptsItemClick(sender: TObject);
+procedure TMainForm.mnuOptsItemClick(sender: TObject);
 var
-  c: ICEEditableOptions;
+  c: IEditableOptions;
 begin
-  c := ICEEditableOptions(TMenuItem(sender).Tag);
+  c := IEditableOptions(TMenuItem(sender).Tag);
   getOptionsEditor.showOptionEditor(c);
 end;
 
-procedure TCEMainForm.InitMRUs;
+procedure TMainForm.InitMRUs;
 begin
-  fProjMru := TCEMRUProjectList.Create;
-  fFileMru := TCEMRUDocumentList.Create;
-  fPrjGrpMru:= TCEMRUProjectsGroupList.create;
+  fProjMru := TMRUProjectList.Create;
+  fFileMru := TMRUDocumentList.Create;
+  fPrjGrpMru:= TMRUProjectsGroupList.create;
   fProjMru.objectTag := mnuItemMruProj;
   fFileMru.objectTag := mnuItemMruFile;
   fPrjGrpMru.objectTag := mnuItemMruGroup;
@@ -1396,7 +1396,7 @@ begin
   fPrjGrpMru.OnChange := @mruChange;
 end;
 
-procedure TCEMainForm.InitImages;
+procedure TMainForm.InitImages;
 var
   c: TIconScaledSize;
   z: array[TIconScaledSize] of integer = (16, 24, 32);
@@ -1538,34 +1538,34 @@ begin
   actProjGitBranchesUpd.ImageIndex:=i;
 end;
 
-procedure TCEMainForm.InitWidgets;
+procedure TMainForm.InitWidgets;
 var
-  widg: TCEWidget;
+  widg: TDexedWidget;
   act: TAction;
   itm: TMenuItem;
   idx: integer;
 begin
-  fWidgList   := TCEWidgetList.Create;
-  fMesgWidg   := TCEMessagesWidget.create(self);
-  fEditWidg   := TCEEditorWidget.create(self);
-  fProjWidg   := TCEProjectInspectWidget.create(self);
-  fPrjCfWidg  := TCEProjectConfigurationWidget.create(self);
-  fFindWidg   := TCESearchWidget.create(self);
-  fExplWidg   := TCEMiniExplorerWidget.create(self);
-  fLibMWidg   := TCELibManEditorWidget.create(self);
-  fTlsEdWidg  := TCEToolsEditorWidget.create(self);
-  fPrInpWidg  := TCEProcInputWidget.create(self);
-  fTodolWidg  := TCETodoListWidget.create(self);
-  fOptEdWidg  := TCEOptionEditorWidget.create(self);
-  fSymlWidg   := TCESymbolListWidget.create(self);
-  fInfoWidg   := TCEInfoWidget.create(self);
-  fDubProjWidg:= TCEDubProjectEditorWidget.create(self);
-  fDfmtWidg   := TCEDfmtWidget.create(self);
-  fPrjGrpWidg := TCEProjectGroupWidget.create(self);
-  fProfWidg   := TCEProfileViewerWidget.create(self);
+  fWidgList   := TWidgetList.Create;
+  fMesgWidg   := TMessagesWidget.create(self);
+  fEditWidg   := TEditorWidget.create(self);
+  fProjWidg   := TProjectInspectWidget.create(self);
+  fPrjCfWidg  := TProjectConfigurationWidget.create(self);
+  fFindWidg   := TSearchWidget.create(self);
+  fExplWidg   := TMiniExplorerWidget.create(self);
+  fLibMWidg   := TLibManEditorWidget.create(self);
+  fTlsEdWidg  := TToolsEditorWidget.create(self);
+  fPrInpWidg  := TProcInputWidget.create(self);
+  fTodolWidg  := TTodoListWidget.create(self);
+  fOptEdWidg  := TOptionEditorWidget.create(self);
+  fSymlWidg   := TSymbolListWidget.create(self);
+  fInfoWidg   := TInfoWidget.create(self);
+  fDubProjWidg:= TDubProjectEditorWidget.create(self);
+  fDfmtWidg   := TDfmtWidget.create(self);
+  fPrjGrpWidg := TProjectGroupWidget.create(self);
+  fProfWidg   := TProfileViewerWidget.create(self);
   {$IFDEF UNIX}
-  fTermWWidg  := TCETermWidget.create(self);
-  fGdbWidg    := TCEGdbWidget.create(self);
+  fTermWWidg  := TTermWidget.create(self);
+  fGdbWidg    := TGdbWidget.create(self);
   {$ENDIF}
 
   getMessageDisplay(fMsgs);
@@ -1616,14 +1616,14 @@ begin
   end;
 end;
 
-procedure TCEMainForm.LockTopWindow(Sender: TObject; var NewSize: Integer;
+procedure TMainForm.LockTopWindow(Sender: TObject; var NewSize: Integer;
   var Accept: Boolean);
 begin
   //TODO-cdocking: top splitter pos can change even if locked (e.g after resize)
   accept := GetKeyShiftState = [ssCtrl];
 end;
 
-procedure TCEMainForm.DockSplitterMw(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+procedure TMainForm.DockSplitterMw(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 var
   offs: integer;
   splt: TAnchorDockSplitter;
@@ -1638,10 +1638,10 @@ begin
   Handled := true;
 end;
 
-procedure TCEMainForm.setSplitterWheelEvent;
+procedure TMainForm.setSplitterWheelEvent;
 var
   i: integer;
-  widg: TCEWidget;
+  widg: TDexedWidget;
   site: TControl;
   anchl: TAnchorKind;
 begin
@@ -1666,15 +1666,15 @@ begin
   end;
 end;
 
-procedure TCEMainForm.widgetDockingChanged(sender: TCEWidget; newState: TWidgetDockingState);
+procedure TMainForm.widgetDockingChanged(sender: TDexedWidget; newState: TWidgetDockingState);
 begin
   setSplitterWheelEvent;
 end;
 
-procedure TCEMainForm.InitDocking(reset: boolean = false);
+procedure TMainForm.InitDocking(reset: boolean = false);
 var
   i: Integer;
-  w: TCEWidget;
+  w: TDexedWidget;
   s: TAnchorDockSplitter;
 begin
 
@@ -1776,13 +1776,13 @@ begin
   end;
 end;
 
-procedure TCEMainForm.LoadSettings;
+procedure TMainForm.LoadSettings;
 var
   fname: string;
 begin
   // project and files MRU
   fname := getDocPath + 'mostrecent.txt';
-  if fname.fileExists then with TCEPersistentMainMrus.create(nil) do
+  if fname.fileExists then with TPersistentMainMrus.create(nil) do
   try
     setTargets(fFileMru, fProjMru, fPrjGrpMru);
     loadFromFile(fname);
@@ -1791,7 +1791,7 @@ begin
   end;
   // shortcuts for the actions standing in the main action list
   fname := getDocPath + 'mainshortcuts.txt';
-  if fname.fileExists then with TCEPersistentMainShortcuts.create(nil) do
+  if fname.fileExists then with TPersistentMainShortcuts.create(nil) do
   try
     loadFromFile(fname);
     assignTo(self);
@@ -1799,12 +1799,12 @@ begin
     Free;
   end;
   // runnables opts
-  fRunnablesOptions := TCEEditableRunnableOptions.create(self);
+  fRunnablesOptions := TEditableRunnableOptions.create(self);
   fname := getDocPath + 'runnables.txt';
   if fname.fileExists then
     fRunnablesOptions.loadFromFile(fname);
   // globals opts
-  fAppliOpts := TCEApplicationOptions.Create(self);
+  fAppliOpts := TApplicationOptions.Create(self);
   fname := getDocPath + 'application.txt';
   if fname.fileExists then
   begin
@@ -1814,12 +1814,12 @@ begin
   else fFirstTimeRun := true;
 end;
 
-procedure TCEMainForm.SaveSettings;
+procedure TMainForm.SaveSettings;
 begin
   if not fInitialized then
     exit;
   // project and files MRU
-  with TCEPersistentMainMrus.create(nil) do
+  with TPersistentMainMrus.create(nil) do
   try
     setTargets(fFileMru, fProjMru, fPrjGrpMru);
     saveToFile(getDocPath + 'mostrecent.txt');
@@ -1827,7 +1827,7 @@ begin
     Free;
   end;
   // shortcuts for the actions standing in the main action list
-  with TCEPersistentMainShortcuts.create(nil) do
+  with TPersistentMainShortcuts.create(nil) do
   try
     assign(self);
     saveToFile(getDocPath + 'mainshortcuts.txt');
@@ -1841,7 +1841,7 @@ begin
   fRunnablesOptions.saveToFile(getDocPath + 'runnables.txt');
 end;
 
-procedure TCEMainForm.SaveDocking;
+procedure TMainForm.SaveDocking;
 var
   xcfg: TXMLConfigStorage;
   i: integer;
@@ -1891,7 +1891,7 @@ begin
   end;
 end;
 
-function TCEMainForm.LoadDocking: boolean;
+function TMainForm.LoadDocking: boolean;
 var
   xcfg: TXMLConfigStorage;
   str: TMemoryStream;
@@ -1942,7 +1942,7 @@ begin
   result := true;
 end;
 
-procedure TCEMainForm.FreeRunnableProc;
+procedure TMainForm.FreeRunnableProc;
 var
   fname: string;
 begin
@@ -1961,9 +1961,9 @@ begin
     sysutils.DeleteFile(fname);
 end;
 
-procedure TCEMainForm.SaveLastDocsAndProj;
+procedure TMainForm.SaveLastDocsAndProj;
 begin
-  with TCELastDocsAndProjs.create(nil) do
+  with TLastDocsAndProjs.create(nil) do
   try
     assign(self);
     saveToFile(getDocPath + 'lastdocsandproj.txt');
@@ -1972,13 +1972,13 @@ begin
   end;
 end;
 
-procedure TCEMainForm.LoadLastDocsAndProj;
+procedure TMainForm.LoadLastDocsAndProj;
 var
   str: string;
 begin
   str := getDocPath + 'lastdocsandproj.txt';
   if str.fileExists then
-    with TCELastDocsAndProjs.create(nil) do
+    with TLastDocsAndProjs.create(nil) do
   try
     loadFromFile(str);
     assignTo(self);
@@ -2065,7 +2065,7 @@ begin
 
 end;
 
-procedure TCEMainForm.DoFirstShow;
+procedure TMainForm.DoFirstShow;
 var
   url: string;
 begin
@@ -2106,29 +2106,29 @@ begin
   fLifeTimeStatusProvider.lifetimeStatus := lfsLoaded;
 end;
 
-procedure TCEMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   // saving doesnt work when csDestroying in comp.state (i.e in destroy)
   if CloseAction = caFree then
     SaveDocking;
 end;
 
-procedure TCEMainForm.FormResize(Sender: TObject);
+procedure TMainForm.FormResize(Sender: TObject);
 begin
   snapTopSplitterToMenu;
 end;
 
-procedure TCEMainForm.FormWindowStateChange(Sender: TObject);
+procedure TMainForm.FormWindowStateChange(Sender: TObject);
 begin
   snapTopSplitterToMenu;
 end;
 
-procedure TCEMainForm.mnuItemAboutClick(Sender: TObject);
+procedure TMainForm.mnuItemAboutClick(Sender: TObject);
 begin
   fInfoWidg.showWidget;
 end;
 
-procedure TCEMainForm.mnuItemCheckUpdClick(Sender: TObject);
+procedure TMainForm.mnuItemCheckUpdClick(Sender: TObject);
 var
   url: string;
 begin
@@ -2142,12 +2142,12 @@ begin
   else dlgOkInfo('No new release available or no connectivity');
 end;
 
-procedure TCEMainForm.mnuItemManualClick(Sender: TObject);
+procedure TMainForm.mnuItemManualClick(Sender: TObject);
 begin
   OpenURL('https://bbasile.github.io/dexed/');
 end;
 
-destructor TCEMainForm.destroy;
+destructor TMainForm.destroy;
 begin
   SaveSettings;
   //
@@ -2163,13 +2163,13 @@ begin
   fLifeTimeStatusProvider.free;
 end;
 
-procedure TCEMainForm.UpdateDockCaption(Exclude: TControl = nil);
+procedure TMainForm.UpdateDockCaption(Exclude: TControl = nil);
 begin
   // otherwise dockmaster puts the widget list.
   Caption := 'dexed';
 end;
 
-procedure TCEMainForm.ApplicationProperties1Exception(Sender: TObject;E: Exception);
+procedure TMainForm.ApplicationProperties1Exception(Sender: TObject;E: Exception);
 begin
   if fMesgWidg.isNil then
     dlgOkError(E.Message)
@@ -2177,14 +2177,14 @@ begin
     fMsgs.message(E.Message, nil, amcApp, amkErr);
 end;
 
-procedure TCEMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 var
   i: Integer;
   f: string = '';
   p: string = '';
   g: string = #9'no';
   c: boolean = false;
-  d: TCESynMemo = nil;
+  d: TDexedMemo = nil;
   b: TTaskDialogBaseButtonItem = nil;
 
 const
@@ -2298,17 +2298,17 @@ begin
     fMultidoc.closeDocument(i, false);
 end;
 
-procedure TCEMainForm.updateDocumentBasedAction(sender: TObject);
+procedure TMainForm.updateDocumentBasedAction(sender: TObject);
 begin
   TAction(sender).Enabled := fDoc.isNotNil;
 end;
 
-procedure TCEMainForm.updateProjectBasedAction(sender: TObject);
+procedure TMainForm.updateProjectBasedAction(sender: TObject);
 begin
   TAction(sender).Enabled := assigned(fProject) {and not fProjActionsLock};
 end;
 
-procedure TCEMainForm.updateDocEditBasedAction(sender: TObject);
+procedure TMainForm.updateDocEditBasedAction(sender: TObject);
 begin
   if fDoc.isNotNil and fDoc.Focused then
     TAction(sender).Enabled := true
@@ -2316,16 +2316,16 @@ begin
     TAction(sender).Enabled := false;
 end;
 
-procedure TCEMainForm.mruChange(Sender: TObject);
+procedure TMainForm.mruChange(Sender: TObject);
 var
-  srcLst: TCEMruFileList;
+  srcLst: TMRUFileList;
   trgMnu: TMenuItem;
   itm: TMenuItem;
   fname: string;
   clickTrg: TNotifyEvent;
   i: integer;
 begin
-  srcLst := TCEMruFileList(Sender);
+  srcLst := TMRUFileList(Sender);
   if srcLst.isNil then
     exit;
   trgMnu := TMenuItem(srcLst.objectTag);
@@ -2372,59 +2372,59 @@ begin
   end;
 end;
 
-procedure TCEMainForm.mruClearClick(Sender: TObject);
+procedure TMainForm.mruClearClick(Sender: TObject);
 var
-  srcLst: TCEMruFileList;
+  srcLst: TMRUFileList;
 begin
-  srcLst := TCEMruFileList(TmenuItem(Sender).Tag);
+  srcLst := TMRUFileList(TmenuItem(Sender).Tag);
   if srcLst.isNotNil then
     srcLst.Clear;
 end;
 
 {$ENDREGION}
 
-{$REGION ICEMultiDocMonitor ----------------------------------------------------}
-procedure TCEMainForm.docNew(document: TCESynMemo);
+{$REGION IMultiDocMonitor ----------------------------------------------------}
+procedure TMainForm.docNew(document: TDexedMemo);
 begin
   fDoc := document;
 end;
 
-procedure TCEMainForm.docClosing(document: TCESynMemo);
+procedure TMainForm.docClosing(document: TDexedMemo);
 begin
   if document <> fDoc then
     exit;
   fDoc := nil;
 end;
 
-procedure TCEMainForm.docFocused(document: TCESynMemo);
+procedure TMainForm.docFocused(document: TDexedMemo);
 begin
   fDoc := document;
 end;
 
-procedure TCEMainForm.docChanged(document: TCESynMemo);
+procedure TMainForm.docChanged(document: TDexedMemo);
 begin
   fDoc := document;
 end;
 {$ENDREGION}
 
-{$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEMainForm.projNew(project: ICECommonProject);
+{$REGION IProjectObserver ----------------------------------------------------}
+procedure TMainForm.projNew(project: ICommonProject);
 begin
   fProject := project;
   case fProject.getFormat of
-    pfDEXED: fNativeProject := TCENativeProject(fProject.getProject);
-    pfDUB: fDubProject := TCEDubProject(fProject.getProject);
+    pfDEXED: fNativeProject := TNativeProject(fProject.getProject);
+    pfDUB: fDubProject := TDubProject(fProject.getProject);
   end;
   if not fProject.inGroup then
     fFreeProj := project;
 end;
 
-procedure TCEMainForm.projChanged(project: ICECommonProject);
+procedure TMainForm.projChanged(project: ICommonProject);
 begin
   showProjTitle;
 end;
 
-procedure TCEMainForm.projClosing(project: ICECommonProject);
+procedure TMainForm.projClosing(project: ICommonProject);
 begin
   if project = fFreeProj then
     fFreeProj := nil;
@@ -2436,12 +2436,12 @@ begin
   showProjTitle;
 end;
 
-procedure TCEMainForm.projFocused(project: ICECommonProject);
+procedure TMainForm.projFocused(project: ICommonProject);
 begin
   fProject := project;
   case fProject.getFormat of
-    pfDEXED: fNativeProject := TCENativeProject(fProject.getProject);
-    pfDUB: fDubProject := TCEDubProject(fProject.getProject);
+    pfDEXED: fNativeProject := TNativeProject(fProject.getProject);
+    pfDUB: fDubProject := TDubProject(fProject.getProject);
   end;
   if not fProject.inGroup then
     fFreeProj := project
@@ -2454,14 +2454,14 @@ begin
   showProjTitle;
 end;
 
-procedure TCEMainForm.projCompiling(project: ICECommonProject);
+procedure TMainForm.projCompiling(project: ICommonProject);
 begin
   fProjActionsLock := true;
   if fAppliOpts.showBuildDuration and not fIsCompilingGroup then
     fCompStart := Time();
 end;
 
-procedure TCEMainForm.projCompiled(project: ICECommonProject; success: boolean);
+procedure TMainForm.projCompiled(project: ICommonProject; success: boolean);
 var
   runArgs: string = '';
   runprev: boolean = true;
@@ -2518,14 +2518,14 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEEditableShortCut ---------------------------------------------------}
-function TCEMainForm.scedWantFirst: boolean;
+{$REGION IEditableShortCut ---------------------------------------------------}
+function TMainForm.scedWantFirst: boolean;
 begin
   fScCollectCount := 0;
   result := true;
 end;
 
-function TCEMainForm.scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
+function TMainForm.scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
 var
   act: TCustomAction;
 begin
@@ -2537,7 +2537,7 @@ begin
   result := fScCollectCount < actions.ActionCount;
 end;
 
-procedure TCEMainForm.scedSendItem(const category, identifier: string; aShortcut: TShortcut);
+procedure TMainForm.scedSendItem(const category, identifier: string; aShortcut: TShortcut);
 var
   act: TCustomAction;
   i: integer;
@@ -2550,25 +2550,25 @@ begin
   end;
 end;
 
-procedure TCEMainForm.scedSendDone;
+procedure TMainForm.scedSendDone;
 begin
 end;
 {$ENDREGION}
 
-{$REGION ICEMAinMenu -----------------------------------------------------------}
-function TCEMainForm.singleServiceName: string;
+{$REGION IMainMenu -----------------------------------------------------------}
+function TMainForm.singleServiceName: string;
 begin
-  exit('ICEMainMenu');
+  exit('IMainMenu');
 end;
 
-function TCEMainForm.mnuAdd: TMenuItem;
+function TMainForm.mnuAdd: TMenuItem;
 begin
   result := TMenuItem.Create(nil);
   mainMenu.Items.Add(result);
   exit(result);
 end;
 
-procedure TCEMainForm.mnuDelete(value: TMenuItem);
+procedure TMainForm.mnuDelete(value: TMenuItem);
 var
   i: integer;
 begin
@@ -2581,7 +2581,7 @@ end;
 {$ENDREGION}
 
 {$REGION file ------------------------------------------------------------------}
-procedure TCEMainForm.actFileHtmlExportExecute(Sender: TObject);
+procedure TMainForm.actFileHtmlExportExecute(Sender: TObject);
 var
   exp: TSynExporterHTML;
 begin
@@ -2608,17 +2608,17 @@ begin
   end;
 end;
 
-procedure TCEMainForm.newFile;
+procedure TMainForm.newFile;
 begin
-  TCESynMemo.Create(nil);
+  TDexedMemo.Create(nil);
 end;
 
-procedure TCEMainForm.openFile(const fname: string);
+procedure TMainForm.openFile(const fname: string);
 begin
   fMultidoc.openDocument(fname);
 end;
 
-procedure TCEMainForm.saveFile(document: TCESynMemo);
+procedure TMainForm.saveFile(document: TDexedMemo);
 begin
   if (document.Highlighter = LfmSyn) or (document.Highlighter = JsSyn) then
     saveProjSource(document)
@@ -2626,12 +2626,12 @@ begin
     document.save;
 end;
 
-procedure TCEMainForm.mruFileItemClick(Sender: TObject);
+procedure TMainForm.mruFileItemClick(Sender: TObject);
 begin
   openFile(TMenuItem(Sender).Hint);
 end;
 
-procedure TCEMainForm.actFileOpenExecute(Sender: TObject);
+procedure TMainForm.actFileOpenExecute(Sender: TObject);
 var
   fname: string;
 begin
@@ -2649,7 +2649,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjOpenContFoldExecute(Sender: TObject);
+procedure TMainForm.actProjOpenContFoldExecute(Sender: TObject);
 begin
   if not assigned(fProject) or not fProject.filename.fileExists then
     exit;
@@ -2657,13 +2657,13 @@ begin
   fExplWidg.showWidget;
 end;
 
-procedure TCEMainForm.actFileNewExecute(Sender: TObject);
+procedure TMainForm.actFileNewExecute(Sender: TObject);
 begin
   newFile;
   fDoc.setFocus;
 end;
 
-procedure TCEMainForm.actFileNewRunExecute(Sender: TObject);
+procedure TMainForm.actFileNewRunExecute(Sender: TObject);
 const
   body: array[boolean] of string =
   (
@@ -2686,7 +2686,7 @@ begin
   fDoc.setFocus;
 end;
 
-procedure TCEMainForm.actFileSaveAsExecute(Sender: TObject);
+procedure TMainForm.actFileSaveAsExecute(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
@@ -2702,7 +2702,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actFileSaveExecute(Sender: TObject);
+procedure TMainForm.actFileSaveExecute(Sender: TObject);
 var
   str: string;
 begin
@@ -2716,7 +2716,7 @@ begin
     actFileSaveAs.Execute;
 end;
 
-procedure TCEMainForm.actFileAddToProjExecute(Sender: TObject);
+procedure TMainForm.actFileAddToProjExecute(Sender: TObject);
 begin
   if fDoc.isNil or not assigned(fProject) then
     exit;
@@ -2733,13 +2733,13 @@ begin
       nil, amcApp, amkHint);
 end;
 
-procedure TCEMainForm.actFileCloseExecute(Sender: TObject);
+procedure TMainForm.actFileCloseExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
     getMultiDocHandler.closeDocument(fDoc);
 end;
 
-procedure TCEMainForm.actFileSaveAllExecute(Sender: TObject);
+procedure TMainForm.actFileSaveAllExecute(Sender: TObject);
 var
   i: Integer;
 begin
@@ -2747,7 +2747,7 @@ begin
     saveFile(fMultidoc.document[i]);
 end;
 
-procedure TCEMainForm.FormDropFiles(Sender: TObject;const fnames: array of string);
+procedure TMainForm.FormDropFiles(Sender: TObject;const fnames: array of string);
 var
   fname: string;
 begin
@@ -2764,7 +2764,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actFileSaveCopyAsExecute(Sender: TObject);
+procedure TMainForm.actFileSaveCopyAsExecute(Sender: TObject);
 var
   str: TStringList;
 begin
@@ -2791,7 +2791,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actLayoutResetExecute(Sender: TObject);
+procedure TMainForm.actLayoutResetExecute(Sender: TObject);
 begin
   InitDocking(true);
 end;
@@ -2799,43 +2799,43 @@ end;
 {$ENDREGION}
 
 {$REGION edit ------------------------------------------------------------------}
-procedure TCEMainForm.actEdCopyExecute(Sender: TObject);
+procedure TMainForm.actEdCopyExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CopyToClipboard;
 end;
 
-procedure TCEMainForm.actEdCutExecute(Sender: TObject);
+procedure TMainForm.actEdCutExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.CutToClipboard;
 end;
 
-procedure TCEMainForm.actEdPasteExecute(Sender: TObject);
+procedure TMainForm.actEdPasteExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.PasteFromClipboard;
 end;
 
-procedure TCEMainForm.actEdUndoExecute(Sender: TObject);
+procedure TMainForm.actEdUndoExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.Undo;
 end;
 
-procedure TCEMainForm.actEdRedoExecute(Sender: TObject);
+procedure TMainForm.actEdRedoExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.Redo;
 end;
 
-procedure TCEMainForm.actEdMacPlayExecute(Sender: TObject);
+procedure TMainForm.actEdMacPlayExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fEditWidg.macRecorder.PlaybackMacro(fDoc);
 end;
 
-procedure TCEMainForm.actEdMacStartStopExecute(Sender: TObject);
+procedure TMainForm.actEdMacStartStopExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
   begin
@@ -2845,19 +2845,19 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actEdIndentExecute(Sender: TObject);
+procedure TMainForm.actEdIndentExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.ExecuteCommand(ecBlockIndent, '', nil);
 end;
 
-procedure TCEMainForm.actEdUnIndentExecute(Sender: TObject);
+procedure TMainForm.actEdUnIndentExecute(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.ExecuteCommand(ecBlockUnIndent, '', nil);
 end;
 
-procedure TCEMainForm.actEdFindExecute(Sender: TObject);
+procedure TMainForm.actEdFindExecute(Sender: TObject);
 var
   str: string;
 begin
@@ -2874,14 +2874,14 @@ begin
   ffindwidg.cbToFind.SetFocus;
 end;
 
-procedure TCEMainForm.actEdFindNextExecute(Sender: TObject);
+procedure TMainForm.actEdFindNextExecute(Sender: TObject);
 begin
   ffindwidg.actFindNextExecute(nil);
 end;
 {$ENDREGION}
 
 {$REGION run -------------------------------------------------------------------}
-function TCEMainForm.runnableExename: string;
+function TMainForm.runnableExename: string;
 var
   of_yes: string;
   of_no: string;
@@ -2925,13 +2925,13 @@ begin
 
 end;
 
-procedure TCEMainForm.asyncprocOutput(sender: TObject);
+procedure TMainForm.asyncprocOutput(sender: TObject);
 var
-  proc: TCEProcess;
+  proc: TDexedProcess;
   lst: TStringList;
   str: string;
 begin
-  proc := TCEProcess(sender);
+  proc := TDexedProcess(sender);
   lst := TStringList.Create;
   try
     proc.getFullLines(lst);
@@ -2945,22 +2945,22 @@ begin
   end;
 end;
 
-procedure TCEMainForm.asyncprocTerminate(sender: TObject);
+procedure TMainForm.asyncprocTerminate(sender: TObject);
 var
-  proc: TCEProcess;
+  proc: TDexedProcess;
   inph: TObject;
 begin
-  proc := TCEProcess(sender);
+  proc := TDexedProcess(sender);
   asyncprocOutput(sender);
-  inph := EntitiesConnector.getSingleService('ICEProcInputHandler');
+  inph := EntitiesConnector.getSingleService('IProcInputHandler');
   if inph.isNotNil then
-    (inph as ICEProcInputHandler).removeProcess(proc);
+    (inph as IProcInputHandler).removeProcess(proc);
   if (proc.ExitStatus <> 0) then
     fMsgs.message(format('error: the process (%s) has returned the status %s',
       [proc.Executable, prettyReturnStatus(proc)]), fDoc, amcEdit, amkErr);
 end;
 
-procedure TCEMainForm.actSetRunnableSwExecute(Sender: TObject);
+procedure TMainForm.actSetRunnableSwExecute(Sender: TObject);
 var
   form: TForm;
   memo: TMemo;
@@ -2982,17 +2982,17 @@ begin
   form.Free;
 end;
 
-procedure TCEMainForm.ApplicationProperties1Activate(Sender: TObject);
+procedure TMainForm.ApplicationProperties1Activate(Sender: TObject);
 begin
   if fDoc.isNotNil then
     fDoc.checkFileDate;
 end;
 
-function TCEMainForm.compileRunnable(unittest: boolean = false): boolean;
+function TMainForm.compileRunnable(unittest: boolean = false): boolean;
 var
   i: integer;
   fname: string;
-  dmdproc: TCEProcess;
+  dmdproc: TDexedProcess;
   lst: TStringList = nil;
   srt: TStringList;
   firstLineFlags: string = '';
@@ -3043,7 +3043,7 @@ begin
     end;
   end;
 
-  dmdproc := TCEProcess.Create(nil);
+  dmdproc := TDexedProcess.Create(nil);
   try
     fMsgs.message('compiling ' + shortenPath(fDoc.fileName, 25), fDoc, amcEdit, amkInf);
     fMsgs.message(usingCompilerInfo(fRunnablesOptions.compiler), fDoc, amcEdit, amkInf);
@@ -3151,7 +3151,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.executeRunnable(unittest: boolean = false; redirect: boolean = true;
+procedure TMainForm.executeRunnable(unittest: boolean = false; redirect: boolean = true;
 	const runArgs: string = '');
 var
   lst: TStringList;
@@ -3163,7 +3163,7 @@ begin
   if not fname.fileExists then
     exit;
 
-  fRunProc := TCEProcess.Create(nil);
+  fRunProc := TDexedProcess.Create(nil);
   if redirect then
   begin
   	fRunProc.Options := [poStderrToOutPut, poUsePipes];
@@ -3197,14 +3197,14 @@ begin
   end;
 end;
 
-procedure TCEMainForm.unittestDone(Sender: TObject);
+procedure TMainForm.unittestDone(Sender: TObject);
 var
   fullcov: boolean;
   fname, covname: string;
   lst: TStringList;
   i: integer;
 const
-  ic : array[boolean] of TCEAppMessageKind = (amkWarn, amkInf);
+  ic : array[boolean] of TAppMessageKind = (amkWarn, amkInf);
 begin
   asyncprocTerminate(sender);
   if fCovModUt and assigned(fRunProc) and (fRunProc.ExitStatus = 0) then
@@ -3238,7 +3238,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actFileUnittestExecute(Sender: TObject);
+procedure TMainForm.actFileUnittestExecute(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
@@ -3246,7 +3246,7 @@ begin
     executeRunnable(true, true);
 end;
 
-procedure TCEMainForm.actFileCompAndRunExecute(Sender: TObject);
+procedure TMainForm.actFileCompAndRunExecute(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
@@ -3254,7 +3254,7 @@ begin
     executeRunnable(false, true);
 end;
 
-procedure TCEMainForm.actFileCompileAndRunOutExecute(Sender: TObject);
+procedure TMainForm.actFileCompileAndRunOutExecute(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
@@ -3262,7 +3262,7 @@ begin
     executeRunnable(false, false);
 end;
 
-procedure TCEMainForm.actFileCompAndRunWithArgsExecute(Sender: TObject);
+procedure TMainForm.actFileCompAndRunWithArgsExecute(Sender: TObject);
 var
   runargs: string = '';
 begin
@@ -3272,16 +3272,16 @@ begin
     executeRunnable(false, true, runargs);
 end;
 
-procedure TCEMainForm.actFileCompileExecute(Sender: TObject);
+procedure TMainForm.actFileCompileExecute(Sender: TObject);
 begin
   compileRunnable(false);
 end;
 
-procedure TCEMainForm.actFileCloseAllOthersExecute(Sender: TObject);
+procedure TMainForm.actFileCloseAllOthersExecute(Sender: TObject);
 var
   i: integer;
-  d: TCESynMemo;
-  c: TCESynMemo;
+  d: TDexedMemo;
+  c: TDexedMemo;
 begin
   if fDoc.isNil then
     exit;
@@ -3294,7 +3294,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actFileCloseAllExecute(Sender: TObject);
+procedure TMainForm.actFileCloseAllExecute(Sender: TObject);
 var
   i: integer;
 begin
@@ -3304,14 +3304,14 @@ begin
     fMultidoc.closeDocument(i);
 end;
 
-procedure TCEMainForm.actEdFormatExecute(Sender: TObject);
+procedure TMainForm.actEdFormatExecute(Sender: TObject);
 begin
   if fDoc.isNil then
     exit;
   getCodeFormatting.formatCurrent();
 end;
 
-procedure TCEMainForm.actFileDscannerExecute(Sender: TObject);
+procedure TMainForm.actFileDscannerExecute(Sender: TObject);
 var
   lst: TStringList;
   prc: TProcess;
@@ -3346,21 +3346,21 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actFileMetricsHalsteadExecute(Sender: TObject);
+procedure TMainForm.actFileMetricsHalsteadExecute(Sender: TObject);
 begin
   if fDoc.isNil or not fDoc.isDSource then
     exit;
   metrics.measure(fDoc);
 end;
 
-procedure TCEMainForm.actFileNewClipExecute(Sender: TObject);
+procedure TMainForm.actFileNewClipExecute(Sender: TObject);
 begin
   newFile;
   fDoc.setFocus;
   fDoc.PasteFromClipboard;
 end;
 
-procedure TCEMainForm.actFileNewDubScriptExecute(Sender: TObject);
+procedure TMainForm.actFileNewDubScriptExecute(Sender: TObject);
 begin
   newFile;
   fDoc.Text :=
@@ -3375,22 +3375,22 @@ begin
   fDoc.setFocus;
 end;
 
-procedure TCEMainForm.actFileRunDubExecute(Sender: TObject);
+procedure TMainForm.actFileRunDubExecute(Sender: TObject);
 begin
   dubFile(false);
 end;
 
-procedure TCEMainForm.actFileRunDubOutExecute(Sender: TObject);
+procedure TMainForm.actFileRunDubOutExecute(Sender: TObject);
 begin
   dubFile(true);
 end;
 
-procedure TCEMainForm.dubFile(outside: boolean);
+procedure TMainForm.dubFile(outside: boolean);
 begin
   if fDoc.isNil then
     exit;
   FreeRunnableProc;
-  fRunProc := TCEProcess.Create(nil);
+  fRunProc := TDexedProcess.Create(nil);
   if fDoc.fileName.fileExists then
     fDoc.save
   else
@@ -3419,7 +3419,7 @@ begin
   fRunProc.execute;
 end;
 
-procedure TCEMainForm.runFile(outside: boolean);
+procedure TMainForm.runFile(outside: boolean);
 var
   fname: string;
   older: boolean = false;
@@ -3452,17 +3452,17 @@ begin
     executeRunnable(false, not outside);
 end;
 
-procedure TCEMainForm.actFileRunExecute(Sender: TObject);
+procedure TMainForm.actFileRunExecute(Sender: TObject);
 begin
   runFile(false);
 end;
 
-procedure TCEMainForm.actFileRunOutExecute(Sender: TObject);
+procedure TMainForm.actFileRunOutExecute(Sender: TObject);
 begin
   runFile(true);
 end;
 
-procedure TCEMainForm.actFileOpenContFoldExecute(Sender: TObject);
+procedure TMainForm.actFileOpenContFoldExecute(Sender: TObject);
 begin
   if fDoc.isNil or not fDoc.fileName.fileExists then
     exit;
@@ -3470,14 +3470,14 @@ begin
   fExplWidg.showWidget;
 end;
 
-procedure TCEMainForm.actProjCompileExecute(Sender: TObject);
+procedure TMainForm.actProjCompileExecute(Sender: TObject);
 begin
   if fAppliOpts.autoSaveProjectFiles then
     saveModifiedProjectFiles(fProject);
   fProject.compile;
 end;
 
-procedure TCEMainForm.actProjCompileAndRunExecute(Sender: TObject);
+procedure TMainForm.actProjCompileAndRunExecute(Sender: TObject);
 begin
   fRunProjAfterCompile := true;
   if fAppliOpts.autoSaveProjectFiles then
@@ -3485,7 +3485,7 @@ begin
   fProject.compile;
 end;
 
-procedure TCEMainForm.actProjCompAndRunWithArgsExecute(Sender: TObject);
+procedure TMainForm.actProjCompAndRunWithArgsExecute(Sender: TObject);
 begin
   fRunProjAfterCompile := true;
   fRunProjAfterCompArg := true;
@@ -3494,7 +3494,7 @@ begin
   fProject.compile;
 end;
 
-procedure TCEMainForm.actProjRunExecute(Sender: TObject);
+procedure TMainForm.actProjRunExecute(Sender: TObject);
 begin
   if fProject.binaryKind <> executable then
     dlgOkInfo('Non executable projects cant be run')
@@ -3512,7 +3512,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjRunWithArgsExecute(Sender: TObject);
+procedure TMainForm.actProjRunWithArgsExecute(Sender: TObject);
 var
   runargs: string = '';
 begin
@@ -3522,9 +3522,9 @@ end;
 {$ENDREGION}
 
 {$REGION view ------------------------------------------------------------------}
-procedure TCEMainForm.updateWidgetMenuEntry(sender: TObject);
+procedure TMainForm.updateWidgetMenuEntry(sender: TObject);
 var
-  widg: TCEWidget;
+  widg: TDexedWidget;
   act: TAction;
 begin
   if sender.isNil then
@@ -3533,7 +3533,7 @@ begin
   if act.Tag = 0 then
     exit;
 
-  widg := TCEWidget(act.Tag);
+  widg := TDexedWidget(act.Tag);
   if widg.isDockable then
   begin
     if DockMaster.GetAnchorSite(widg).GetTopParent = DockMaster.GetAnchorSite(widg) then
@@ -3544,16 +3544,16 @@ begin
   else act.Enabled := not widg.IsVisible;
 end;
 
-procedure TCEMainForm.widgetShowFromAction(sender: TObject);
+procedure TMainForm.widgetShowFromAction(sender: TObject);
 var
-  widg: TCEWidget;
+  widg: TDexedWidget;
 begin
-  widg := TCEWidget( TComponent(sender).tag );
+  widg := TDexedWidget( TComponent(sender).tag );
   if widg.isNotNil then
     widg.showWidget;
 end;
 
-procedure TCEMainForm.layoutLoadFromFile(const fname: string);
+procedure TMainForm.layoutLoadFromFile(const fname: string);
 var
   xcfg: TXMLConfigStorage;
 begin
@@ -3568,7 +3568,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.layoutSaveToFile(const fname: string);
+procedure TMainForm.layoutSaveToFile(const fname: string);
 var
   xcfg: TXMLConfigStorage;
   i: integer;
@@ -3608,7 +3608,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.layoutUpdateMenu;
+procedure TMainForm.layoutUpdateMenu;
 var
   lst: TStringList;
   itm: TMenuItem;
@@ -3640,13 +3640,13 @@ begin
   end;
 end;
 
-procedure TCEMainForm.layoutMnuItemClick(sender: TObject);
+procedure TMainForm.layoutMnuItemClick(sender: TObject);
 begin
   layoutLoadFromFile(getDocPath + 'layouts' + DirectorySeparator +
     TMenuItem(sender).Caption + '.xml');
 end;
 
-procedure TCEMainForm.actLayoutSaveExecute(Sender: TObject);
+procedure TMainForm.actLayoutSaveExecute(Sender: TObject);
 var
   fname: string = '';
 begin
@@ -3661,9 +3661,9 @@ begin
   layoutUpdateMenu;
 end;
 
-procedure TCEMainForm.updateFloatingWidgetOnTop(onTop: boolean);
+procedure TMainForm.updateFloatingWidgetOnTop(onTop: boolean);
 var
-  widg: TCEWidget;
+  widg: TDexedWidget;
 const
   fstyle: array[boolean] of TFormStyle = (fsNormal, fsStayOnTop);
 begin
@@ -3678,7 +3678,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.snapTopSplitterToMenu;
+procedure TMainForm.snapTopSplitterToMenu;
 var
   topsplt: TAnchorDockSplitter;
   topsite: TControl;
@@ -3704,7 +3704,7 @@ end;
 {$ENDREGION}
 
 {$REGION project ---------------------------------------------------------------}
-function  TCEMainForm.checkProjectLock(message: boolean = true): boolean;
+function  TMainForm.checkProjectLock(message: boolean = true): boolean;
 begin
   result := false;
   if fProjActionsLock then
@@ -3716,7 +3716,7 @@ begin
   end
 end;
 
-procedure TCEMainForm.showProjTitle;
+procedure TMainForm.showProjTitle;
 begin
   if assigned(fProject) and fProject.filename.fileExists then
     caption := format('dexed - %s', [shortenPath(fProject.filename, 30)])
@@ -3724,7 +3724,7 @@ begin
     caption := 'dexed';
 end;
 
-procedure TCEMainForm.saveProjSource(const document: TCESynMemo);
+procedure TMainForm.saveProjSource(const document: TDexedMemo);
 var
   fname: string;
 begin
@@ -3737,7 +3737,7 @@ begin
   fProject.reload;
 end;
 
-function TCEMainForm.closeProj: boolean;
+function TMainForm.closeProj: boolean;
 begin
   if not assigned(fProject) then
     exit(true);
@@ -3757,7 +3757,7 @@ begin
   result := true;
 end;
 
-procedure TCEMainForm.actProjNewDialogExecute(Sender: TObject);
+procedure TMainForm.actProjNewDialogExecute(Sender: TObject);
 var
   r: TModalResult;
 begin
@@ -3776,7 +3776,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjNewDubJsonExecute(Sender: TObject);
+procedure TMainForm.actProjNewDubJsonExecute(Sender: TObject);
 begin
   if assigned(fProject) and not fProject.inGroup and fProject.modified and
     (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then
@@ -3786,7 +3786,7 @@ begin
   newDubProj;
 end;
 
-procedure TCEMainForm.actProjNewNativeExecute(Sender: TObject);
+procedure TMainForm.actProjNewNativeExecute(Sender: TObject);
 begin
   if assigned(fProject) and not fProject.inGroup and fProject.modified and
     (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then
@@ -3796,33 +3796,33 @@ begin
   newNativeProj;
 end;
 
-procedure TCEMainForm.newNativeProj;
+procedure TMainForm.newNativeProj;
 begin
-  fNativeProject := TCENativeProject.Create(nil);
+  fNativeProject := TNativeProject.Create(nil);
   fNativeProject.Name := 'CurrentProject';
-  fProject := fNativeProject as ICECommonProject;
+  fProject := fNativeProject as ICommonProject;
   showProjTitle;
 end;
 
-procedure TCEMainForm.newDubProj;
+procedure TMainForm.newDubProj;
 begin
-  fDubProject := TCEDubProject.create(nil);
-  fProject := fDubProject as ICECommonProject;
+  fDubProject := TDubProject.create(nil);
+  fProject := fDubProject as ICommonProject;
   showProjTitle;
 end;
 
-procedure TCEMainForm.saveProj;
+procedure TMainForm.saveProj;
 begin
   fProject.saveToFile(fProject.filename);
 end;
 
-procedure TCEMainForm.saveProjAs(const fname: string);
+procedure TMainForm.saveProjAs(const fname: string);
 begin
   fProject.saveToFile(fname);
   showProjTitle;
 end;
 
-procedure TCEMainForm.openProj(const fname: string);
+procedure TMainForm.openProj(const fname: string);
 var
   ext: string;
 begin
@@ -3844,7 +3844,7 @@ begin
   fProject.activate;
 end;
 
-procedure TCEMainForm.mruProjItemClick(Sender: TObject);
+procedure TMainForm.mruProjItemClick(Sender: TObject);
 begin
   if checkProjectLock then
     exit;
@@ -3854,7 +3854,7 @@ begin
   openProj(TMenuItem(Sender).Hint);
 end;
 
-procedure TCEMainForm.mruProjGroupItemClick(Sender: TObject);
+procedure TMainForm.mruProjGroupItemClick(Sender: TObject);
 begin
   if checkProjectLock then
     exit;
@@ -3867,7 +3867,7 @@ begin
     fProjectGroup.getProject(fProjectGroup.getProjectIndex).activate();
 end;
 
-procedure TCEMainForm.actProjCloseExecute(Sender: TObject);
+procedure TMainForm.actProjCloseExecute(Sender: TObject);
 begin
   if assigned(fProject) and not fProject.inGroup and fProject.modified and
     (dlgFileChangeClose(fProject.filename, UnsavedProj) = mrCancel) then
@@ -3875,11 +3875,11 @@ begin
   closeProj;
 end;
 
-procedure TCEMainForm.actProjSaveAsExecute(Sender: TObject);
+procedure TMainForm.actProjSaveAsExecute(Sender: TObject);
 begin
   if checkProjectLock then
     exit;
-  if (fProject.getFormat = pfDUB) and TCEDubProject(fProject.getProject).isSDL then
+  if (fProject.getFormat = pfDUB) and TDubProject(fProject.getProject).isSDL then
   begin
     fMsgs.message(DubSdlWarning, fProject, amcProj, amkWarn);
     exit;
@@ -3896,11 +3896,11 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjSaveExecute(Sender: TObject);
+procedure TMainForm.actProjSaveExecute(Sender: TObject);
 begin
   if not assigned(fProject) then
     exit;
-  if (fProject.getFormat = pfDUB) and TCEDubProject(fProject.getProject).isSDL then
+  if (fProject.getFormat = pfDUB) and TDubProject(fProject.getProject).isSDL then
   begin
     fMsgs.message(DubSdlWarning, fProject, amcProj, amkWarn);
     exit;
@@ -3913,7 +3913,7 @@ begin
     actProjSaveAs.Execute;
 end;
 
-procedure TCEMainForm.actProjOpenExecute(Sender: TObject);
+procedure TMainForm.actProjOpenExecute(Sender: TObject);
 begin
   if checkProjectLock then
       exit;
@@ -3930,7 +3930,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjEditorExecute(Sender: TObject);
+procedure TMainForm.actProjEditorExecute(Sender: TObject);
 var
   win: TControl = nil;
 begin
@@ -3946,12 +3946,12 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjSourceExecute(Sender: TObject);
+procedure TMainForm.actProjSourceExecute(Sender: TObject);
 begin
   if not assigned(fProject) or not fProject.filename.fileExists then
     exit;
 
-  if (fProject.getFormat = pfDUB) and TCEDubProject(fProject.getProject).isSDL then
+  if (fProject.getFormat = pfDUB) and TDubProject(fProject.getProject).isSDL then
   begin
     fMsgs.message(DubSdlWarning, fProject, amcProj, amkWarn);
     exit;
@@ -3965,14 +3965,14 @@ begin
     fDoc.Highlighter := JsSyn;
 end;
 
-procedure TCEMainForm.actProjOptViewExecute(Sender: TObject);
+procedure TMainForm.actProjOptViewExecute(Sender: TObject);
 begin
   if not assigned(fProject) then
     exit;
   dlgOkInfo(fProject.getCommandLine, 'Compilation command line');
 end;
 
-procedure TCEMainForm.actProjTestExecute(Sender: TObject);
+procedure TMainForm.actProjTestExecute(Sender: TObject);
 begin
   if not assigned(fProject) then
     exit;
@@ -3981,14 +3981,14 @@ begin
   fProject.test;
 end;
 
-procedure TCEMainForm.actProjStopCompExecute(Sender: TObject);
+procedure TMainForm.actProjStopCompExecute(Sender: TObject);
 begin
   if fProject = nil then
     exit;
   fProject.stopCompilation();
 end;
 
-procedure TCEMainForm.actProjDscanExecute(Sender: TObject);
+procedure TMainForm.actProjDscanExecute(Sender: TObject);
 var
   lst: TStringList;
   prc: TProcess;
@@ -4032,7 +4032,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjGitPullExecute(Sender: TObject);
+procedure TMainForm.actProjGitPullExecute(Sender: TObject);
 var
   p: TProcess;
   r: TStringList;
@@ -4071,7 +4071,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.gitBranchMenuItemClick(sender: TObject);
+procedure TMainForm.gitBranchMenuItemClick(sender: TObject);
 var
   p: TProcess;
   r: TStringList;
@@ -4105,7 +4105,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjGitBranchesUpdExecute(Sender: TObject);
+procedure TMainForm.actProjGitBranchesUpdExecute(Sender: TObject);
 var
   p: TProcess;
   r: TStringList;
@@ -4168,7 +4168,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjOpenGroupExecute(Sender: TObject);
+procedure TMainForm.actProjOpenGroupExecute(Sender: TObject);
 begin
   if fProjectGroup.groupModified then
   begin
@@ -4192,7 +4192,7 @@ begin
     fProjectGroup.getProject(fProjectGroup.getProjectIndex).activate();
 end;
 
-procedure TCEMainForm.actProjSaveGroupAsExecute(Sender: TObject);
+procedure TMainForm.actProjSaveGroupAsExecute(Sender: TObject);
 begin
   with TSaveDialog.Create(nil) do
   try
@@ -4206,7 +4206,7 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjSaveGroupExecute(Sender: TObject);
+procedure TMainForm.actProjSaveGroupExecute(Sender: TObject);
 begin
   if not fProjectGroup.groupFilename.fileExists then
     actProjSaveGroupAs.Execute
@@ -4214,13 +4214,13 @@ begin
     fProjectGroup.saveGroup(fProjectGroup.groupFilename);
 end;
 
-procedure TCEMainForm.actProjSelUngroupedExecute(Sender: TObject);
+procedure TMainForm.actProjSelUngroupedExecute(Sender: TObject);
 begin
   if assigned(fFreeProj) then
     fFreeProj.activate;
 end;
 
-procedure TCEMainForm.actNewGroupExecute(Sender: TObject);
+procedure TMainForm.actNewGroupExecute(Sender: TObject);
 begin
   if fProjectGroup.groupModified then
   begin
@@ -4230,7 +4230,7 @@ begin
   fProjectGroup.closeGroup;
 end;
 
-procedure TCEMainForm.actProjAddToGroupExecute(Sender: TObject);
+procedure TMainForm.actProjAddToGroupExecute(Sender: TObject);
 begin
   if not assigned(fFreeProj) or fFreeProj.inGroup or
     not fFreeProj.filename.fileExists then
@@ -4241,7 +4241,7 @@ end;
 
 // TODO-cprojectsgroup: add a "out of mem" protection in async mode.
 
-procedure TCEMainForm.compileGroup(async: TAsyncWait);
+procedure TMainForm.compileGroup(async: TAsyncWait);
 var
   i, j: integer;
 begin
@@ -4289,22 +4289,22 @@ begin
   end;
 end;
 
-procedure TCEMainForm.actProjGroupCompileExecute(Sender: TObject);
+procedure TMainForm.actProjGroupCompileExecute(Sender: TObject);
 begin
   compileGroup(awYes);
 end;
 
-procedure TCEMainForm.actProjGroupCompileSyncExecute(Sender: TObject);
+procedure TMainForm.actProjGroupCompileSyncExecute(Sender: TObject);
 begin
   compileGroup(awNo);
 end;
 
-procedure TCEMainForm.actProjGroupCompileCustomSyncExecute(Sender: TObject);
+procedure TMainForm.actProjGroupCompileCustomSyncExecute(Sender: TObject);
 begin
   compileGroup(awCustom);
 end;
 
-procedure TCEMainForm.actProjNewGroupExecute(Sender: TObject);
+procedure TMainForm.actProjNewGroupExecute(Sender: TObject);
 begin
   if fProjectGroup.groupModified and
     (dlgFileChangeClose(fProjectGroup.groupFilename, UnsavedPGrp) = mrCancel) then

@@ -1,4 +1,4 @@
-inherited CETodoListWidget: TCETodoListWidget
+inherited TodoListWidget: TTodoListWidget
   Left = 630
   Height = 337
   Top = 196
@@ -14,7 +14,6 @@ inherited CETodoListWidget: TCETodoListWidget
     ClientWidth = 584
     inherited Content: TPanel
       Height = 301
-      Top = 36
       Width = 584
       ClientHeight = 301
       ClientWidth = 584
@@ -29,32 +28,31 @@ inherited CETodoListWidget: TCETodoListWidget
           item
             AutoSize = True
             Caption = 'text'
-            Width = 34
+            Width = 36
           end        
           item
             AutoSize = True
             Caption = 'category'
-            Width = 65
+            Width = 67
           end        
           item
             AutoSize = True
             Caption = 'assignee'
-            Width = 66
+            Width = 68
           end        
           item
             AutoSize = True
             Caption = 'status'
-            Width = 48
           end        
           item
             AutoSize = True
             Caption = 'priority'
-            Width = 55
+            Width = 57
           end        
           item
             AutoSize = True
             Caption = 'file'
-            Width = 291
+            Width = 284
           end>
         ReadOnly = True
         SortType = stText
@@ -62,10 +60,10 @@ inherited CETodoListWidget: TCETodoListWidget
         ViewStyle = vsReport
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 576
       OnResize = toolbarResize
-      object btnGo: TCEToolButton[0]
+      object btnGo: TDexedToolButton[0]
         Left = 29
         Hint = 'go the TODO item definition'
         Top = 0
@@ -74,7 +72,7 @@ inherited CETodoListWidget: TCETodoListWidget
         resourceName = 'PENCIL_GO'
         scaledSeparator = False
       end
-      object btnRefresh: TCEToolButton[1]
+      object btnRefresh: TDexedToolButton[1]
         Left = 1
         Hint = 'refresh the TODO items'
         Top = 0
@@ -90,11 +88,11 @@ inherited CETodoListWidget: TCETodoListWidget
         Top = 2
         Width = 513
         ButtonWidth = 28
-        NumGlyphs = 1
         Align = alClient
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 58
         BorderSpacing.Around = 2
+        NumGlyphs = 1
         MaxLength = 0
         TabOrder = 0
       end

@@ -1,4 +1,4 @@
-inherited CELibManEditorWidget: TCELibManEditorWidget
+inherited LibManEditorWidget: TLibManEditorWidget
   Left = 1051
   Height = 297
   Top = 0
@@ -14,7 +14,6 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
     ClientWidth = 641
     inherited Content: TPanel
       Height = 261
-      Top = 36
       Width = 641
       ClientHeight = 261
       ClientWidth = 641
@@ -57,9 +56,9 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         OnSelectItem = ListSelectItem
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 633
-      object btnSelProj: TCEToolButton[0]
+      object btnSelProj: TDexedToolButton[0]
         Left = 342
         Hint = 'set the project that compiles the selected entry'
         Top = 0
@@ -69,7 +68,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'SCRIPT_BRICKS'
         scaledSeparator = False
       end
-      object btnSelRoot: TCEToolButton[1]
+      object btnSelRoot: TDexedToolButton[1]
         Left = 314
         Hint = 'set the root of the library sources'
         Top = 0
@@ -79,7 +78,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'FOLDER_ADD'
         scaledSeparator = False
       end
-      object btnSelfoldOfFiles: TCEToolButton[2]
+      object btnSelfoldOfFiles: TDexedToolButton[2]
         Left = 286
         Hint = 'select a folder containing several d sources (optional trick)'
         Top = 0
@@ -89,7 +88,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'BRICKS'
         scaledSeparator = False
       end
-      object btnSelFile: TCEToolButton[3]
+      object btnSelFile: TDexedToolButton[3]
         Left = 258
         Hint = 'selected the static library file'
         Top = 0
@@ -99,7 +98,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'FOLDER_BRICK'
         scaledSeparator = False
       end
-      object btnEditAlias: TCEToolButton[4]
+      object btnEditAlias: TDexedToolButton[4]
         Left = 230
         Hint = 'set the entry alias'
         Top = 0
@@ -109,7 +108,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'BOOK_EDIT'
         scaledSeparator = False
       end
-      object button5: TCEToolButton[5]
+      object button5: TDexedToolButton[5]
         Left = 225
         Height = 5
         Top = 0
@@ -118,7 +117,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         Style = tbsDivider
         scaledSeparator = False
       end
-      object btnEnabled: TCEToolButton[6]
+      object btnEnabled: TDexedToolButton[6]
         Left = 197
         Hint = 'activate or deactivate the selected entry'
         Top = 0
@@ -128,7 +127,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'BOOK'
         scaledSeparator = False
       end
-      object btnDubFetch: TCEToolButton[7]
+      object btnDubFetch: TDexedToolButton[7]
         Left = 169
         Hint = 'setup a new entry using an online DUB package'
         Top = 0
@@ -138,7 +137,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'DUB'
         scaledSeparator = False
       end
-      object btnOpenProj: TCEToolButton[8]
+      object btnOpenProj: TDexedToolButton[8]
         Left = 141
         Hint = 'open the project that matches to the selected entry'
         Top = 0
@@ -148,7 +147,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'BOOK_OPEN'
         scaledSeparator = False
       end
-      object btnReg: TCEToolButton[9]
+      object btnReg: TDexedToolButton[9]
         Left = 113
         Hint = 'register a new entry using the active project'
         Top = 0
@@ -158,7 +157,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'BOOK_LINK'
         scaledSeparator = False
       end
-      object btnMoveUp: TCEToolButton[10]
+      object btnMoveUp: TDexedToolButton[10]
         Left = 85
         Hint = 'move entry up'
         Top = 0
@@ -168,7 +167,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'ARROW_UP'
         scaledSeparator = False
       end
-      object btnMoveDown: TCEToolButton[11]
+      object btnMoveDown: TDexedToolButton[11]
         Left = 57
         Hint = 'move entry down'
         Top = 0
@@ -178,7 +177,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'ARROW_DOWN'
         scaledSeparator = False
       end
-      object btnRemLib: TCEToolButton[12]
+      object btnRemLib: TDexedToolButton[12]
         Left = 29
         Hint = 'remove selected entry'
         Top = 0
@@ -188,7 +187,7 @@ inherited CELibManEditorWidget: TCELibManEditorWidget
         resourceName = 'BOOK_DELETE'
         scaledSeparator = False
       end
-      object btnAddLib: TCEToolButton[13]
+      object btnAddLib: TDexedToolButton[13]
         Left = 1
         Hint = 'add a new empty entry'
         Top = 0

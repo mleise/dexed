@@ -19,7 +19,7 @@ uses
 
 begin
   Application.Initialize;
-  Application.CreateForm(TCEMainForm, CEMainForm);
+  Application.CreateForm(TMainForm, MainForm);
   Application.Run;
 end.
 

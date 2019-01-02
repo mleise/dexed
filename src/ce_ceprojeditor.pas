@@ -12,13 +12,13 @@ uses
 
 type
 
-  { TCEProjectConfigurationWidget }
+  { TProjectConfigurationWidget }
 
-  TCEProjectConfigurationWidget = class(TCEWidget, ICEProjectObserver)
-    btnAddConf: TCEToolButton;
-    btnCloneConf: TCEToolButton;
-    btnDelConf: TCEToolButton;
-    btnSyncEdit: TCEToolButton;
+  TProjectConfigurationWidget = class(TDexedWidget, IProjectObserver)
+    btnAddConf: TDexedToolButton;
+    btnCloneConf: TDexedToolButton;
+    btnDelConf: TDexedToolButton;
+    btnSyncEdit: TDexedToolButton;
     imgList: TImageList;
     Panel2: TPanel;
     selConf: TComboBox;
@@ -34,7 +34,7 @@ type
     procedure TreeChange(Sender: TObject; Node: TTreeNode);
     procedure GridFilter(Sender: TObject; aEditor: TPropertyEditor;var aShow: boolean);
   private
-    fProj: TCENativeProject;
+    fProj: TNativeProject;
     fSyncroMode: boolean;
     fSynchroItem: TStringList;
     fSynchroValue: TStringList;
@@ -44,12 +44,12 @@ type
     procedure syncroGetPropAsString(const section, Item, value: string);
     property syncroMode: boolean read fSyncroMode write setSyncroMode;
     //
-    procedure projNew(project: ICECommonProject);
-    procedure projClosing(project: ICECommonProject);
-    procedure projChanged(project: ICECommonProject);
-    procedure projFocused(project: ICECommonProject);
-    procedure projCompiling(project: ICECommonProject);
-    procedure projCompiled(project: ICECommonProject; success: boolean);
+    procedure projNew(project: ICommonProject);
+    procedure projClosing(project: ICommonProject);
+    procedure projChanged(project: ICommonProject);
+    procedure projFocused(project: ICommonProject);
+    procedure projCompiling(project: ICommonProject);
+    procedure projCompiled(project: ICommonProject; success: boolean);
   protected
     procedure updateImperative; override;
     procedure SetVisible(value: boolean); override;
@@ -62,7 +62,7 @@ implementation
 {$R *.lfm}
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEProjectConfigurationWidget.create(aOwner: TComponent);
+constructor TProjectConfigurationWidget.create(aOwner: TComponent);
 begin
   inherited;
 
@@ -78,7 +78,7 @@ begin
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCEProjectConfigurationWidget.destroy;
+destructor TProjectConfigurationWidget.destroy;
 begin
   fSynchroItem.Free;
   fSynchroValue.Free;
@@ -86,15 +86,15 @@ begin
   inherited;
 end;
 
-procedure TCEProjectConfigurationWidget.SetVisible(value: boolean);
+procedure TProjectConfigurationWidget.SetVisible(value: boolean);
 begin
   inherited;
   if Visible then updateImperative;
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
-{$REGION ICEProjectObserver ----------------------------------------------------}
-procedure TCEProjectConfigurationWidget.projNew(project: ICECommonProject);
+{$REGION IProjectObserver ----------------------------------------------------}
+procedure TProjectConfigurationWidget.projNew(project: ICommonProject);
 begin
   fProj := nil;
   enabled := false;
@@ -102,12 +102,12 @@ begin
     exit;
   enabled := true;
   //
-  fProj := TCENativeProject(project.getProject);
+  fProj := TNativeProject(project.getProject);
   if Visible then updateImperative;
   syncroMode := false;
 end;
 
-procedure TCEProjectConfigurationWidget.projClosing(project: ICECommonProject);
+procedure TProjectConfigurationWidget.projClosing(project: ICommonProject);
 begin
   if fProj.isNil then exit;
   if fProj <> project.getProject then
@@ -120,7 +120,7 @@ begin
   fProj := nil;
 end;
 
-procedure TCEProjectConfigurationWidget.projChanged(project: ICECommonProject);
+procedure TProjectConfigurationWidget.projChanged(project: ICommonProject);
 begin
   if fProj.isNil then exit;
   if fProj <> project.getProject then
@@ -128,7 +128,7 @@ begin
   if Visible then updateImperative;
 end;
 
-procedure TCEProjectConfigurationWidget.projFocused(project: ICECommonProject);
+procedure TProjectConfigurationWidget.projFocused(project: ICommonProject);
 begin
   fProj := nil;
   enabled := false;
@@ -136,21 +136,21 @@ begin
     exit;
   enabled := true;
   //
-  fProj := TCENativeProject(project.getProject);
+  fProj := TNativeProject(project.getProject);
   if Visible then updateImperative;
 end;
 
-procedure TCEProjectConfigurationWidget.projCompiling(project: ICECommonProject);
+procedure TProjectConfigurationWidget.projCompiling(project: ICommonProject);
 begin
 end;
 
-procedure TCEProjectConfigurationWidget.projCompiled(project: ICECommonProject; success: boolean);
+procedure TProjectConfigurationWidget.projCompiled(project: ICommonProject; success: boolean);
 begin
 end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION config. things --------------------------------------------------------}
-procedure TCEProjectConfigurationWidget.selConfChange(Sender: TObject);
+procedure TProjectConfigurationWidget.selConfChange(Sender: TObject);
 begin
   if fProj.isNil then exit;
   if Updating then exit;
@@ -161,14 +161,14 @@ begin
   endImperativeUpdate;
 end;
 
-procedure TCEProjectConfigurationWidget.TreeChange(Sender: TObject;
+procedure TProjectConfigurationWidget.TreeChange(Sender: TObject;
   Node: TTreeNode);
 begin
   inspector.TIObject := getGridTarget;
   selconf.Enabled := (inspector.TIObject <> fProj) and fProj.isNotNil;
 end;
 
-procedure TCEProjectConfigurationWidget.setSyncroMode(value: boolean);
+procedure TProjectConfigurationWidget.setSyncroMode(value: boolean);
 begin
   if fSyncroMode = value then
     exit;
@@ -179,7 +179,7 @@ begin
     btnSyncEdit.resourceName := 'LINK_BREAK';
 end;
 
-function TCEProjectConfigurationWidget.syncroSetPropAsString(const section, Item, def: string): string;
+function TProjectConfigurationWidget.syncroSetPropAsString(const section, Item, def: string): string;
 var
   i: Integer;
 begin
@@ -188,13 +188,13 @@ begin
   result := fSynchroValue[i];
 end;
 
-procedure TCEProjectConfigurationWidget.syncroGetPropAsString(const section, Item, value: string);
+procedure TProjectConfigurationWidget.syncroGetPropAsString(const section, Item, value: string);
 begin
   fSynchroItem.Add(Item);
   fSynchroValue.Add(value);
 end;
 
-procedure TCEProjectConfigurationWidget.inspectorModified(Sender: TObject);
+procedure TProjectConfigurationWidget.inspectorModified(Sender: TObject);
 var
   propstr: string;
   src_list, trg_list: rttiutils.TPropInfoList;
@@ -268,7 +268,7 @@ begin
   end;
 end;
 
-procedure TCEProjectConfigurationWidget.btnAddConfClick(Sender: TObject);
+procedure TProjectConfigurationWidget.btnAddConfClick(Sender: TObject);
 var
   nme: string;
   cfg: TCompilerConfiguration;
@@ -284,7 +284,7 @@ begin
   endImperativeUpdate;
 end;
 
-procedure TCEProjectConfigurationWidget.btnDelConfClick(Sender: TObject);
+procedure TProjectConfigurationWidget.btnDelConfClick(Sender: TObject);
 begin
   if fProj.isNil then exit;
   if fProj.OptionsCollection.Count = 1 then exit;
@@ -298,7 +298,7 @@ begin
   endImperativeUpdate;
 end;
 
-procedure TCEProjectConfigurationWidget.btnCloneCurrClick(Sender: TObject);
+procedure TProjectConfigurationWidget.btnCloneCurrClick(Sender: TObject);
 var
   nme: string;
   trg, src: TCompilerConfiguration;
@@ -317,7 +317,7 @@ begin
   endImperativeUpdate;
 end;
 
-procedure TCEProjectConfigurationWidget.btnSyncEditClick(Sender: TObject);
+procedure TProjectConfigurationWidget.btnSyncEditClick(Sender: TObject);
 begin
   fSynchroValue.Clear;
   fSynchroItem.Clear;
@@ -325,7 +325,7 @@ begin
   syncroMode := not syncroMode;
 end;
 
-procedure TCEProjectConfigurationWidget.GridFilter(Sender: TObject; aEditor: TPropertyEditor;
+procedure TProjectConfigurationWidget.GridFilter(Sender: TObject; aEditor: TPropertyEditor;
   var aShow: boolean);
 begin
   if fProj.isNil then exit;
@@ -369,7 +369,7 @@ begin
       aShow := false;
 end;
 
-function TCEProjectConfigurationWidget.getGridTarget: TPersistent;
+function TProjectConfigurationWidget.getGridTarget: TPersistent;
 begin
   if fProj.isNil then exit(nil);
   if fProj.ConfigurationIndex = -1 then exit(nil);
@@ -391,7 +391,7 @@ begin
   end;
 end;
 
-procedure TCEProjectConfigurationWidget.updateImperative;
+procedure TProjectConfigurationWidget.updateImperative;
 var
   i: NativeInt;
 begin

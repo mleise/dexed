@@ -9,16 +9,16 @@ uses
   Menus, Clipbrd;
 
 type
-  TCEPageControlButton = (pbClose, pbMoveLeft, pbMoveRight, pbAdd, pbSplit);
-  TCEPageControlButtons = set of TCEPageControlButton;
+  TPageControlButton = (pbClose, pbMoveLeft, pbMoveRight, pbAdd, pbSplit);
+  TPageControlButtons = set of TPageControlButton;
 
 const
-  CEPageControlDefaultButtons = [pbClose, pbMoveLeft, pbMoveRight, pbAdd, pbSplit];
+  DexedPageControlDefaultButtons = [pbClose, pbMoveLeft, pbMoveRight, pbAdd, pbSplit];
 
 type
 
   // Used instead of a TTabSheet since only the caption is interesting
-  TCEPage = class(TCustomControl)
+  TDexedPage = class(TCustomControl)
   private
     function getIndex: integer;
   protected
@@ -27,8 +27,8 @@ type
     property index: integer read getIndex;
   end;
 
-  TCEPageControlOption = (poPageHistory, poBottomHeader, poFlatButtons);
-  TCEPageControlOptions = set of TCEPageControlOption;
+  TPageControlOption = (poPageHistory, poBottomHeader, poFlatButtons);
+  TPageControlOptions = set of TPageControlOption;
 
 const
 
@@ -36,7 +36,7 @@ const
 
 type
 
-  TPageControlButtonClick = procedure(sender: TObject; button: TCEPageControlButton) of object;
+  TPageControlButtonClick = procedure(sender: TObject; button: TPageControlButton) of object;
 
   (**
    * Minimalist page-control
@@ -46,7 +46,7 @@ type
    * - add/close/move left and right speed buttons
    * - a particular tab can be set to reside on a split view
    *)
-  TCEPageControl = class(TWinControl)
+  TDexedPageControl = class(TWinControl)
   private
     fHeader: TWinControl;
     fTabs: TTabControl;
@@ -60,12 +60,12 @@ type
     fPagesHistory: TFPList;
     fPageIndex: integer;
     fSplittedPageIndex: integer;
-    fButtons: TCEPageControlButtons;
+    fButtons: TPageControlButtons;
     fOnChanged: TNotifyEvent;
     fOnChanging: TTabChangingEvent;
     fSplitter: TSplitter;
     fOldSplitPos: integer;
-    fOptions: TCEPageControlOptions;
+    fOptions: TPageControlOptions;
     fOnDragDrop: TDragDropEvent;
     fOnDragOver: TDragOverEvent;
     fPageControlButtonClick: TPageControlButtonClick;
@@ -75,45 +75,45 @@ type
     procedure btnMoveRightClick(sender: TObject);
     procedure btnAddClick(sender: TObject);
     procedure btnSplitClick(sender: TObject);
-    procedure btnClickEvent(button: TCEPageControlButton); inline;
+    procedure btnClickEvent(button: TPageControlButton); inline;
 
     procedure tabsChanging(sender: TObject; var AllowChange: Boolean);
     procedure tabsChanged(sender: TObject);
     procedure hidePage(index: integer);
     procedure showPage(index: integer);
     procedure setPageIndex(index: integer);
-    procedure setButtons(value: TCEPageControlButtons);
-    procedure setCurrentPage(value: TCEPage);
-    function getCurrentPage: TCEPage;
+    procedure setButtons(value: TPageControlButtons);
+    procedure setCurrentPage(value: TDexedPage);
+    function getCurrentPage: TDexedPage;
     function getPageCount: integer;
-    function getPage(index: integer): TCEPage;
-    function getSplitPage: TCEPage;
+    function getPage(index: integer): TDexedPage;
+    function getSplitPage: TDexedPage;
 
     procedure changedNotify;
     procedure updateButtonsState;
 
     procedure setOnDragOver(value: TDragOverEvent);
     procedure setOnDragDrop(value: TDragDropEvent);
-    procedure setPagesOptions(value: TCEPageControlOptions);
+    procedure setPagesOptions(value: TPageControlOptions);
     procedure setHeaderPosition(bottom: boolean);
 
   public
     constructor Create(aowner: TComponent); override;
     destructor Destroy; override;
 
-    function  addPage: TCEPage;
+    function  addPage: TDexedPage;
     procedure deletePage(index: integer);
-    function  getPageIndex(page: TCEPage): integer;
+    function  getPageIndex(page: TDexedPage): integer;
     procedure movePageRight;
     procedure movePageLeft;
 
-    property splitPage: TCEPage read getSplitPage;
-    property currentPage: TCEPage read getCurrentPage write setCurrentPage;
+    property splitPage: TDexedPage read getSplitPage;
+    property currentPage: TDexedPage read getCurrentPage write setCurrentPage;
     property pageIndex: integer read fPageIndex write setPageIndex;
     property pageCount: integer read getPageCount;
-    property pages[index: integer]: TCEPage read getPage; default;
+    property pages[index: integer]: TDexedPage read getPage; default;
 
-    property buttons: TCEPageControlButtons read fButtons write setButtons;
+    property buttons: TPageControlButtons read fButtons write setButtons;
     property closeButton: TSpeedButton read fCloseBtn;
     property moveLeftButton: TSpeedButton read fMoveLeftBtn;
     property moveRightButton: TSpeedButton read fMoveRightBtn;
@@ -124,7 +124,7 @@ type
     property onChanged: TNotifyEvent read fOnChanged write fOnChanged;
     property onChanging: TTabChangingEvent read fOnChanging write fOnChanging;
 
-    property options: TCEPageControlOptions read fOptions write setPagesOptions default defPagesOpt;
+    property options: TPageControlOptions read fOptions write setPagesOptions default defPagesOpt;
 
     property OnDragOver read fOnDragOver write setOnDragOver;
     property OnDragDrop read fOnDragDrop write setOnDragDrop;
@@ -134,7 +134,7 @@ type
    * A context menu dedicated to TlistView with read-only content.
    * Contains items allowing to copy a column, a line, a cell, etc.
    *)
-  TCEListViewCopyMenu = class(TPopupMenu)
+  TListViewCopyMenu = class(TPopupMenu)
   private
     fList: TListView;
     function getColumnIndex: integer;
@@ -153,25 +153,25 @@ type
 
 implementation
 
-function TCEPage.getIndex: integer;
+function TDexedPage.getIndex: integer;
 var
-  ctrl: TCEPageControl;
+  ctrl: TDexedPageControl;
   i: integer;
 begin
-  ctrl := TCEPageControl(owner);
+  ctrl := TDexedPageControl(owner);
   for i := 0 to ctrl.pageCount-1 do
       if ctrl.pages[i] = self then
         exit(i);
   exit(-1);
 end;
 
-procedure TCEPage.RealSetText(const Value: TCaption);
+procedure TDexedPage.RealSetText(const Value: TCaption);
 var
   i: integer;
-  ctrl: TCEPageControl;
+  ctrl: TDexedPageControl;
 begin
   inherited;
-  ctrl :=  TCEPageControl(owner);
+  ctrl :=  TDexedPageControl(owner);
   i := ctrl.getPageIndex(self);
   ctrl.fTabs.BeginUpdate;
   if i <> -1 then
@@ -179,7 +179,7 @@ begin
   ctrl.fTabs.EndUpdate;
 end;
 
-constructor TCEPageControl.Create(aowner: TComponent);
+constructor TDexedPageControl.Create(aowner: TComponent);
 begin
   inherited;
 
@@ -271,11 +271,11 @@ begin
 
   setPagesOptions(defPagesOpt);
 
-  fButtons:= CEPageControlDefaultButtons;
+  fButtons:= DexedPageControlDefaultButtons;
   updateButtonsState;
 end;
 
-destructor TCEPageControl.Destroy;
+destructor TDexedPageControl.Destroy;
 begin
   while fPages.Count > 0 do
     deletePage(fPages.Count-1);
@@ -284,7 +284,7 @@ begin
   inherited;
 end;
 
-procedure TCEPageControl.setOnDragOver(value: TDragOverEvent);
+procedure TDexedPageControl.setOnDragOver(value: TDragOverEvent);
 begin
   if fOnDragOver = value then
     exit;
@@ -293,7 +293,7 @@ begin
   fTabs.OnDragOver:=value;
 end;
 
-procedure TCEPageControl.setOnDragDrop(value: TDragDropEvent);
+procedure TDexedPageControl.setOnDragDrop(value: TDragDropEvent);
 begin
   if fOnDragDrop = value then
     exit;
@@ -302,7 +302,7 @@ begin
   fTabs.OnDragDrop:=value;
 end;
 
-procedure TCEPageControl.setPagesOptions(value: TCEPageControlOptions);
+procedure TDexedPageControl.setPagesOptions(value: TPageControlOptions);
 var
   flat: boolean;
 begin
@@ -319,7 +319,7 @@ begin
   fSplitBtn.Flat:=flat;
 end;
 
-procedure TCEPageControl.setHeaderPosition(bottom: boolean);
+procedure TDexedPageControl.setHeaderPosition(bottom: boolean);
 begin
   if bottom then
   begin
@@ -332,44 +332,44 @@ begin
   end;
 end;
 
-procedure TCEPageControl.changedNotify;
+procedure TDexedPageControl.changedNotify;
 begin
   updateButtonsState;
   if assigned(fOnChanged) then
     fOnChanged(self);
 end;
 
-procedure TCEPageControl.tabsChanged(sender: TObject);
+procedure TDexedPageControl.tabsChanged(sender: TObject);
 begin
   if fTabs.TabIndex < fPages.Count then
     setPageIndex(fTabs.TabIndex);
 end;
 
-procedure TCEPageControl.tabsChanging(Sender: TObject; var AllowChange: Boolean);
+procedure TDexedPageControl.tabsChanging(Sender: TObject; var AllowChange: Boolean);
 begin
   if assigned(fOnChanging) then fOnChanging(self, AllowChange);
 end;
 
-procedure TCEPageControl.hidePage(index: integer);
+procedure TDexedPageControl.hidePage(index: integer);
 var
-  pge: TCEPage;
+  pge: TDexedPage;
 begin
   if (index < 0) or (index > fPages.Count-1) then
     exit;
 
-  pge := TCEPage(fPages[index]);
+  pge := TDexedPage(fPages[index]);
   pge.Visible:=false;
 end;
 
-procedure TCEPageControl.showPage(index: integer);
+procedure TDexedPageControl.showPage(index: integer);
 var
-  pge: TCEPage;
+  pge: TDexedPage;
   ctl: TControl;
 begin
   if (index < 0) or (index > fPages.Count-1) then
     exit;
 
-  pge := TCEPage(fPages[index]);
+  pge := TDexedPage(fPages[index]);
   if (fSplittedPageIndex = -1) or (index = fSplittedPageIndex) then
     pge.Align:=alClient;
   pge.Visible:=true;
@@ -378,9 +378,9 @@ begin
     ctl.Visible:=true;
 end;
 
-procedure TCEPageControl.setPageIndex(index: integer);
+procedure TDexedPageControl.setPageIndex(index: integer);
 var
-  leftp, rightp: TCEPage;
+  leftp, rightp: TDexedPage;
 begin
   if (fPageIndex <> fSplittedPageIndex) then
     fOldSplitPos := fSplitter.Left;
@@ -422,9 +422,9 @@ begin
   changedNotify;
 end;
 
-function TCEPageControl.addPage: TCEPage;
+function TDexedPageControl.addPage: TDexedPage;
 var
-  pge: TCEPage;
+  pge: TDexedPage;
 begin
 
   if poPageHistory in fOptions then
@@ -432,7 +432,7 @@ begin
     fPagesHistory.Insert(0, Pointer(PtrUint(fPageIndex)));
     {$POP}
 
-  pge := TCEPage.Create(self);
+  pge := TDexedPage.Create(self);
   pge.Parent := fContent;
   pge.Align:= alClient;
 
@@ -443,7 +443,7 @@ begin
   result := pge;
 end;
 
-procedure TCEPageControl.deletePage(index: integer);
+procedure TDexedPageControl.deletePage(index: integer);
 begin
   if (index > fPages.Count-1) or (index < 0) then
     exit;
@@ -453,7 +453,7 @@ begin
   else if index < fSplittedPageIndex then
     fSplittedPageIndex -= 1;
 
-  TCEPage(fPages[index]).Free;
+  TDexedPage(fPages[index]).Free;
   if fPageIndex >= fPages.Count then
     fPageIndex -= 1;
 
@@ -475,35 +475,35 @@ begin
   setPageIndex(fPageIndex);
 end;
 
-function TCEPageControl.getPageIndex(page: TCEPage): integer;
+function TDexedPageControl.getPageIndex(page: TDexedPage): integer;
 begin
   exit(fPages.IndexOf(page));
 end;
 
-function TCEPageControl.getCurrentPage: TCEPage;
+function TDexedPageControl.getCurrentPage: TDexedPage;
 begin
   if (fPageIndex < 0) or (fPageIndex > fPages.Count-1) then
     exit(nil)
   else
-    exit(TCEPage(fPages[fPageIndex]));
+    exit(TDexedPage(fPages[fPageIndex]));
 end;
 
-procedure TCEPageControl.setCurrentPage(value: TCEPage);
+procedure TDexedPageControl.setCurrentPage(value: TDexedPage);
 begin
   setPageIndex(getPageIndex(value));
 end;
 
-function TCEPageControl.getPageCount: integer;
+function TDexedPageControl.getPageCount: integer;
 begin
   exit(fPages.Count);
 end;
 
-function TCEPageControl.getPage(index: integer): TCEPage;
+function TDexedPageControl.getPage(index: integer): TDexedPage;
 begin
-  exit(TCEPage(fPages[index]));
+  exit(TDexedPage(fPages[index]));
 end;
 
-function TCEPageControl.getSplitPage: TCEPage;
+function TDexedPageControl.getSplitPage: TDexedPage;
 begin
   if fSplittedPageIndex = -1 then
     exit(nil)
@@ -511,7 +511,7 @@ begin
     exit(getPage(fSplittedPageIndex));
 end;
 
-procedure TCEPageControl.movePageRight;
+procedure TDexedPageControl.movePageRight;
 var
   i: integer;
 begin
@@ -536,7 +536,7 @@ begin
   setPageIndex(fPageIndex+1);
 end;
 
-procedure TCEPageControl.movePageLeft;
+procedure TDexedPageControl.movePageLeft;
 var
   i: integer;
 begin
@@ -561,37 +561,37 @@ begin
   setPageIndex(fPageIndex-1);
 end;
 
-procedure TCEPageControl.btnClickEvent(button: TCEPageControlButton);
+procedure TDexedPageControl.btnClickEvent(button: TPageControlButton);
 begin
   if assigned(fPageControlButtonClick) then
     fPageControlButtonClick(self, button);
 end;
 
-procedure TCEPageControl.btnCloseClick(sender: TObject);
+procedure TDexedPageControl.btnCloseClick(sender: TObject);
 begin
   btnClickEvent(pbClose);
   deletePage(fPageIndex);
 end;
 
-procedure TCEPageControl.btnMoveLeftClick(sender: TObject);
+procedure TDexedPageControl.btnMoveLeftClick(sender: TObject);
 begin
   movePageLeft;
   btnClickEvent(pbMoveLeft);
 end;
 
-procedure TCEPageControl.btnMoveRightClick(sender: TObject);
+procedure TDexedPageControl.btnMoveRightClick(sender: TObject);
 begin
   movePageRight;
   btnClickEvent(pbMoveRight);
 end;
 
-procedure TCEPageControl.btnAddClick(sender: TObject);
+procedure TDexedPageControl.btnAddClick(sender: TObject);
 begin
   addPage;
   btnClickEvent(pbAdd);
 end;
 
-procedure TCEPageControl.btnSplitClick(sender: TObject);
+procedure TDexedPageControl.btnSplitClick(sender: TObject);
 begin
   if fPageIndex = fSplittedPageIndex then
     fSplittedPageIndex := -1
@@ -605,7 +605,7 @@ begin
   btnClickEvent(pbSplit);
 end;
 
-procedure TCEPageControl.setButtons(value: TCEPageControlButtons);
+procedure TDexedPageControl.setButtons(value: TPageControlButtons);
 begin
   if fButtons = value then
     exit;
@@ -615,7 +615,7 @@ begin
   fHeader.ReAlign;
 end;
 
-procedure TCEPageControl.updateButtonsState;
+procedure TDexedPageControl.updateButtonsState;
 begin
   fHeader.DisableAlign;
   fMoveLeftBtn.Visible := pbMoveLeft in fButtons;
@@ -630,7 +630,7 @@ begin
   fMoveRightBtn.Enabled := fPageIndex < fPages.Count-1;
 end;
 
-constructor TCEListViewCopyMenu.create(aOwner: TComponent);
+constructor TListViewCopyMenu.create(aOwner: TComponent);
 var
   itm: TMenuItem;
 begin
@@ -682,7 +682,7 @@ begin
   items.Add(itm);
 end;
 
-function TCEListViewCopyMenu.getColumnIndex: integer;
+function TListViewCopyMenu.getColumnIndex: integer;
 var
   i: integer;
   w: integer = 0;
@@ -702,7 +702,7 @@ begin
   end;
 end;
 
-function TCEListViewCopyMenu.getLine(item: TListItem): string;
+function TListViewCopyMenu.getLine(item: TListItem): string;
 var
   c: integer;
   i: integer;
@@ -721,7 +721,7 @@ begin
   end;
 end;
 
-function TCEListViewCopyMenu.getLineAsList(item: TListItem): string;
+function TListViewCopyMenu.getLineAsList(item: TListItem): string;
 var
   i: integer;
 begin
@@ -734,7 +734,7 @@ begin
     result += LineEnding + item.SubItems[i];
 end;
 
-procedure TCEListViewCopyMenu.copyCell(sender: TObject);
+procedure TListViewCopyMenu.copyCell(sender: TObject);
 var
   s: string = '';
   c: integer;
@@ -751,7 +751,7 @@ begin
   clipboard.AsText := s;
 end;
 
-procedure TCEListViewCopyMenu.copyLine(sender: TObject);
+procedure TListViewCopyMenu.copyLine(sender: TObject);
 begin
   if not assigned(fList) or not assigned(fList.Selected) then
     exit;
@@ -759,7 +759,7 @@ begin
   Clipboard.AsText := getLine(fList.Selected);
 end;
 
-procedure TCEListViewCopyMenu.copyLineAsList(sender: TObject);
+procedure TListViewCopyMenu.copyLineAsList(sender: TObject);
 begin
   if not assigned(fList) or not assigned(fList.Selected) then
     exit;
@@ -767,7 +767,7 @@ begin
   Clipboard.AsText := getLineAsList(fList.Selected);
 end;
 
-procedure TCEListViewCopyMenu.copyColumn(sender: TObject);
+procedure TListViewCopyMenu.copyColumn(sender: TObject);
 var
   s: string = '';
   c: integer;
@@ -791,7 +791,7 @@ begin
   clipboard.AsText := s;
 end;
 
-procedure TCEListViewCopyMenu.copyAll(sender: TObject);
+procedure TListViewCopyMenu.copyAll(sender: TObject);
 var
   s: string = '';
   c: integer;
@@ -808,7 +808,7 @@ begin
   clipboard.AsText := s;
 end;
 
-procedure TCEListViewCopyMenu.copyAllAsList(sender: TObject);
+procedure TListViewCopyMenu.copyAllAsList(sender: TObject);
 var
   s: string = '';
   c: integer;
@@ -825,7 +825,7 @@ begin
   clipboard.AsText := s;
 end;
 
-procedure TCEListViewCopyMenu.copyAllAsMarkdown(sender: TObject);
+procedure TListViewCopyMenu.copyAllAsMarkdown(sender: TObject);
 var
   s: string = '';
   c: integer;

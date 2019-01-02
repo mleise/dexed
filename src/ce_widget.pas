@@ -13,9 +13,9 @@ type
   (**
    * Base type for an UI module.
    *)
-  PTCEWidget = ^TCEWidget;
+  PTDexedWidget = ^TDexedWidget;
 
-  TCEWidget = class;
+  TDexedWidget = class;
 
   TWidgetDockingState =
   (
@@ -24,12 +24,12 @@ type
     wdsRedocked   // docked from a site to another
   );
 
-  TWidgetDockingChangedEvent = procedure(sender: TCEWidget; newState: TWidgetDockingState) of object;
+  TWidgetDockingChangedEvent = procedure(sender: TDexedWidget; newState: TWidgetDockingState) of object;
 
-  { TCEWidget }
+  { TDexedWidget }
 
-  TCEWidget = class(TForm, ICEContextualActions)
-    toolbar: TCEToolBar;
+  TDexedWidget = class(TForm, IContextualActions)
+    toolbar: TDexedToolBar;
     Content: TPanel;
     Back: TPanel;
     contextMenu: TPopupMenu;
@@ -112,25 +112,25 @@ type
   end;
 
   (**
-   * TCEWidget list.
+   * TDexedWidget list.
    *)
-  TCEWidgetList = class(TFPList)
+  TWidgetList = class(TFPList)
   private
-    function getWidget(index: integer): TCEWidget;
+    function getWidget(index: integer): TDexedWidget;
   public
-    procedure addWidget(value: PTCEWidget);
-    property widget[index: integer]: TCEWidget read getWidget;
+    procedure addWidget(value: PTDexedWidget);
+    property widget[index: integer]: TDexedWidget read getWidget;
   end;
 
   TWidgetEnumerator = class
-    fList: TCEWidgetList;
+    fList: TWidgetList;
     fIndex: Integer;
-    function getCurrent: TCEWidget;
+    function getCurrent: TDexedWidget;
     Function moveNext: boolean;
-    property current: TCEWidget read getCurrent;
+    property current: TDexedWidget read getCurrent;
   end;
 
-  operator enumerator(aWidgetList: TCEWidgetList): TWidgetEnumerator;
+  operator enumerator(aWidgetList: TWidgetList): TWidgetEnumerator;
 
   function CompareWidgCaption(Item1, Item2: Pointer): Integer;
 
@@ -141,7 +141,7 @@ uses
   ce_observer;
 
 {$REGION Standard Comp/Obj------------------------------------------------------}
-constructor TCEWidget.create(aOwner: TComponent);
+constructor TDexedWidget.create(aOwner: TComponent);
 var
   i: Integer;
   itm: TmenuItem;
@@ -168,13 +168,13 @@ begin
   EntitiesConnector.addObserver(self);
 end;
 
-destructor TCEWidget.destroy;
+destructor TDexedWidget.destroy;
 begin
   EntitiesConnector.removeObserver(self);
   inherited;
 end;
 
-function TCEWidget.closeQuery: boolean;
+function TDexedWidget.closeQuery: boolean;
 begin
   result := inherited;
   if fIsDockable and (not DockMaster.AllowDragging) and not
@@ -182,7 +182,7 @@ begin
       result := false;
 end;
 
-function TCEWidget.getIfModal: boolean;
+function TDexedWidget.getIfModal: boolean;
 begin
   if isDockable then
     result := false
@@ -190,7 +190,7 @@ begin
     result := fIsModal;
 end;
 
-procedure TCEWidget.showWidget;
+procedure TDexedWidget.showWidget;
 var
   win: TControl;
 begin
@@ -213,7 +213,7 @@ begin
   end;
 end;
 
-procedure TCEWidget.setToolBarVisible(value: boolean);
+procedure TDexedWidget.setToolBarVisible(value: boolean);
 begin
   if fToolBarVisible = value then
     exit;
@@ -221,7 +221,7 @@ begin
   fToolBarVisible := value;
 end;
 
-procedure TCEWidget.setToolBarFlat(value: boolean);
+procedure TDexedWidget.setToolBarFlat(value: boolean);
 begin
   if fToolBarFlat = value then
     exit;
@@ -229,7 +229,7 @@ begin
   fToolBarFlat := value;
 end;
 
-procedure TCEWidget.Resize;
+procedure TDexedWidget.Resize;
 var
   n: TWinControl = nil;
   s: TAnchorDockHostSite;
@@ -251,25 +251,25 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEContextualActions---------------------------------------------------}
-function TCEWidget.contextName: string;
+{$REGION IContextualActions---------------------------------------------------}
+function TDexedWidget.contextName: string;
 begin
   result := '';
 end;
 
-function TCEWidget.contextActionCount: integer;
+function TDexedWidget.contextActionCount: integer;
 begin
   result := 0;
 end;
 
-function TCEWidget.contextAction(index: integer): TAction;
+function TDexedWidget.contextAction(index: integer): TAction;
 begin
   result := nil;
 end;
 {$ENDREGION}
 
 {$REGION Updaters---------------------------------------------------------------}
-procedure TCEWidget.setDelayDur(value: Integer);
+procedure TDexedWidget.setDelayDur(value: Integer);
 begin
   if value < 100 then value := 100;
   if fDelayDur = value then exit;
@@ -277,7 +277,7 @@ begin
   fUpdaterDelay.Interval := fDelayDur;
 end;
 
-procedure TCEWidget.setLoopInt(value: Integer);
+procedure TDexedWidget.setLoopInt(value: Integer);
 begin
   if fLoopInter = value then
     exit;
@@ -291,17 +291,17 @@ begin
   else fUpdaterAuto.Enabled:= true;
 end;
 
-procedure TCEWidget.IncLoopUpdate;
+procedure TDexedWidget.IncLoopUpdate;
 begin
   inc(fLoopUpdateCount);
 end;
 
-procedure TCEWidget.beginImperativeUpdate;
+procedure TDexedWidget.beginImperativeUpdate;
 begin
   Inc(fImperativeUpdateCount);
 end;
 
-procedure TCEWidget.endImperativeUpdate;
+procedure TDexedWidget.endImperativeUpdate;
 begin
   Dec(fImperativeUpdateCount);
   if fImperativeUpdateCount > 0 then exit;
@@ -311,7 +311,7 @@ begin
   fImperativeUpdateCount := 0;
 end;
 
-procedure TCEWidget.forceImperativeUpdate;
+procedure TDexedWidget.forceImperativeUpdate;
 begin
   fUpdating := true;
   updateImperative;
@@ -319,24 +319,24 @@ begin
   fImperativeUpdateCount := 0;
 end;
 
-procedure TCEWidget.beginDelayedUpdate;
+procedure TDexedWidget.beginDelayedUpdate;
 begin
   fUpdaterDelay.Enabled := false;
   fUpdaterDelay.Enabled := true;
   fUpdaterDelay.OnTimer := @updaterLatchProc;
 end;
 
-procedure TCEWidget.stopDelayedUpdate;
+procedure TDexedWidget.stopDelayedUpdate;
 begin
   fUpdaterDelay.OnTimer := nil;
 end;
 
-procedure TCEWidget.forceDelayedUpdate;
+procedure TDexedWidget.forceDelayedUpdate;
 begin
   updaterLatchProc(nil);
 end;
 
-procedure TCEWidget.updaterAutoProc(Sender: TObject);
+procedure TDexedWidget.updaterAutoProc(Sender: TObject);
 begin
   fUpdating := true;
   if fLoopUpdateCount > 0 then
@@ -345,7 +345,7 @@ begin
   fUpdating := false;
 end;
 
-procedure TCEWidget.updaterLatchProc(Sender: TObject);
+procedure TDexedWidget.updaterLatchProc(Sender: TObject);
 begin
   fUpdating := true;
   updateDelayed;
@@ -353,38 +353,38 @@ begin
   fUpdaterDelay.OnTimer := nil;
 end;
 
-procedure TCEWidget.updateLoop;
+procedure TDexedWidget.updateLoop;
 begin
 end;
 
-procedure TCEWidget.updateImperative;
+procedure TDexedWidget.updateImperative;
 begin
 end;
 
-procedure TCEWidget.updateDelayed;
+procedure TDexedWidget.updateDelayed;
 begin
 end;
 {$ENDREGION}
 
-{$REGION TCEWidgetList----------------------------------------------------------}
+{$REGION TWidgetList----------------------------------------------------------}
 function CompareWidgCaption(Item1, Item2: Pointer): Integer;
 type
-  PWidg = ^TCEWidget;
+  PWidg = ^TDexedWidget;
 begin
   result := AnsiCompareStr(PWidg(Item1)^.Caption, PWidg(Item2)^.Caption);
 end;
 
-function TCEWidgetList.getWidget(index: integer): TCEWidget;
+function TWidgetList.getWidget(index: integer): TDexedWidget;
 begin
-  result := PTCEWidget(Items[index])^;
+  result := PTDexedWidget(Items[index])^;
 end;
 
-procedure TCEWidgetList.addWidget(value: PTCEWidget);
+procedure TWidgetList.addWidget(value: PTDexedWidget);
 begin
   add(Pointer(value));
 end;
 
-function TWidgetEnumerator.getCurrent:TCEWidget;
+function TWidgetEnumerator.getCurrent:TDexedWidget;
 begin
   result := fList.widget[fIndex];
 end;
@@ -395,7 +395,7 @@ begin
   result := fIndex < fList.Count;
 end;
 
-operator enumerator(aWidgetList: TCEWidgetList): TWidgetEnumerator;
+operator enumerator(aWidgetList: TWidgetList): TWidgetEnumerator;
 begin
   result := TWidgetEnumerator.Create;
   result.fList := aWidgetList;

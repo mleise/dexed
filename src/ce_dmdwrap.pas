@@ -29,7 +29,7 @@ type
     fOnChange: TNotifyEvent;
     procedure doChanged;
   protected
-    fSymStringExpander: ICESymStringExpander;
+    fSymStringExpander: ISymStringExpander;
     property onChange: TNotifyEvent read fOnChange write fOnChange;
   public
     procedure getOpts(list: TStrings; base: TOptsGroup = nil); virtual; abstract;
@@ -42,18 +42,18 @@ type
   TDocOpts = class(TOptsGroup)
   private
     fGenDoc: boolean;
-    fDocDir: TCEPathname;
+    fDocDir: TPathname;
     fGenJson: boolean;
-    fJsonFname: TCEFilename;
+    fJsonFname: TFilename;
     procedure setGenDoc(const value: boolean);
     procedure setGenJSON(const value: boolean);
-    procedure setDocDir(const value: TCEPathname);
-    procedure setJSONFile(const value: TCEFilename);
+    procedure setDocDir(const value: TPathname);
+    procedure setJSONFile(const value: TFilename);
   published
     property generateDocumentation: boolean read fGenDoc write setGenDoc default false;
     property generateJSON: boolean read fGenJson write setGenJSON default false;
-    property DocumentationDirectory: TCEPathname read fDocDir write setDocDir;
-    property JSONFilename: TCEFilename read fJsonFname write setJSONFile;
+    property DocumentationDirectory: TPathname read fDocDir write setDocDir;
+    property JSONFilename: TFilename read fJsonFname write setJSONFile;
   public
     procedure assign(source: TPersistent); override;
     procedure getOpts(list: TStrings; base: TOptsGroup = nil); override;
@@ -206,20 +206,20 @@ type
     fImpMod: TStringList;
     fImpStr: TStringList;
     fExcl: TStringList;
-    fFname: TCEFilename;
-    fObjDir: TCEPathname;
+    fFname: TFilename;
+    fObjDir: TPathname;
     fForceExt: boolean;
     procedure setForceExt(value: boolean);
-    procedure setFname(const value: TCEFilename);
-    procedure setObjDir(const value: TCEPathname);
+    procedure setFname(const value: TFilename);
+    procedure setObjDir(const value: TPathname);
     procedure setSrcs(value: TStringList);
     procedure setIncl(value: TStringList);
     procedure setImpt(value: TStringList);
     procedure setExcl(value: TStringList);
     procedure strLstChange(sender: TObject);
   published
-    property outputFilename: TCEFilename read fFname write setFname;
-    property objectDirectory: TCEPathname read fObjDir write setObjDir;
+    property outputFilename: TFilename read fFname write setFname;
+    property objectDirectory: TPathname read fObjDir write setObjDir;
     property exclusions: TStringList read fExcl write setExcl;
     property extraSources: TStringList read fExtraSrcs write setSrcs;
     property importModulePaths: TStringList read fImpMod write setIncl;
@@ -271,21 +271,21 @@ type
    *)
   TCustomProcOptions = class(TOptsGroup)
   private
-    fExecutable: TCEFilename;
-    fWorkDir: TCEPathname;
+    fExecutable: TFilename;
+    fWorkDir: TPathname;
     fOptions: TProcessOptions;
     fParameters: TStringList;
     fShowWin: TShowWindowOptions;
     fCommands: TStringList;
-    procedure setExecutable(const value: TCEFilename);
-    procedure setWorkDir(const value: TCEPathname);
+    procedure setExecutable(const value: TFilename);
+    procedure setWorkDir(const value: TPathname);
     procedure setOptions(const value: TProcessOptions);
     procedure setParameters(value: TStringList);
     procedure setShowWin(value: TShowWindowOptions);
     procedure setCommands(value: TStringList);
   protected
-    property executable: TCEFilename read fExecutable write setExecutable;
-    property workingDirectory: TCEPathname read fWorkDir write setWorkDir;
+    property executable: TFilename read fExecutable write setExecutable;
+    property workingDirectory: TPathname read fWorkDir write setWorkDir;
     property options: TProcessOptions read fOptions write setOptions default [];
     property parameters: TStringList read fParameters write setParameters;
     property showWindow: TShowWindowOptions read fShowWin write setShowWin default swoNone;
@@ -300,7 +300,7 @@ type
       without the overload aProcess does not get the Parameters if aProcess is TAsynProcess...}
     procedure setProcess(var process: TProcess);
     procedure setProcess(var process: TAsyncProcess);
-    procedure setProcess(var process: TCEProcess);
+    procedure setProcess(var process: TDexedProcess);
   end;
 
   (*****************************************************************************
@@ -333,7 +333,7 @@ type
    *)
   TCompilerConfiguration = class(TCollectionItem)
   private
-    fSymStringExpander: ICESymStringExpander;
+    fSymStringExpander: ISymStringExpander;
     fName: string;
     fOnChanged: TNotifyEvent;
     fDocOpts: TDocOpts;
@@ -477,7 +477,7 @@ begin
   doChanged;
 end;
 
-procedure TDocOpts.setDocDir(const value: TCEPathname);
+procedure TDocOpts.setDocDir(const value: TPathname);
 begin
   if fDocDir = value then
     exit;
@@ -487,7 +487,7 @@ begin
   doChanged;
 end;
 
-procedure TDocOpts.setJSONFile(const value: TCEFilename);
+procedure TDocOpts.setJSONFile(const value: TFilename);
 begin
   if fJsonFname = value then
     exit;
@@ -1110,7 +1110,7 @@ begin
   doChanged;
 end;
 
-procedure TPathsOpts.setFname(const value: TCEFilename);
+procedure TPathsOpts.setFname(const value: TFilename);
 begin
   if fFname = value then exit;
   fFname := patchPlateformPath(value);
@@ -1118,7 +1118,7 @@ begin
   doChanged;
 end;
 
-procedure TPathsOpts.setObjDir(const value: TCEPathname);
+procedure TPathsOpts.setObjDir(const value: TPathname);
 begin
   if fObjDir = value then exit;
   fObjDir := patchPlateformPath(value);
@@ -1389,7 +1389,7 @@ begin
   process.StartupOptions := process.StartupOptions + [suoUseShowWindow];
 end;
 
-procedure TCustomProcOptions.setProcess(var process: TCEProcess);
+procedure TCustomProcOptions.setProcess(var process: TDexedProcess);
 begin
   process.Parameters.Clear;
   process.Parameters.AddText(fSymStringExpander.expand(Parameters.Text));
@@ -1400,14 +1400,14 @@ begin
   process.StartupOptions := process.StartupOptions + [suoUseShowWindow];
 end;
 
-procedure TCustomProcOptions.setExecutable(const value: TCEFilename);
+procedure TCustomProcOptions.setExecutable(const value: TFilename);
 begin
   if fExecutable = value then exit;
   fExecutable := value;
   doChanged;
 end;
 
-procedure TCustomProcOptions.setWorkDir(const value: TCEPathname);
+procedure TCustomProcOptions.setWorkDir(const value: TPathname);
 begin
   if fWorkDir = value then exit;
   fWorkDir := value;

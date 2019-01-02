@@ -34,10 +34,10 @@ type
     procedure assign(value: TPersistent); override;
   end;
 
-  THalsteadMetrics = class(THalsteadMetricsBase, ICEEditableOptions)
+  THalsteadMetrics = class(THalsteadMetricsBase, IEditableOptions)
   private
     fBackup: THalsteadMetricsBase;
-    fMsgs: ICEMessagesDisplay;
+    fMsgs: IMessagesDisplay;
     function optionedWantCategory(): string;
     function optionedWantEditorKind: TOptionEditorKind;
     function optionedWantContainer: TPersistent;
@@ -46,7 +46,7 @@ type
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
-    procedure measure(document: TCESynMemo);
+    procedure measure(document: TDexedMemo);
   end;
 
   function metrics: THalsteadMetrics;
@@ -159,7 +159,7 @@ begin
   exit(false);
 end;
 
-procedure THalsteadMetrics.Measure(document: TCESynMemo);
+procedure THalsteadMetrics.Measure(document: TDexedMemo);
 
   function checkFunction(const obj: TJSONObject; var bugsSum: single): boolean;
   var
@@ -171,7 +171,7 @@ procedure THalsteadMetrics.Measure(document: TCESynMemo);
     vwn: boolean;
     bwn: boolean;
   const
-    bgt: array[boolean] of TCEAppMessageKind = (amkInf, amkWarn);
+    bgt: array[boolean] of TAppMessageKind = (amkInf, amkWarn);
   begin
     result := true;
     val := obj.Find('n1Count');

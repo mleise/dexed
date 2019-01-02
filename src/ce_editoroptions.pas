@@ -21,7 +21,7 @@ type
    * the constructor according to the default value of the member binded
    * to the property.
    *)
-  TCEEditorOptionsBase = class(TWritableLfmTextComponent)
+  TEditorOptionsBase = class(TWritableLfmTextComponent)
   private
     // note this is how a TComponent can be edited in
     // a basic TTIGrid: in the ctor create the component
@@ -60,7 +60,7 @@ type
     fCompletionMenuWidth: integer;
     fCompletionMenuLines: Byte;
     fAutoCloseCurlyBrace: TBraceAutoCloseStyle;
-    fPhobosDocRoot: TCEPathname;
+    fPhobosDocRoot: TPathname;
     fAlwaysAdvancedFeatures: boolean;
     fAutoClosedPairs: TAutoClosePairs;
     fSmartDdocNewline: boolean;
@@ -73,7 +73,7 @@ type
     fDscannerEnabled: boolean;
     fScrollPreview: boolean;
     //
-    procedure setPhobosDocRoot(value: TCEPathname);
+    procedure setPhobosDocRoot(value: TPathname);
     procedure setFont(value: TFont);
     procedure setSelCol(value: TSynSelectedColor);
     procedure setFoldedColor(value: TSynSelectedColor);
@@ -122,7 +122,7 @@ type
     property mouseOptions: TSynEditorMouseOptions read fMouseOptions write fMouseOptions;
     property options1: TSynEditorOptions read fOptions1 write fOptions1;
     property options2: TSynEditorOptions2 read fOptions2 write fOptions2;
-    property phobosDocRoot: TCEPathname read fPhobosDocRoot write setPhobosDocRoot;
+    property phobosDocRoot: TPathname read fPhobosDocRoot write setPhobosDocRoot;
     property plusDdoc: boolean read fInsertPlusDdoc write fInsertPlusDdoc;
     property resetFontSize: boolean read fResetFontSize write fResetFontSize default true;
     property rightEdge: Integer read fRightEdge write fRightEdge default 80;
@@ -141,12 +141,12 @@ type
   end;
 
   (**
-   * Manages and exposes all the editor and highligther options to an TCEOptionsEditor.
+   * Manages and exposes all the editor and highligther options to an TOptionsEditor.
    * It's also responsible to give the current options to a new editor.
    *)
-  TCEEditorOptions = class(TCEEditorOptionsBase, ICEEditableOptions, ICEDocumentObserver, ICEEDitableShortcut)
+  TEditorOptions = class(TEditorOptionsBase, IEditableOptions, IDocumentObserver, IEditableShortCut)
   private
-    fBackup: TCEEditorOptionsBase;
+    fBackup: TEditorOptionsBase;
     fShortcutCount: Integer;
     //
     function optionedWantCategory(): string;
@@ -155,17 +155,17 @@ type
     procedure optionedEvent(event: TOptionEditorEvent);
     function optionedOptionsModified: boolean;
     //
-    procedure docNew(document: TCESynMemo);
-    procedure docFocused(document: TCESynMemo);
-    procedure docChanged(document: TCESynMemo);
-    procedure docClosing(document: TCESynMemo);
+    procedure docNew(document: TDexedMemo);
+    procedure docFocused(document: TDexedMemo);
+    procedure docChanged(document: TDexedMemo);
+    procedure docClosing(document: TDexedMemo);
     //
     function scedWantFirst: boolean;
     function scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
     procedure scedSendItem(const category, identifier: string; aShortcut: TShortcut);
     procedure scedSendDone;
     //
-    procedure applyChangeToEditor(anEditor: TCESynMemo);
+    procedure applyChangeToEditor(anEditor: TDexedMemo);
   protected
     procedure afterLoad; override;
   public
@@ -175,7 +175,7 @@ type
   end;
 
 var
-  EditorOptions: TCEEditorOptions;
+  EditorOptions: TEditorOptions;
 
 implementation
 
@@ -183,10 +183,10 @@ const
   edoptFname = 'editor.txt';
 
 {$REGION Standard Comp/Obj -----------------------------------------------------}
-constructor TCEEditorOptionsBase.Create(AOwner: TComponent);
+constructor TEditorOptionsBase.Create(AOwner: TComponent);
 var
   i: integer;
-  shc: TCEPersistentShortcut;
+  shc: TPersistentShortcut;
   ed: TSynEdit;
 begin
   inherited;
@@ -272,14 +272,14 @@ begin
   mouseOptions := MouseOptions +
     [emAltSetsColumnMode, emDragDropEditing, emCtrlWheelZoom, emShowCtrlMouseLinks];
   //
-  fShortCuts := TCollection.Create(TCEPersistentShortcut);
+  fShortCuts := TCollection.Create(TPersistentShortcut);
   ed := TSynEdit.Create(nil);
   try
-    // note: cant use a TCESynMemo because it'd be added to the EntitiesConnector
+    // note: cant use a TDexedMemo because it'd be added to the EntitiesConnector
     SetDefaultDexedKeystrokes(ed);
     for i:= 0 to ed.Keystrokes.Count-1 do
     begin
-      shc := TCEPersistentShortcut(fShortCuts.Add);
+      shc := TPersistentShortcut(fShortCuts.Add);
       shc.actionName:= EditorCommandToCodeString(ed.Keystrokes[i].Command);
       shc.shortcut  := ed.Keystrokes[i].ShortCut;
     end;
@@ -288,7 +288,7 @@ begin
   end;
 end;
 
-destructor TCEEditorOptionsBase.Destroy;
+destructor TEditorOptionsBase.Destroy;
 begin
   fFont.Free;
   fCurrLineAttribs.Free;
@@ -301,13 +301,13 @@ begin
   inherited;
 end;
 
-procedure TCEEditorOptionsBase.Assign(source: TPersistent);
+procedure TEditorOptionsBase.Assign(source: TPersistent);
 var
-  srcopt: TCEEditorOptionsBase;
+  srcopt: TEditorOptionsBase;
 begin
-  if (source is TCEEditorOptionsBase) then
+  if (source is TEditorOptionsBase) then
   begin
-    srcopt := TCEEditorOptionsBase(source);
+    srcopt := TEditorOptionsBase(source);
     //
     fDscannerDelay:=srcopt.fDscannerDelay;
     fDscannerEnabled:=srcopt.dscannerEnabled;
@@ -360,52 +360,52 @@ begin
     inherited;
 end;
 
-procedure TCEEditorOptionsBase.setDDocDelay(value: Integer);
+procedure TEditorOptionsBase.setDDocDelay(value: Integer);
 begin
   if value > 2000 then value := 2000
   else if value < 20 then value := 20;
   fDDocDelay:=value;
 end;
 
-procedure TCEEditorOptionsBase.setDscannerDelay(value: Integer);
+procedure TEditorOptionsBase.setDscannerDelay(value: Integer);
 begin
   if value > 10000 then value := 10000
   else if value < 500 then value := 500;
   fDscannerDelay:=value;
 end;
 
-procedure TCEEditorOptionsBase.setAutoDotDelay(value: Integer);
+procedure TEditorOptionsBase.setAutoDotDelay(value: Integer);
 begin
   if value > 2000 then value := 2000
   else if value < 0 then value := 0;
   fAutoDotDelay:=value;
 end;
 
-procedure TCEEditorOptionsBase.setCompletionMenuLines(value: byte);
+procedure TEditorOptionsBase.setCompletionMenuLines(value: byte);
 begin
   if value < 5 then value := 5
   else if value > 64 then value := 64;
   fCompletionMenuLines := value;
 end;
 
-procedure TCEEditorOptionsBase.setLineNumEvery(value: integer);
+procedure TEditorOptionsBase.setLineNumEvery(value: integer);
 begin
   if value < 1 then value := 1
   else if value > 10 then value := 10;
   fLineNumEvery := value;
 end;
 
-procedure TCEEditorOptionsBase.setShortcuts(value: TCollection);
+procedure TEditorOptionsBase.setShortcuts(value: TCollection);
 begin
   fShortCuts.Assign(value);
 end;
 
-procedure TCEEditorOptionsBase.setFont(value: TFont);
+procedure TEditorOptionsBase.setFont(value: TFont);
 begin
   fFont.Assign(value);
 end;
 
-procedure TCEEditorOptionsBase.setPhobosDocRoot(value: TCEPathname);
+procedure TEditorOptionsBase.setPhobosDocRoot(value: TPathname);
 begin
   if not DirectoryExists(value)  and (value <> 'https://dlang.org/phobos/') then
     value := 'https://dlang.org/phobos/';
@@ -414,52 +414,52 @@ begin
   fPhobosDocRoot:=value;
 end;
 
-procedure TCEEditorOptionsBase.setSelCol(value: TSynSelectedColor);
+procedure TEditorOptionsBase.setSelCol(value: TSynSelectedColor);
 begin
   fSelAttribs.Assign(value);
 end;
 
-procedure TCEEditorOptionsBase.setFoldedColor(value: TSynSelectedColor);
+procedure TEditorOptionsBase.setFoldedColor(value: TSynSelectedColor);
 begin
   fFoldedColor.Assign(value);
 end;
 
-procedure TCEEditorOptionsBase.setMouseLinkColor(value: TSynSelectedColor);
+procedure TEditorOptionsBase.setMouseLinkColor(value: TSynSelectedColor);
 begin
   fMouseLinkAttribs.Assign(value);
 end;
 
-procedure TCEEditorOptionsBase.setBracketMatchColor(value: TSynSelectedColor);
+procedure TEditorOptionsBase.setBracketMatchColor(value: TSynSelectedColor);
 begin
   fBracketMatchAttribs.Assign(value);
 end;
 
-procedure TCEEditorOptionsBase.SetIdentifierMarkup(value: TSynSelectedColor);
+procedure TEditorOptionsBase.SetIdentifierMarkup(value: TSynSelectedColor);
 begin
   fIdentifierMarkup.Assign(value);
 end;
 
-procedure TCEEditorOptionsBase.setCurrLineAttribs(value: TSynSelectedColor);
+procedure TEditorOptionsBase.setCurrLineAttribs(value: TSynSelectedColor);
 begin
   fCurrLineAttribs.Assign(value);
 end;
 
-procedure TCEEditorOptionsBase.setD2Syn(value: TPersistent);
+procedure TEditorOptionsBase.setD2Syn(value: TPersistent);
 begin
   D2Syn.Assign(value);
 end;
 
-procedure TCEEditorOptionsBase.setTxtSyn(value: TPersistent);
+procedure TEditorOptionsBase.setTxtSyn(value: TPersistent);
 begin
   TxtSyn.Assign(value);
 end;
 
-constructor TCEEditorOptions.Create(AOwner: TComponent);
+constructor TEditorOptions.Create(AOwner: TComponent);
 var
   fname: string;
 begin
   inherited;
-  fBackup := TCEEditorOptionsBase.Create(self);
+  fBackup := TEditorOptionsBase.Create(self);
   EntitiesConnector.addObserver(self);
   //
   fname := getDocPath + edoptFname;
@@ -467,7 +467,7 @@ begin
     loadFromFile(fname);
 end;
 
-destructor TCEEditorOptions.Destroy;
+destructor TEditorOptions.Destroy;
 begin
   saveToFile(getDocPath + edoptFname);
   //
@@ -475,10 +475,10 @@ begin
   inherited;
 end;
 
-procedure TCEEditorOptions.afterLoad;
+procedure TEditorOptions.afterLoad;
 var
   ed: TSynEdit;
-  shc: TCEPersistentShortcut;
+  shc: TPersistentShortcut;
   i,j: integer;
   exists: boolean;
 begin
@@ -495,7 +495,7 @@ begin
       exists := false;
       for j := 0 to fShortcuts.count-1 do
       begin
-        if TCEPersistentShortcut(fShortCuts.Items[j]).actionName <>
+        if TPersistentShortcut(fShortCuts.Items[j]).actionName <>
           EditorCommandToCodeString(ed.Keystrokes.Items[i].Command) then
             continue;
         exists := true;
@@ -503,7 +503,7 @@ begin
       end;
       if exists then
         continue;
-      shc := TCEPersistentShortcut(fShortCuts.Add);
+      shc := TPersistentShortcut(fShortCuts.Add);
       shc.actionName := EditorCommandToCodeString(ed.Keystrokes.Items[i].Command);
       shc.shortcut := ed.Keystrokes.Items[i].ShortCut;
     end;
@@ -513,7 +513,7 @@ begin
       exists := false;
       for i:= 0 to ed.Keystrokes.Count-1 do
       begin
-        if TCEPersistentShortcut(fShortCuts.Items[j]).actionName <>
+        if TPersistentShortcut(fShortCuts.Items[j]).actionName <>
           EditorCommandToCodeString(ed.Keystrokes.Items[i].Command) then
             continue;
         exists := true;
@@ -529,8 +529,8 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION ICEDocumentObserver ---------------------------------------------------}
-procedure TCEEditorOptions.docNew(document: TCESynMemo);
+{$REGION IDocumentObserver ---------------------------------------------------}
+procedure TEditorOptions.docNew(document: TDexedMemo);
 begin
   //apply...des not modify font size to preserve current zoom
   // when called after the options are edited
@@ -539,33 +539,33 @@ begin
   document.Font.Size:=self.font.Size;
 end;
 
-procedure TCEEditorOptions.docFocused(document: TCESynMemo);
+procedure TEditorOptions.docFocused(document: TDexedMemo);
 begin
 end;
 
-procedure TCEEditorOptions.docChanged(document: TCESynMemo);
+procedure TEditorOptions.docChanged(document: TDexedMemo);
 begin
 end;
 
-procedure TCEEditorOptions.docClosing(document: TCESynMemo);
+procedure TEditorOptions.docClosing(document: TDexedMemo);
 begin
   fCompletionMenuWidth := document.completionMenu.TheForm.Width;
   fCompletionMenuLines := document.completionMenu.LinesInWindow;
 end;
 {$ENDREGION}
 
-{$REGION ICEEDitableShortcut ---------------------------------------------------}
-function TCEEditorOptions.scedWantFirst: boolean;
+{$REGION IEditableShortCut ---------------------------------------------------}
+function TEditorOptions.scedWantFirst: boolean;
 begin
   result := fShortCuts.Count > 0;
   fShortcutCount := 0;
 end;
 
-function TCEEditorOptions.scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
+function TEditorOptions.scedWantNext(out category, identifier: string; out aShortcut: TShortcut): boolean;
 var
-  shrct: TCEPersistentShortcut;
+  shrct: TPersistentShortcut;
 begin
-  shrct     := TCEPersistentShortcut(fShortCuts.Items[fShortcutCount]);
+  shrct     := TPersistentShortcut(fShortCuts.Items[fShortcutCount]);
   category  := 'Code editor';
   identifier:= shrct.actionName;
   // SynEdit shortcuts start with 'ec'
@@ -577,16 +577,16 @@ begin
   result := fShortcutCount < fShortCuts.Count;
 end;
 
-procedure TCEEditorOptions.scedSendItem(const category, identifier: string; aShortcut: TShortcut);
+procedure TEditorOptions.scedSendItem(const category, identifier: string; aShortcut: TShortcut);
 var
   i: Integer;
-  shc: TCEPersistentShortcut;
+  shc: TPersistentShortcut;
 begin
   if category <> 'Code editor' then exit;
   //
   for i:= 0 to fShortCuts.Count-1 do
   begin
-    shc := TCEPersistentShortcut(fShortCuts.Items[i]);
+    shc := TPersistentShortcut(fShortCuts.Items[i]);
     if shc.actionName.length > 2 then
     begin
       if shc.actionName[3..shc.actionName.length] <> identifier then
@@ -600,25 +600,25 @@ begin
   // they are sent from another option editor.
 end;
 
-procedure TCEEditorOptions.scedSendDone;
+procedure TEditorOptions.scedSendDone;
 begin
   applyChangesFromSelf;
 end;
 
 {$ENDREGION}
 
-{$REGION ICEEditableOptions ----------------------------------------------------}
-function TCEEditorOptions.optionedWantCategory(): string;
+{$REGION IEditableOptions ----------------------------------------------------}
+function TEditorOptions.optionedWantCategory(): string;
 begin
   exit('Editor');
 end;
 
-function TCEEditorOptions.optionedWantEditorKind: TOptionEditorKind;
+function TEditorOptions.optionedWantEditorKind: TOptionEditorKind;
 begin
   exit(oekGeneric);
 end;
 
-function TCEEditorOptions.optionedWantContainer: TPersistent;
+function TEditorOptions.optionedWantContainer: TPersistent;
 begin
   fD2Syn := D2Syn;
   fTxtSyn := TxtSyn;
@@ -628,7 +628,7 @@ begin
   exit(self);
 end;
 
-procedure TCEEditorOptions.optionedEvent(event: TOptionEditorEvent);
+procedure TEditorOptions.optionedEvent(event: TOptionEditorEvent);
 begin
   // restores
   if event = oeeCancel then
@@ -650,16 +650,16 @@ begin
   end;
 end;
 
-function TCEEditorOptions.optionedOptionsModified: boolean;
+function TEditorOptions.optionedOptionsModified: boolean;
 begin
   exit(false);
 end;
 {$ENDREGION}
 
-{$REGION ICEEditableOptions ----------------------------------------------------}
-procedure TCEEditorOptions.applyChangesFromSelf;
+{$REGION IEditableOptions ----------------------------------------------------}
+procedure TEditorOptions.applyChangesFromSelf;
 var
-  multied: ICEMultiDocHandler;
+  multied: IMultiDocHandler;
   i: Integer;
 begin
   multied := getMultiDocHandler;
@@ -667,10 +667,10 @@ begin
     applyChangeToEditor(multied.document[i]);
 end;
 
-procedure TCEEditorOptions.applyChangeToEditor(anEditor: TCESynMemo);
+procedure TEditorOptions.applyChangeToEditor(anEditor: TDexedMemo);
 var
   i, j: Integer;
-  shc: TCEPersistentShortcut;
+  shc: TPersistentShortcut;
   kst: TSynEditKeyStroke;
   dup: boolean;
   savedSize: integer;
@@ -770,7 +770,7 @@ begin
     for j := 0 to fShortCuts.Count-1 do
     begin
       dup := false;
-      shc := TCEPersistentShortcut(fShortCuts.Items[j]);
+      shc := TPersistentShortcut(fShortCuts.Items[j]);
       if shc.actionName = EditorCommandToCodeString(kst.Command) then
       begin
         if not dup then
@@ -787,7 +787,7 @@ end;
 {$ENDREGION}
 
 initialization
-  EditorOptions := TCEEditorOptions.Create(nil);
+  EditorOptions := TEditorOptions.Create(nil);
 
 finalization
   EditorOptions.Free;

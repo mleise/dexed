@@ -13,7 +13,7 @@ type
   (**
    * The option frame to edit the docking option, displayed in the option form.
    *)
-  TDockOptionsEditor = class(TAnchorDockOptionsFrame, ICEEditableOptions)
+  TDockOptionsEditor = class(TAnchorDockOptionsFrame, IEditableOptions)
   private
     fBackup: TXMLConfigStorage;
     //

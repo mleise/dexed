@@ -58,9 +58,9 @@ type
   TStringHashSet = class(specialize THashSet<string, TStringHash>);
 
   // aliased to get a custom prop inspector
-  TCEPathname = type string;
-  TCEFilename = type string;
-  TCEEditEvent = type boolean;
+  TPathname = type string;
+  TFilename = type string;
+  TEditEvent = type boolean;
 
   // sugar for classes
   TObjectHelper = class helper for TObject
@@ -75,7 +75,7 @@ type
   end;
 
   // sugar for strings
-  TCEStringHelper = type helper(TStringHelper) for string
+  TDexedStringHelper = type helper(TStringHelper) for string
     function isEmpty: boolean;
     function isNotEmpty: boolean;
     function isBlank: boolean;
@@ -119,7 +119,7 @@ type
   (**
    * CollectionItem used to store a shortcut.
    *)
-  TCEPersistentShortcut = class(TCollectionItem)
+  TPersistentShortcut = class(TCollectionItem)
   private
     fShortcut: TShortCut;
     fActionName: string;
@@ -383,13 +383,13 @@ begin
   {$POP}
 end;
 
-procedure TCEPersistentShortcut.assign(value: TPersistent);
+procedure TPersistentShortcut.assign(value: TPersistent);
 var
-  src: TCEPersistentShortcut;
+  src: TPersistentShortcut;
 begin
-  if value is TCEPersistentShortcut then
+  if value is TPersistentShortcut then
   begin
-    src := TCEPersistentShortcut(value);
+    src := TPersistentShortcut(value);
     fActionName := src.fActionName;
     fShortcut := src.fShortcut;
   end
@@ -416,77 +416,77 @@ begin
   exit(self <> nil);
 end;
 
-function TCEStringHelper.isEmpty: boolean;
+function TDexedStringHelper.isEmpty: boolean;
 begin
   exit(self = '');
 end;
 
-function TCEStringHelper.isNotEmpty: boolean;
+function TDexedStringHelper.isNotEmpty: boolean;
 begin
   exit(self <> '');
 end;
 
-function TCEStringHelper.isBlank: boolean;
+function TDexedStringHelper.isBlank: boolean;
 begin
   exit(ce_common.isBlank(self));
 end;
 
-function TCEStringHelper.extractFileName: string;
+function TDexedStringHelper.extractFileName: string;
 begin
   exit(sysutils.extractFileName(self));
 end;
 
-function TCEStringHelper.extractFileExt: string;
+function TDexedStringHelper.extractFileExt: string;
 begin
   exit(sysutils.extractFileExt(self));
 end;
 
-function TCEStringHelper.extractFilePath: string;
+function TDexedStringHelper.extractFilePath: string;
 begin
   exit(sysutils.extractFilePath(self));
 end;
 
-function TCEStringHelper.extractFileDir: string;
+function TDexedStringHelper.extractFileDir: string;
 begin
   exit(sysutils.extractFileDir(self));
 end;
 
-function TCEStringHelper.stripFileExt: string;
+function TDexedStringHelper.stripFileExt: string;
 begin
   exit(ce_common.stripFileExt(self));
 end;
 
-function TCEStringHelper.fileExists: boolean;
+function TDexedStringHelper.fileExists: boolean;
 begin
   exit(sysutils.FileExists(self));
 end;
 
-function TCEStringHelper.dirExists: boolean;
+function TDexedStringHelper.dirExists: boolean;
 begin
   exit(sysutils.DirectoryExists(self));
 end;
 
-function TCEStringHelper.upperCase: string;
+function TDexedStringHelper.upperCase: string;
 begin
   exit(sysutils.upperCase(self));
 end;
 
-function TCEStringHelper.length: integer;
+function TDexedStringHelper.length: integer;
 begin
   exit(system.length(self));
 end;
 
-function TCEStringHelper.toInt: integer;
+function TDexedStringHelper.toInt: integer;
 begin
   exit(strToInt(self));
 end;
 
-function TCEStringHelper.toIntNoExcept(default: integer = -1): integer;
+function TDexedStringHelper.toIntNoExcept(default: integer = -1): integer;
 begin
   exit(StrToIntDef(self, default));
 end;
 
-function TCEStringHelper.normalizePath: string;
+function TDexedStringHelper.normalizePath: string;
 begin
   exit(TrimFilename(self));
 end;

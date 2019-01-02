@@ -1,4 +1,4 @@
-inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
+inherited MiniExplorerWidget: TMiniExplorerWidget
   Left = 1367
   Height = 565
   Top = 3
@@ -16,6 +16,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
     inherited Content: TPanel
       Left = 4
       Height = 523
+      Top = 38
       Width = 527
       BorderSpacing.Around = 4
       ClientHeight = 523
@@ -109,10 +110,10 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         end
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 527
       OnResize = toolbarResize
-      object btnEdit: TCEToolButton[0]
+      object btnEdit: TDexedToolButton[0]
         Left = 153
         Hint = 'open the selected file in an editor or as a new project'
         Top = 0
@@ -122,7 +123,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         resourceName = 'PENCIL'
         scaledSeparator = False
       end
-      object btnShellOpen: TCEToolButton[1]
+      object btnShellOpen: TDexedToolButton[1]
         Left = 125
         Hint = 'open the selected folder or the selected file using the shell'
         Top = 0
@@ -132,7 +133,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         resourceName = 'FLASH'
         scaledSeparator = False
       end
-      object btnRemFav: TCEToolButton[2]
+      object btnRemFav: TDexedToolButton[2]
         Left = 97
         Hint = 'remove selected favorite folder'
         Top = 0
@@ -142,7 +143,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         resourceName = 'FOLDER_DELETE'
         scaledSeparator = False
       end
-      object btnAddFav: TCEToolButton[3]
+      object btnAddFav: TDexedToolButton[3]
         Left = 69
         Hint = 'add selected folder to the favorites'
         Top = 0
@@ -152,7 +153,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         resourceName = 'FOLDER_ADD'
         scaledSeparator = False
       end
-      object btnDrive: TCEToolButton[4]
+      object btnDrive: TDexedToolButton[4]
         Left = 1
         Hint = 'select a drive or a custom folder'
         Top = 0
@@ -164,7 +165,7 @@ inherited CEMiniExplorerWidget: TCEMiniExplorerWidget
         resourceName = 'FOLDER_GO'
         scaledSeparator = False
       end
-      object btnParentFolder: TCEToolButton[5]
+      object btnParentFolder: TDexedToolButton[5]
         Left = 41
         Hint = 'select parent folder'
         Top = 0

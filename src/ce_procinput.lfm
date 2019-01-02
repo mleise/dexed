@@ -1,4 +1,4 @@
-inherited CEProcInputWidget: TCEProcInputWidget
+inherited ProcInputWidget: TProcInputWidget
   Left = 837
   Height = 107
   Top = 298
@@ -13,7 +13,6 @@ inherited CEProcInputWidget: TCEProcInputWidget
     ClientWidth = 558
     inherited Content: TPanel
       Height = 71
-      Top = 36
       Width = 558
       ClientHeight = 71
       ClientWidth = 558
@@ -89,7 +88,7 @@ inherited CEProcInputWidget: TCEProcInputWidget
         end
       end
     end
-    inherited toolbar: TCEToolBar
+    inherited toolbar: TDexedToolBar
       Width = 550
     end
   end
