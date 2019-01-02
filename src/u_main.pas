@@ -1893,50 +1893,66 @@ end;
 
 function TMainForm.LoadDocking: boolean;
 var
-  xcfg: TXMLConfigStorage;
-  str: TMemoryStream;
+  x: TXMLConfigStorage;
+  s: TMemoryStream;
+  f: string;
+  t: string;
+  i: integer;
 begin
   result := false;
-  if fileExists(getDocPath + 'docking.xml') then
+  f := getDocPath + 'docking.xml';
+  if fileExists(f) then
   begin
-    xcfg := TXMLConfigStorage.Create(getDocPath + 'docking.xml', true);
+
+    // TODO-cmaintenance: remove this from 3.8.0
+    with TStringList.Create do
+    try
+      LoadFromFile(f);
+      for i := 0 to Count-1 do
+        strings[i] := ReplaceText(strings[i], 'Name="CE', 'Name="');
+    finally
+      SaveToFile(f);
+      free;
+    end;
+
+    x := TXMLConfigStorage.Create(f, true);
     try
       try
         DockMaster.CloseAll;
         self.Visible:=true;
-        DockMaster.LoadLayoutFromConfig(xcfg, false);
+        DockMaster.LoadLayoutFromConfig(x, false);
       except
         exit;
       end;
-      str := TMemoryStream.Create;
+      s := TMemoryStream.Create;
       try
-        xcfg.SaveToStream(str);
-        str.saveToFile(getDocPath + 'docking.bak')
+        x.SaveToStream(s);
+        s.saveToFile(f)
       finally
-        str.Free;
+        s.Free;
       end;
     finally
-      xcfg.Free;
+      x.Free;
     end;
   end;
   if fileExists(getDocPath + 'dockingopts.xml') then
   begin
-    xcfg := TXMLConfigStorage.Create(getDocPath + 'dockingopts.xml', true);
+    x := TXMLConfigStorage.Create(getDocPath + 'dockingopts.xml', true);
     try
       try
-        DockMaster.LoadSettingsFromConfig(xcfg);
+        DockMaster.LoadSettingsFromConfig(x);
       except
         exit;
       end;
-      str := TMemoryStream.Create;
+      s := TMemoryStream.Create;
       try
-        xcfg.SaveToStream(str);
-        str.saveToFile(getDocPath + 'dockingopts.bak')
+        x.SaveToStream(s);
+        s.saveToFile(getDocPath + 'dockingopts.bak')
       finally
-        str.Free;
+        s.Free;
       end;
     finally
-      xcfg.Free;
+      x.Free;
     end;
   end;
   result := true;
