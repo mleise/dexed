@@ -2573,7 +2573,7 @@ begin
   if right then
     c := s[p.x]
   else
-    c := s[p.x-1];
+    c := s[min(p.x-1, s.length)];
   if not right then
   begin
     if c in w then
