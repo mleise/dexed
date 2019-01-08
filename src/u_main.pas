@@ -1055,9 +1055,11 @@ begin
     if fProject.isNotEmpty and fProject.fileExists then
     begin
       dst.openProj(fProject);
+      if not assigned(dst.fProject) then
+        exit;
       hdl := getMultiDocHandler;
       if assigned(hdl) then
-      mem := hdl.findDocument(dst.fProject.filename);
+        mem := hdl.findDocument(dst.fProject.filename);
       if mem.isNotNil then
         if dst.fProject.getFormat = pfDEXED then
           mem.Highlighter := LfmSyn
