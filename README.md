@@ -48,11 +48,6 @@ Linux and Windows 32 bits version must be [built manually](https://bbasile.githu
 
 [**See this page**](https://bbasile.github.io/dexed/setup.html) for more information about the setup.
 
-Download 3rd part packages, maintained by volunteers, but the available versions are not guaranteed to be the latest:
-
-- :package: [port for FreeBSD](https://www.freshports.org/editors/coedit/)
-- :package: [AUR package for ArchLinux](https://aur.archlinux.org/packages/coedit-bin/)
-
 **Build**
 ---
 

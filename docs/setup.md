@@ -62,19 +62,12 @@ Under Linux, the command line tool *zip* is used (_deflate_ and _-9_).
 Under Linux you could have to set the files permission to allow their execution. This used to be necessary when
 the early alpha zip were all done on Windows (files attributes were lost) but it shouldn't be the case anymore.
 
-If they are not correctly set, for each of the following file **dexed**, **dcd-client**, **dcd-server**, **dastworx**, either set the permission in the context menu (check _allow execution_ or _executable_ depending on the desktop) or `chmod a+x` the file in a console.
+If they are not correctly set, for each of the following file **dexed**, **dcd-client**, **dcd-server**, **dastworx**, either set the permission in the context menu (check _allow execution_ or _executable_ depending on the desktop) or `chmod +x` the file in a console.
 
 ### Linux package
 
 Are provided a _deb_ package (Debian and derived Ubuntu, Mint, etc) and a _rpm_ (Fedora, openSUSE), only for x86_64 (amd64).
 After the installation, you must also build [DCD](features_dcd).
-
-### Other OS-specific packages
-
-Maintained by volunteers and for specific operating systems:
-
-- [FreeBSD ports](http://www.freshports.org/editors/coedit/)
-- [ArchLinux AUR package](https://aur.archlinux.org/packages/coedit-bin/)
 
 ### First steps
 
