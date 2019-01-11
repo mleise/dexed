@@ -2782,6 +2782,11 @@ begin
     caretX := CaretX - 1;
     getCompletionList();
     caretX := CaretX + 1;
+    if fCompletion.TheForm.ItemList.Count = 0 then
+    begin
+      fCompletion.TheForm.Close;
+      exit;
+    end;
   end;
   if fCompletionMenuAutoClose and (fCompletion.CurrentString.length < 2) then
     fCompletion.TheForm.Close;
