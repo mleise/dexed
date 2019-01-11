@@ -560,7 +560,9 @@ begin
   begin
     updateServerlistening;
     exit;
-  end;
+  end
+  else if fTempLines.Count = 1 then
+    exit;
   if not (fTempLines[0] = 'identifiers') then exit;
 
   list.Clear;
@@ -587,6 +589,8 @@ begin
       'l': kindObj := TObject(PtrUint(dckAlias));
       't': kindObj := TObject(PtrUint(dckTemplate));
       'T': kindObj := TObject(PtrUint(dckMixin));
+      'h': kindObj := TObject(PtrUint(dckMember));
+      'p': kindObj := TObject(PtrUint(dckMember));
       // internal DCD stuff, Should not to happen...report bug if it does.
       '*', '?': continue;
     end;
