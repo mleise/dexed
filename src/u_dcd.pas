@@ -560,9 +560,7 @@ begin
   begin
     updateServerlistening;
     exit;
-  end
-  else if fTempLines.Count = 1 then
-    exit;
+  end;
   if not (fTempLines[0] = 'identifiers') then exit;
 
   list.Clear;
