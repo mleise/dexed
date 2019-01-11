@@ -393,14 +393,14 @@ begin
   f := fname;
   if not FilenameIsAbsolute(f) then
     f := ExpandFileName(f);
-  if fname.extractFileExt <> '.dgrp' then
+  fBasePath := f.extractFilePath;
+  loadFromFile(f);
+  if hasLoaded and (fname.extractFileExt <> '.dgrp') then
   begin
     dlgOkInfo('project file extension automatically updated to "dgrp"');
     f := ChangeFileExt(fname, '.dgrp');
     RenameFile(fname, f);
   end;
-  fBasePath := f.extractFilePath;
-  loadFromFile(f);
   for i:= 0 to fItems.Count-1 do
     getItem(i).fGroup := self;
   doChanged;

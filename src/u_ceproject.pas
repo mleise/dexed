@@ -271,14 +271,14 @@ begin
   f := fname;
   if not FilenameIsAbsolute(f) then
     f := ExpandFileName(f);
-  if fname.extractFileExt <> '.dprj' then
+  fbasePath := f.extractFilePath;
+  inherited customLoadFromFile(f);
+  if hasLoaded and (fname.extractFileExt <> '.dprj') then
   begin
     dlgOkInfo('project file extension automatically updated to "dprj"');
     f := ChangeFileExt(fname, '.dprj');
     RenameFile(fname, f);
   end;
-  fbasePath := f.extractFilePath;
-  inherited customLoadFromFile(f);
 end;
 
 procedure TNativeProject.customSaveToFile(const fname: string);
