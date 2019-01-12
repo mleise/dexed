@@ -263,12 +263,17 @@ begin
   end;
   if (not fProcess.Running) then
   begin
-    if fProcess.ExitStatus > 0 then
+    if fProcess.ExitStatus <> 0 then
     begin
       fMsgs.message(format('error: the tool (%s) has returned the status %s',
         [fProcess.Executable, prettyReturnStatus(fProcess)]), nil, amcMisc, amkErr);
       u_processes.killProcess(fProcess);
       exit;
+    end
+    else
+    begin
+      fMsgs.message(format('the tool (%s) has finished normally',
+        [fProcess.Executable]), nil, amcMisc, amkBub);
     end;
     if fNextToolAlias.isNotEmpty then
     begin
