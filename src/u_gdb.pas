@@ -267,6 +267,29 @@ type
     procedure assign(source: TPersistent); override;
   end;
 
+  TDlangBreakpoint = (
+    onAssertError,
+    onAssertErrorMsg,
+    onUnittestErrorMsg,
+    onRangeError,
+    onFinalizeError,
+    onHiddenFuncError,
+    onOutOfMemoryError,
+    onInvalidMemoryOperationError,
+    onSwitchError,
+    onUnicodeError,
+    _d_throwc,
+    _d_throwdwarf,
+    _d_assertm,
+    _d_assert,
+    _d_assert_msg,
+    _d_array_bounds,
+    _d_arraybounds,
+    _d_switch_error
+  );
+
+  TDlangBreakpoints = set of TDlangBreakpoint;
+
   TDebugOptionsBase = class(TWritableLfmTextComponent)
   private
     fAutoDisassemble: boolean;
@@ -285,6 +308,7 @@ type
     fAsmSyntax: TAsmSyntax;
     fKeepRedirectedStreams: boolean;
     fStopAllThreadsOnBreak: boolean;
+    fDlangBreakpoints: TDlangBreakpoints;
     procedure setIgnoredSignals(value: TStringList);
     procedure setCommandsHistory(value: TStringList);
     procedure setCustomEvalHistory(value: TStringList);
@@ -299,6 +323,7 @@ type
     property autoGetVariables: boolean read fAutoGetVariables write fAutoGetVariables;
     property autoGetThreads: boolean read fAutoGetThreads write fAutoGetThreads;
     property commandsHistory: TStringList read fCommandsHistory write setCommandsHistory;
+    property coreBreakingSymbols: TDlangBreakpoints read fDlangBreakpoints write fDlangBreakpoints;
     property customEvalHistory: TStringList read fCustomEvalHistory write setCustomEvalHistory;
     property ignoredSignals: TStringList read fIgnoredSignals write setIgnoredSignals;
     property keepRedirectedStreams: boolean read fKeepRedirectedStreams write fKeepRedirectedStreams default false;
@@ -635,6 +660,8 @@ begin
 end;
 
 constructor TDebugOptionsBase.create(aOwner: TComponent);
+var
+  d: TDlangBreakpoint;
 begin
   inherited;
   fAutoDemangle := true;
@@ -655,6 +682,8 @@ begin
   fCustomEvalHistory := TstringList.Create;
   fCustomEvalHistory.Duplicates:= dupIgnore;
   fCustomEvalHistory.Sorted:=true;
+  for d in [low(TDlangBreakpoint) .. high(TDlangBreakpoint)] do
+    include(fDlangBreakpoints, d);
 end;
 
 destructor TDebugOptionsBase.destroy;
@@ -1812,24 +1841,43 @@ begin
   end;
   gdbCommand('set disassembly-flavor ' + asmFlavorStr[fOptions.asmSyntax]);
   // break on druntime exceptions + any throw'
-  gdbCommand('-break-insert --function onAssertError');
-  gdbCommand('-break-insert --function onAssertErrorMsg');
-  gdbCommand('-break-insert --function onUnittestErrorMsg');
-  gdbCommand('-break-insert --function onRangeError');
-  gdbCommand('-break-insert --function onFinalizeError');
-  gdbCommand('-break-insert --function onHiddenFuncError');
-  gdbCommand('-break-insert --function onOutOfMemoryError');
-  gdbCommand('-break-insert --function onInvalidMemoryOperationError');
-  gdbCommand('-break-insert --function onSwitchError');
-  gdbCommand('-break-insert --function onUnicodeError');
-  gdbCommand('-break-insert --function _d_throwc');
-  gdbCommand('-break-insert --function _d_throwdwarf');
-  gdbCommand('-break-insert --function _d_assertm');
-  gdbCommand('-break-insert --function _d_assert');
-  gdbCommand('-break-insert --function _d_assert_msg');
-  gdbCommand('-break-insert --function _d_array_bounds');
-  gdbCommand('-break-insert --function _d_arraybounds');
-  gdbCommand('-break-insert --function _d_switch_error');
+  if (onAssertError in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onAssertError');
+  if (onAssertErrorMsg in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onAssertErrorMsg');
+  if (onUnittestErrorMsg in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onUnittestErrorMsg');
+  if (onRangeError in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onRangeError');
+  if (onFinalizeError in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onFinalizeError');
+  if (onHiddenFuncError in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onHiddenFuncError');
+  if (onOutOfMemoryError in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onOutOfMemoryError');
+  if (onInvalidMemoryOperationError in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onInvalidMemoryOperationError');
+  if (onSwitchError in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onSwitchError');
+  if (onUnicodeError in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function onUnicodeError');
+  if (_d_throwc in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function _d_throwc');
+  if (_d_throwdwarf in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function _d_throwdwarf');
+  if (_d_assertm in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function _d_assertm');
+  if (_d_assert in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function _d_assert');
+  if (_d_assert_msg in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function _d_assert_msg');
+  if (_d_array_bounds in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function _d_array_bounds');
+  if (_d_arraybounds in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function _d_arraybounds');
+  if (_d_switch_error in fOptions.coreBreakingSymbols) then
+    gdbCommand('-break-insert --function _d_switch_error');
+
   gdbCommand('-gdb-set mi-async on');
   if fOptions.stopAllThreadsOnBreak then
     gdbCommand('-gdb-set non-stop off')
