@@ -21,7 +21,7 @@ type
 type
   // wraps dfmt options to build the command line with ease
   // and allows to save the options between session.
-  TDmtWrapper = class(TWritableLfmTextComponent)
+  TDfmtWrapper = class(TWritableLfmTextComponent)
   private
     fEol: DfmtEol;
     fTabStyle: DfmtIndentstyle;
@@ -73,7 +73,7 @@ type
   private
     fDoc: TDexedMemo;
     fBackup: TStringList;
-    fDmtWrapper: TDmtWrapper;
+    fDmtWrapper: TDfmtWrapper;
     //
     procedure docNew(document: TDexedMemo);
     procedure docFocused(document: TDexedMemo);
@@ -102,7 +102,7 @@ var
 begin
   inherited;
   toolbarVisible:=false;
-  fDmtWrapper := TDmtWrapper.Create(self);
+  fDmtWrapper := TDfmtWrapper.Create(self);
   fBackup := TStringList.Create;
 
   fname := getDocPath + optFname;
@@ -143,7 +143,7 @@ begin
   inherited;
 end;
 
-constructor TDmtWrapper.create(AOwner: TComponent);
+constructor TDfmtWrapper.create(AOwner: TComponent);
 begin
   inherited;
   fEol          := lf;
@@ -169,7 +169,7 @@ begin
   end;
 end;
 
-procedure TDmtWrapper.setSoftLLen(value: integer);
+procedure TDfmtWrapper.setSoftLLen(value: integer);
 begin
   if value < 60 then
     value := 60
@@ -178,7 +178,7 @@ begin
   fSoftLLen := value;
 end;
 
-procedure TDmtWrapper.setHardLLen(value: integer);
+procedure TDfmtWrapper.setHardLLen(value: integer);
 begin
   if value < 60 then
     value := 60
@@ -187,7 +187,7 @@ begin
   fHardLLen := value;
 end;
 
-procedure TDmtWrapper.setTabWidth(value: integer);
+procedure TDfmtWrapper.setTabWidth(value: integer);
 begin
   if value < 1 then
     value := 1
@@ -196,7 +196,7 @@ begin
   fTabWidth := value;
 end;
 
-procedure TDmtWrapper.setIndentSize(value: integer);
+procedure TDfmtWrapper.setIndentSize(value: integer);
 begin
   if value < 1 then
     value := 1
@@ -205,14 +205,14 @@ begin
   fIndentSize := value;
 end;
 
-procedure TDmtWrapper.setEol(value: DfmtEol);
+procedure TDfmtWrapper.setEol(value: DfmtEol);
 begin
   if not (value in [DfmtEol.cr, DfmtEol.lf, DfmtEol.crlf]) then
     value := DfmtEol.lf;
   fEol:=value;
 end;
 
-procedure TDmtWrapper.setBraceStyle(value: DfmtBraceStyle);
+procedure TDfmtWrapper.setBraceStyle(value: DfmtBraceStyle);
 begin
   if not (value in [DfmtBraceStyle.allman, DfmtBraceStyle.otbs,
     DfmtBraceStyle.stroustrup]) then
@@ -220,14 +220,14 @@ begin
   fBraceStyle:=value;
 end;
 
-procedure TDmtWrapper.setIndentStyle(value: DfmtIndentstyle);
+procedure TDfmtWrapper.setIndentStyle(value: DfmtIndentstyle);
 begin
   if not (value in [DfmtIndentstyle.space, DfmtIndentstyle.tab]) then
     value := DfmtIndentstyle.space;
   fTabStyle:=value;
 end;
 
-procedure TDmtWrapper.setConstraintsStyle(value: DfmtConstraint);
+procedure TDfmtWrapper.setConstraintsStyle(value: DfmtConstraint);
 begin
   if not (value in [DfmtConstraint.alwaysNewLine, DfmtConstraint.alwaysNewLineIndent,
     DfmtConstraint.condNewLine, DfmtConstraint.condNewLineIndent]) then
@@ -262,7 +262,7 @@ end;
 {$ENDREGION}
 
 {$REGION Dfmt things -----------------------------------------------------------}
-procedure TDmtWrapper.getParameters(str: TStrings; majv, minv: Byte);
+procedure TDfmtWrapper.getParameters(str: TStrings; majv, minv: Byte);
 const
   eol: array[DfmtEol] of string = ('cr', 'lf', 'crlf');
   falsetrue: array[boolean] of string = ('false', 'true');
