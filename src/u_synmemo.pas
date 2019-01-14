@@ -2769,6 +2769,8 @@ procedure TDexedMemo.completionExecute(sender: TObject);
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
+  hideDDocs;
+  hideCallTips;
   fCompletion.TheForm.Font.Size := Font.Size;
   fCompletion.TheForm.BackgroundColor:= self.Color;
   fCompletion.TheForm.TextColor:= fD2Highlighter.identifiers.Foreground;
