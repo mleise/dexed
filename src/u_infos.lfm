@@ -16,7 +16,6 @@ inherited InfoWidget: TInfoWidget
     ClientWidth = 287
     inherited Content: TPanel
       Height = 267
-      Top = 36
       Width = 287
       ClientHeight = 267
       ClientWidth = 287

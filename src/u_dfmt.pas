@@ -277,9 +277,9 @@ begin
   str.Add('--indent_size='  + intToStr(indentSize));
   str.Add('--indent_style=' + idtstyle[indentationStyle]);
   str.Add('--tab_width=' + intToStr(tabWidth));
-  str.Add('--brau_style=' + brc[braceStyle]);
+  str.Add('--brace_style=' + brc[braceStyle]);
   str.Add('--split_operator_at_line_end=' + falsetrue[splitOpAtPrevLine]);
-  str.Add('--spau_after_cast=' + falsetrue[spaceAfterCast]);
+  str.Add('--space_after_cast=' + falsetrue[spaceAfterCast]);
   str.Add('--selective_import_space=' + falsetrue[spaceAfterImport]);
   str.Add('--compact_labeled_statements=' + falsetrue[compactLabeledStatements]);
   if (majv = 0) and (minv > 4) then

@@ -202,7 +202,7 @@ end;
 constructor TInfoWidget.create(aOwner: TComponent);
 var
   itm: TToolInfo;
-  ver: string = 'enough_spau_for_the_version';
+  ver: string = 'enough_space_for_the_version';
   len: integer;
 begin
   inherited;
