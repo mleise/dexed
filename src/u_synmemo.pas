@@ -1397,6 +1397,8 @@ begin
     AddKey(ecRightWordEdge, 0, [], 0, []);
     AddKey(ecSelLeftWordEdge, 0, [], 0, []);
     AddKey(ecSelRightWordEdge, 0, [], 0, []);
+    AddKey(ecSmartWordLeft, 0, [], 0, []);
+    AddKey(ecSmartWordRight, 0, [], 0, []);
   end;
 end;
 
