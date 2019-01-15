@@ -1898,8 +1898,8 @@ var
   x: TXMLConfigStorage;
   s: TMemoryStream;
   f: string;
-  t: string;
   i: integer;
+  w: TDexedWidget;
 begin
   result := false;
   f := getDocPath + 'docking.xml';
@@ -1920,8 +1920,10 @@ begin
     x := TXMLConfigStorage.Create(f, true);
     try
       try
-        DockMaster.CloseAll;
-        self.Visible:=true;
+        // without this the relaoding fails
+        // see https://bugs.freepascal.org/view.php?id=34454
+        for w in fWidgList do
+            w.Close;
         DockMaster.LoadLayoutFromConfig(x, false);
       except
         exit;

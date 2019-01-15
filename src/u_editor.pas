@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, lcltype, Graphics, SynEditKeyCmds,
   ComCtrls, SynEditHighlighter, ExtCtrls, Menus, SynMacroRecorder, dialogs, LazFileUtils,
-  SynPluginSyncroEdit, SynEdit, SynHighlighterMulti, u_dialogs,
+  SynPluginSyncroEdit, SynEdit, SynHighlighterMulti, AnchorDocking, u_dialogs,
   u_widget, u_interfaces, u_synmemo, u_dlang, u_common, u_dcd, u_observer,
   u_sharedres, u_controls, u_writableComponent, u_dsgncontrols, LMessages;
 
@@ -454,7 +454,11 @@ end;
 
 function TEditorWidget.closeQuery: boolean;
 begin
-  result := inherited and Parent.isNil;
+  result := inherited and (Parent.isNil  or
+    // already set as dockable but not docked
+    // necessary because it has te closed programmatically during loading sequence
+    // otherwise the layout reloading has no effect.
+    Parent is TAnchorDockHostSite and Parent.Parent.isNil);
 end;
 
 procedure TEditorWidget.setToolBarFlat(value: boolean);
