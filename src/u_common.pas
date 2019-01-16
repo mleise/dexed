@@ -325,6 +325,9 @@ type
   // Converts all leading whites to tabs. Fails if width doesn't fivide number of spaces.
   function leadingSpacesToTabs(const value: string; width: integer): string;
 
+  // Converts the delta between two calls to GetTickCount64 to a string indicating a duration.
+  function formatTicksAsDuration(ticks: UInt64): string;
+
 var
   // additional directories to find background tools
   additionalPath: string;
@@ -1104,6 +1107,20 @@ begin
     fname := parent;
     result += 1;
   end;
+end;
+
+function formatTicksAsDuration(ticks: UInt64): string;
+var
+  ms: Uint64;
+  sc: Uint64;
+  mn: Uint64;
+begin
+  mn := ticks div 60000;
+  ticks -= mn * 60000;
+  sc := ticks div 1000;
+  ticks -= sc * 1000;
+  ms := ticks;
+  result := format('%d minutes, %d seconds and %d msecs', [mn, sc, ms]);
 end;
 
 //TODO-cfeature: make it working with relative paths

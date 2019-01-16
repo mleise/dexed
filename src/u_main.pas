@@ -428,7 +428,7 @@ type
 
     fDfmtWidg: TDfmtWidget;
     fProfWidg: TProfileViewerWidget;
-    fCompStart: TDateTime;
+    fCompStart: UInt64;
 
     fRunProjAfterCompArg: boolean;
     fRunProjAfterCompile: boolean;
@@ -2478,7 +2478,7 @@ procedure TMainForm.projCompiling(project: ICommonProject);
 begin
   fProjActionsLock := true;
   if fAppliOpts.showBuildDuration and not fIsCompilingGroup then
-    fCompStart := Time();
+    fCompStart := GetTickCount64;
 end;
 
 procedure TMainForm.projCompiled(project: ICommonProject; success: boolean);
@@ -2493,7 +2493,8 @@ begin
   begin
     if fAppliOpts.showBuildDuration then
     begin
-      fMsgs.message('Build duration: ' + TimeToStr(Time - fCompStart), project, amcProj, amkInf);
+      fMsgs.message('Build duration: ' + formatTicksAsDuration(GetTickCount64 - fCompStart),
+        project, amcProj, amkInf);
     end;
     if fRunProjAfterCompile and assigned(fProject) then
     begin
@@ -2527,7 +2528,8 @@ begin
         fMsgs.message('the project group is successfully compiled', nil, amcAll, amkInf);
       if fAppliOpts.showBuildDuration then
       begin
-        fMsgs.message('Group build duration: ' + TimeToStr(Time - fCompStart), nil, amcAll, amkInf);
+        fMsgs.message('Group build duration: ' + formatTicksAsDuration(GetTickCount64 - fCompStart),
+          nil, amcAll, amkInf);
       end;
       if assigned(fProjBeforeGroup) then
         fProjBeforeGroup.activate;
@@ -3021,6 +3023,9 @@ var
   rng: TStringRange = (ptr:nil; pos:0; len: 0);
 begin
 
+  if fAppliOpts.showBuildDuration then
+    fCompStart := GetTickCount64;
+
   result := false;
   fMsgs.clearByData(fDoc);
   FreeRunnableProc;
@@ -3162,6 +3167,11 @@ begin
         [dmdproc.Executable, prettyReturnStatus(dmdproc)]), fDoc, amcEdit, amkErr);
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' has not been compiled',
         fDoc, amcEdit, amkErr);
+    end;
+    if fAppliOpts.showBuildDuration then
+    begin
+      fMsgs.message('Runnable build duration: ' + formatTicksAsDuration(GetTickCount64 - fCompStart),
+        nil, amcAll, amkInf);
     end;
 
   finally
@@ -4274,7 +4284,7 @@ begin
   fIsCompilingGroup := true;
   fMsgs.message('start compiling a project group...', nil, amcAll, amkInf);
   if fAppliOpts.showBuildDuration then
-    fCompStart := Time;
+    fCompStart := GetTickCount64;
   for i:= 0 to fProjectGroup.projectCount-1 do
   begin
     fProjectGroup.getProject(i).activate;
