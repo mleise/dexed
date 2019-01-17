@@ -3171,7 +3171,7 @@ begin
     if fAppliOpts.showBuildDuration then
     begin
       fMsgs.message('Runnable build duration: ' + formatTicksAsDuration(GetTickCount64 - fCompStart),
-        nil, amcAll, amkInf);
+        nil, amcEdit, amkInf);
     end;
 
   finally
