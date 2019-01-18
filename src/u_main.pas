@@ -1923,7 +1923,7 @@ begin
         // without this the relaoding fails
         // see https://bugs.freepascal.org/view.php?id=34454
         for w in fWidgList do
-            w.Close;
+          DockMaster.ManualFloat(w);
         DockMaster.LoadLayoutFromConfig(x, false);
       except
         exit;
