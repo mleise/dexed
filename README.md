@@ -25,21 +25,21 @@ Dexed, the _D Extended EDitor_, is an IDE for the [D programming language](https
 **Project information**
 ---
 
-- latest release: version 3.7.0, Thu 3 Jan 2019.
+- latest release: version 3.7.1, Wed 18 Jan 2019.
 - licensed under the terms of the Boost software license.
 - Development can be supported with [Paypal donations](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AQDJVC39PJF7J).
 
-**Download version 3.7.0**
+**Download version 3.7.1**
 ---
 
 Download the zipped binaries or the zip that contains the setup program for you platform:
 
-- :package: [setup program for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.linux64.zip)
-- :package: [setup program for Windows 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.win64.setup.zip)
-- :package: [binaries for Windows 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed.3.7.0.win64.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed-3.7.0-0.x86_64.rpm)
-- :package: [deb for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.0/dexed-3.7.0.amd64.deb)
+- :package: [setup program for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.1/dexed.3.7.1.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.1/dexed.3.7.1.linux64.zip)
+- :package: [setup program for Windows 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.1/dexed.3.7.1.win64.setup.zip)
+- :package: [binaries for Windows 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.1/dexed.3.7.1.win64.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.1/dexed-3.7.1-0.x86_64.rpm)
+- :package: [deb for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.1/dexed-3.7.1.amd64.deb)
 
 The _zip_ archives allow to move freely the files.
 The _setup.zip_ archives contains a command line program that installs to predefined locations so that the software can be run without additional intervention.
