@@ -628,8 +628,8 @@ end;
 
 function TDubBuildOptions.optionedWantContainer: TPersistent;
 begin
-  exit(self);
   fBackup.assign(self);
+  exit(self);
 end;
 
 procedure TDubBuildOptions.optionedEvent(event: TOptionEditorEvent);
@@ -852,6 +852,7 @@ function TDubProject.getCommandLine: string;
 var
   str: TStringList;
 begin
+  result := '';
   str := TStringList.Create;
   try
     str.Add('dub' + exeExt);
