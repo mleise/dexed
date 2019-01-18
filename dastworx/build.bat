@@ -24,7 +24,7 @@ echo building...
 %dc% %dast% %dparse% %iz% %stdxalloc% ^
 -O -release -inline -boundscheck=off %mflags% ^
 -Isrc -I"..\etc\iz\import" -I"..\etc\libdparse\src" ^ -I"..\etc\stdx-allocator\source" ^
--of"..\bin\dastworx"
+-of"..\bin\dastworx.exe"
 
 ::cleanup
 del ..\bin\dastworx.obj
