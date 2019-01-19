@@ -2009,7 +2009,7 @@ end;
 
 function checkForUpdate: string;
 const
-  updURL = 'https://api.github.com/repos/BBasile/dexed/releases/latest';
+  updURL = 'https://api.github.com/repos/Basile-z/dexed/releases/latest';
 var
   prs: TJSONParser = nil;
   dat: TJSONData = nil;
@@ -3127,7 +3127,7 @@ begin
     end
     else
     begin
-      // back compat, see https://github.com/BBasile/dexed/issues/276
+      // back compat, see https://github.com/Basile-z/dexed/issues/276
       dmdproc.Parameters.Add('-version=runnable_module');
 
       dmdproc.Parameters.Add('-version=run_single_module');

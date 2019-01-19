@@ -30,7 +30,7 @@ Windows interface is based on native win32 controls.
 
 ### Setup program
 
-* Go to [the release page](https://github.com/BBasile/dexed/releases),
+* Go to [the release page](https://github.com/Basile-z/dexed/releases),
 * Choose the zipped setup for your platform (at the bottom of a release log, the buttons labeled `dexed.<version>.<platform>.setup.zip`).
 * The content must be extracted and executed:
     * note that the option `--nodcd` can be typed to skip the installation of the completion daemon.
@@ -50,7 +50,7 @@ Note for the future versions:
 
 ### Binaries
 
-* Go to [the release page](https://github.com/BBasile/dexed/releases),
+* Go to [the release page](https://github.com/Basile-z/dexed/releases),
 * Choose the binaries for your platform (at the bottom of an entry, the buttons labeled `dexed.<version>.<platform>.zip`).
 * Extract the executables.
     * Linux: it's recommended to put them in `/home/<your account>/bin`, since it's a known system PATH and that it doesn't require the super user privileges.

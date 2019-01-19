@@ -1027,7 +1027,7 @@ begin
   if not openFileFromDmdMessage(msg) then
     exit;
 
-  // fixes strange bug : https://github.com/BBasile/dexed/issues/320
+  // fixes strange bug : https://github.com/Basile-z/dexed/issues/320
   if (fDoc <> old) and fOptions.singleMessageClick and
     assigned(dat) and (dat^.ctxt = amcEdit) then
       List.ClearSelection(false);

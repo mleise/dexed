@@ -64,7 +64,7 @@ Version: $maj.$min.$pch
 Release: $lbl
 Summary: IDE for the D programming language
 License: Boost
-URL: www.github.com/BBasile/dexed
+URL: www.github.com/Basile-z/dexed
 Requires: gtk2, glibc, cairo, libX11, vte
 
 %description
@@ -78,7 +78,7 @@ Dexed is an IDE for the DMD D compiler.
 
 %changelog
 * $dte Basile Burg b2.temp@gmx.com
-- see https://github.com/BBasile/dexed/releases/tag/$ver
+- see https://github.com/Basile-z/dexed/releases/tag/$ver
 ">$specname
 
 rpmbuild -ba $specname

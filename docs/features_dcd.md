@@ -23,7 +23,7 @@ The D Completion Daemon (DCD) is used to accomplish IDE-grade features such as
 
 #### Setup
 
-_DCD_ is a third part software, it's bundled in the archives distributed for each new [release](https://github.com/BBasile/dexed/releases).
+_DCD_ is a third part software, it's bundled in the archives distributed for each new [release](https://github.com/Basile-z/dexed/releases).
 However, _DCD_ may have to be build manually, for example if a new version is released while _Dexed_ development is paused for a while.
 Visit the product [homepage](https://github.com/dlang-community/DCD) for more information.
 

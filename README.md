@@ -1,6 +1,6 @@
 Dexed, the _D Extended EDitor_, is an IDE for the [D programming language](https://dlang.org), its compilers, tools and libraries.
 
-[![](https://bbasile.github.io/dexed/img/coedit_kde4_thumb.png)](https://bbasile.github.io/dexed/img/coedit_kde4.png)
+[![](https://basile-z.github.io/dexed/img/coedit_kde4_thumb.png)](https://basile-z.github.io/dexed/img/coedit_kde4.png)
 
 **Overview**
 ---
@@ -20,7 +20,7 @@ Dexed, the _D Extended EDitor_, is an IDE for the [D programming language](https
 - static library manager that supports auto-registration from local DUB projects, from online DUB packages or from dexed custom project format.
 - todo list based on the _todo comments_ located in a project or in the current source.
 - user-defined tools powered by a string interpolation system.
-- integrated file browser, dfmt interface, search & replace, [discover more in the manual](https://bbasile.github.io/dexed/).
+- integrated file browser, dfmt interface, search & replace, [discover more in the manual](https://basile-z.github.io/dexed/).
 
 **Project information**
 ---
@@ -34,21 +34,21 @@ Dexed, the _D Extended EDitor_, is an IDE for the [D programming language](https
 
 Download the zipped binaries or the zip that contains the setup program for you platform:
 
-- :package: [setup program for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.2/dexed.3.7.2.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.2/dexed.3.7.2.linux64.zip)
-- :package: [setup program for Windows 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.2/dexed.3.7.2.win64.setup.zip)
-- :package: [binaries for Windows 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.2/dexed.3.7.2.win64.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.2/dexed-3.7.2-0.x86_64.rpm)
-- :package: [deb for Linux 64 bit](https://github.com/BBasile/dexed/releases/download/v3.7.2/dexed-3.7.2.amd64.deb)
+- :package: [setup program for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed.3.7.2.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed.3.7.2.linux64.zip)
+- :package: [setup program for Windows 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed.3.7.2.win64.setup.zip)
+- :package: [binaries for Windows 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed.3.7.2.win64.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed-3.7.2-0.x86_64.rpm)
+- :package: [deb for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed-3.7.2.amd64.deb)
 
 The _zip_ archives allow to move freely the files.
 The _setup.zip_ archives contains a command line program that installs to predefined locations so that the software can be run without additional intervention.
 The _deb_ and the _rpm_ packages are for those who prefer the official setup system for their linux systems.
-Linux and Windows 32 bits version must be [built manually](https://bbasile.github.io/dexed/build.html).
+Linux and Windows 32 bits version must be [built manually](https://basile-z.github.io/dexed/build.html).
 
-[**See this page**](https://bbasile.github.io/dexed/setup.html) for more information about the setup.
+[**See this page**](https://basile-z.github.io/dexed/setup.html) for more information about the setup.
 
 **Build**
 ---
 
-Follow the procedure described [**here**](https://bbasile.github.io/dexed/build.html).
+Follow the procedure described [**here**](https://basile-z.github.io/dexed/build.html).

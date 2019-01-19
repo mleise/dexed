@@ -16,7 +16,7 @@ Dexed is mostly programmed in Object Pascal, using the the [Lazarus development 
     * Windows: the three packages are bundled in an installer.
     * Linux: the three packages must be downloaded and setup individually. It's recommended to download the packages from _SourceForge_ and not from the official repository of the distribution because they don't always propose the latest version.
 * `cd <user dir where to clone>`
-* `git clone https://github.com/BBasile/dexed.git`
+* `git clone https://github.com/Basile-z/dexed.git`
 * `git submodule update --init --recursive`, to clone the dependencies used by the background tool.
 * `git checkout 3ddc0b59288b1af02194f82d38f6fc0175b0560e` to select the last revision that can be build with Lazarus 1.8.4. If you wish to build Dexed master then you must setup Lazarus 2.0 RC (and then ignore this step).
 

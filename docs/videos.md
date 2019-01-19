@@ -10,7 +10,7 @@ Picked from a dedicated [playlist](https://www.youtube.com/playlist?list=PLzk8A0
 
 ### Using dbeaengine in a runnable
 
-This video shows how the disassembler library [dbeaengine](https://github.com/BBasile/dbeaengine)
+This video shows how the disassembler library [dbeaengine](https://github.com/Basile-z/dbeaengine)
 can be used in a [runnable module](features_runnables) to check the DMD backend production.
 The disassembler is fetched from the online DUB registry, automatically compiled and setup in the [library manager](widgets_library_manager).
 It's then used to show a weakness of the DMD backend (a constant is not converted, leading to 2 conversions at runtime) and to check a workaround.

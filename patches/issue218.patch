@@ -1,4 +1,4 @@
-Fixes https://github.com/BBasile/Coedit/issues/218
+Fixes https://github.com/Basile-z/Coedit/issues/218
 Must be applied to any Lazarus 1.8.0 Vanilla.
 Has not be applied to Lazarus 1.8.1 or newer.
 --- synedit.pp
