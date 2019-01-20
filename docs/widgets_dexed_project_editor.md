@@ -1,5 +1,5 @@
 ---
-title: Widgets - CE project editor
+title: Widgets - DEXED project editor
 ---
 {% raw %}
 <script src="//cdnjs.cloudflare.com/ajax/libs/anchor-js/4.0.0/anchor.min.js"></script>
@@ -8,7 +8,7 @@ title: Widgets - CE project editor
 
 ### CE project editor
 
-The widget is used to edit the properties of a project that has the CE (for _Coedit_, Dexed former name) format.
+The widget is used to edit the properties of a project that has the DEXED format (*.dprj extension)
 It's no recommended to use this format anymore.
 
 ![](img/ce_project_editor.png)

@@ -3,7 +3,7 @@ inherited ProjectConfigurationWidget: TProjectConfigurationWidget
   Height = 315
   Top = 349
   Width = 445
-  Caption = 'CE project editor'
+  Caption = 'DEXED project editor'
   ClientHeight = 315
   ClientWidth = 445
   inherited Back: TPanel

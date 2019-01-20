@@ -23,10 +23,10 @@ The widget used to edit the properties is the [DUB project editor](widgets_dub_p
 
 The option editor exposes a [category for DUB](options_dub_build). The options specified in this category are applied each time a project is compiled.
 
-#### CE format
+#### DEXED format
 
-The CE format (previously called _native format_) is based on DMD command line interface.
-The widget used to edit the properties is the [CE project editor](widgets_ce_project_editor) (the format is detailed in this page).
+The DEXED format (previously called _native format_ then _ce projects_) is based on DMD command line interface.
+The widget used to edit the properties is the [DEXED project editor](widgets_dexed_project_editor) (the format is detailed in this page).
 
 #### Menu reference
 
