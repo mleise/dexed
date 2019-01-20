@@ -2882,7 +2882,7 @@ const
 var
   cmd : string;
 begin
-  cmd := format(spec, [GetEnumName(typeinfo(TCpuRegister),integer(reg)), val]);
+  cmd := format(spec, [GetEnumName(typeinfo(TCpuRegister), integer(reg)), val]);
   gdbCommand(cmd);
 end;
 
@@ -2892,7 +2892,17 @@ const
 var
   cmd : string;
 begin
-  cmd := format(spec, [GetEnumName(typeinfo(TSegRegister),integer(reg)), val]);
+  cmd := format(spec, [GetEnumName(typeinfo(TSegRegister), integer(reg)), val]);
+  gdbCommand(cmd);
+end;
+
+procedure TGdbWidget.setFpr(reg: TFpuRegister; val: extended);
+const
+  spec = 'set $%s = %.18g';
+var
+  cmd : string;
+begin
+  cmd := format(spec, [GetEnumName(typeinfo(TFpuRegister), integer(reg)), val]);
   gdbCommand(cmd);
 end;
 
@@ -2903,16 +2913,6 @@ var
   cmd: string;
 begin
   cmd := format(spec, [val]);
-  gdbCommand(cmd);
-end;
-
-procedure TGdbWidget.setFpr(reg: TFpuRegister; val: extended);
-const
-  spec = 'set $%s = %.18g';
-var
-  cmd : string;
-begin
-  cmd := format(spec, [GetEnumName(typeinfo(TFpuRegister),integer(reg)), val]);
   gdbCommand(cmd);
 end;
 {$ENDREGION}
