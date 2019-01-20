@@ -52,7 +52,7 @@ inherited InfoWidget: TInfoWidget
           Align = alClient
           Alignment = taCenter
           BorderSpacing.Around = 8
-          Caption = 'Licensed under the terms of the BSL-1.0'#10'©Basile Burg, 2014-2018'
+          Caption = 'Licensed under the terms of the BSL-1.0'#10'©Basile Burg, 2014-2019'
           Font.Style = [fsItalic]
           Layout = tlCenter
           ParentColor = False
