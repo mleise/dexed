@@ -21,7 +21,7 @@ It allows to debug the project output (if it's an application) but also the [run
 The breakpoints are handled by the editor. Click the gutter to add or to remove a breakpoint.
 After a break, the following icons may be displayed in the gutter:
 
-- <img src="{%include icurl%}other/breaks.png" class="tlbric"/>: A breakpoint is reached.
+- <img src="{% include icurl %}other/breaks.png" class="tlbric"/>: A breakpoint is reached.
 - <img src="{%include icurl%}other/camera_go.png" class="tlbric"/>: A watch point is reached. For now the only watchpoints supported are those that monitor a variable (see the toolbar description).
 - <img src="{%include icurl%}other/step.png" class="tlbric"/>: The program execution stopped here for another reason. It may be caused by step by step execution or because an unexpected signal has been received.
 
