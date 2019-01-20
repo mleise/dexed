@@ -51,6 +51,7 @@ type
     fSymStringExpander: ISymStringExpander;
     fMsgs: IMessagesDisplay;
     fAsProjectItf: ICommonProject;
+    fVersionFile: string;
     procedure updateOutFilename;
     procedure doChanged(modified: boolean = true);
     procedure getBaseConfig;
@@ -63,6 +64,7 @@ type
     function getConfig(value: integer): TCompilerConfiguration;
     function getCurrConf: TCompilerConfiguration;
     function runPrePostProcess(processInfo: TCompileProcOptions): Boolean;
+    function getVersion(): string;
     // passes pre/post/executed project/ outputs as bubles.
     procedure runProcOutput(sender: TObject);
     // passes compilation message as "to be guessed"
@@ -85,7 +87,8 @@ type
     property ConfigurationIndex: Integer read fConfIx write setConfIx;
     property LibraryAliases: TStringList read fLibAliases write setLibAliases;
     property AutoSolveDependencies: boolean read fAutoDeps write fAutoDeps default false;
-    property version: string read fVersion write fVersion;
+    property version: string read getVersion write fVersion;
+    property versionFile: TPathname read fVersionFile write fVersionFile;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
@@ -388,6 +391,28 @@ end;
 function TNativeProject.getCurrConf: TCompilerConfiguration;
 begin
   result := TCompilerConfiguration(fConfigs.Items[fConfIx]);
+end;
+
+function TNativeProject.getVersion(): string;
+var
+  p: string = '';
+begin
+  if fVersionFile.isNotEmpty then
+  begin
+    if FilenameIsAbsolute(fVersionFile) then
+      p := fVersionFile
+    else
+      p := expandFilenameEx(fBasePath, fVersionFile);
+  end;
+  if p.isNotEmpty and p.fileExists then
+    with TStringList.Create do
+  try
+    LoadFromFile(p);
+    fVersion := trim(strictText);
+  finally
+    free;
+  end;
+  result := fVersion;
 end;
 
 procedure TNativeProject.addDefaults;
