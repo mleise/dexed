@@ -42,6 +42,7 @@ When dependencies are complex, it's possible to select all the entries by settin
 It's recommended to use the [project inspector](widgets_project_inspector) instead of this archaic editor. To include a folder of source it's also possible to specify a path with a asterisk in the **Paths** options, **ExtraSources** editor.
 This avoids to manually remove the obsolete source or to manually add the new source files.
 - **version**: Defines a string used to expand the [_CPV_ symbolic string](features_symbolic_strings).
+- **versionFile**: Defines the name of a file that contains the **version** text. This property has for effect to replace the existing **version**. The filename can be relative to the project root or absolute.
 
 #### Message options
 

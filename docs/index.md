@@ -69,8 +69,8 @@ _Description of each widget._
 
 * [About box](widgets_about)
 * [DFMT commander](widgets_dfmt_commander)
+* [DEXED project editor](widgets_dexed_project_editor)
 * [DUB project editor](widgets_dub_project_editor)
-* [CE project editor](widgets_ce_project_editor)
 * [Custom tools](widgets_custom_tools)
 * [Editor](widgets_editor)
 * [GDB commander](widgets_gdb_commander)
