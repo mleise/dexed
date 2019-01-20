@@ -2783,9 +2783,16 @@ procedure TDexedMemo.completionDeleteKey(sender: TObject);
 begin
   if CaretX > 0 then
   begin
-    caretX := CaretX - 1;
+
+    // these "stinky" lines are necessary because
+    // the proc is called before deletion is effective
+    // i.e the deleted char is still there...
+    // related issues #400 and #398
+    caretX := caretX - 1;
+    ExecuteCommand(ecDeleteChar, #0, nil);
+    caretX := caretX + 1;
+
     getCompletionList();
-    caretX := CaretX + 1;
     if fCompletion.TheForm.ItemList.Count = 0 then
     begin
       fCompletion.TheForm.Close;
