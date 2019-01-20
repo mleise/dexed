@@ -54,6 +54,7 @@ Note that for now SSE registers are not supported by the inspector.
 - <img src="{%include icurl%}other/list.png" class="tlbric"/>: Updates the call stack list.
 - <img src="{%include icurl%}window/watch_window.png" class="tlbric"/>: Updates the local variables list.
 - <img src="{%include icurl%}other/camera_add.png" class="tlbric"/>: Allows to set or remove a watch point. When the button is clicked, a watch is added for the variable that's selected in the variables list. A context menu at the right allows to define the access for which the debugger breaks.
+- <img src="{%include icurl%}other/evaluate_formula.png" class="tlbric"/>: Allows to evaluate either the variable or the dereference of the variable selected in the variable list, or a custom expression. To select the mode, use the menu attached to the right of the icon. Note that a specific shortcut allows to repeat the command when the mode is set to "Evaluate Custom Expression", so that the input dialog step is skipped.
 
 #### Custom commands
 
