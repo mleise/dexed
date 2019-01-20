@@ -2344,60 +2344,64 @@ var
   i, p: integer;
   tk0, tk1: PLexToken;
   str: string;
+  matchingTok: TLexTokenKind = ltkIllegal;
+const
+  dontCloseIfStuckTo = [ltkIdentifier, ltkNumber, ltkString, ltkChar, ltkComment];
 begin
-  fLexToks.Clear;
-  if value in [autoCloseBackTick, autoCloseDoubleQuote] then
+  if fLexToks.Count < 3 then
+    exit;
+
+  p := selStart;
+  if value in [autoCloseBackTick, autoCloseDoubleQuote, autoCloseSingleQuote] then
   begin
-    p := selStart;
-    lex(Lines.Text, fLexToks);
-    for i:=0 to fLexToks.Count-2 do
+    case value of
+      autoCloseBackTick: matchingTok := ltkString;
+      autoCloseDoubleQuote: matchingTok := ltkString;
+      autoCloseSingleQuote: matchingTok := ltkChar;
+    end;
+    for i := 0 to fLexToks.Count-1 do
     begin
       tk0 := fLexToks[i];
-      tk1 := fLexToks[i+1];
-      if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
-        (tk0^.kind in [ltkString, ltkComment]) then
-          exit;
+      // opening char is stuck to something, assume this thing is
+      // what has to be between the pair, so don't close.
+      if (tk0^.offset+2 = p) and (tk0^.kind in dontCloseIfStuckTo) then
+        exit;
+      if i < fLexToks.Count-1 then
+      begin
+        tk1 := fLexToks[i+1];
+        // inside a token of the same type and comments, don't put the mess.
+        if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
+           (tk0^.kind in [matchingTok, ltkComment]) then
+             exit;
+      end
+      // at the EOF an illegal tok is lokely something that has to be closed so
+      // dont auto insert the pair.
+      else if (tk0^.offset+1 <= p) and (tk0^.kind = ltkIllegal) then
+        exit;
     end;
-    tk0 := fLexToks[fLexToks.Count-1];
-    if (tk0^.offset+1 <= p) and (tk0^.kind <> ltkIllegal) then
-      exit;
   end
-  else if value = autoCloseSingleQuote then
-  begin
-    p := selStart;
-    lex(Lines.Text, fLexToks);
-    for i:=0 to fLexToks.Count-2 do
-    begin
-      tk0 := fLexToks[i];
-      tk1 := fLexToks[i+1];
-      if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
-        (tk0^.kind in [ltkChar, ltkComment]) then
-          exit;
-    end;
-    tk0 := fLexToks[fLexToks.Count-1];
-    if (tk0^.offset+1 <= p) and (tk0^.kind <> ltkIllegal) then
-      exit;
-  end
+
   else if value = autoCloseSquareBracket then
   begin
-    p := selStart;
-    lex(Lines.Text, fLexToks);
     for i:=0 to fLexToks.Count-2 do
     begin
       tk0 := fLexToks[i];
       tk1 := fLexToks[i+1];
+      // opening char is stuck to something, assume this thing is
+      // what has to be between the pair, so don't close.
+      if (tk0^.offset+2 = p) and (tk0^.kind in dontCloseIfStuckTo) then
+        exit;
       if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
         (tk0^.kind = ltkComment) then
           exit;
     end;
     tk0 := fLexToks[fLexToks.Count-1];
-    if (tk0^.offset+1 <= p) and (tk0^.kind <> ltkIllegal) then
-      exit;
     str := lineText;
     i := LogicalCaretXY.X;
     if (i <= str.length) and (lineText[i] = ']') then
       exit;
   end;
+
   BeginUndoBlock;
   ExecuteCommand(ecChar, autoClosePair2Char[value], nil);
   ExecuteCommand(ecLeft, #0, nil);
@@ -3586,9 +3590,31 @@ end;
 procedure TDexedMemo.UTF8KeyPress(var Key: TUTF8Char);
 var
   c: AnsiChar;
+
+procedure reLex();
+begin
+  fLexToks.Clear;
+  lex(Lines.Text, fLexToks);
+end;
+
 begin
   c := Key[1];
+
+  // scan source before insertion if pair auto closing is allowed otherwise the
+  // tokens following the cursor are wring after the "inherited" call.
+  case c of
+    #39: if autoCloseSingleQuote in fAutoClosedPairs then
+      reLex();
+    '"': if autoCloseDoubleQuote in fAutoClosedPairs then
+      reLex();
+    '`': if autoCloseBackTick in fAutoClosedPairs then
+      reLex();
+    '[': if autoCloseSquareBracket in fAutoClosedPairs then
+      reLex();
+  end;
+
   inherited;
+
   fCanDscan := true;
   case c of
     #39: if autoCloseSingleQuote in fAutoClosedPairs then
