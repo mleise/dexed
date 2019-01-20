@@ -2813,18 +2813,21 @@ begin
   fEvalKind := gekDerefSelectedVar;
   mnuEvalSelected.Checked:=false;
   mnuEvalCustom.Checked:=false;
+  mnuEvalDeref.Checked:=true;
 end;
 
 procedure TGdbWidget.mnuEvalCustomClick(Sender: TObject);
 begin
   fEvalKind := gekCustom;
   mnuEvalSelected.Checked:=false;
+  mnuEvalCustom.Checked:=true;
   mnuEvalDeref.Checked:=false;
 end;
 
 procedure TGdbWidget.mnuEvalSelectedClick(Sender: TObject);
 begin
   fEvalKind := gekSelectedVar;
+  mnuEvalSelected.Checked:=true;
   mnuEvalCustom.Checked:=false;
   mnuEvalDeref.Checked:=false;
 end;
