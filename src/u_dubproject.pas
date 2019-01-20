@@ -110,6 +110,7 @@ type
   private
     fIsSdl: boolean;
     fInGroup: boolean;
+    fHasLoaded: boolean;
     fDubProc: TDexedProcess;
     fPreCompilePath: string;
     fPackageName: string;
@@ -146,18 +147,20 @@ type
     procedure dubProcTerminated(proc: TObject);
     function getCurrentCustomConfig: TJSONObject;
     procedure executeDub(command: TDubCommand; const runArgs: string = '');
+    procedure restorePersistentConfigId;
+    procedure storePersistentConfigId;
   public
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
-    //
+
     procedure beginModification;
     procedure endModification;
-    //
+
     function filename: string;
     function basePath: string;
     procedure loadFromFile(const fname: string);
     procedure saveToFile(const fname: string);
-    //
+
     procedure updateSourcesList;
     procedure activate;
     function inGroup: boolean;
@@ -170,25 +173,25 @@ type
     function outputFilename: string;
     procedure reload;
     procedure stopCompilation;
-    //
+
     function isSource(const fname: string): boolean;
     function sourcesCount: integer;
     function sourceRelative(index: integer): string;
     function sourceAbsolute(index: integer): string;
     function importsPathCount: integer;
     function importPath(index: integer): string;
-    //
+
     function configurationCount: integer;
     function getActiveConfigurationIndex: integer;
     procedure setActiveConfigurationIndex(index: integer);
     function configurationName(index: integer): string;
-    //
+
     procedure compile;
     function compiled: boolean;
     procedure run(const runArgs: string = '');
     procedure test;
     function targetUpToDate: boolean;
-    //
+
     property json: TJSONObject read fJSON;
     property packageName: string read fPackageName;
     property isSDL: boolean read fIsSdl;
@@ -676,6 +679,8 @@ end;
 
 destructor TDubProject.destroy;
 begin
+  if not inGroup and fHasLoaded then
+    storePersistentConfigId();
   killProcess(fDubProc);
   subjProjClosing(fProjectSubject, self);
   fProjectSubject.free;
@@ -812,9 +817,17 @@ begin
   end;
 
   if not assigned(fJSON) then
-    fJson := TJSONObject.Create(['name','invalid json']);
+  begin
+    fHasLoaded := false;
+    fJson := TJSONObject.Create(['name','invalid json'])
+  end
+  else
+    fHasLoaded := true;
 
   updateFields;
+  if not inGroup then
+    restorePersistentConfigId();
+
   subjProjChanged(fProjectSubject, self);
   fModified := false;
 end;
@@ -918,6 +931,66 @@ end;
 {$ENDREGION --------------------------------------------------------------------}
 
 {$REGION ICommonProject: configs ---------------------------------------------}
+procedure TDubProject.restorePersistentConfigId;
+var
+  f: string;
+  t: string;
+  c: string;
+  i: integer;
+begin
+  f := fBasePath + DirectorySeparator + '.dub' + DirectorySeparator + '.editor_meta_data.ini';
+  if f.fileExists then
+    with TStringList.Create do
+  try
+    try
+      LoadFromFile(f);
+    except
+    end;
+    t := values['last_dexed_buildType'];
+    c := values['last_dexed_config'];
+    if t.isNotEmpty and c.isNotEmpty then
+      for i := 0 to configurationCount-1 do
+        if configurationName(i) = t + ' - ' + c then
+    begin
+      setActiveConfigurationIndex(i);
+      break;
+    end;
+  finally
+    free;
+  end;
+end;
+
+procedure TDubProject.storePersistentConfigId;
+var
+  f: string;
+  n: string;
+  c: string;
+  t: string;
+  p: integer;
+  i: integer;
+begin
+  i := getActiveConfigurationIndex();
+  n := configurationName(i);
+  p := Pos(' ', n);
+  if (p < 4) and (p + 5 < n.length) then
+    exit;
+
+  t := n[1..p-1];
+  c := n[p + 3 .. n.length];
+  f := fBasePath + DirectorySeparator + '.dub' + DirectorySeparator + '.editor_meta_data.ini';
+  with TStringList.Create do
+  try
+    values['last_dexed_buildType'] := t;
+    values['last_dexed_config'] := c;
+    try
+      SaveToFile(f);
+    except
+    end;
+  finally
+    free;
+  end;
+end;
+
 function TDubProject.configurationCount: integer;
 begin
   exit(fConfigsCount);
