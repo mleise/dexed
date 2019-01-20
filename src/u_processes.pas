@@ -63,6 +63,8 @@ type
     property StdErrEx: TMemoryStream read fStderrEx;
     // indicates if an output buffer is read
     property hasRead: boolean read fHasRead;
+    // indicates if OnTerminated was called
+    property doneTerminated: boolean read fDoneTerminated;
   end;
 
   {
@@ -232,6 +234,7 @@ var
   buff: Byte = 0;
   str: TMemoryStream;
 begin
+  stored := fStdoutEx.Position;
   if not Running then
   begin
     // stderr has been read in its own stream
@@ -243,14 +246,13 @@ begin
       if consume then
         fStderrEx.Clear;
     end;
-    fStdoutEx.Position:=0;
+    fStdoutEx.Position:=stored;
     list.LoadFromStream(fStdoutEx);
     if consume then
       fStdoutEx.Clear;
   end else
   begin
     lastTerm := fStdoutEx.Position;
-    stored := fStdoutEx.Position;
     while fStdoutEx.Read(buff, 1) = 1 do
       if buff = 10 then lastTerm := fStdoutEx.Position;
     fStdoutEx.Position := stored;

@@ -3154,6 +3154,15 @@ begin
     dmdproc.Execute;
     while dmdproc.Running do
       application.ProcessMessages;
+
+    // The timer in TDexedProcess still does not fix
+    // the "onTerminated never called bug"
+    if not dmdproc.doneTerminated then
+    begin
+      dmdProc.fillOutputStack;
+      asyncprocTerminate(dmdproc);
+    end;
+
     if not asObj then
       sysutils.DeleteFile(fname + objExt);
     if (dmdProc.ExitStatus = 0) then
@@ -3163,8 +3172,8 @@ begin
         fDoc, amcEdit, amkInf);
     end
     else begin
-      fMsgs.message(format('error: the process (%s) has returned the status %s',
-        [dmdproc.Executable, prettyReturnStatus(dmdproc)]), fDoc, amcEdit, amkErr);
+      //fMsgs.message(format('error: the process (%s) has returned the status %s',
+      //  [dmdproc.Executable, prettyReturnStatus(dmdproc)]), fDoc, amcEdit, amkErr);
       fMsgs.message(shortenPath(fDoc.fileName, 25) + ' has not been compiled',
         fDoc, amcEdit, amkErr);
     end;
