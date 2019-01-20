@@ -488,8 +488,8 @@ end;
 
 procedure TTodoListWidget.toolTerminated(Sender: TObject);
 begin
-  fToolProc.OutputStack.Position := 0;
-  fTodos.loadFromTxtStream(fToolProc.OutputStack);
+  fToolProc.StdoutEx.Position := 0;
+  fTodos.loadFromTxtStream(fToolProc.StdoutEx);
   fillTodoList;
   fToolProc.OnTerminate := nil;
 end;

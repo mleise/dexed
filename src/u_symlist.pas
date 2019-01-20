@@ -861,10 +861,10 @@ begin
 
   fToolProc.OnTerminate := nil;
   fToolProc.OnReadData  := nil;
-  fToolProc.OutputStack.Position:=0;
-  if fToolProc.OutputStack.Size = 0 then
+  fToolProc.StdoutEx.Position:=0;
+  if fToolProc.StdoutEx.Size = 0 then
     exit;
-  fSyms.LoadFromTool(fToolProc.OutputStack);
+  fSyms.LoadFromTool(fToolProc.StdoutEx);
 
   flt := TreeFilterEdit1.Filter;
   TreeFilterEdit1.Text := '';

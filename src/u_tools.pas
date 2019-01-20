@@ -235,9 +235,9 @@ begin
     if previous.isNotNil and previous.outputToNext
       and (poUsePipes in previous.Options) and (poUsePipes in Options) then
     begin
-      setLength(inp, previous.process.OutputStack.Size);
-      previous.process.OutputStack.Position:=0;
-      previous.process.OutputStack.Read(inp[1], inp.length);
+      setLength(inp, previous.process.StdoutEx.Size);
+      previous.process.StdoutEx.Position:=0;
+      previous.process.StdoutEx.Read(inp[1], inp.length);
       fProcess.Input.Write(inp[1], inp.length);
       fProcess.CloseInput;
     end;

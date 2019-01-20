@@ -5,7 +5,7 @@ unit u_processes;
 interface
 
 uses
-  Classes, SysUtils, ExtCtrls, process, asyncprocess;
+  Classes, SysUtils, ExtCtrls, process, asyncprocess, pipes;
 
 type
 
@@ -19,6 +19,9 @@ type
     -   TAsyncProcess.OnReadData event is not usable to read full output lines.
         Here the output is accumulated in a TMemoryStream which allows to keep data
         at the left of an unterminated line when a buffer is available.
+    -   When StdErr is redirect to Output, both streams can be blended. Here the
+        option is deactivated on execution, a falg is set, and the error stream
+        is always added to after the output.
 
     The member Output is not usable anymore. Instead:
 
@@ -29,10 +32,11 @@ type
   }
   TDexedProcess = class(TASyncProcess)
   private
+    fErrToOut: boolean;
     fRealOnTerminate: TNotifyEvent;
     fRealOnReadData: TNotifyEvent;
-    fOutputStack: TMemoryStream;
-    fStdError: TMemoryStream;
+    fStdoutEx: TMemoryStream;
+    fStderrEx: TMemoryStream;
     fTerminateChecker: TTimer;
     fDoneTerminated: boolean;
     fHasRead: boolean;
@@ -49,12 +53,14 @@ type
     constructor create(aOwner: TComponent); override;
     destructor destroy; override;
     procedure execute; override;
-    // reads TProcess.OUtput in OutputStack
+    // reads TProcess.Output and StdErr in their "Ex" versions.
     procedure fillOutputStack;
-    // fills list with the full lines contained in OutputStack
+    // fills list with the full lines contained in StdoutEx
     procedure getFullLines(list: TStrings; consume: boolean = true);
     // access to a flexible copy of TProcess.Output
-    property OutputStack: TMemoryStream read fOutputStack;
+    property StdoutEx: TMemoryStream read fStdoutEx;
+    // access to a flexible copy of TProcess.Error
+    property StdErrEx: TMemoryStream read fStderrEx;
     // indicates if an output buffer is read
     property hasRead: boolean read fHasRead;
   end;
@@ -160,13 +166,12 @@ end;
 constructor TDexedProcess.create(aOwner: TComponent);
 begin
   inherited;
-  FOutputStack := TMemoryStream.Create;
-  fStdError := TMemoryStream.Create;
+  fStdoutEx := TMemoryStream.Create;
+  fStderrEx := TMemoryStream.Create;
   FTerminateChecker := TTimer.Create(nil);
   FTerminateChecker.Interval := 50;
   fTerminateChecker.OnTimer := @checkTerminated;
   fTerminateChecker.Enabled := false;
-  //fTerminateChecker.AutoEnabled:= true;
   TAsyncProcess(self).OnTerminate := @internalDoOnTerminate;
   TAsyncProcess(self).OnReadData := @internalDoOnReadData;
 end;
@@ -174,17 +179,20 @@ end;
 destructor TDexedProcess.destroy;
 begin
   FTerminateChecker.Free;
-  FOutputStack.Free;
-  fStdError.Free;
+  fStdoutEx.Free;
+  fStderrEx.Free;
   inherited;
 end;
 
 procedure TDexedProcess.Execute;
 begin
   fHasRead := false;
-  fOutputStack.Clear;
-  fStdError.Clear;
+  fStdoutEx.Clear;
+  fStderrEx.Clear;
   fDoneTerminated := false;
+  fErrToOut := poStderrToOutPut in Options;
+  if fErrToOut then
+    Options := Options - [poStderrToOutPut];
   TAsyncProcess(self).OnReadData := @internalDoOnReadData;
   TAsyncProcess(self).OnTerminate := @internalDoOnTerminate;
   fTerminateChecker.Enabled := true;
@@ -192,21 +200,28 @@ begin
 end;
 
 procedure TDexedProcess.fillOutputStack;
-var
-  sum, cnt: Integer;
+
+  procedure fill(inStr: TInputPipeStream; outStr: TMemoryStream);
+  var
+    s: integer;
+    c: integer;
+  begin
+    s := outStr.size;
+    while (inStr <> nil) and (inStr.NumBytesAvailable > 0) do
+    begin
+      outStr.SetSize(s + 1024);
+      c := inStr.Read((outStr.Memory + s)^, 1024);
+      s += c;
+    end;
+    outStr.SetSize(s);
+  end;
+
 begin
   if not (poUsePipes in Options) then
     exit;
 
-  // output
-  sum := fOutputStack.Size;
-  while (Output <> nil) and (NumBytesAvailable > 0) do
-  begin
-    fOutputStack.SetSize(sum + 1024);
-    cnt := Output.Read((fOutputStack.Memory + sum)^, 1024);
-    sum += cnt;
-  end;
-  fOutputStack.SetSize(sum);
+  fill(Output, StdoutEx);
+  fill(Stderr, stderrEx);
 end;
 
 procedure TDexedProcess.getFullLines(list: TStrings; consume: boolean = true);
@@ -219,23 +234,33 @@ var
 begin
   if not Running then
   begin
-    list.LoadFromStream(fOutputStack);
+    // stderr has been read in its own stream
+    // preventing interleaving, now put it at the end...
+    if (poStderrToOutPut in Options) or fErrToOut then
+    begin
+      fStdoutEx.Position:=fStdoutEx.Size;
+      fStdoutEx.Write(fStderrEx.Memory^, fStderrEx.Size);
+      if consume then
+        fStderrEx.Clear;
+    end;
+    fStdoutEx.Position:=0;
+    list.LoadFromStream(fStdoutEx);
     if consume then
-      fOutputStack.Clear;
+      fStdoutEx.Clear;
   end else
   begin
-    lastTerm := fOutputStack.Position;
-    stored := fOutputStack.Position;
-    while fOutputStack.Read(buff, 1) = 1 do
-      if buff = 10 then lastTerm := fOutputStack.Position;
-    fOutputStack.Position := stored;
+    lastTerm := fStdoutEx.Position;
+    stored := fStdoutEx.Position;
+    while fStdoutEx.Read(buff, 1) = 1 do
+      if buff = 10 then lastTerm := fStdoutEx.Position;
+    fStdoutEx.Position := stored;
     if lastTerm <> stored then
     begin
       str := TMemoryStream.Create;
       try
         toread := lastTerm - stored;
         str.SetSize(toRead);
-        fOutputStack.Read(str.Memory^, toread);
+        fStdoutEx.Read(str.Memory^, toread);
         list.LoadFromStream(str);
       finally
         str.Free;
@@ -270,6 +295,11 @@ begin
   fTerminateChecker.Enabled := false;
   if fDoneTerminated then exit;
   fDoneTerminated := true;
+
+  // restore if same proc is called again,
+  // self.execute will exclude the option.
+  if fErrToOut then
+    Options := Options + [poStderrToOutPut];
 
   // note: made to fix a leak in the process used by the linter
   // onTerminate is sometimes determined by an internal timer
@@ -310,19 +340,19 @@ end;
 
 procedure TAutoBufferedProcess.execute;
 begin
-  fPreviousSize := fOutputStack.Size;
+  fPreviousSize := fStdoutEx.Size;
   fNewBufferChecker.Enabled:=true;
   inherited;
 end;
 
 procedure TAutoBufferedProcess.newBufferCheckerChecks(sender: TObject);
 begin
-  if fOutputStack.Size = fPreviousSize then
+  if fStdoutEx.Size = fPreviousSize then
   begin
     if assigned(fRealOnReadData) then
       fRealOnReadData(self);
   end;
-  fPreviousSize := fOutputStack.Size;
+  fPreviousSize := fStdoutEx.Size;
 end;
 
 procedure TAutoBufferedProcess.internalDoOnReadData(sender: TObject);

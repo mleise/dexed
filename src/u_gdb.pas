@@ -2586,7 +2586,7 @@ end;
 procedure TGdbWidget.gdboutQuiet(sender: TObject);
 begin
   fCommandProcessed := true;
-  fGdb.OutputStack.Clear;
+  fGdb.StdoutEx.Clear;
   fGdb.OnReadData:=@gdboutJsonize;
 end;
 {$ENDREGION}
