@@ -14,20 +14,20 @@ type
 
     This class solves several issues encountered when using TProcess and TAsyncProcess:
 
-    -   OnTerminate event is never called under Linux.
-        Here a timer perdiodically check the process and call the event accordingly.
-    -   TAsyncProcess.OnReadData event is not usable to read full output lines.
-        Here the output is accumulated in a TMemoryStream which allows to keep data
+    -   "OnTerminate" event is never called under Linux.
+        FIX: a timer perdiodically check the process and call the event accordingly.
+    -   "OnReadData" event is not usable to read full output lines.
+        FIX: the output is accumulated in a TMemoryStream which allows to keep data
         at the left of an unterminated line when a buffer is available.
-    -   When StdErr is redirect to Output, both streams can be blended. Here the
-        option is deactivated on execution, a falg is set, and the error stream
-        is always added to after the output.
+    -   When StdErr is redirect to "Output", both streams can be blended.
+        FIX: the option is deactivated on execution, a flag is set, and the error
+        stream is always appended after the output.
 
-    The member Output is not usable anymore. Instead:
+    The member "Output" is not usable anymore. Instead:
 
-    -   getFullLines() can be used  in OnReadData or after the execution to fill
+    -   "getFullLines()" can be used in "OnReadData" or after the execution to fill
         a string list.
-    -   OutputStack can be used to read the raw output. It allows to seek, which
+    -   "StdoutEx" can be used to read the raw output. It allows to seek, which
         overcomes another limitation of the basic process classes.
   }
   TDexedProcess = class(TASyncProcess)

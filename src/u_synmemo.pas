@@ -2374,7 +2374,7 @@ begin
            (tk0^.kind in [matchingTok, ltkComment]) then
              exit;
       end
-      // at the EOF an illegal tok is lokely something that has to be closed so
+      // at the EOF an illegal tok is likely something that has to be closed so
       // dont auto insert the pair.
       else if (tk0^.offset+1 <= p) and (tk0^.kind = ltkIllegal) then
         exit;
@@ -3601,7 +3601,7 @@ begin
   c := Key[1];
 
   // scan source before insertion if pair auto closing is allowed otherwise the
-  // tokens following the cursor are wring after the "inherited" call.
+  // tokens following the cursor are wrong after the "inherited" call.
   case c of
     #39: if autoCloseSingleQuote in fAutoClosedPairs then
       reLex();
