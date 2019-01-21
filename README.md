@@ -2,8 +2,7 @@ Dexed, the _D Extended EDitor_, is an IDE for the [D programming language](https
 
 [![](https://basile-z.github.io/dexed/img/coedit_kde4_thumb.png)](https://basile-z.github.io/dexed/img/coedit_kde4.png)
 
-**Overview**
----
+## Overview
 
 - available for _Linux_ or _Windows_.
 - supports all the D compilers (DMD-GDC-LDC).
@@ -13,42 +12,40 @@ Dexed, the _D Extended EDitor_, is an IDE for the [D programming language](https
 - Dynamic [D-Scanner](https://github.com/dlang-community/D-Scanner) linting with results displayed in the editor gutter.
 - single click to compile and to _unittest_ a module and optionally display tests coverage.
 - advanced editor with D2 syntax highlighter, folds, regions, identifier markup, macros, sync-edit, etc.
+- additonal highlithers for C and C++ sources, based on the D color scheme, for other files a generic bicolor highlighter is used.
 - edition helpers: comment blocks, local identifier renaming, brace auto-closing, ddoc templates, etc.
 - Debugging with a GDB gui. (**linux only**)
-- Integrated terminal emulator. (**linux only**)
+- Integrated terminal emulator. (**linux** + **GTK2 widget set** only)
 - Tree of symbols in the current module.
 - static library manager that supports auto-registration from local DUB projects, from online DUB packages or from dexed custom project format.
 - todo list based on the _todo comments_ located in a project or in the current source.
 - user-defined tools powered by a string interpolation system.
 - integrated file browser, dfmt interface, search & replace, [discover more in the manual](https://basile-z.github.io/dexed/).
 
-**Project information**
----
+## Project information
 
-- latest release: version 3.7.2, Wed 18 Jan 2019.
-- licensed under the terms of the Boost software license.
-- Development can be supported with [Paypal donations](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AQDJVC39PJF7J).
+- :bookmark: latest release: version 3.7.3, Mon 21 Jan 2019.
+- :scroll: licensed under the terms of the Boost software license.
+- :dollar: Development can be supported with [Paypal donations](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AQDJVC39PJF7J).
 
-**Download version 3.7.2**
----
+## Download version 3.7.3
 
 Download the zipped binaries or the zip that contains the setup program for you platform:
 
-- :package: [setup program for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed.3.7.2.linux64.setup.zip)
-- :package: [binaries for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed.3.7.2.linux64.zip)
-- :package: [setup program for Windows 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed.3.7.2.win64.setup.zip)
-- :package: [binaries for Windows 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed.3.7.2.win64.zip)
-- :package: [rpm for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed-3.7.2-0.x86_64.rpm)
-- :package: [deb for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.2/dexed-3.7.2.amd64.deb)
+- :package: [setup program for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.3/dexed.3.7.3.linux64.setup.zip)
+- :package: [binaries for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.3/dexed.3.7.3.linux64.zip)
+- :package: [setup program for Windows 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.3/dexed.3.7.3.win64.setup.zip)
+- :package: [binaries for Windows 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.3/dexed.3.7.3.win64.zip)
+- :package: [rpm for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.3/dexed-3.7.3-0.x86_64.rpm)
+- :package: [deb for Linux 64 bit](https://github.com/Basile-z/dexed/releases/download/v3.7.3/dexed-3.7.3.amd64.deb)
 
 The _zip_ archives allow to move freely the files.
-The _setup.zip_ archives contains a command line program that installs to predefined locations so that the software can be run without additional intervention.
-The _deb_ and the _rpm_ packages are for those who prefer the official setup system for their linux systems.
-Linux and Windows 32 bits version must be [built manually](https://basile-z.github.io/dexed/build.html).
+The _setup.zip_ archives contain a command line program that installs to predefined locations so that the software can be run without additional intervention.
+The _deb_ and the _rpm_ packages are for those who prefer the official setup system of their linux systems.
+FreeBSD (all archs), Linux (32 bit) and Windows (32 bit) versions must be [built manually](https://basile-z.github.io/dexed/build.html).
 
 [**See this page**](https://basile-z.github.io/dexed/setup.html) for more information about the setup.
 
-**Build**
----
+## Building
 
 Follow the procedure described [**here**](https://basile-z.github.io/dexed/build.html).
