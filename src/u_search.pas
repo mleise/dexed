@@ -70,7 +70,11 @@ type
     Panel2: TPanel;
     procedure btnAllScopeClick(Sender: TObject);
     procedure cbReplaceWthChange(Sender: TObject);
+    procedure cbReplaceWthKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     procedure cbToFindChange(Sender: TObject);
+    procedure cbToFindKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
+      );
     procedure chkEnableRepChange(Sender: TObject);
   private
     fDoc: TDexedMemo;
@@ -610,6 +614,13 @@ begin
   updateImperative;
 end;
 
+procedure TSearchWidget.cbToFindKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key <> 13 then
+    exit;
+  actFindNextExecute(nil);
+end;
+
 procedure TSearchWidget.chkEnableRepChange(Sender: TObject);
 begin
   if Updating then exit;
@@ -622,6 +633,14 @@ begin
   fReplaceWth := cbReplaceWth.Text;
   fHasSearched := false;
   updateImperative;
+end;
+
+procedure TSearchWidget.cbReplaceWthKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Key <> 13 then
+    exit;
+  actReplaceNextExecute(nil);
 end;
 
 procedure TSearchWidget.btnAllScopeClick(Sender: TObject);

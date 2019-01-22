@@ -28,6 +28,7 @@ inherited SearchWidget: TSearchWidget
         ItemHeight = 0
         MaxLength = 128
         OnChange = cbToFindChange
+        OnKeyDown = cbToFindKeyDown
         OnSelect = cbToFindChange
         TabOrder = 0
       end
@@ -203,6 +204,7 @@ inherited SearchWidget: TSearchWidget
           ItemHeight = 0
           MaxLength = 128
           OnChange = cbReplaceWthChange
+          OnKeyDown = cbReplaceWthKeyDown
           OnSelect = cbReplaceWthChange
           TabOrder = 1
         end
