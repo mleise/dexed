@@ -325,20 +325,13 @@ end;
 {$REGION IDocumentObserver ---------------------------------------------------}
 procedure TTodoListWidget.docNew(document: TDexedMemo);
 begin
+  fDoc := document;
+  if Visible and fAutoRefresh then
+    callToolProcess;
 end;
 
 procedure TTodoListWidget.docFocused(document: TDexedMemo);
 begin
-  if document.isNil then
-    exit;
-
-  // issue 412 :
-  // 1. the file name is in a first time "<new document>"
-  // 2. document assigned the fDoc var
-  // 3. once the filename loaded it exited on next focused
-  //    because diff for filename was not tested.
-  if fDoc.isNotNil and (document = fDoc) and (fDoc.fileName = document.fileName) then
-    exit;
   fDoc := document;
   if Visible and fAutoRefresh then
     callToolProcess;
@@ -383,8 +376,6 @@ end;
 
 procedure TTodoListWidget.projFocused(project: ICommonProject);
 begin
-  if project = fProj then
-    exit;
   fProj := project;
   if Visible and fAutoRefresh then
     callToolProcess;
@@ -505,8 +496,10 @@ end;
 
 procedure TTodoListWidget.clearTodoList;
 begin
+  lstItems.BeginUpdate;
   lstItems.Clear;
   fTodos.items.Clear;
+  lstItems.EndUpdate;
 end;
 
 procedure TTodoListWidget.fillTodoList;
@@ -516,6 +509,7 @@ var
   trg: TListItem;
   flt: string;
 begin
+  lstItems.BeginUpdate;
   lstItems.Clear;
   lstItems.Column[1].Visible := False;
   lstItems.Column[2].Visible := False;
@@ -555,6 +549,7 @@ begin
     if src.priority.isNotEmpty then
       lstItems.Column[4].Visible := True;
   end;
+  lstItems.EndUpdate;
 end;
 
 procedure TTodoListWidget.handleListClick(Sender: TObject);
@@ -677,15 +672,21 @@ end;
 
 procedure TTodoListWidget.refreshVisibleColumns;
 begin
-  if lstItems.isNil then exit;
-  if lstItems.Columns.isNil then exit;
-  if lstItems.ColumnCount <> 6 then exit;
-  //
+
+  if lstItems.isNil then
+    exit;
+  if lstItems.Columns.isNil then
+    exit;
+  if lstItems.ColumnCount <> 6 then
+    exit;
+
+  lstItems.BeginUpdate;
   lstItems.Column[1].Visible := TTodoColumn.category in fColumns ;
   lstItems.Column[2].Visible := TTodoColumn.assignee in fColumns ;
   lstItems.Column[3].Visible := TTodoColumn.status in fColumns ;
   lstItems.Column[4].Visible := TTodoColumn.priority in fColumns ;
   lstItems.Column[5].Visible := TTodoColumn.filename in fColumns ;
+  lstItems.EndUpdate;
 end;
 {$ENDREGION}
 
