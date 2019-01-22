@@ -5,11 +5,24 @@ unit u_term;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, LCLType,
+  ActnList, LMessages,
   u_widget, TerminalCtrls, u_interfaces, u_writableComponent, u_observer,
   u_common, u_synmemo;
 
 type
+
+  TTerminalShortcuts = class(TPersistent)
+  private
+    fCopy: TShortCut;
+    fPaste: TShortCut;
+  published
+    property copy: TShortCut read fCopy write fCopy;
+    property paste: TShortCut read fPaste write fPaste;
+  public
+    constructor create;
+    procedure assign(source: TPersistent); override;
+  end;
 
   // Terminal options
   TTerminalOptionsBase = class(TWritableLfmTextComponent)
@@ -22,7 +35,9 @@ type
     fFollowExplorer: boolean;
     fScrollbackLines: longword;
     fFont: TFont;
+    fShortcuts: TTerminalShortcuts;
     procedure setFont(value: TFont);
+    procedure setShortcuts(value: TTerminalShortcuts);
   public
     constructor create(AOwner: TComponent); override;
     destructor destroy; override;
@@ -36,6 +51,7 @@ type
     property followProjects: boolean read fFollowProjects write fFollowProjects;
     property followExplorer: boolean read fFollowExplorer write fFollowExplorer;
     property scrollbackLines: longword read fScrollbackLines write fScrollbackLines default 512;
+    property shortcuts: TTerminalShortcuts read fShortcuts write fShortcuts;
   end;
 
   // Editable and reversible Terminal options
@@ -56,6 +72,7 @@ type
 
   TTermWidget = class(TDexedWidget, IDocumentObserver, IProjectObserver, IMiniExplorerObserver)
     procedure ContentPaint(Sender: TObject);
+    procedure FormShortCut(var Msg: TLMKey; var Handled: Boolean);
   private
     fTerm: TTerminal;
     fOpts: TTerminalOptions;
@@ -92,6 +109,25 @@ implementation
 const
   optFname = 'terminal.txt';
 
+constructor TTerminalShortcuts.create;
+begin
+  fCopy := KeyToShortCut(word(char('C')), [ssCtrl]);
+  fPaste:= KeyToShortCut(word(char('V')), [ssCtrl]);
+end;
+
+procedure TTerminalShortcuts.assign(source: TPersistent);
+var
+  s: TTerminalShortcuts;
+begin
+  if source is TTerminalShortcuts then
+  begin
+    s := TTerminalShortcuts(source);
+    fCopy := s.fCopy;
+    fPaste:= s.fPaste;
+  end
+  else inherited;
+end;
+
 constructor TTerminalOptionsBase.create(AOwner: TComponent);
 begin
   inherited;
@@ -102,17 +138,24 @@ begin
   fFont.Name:= 'Monospace';
   fFont.Size:= 12;
   fScrollbackLines:=512;
+  fShortcuts := TTerminalShortcuts.create;
 end;
 
 destructor TTerminalOptionsBase.destroy;
 begin
   fFont.Free;
+  fShortcuts.Free;
   inherited;
 end;
 
 procedure TTerminalOptionsBase.setFont(value: TFont);
 begin
   fFont.Assign(value);
+end;
+
+procedure TTerminalOptionsBase.setShortcuts(value: TTerminalShortcuts);
+begin
+  fShortcuts.assign(value);
 end;
 
 procedure TTerminalOptionsBase.assign(value: TPersistent);
@@ -131,6 +174,7 @@ begin
     fFont.Height:=fFont.Height-1;
     fFont.Assign(s.font);
     fFont.EndUpdate;
+    fShortcuts.assign(s.fShortcuts);
     fScrollbackLines := s.fScrollbackLines;
   end
   else inherited;
@@ -204,6 +248,7 @@ var
   f: string;
 begin
   inherited;
+
   toolbarVisible:=false;
   fTerm := TTerminal.Create(self);
   fTerm.Align:= alClient;
@@ -245,6 +290,24 @@ begin
     exit;
   fNeedApplyChanges:=false;
   fOpts.applyChanges;
+end;
+
+procedure TTermWidget.FormShortCut(var Msg: TLMKey; var Handled: Boolean);
+var
+  s: TShortCut;
+begin
+  Handled := false;
+  s := KeyToShortCut(Msg.CharCode, KeyDataToShiftState(Msg.KeyData));
+  if s = fOpts.shortcuts.copy then
+  begin
+    fTerm.copyToClipboard();
+    handled := true;
+  end
+  else if s = fOpts.shortcuts.paste then
+  begin
+    fTerm.pasteFromClipboard();
+    handled := true;
+  end;
 end;
 
 procedure TTermWidget.mnexDirectoryChanged(const directory: string);

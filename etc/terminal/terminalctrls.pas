@@ -51,6 +51,8 @@ type
     procedure Reparent;
     // Sends a command, as it would be manually typed. Line feed is automatically added.
     procedure Command(const data: string);
+    procedure copyToClipboard();
+    procedure pasteFromClipboard();
   published
     {$ifdef windows}
     property terminalProgram: string read fTermProgram write fTermProgram;
@@ -298,6 +300,22 @@ begin
   {$ifdef hasgtk2term}
   if assigned(fTerminalHanlde) and assigned(vte_terminal_feed_child) then
     vte_terminal_feed_child(fTerminalHanlde, PChar(data + #10), data.Length + 1);
+  {$endif}
+end;
+
+procedure TTerminal.copyToClipboard();
+begin
+  {$ifdef hasgtk2term}
+  if assigned(fTerminalHanlde) and assigned(vte_terminal_copy_clipboard) then
+    vte_terminal_copy_clipboard(fTerminalHanlde);
+  {$endif}
+end;
+
+procedure TTerminal.pasteFromClipboard();
+begin
+  {$ifdef hasgtk2term}
+  if assigned(fTerminalHanlde) and assigned(vte_terminal_paste_clipboard) then
+    vte_terminal_paste_clipboard(fTerminalHanlde);
   {$endif}
 end;
 

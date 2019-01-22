@@ -88,6 +88,10 @@ var
   vte_terminal_feed_child: procedure(terminal: PVteTerminal; data: PChar;
     length: PtrInt); cdecl;
 
+  vte_terminal_copy_clipboard: procedure(terminal: PVteTerminal); cdecl;
+
+  vte_terminal_paste_clipboard: procedure(terminal: PVteTerminal); cdecl;
+
   vte_get_user_shell: function(): PChar;
 
 function Gtk2TermLoad: Boolean;
@@ -134,8 +138,13 @@ begin
     'vte_terminal_feed');
   @vte_terminal_feed_child := GetProcAddress(Lib,
     'vte_terminal_feed_child');
+  @vte_terminal_copy_clipboard := GetProcAddress(Lib,
+    'vte_terminal_copy_clipboard');
+  @vte_terminal_paste_clipboard := GetProcAddress(Lib,
+    'vte_terminal_paste_clipboard');
   @vte_get_user_shell := GetProcAddress(Lib,
     'vte_get_user_shell');
+
 
   // assume all or none
   Loaded := @vte_terminal_new <> nil;

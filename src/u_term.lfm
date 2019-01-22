@@ -5,6 +5,7 @@ inherited TermWidget: TTermWidget
   Caption = 'Terminal'
   ClientHeight = 296
   ClientWidth = 674
+  OnShortCut = FormShortCut
   inherited Back: TPanel
     Height = 296
     Width = 674
