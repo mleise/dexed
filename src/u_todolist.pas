@@ -329,14 +329,15 @@ end;
 
 procedure TTodoListWidget.docFocused(document: TDexedMemo);
 begin
-  if fdoc.isNil then
+  if document.isNil then
     exit;
+
   // issue 412 :
   // 1. the file name is in a first time "<new document>"
   // 2. document assigned the fDoc var
   // 3. once the filename loaded it exited on next focused
   //    because diff for filename was not tested.
-  if (document = fDoc) and (fDoc.fileName = document.fileName) then
+  if fDoc.isNotNil and (document = fDoc) and (fDoc.fileName = document.fileName) then
     exit;
   fDoc := document;
   if Visible and fAutoRefresh then
