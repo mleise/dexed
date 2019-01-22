@@ -2344,9 +2344,8 @@ var
   i, p: integer;
   tk0, tk1: PLexToken;
   str: string;
-  matchingTok: TLexTokenKind = ltkIllegal;
 const
-  dontCloseIfStuckTo = [ltkIdentifier, ltkNumber, ltkString, ltkChar, ltkComment];
+  dontCloseIfContiguousTo = [ltkIdentifier, ltkNumber, ltkString, ltkChar, ltkComment];
 begin
   if fLexToks.Count < 3 then
     exit;
@@ -2354,24 +2353,24 @@ begin
   p := selStart;
   if value in [autoCloseBackTick, autoCloseDoubleQuote, autoCloseSingleQuote] then
   begin
-    case value of
-      autoCloseBackTick: matchingTok := ltkString;
-      autoCloseDoubleQuote: matchingTok := ltkString;
-      autoCloseSingleQuote: matchingTok := ltkChar;
-    end;
     for i := 0 to fLexToks.Count-1 do
     begin
       tk0 := fLexToks[i];
       // opening char is stuck to something, assume this thing is
       // what has to be between the pair, so don't close.
-      if (tk0^.offset+2 = p) and (tk0^.kind in dontCloseIfStuckTo) then
+      if (tk0^.offset+2 = p) and (tk0^.kind in dontCloseIfContiguousTo) then
         exit;
       if i < fLexToks.Count-1 then
       begin
         tk1 := fLexToks[i+1];
-        // inside a token of the same type and comments, don't put the mess.
+        // inside a strings lit., char lit., comments, don't put the mess.
         if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
-           (tk0^.kind in [matchingTok, ltkComment]) then
+           (tk0^.kind in [ltkString, ltkChar, ltkComment]) then
+             exit;
+        // since the source is scanned before inserting the opening char,
+        // in single line comments, p can be > to next tok offset
+        if (tk0^.offset+1 <= p) and (p > tk1^.offset+2) and
+           (tk0^.kind = ltkComment) and (tk0^.Data[1] = '/') then
              exit;
       end
       // at the EOF an illegal tok is likely something that has to be closed so
@@ -2389,7 +2388,7 @@ begin
       tk1 := fLexToks[i+1];
       // opening char is stuck to something, assume this thing is
       // what has to be between the pair, so don't close.
-      if (tk0^.offset+2 = p) and (tk0^.kind in dontCloseIfStuckTo) then
+      if (tk0^.offset+2 = p) and (tk0^.kind in dontCloseIfContiguousTo) then
         exit;
       if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
         (tk0^.kind = ltkComment) then
