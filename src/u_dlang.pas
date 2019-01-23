@@ -300,7 +300,7 @@ end;
 procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = nil; Options: TLexOptions = []);
 var
   reader: TReaderHead;
-  identifier: string;
+  identifier: string = '';
   nestedCom: integer;
   rstring: boolean;
   decSet: boolean;
@@ -319,6 +319,7 @@ var
     ptk^.position.Y := reader.SavedLine;
     ptk^.offset := reader.savedOffset;
     ptk^.Data := identifier;
+    identifier := '';
     list.Add(ptk);
   end;
 
@@ -348,8 +349,6 @@ begin
 
     if isOutOfBound then
       exit;
-
-    identifier := '';
 
     // skip blanks
     if isWhite(reader.head^) then
