@@ -2322,7 +2322,8 @@ var
   tk0, tk1: PLexToken;
   str: string;
 const
-  dontCloseIfContiguousTo = [ltkIdentifier, ltkNumber, ltkString, ltkChar, ltkComment];
+  dontCloseIfContiguousTo = [ltkIdentifier, ltkNumber, ltkString, ltkRawString,
+    ltkChar, ltkComment];
 begin
   if fLexToks.Count < 3 then
     exit;

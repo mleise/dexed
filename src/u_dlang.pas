@@ -45,7 +45,7 @@ type
   end;
 
   TLexTokenKind = (ltkIllegal, ltkChar, ltkComment, ltkIdentifier, ltkKeyword,
-    ltkNumber, ltkOperator, ltkString, ltkSymbol, ltkWhite);
+    ltkNumber, ltkOperator, ltkString, ltkRawString, ltkSymbol, ltkWhite);
 
 const
   LexTokenKindString: array[TLexTokenKind] of string =
@@ -57,6 +57,7 @@ const
     'Number    ',
     'Operator  ',
     'String    ',
+    'Raw String',
     'Symbol    ',
     'White     ');
 
@@ -485,7 +486,10 @@ begin
       begin
         if isStringPostfix(reader.Next^) then
           reader.Next;
-        addToken(ltkString);
+        if rstring then
+          addToken(ltkRawString)
+        else
+          addToken(ltkString);
         rstring := false;
         if callBackDoStop then
           exit;
@@ -527,7 +531,10 @@ begin
         identifier += reader.head^;
         reader.Next;
       end;
-      addToken(ltkString);
+      if rstring then
+        addToken(ltkRawString)
+      else
+        addToken(ltkString);
       rstring := false;
       if callBackDoStop then
         exit;
@@ -552,7 +559,7 @@ begin
         reader.Next;
       if isOutOfBound then
         exit;
-      addToken(ltkString);
+      addToken(ltkRawString);
       if callBackDoStop then
         exit;
       continue;
