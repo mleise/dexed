@@ -292,7 +292,6 @@ type
     procedure goToChangedArea(next: boolean);
     procedure goToProtectionGroup(next: boolean);
     procedure goToWarning(next: boolean);
-    procedure autoClosePair(value: TAutoClosedPair);
     procedure setSelectionOrWordCase(upper: boolean);
     procedure sortSelectedLines(descending, caseSensitive: boolean);
     procedure tokFoundForCaption(const token: PLexToken; out stop: boolean);
@@ -2316,75 +2315,6 @@ begin
   end;
 end;
 
-procedure TDexedMemo.autoClosePair(value: TAutoClosedPair);
-var
-  i, p: integer;
-  tk0, tk1: PLexToken;
-  str: string;
-const
-  dontCloseIfContiguousTo = [ltkIdentifier, ltkNumber, ltkString, ltkRawString,
-    ltkChar, ltkComment];
-begin
-  if fLexToks.Count < 3 then
-    exit;
-
-  p := selStart;
-  if value in [autoCloseBackTick, autoCloseDoubleQuote, autoCloseSingleQuote] then
-  begin
-    for i := 0 to fLexToks.Count-1 do
-    begin
-      tk0 := fLexToks[i];
-      // opening char is stuck to something, assume this thing is
-      // what has to be between the pair, so don't close.
-      if (tk0^.offset+2 = p) and (tk0^.kind in dontCloseIfContiguousTo) then
-        exit;
-      if i < fLexToks.Count-1 then
-      begin
-        tk1 := fLexToks[i+1];
-        // inside a strings lit., char lit., comments, don't put the mess.
-        if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
-           (tk0^.kind in [ltkString, ltkChar, ltkComment]) then
-             exit;
-        // since the source is scanned before inserting the opening char,
-        // in single line comments, p can be > to next tok offset
-        if (tk0^.offset+1 <= p) and (p > tk1^.offset+2) and
-           (tk0^.kind = ltkComment) and (tk0^.Data[1] = '/') then
-             exit;
-      end
-      // at the EOF an illegal tok is likely something that has to be closed so
-      // dont auto insert the pair.
-      else if (tk0^.offset+1 <= p) and (tk0^.kind = ltkIllegal) then
-        exit;
-    end;
-  end
-
-  else if value = autoCloseSquareBracket then
-  begin
-    for i:=0 to fLexToks.Count-2 do
-    begin
-      tk0 := fLexToks[i];
-      tk1 := fLexToks[i+1];
-      // opening char is stuck to something, assume this thing is
-      // what has to be between the pair, so don't close.
-      if (tk0^.offset+2 = p) and (tk0^.kind in dontCloseIfContiguousTo) then
-        exit;
-      if (tk0^.offset+1 <= p) and (p < tk1^.offset+2) and
-        (tk0^.kind = ltkComment) then
-          exit;
-    end;
-    tk0 := fLexToks[fLexToks.Count-1];
-    str := lineText;
-    i := LogicalCaretXY.X;
-    if (i <= str.length) and (lineText[i] = ']') then
-      exit;
-  end;
-
-  BeginUndoBlock;
-  ExecuteCommand(ecChar, autoClosePair2Char[value], nil);
-  ExecuteCommand(ecLeft, #0, nil);
-  EndUndoBlock;
-end;
-
 procedure TDexedMemo.setSelectionOrWordCase(upper: boolean);
 var
   i: integer;
@@ -3618,6 +3548,14 @@ end;
 procedure TDexedMemo.UTF8KeyPress(var Key: TUTF8Char);
 var
   c: AnsiChar;
+  escaped: Boolean = false;
+  closingCharAhead: Boolean = false;
+  autoClose: Boolean = true;
+  autoClosedPair: TAutoClosedPair = autoCloseSingleQuote;
+  i, p: Integer;
+  eol, eof: Boolean;
+  tkIns: TLexTokenKind = ltkIllegal;
+  tkNext: TLexTokenKind = ltkWhite; // at EOF assume whitespace ahead
 
 procedure reLex();
 begin
@@ -3628,40 +3566,127 @@ end;
 begin
   c := Key[1];
 
-  // scan source before insertion if pair auto closing is allowed otherwise the
-  // tokens following the cursor are wrong after the "inherited" call.
+  // figure out if we may want to auto close the typed character
   case c of
-    #39: if autoCloseSingleQuote in fAutoClosedPairs then
-      reLex();
-    '"': if autoCloseDoubleQuote in fAutoClosedPairs then
-      reLex();
-    '`': if autoCloseBackTick in fAutoClosedPairs then
-      reLex();
-    '[': if autoCloseSquareBracket in fAutoClosedPairs then
-      reLex();
+    #39: autoClosedPair := autoCloseSingleQuote;
+    '"': autoClosedPair := autoCloseDoubleQuote;
+    '`': autoClosedPair := autoCloseBackTick;
+    '[': autoClosedPair := autoCloseSquareBracket;
+    otherwise autoClose := false;
+  end;
+  autoClose := autoClose and (autoClosedPair in fAutoClosedPairs);
+
+  // test if we maybe in a string escape sequence
+  p := logicalCaretXY.x;
+  if (p > 1) and (lineText[p-1] = '\') and
+    ((p = 2) or (lineText[p-2] <> '\')) then
+    escaped := true;
+
+  // are we to the left of an existing closing char?
+  if autoClose and (p <= length(lineText)) then
+    closingCharAhead := lineText[p] = autoClosePair2Char[autoClosedPair];
+
+  if autoClose or escaped then
+  begin
+    // scan source before insertion if pair auto closing is allowed otherwise
+    // the tokens following the cursor are wrong after the "inherited" call.
+    // this also allows us to test if we are at an escape sequence in a string.
+    reLex();
+
+    // find the token kind that we are inside of and right in front of if any
+    eol := CaretX = lineText.length+1;
+    eof := (CaretY = Lines.Count) and eol;
+    p := selStart - 1;
+    if fLexToks.Count <> 0 then
+    begin
+      if fLexToks[fLexToks.Count-1]^.offset < p then
+        tkIns := fLexToks[fLexToks.Count-1]^.kind
+      else
+        for i := 0 to fLexToks.Count-1 do
+        begin
+          if fLexToks[i]^.offset = p then
+            tkNext := fLexToks[i]^.kind;
+          if i = fLexToks.Count-1 then
+            break;
+          if fLexToks[i+1]^.offset > p then
+            tkIns := fLexToks[i]^.kind;
+          if fLexToks[i+1]^.offset >= p then
+            break;
+        end;
+    end;
+
+    // Add backtick string to token kinds and don't escape there.
+    escaped := escaped and (tkIns in [ltkIllegal, ltkChar, ltkString]);
+
+    // Don't auto-close on the following occasions...
+    if ((c = #39) and (tkIns = ltkComment)) or
+      (tkNext in [ltkChar, ltkString, ltkRawString, ltkNumber]) or
+      (tkNext in [ltkIllegal, ltkIdentifier]) then
+      autoClose := false;
   end;
 
-  inherited;
+  if closingCharAhead and not escaped then
+  begin
+    // skip over existing string terminators
+    ExecuteCommand(ecRight, #0, nil);
+    Key := '';
+  end
+  else
+  begin
+    // insert the character regularly
+    inherited;
 
-  fCanDscan := true;
-  case c of
-    #39: if autoCloseSingleQuote in fAutoClosedPairs then
-      autoClosePair(autoCloseSingleQuote);
-    ',':
+    if autoClose and not escaped then
     begin
-      if not fCallTipWin.Visible then
-        showCallTips(true);
-    end;
-    '"': if autoCloseDoubleQuote in fAutoClosedPairs then
-      autoClosePair(autoCloseDoubleQuote);
-    '`': if autoCloseBackTick in fAutoClosedPairs then
-      autoClosePair(autoCloseBackTick);
-    '[': if autoCloseSquareBracket in fAutoClosedPairs then
-      autoClosePair(autoCloseSquareBracket);
-    '(': showCallTips(false);
-    ')': if fCallTipWin.Visible then decCallTipsLvl;
-    '{': if GetKeyShiftState <> [ssShift] then
-    begin
+      BeginUndoBlock;
+      if (((tkIns = ltkString) and (autoClosedPair = autoCloseDoubleQuote)) or
+        ((tkIns = ltkRawString) and (autoClosedPair = autoCloseBackTick))) and
+        not eof then
+      begin
+        if RightEdge - CaretXY.x >= 9 then
+        begin
+          // split strings in two parts adjoined them by ~ characters
+          for i := 1 to 6 do
+            ExecuteCommand(ecChar, ' ~  ~ '[i], nil);
+          ExecuteCommand(ecChar, autoClosePair2Char[autoClosedPair], nil);
+          for i := 1 to 4 do
+            ExecuteCommand(ecLeft, #0, nil);
+        end
+        else
+        begin
+          ExecuteCommand(ecChar, ' ', nil);
+          ExecuteCommand(ecChar, '~', nil);
+          ExecuteCommand(ecLineBreak, #0, nil);
+          if eoAutoIndent in Options then
+          begin
+            while CaretX <> 1 do
+              ExecuteCommand(ecLeft, #0, nil);
+            for i := autoIndentationLevel(CaretY) downto 1 do
+              ExecuteCommand(ecTab, #0, nil);
+            ExecuteCommand(ecTab, #0, nil);
+          end;
+          ExecuteCommand(ecChar, autoClosePair2Char[autoClosedPair], nil);
+          ExecuteCommand(ecLeft, #0, nil);
+        end;
+      end
+      else
+      begin
+        ExecuteCommand(ecChar, autoClosePair2Char[autoClosedPair], nil);
+        ExecuteCommand(ecLeft, #0, nil);
+      end;
+      EndUndoBlock;
+    end
+    else
+    case c of
+      ',':
+      begin
+        if not fCallTipWin.Visible then
+          showCallTips(true);
+      end;
+      '(': showCallTips(false);
+      ')': if fCallTipWin.Visible then decCallTipsLvl;
+      '{': if GetKeyShiftState <> [ssShift] then
+      begin
         case fAutoCloseCurlyBrace of
           autoCloseAlways:
             curlyBraceCloseAndIndent;
@@ -3678,8 +3703,10 @@ begin
             end;
           end;
         end;
+      end;
     end;
   end;
+  fCanDscan := true;
   if fCompletion.IsActive then
     fCompletion.CurrentString:=GetWordAtRowCol(LogicalCaretXY);
 end;
