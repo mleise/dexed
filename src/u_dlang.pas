@@ -36,7 +36,7 @@ type
     property AbsoluteIndex: Integer read fAbsoluteIndex;
     property LineIndex: Integer read fLineIndex;
     property ColumnIndex: Integer read fColumnIndex;
-    property LineAnColumn: TPoint read getColAndLine;
+    property LineAndColumn: TPoint read getColAndLine;
     property SavedLine: Integer read fBegLineIndex;
     property SavedColumn: Integer read fBegColumnIndex;
     property SavedOffset: Integer read fBegOffset;
@@ -188,13 +188,9 @@ procedure TReaderHead.setReader(const text: PChar; const colAndLine: TPoint);
 begin
   fLineIndex := colAndLine.y;
   fColumnIndex := colAndLine.x;
+  assert((fLineIndex >= 1) and (fColumnIndex >= 1),
+    'Line and column have to be greater or equal to 1');
   fReaderHead := text;
-  while (LineAnColumn <> colAndLine) do
-    Next;
-  //
-  // editor not 0 based ln index
-  if fLineIndex = 0 then
-    fLineIndex := 1;
 end;
 
 function TReaderHead.getColAndLine: TPoint;
@@ -208,7 +204,7 @@ begin
   begin
     Inc(fLineIndex);
     fPreviousLineColum := fColumnIndex;
-    fColumnIndex := -1;
+    fColumnIndex := 0;
   end;
   Inc(fReaderHead);
   Inc(fAbsoluteIndex);
@@ -343,7 +339,7 @@ begin
 
   noComment := lxoNoComments in Options;
 
-  reader.Create(@text[1], Point(0, 0));
+  reader.Create(@text[1], Point(1, 1));
   while (True) do
   begin
 

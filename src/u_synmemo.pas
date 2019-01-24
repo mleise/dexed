@@ -1935,7 +1935,6 @@ begin
     begin
       BeginUndoBlock;
       LogicalCaretXY := tok^.position;
-      CaretX:=CaretX+1;
       case tok^.Data of
         'all':
         begin
@@ -3127,7 +3126,7 @@ begin
   // note: never use SelStart here. SelStart is updated too early
   // and matches to the future position, e.g the one after auto-indentation.
   result := #0;
-  p := CaretXY;
+  p := LogicalCaretXY;
   for i := 0 to fLexToks.Count-1 do
   begin
     tk1 := fLexToks[i];
