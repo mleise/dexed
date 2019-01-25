@@ -32,6 +32,8 @@ type
   }
   TDexedProcess = class(TASyncProcess)
   private
+    class var FAutoKillProcThreshold: dword;
+  var
     fErrToOut: boolean;
     fRealOnTerminate: TNotifyEvent;
     fRealOnReadData: TNotifyEvent;
@@ -40,6 +42,7 @@ type
     fTerminateChecker: TTimer;
     fDoneTerminated: boolean;
     fHasRead: boolean;
+    fAutoKilled: boolean;
     procedure checkTerminated(sender: TObject);
     procedure setOnTerminate(value: TNotifyEvent);
     procedure setOnReadData(value: TNotifyEvent);
@@ -65,6 +68,10 @@ type
     property hasRead: boolean read fHasRead;
     // indicates if OnTerminated was called
     property doneTerminated: boolean read fDoneTerminated;
+    // indicates of the process was autokilled
+    property autoKilled: boolean read fAutoKilled;
+    // auto kill the process if its output reach this size
+    class property autoKillProcThreshold: dword read FAutoKillProcThreshold write FAutoKillProcThreshold;
   end;
 
   {
@@ -188,6 +195,7 @@ end;
 
 procedure TDexedProcess.Execute;
 begin
+  fAutoKilled := false;
   fHasRead := false;
   fStdoutEx.Clear;
   fStderrEx.Clear;
@@ -214,6 +222,16 @@ procedure TDexedProcess.fillOutputStack;
       outStr.SetSize(s + 1024);
       c := inStr.Read((outStr.Memory + s)^, 1024);
       s += c;
+
+      if (FAutoKillProcThreshold <> 0) and not fDoneTerminated and
+        (fStderrEx.Size + fStdoutEx.Size >= FAutoKillProcThreshold) then
+      begin
+        fStdoutEx.Clear;
+        fAutoKilled := true;
+        Terminate(1);
+        exit;
+      end;
+
     end;
     outStr.SetSize(s);
   end;

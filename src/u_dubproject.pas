@@ -1060,6 +1060,9 @@ begin
       dubCmd2PostMsg[fNextTerminatedCommand], fAsProjectItf, amcProj, amkWarn);
     fMsgs.message(format('error: DUB has returned the status %s',
       [prettyReturnStatus(fDubProc)]), fAsProjectItf, amcProj, amkErr);
+    if fDubProc.autoKilled then
+      fMsgs.message(format('the process was autokilled because the size of its output exceeded %d',
+        [fDubProc.autoKillProcThreshold]), nil, amcProj, amkWarn);
   end;
   subjProjCompiled(fProjectSubject, fAsProjectItf, fCompiled);
   SetCurrentDirUTF8(fPreCompilePath);

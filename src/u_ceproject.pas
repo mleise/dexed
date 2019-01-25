@@ -937,6 +937,7 @@ var
   lst: TStringList;
   str: string;
   proc: TProcess;
+  dproc: TDexedProcess = nil;
 begin
   lst := TStringList.Create;
   try
@@ -956,9 +957,17 @@ begin
     getprocInputHandler.removeProcess(TProcess(sender));
     SetCurrentDirUTF8(fRunnerOldCwd);
 
+    if proc is TDexedProcess then
+      dproc := TDexedProcess(proc);
+
     if (proc.ExitStatus <> 0) then
+    begin
       fMsgs.message(format('error: the process (%s) has returned the status %s',
         [proc.Executable, prettyReturnStatus(proc)]), fAsProjectItf, amcProj, amkErr);
+      if dproc.isNotNil and dproc.autoKilled then
+        fMsgs.message(format('the process was autokilled because the size of its output exceeded %d',
+          [dproc.autoKillProcThreshold]), nil, amcProj, amkWarn);
+    end;
   end;
 end;
 

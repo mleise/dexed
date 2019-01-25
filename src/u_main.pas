@@ -614,6 +614,7 @@ type
     fAutoCheckUpdates: boolean;
     fShowBuildDuration: boolean;
     fToolBarScaling: TToolBarScaling;
+    fAutoKillProcThreshold: dword;
     function getConsoleProgram: string;
     procedure setConsoleProgram(const value: string);
     function getAdditionalPATH: string;
@@ -624,6 +625,7 @@ type
   published
     property additionalPATH: string read getAdditionalPATH write setAdditionalPath;
     property autoCheckUpdates: boolean read fAutoCheckUpdates write fAutoCheckUpdates;
+    property autoKillProcThreshold: dword read fAutoKillProcThreshold write fAutoKillProcThreshold default 1024 * 1024 * 2;
     property consoleProgram: string read getConsoleProgram write setConsoleProgram;
     property coverModuleTests: boolean read fCovModUt write fCovModUt;
     property floatingWidgetOnTop: boolean read fFloatingWidgetOnTop write fFloatingWidgetOnTop;
@@ -839,6 +841,7 @@ begin
   fReloadLastDocuments:=true;
   fFlatLook:=true;
   fDcdPort:=DCDWrapper.port;
+  fAutoKillProcThreshold := 1024 * 1024 * 2;
 end;
 
 function TApplicationOptionsBase.getNativeProjecCompiler: DCompiler;
@@ -929,6 +932,7 @@ begin
     MainForm.fDscanUnittests := fDscanUnittests;
     nativeProjectCompiler:= fBackup.nativeProjectCompiler;
     fToolBarScaling:= fBackup.fToolBarScaling;
+    fAutoKillProcThreshold:= fBackup.fAutoKillProcThreshold;
   end
   else inherited;
 end;
@@ -945,6 +949,7 @@ begin
     MainForm.fPrjGrpMru.maxCount:= fMaxRecentGroups;
     MainForm.updateFloatingWidgetOnTop(fFloatingWidgetOnTop);
     MainForm.fDscanUnittests := fDscanUnittests;
+    TDexedProcess.autoKillProcThreshold:= fAutoKillProcThreshold;
     DcdWrapper.port:=fDcdPort;
     for i := 0 to MainForm.fWidgList.Count-1 do
     begin
@@ -968,6 +973,7 @@ begin
     fBackup.fAutoCheckUpdates:= fAutoCheckUpdates;
     fBackup.fShowBuildDuration:= fShowBuildDuration;
     fBackup.nativeProjectCompiler:= nativeProjectCompiler;
+    fBackup.fAutoKillProcThreshold := fAutoKillProcThreshold;
   end
   else inherited;
 end;
@@ -2978,8 +2984,13 @@ begin
   if inph.isNotNil then
     (inph as IProcInputHandler).removeProcess(proc);
   if (proc.ExitStatus <> 0) then
+  begin
     fMsgs.message(format('error: the process (%s) has returned the status %s',
       [proc.Executable, prettyReturnStatus(proc)]), fDoc, amcEdit, amkErr);
+    if proc.autoKilled then
+      fMsgs.message(format('the process was autokilled because the size of its output exceeded %d',
+        [proc.autoKillProcThreshold]), nil, amcEdit, amkWarn);
+  end;
 end;
 
 procedure TMainForm.actSetRunnableSwExecute(Sender: TObject);

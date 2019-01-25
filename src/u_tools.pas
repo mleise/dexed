@@ -272,6 +272,9 @@ begin
     begin
       fMsgs.message(format('error: the tool (%s) has returned the status %s',
         [fProcess.Executable, prettyReturnStatus(fProcess)]), nil, amcMisc, amkErr);
+      if fProcess.autoKilled then
+        fMsgs.message(format('the process was autokilled because the size of its output exceeded %d',
+          [fProcess.autoKillProcThreshold]), nil, amcMisc, amkWarn);
       u_processes.killProcess(fProcess);
       exit;
     end
