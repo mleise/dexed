@@ -111,8 +111,8 @@ const
 
 constructor TTerminalShortcuts.create;
 begin
-  fCopy := KeyToShortCut(word(char('C')), [ssCtrl]);
-  fPaste:= KeyToShortCut(word(char('V')), [ssCtrl]);
+  fCopy := KeyToShortCut(word(char('C')), [ssCtrl, ssShift]);
+  fPaste:= KeyToShortCut(word(char('V')), [ssCtrl, ssShift]);
 end;
 
 procedure TTerminalShortcuts.assign(source: TPersistent);
