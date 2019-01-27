@@ -332,7 +332,7 @@ begin
     fDmtWrapper.getParameters(prc.Parameters, majv, minv);
     prc.Execute;
     inp := fDoc.Lines.Text;
-    prc.Input.Write(inp[1], inp.length);
+    prc.Input.Write(PChar(inp)^, inp.length);
     prc.CloseInput;
     try
       str := TStringList.Create;

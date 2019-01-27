@@ -52,7 +52,7 @@ begin
     prc.ShowWindow := swoHIDE;
     prc.Execute;
     str := source.Text;
-    prc.Input.Write(str[1], str.length);
+    prc.Input.Write(PChar(str)^, str.length);
     prc.CloseInput;
     processOutputToStrings(prc, imports);
     while prc.Running do ;
@@ -111,7 +111,7 @@ begin
     prc.ShowWindow := swoHIDE;
     prc.Execute;
     str := source.Text;
-    prc.Input.Write(str[1], str.length);
+    prc.Input.Write(PChar(str)^, str.length);
     prc.CloseInput;
     processOutputToStrings(prc, lst);
     prs := TJSONParser.Create(lst.Text, [joIgnoreTrailingComma, joUTF8]);
@@ -146,7 +146,7 @@ begin
     prc.ShowWindow := swoHIDE;
     prc.Execute;
     str := source.Text;
-    prc.Input.Write(str[1], str.length);
+    prc.Input.Write(PChar(str)^, str.length);
     prc.CloseInput;
     processOutputToStrings(prc, res);
   finally
