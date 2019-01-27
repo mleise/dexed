@@ -211,7 +211,7 @@ begin
         continue;
       clbck.fModStart := false;
       srcc.LoadFromFile(path);
-      lex(srcc.Text, toks, @clbck.lexFindToken, [lxoNoComments]);
+      lex(srcc.strictText, toks, @clbck.lexFindToken, [lxoNoComments]);
       mnme := getModuleName(toks);
       toks.Clear;
       if mnme.isEmpty then

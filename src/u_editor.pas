@@ -946,7 +946,7 @@ begin
     if execute then
     begin
       fTokList.Clear;
-      lex(fDoc.Text, fTokList, nil);
+      lex(fDoc.lines.strictText, fTokList, nil);
       fTokList.saveToFile(FileName.normalizePath);
       fTokList.Clear;
     end;
@@ -1112,7 +1112,7 @@ begin
     begin
       str := TStringList.Create;
       fTokList.Clear;
-      lex(fDoc.Text, fTokList, nil, [lxoNoComments]);
+      lex(fDoc.lines.strictText, fTokList, nil, [lxoNoComments]);
       getImports(fTOkList, str);
       str.SaveToFile(filename.normalizePath);
       fTokList.Clear;

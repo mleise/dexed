@@ -45,7 +45,7 @@ type
   end;
 
   TLexTokenKind = (ltkIllegal, ltkChar, ltkComment, ltkIdentifier, ltkKeyword,
-    ltkNumber, ltkOperator, ltkString, ltkSymbol, ltkWhite);
+    ltkNumber, ltkOperator, ltkString, ltkSymbol, ltkWhite, ltkDirective, ltkEOF);
 
 const
   LexTokenKindString: array[TLexTokenKind] of string =
@@ -58,7 +58,9 @@ const
     'Operator  ',
     'String    ',
     'Symbol    ',
-    'White     ');
+    'White     ',
+    'Directive ',
+    'EOF       ');
 
 type
 
@@ -296,695 +298,850 @@ end;
 procedure lex(const text: string; list: TLexTokenList; clbck: TLexFoundEvent = nil; Options: TLexOptions = []);
 var
   reader: TReaderHead;
-  identifier: string = '';
+  tk: TLexTokenKind;
   nestedCom: integer;
-  rstring: boolean;
-  decSet: boolean;
-  expSet: boolean;
-  noComment: boolean;
+  c: UCS4Char;
 
-  procedure addToken(aTk: TLexTokenKind);
+  function addToken(): boolean;
   var
     ptk: PLexToken;
   begin
-    if (aTk = ltkComment) and (noComment) then
-      exit;
-    ptk := new(PLexToken);
-    ptk^.kind := aTk;
-    ptk^.position.X := reader.SavedColumn;
-    ptk^.position.Y := reader.SavedLine;
-    ptk^.offset := reader.savedOffset;
-    ptk^.Data := identifier;
-    identifier := '';
-    list.Add(ptk);
+    result := false;
+    if ((tk <> ltkWhite) or not (lxoNoWhites in Options)) and
+      ((tk <> ltkComment) or not (lxoNoComments in Options)) then
+    begin
+      // add token to the list
+      ptk := new(PLexToken);
+      ptk^.kind := tk;
+      ptk^.position.X := reader.SavedColumn;
+      ptk^.position.Y := reader.SavedLine;
+      ptk^.offset := reader.savedOffset;
+      if tk = ltkWhite then
+        ptk^.data := ''
+      else
+        ptk^.data := Copy(text, ptk^.offset+1, reader.absoluteIndex - ptk^.offset);
+      list.Add(ptk);
+
+      // ask caller if we should stop here
+      if (tk <> ltkWhite) and (tk <> ltkIllegal) and (clbck <> nil) then
+        clbck(list[list.Count-1], result);
+    end;
+    reader.saveBeginning;
   end;
 
-  function isOutOfBound: boolean;
+  function inreal: boolean;
+  var
+    hex: boolean = false;
+    expSet: boolean = false;
   begin
-    result := reader.AbsoluteIndex >= length(text);
-    if result and (identifier <> '') then
-      addToken(ltkIllegal);
+    tk := ltkNumber;
+    if (reader.head^ = '0') and (reader.next^ in ['x', 'X']) then
+    begin
+      hex := true;
+      reader.next;
+    end;
+    while (true) do
+    begin
+      if reader.head^ = '.' then
+      begin
+        reader.next;
+        break;
+      end;
+      if isNumber(reader.head^) or (hex and isHex(reader.head^))
+        or (reader.head^ = '_') then
+      begin
+        reader.next;
+        continue;
+      end;
+      break;
+    end;
+    while (true) do
+    begin
+      if isNumber(reader.head^) or (hex and isHex(reader.head^))
+        or (reader.head^ = '_') then
+      begin
+        reader.next;
+        continue;
+      end;
+      break;
+    end;
+    if (reader.head^ in ['e', 'E']) or (hex and (reader.head^ in ['p', 'P'])) then
+    begin
+      if reader.next^ in ['+', '-'] then
+        reader.next;
+      while (true) do
+      begin
+        if isNumber(reader.head^) then
+          expSet := true
+        else if reader.head^ <> '_' then
+          break;
+        reader.next;
+      end;
+      if not expSet then // exit early if no exponent digits
+        exit(addToken);
+    end
+    else if hex then // exit early if hex float without required exponent
+      exit(addToken);
+    if reader.head^ in ['F', 'f', 'L'] then
+      reader.next;
+    if reader.head^ = 'i' then
+      reader.next;
+    exit(addToken);
   end;
 
-  function callBackDoStop: boolean;
+  function number: boolean;
+  var
+    base: integer = 10;
+    d: integer = 0;
+    done: boolean = false;
+    haveDigits: boolean = false;
   begin
-    Result := False;
-    if clbck <> nil then
-      clbck(list[list.Count-1], Result);
+    tk := ltkNumber;
+    if reader.head^ = '0' then
+    begin
+      case reader.next^ of
+        '0'..'9':
+          base := 8;
+        'x', 'X':
+          begin
+            reader.next;
+            base := 16;
+          end;
+        'b', 'B':
+          begin
+            reader.next;
+            base := 2;
+          end;
+        '.':
+          begin
+            if (reader.next^ = '.') or isAlpha(reader.head^) or
+              (reader.head^ = '_') or (ord(reader.head^) >= $80) then
+            begin
+              // . is already part of following .. or identifier
+              reader.previous;
+              done := true;
+            end
+            else
+            begin
+              reader.previous;
+              reader.previous;
+              exit(inreal);
+            end;
+          end;
+        'i', 'f', 'F':
+          begin
+            reader.previous;
+            exit(inreal);
+          end;
+        '_':
+          begin
+            reader.next;
+            base := 8;
+          end;
+        'L':
+          begin
+            if reader.next^ = 'i' then
+            begin
+              reader.previous;
+              reader.previous;
+              exit(inreal);
+            end;
+          end;
+      end;
+    end;
+    if not done then
+    begin
+      while (true) do
+      begin
+        case reader.head^ of
+          '0'..'9':
+            begin
+              d := Ord(reader.head^) - Ord('0');
+              reader.next;
+            end;
+          'a'..'f', 'A'..'F':
+            begin
+              if (base <> 16) and (reader.head^ in ['e', 'E', 'f', 'F']) then
+              begin
+                repeat
+                  reader.previous;
+                until reader.absoluteIndex = reader.savedOffset;
+                exit(inreal);
+              end;
+              if reader.head^ in ['a'..'f'] then
+                d := ord(reader.head^) - ord('a') + 10
+              else
+                d := ord(reader.head^) - ord('A') + 10;
+              reader.next;
+            end;
+          'L':
+            begin
+              if reader.next^ = 'i' then
+              begin
+                repeat
+                  reader.previous;
+                until reader.absoluteIndex = reader.savedOffset;
+                exit(inreal);
+              end;
+              reader.previous;
+              break;
+            end;
+          '.':
+            begin
+              if (reader.next^ = '.') or ((base = 10) and (isAlpha(reader.head^) or
+                (reader.head^ = '_') or (ord(reader.head^) >= $80))) then
+              begin
+                // . is already part or following .. or identifier
+                reader.previous;
+                break;
+              end
+              else
+              begin
+                repeat
+                  reader.previous;
+                until reader.absoluteIndex = reader.savedOffset;
+                exit(inreal);
+              end;
+            end;
+          'p', 'P', 'i':
+            begin
+              repeat
+                reader.previous;
+              until reader.absoluteIndex = reader.savedOffset;
+              exit(inreal);
+            end;
+          '_':
+            begin
+              reader.next;
+              continue;
+            end;
+          otherwise
+            break;
+        end;
+        haveDigits := true;
+        if d >= base then
+        begin
+          // digit too large for chosen base
+          reader.previous;
+          break;
+        end;
+      end;
+    end;
+    if haveDigits or ((base <> 2) and (base <> 16)) then
+    begin
+      if reader.head^ in ['U', 'u'] then
+      begin
+        if reader.next^ = 'L' then
+          reader.next;
+      end
+      else if reader.head^ = 'L' then
+        if reader.next^ in ['U', 'u'] then
+          reader.next;
+    end;
+    exit(addToken);
+  end;
+
+  procedure escapeSequence;
+  var
+    ndigits: integer;
+  begin
+    case reader.head^ of
+      #39, '"', '?', '\', 'a', 'b', 'f', 'n', 'r', 't', 'v':
+      begin
+        reader.next;
+        exit;
+      end;
+      'x': // single-byte (i.e. ascii)
+        ndigits := 2;
+      'u': // base plane code point
+        ndigits := 4;
+      'U': // full unicode range
+        ndigits := 8;
+      '&': // xml-style named character entity
+        begin
+          if (reader.next^ <> ';') and not isNumber(reader.head^) then
+          begin
+            while isAlNum(reader.head^) do
+              reader.next;
+            if reader.head^ = ';' then
+              reader.next;
+          end;
+          exit;
+        end;
+      #0, #26: // end-of-file
+        exit;
+      otherwise
+        if isOctal(reader.head^) then
+        begin
+          // 0-255 in octal notation
+          if isOctal(reader.next^) then
+            if isOctal(reader.next^) then
+              reader.next;
+        end
+        else // unrecognized escape sequence, skip the char
+          reader.next;
+        exit;
+    end;
+    // parsing hex digits for 'x', 'u', 'U', otherwise unreachable
+    while isHex(reader.next^) and (ndigits > 0) do
+      dec(ndigits);
+  end;
+
+  function decodeUTF(advance: boolean; out c: UCS4Char): boolean;
+  var
+    p: PChar;
+    len: integer;
+  begin
+    result := true;
+    c := 0;
+    p := reader.head;
+    if (ord(p^) and $F8) = $F0 then
+    begin
+      len := 4;
+      c := ord(p^) and $07;
+    end
+    else if (ord(p^) and $F0) = $E0 then
+    begin
+      len := 3;
+      c := ord(p^) and $0F;
+    end
+    else if (ord(p^) and $E0) = $C0 then
+    begin
+      len := 2;
+      c := ord(p^) and $1F;
+    end
+    else
+    begin
+      assert(ord(p^) >= $80, 'decodeUTF need not be called for ASCII chars');
+      // invalid start code, handle as 1 byte
+      result := false;
+      len := 1;
+      c := ord(p^);
+    end;
+    while len > 1 do
+    begin
+      inc(p);
+      if (ord(p^) and $C0) <> $80 then
+      begin
+        // invalid following byte, handle as 1 byte
+        result := false;
+        c := ord(reader.head^);
+        p := reader.head;
+        break;
+      end;
+      c *= $40;
+      c += ord(p^) and $3F;
+      dec(len);
+    end;
+    if advance then
+      while reader.head <= p do
+        reader.next;
+  end;
+
+  function isIdentifierStart: boolean;
+  var
+    c: UCS4Char;
+  begin
+    result := false;
+    if isAlpha(reader.head^) or (reader.head^ = '_') then
+      result := true
+    else if ord(reader.head^) >= $80 then
+      if decodeUTF(false, c) then
+        result := uniAlpha.match(c)
+  end;
+
+  function readIdentifier: string;
+  var
+    start, p: PChar;
+    c: UCS4Char;
+    len: integer;
+  begin
+    start := reader.head;
+    while (true) do
+    begin
+      if isAlNum(reader.head^) or (reader.head^ = '_') then
+        reader.next
+      else if ord(reader.head^) >= $80 then
+      begin
+        p := reader.head;
+        if decodeUTF(true, c) then
+          if uniAlpha.match(c) then
+            continue;
+        while reader.previous <> p do;
+        break;
+      end
+      else
+        break;
+    end;
+    len := reader.head - start;
+    result := copy(text, reader.absoluteIndex - len + 1, len);
+  end;
+
+  function ident: boolean;
+  var
+    s: string;
+  begin
+    tk := ltkIdentifier;
+    s := readIdentifier;
+    if keywordsMap.match(s) or specialKeywordsMap.match(s) then
+      tk := ltkKeyword;
+    exit(addToken);
+  end;
+
+  function wysiwygStringConstant: boolean;
+  var
+    delim: char;
+  begin
+    tk := ltkString;
+    delim := reader.head^;
+    while (true) do
+    begin
+      if reader.next^ in [#0, #26] then // EOF
+        break;
+      if reader.head^ = delim then
+      begin
+        if reader.next^ in stringPostfixes then
+          reader.next;
+        break;
+      end;
+    end;
+    exit(addToken);
+  end;
+
+  function delimitedStringConstant: boolean;
+  var
+    startline: boolean = false;
+    blankrol: boolean = false;
+    hereid: string = '';
+    delimleft: char = #0;
+    delimright: char = #0;
+    nest: boolean = true;
+    nestcount: dword = 0;
+    psave: PChar;
+  begin
+    tk := ltkString;
+    reader.next;
+    while (true) do
+    begin
+      case reader.head^ of
+        #10:
+          begin
+            startline := true;
+            if blankrol then
+            begin
+              blankrol := false;
+              reader.next;
+              continue;
+            end;
+            if hereid <> '' then
+            begin
+              reader.next;
+              continue;
+            end;
+          end;
+        #0, #26:
+          exit(addToken);
+      end;
+      if delimleft = #0 then
+      begin
+        delimleft := reader.head^;
+        nest := true;
+        nestcount := 1;
+        case delimleft of
+          '(':
+            delimright := ')';
+          '{':
+            delimright := '}';
+          '[':
+            delimright := ']';
+          '<':
+            delimright := '>';
+          otherwise
+            if isIdentifierStart then
+            begin
+              hereid := readIdentifier;
+              blankrol := true;
+              nest := false;
+              continue;
+            end
+            else
+            begin
+              if isSpace(delimleft) then // delimiter cannot be whitespace
+                exit(addToken);
+              delimright := delimleft;
+              nest := false;
+            end;
+        end;
+      end
+      else
+      begin
+        if blankrol then // heredoc rest of line should be blank
+          exit(addToken);
+        if nest then
+        begin
+          if reader.head^ = delimleft then
+            inc(nestcount)
+          else if reader.head^ = delimright then
+          begin
+            dec(nestcount);
+            if nestcount = 0 then
+            begin
+              reader.next;
+              break;
+            end;
+          end;
+        end
+        else if reader.head^ = delimright then
+        begin
+          reader.next;
+          break;
+        end;
+        if startline and (hereid <> '') and isIdentifierStart then
+        begin
+          psave := reader.head;
+          if readIdentifier = hereid then
+            break;
+          while reader.previous <> psave do;
+        end;
+        startline := false;
+      end;
+      reader.next;
+    end;
+    if reader.head^ = '"' then
+      if reader.next^ in stringPostfixes then
+        reader.next;
+    exit(addToken);
+  end;
+
+  function escapeStringConstant: boolean;
+  var
+    c: UCS4Char;
+  begin
+    tk := ltkString;
+    reader.next;
+    while (true) do
+    begin
+      case reader.head^ of
+        '\':
+          begin
+            reader.next;
+            escapeSequence;
+          end;
+        '"':
+          begin
+            reader.next;
+            break;
+          end;
+        #0, #26: // EOF
+          break;
+        otherwise
+          if ord(reader.head^) >= $80 then
+            decodeUTF(true, c)
+          else
+            reader.next;
+      end;
+    end;
+    exit(addToken);
   end;
 
 begin
+  // based on dmd/lexer.d, commit 77260f78e45675bb1418feb9836ed0c6252fd1b9
+  // - all characters belonging to a token are always captured
+  // - the line endings are assumed to be converted to #10
 
-  if text = '' then exit;
-
-  noComment := lxoNoComments in Options;
-
-  reader.Create(@text[1], Point(1, 1));
-  while (True) do
+  reader.create(PChar(text), Point(1, 1));
+  reader.saveBeginning;
+  while (true) do
   begin
-
-    if isOutOfBound then
-      exit;
-
-    // skip blanks
-    if isWhite(reader.head^) then
-    begin
-      reader.saveBeginning;
-      while isWhite(reader.head^) do
-      begin
-        if isOutOfBound then
-          exit;
-        reader.Next;
-      end;
-      if not (lxoNoWhites in Options) then
-        addToken(ltkWhite);
-    end;
-
-    // line comment
-    if (reader.head^ = '/') then
-    begin
-      if (reader.Next^ = '/') then
-      begin
-        reader.saveBeginning;
-        if isOutOfBound then
-          exit;
-        while (reader.head^ <> #10) do
+    case reader.head^ of
+      #0, #26:
         begin
-          if not noComment then
-            identifier += reader.head^;
-          reader.Next;
-          if isOutOfBound then
-            exit;
+          tk := ltkEOF;
+          addToken();
+          break;
         end;
-        if not noComment then
+      ' ', #9, #10, #11, #12, #13:
         begin
-          addToken(ltkComment);
-          if callBackDoStop then
-            exit;
+          tk := ltkWhite;
+          repeat until not isSpace(reader.next^);
+          addToken;
         end;
-        reader.Next;
-        continue;
-      end
-      else
-        reader.previous;
-    end;
-
-    // block comments
-    if (reader.head^ = '/') then
-    begin
-      if (reader.Next^ = '*') then
-      begin
-        reader.saveBeginning;
-        if isOutOfBound then
-          exit;
-        reader.Next;
-        while (reader.head^ <> '/') or ((reader.head - 1)^ <> '*') do
+      '0'..'9':
         begin
-          if not noComment then
-            identifier += reader.head^;
-          reader.Next;
-          if isOutOfBound then
-            exit;
-        end;
-        if not noComment then
-        begin
-          addToken(ltkComment);
-          if callBackDoStop then
-            exit;
-        end;
-        reader.Next;
-        continue;
-      end
-      else
-        reader.previous;
-    end;
-
-    // nested block comments
-    if (reader.head^ = '/') then
-    begin
-      if (reader.Next^ = '+') then
-      begin
-        reader.saveBeginning;
-        nestedCom := 1;
-        if isOutOfBound then
-          exit;
-        repeat
-          while ((reader.head^ <> '+') or (reader.head^ <> '/')) and
-                ((reader.next^ <> '/') or (reader.head^ <> '+')) do
+          tk := ltkNumber;
+          if reader.head^ = '0' then
           begin
-            if isOutOfBound then
-              exit;
-            if not noComment then
-              identifier += reader.head^;
-            if ((reader.head-1)^ = '/') and (reader.head^ = '+') then
+            if not isZeroSecond(reader.next^) then
             begin
-              nestedCom += 1;
-              break;
+              if addToken then
+                exit;
+              continue;
             end;
-            if ((reader.head-1)^ = '+') and (reader.head^ = '/') then
-            begin
-              nestedCom -= 1;
-              break;
-            end;
-            if isOutOfBound then
+          end
+          else if not isDigitSecond(reader.next^) then
+          begin
+            if addToken then
               exit;
-          end;
-        until nestedCom = 0;
-        if not noComment then
-        begin
-          addToken(ltkComment);
-          if callBackDoStop then
-            exit;
-        end;
-        reader.Next;
-        continue;
-      end
-      else
-        reader.previous;
-    end;
-
-    // double quoted or raw strings
-    rstring := false;
-    if (reader.head^ in ['r', 'x']) then
-    begin
-      rstring := reader.head^ = 'r';
-      if not (reader.Next^ = '"') then
-        reader.previous;
-    end;
-    if (reader.head^ = '"') then
-    begin
-      reader.saveBeginning;
-      reader.Next;
-      if isOutOfBound then
-        exit;
-      if (reader.head^ = '"') then
-      begin
-        if isStringPostfix(reader.Next^) then
-          reader.Next;
-        addToken(ltkString);
-        rstring := false;
-        if callBackDoStop then
-          exit;
-        continue;
-      end;
-      while (True) do
-      begin
-        if reader.head^ = '\' then
-        begin
-          identifier += reader.head^;
-          reader.Next;
-          if isOutOfBound then
-            exit;
-          if rstring then
             continue;
-          identifier += reader.head^;
-          reader.Next;
-          if isOutOfBound then
-            exit;
-          continue;
-        end;
-        if (reader.head^ = '"') then
-        begin
-          reader.Next;
-          if isOutOfBound then
-            exit;
-          break;
-        end
-        else
-        begin
-          identifier += reader.head^;
-          reader.Next;
-          if isOutOfBound then
-            exit;
-        end;
-      end;
-      if isStringPostfix(reader.head^) then
-      begin
-        identifier += reader.head^;
-        reader.Next;
-      end;
-      addToken(ltkString);
-      rstring := false;
-      if callBackDoStop then
-        exit;
-      continue;
-    end;
-
-    // back quoted strings
-    if (reader.head^ = '`') then
-    begin
-      reader.Next;
-      reader.saveBeginning;
-      if isOutOfBound then
-        exit;
-      while (reader.head^ <> '`') do
-      begin
-        identifier += reader.head^;
-        reader.Next;
-        if isOutOfBound then
-          exit;
-      end;
-      if isStringPostfix(reader.Next^) then
-        reader.Next;
-      if isOutOfBound then
-        exit;
-      addToken(ltkString);
-      if callBackDoStop then
-        exit;
-      continue;
-    end;
-
-    // token string
-    if (reader.head^ = 'q') then
-    begin
-      if (reader.Next^ = '{') then
-      begin
-        reader.saveBeginning;
-        reader.Next;
-        if isOutOfBound then
-          exit;
-        identifier := 'q{';
-        addToken(ltkSymbol);
-        if callBackDoStop then
-          exit;
-        continue;
-      end else
-        reader.previous;
-    end;
-
-    // char literals
-    if (reader.head^ = #39) then
-    begin
-      reader.Next;
-      reader.saveBeginning;
-      if isOutOfBound then
-        exit;
-      while true do
-      begin
-        if reader.head^ = '\' then
-        begin
-          identifier += reader.head^;
-          reader.Next;
-          identifier += reader.head^;
-          if isOutOfBound then
-            exit;
-          reader.Next;
-          if isOutOfBound then
-            exit;
-        end;
-        if isOutOfBound then
-          exit;
-        if reader.head^ = #39 then
-          break;
-        identifier += reader.head^;
-        reader.Next;
-      end;
-      reader.Next;
-      if isOutOfBound then
-        exit;
-      addToken(ltkChar);
-      if callBackDoStop then
-        exit;
-      continue;
-    end;
-
-    // binary and hex literals
-    if (reader.head^ = '0') then
-    begin
-      reader.saveBeginning;
-      if reader.Next^ in ['b', 'B'] then
-      begin
-        identifier := '0' + reader.head^;
-        while reader.Next^ in ['0','1','_'] do
-          identifier += reader.head^;
-        if  (reader.head[0..1] = 'LU') or
-            (reader.head[0..1] = 'Lu') or
-            (reader.head[0..1] = 'UL') or
-            (reader.head[0..1] = 'uL') then
-        begin
-          identifier += reader.head[0..1];
-          reader.Next;
-          reader.Next;
-        end else
-        if reader.head^ in ['L','u','U'] then
-        begin
-          identifier += reader.head^;
-          reader.Next;
-        end;
-        if isWhite(reader.head^) or isOperator1(reader.head^) or
-          isSymbol(reader.head^) then
-        begin
-          addToken(ltkNumber);
-          if callBackDoStop then
-            exit;
-          continue;
-        end
-        else
-        begin
-          while true do
-          begin
-            if isWhite(reader.head^) or isOperator1(reader.head^) or
-              isSymbol(reader.head^) or isOutOfBound then
-            begin
-              addToken(ltkIllegal);
-              break;
-              if callBackDoStop then
-                exit;
-            end;
-            identifier += reader.head^;
-            reader.Next;
           end;
-          continue;
-        end;
-      end
-      else if reader.head^ in ['x', 'X'] then
-      begin
-        identifier := '0' + reader.head^;
-        reader.Next;
-        expSet := reader.head^ in ['p','P'];
-        decSet := reader.head^ = '.';
-        if not (expSet or decSet) then
           reader.previous;
-        while reader.Next^ in ['0'..'9', 'a'..'f', 'A'..'F', '_'] do
-          identifier += reader.head^;
-        decSet := reader.head^ = '.';
-        expSet := reader.head^ in ['p','P'];
-        if (not expSet and decSet) then
-          while reader.Next^ in ['0'..'9', 'a'..'f', 'A'..'F', '_'] do
-            identifier += reader.head^
-        else if (expSet) then
-          while reader.Next^ in ['0'..'9', '_'] do
-            identifier += reader.head^;
-        if not expSet then expSet:= reader.head^ in ['p','P'];
-        if (expSet) then
-          while reader.Next^ in ['0'..'9', '_'] do
-            identifier += reader.head^;
-        if  (reader.head[0..1] = 'LU') or
-            (reader.head[0..1] = 'Lu') or
-            (reader.head[0..1] = 'UL') or
-            (reader.head[0..1] = 'Li') or
-            (reader.head[0..1] = 'fi') or
-            (reader.head[0..1] = 'uL') then
-        begin
-          identifier += reader.head[0..1];
-          reader.Next;
-          reader.Next;
-        end else
-        if reader.head^ in ['L','u','U', 'i', 'f'] then
-        begin
-          identifier += reader.head^;
-          reader.Next;
-        end;
-        if isWhite(reader.head^) or isOperator1(reader.head^) or
-          isSymbol(reader.head^) then
-        begin
-          addToken(ltkNumber);
-          if callBackDoStop then
+          if number then
             exit;
-          continue;
-        end
-        else
-        begin
-          while true do
-          begin
-            if isWhite(reader.head^) or isOperator1(reader.head^) or
-              isSymbol(reader.head^) or isOutOfBound then
-            begin
-              addToken(ltkIllegal);
-              break;
-              if callBackDoStop then
-                exit;
-            end;
-            identifier += reader.head^;
-            reader.Next;
-          end;
-          continue;
         end;
-      end
-      else
-        reader.previous;
-    end;
-
-    // check float literal starting with dec separator
-    decSet := false;
-    expSet := false;
-    if (reader.head^= '.') then
-    begin
-      if isNumber(reader.Next^) then
-        decSet := true
-      else
-        reader.previous;
-    end;
-
-    // decimal number literals
-    if isNumber(reader.head^) then
-    begin
-      reader.saveBeginning;
-      if decSet then
-        identifier:= '.';
-      identifier += reader.head^;
-      while isNumber(reader.Next^) or (reader.head^ = '_') do
-      begin
-        if isOutOfBound then
-          exit;
-        identifier += reader.head^;
-      end;
-      if decSet and (reader.head^ = '.') then
-      begin
-        addToken(ltkNumber);
-        if callBackDoStop then
-          exit;
-        continue;
-      end;
-      if (reader.head^ = '.') then
-      begin
-        decSet := true;
-        identifier += reader.head^;
-      end;
-      expSet := reader.head^ in ['e','E'];
-      if expSet then identifier += reader.head^;
-      if decSet then while isNumber(reader.Next^) or (reader.head^ = '_') do
-      begin
-        if isOutOfBound then
-          exit;
-        identifier += reader.head^;
-      end;
-      if not expSet then
-      begin
-        expSet := reader.head^ in ['e','E'];
-        if expSet then identifier += reader.head^;
-      end;
-      if expSet then while isNumber(reader.Next^) or (reader.head^ = '_') do
-      begin
-        if isOutOfBound then
-          exit;
-        identifier += reader.head^;
-      end;
-      if  (reader.head[0..1] = 'LU') or
-          (reader.head[0..1] = 'Lu') or
-          (reader.head[0..1] = 'UL') or
-          (reader.head[0..1] = 'Li') or
-          (reader.head[0..1] = 'fi') or
-          (reader.head[0..1] = 'uL') then
-      begin
-        identifier += reader.head[0..1];
-        reader.Next;
-        reader.Next;
-      end else
-      if reader.head^ in ['L','u','U', 'i', 'f'] then
-      begin
-        identifier += reader.head^;
-        reader.Next;
-      end;
-      if isWhite(reader.head^) or isOperator1(reader.head^) or
-        isSymbol(reader.head^) then
-      begin
-        addToken(ltkNumber);
-        if callBackDoStop then
-          exit;
-        continue;
-      end
-      else
-      begin
-        while true do
+      #39:
         begin
-          if isWhite(reader.head^) or isOperator1(reader.head^) or
-            isSymbol(reader.head^) or isOutOfBound then
+          tk := ltkChar;
+          if isSingleChar(reader.next^) then
           begin
-            addToken(ltkIllegal);
-            break;
-            if callBackDoStop then
+            if reader.next^ = #39 then
+            begin
+              reader.next;
+              if addToken then
+                exit;
+              continue;
+            end;
+            reader.previous;
+          end;
+          case reader.head^ of
+            '\':
+              begin
+                reader.next;
+                escapeSequence;
+              end;
+            #0, #10, #13, #26, #39:
+              ; // don't skip over these EOL and EOF chars
+            #128..#255:
+              decodeUTF(true, c);
+            otherwise
+              reader.next;
+          end;
+          if reader.head^ = #39 then
+            reader.next;
+          if addToken then
+            exit;
+        end;
+      'r', '`':
+        begin
+          if reader.head^ = 'r' then
+          begin
+            if reader.next^ <> '"' then
+            begin
+              reader.previous;
+              if ident then
+                exit;
+              continue;
+            end;
+            // skipping over the 'r', to the delimiter '"'
+          end;
+          if wysiwygStringConstant then
+            exit;
+        end;
+      'q':
+        begin
+          if reader.next^ = '"' then
+          begin
+            if delimitedStringConstant then
               exit;
+            continue;
+          end
+          else if reader.head^ = '{' then
+          begin
+            tk := ltkSymbol;
+            reader.next;
+            if addToken then
+              exit;
+            continue;
           end;
-          identifier += reader.head^;
-          reader.Next;
+          reader.previous;
+          if ident then
+            exit;
         end;
+      '"':
+        begin
+          if escapeStringConstant then
+            exit;
+        end;
+      '/':
+        begin
+          case reader.next^ of
+            '=':
+              begin
+                tk := ltkOperator;
+                reader.next;
+                if addToken then
+                  exit;
+              end;
+            '*':
+              begin
+                tk := ltkComment;
+                reader.next;
+                while not (reader.head^ in ['/', #0, #26]) or
+                  ((reader.head^ = '/') and (((reader.head-1)^ <> '*') or
+                  (reader.savedOffset = reader.absoluteIndex-2))) do
+                  reader.next;
+                if reader.head^ = '/' then
+                  reader.next;
+                if addToken then
+                  exit;
+              end;
+            '/':
+              begin
+                tk := ltkComment;
+                reader.next;
+                while not (reader.head^ in [#0, #10, #13, #26]) do
+                  reader.next;
+                if addToken then
+                  exit;
+              end;
+            '+':
+              begin
+                tk := ltkComment;
+                reader.next;
+                nestedCom := 1;
+                while not (reader.head^ in [#0, #26]) do
+                begin
+                  if reader.head^ = '/' then
+                  begin
+                    if reader.next^ = '+' then
+                    begin
+                      reader.next;
+                      nestedCom += 1;
+                    end;
+                  end
+                  else if reader.head^ = '+' then
+                  begin
+                    if reader.next^ = '/' then
+                    begin
+                      reader.next;
+                      nestedCom -= 1;
+                      if nestedCom = 0 then
+                        break;
+                    end;
+                  end
+                  else
+                    reader.next;
+                end;
+                if addToken then
+                  exit;
+              end;
+            otherwise // division operator
+              tk := ltkOperator;
+              if addToken then
+                exit;
+          end;
+        end;
+      '.':
+        begin
+          if isNumber(reader.next^) then // float literal
+          begin
+            reader.previous;
+            if inreal then
+              exit;
+            continue;
+          end;
+          tk := ltkSymbol; // .
+          if reader.head^ = '.' then // ..
+            if reader.next^ = '.' then // ...
+              reader.next;
+          if addToken then
+            exit;
+        end;
+      '&', '|', '-', '+': // &= && |= || -= -- += ++
+        begin
+          tk := ltkOperator;
+          if (reader.head^ = reader.next^) or (reader.head^ = '=') then
+            reader.next;
+          if addToken then
+            exit;
+        end;
+      '<': // < <= << <<=
+        begin
+          tk := ltkOperator;
+          if reader.next^ = '=' then
+            reader.next
+          else if reader.head^ = '<' then
+            if reader.next^ = '=' then
+              reader.next;
+          if addToken then
+            exit;
+        end;
+      '>': // > >= >> >>= >>> >>>=
+        begin
+          tk := ltkOperator;
+          if reader.next^ = '=' then
+            reader.next
+          else if reader.head^ = '>' then
+            if reader.next^ = '=' then
+              reader.next
+            else if reader.head^ = '>' then
+              if reader.next^ = '=' then
+                reader.next;
+          if addToken then
+            exit;
+        end;
+      '!', '~', '*', '%': // ! != ~ ~= * *= % %=
+        begin
+          tk := ltkOperator;
+          if reader.next^ = '=' then
+            reader.next;
+          if addToken then
+            exit;
+        end;
+      '=': // = == =>
+        begin
+          tk := ltkOperator;
+          if reader.next^ in ['=', '>'] then
+            reader.next;
+          if addToken then
+            exit;
+        end;
+      '^': // ^ ^= ^^ ^^=
+        begin
+          tk := ltkOperator;
+          if reader.head^ = '=' then
+            reader.next
+          else if reader.next^ = '^' then
+            if reader.next^ = '=' then
+              reader.next;
+          if addToken then
+            exit;
+        end;
+      '(', ')', '[', ']', '{', '}', '?', ',', ';', ':', '$', '@':
+        begin
+          tk := ltkSymbol;
+          reader.next;
+          if addToken then
+            exit;
+        end;
+      '#': // directive
+        begin
+          tk := ltkDirective;
+          while not (reader.next^ in [#0, #10, #13, #26]) do;
+          if addToken then
+            exit;
+        end;
+    otherwise
+      if isIdentifierStart then
+      begin
+        if ident then
+          exit;
         continue;
       end;
+      // only add a new illegal token if we aren't already inside one
+      if list.count <> 0 then
+      begin
+        if list[list.count-1]^.kind = ltkIllegal then
+        begin
+          list[list.count-1]^.data += reader.head^;
+          reader.next;
+          reader.saveBeginning;
+          continue;
+        end;
+      end;
+      tk := ltkIllegal;
+      reader.next;
+      addToken;
     end;
-
-    // symbols
-    if isSymbol(reader.head^) then
-    begin
-      reader.saveBeginning;
-      identifier += reader.head^;
-      if (reader.head^ = '}') and ((reader.head + 1)^  in stringPostfixes) and not
-        isIdentifier((reader.head + 2)^) then
-          reader.Next;
-      reader.Next;
-      addToken(ltkSymbol);
-      if callBackDoStop then
-        exit;
-      if isOutOfBound then
-        exit;
-      continue;
-    end;
-
-    // operators
-    if isOperator1(reader.head^) then
-    begin
-      reader.saveBeginning;
-      while isOperator1(reader.head^) do
-      begin
-        if isOutOfBound then
-          exit;
-        identifier += reader.head^;
-        reader.next;
-        if length(identifier) = 4 then
-          break;
-      end;
-      if length(identifier) = 4 then
-      begin
-        if isOperator4(identifier) then
-        begin
-          addToken(ltkOperator);
-          if callBackDoStop then
-            exit;
-          continue;
-        end;
-        if isOperator3(identifier[1..3]) then
-        begin
-          setLength(identifier, 3);
-          reader.previous;
-          addToken(ltkOperator);
-          if callBackDoStop then
-            exit;
-          continue;
-        end;
-        if isOperator2(identifier[1..2]) then
-        begin
-          setLength(identifier, 2);
-          reader.previous;
-          reader.previous;
-          addToken(ltkOperator);
-          if callBackDoStop then
-            exit;
-          continue;
-        end;
-        if isOperator1(identifier[1]) then
-        begin
-          setLength(identifier, 1);
-          reader.previous;
-          reader.previous;
-          reader.previous;
-          addToken(ltkOperator);
-          if callBackDoStop then
-            exit;
-          continue;
-        end;
-      end;
-      if length(identifier) = 3 then
-      begin
-        if isOperator3(identifier) then
-        begin
-          addToken(ltkOperator);
-          if callBackDoStop then
-            exit;
-          continue;
-        end;
-        if isOperator2(identifier[1..2]) then
-        begin
-          setLength(identifier, 2);
-          reader.previous;
-          addToken(ltkOperator);
-          if callBackDoStop then
-            exit;
-          continue;
-        end;
-        if isOperator1(identifier[1]) then
-        begin
-          setLength(identifier, 1);
-          reader.previous;
-          reader.previous;
-          addToken(ltkOperator);
-          if callBackDoStop then
-            exit;
-          continue;
-        end;
-      end;
-      if length(identifier) = 2 then
-      begin
-        if isOperator2(identifier) then
-        begin
-          addToken(ltkOperator);
-          if callBackDoStop then
-            exit;
-          continue;
-        end;
-        if isOperator1(identifier[1]) then
-        begin
-          setLength(identifier, 1);
-          reader.previous;
-          addToken(ltkOperator);
-          if callBackDoStop then
-            exit;
-          continue;
-        end;
-      end;
-      if (length(identifier) = 1) and isOperator1(identifier[1]) then
-      begin
-        addToken(ltkOperator);
-        if callBackDoStop then
-          exit;
-        continue;
-      end;
-    end;
-
-    // identifiers and keywords
-    if isFirstIdentifier(reader.head^) then
-    begin
-      reader.saveBeginning;
-      while isIdentifier(reader.head^) do
-      begin
-        identifier += reader.head^;
-        reader.Next;
-        if isOutOfBound then
-          exit;
-      end;
-      if keywordsMap.match(identifier) then
-        addToken(ltkKeyword)
-      else if specialKeywordsMap.match(identifier) then
-        addToken(ltkKeyword)
-      else
-        addToken(ltkIdentifier);
-      if callBackDoStop then
-        exit;
-      continue;
-    end;
-
-    // illegal
-    while not isWhite(reader.head^) or not isSymbol(reader.head^) or
-      not isOperator1(reader.head^) do
-    begin
-      if isOutOfBound then
-        break;
-      reader.Next;
-    end;
-    {$IFDEF DEBUG}
-    identifier += ' (unrecognized lexer input)';
-    {$ENDIF}
-    addToken(ltkIllegal);
-
   end;
 end;
 {$ENDREGION}

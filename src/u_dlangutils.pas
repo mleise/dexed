@@ -14,7 +14,6 @@ const
   stringPostfixes: TCharSet = ['c', 'w', 'd'];
   stringPrefixes: TCharSet = ['r', 'x', 'q', '"'];
   stringStopChecks: TCharSet = ['\', '"'];
-  charStopChecks: TCharSet = ['\', #39];
   symbChars: TCharSet = [';', '{', '}', '(', ')', '[', ']', ',', '.', ':', '?', '$', '"', #39];
   hexaChars: TCharSet = ['0'..'9', 'a'..'f', 'A'..'F', '_'];
 
@@ -22,7 +21,6 @@ function isWhite(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isSpace(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isAlpha(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isNumber(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
-function isBit(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isAlNum(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isHex(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isSymbol(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
@@ -30,9 +28,12 @@ function isOperator1(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isOperator2(const s: string): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isOperator3(const s: string): boolean; {$IFNDEF DEBUG} inline; {$ENDIF}
 function isOperator4(const s: string): boolean; {$IFNDEF DEBUG} inline; {$ENDIF}
-function isStringPostfix(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isIdentifier(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 function isFirstIdentifier(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+function isZeroSecond(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+function isDigitSecond(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+function isSingleChar(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+function isOctal(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 
 
 function readLine(var reader: PChar; var position: Integer): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
@@ -61,7 +62,7 @@ end;
 
 function isSpace(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 begin
-  exit(c in [#9,' ']);
+  exit(c in [' ', #9..#13]);
 end;
 
 function isAlpha(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
@@ -72,11 +73,6 @@ end;
 function isNumber(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 begin
   exit(c in ['0'..'9']);
-end;
-
-function isBit(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
-begin
-  exit((c in ['0'..'1']));
 end;
 
 function isAlNum(const c: Char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
@@ -142,11 +138,6 @@ begin
   result := (s = '>>>=') or (s = '!<>=');
 end;
 
-function isStringPostfix(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
-begin
-  exit(c in stringPostfixes);
-end;
-
 function isIdentifier(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 begin
   exit((not isSymbol(c)) and (not isOperator1(c)) and (not isWhite(c)));
@@ -155,6 +146,26 @@ end;
 function isFirstIdentifier(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
 begin
   exit(isIdentifier(c) and (not isNumber(c)));
+end;
+
+function isZeroSecond(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+begin
+  exit(isDigitSecond(c) or (c in ['x', 'X', 'b', 'B']));
+end;
+
+function isDigitSecond(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+begin
+  exit(c in ['e', 'E', 'f', 'F', 'l', 'L', 'p', 'P', 'u', 'U', 'i', '0'..'9', '.', '_']);
+end;
+
+function isSingleChar(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+begin
+  exit(not (c in ['\', #10, #13, #0, #26, #39, #128..#255]));
+end;
+
+function isOctal(const c: char): boolean; {$IFNDEF DEBUG}inline;{$ENDIF}
+begin
+  exit(c in ['0'..'7']);
 end;
 
 function readLine(var reader: PChar; var position: Integer): boolean;

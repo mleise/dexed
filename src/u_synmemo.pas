@@ -1903,7 +1903,7 @@ begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
   fLexToks.Clear;
-  lex(lines.Text, fLexToks, nil, [lxoNoComments]);
+  lex(lines.strictText, fLexToks, nil, [lxoNoComments]);
   cp := CaretXY;
   if SelAvail then
   begin
@@ -2234,7 +2234,7 @@ begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
   fLexToks.Clear;
-  lex(Lines.Text, fLexToks, nil, [lxoNoComments, lxoNoWhites]);
+  lex(Lines.strictText, fLexToks, nil, [lxoNoComments, lxoNoWhites]);
   for i:=0 to fLexToks.Count-2 do
   begin
     tk0 := fLexToks[i];
@@ -3085,7 +3085,7 @@ begin
   if checkModule and isDSource then
   begin
     fLexToks.Clear;
-    lex(Lines.Text, fLexToks, @tokFoundForCaption, [lxoNoComments]);
+    lex(Lines.strictText, fLexToks, @tokFoundForCaption, [lxoNoComments]);
     if fHasModuleDeclaration then
       result := getModuleName(fLexToks);
   end;
@@ -3517,7 +3517,7 @@ begin
           begin
             lxd := true;
             fLexToks.Clear;
-            lex(lines.Text, fLexToks);
+            lex(lines.strictText, fLexToks);
             if lexCanCloseBrace then
             begin
               Key := 0;
@@ -3530,7 +3530,7 @@ begin
             if not lxd then
             begin
               fLexToks.Clear;
-              lex(lines.Text, fLexToks);
+              lex(lines.strictText, fLexToks);
             end;
             ddc := canInsertLeadingDdocSymbol;
             if ddc in ['*', '+'] then
@@ -3592,7 +3592,7 @@ var
 procedure reLex();
 begin
   fLexToks.Clear;
-  lex(Lines.Text, fLexToks);
+  lex(Lines.strictText, fLexToks);
 end;
 
 begin
@@ -3641,7 +3641,7 @@ begin
           autoCloseLexically:
           begin
             fLexToks.Clear;
-            lex(lines.Text, fLexToks);
+            lex(lines.strictText, fLexToks);
             if lexCanCloseBrace then
               curlyBraceCloseAndIndent;
           end;
