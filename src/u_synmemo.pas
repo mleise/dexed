@@ -44,6 +44,12 @@ type
 
   TAutoClosePairs = set of TAutoClosedPair;
 
+  TBraceCloseOption = (
+    braceClosePositive,
+    braceCloseLessEven,
+    braceCloseInvalid
+  );
+
 const
 
   autoClosePair2Char: array[TAutoClosedPair] of char = (#39, '"', '`', ']');
@@ -279,8 +285,9 @@ type
     procedure completionCodeCompletion(var value: string; SourceValue: string;
       var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
     procedure showCallTipsString(const tips: string; indexOfExpected: integer);
-    function lexCanCloseBrace: boolean;
+    function lexCanCloseBrace: TBraceCloseOption;
     function canInsertLeadingDdocSymbol: char;
+    function autoIndentationLevel(line: Integer): Integer;
     procedure handleStatusChanged(Sender: TObject; Changes: TSynStatusChanges);
     procedure goToChangedArea(next: boolean);
     procedure goToProtectionGroup(next: boolean);
@@ -339,7 +346,7 @@ type
     procedure forceIndentation(m: TIndentationMode; w: integer);
     procedure addBreakPoint(line: integer);
     procedure removeBreakPoint(line: integer);
-    procedure curlyBraceCloseAndIndent;
+    procedure curlyBraceCloseAndIndent(close: boolean = true);
     procedure insertLeadingDDocSymbol(c: char);
     procedure commentSelection;
     procedure commentIdentifier;
@@ -1671,35 +1678,32 @@ begin
   EndUndoBlock;
 end;
 
-procedure TDexedMemo.curlyBraceCloseAndIndent;
+function TDexedMemo.autoIndentationLevel(line: Integer): Integer;
 var
   i: integer;
   beg: string = '';
+  balanceInBeg: Integer = 0;
   numTabs: integer = 0;
   numSpac: integer = 0;
   numSkip: integer = 0;
+  c: Char;
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
-    exit;
+    exit(0);
 
-  i := CaretY - 1;
-  while true do
+  for i := line - 2 downto 0 do
   begin
-    if i < 0 then
-      break;
     beg := Lines[i];
-    if (Pos('}', beg) <> 0) then
-    begin
-      numSkip += 1;
-    end
-    else if (Pos('{', beg) <> 0) then
-    begin
-      numSkip -= 1;
-    end;
+    balanceInBeg := 0;
+    for c in beg do
+      if c = '}' then
+        balanceInBeg -= 1
+      else if c = '{' then
+        balanceInBeg += 1;
+    numSkip -= balanceInBeg;
     if numSkip < 0 then
       break
     else
-      i -= 1;
   end;
 
   for i:= 1 to beg.length do
@@ -1710,22 +1714,36 @@ begin
       else break;
     end;
   end;
-  numTabs += numSpac div TabWidth;
+  result := numTabs + numSpac div TabWidth;
+  if balanceInBeg > 0 then
+    result += 1;
+end;
+
+procedure TDexedMemo.curlyBraceCloseAndIndent(close: boolean = true);
+var
+  numTabs, i: integer;
+begin
+  if not fIsDSource and not alwaysAdvancedFeatures then
+    exit;
 
   BeginUndoBlock;
 
   CommandProcessor(ecInsertLine, '', nil);
   CommandProcessor(ecDown, '', nil);
+  numTabs := autoIndentationLevel(CaretY);
 
-  CommandProcessor(ecInsertLine, '', nil);
-  CommandProcessor(ecDown, '', nil);
-  while CaretX <> 1 do CommandProcessor(ecLeft, '' , nil);
-  for i:= 0 to numTabs-1 do CommandProcessor(ecTab, '', nil);
-  CommandProcessor(ecChar, '}', nil);
+  if close then
+  begin
+    CommandProcessor(ecInsertLine, '', nil);
+    CommandProcessor(ecDown, '', nil);
+    while CaretX <> 1 do CommandProcessor(ecLeft, '' , nil);
+    for i:= 1 to numTabs-1 do CommandProcessor(ecTab, '', nil);
+    CommandProcessor(ecChar, '}', nil);
+    CommandProcessor(ecUp, '', nil);
+  end;
 
-  CommandProcessor(ecUp, '', nil);
   while CaretX <> 1 do CommandProcessor(ecLeft, '' , nil);
-  for i:= 0 to numTabs do CommandProcessor(ecTab, '', nil);
+  for i:= 1 to numTabs do CommandProcessor(ecTab, '', nil);
 
   EndUndoBlock;
 end;
@@ -3145,7 +3163,7 @@ begin
   end;
 end;
 
-function TDexedMemo.lexCanCloseBrace: boolean;
+function TDexedMemo.lexCanCloseBrace: TBraceCloseOption;
 var
   i: integer;
   p: integer;
@@ -3165,16 +3183,18 @@ begin
     end else
       bet := false;
     if bet and (tok^.kind = ltkComment) then
-      exit(false);
+      exit(braceCloseInvalid);
     c += byte((tok^.kind = TLexTokenKind.ltkSymbol) and (((tok^.Data = '{')) or (tok^.Data = 'q{')));
     c -= byte((tok^.kind = TLexTokenKind.ltkSymbol) and (tok^.Data = '}'));
     if bet and (c = 0) then
-      exit(false);
+      exit(braceCloseLessEven);
   end;
   if (tok <> nil) and (tok^.kind = ltkIllegal) then
-    result := false
+    result := braceCloseInvalid
+  else if c > 0 then
+    result := braceClosePositive
   else
-    result := c > 0;
+    result := braceCloseLessEven;
 end;
 
 procedure TDexedMemo.SetHighlighter(const Value: TSynCustomHighlighter);
@@ -3478,6 +3498,7 @@ var
   line: string;
   ddc: char;
   lxd: boolean;
+  ccb: TBraceCloseOption;
 begin
   case Key of
     VK_BACK:
@@ -3493,52 +3514,58 @@ begin
       line := LineText;
       if [ssCtrl] <> Shift then
       begin
+        lxd := false;
         case fAutoCloseCurlyBrace of
-          autoCloseOnNewLineAlways: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
+         autoCloseAlways, autoCloseOnNewLineAlways:
+          if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
           begin
             Key := 0;
             curlyBraceCloseAndIndent;
           end;
-          autoCloseOnNewLineEof: if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
+         autoCloseAtEof, autoCloseOnNewLineEof:
+          if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
           if (CaretY = Lines.Count) and (CaretX = line.length+1) then
           begin
             Key := 0;
             curlyBraceCloseAndIndent;
           end;
-        end;
-        if (fAutoCloseCurlyBrace = autoCloseOnNewLineLexically) or
-          fSmartDdocNewline then
-        begin
-          lxd := false;
-          if (LogicalCaretXY.X - 1 >= line.length)
-              or isBlank(line[LogicalCaretXY.X .. line.length]) then
+         autoCloseNever:
+          if (CaretX > 1) and (line[LogicalCaretXY.X - 1] = '{') then
           begin
-            lxd := true;
+            Key := 0;
+            curlyBraceCloseAndIndent(false);
+          end;
+         autoCloseLexically, autoCloseOnNewLineLexically:
+          if ((LogicalCaretXY.X - 1 >= line.length) or
+            isBlank(line[LogicalCaretXY.X .. line.length])) then
+          begin
             fLexToks.Clear;
             lex(lines.strictText, fLexToks);
-            if lexCanCloseBrace then
+            lxd := true;
+            ccb := lexCanCloseBrace;
+            if ccb <> braceCloseInvalid then
             begin
               Key := 0;
-              curlyBraceCloseAndIndent;
+              curlyBraceCloseAndIndent(ccb = braceClosePositive);
               lxd := false;
             end;
           end;
-          if (fSmartDdocNewline) then
+        end;
+        if (fSmartDdocNewline) then
+        begin
+          if not lxd then
           begin
-            if not lxd then
-            begin
-              fLexToks.Clear;
-              lex(lines.strictText, fLexToks);
-            end;
-            ddc := canInsertLeadingDdocSymbol;
-            if ddc in ['*', '+'] then
-            begin
-              inherited;
-              insertLeadingDDocSymbol(ddc);
-              fCanShowHint:=false;
-              fDDocWin.Hide;
-              exit;
-            end;
+            fLexToks.Clear;
+            lex(lines.strictText, fLexToks);
+          end;
+          ddc := canInsertLeadingDdocSymbol;
+          if ddc in ['*', '+'] then
+          begin
+            inherited;
+            insertLeadingDDocSymbol(ddc);
+            fCanShowHint:=false;
+            fDDocWin.Hide;
+            exit;
           end;
         end;
       end
@@ -3640,8 +3667,10 @@ begin
           begin
             fLexToks.Clear;
             lex(lines.strictText, fLexToks);
-            if lexCanCloseBrace then
-              curlyBraceCloseAndIndent;
+            case lexCanCloseBrace of
+              braceClosePositive: curlyBraceCloseAndIndent;
+              braceCloseLessEven: curlyBraceCloseAndIndent(false);
+            end;
           end;
         end;
     end;
