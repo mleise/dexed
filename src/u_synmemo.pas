@@ -3123,31 +3123,25 @@ end;
 function TDexedMemo.canInsertLeadingDdocSymbol: char;
 var
   i: integer;
-  p: TPoint;
+  st, nd: TPoint;
   tk1: PLexToken = nil;
   tk2: PLexToken = nil;
 begin
   // note: never use SelStart here. SelStart is updated too early
   // and matches to the future position, e.g the one after auto-indentation.
   result := #0;
-  p := LogicalCaretXY;
-  for i := 0 to fLexToks.Count-1 do
+  nd := LogicalCaretXY;
+  st := Point(nd.x - 3, nd.y);
+  for i := 0 to fLexToks.Count-2 do
   begin
     tk1 := fLexToks[i];
-    if (i <> fLexToks.Count-1) then
-    begin
-      tk2 := fLexToks[i+1];
-      if (tk1^.position < p) and (tk1^.kind in [ltkComment, ltkIllegal])
-        and (p <= tk2^.position) and (tk1^.Data[1] in ['*','+']) then
-      begin
-        exit(tk1^.Data[1]);
-      end
-      else if (tk1^.position > p) then
-        exit;
-    end
-    else if (tk1^.position < p) and (tk1^.kind in [ltkComment, ltkIllegal])
-      and (tk1^.Data[1] in ['*','+']) then
-        exit(tk1^.Data[1]);
+    tk2 := fLexToks[i+1];
+    if (st < tk1^.position) then
+      exit
+    else if (nd <= tk2^.position) and (tk1^.kind = ltkComment) and
+      (length(tk1^.Data) >= 3) and (tk1^.data[2] = tk1^.data[3]) and
+      (tk1^.Data[2] in ['*','+']) then
+      exit(tk1^.Data[2]);
   end;
 end;
 
