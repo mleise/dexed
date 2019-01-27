@@ -2230,6 +2230,7 @@ var
   i: integer;
   tk0, tk1: PLexToken;
   tk: PLexToken = nil;
+  pp: TPoint;
 begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
@@ -2258,7 +2259,10 @@ begin
     end;
   end;
   if assigned(tk) then
-    ExecuteCommand(ecGotoXY, #0, @tk^.position);
+  begin
+    pp := LogicalToPhysicalPos(tk^.position);
+    ExecuteCommand(ecGotoXY, #0, @pp);
+  end;
 end;
 
 procedure TDexedMemo.goToWarning(next: boolean);
