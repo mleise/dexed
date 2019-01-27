@@ -1903,7 +1903,7 @@ begin
   if not fIsDSource and not alwaysAdvancedFeatures then
     exit;
   fLexToks.Clear;
-  lex(lines.strictText, fLexToks, nil, [lxoNoComments]);
+  lex(lines.strictText, fLexToks, nil, [lxoNoComments, lxoNoWhites]);
   cp := CaretXY;
   if SelAvail then
   begin
