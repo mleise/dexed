@@ -2649,12 +2649,12 @@ begin
     exit;
   if not fCallTipWin.Visible then
     fCallTipStrings.Clear;
-  str := LineText[1..CaretX];
-  x := CaretX;
+  x := logicalCaretXY.x;
+  str := copy(lineText, 1, x-1); // copy accepts 0 length ranges
   i := min(x, str.length);
   if findOpenParen then while true do
   begin
-    if i = 1 then
+    if i <= 1 then
       break;
     if str[i] = ',' then
       j += 1;
@@ -2669,12 +2669,7 @@ begin
       end
       else n -= 1;
     end;
-    if str[i] = #9 then
-      i -= TabWidth
-    else
-      i -= 1;
-    if i <= 0 then
-      break;
+    i -= 1;
   end;
 
   if i > 0 then
@@ -2705,7 +2700,7 @@ begin
   end;
 
   if findOpenParen then
-    CaretX:=x;
+    LogicalCaretXY := Point(x, CaretY);
 end;
 
 procedure TDexedMemo.showCallTipsString(const tips: string; indexOfExpected: integer);
